@@ -1,0 +1,27 @@
+{
+  "name": "kanban",
+  "version": "0.0.1",
+  "description": "FAB coin's kanban system.",
+  "main": "src/app.js",
+  "scripts": {
+    "serve": "node src/app.js",
+    "develop": "nodemon src/app.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/blockchaingate/Kanban.git"
+  },
+  "keywords": [
+    "FAB",
+    "coin"
+  ],
+  "author": "Todor Milev",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/blockchaingate/Kanban/issues"
+  },
+  "homepage": "https://github.com/blockchaingate/Kanban#readme",
+  "dependencies": {
+    "nodemon": "^1.17.3"
+  }
+}
