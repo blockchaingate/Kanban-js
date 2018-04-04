@@ -12,12 +12,13 @@ const handleRequests = require('./handle_requests');
 const fs = require('fs');
 const execSync = require('child_process').execSync;
 const handleRequest = require('./handle_requests');
+const colors = require('colors');
 
 // This line is from the Node.js HTTPS documentation.
 
-if (!fs.existsSync(pathnames.pathnameCryptoKey)) {
+if (!fs.existsSync(pathnames.pathnamePrivateKey)) {
   console.log("Key file: " + pathnames.pathnamePrivateKey + " appears not to exist. Let me create that for you. Answer all prompts please (enter for defaults). " );
-  execSync("openssl req -new -newkey rsa:2048 -days 3000 -nodes -x509 -subj \"/C=CA/ST=ON/L=Waterloo/O=IMAltd/CN=none\" -keyout " + pathnames.pathnameCertificate + " -out " + project.pathnameCryptoCertificate);
+  execSync("openssl req -new -newkey rsa:2048 -days 3000 -nodes -x509 -subj \"/C=CA/ST=ON/L=Waterloo/O=IMAltd/CN=none\" -keyout " + pathnames.pathnamePrivateKey + " -out " + pathnames.pathnameCertificate);
 }
 
 var options = {
@@ -29,12 +30,12 @@ var options = {
 var portHttps = 52907;
 var portHttp = 51846;
 
-var serverHTTPS = https.createServer(options, handleRequest);
+var serverHTTPS = https.createServer(options, handleRequest.handle_requests);
 serverHTTPS.listen(portHttps, function(){
   console.log(`Listening on https port: ${portHttps}`.green);
 });
 
-var serverHTTP = http.createServer(handleRequest);
-serverHttp.listen(portHttp, function(){
+var serverHTTP = http.createServer(handleRequest.handle_requests);
+serverHTTP.listen(portHttp, function(){
   console.log(`Listening on http port: ${portHttp}`.yellow);
 });
