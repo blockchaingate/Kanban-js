@@ -13,6 +13,7 @@ const fs = require('fs');
 const execSync = require('child_process').execSync;
 const handleRequest = require('./handle_requests');
 const colors = require('colors');
+const buildFrontEnd = require('./build_frontend');
 
 // This line is from the Node.js HTTPS documentation.
 
@@ -21,11 +22,12 @@ if (!fs.existsSync(pathnames.pathname.privateKey)) {
   execSync(`openssl req -new -newkey rsa:2048 -days 3000 -nodes -x509 -subj "/C=CA/ST=ON/L=Markham/O=FA Enterprise System/CN=none" -keyout ${pathnames.pathname.privateKey} -out ${pathnames.pathname.certificate}`);
 }
 
+buildFrontEnd.buildFrontEnd();
+
 var options = {
   cert: fs.readFileSync(pathnames.pathname.certificate),
   key: fs.readFileSync(pathnames.pathname.privateKey)
 };
-
 
 var portHttps = 52907;
 var portHttp = 51846;

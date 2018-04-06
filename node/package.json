@@ -24,6 +24,7 @@
   "homepage": "https://github.com/blockchaingate/Kanban#readme",
   "dependencies": {
     "bitcoinjs-lib": "^3.3.2",
+    "browserify": "^16.1.1",
     "colors": "^1.2.1",
     "nodemon": "^1.17.3"
   }
