@@ -1,0 +1,52 @@
+div.divPageAndMenu{
+  display: flex;
+  flex-direction: row;
+  width: 100%;
+  visibility: visible;
+}
+
+div.divMenuSeparator{
+  text-align: center;
+  font-weight: lighter;
+  font-size: smaller;
+  border-bottom: 1px solid black;
+}
+
+div.divMenu{
+  display: flex;
+  flex-direction: column;
+  transition: all 1s;
+  max-width: 120px;
+  width: 20%;
+  position: fixed;
+  right: 0.5%;
+  overflow: hidden;
+}
+
+div.divMenuCollapsed{
+  display: flex;
+  max-width: 29px;
+  width: 29px;
+  flex-direction: column;
+  transition: all 1s;
+  overflow: hidden;
+}
+
+div.divMenu div{
+  overflow: hidden;
+}
+
+div.divMainPage{
+  width: 90%;
+  height: 100%;
+}
+
+div.divTableContainerSearch{
+  overflow: auto;
+  height: 80%;
+  font-size: x-small;
+}
+
+div.pageMainWindow{
+  margin-left: 12px;
+}
