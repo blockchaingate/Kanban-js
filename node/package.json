@@ -5,7 +5,8 @@
   "main": "src/app.js",
   "scripts": {
     "serve": "node src/app.js",
-    "develop": "nodemon src/app.js"
+    "develop": "nodemon src/app.js",
+    "test": "node lib/unit.js"
   },
   "repository": {
     "type": "git",
