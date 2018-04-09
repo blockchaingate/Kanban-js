@@ -15,7 +15,7 @@ function recordProgressDone(progress){
   if (typeof progress === "string"){
     progress = document.getElementById(progress);
   }
-  var theButton = progress.childNodes[0];
+  var theButton = progress.childNodes[0].childNodes[0];
   theButton.childNodes[0].innerHTML = "<b style='color:green'>Received</b>";
 }
 
@@ -26,7 +26,8 @@ function recordProgressStarted(progress, address){
   if (typeof progress === "string"){
     progress = document.getElementById(progress);
   }
-  progress.innerHTML = getToggleButton({content: address, label: "<b style=\"color:orange\">Sent</b>"});
+  addressHTML = `<a href="${address}" target="_blank">${address}</a>`;
+  progress.innerHTML = getToggleButton({content: addressHTML, label: "<b style=\"color:orange\">Sent</b>"});
 }
 
 function recordResult(resultText, resultSpan){

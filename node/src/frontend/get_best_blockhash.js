@@ -3,19 +3,19 @@ const pathnames = require('../pathnames');
 const ids = require('./ids_dom_elements');
 const jsonToHtml = require('./json_to_html');
 
-function getPeerInfoTestNet(output, progress){
+function getBestBlockHash(output, blockHash,  progress){
+  blockHash = document.getElementById(blockHash);
   if (typeof progress === "undefined"){
     progress = ids.defaults.progressReport
   }
   submitRequests.submitGET({
-    url: pathnames.getURLfromRPCLabel(pathnames.rpcCalls.getPeerInfo.rpcCallLabel),
+    url: pathnames.getURLfromRPCLabel(pathnames.rpcCalls.getBestBlockHash.rpcCallLabel),
     progress: progress,
     result : output,
     callback: jsonToHtml.writeJSONtoDOMComponent
   });
-
 }
 
 module.exports = {
-  getPeerInfoTestNet
+  getBestBlockHash
 }

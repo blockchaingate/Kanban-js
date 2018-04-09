@@ -10,13 +10,15 @@ function writeJSONtoDOMComponent(inputJSON, theDomComponent){
 }
 
 function getTableHorizontallyLaidFromJSON(input){
-  if (typeof input === "string")
+  if (typeof input === "string"){
     return input;
-  if (typeof input === "number")
+  }
+  if (typeof input === "number"){
     return input;
-  if (typeof input === "boolean")
+  }
+  if (typeof input === "boolean"){
     return input;
-  
+  }  
   if (typeof input === "object"){
     var result = "";
     result += "<table class='tableJSON'>";
@@ -59,13 +61,19 @@ function getLabelsRows(input){
 }
 
 function getHtmlFromArrayOfObjects(input){
-  var inputJSON = input; 
+  var inputJSON = input.replace(/\s/g, ""); 
   if (typeof inputJSON === "string"){
+    if (inputJSON[0] !== "{" && inputJSON[0] !== "[" && input[0] !== "\""){
+      inputJSON = `"${inputJSON}"`;
+    }
     try {
       inputJSON = JSON.parse(inputJSON);
     } catch (e){
-      return `<error>Error: ${e}</error>`;
+      return `<error>Error while parsing ${escape(inputJSON)}: ${e}</error>`;
     }
+  }
+  if (typeof inputJSON === "string"){
+    return inputJSON;
   }
   var labelsRows = getLabelsRows(inputJSON);
   var result = "";

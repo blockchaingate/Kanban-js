@@ -1,2 +1,2 @@
 window.kanban = {};
-window.kanban.getPeerInfo = require('./get_peer_info');
+window.kanban.rpc = require('./fabcoin_rpc');

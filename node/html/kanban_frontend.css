@@ -16,11 +16,13 @@ div.divMenu{
   display: flex;
   flex-direction: column;
   transition: all 1s;
-  max-width: 120px;
-  width: 20%;
+/*  max-width: 120px;*/
+  width: 10%;
+  height: 100%;
   position: fixed;
   right: 0.5%;
   overflow: hidden;
+  background: black;
 }
 
 div.divMenuCollapsed{
@@ -34,7 +36,6 @@ div.divMenuCollapsed{
 
 div.divMenu div{
   overflow: hidden;
-  
 }
 
 div.divMainPage{
@@ -47,6 +48,11 @@ div.divTableContainerSearch{
   overflow: auto;
   height: 80%;
   font-size: x-small;
+}
+
+span.spanProgressReport{
+  background: white;
+  transition: all 2s;
 }
 
 div.pageMainWindow{
@@ -99,7 +105,12 @@ table.tableJSON td{
 }
 
 span.spanRESTDeveloperInfo{
-white-space: pre-wrap;
-word-wrap:break-word;
-transition: 2s all;  
+  white-space: pre-wrap;
+  word-wrap:break-word;
+  transition: 2s all;  
+}
+
+img.imgFabLogo{
+  width: 100%;
+  max-width: 100px;
 }

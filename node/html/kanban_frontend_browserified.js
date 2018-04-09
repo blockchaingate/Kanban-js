@@ -79,9 +79,63 @@ function escapeHtml(string) {
 }
 
 },{}],2:[function(require,module,exports){
+var getPeerInfoTestNet = require('./get_peer_info').getPeerInfoTestNet;
+var getBlock = require('./get_block').getBlock;
+var getBestBlockHash = require('./get_best_blockhash').getBestBlockHash;
+
+module.exports = {
+  getPeerInfoTestNet, 
+  getBestBlockHash,
+  getBlock,
+}
+},{"./get_best_blockhash":4,"./get_block":5,"./get_peer_info":6}],3:[function(require,module,exports){
 window.kanban = {};
-window.kanban.getPeerInfo = require('./get_peer_info');
-},{"./get_peer_info":3}],3:[function(require,module,exports){
+window.kanban.rpc = require('./fabcoin_rpc');
+},{"./fabcoin_rpc":2}],4:[function(require,module,exports){
+const submitRequests = require('./submit_requests');
+const pathnames = require('../pathnames');
+const ids = require('./ids_dom_elements');
+const jsonToHtml = require('./json_to_html');
+
+function getBestBlockHash(output, blockHash,  progress){
+  blockHash = document.getElementById(blockHash);
+  if (typeof progress === "undefined"){
+    progress = ids.defaults.progressReport
+  }
+  submitRequests.submitGET({
+    url: pathnames.getURLfromRPCLabel(pathnames.rpcCalls.getBestBlockHash.rpcCallLabel),
+    progress: progress,
+    result : output,
+    callback: jsonToHtml.writeJSONtoDOMComponent
+  });
+}
+
+module.exports = {
+  getBestBlockHash
+}
+},{"../pathnames":10,"./ids_dom_elements":7,"./json_to_html":8,"./submit_requests":9}],5:[function(require,module,exports){
+const submitRequests = require('./submit_requests');
+const pathnames = require('../pathnames');
+const ids = require('./ids_dom_elements');
+const jsonToHtml = require('./json_to_html');
+
+function getBlock(output, blockHash,  progress){
+  blockHash = document.getElementById(blockHash);
+  if (typeof progress === "undefined"){
+    progress = ids.defaults.progressReport
+  }
+  submitRequests.submitGET({
+    url: pathnames.getURLfromRPCLabel(pathnames.rpcCalls.getBlock.rpcCallLabel, {blockHash: blockHash.value}),
+    progress: progress,
+    result : output,
+    callback: jsonToHtml.writeJSONtoDOMComponent
+  });
+}
+
+module.exports = {
+  getBlock
+}
+},{"../pathnames":10,"./ids_dom_elements":7,"./json_to_html":8,"./submit_requests":9}],6:[function(require,module,exports){
 const submitRequests = require('./submit_requests');
 const pathnames = require('../pathnames');
 const ids = require('./ids_dom_elements');
@@ -91,11 +145,8 @@ function getPeerInfoTestNet(output, progress){
   if (typeof progress === "undefined"){
     progress = ids.defaults.progressReport
   }
-
-  var theRequest = {};
-  theRequest[pathnames.rpc.command] = pathnames.rpc.getPeerInfo;  
   submitRequests.submitGET({
-    url: `${pathnames.url.known.rpc}?${pathnames.rpc.command}=${encodeURIComponent(JSON.stringify(theRequest))}`,
+    url: pathnames.getURLfromRPCLabel(pathnames.rpcCalls.getPeerInfo.rpcCallLabel),
     progress: progress,
     result : output,
     callback: jsonToHtml.writeJSONtoDOMComponent
@@ -106,7 +157,7 @@ function getPeerInfoTestNet(output, progress){
 module.exports = {
   getPeerInfoTestNet
 }
-},{"../pathnames":7,"./ids_dom_elements":4,"./json_to_html":5,"./submit_requests":6}],4:[function(require,module,exports){
+},{"../pathnames":10,"./ids_dom_elements":7,"./json_to_html":8,"./submit_requests":9}],7:[function(require,module,exports){
 "use strict";
 
 var defaults = {
@@ -117,7 +168,7 @@ var defaults = {
 module.exports = {
   defaults
 }
-},{}],5:[function(require,module,exports){
+},{}],8:[function(require,module,exports){
 "use srict";
 const escapeHtml = require('escape-html');
 const submitRequests = require('./submit_requests');
@@ -130,13 +181,15 @@ function writeJSONtoDOMComponent(inputJSON, theDomComponent){
 }
 
 function getTableHorizontallyLaidFromJSON(input){
-  if (typeof input === "string")
+  if (typeof input === "string"){
     return input;
-  if (typeof input === "number")
+  }
+  if (typeof input === "number"){
     return input;
-  if (typeof input === "boolean")
+  }
+  if (typeof input === "boolean"){
     return input;
-  
+  }  
   if (typeof input === "object"){
     var result = "";
     result += "<table class='tableJSON'>";
@@ -179,13 +232,19 @@ function getLabelsRows(input){
 }
 
 function getHtmlFromArrayOfObjects(input){
-  var inputJSON = input; 
+  var inputJSON = input.replace(/\s/g, ""); 
   if (typeof inputJSON === "string"){
+    if (inputJSON[0] !== "{" && inputJSON[0] !== "[" && input[0] !== "\""){
+      inputJSON = `"${inputJSON}"`;
+    }
     try {
       inputJSON = JSON.parse(inputJSON);
     } catch (e){
-      return `<error>Error: ${e}</error>`;
+      return `<error>Error while parsing ${escape(inputJSON)}: ${e}</error>`;
     }
+  }
+  if (typeof inputJSON === "string"){
+    return inputJSON;
   }
   var labelsRows = getLabelsRows(inputJSON);
   var result = "";
@@ -211,7 +270,7 @@ module.exports = {
   writeJSONtoDOMComponent,
   getHtmlFromArrayOfObjects
 }
-},{"./submit_requests":6,"escape-html":1}],6:[function(require,module,exports){
+},{"./submit_requests":9,"escape-html":1}],9:[function(require,module,exports){
 "use srict";
 const escapeHtml = require('escape-html');
 
@@ -229,7 +288,7 @@ function recordProgressDone(progress){
   if (typeof progress === "string"){
     progress = document.getElementById(progress);
   }
-  var theButton = progress.childNodes[0];
+  var theButton = progress.childNodes[0].childNodes[0];
   theButton.childNodes[0].innerHTML = "<b style='color:green'>Received</b>";
 }
 
@@ -240,7 +299,8 @@ function recordProgressStarted(progress, address){
   if (typeof progress === "string"){
     progress = document.getElementById(progress);
   }
-  progress.innerHTML = getToggleButton({content: address, label: "<b style=\"color:orange\">Sent</b>"});
+  addressHTML = `<a href="${address}" target="_blank">${address}</a>`;
+  progress.innerHTML = getToggleButton({content: addressHTML, label: "<b style=\"color:orange\">Sent</b>"});
 }
 
 function recordResult(resultText, resultSpan){
@@ -299,7 +359,7 @@ module.exports = {
   submitGET,
   getToggleButton
 }
-},{"escape-html":1}],7:[function(require,module,exports){
+},{"escape-html":1}],10:[function(require,module,exports){
 (function (__dirname){
 "use strict";
 var path = {
@@ -313,6 +373,7 @@ var pathname = {
   privateKey: `${path.certificates}/private_key.pem`,
   certificate: `${path.certificates}/certificate.pem`,
   faviconIco: `${path.HTML}/favicon.ico`,
+  fabcoinSvg: `${path.HTML}/fabcoin.svg`,
   frontEndBrowserifiedJS: `${path.HTML}/kanban_frontend_browserified.js`,
   frontEndNONBrowserifiedJS: `${__dirname}/frontend/frontend.js`,
   frontEndHTML: `${path.HTML}/kanban_frontend.html`,
@@ -324,33 +385,120 @@ var pathname = {
 var url = {};
 url.known = {
   faviconIco : "/favicon.ico",
+  fabcoinSvg : "/fabcoin.svg",
   frontEndBrowserifiedJS: "/kanban_frontend_browserified.js",
   frontEndHTML: "/kanban_frontend.html",
   frontEndCSS: "/kanban_frontend.css",
   rpc: "/rpc"
 };
 
+url.whiteListed = {};
+url.whiteListed[url.known.faviconIco] = pathname.faviconIco;
+url.whiteListed[url.known.fabcoinSvg] = pathname.fabcoinSvg;
+url.whiteListed[url.known.frontEndBrowserifiedJS] = pathname.frontEndBrowserifiedJS;
+url.whiteListed[url.known.frontEndHTML] = pathname.frontEndHTML;
+url.whiteListed[url.known.frontEndCSS] = pathname.frontEndCSS;
+
+
 url.synonyms = {
   "/" : url.known.frontEndHTML
 };
 
-var rpc = {
-  command: "command",
-  getPeerInfo: "getPeerInfo"
-};
 
-url.whiteListed = {};
-url.whiteListed[url.known.faviconIco] = pathname.faviconIco;
-url.whiteListed[url.known.frontEndBrowserifiedJS] = pathname.frontEndBrowserifiedJS;
-url.whiteListed[url.known.frontEndHTML] = pathname.frontEndHTML;
-url.whiteListed[url.known.frontEndCSS] = pathname.frontEndCSS;
+var rpcCallLabel = "rpcCallLabel";
+/**
+ * Use null for mandatory variables.
+ * Use "" for optional variables.
+ * The cli argument gives the order of the commands.
+ */
+var rpcCalls = {
+  getPeerInfo: {
+    rpcCallLabel: "getPeerInfo", //must be same as rpc label, used for autocomplete
+    command: "getpeerinfo",
+    net: "--testnet",
+    cli: ["net", "command"]
+  },
+  getBlock: {
+    rpcCallLabel: "getBlock", //must be same as rpc label, used for autocomplete
+    command: "getblock",
+    blockHash: null, // mandatory input
+    net: "--testnet",
+    verbosity: null, // mandatory input
+    cli: ["net", "command", "blockHash", "verbosity"]
+  },
+  getBestBlockHash: {
+    rpcCallLabel: "getBestBlockHash", //must be same as rpc label, used for autocomplete
+    command: "getbestblockhash",
+    net: "--testnet",
+    cli: ["net", "command"]
+  },
+}
+
+function getURLfromRPCLabel(theRPClabel, theArguments){
+  var theRequest = {};
+  theRequest[rpcCallLabel] = theRPClabel;
+  var theRPCCall = rpcCalls[theRPClabel];
+  for (var label in theRPCCall){
+    if (typeof theRPCCall[label] === "string"){
+      theRequest[label] = theRPCCall[label]
+    } 
+  }
+  if (theArguments === undefined){
+    theArguments = {};
+  }
+  for (var label in theArguments){
+    if (typeof theRPCCall[label] === "string" || theRPCCall[label] === null){
+      if (typeof theArguments[label] === "string"){
+        theRequest[label] = theRPCCall[label];
+      }
+    } 
+  }
+  return `${url.known.rpc}?command=${encodeURIComponent(JSON.stringify(theRequest))}`;
+}
+
+function getRPCcallArguments(theRPCLabel, additionalArguments, errors){
+  var result = [];
+  if (!(theRPCLabel in rpcCalls)){
+    errors.push(`Uknown or non-implemented rpc command: ${theRPCLabel}.`);
+    return null;
+  }
+  var theRPCCall = rpcCalls[theRPCLabel];
+  for (var counterCommand = 0; counterCommand < theRPCCall.cli.length; counterCommand ++){
+    var currentLabel = theRPCCall.cli[counterCommand];
+    if (!(currentLabel in additionalArguments)){
+      if (!(currentLabel in theRPCCall)){
+        console.log(`WARNING: no default given for ${currentLabel} in rpc call labeled ${theRPCLabel}. If this is an optional argument, set the default to an empty string.`.red);
+        continue;
+      }
+      if (typeof theRPCCall[currentLabel] === null){
+        errors.push(`Mandatory argument ${currentLabel} missing for rpc command: ${theRPCLabel}`);
+        return null;
+      }
+      if (theRPCCall[currentLabel] === ""){
+        continue;
+      }
+      result.push(theRPCCall[currentLabel]);
+    } else {
+      if (typeof additionalArguments[currentLabel] === "string"){
+        if (additionalArguments[currentLabel] !== ""){
+          result.push(additionalArguments[currentLabel]);
+          //console.log(`Pusing label ${currentLabel} with value: ${additionalArguments[currentLabel]}.`);
+        } 
+      }
+    }
+  }
+  return result;
+}
 
 module.exports = {
   pathname,
   path,
   url,
-  rpc
+  rpcCalls,
+  rpcCallLabel,
+  getURLfromRPCLabel,
+  getRPCcallArguments,
 }
 
 }).call(this,"/src")
-},{}]},{},[2]);
+},{}]},{},[3]);

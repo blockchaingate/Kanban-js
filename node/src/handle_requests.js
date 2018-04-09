@@ -5,8 +5,7 @@ const mime = require('mime-types');
 const escapeHtml = require('escape-html');
 const queryString = require('querystring');
 const url  = require('url');
-const getPeerInfo = require('./get_peer_info');
-
+const fabCli = require('./fabcoin_cli_call');
 function handle_requests(request, response){
   //console.log(`The url is: ${request.url}`.red);
   if (request.url in pathnames.url.synonyms){
@@ -38,21 +37,12 @@ function handleRPC(request, response){
   try {
     parsedURL = url.parse(request.url);
     query = queryString.parse(parsedURL.query);
-    queryCommand = JSON.parse(query[pathnames.rpc.command]);
+    queryCommand = JSON.parse(query.command);
   } catch (e) {
     response.writeHead(400);
-    return response.end(`Bad rpc request: ${escapeHtml(e)}`);
+    return response.end(`Bad RPC request: ${e}`);
   }
-  switch (queryCommand[pathnames.rpc.command]){
-    case pathnames.rpc.getPeerInfo:
-      return getPeerInfo.getPeerInfo(request, response);
-
-    default:
-      response.writeHead(200);
-      var command = escapeHtml(JSON.stringify(queryCommand[pathnames.rpc.command]));
-      var commandQuery = escapeHtml(JSON.stringify(queryCommand));
-      return response.end(`Don't know how to interpret command: ${command} extracted from query: ${commandQuery}.`);
-  }
+  return fabCli.rpc_call(request, response, queryCommand);
 }
 
 function handleFile(request, response){

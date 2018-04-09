@@ -1,15 +1,21 @@
 <html>
-<script src='/kanban_frontend_browserified.js'></script>
-<link rel="stylesheet" type="text/css" href="/kanban_frontend.css">
+<script src = '/kanban_frontend_browserified.js'></script>
+<link rel = "stylesheet" type = "text/css" href = "/kanban_frontend.css">
 <body>
 <div class = "divPageAndMenu">
   <div class = "divMainPage">
-    <button onclick="window.kanban.getPeerInfo.getPeerInfoTestNet('divKanbanRPCOutput');" class = "buttonStandard">getPeerInfoTestNet</button>
+    <button onclick = "window.kanban.rpc.getPeerInfoTestNet('divKanbanRPCOutput');" class = "buttonStandard">getPeerInfoTestNet</button>
+    <button onclick = "window.kanban.rpc.getBestBlockHash('divKanbanRPCOutput');" class = "buttonStandard">getLastBlockTestNet</button> 
+    <button onclick = "window.kanban.rpc.getBlock('divKanbanRPCOutput', 'inputBlockHash');" class = "buttonStandard">getBlockTestNet</button> 
+    <input type = "text" id = "inputBlockHash"></input>
 
     <div id = "divKanbanRPCOutput"></div>
+    <span id = "spanProgressReport" class = "spanProgressReport"> </span>
   </div>
   <div class = "divMenu">
-    <span id = "spanProgressReport"> </span>
+    <div style = "text-align:center">
+      <img alt = "FAB Coin" src = "/fabcoin.svg" class = "imgFabLogo">
+    </div>
   </div>
 
 </div>
