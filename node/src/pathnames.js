@@ -9,7 +9,7 @@ var pathname = {
   frontEndBrowserifiedJS: `${path.HTML}/kanban_frontend_browserified.js`,
   frontEndNONBrowserifiedJS: `${__dirname}/frontend/frontend.js`,
   frontEndHTML: `${path.HTML}/kanban_frontend.html`,
-  frontEndCSS: `${path.HTML}/kanban_frontend.css`,
+  frontEndCSS: `${path.HTML}/kanban_frontend.css`
 };
 
 var url = {};
@@ -17,9 +17,8 @@ url.known = {
   faviconIco : "/favicon.ico",
   frontEndBrowserifiedJS: "/kanban_frontend_browserified.js",
   frontEndHTML: "/kanban_frontend.html",
-  frontendCSS: "/kanban_style.css",
-  rpc: "/rpc",
-  rpcWithQuery: "/rpc?command="
+  frontEndCSS: "/kanban_frontend.css",
+  rpc: "/rpc"
 };
 
 url.synonyms = {

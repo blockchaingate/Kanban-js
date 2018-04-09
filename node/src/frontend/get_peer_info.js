@@ -1,17 +1,18 @@
-var submitRequests = require('./submit_requests');
-var pathnames = require('../pathnames');
+const submitRequests = require('./submit_requests');
+const pathnames = require('../pathnames');
+const ids = require('./ids_dom_elements');
 
 function getPeerInfoTestNet(output, progress){
-  if (typeof output === "string" ){
-    output = document.getElementById(output);
+  if (typeof progress === "undefined"){
+    progress = ids.defaults.progressReport
   }
-  if (typeof progress === "string" ){
-    progress = document.getElementById(progress);
-  }
+
   var theRequest = {};
   theRequest[pathnames.rpc.command] = pathnames.rpc.getPeerInfo;  
   submitRequests.submitGET({
-    url: `${pathnames.url.known.rpcWithQuery}${encodeURIComponent(JSON.stringify(theRequest))}`
+    url: `${pathnames.url.known.rpc}?${pathnames.rpc.command}=${encodeURIComponent(JSON.stringify(theRequest))}`,
+    progress: progress,
+    result : output 
   });
 
 }

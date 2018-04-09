@@ -1,14 +1,15 @@
 <html>
 <script src='/kanban_frontend_browserified.js'></script>
+<link rel="stylesheet" type="text/css" href="/kanban_frontend.css">
 <body>
 <div class = "divPageAndMenu">
   <div class = "divMainPage">
-    <button onclick="window.kanban.getPeerInfo.getPeerInfoTestNet('divRPCOutput');">getPeerInfoTestNet</button>
+    <button onclick="window.kanban.getPeerInfo.getPeerInfoTestNet('divKanbanRPCOutput');" class = "buttonStandard">getPeerInfoTestNet</button>
 
-    <div id = "divRPCOutput"></div>
+    <div id = "divKanbanRPCOutput"></div>
   </div>
   <div class = "divMenu">
-
+    <span id = "spanProgressReport"> </span>
   </div>
 
 </div>

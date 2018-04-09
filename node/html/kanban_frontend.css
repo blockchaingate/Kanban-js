@@ -50,3 +50,26 @@ div.divTableContainerSearch{
 div.pageMainWindow{
   margin-left: 12px;
 }
+
+button.buttonStandard{
+  border: 0;
+  background-color: lightblue;
+  transition: 2s all;
+  border-radius: 2px;
+  padding: 5px;
+}
+
+button.buttonStandard:hover{
+  background-color: lightskyblue;
+}
+
+button.buttonProgress {
+  border: 0;
+  background: none;
+  transition: 2s all;
+  border-radius: 2px;
+}
+
+button.buttonProgress:hover {
+  background-color: lightgray;
+}

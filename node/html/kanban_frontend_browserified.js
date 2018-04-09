@@ -1,21 +1,102 @@
 (function(){function r(e,n,t){function o(i,f){if(!n[i]){if(!e[i]){var c="function"==typeof require&&require;if(!f&&c)return c(i,!0);if(u)return u(i,!0);var a=new Error("Cannot find module '"+i+"'");throw a.code="MODULE_NOT_FOUND",a}var p=n[i]={exports:{}};e[i][0].call(p.exports,function(r){var n=e[i][1][r];return o(n||r)},p,p.exports,r,e,n,t)}return n[i].exports}for(var u="function"==typeof require&&require,i=0;i<t.length;i++)o(t[i]);return o}return r})()({1:[function(require,module,exports){
+/*!
+ * escape-html
+ * Copyright(c) 2012-2013 TJ Holowaychuk
+ * Copyright(c) 2015 Andreas Lubbe
+ * Copyright(c) 2015 Tiancheng "Timothy" Gu
+ * MIT Licensed
+ */
+
+'use strict';
+
+/**
+ * Module variables.
+ * @private
+ */
+
+var matchHtmlRegExp = /["'&<>]/;
+
+/**
+ * Module exports.
+ * @public
+ */
+
+module.exports = escapeHtml;
+
+/**
+ * Escape special characters in the given string of html.
+ *
+ * @param  {string} string The string to escape for inserting into HTML
+ * @return {string}
+ * @public
+ */
+
+function escapeHtml(string) {
+  var str = '' + string;
+  var match = matchHtmlRegExp.exec(str);
+
+  if (!match) {
+    return str;
+  }
+
+  var escape;
+  var html = '';
+  var index = 0;
+  var lastIndex = 0;
+
+  for (index = match.index; index < str.length; index++) {
+    switch (str.charCodeAt(index)) {
+      case 34: // "
+        escape = '&quot;';
+        break;
+      case 38: // &
+        escape = '&amp;';
+        break;
+      case 39: // '
+        escape = '&#39;';
+        break;
+      case 60: // <
+        escape = '&lt;';
+        break;
+      case 62: // >
+        escape = '&gt;';
+        break;
+      default:
+        continue;
+    }
+
+    if (lastIndex !== index) {
+      html += str.substring(lastIndex, index);
+    }
+
+    lastIndex = index + 1;
+    html += escape;
+  }
+
+  return lastIndex !== index
+    ? html + str.substring(lastIndex, index)
+    : html;
+}
+
+},{}],2:[function(require,module,exports){
 window.kanban = {};
 window.kanban.getPeerInfo = require('./get_peer_info');
-},{"./get_peer_info":2}],2:[function(require,module,exports){
-var submitRequests = require('./submit_requests');
-var pathnames = require('../pathnames');
+},{"./get_peer_info":3}],3:[function(require,module,exports){
+const submitRequests = require('./submit_requests');
+const pathnames = require('../pathnames');
+const ids = require('./ids_dom_elements');
 
 function getPeerInfoTestNet(output, progress){
-  if (typeof output === "string" ){
-    output = document.getElementById(output);
+  if (typeof progress === "undefined"){
+    progress = ids.defaults.progressReport
   }
-  if (typeof progress === "string" ){
-    progress = document.getElementById(progress);
-  }
+
   var theRequest = {};
   theRequest[pathnames.rpc.command] = pathnames.rpc.getPeerInfo;  
   submitRequests.submitGET({
-    url: `${pathnames.url.known.rpcWithQuery}${encodeURIComponent(JSON.stringify(theRequest))}`
+    url: `${pathnames.url.known.rpc}?${pathnames.rpc.command}=${encodeURIComponent(JSON.stringify(theRequest))}`,
+    progress: progress,
+    result : output 
   });
 
 }
@@ -23,8 +104,20 @@ function getPeerInfoTestNet(output, progress){
 module.exports = {
   getPeerInfoTestNet
 }
-},{"../pathnames":4,"./submit_requests":3}],3:[function(require,module,exports){
+},{"../pathnames":6,"./ids_dom_elements":4,"./submit_requests":5}],4:[function(require,module,exports){
+"use strict";
+
+var defaults = {
+  progressReport: "spanProgressReport",
+
+}
+
+module.exports = {
+  defaults
+}
+},{}],5:[function(require,module,exports){
 "use srict";
+const escapeHtml = require('escape-html');
 
 function recordProgressDone(progress){
   if (progress === null || progress === undefined){
@@ -58,7 +151,7 @@ function recordResult(resultText, resultSpan){
   if (typeof resultSpan === "string"){
     resultSpan = document.getElementById(resultSpan);
   }
-  resultSpan.innerHTML = escapeHtml(resultText);
+  resultSpan.innerHTML = resultText;
 }
 
 /**
@@ -105,7 +198,7 @@ function submitGET(inputObject){
 module.exports = {
   submitGET
 }
-},{}],4:[function(require,module,exports){
+},{"escape-html":1}],6:[function(require,module,exports){
 (function (__dirname){
 "use strict";
 var path = {};
@@ -118,7 +211,7 @@ var pathname = {
   frontEndBrowserifiedJS: `${path.HTML}/kanban_frontend_browserified.js`,
   frontEndNONBrowserifiedJS: `${__dirname}/frontend/frontend.js`,
   frontEndHTML: `${path.HTML}/kanban_frontend.html`,
-  frontEndCSS: `${path.HTML}/kanban_frontend.css`,
+  frontEndCSS: `${path.HTML}/kanban_frontend.css`
 };
 
 var url = {};
@@ -126,9 +219,8 @@ url.known = {
   faviconIco : "/favicon.ico",
   frontEndBrowserifiedJS: "/kanban_frontend_browserified.js",
   frontEndHTML: "/kanban_frontend.html",
-  frontendCSS: "/kanban_style.css",
-  rpc: "/rpc",
-  rpcWithQuery: "/rpc?command="
+  frontEndCSS: "/kanban_frontend.css",
+  rpc: "/rpc"
 };
 
 url.synonyms = {
@@ -154,4 +246,4 @@ module.exports = {
 }
 
 }).call(this,"/src")
-},{}]},{},[1]);
+},{}]},{},[2]);

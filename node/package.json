@@ -26,6 +26,8 @@
     "bitcoinjs-lib": "^3.3.2",
     "browserify": "^16.1.1",
     "colors": "^1.2.1",
+    "escape-html": "^1.0.3",
+    "mime-types": "^2.1.18",
     "nodemon": "^1.17.3"
   }
 }

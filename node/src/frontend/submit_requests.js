@@ -1,4 +1,5 @@
 "use srict";
+const escapeHtml = require('escape-html');
 
 function recordProgressDone(progress){
   if (progress === null || progress === undefined){
@@ -32,7 +33,7 @@ function recordResult(resultText, resultSpan){
   if (typeof resultSpan === "string"){
     resultSpan = document.getElementById(resultSpan);
   }
-  resultSpan.innerHTML = escapeHtml(resultText);
+  resultSpan.innerHTML = resultText;
 }
 
 /**
