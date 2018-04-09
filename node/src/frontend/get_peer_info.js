@@ -1,6 +1,7 @@
 const submitRequests = require('./submit_requests');
 const pathnames = require('../pathnames');
 const ids = require('./ids_dom_elements');
+const jsonToHtml = require('./json_to_html');
 
 function getPeerInfoTestNet(output, progress){
   if (typeof progress === "undefined"){
@@ -12,7 +13,8 @@ function getPeerInfoTestNet(output, progress){
   submitRequests.submitGET({
     url: `${pathnames.url.known.rpc}?${pathnames.rpc.command}=${encodeURIComponent(JSON.stringify(theRequest))}`,
     progress: progress,
-    result : output 
+    result : output,
+    callback: jsonToHtml.writeJSONtoDOMComponent
   });
 
 }

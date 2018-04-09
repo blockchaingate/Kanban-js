@@ -4,7 +4,8 @@ const colors = require('colors');
 const mime = require('mime-types');
 const escapeHtml = require('escape-html');
 const queryString = require('querystring');
-var url  = require('url');
+const url  = require('url');
+const getPeerInfo = require('./get_peer_info');
 
 function handle_requests(request, response){
   //console.log(`The url is: ${request.url}`.red);
@@ -43,6 +44,8 @@ function handleRPC(request, response){
     return response.end(`Bad rpc request: ${escapeHtml(e)}`);
   }
   switch (queryCommand[pathnames.rpc.command]){
+    case pathnames.rpc.getPeerInfo:
+      return getPeerInfo.getPeerInfo(request, response);
 
     default:
       response.writeHead(200);

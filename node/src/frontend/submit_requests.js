@@ -69,9 +69,10 @@ function submitGET(inputObject){
   xhr.setRequestHeader('Accept', 'text/html');
   xhr.onload = function () {
     recordProgressDone(progress);
-    recordResult(xhr.responseText, result);
     if (callback !== undefined && callback !== null){
       callback(xhr.responseText, result);
+    } else { 
+      recordResult(xhr.responseText, result);
     }
   };
   xhr.send();

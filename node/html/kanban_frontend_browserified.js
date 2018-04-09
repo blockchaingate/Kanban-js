@@ -85,6 +85,7 @@ window.kanban.getPeerInfo = require('./get_peer_info');
 const submitRequests = require('./submit_requests');
 const pathnames = require('../pathnames');
 const ids = require('./ids_dom_elements');
+const jsonToHtml = require('./json_to_html');
 
 function getPeerInfoTestNet(output, progress){
   if (typeof progress === "undefined"){
@@ -96,7 +97,8 @@ function getPeerInfoTestNet(output, progress){
   submitRequests.submitGET({
     url: `${pathnames.url.known.rpc}?${pathnames.rpc.command}=${encodeURIComponent(JSON.stringify(theRequest))}`,
     progress: progress,
-    result : output 
+    result : output,
+    callback: jsonToHtml.writeJSONtoDOMComponent
   });
 
 }
@@ -104,7 +106,7 @@ function getPeerInfoTestNet(output, progress){
 module.exports = {
   getPeerInfoTestNet
 }
-},{"../pathnames":6,"./ids_dom_elements":4,"./submit_requests":5}],4:[function(require,module,exports){
+},{"../pathnames":7,"./ids_dom_elements":4,"./json_to_html":5,"./submit_requests":6}],4:[function(require,module,exports){
 "use strict";
 
 var defaults = {
@@ -116,6 +118,88 @@ module.exports = {
   defaults
 }
 },{}],5:[function(require,module,exports){
+"use srict";
+const escapeHtml = require('escape-html');
+
+function writeJSONtoDOMComponent(inputJSON, theDomComponent){
+  if (typeof theDomComponent === "string"){
+    theDomComponent = document.getElementById(theDomComponent);
+  }
+  theDomComponent.innerHTML = getHtmlFromArrayOfObjects(inputJSON);
+}
+
+function getTableHorizontallyLaidFromJSON(input){
+  if (typeof input === "string")
+    return input;
+  if (typeof input === "number")
+    return input;
+  if (typeof input === "boolean")
+    return input;
+  if (typeof input !== "object"){
+    return typeof input;
+  }
+}
+
+function getLabelsRows(input){
+  var result = {
+    labels: [],
+    rows: []
+  };
+  var labelFinder = {};
+  for (var counterRow = 0; counterRow < input.length; counterRow ++){
+    for (var label in input[counterRow]){
+      labelFinder[label] = true;
+    }
+  }
+  result.labels = Object.keys(labelFinder).sort();
+  for (var counterRow = 0; counterRow < input.length; counterRow ++){
+    var currentInputItem = input[counterRow];
+    result.rows.push([]);
+    var currentOutputItem = result.rows[result.rows.length - 1];
+    for (var counterLabel = 0; counterLabel < result.labels.length; counterLabel ++){
+      var label = result.labels[counterLabel];
+      if (label in currentInputItem){
+        currentOutputItem.push(currentInputItem[label]);
+      } else {
+        currentOutputItem.push("");
+      }
+    }
+  }
+  return result;
+}
+
+function getHtmlFromArrayOfObjects(inputJSON){
+  if (typeof inputJSON === "string"){
+    try {
+      inputJSON = JSON.parse(inputJSON);
+    } catch (e){
+      return `<error>Error: ${e}</error>`;
+    }
+  }
+  var labelsRows = getLabelsRows(inputJSON);
+  var result = "";
+  result += "<table class='tableJSON'>";
+  result += "<tr>";
+  for (var counterColumn = 0; counterColumn < labelsRows.labels.length; counterColumn ++){
+    result += `<th>${labelsRows.labels[counterColumn]}</th>`;
+  }
+  for (var counterRow = 0; counterRow < labelsRows.rows.length; counterRow ++){
+    result += "<tr>";
+    for (var counterColumn = 0; counterColumn < labelsRows.labels.length; counterColumn ++){
+      result += `<td>${getTableHorizontallyLaidFromJSON(labelsRows.rows[counterRow][counterColumn])}</td>`;
+    }
+    result += "</tr>";
+  }
+  result += "</tr>";
+  result += "</table>";
+  return result;
+}
+
+module.exports = {
+  writeJSONtoDOMComponent,
+  getHtmlFromArrayOfObjects
+}
+},{"escape-html":1}],6:[function(require,module,exports){
 "use srict";
 const escapeHtml = require('escape-html');
 
@@ -187,9 +271,10 @@ function submitGET(inputObject){
   xhr.setRequestHeader('Accept', 'text/html');
   xhr.onload = function () {
     recordProgressDone(progress);
-    recordResult(xhr.responseText, result);
     if (callback !== undefined && callback !== null){
       callback(xhr.responseText, result);
+    } else { 
+      recordResult(xhr.responseText, result);
     }
   };
   xhr.send();
@@ -198,12 +283,16 @@ function submitGET(inputObject){
 module.exports = {
   submitGET
 }
-},{"escape-html":1}],6:[function(require,module,exports){
+},{"escape-html":1}],7:[function(require,module,exports){
 (function (__dirname){
 "use strict";
-var path = {};
-path.certificates = __dirname + "/" + "../certificates_secret";
-path.HTML = __dirname + "/../html";
+var path = {
+  certificates: `${__dirname}/../certificates_secret`,
+  HTML: `${__dirname}/../html`,
+  fabcoin: `${__dirname}/../../../fabcoin-dev`,
+  fabcoinSrc: `${__dirname}/../../../fabcoin-dev/src`,
+};
+
 var pathname = {
   privateKey: `${path.certificates}/private_key.pem`,
   certificate: `${path.certificates}/certificate.pem`,
@@ -211,7 +300,9 @@ var pathname = {
   frontEndBrowserifiedJS: `${path.HTML}/kanban_frontend_browserified.js`,
   frontEndNONBrowserifiedJS: `${__dirname}/frontend/frontend.js`,
   frontEndHTML: `${path.HTML}/kanban_frontend.html`,
-  frontEndCSS: `${path.HTML}/kanban_frontend.css`
+  frontEndCSS: `${path.HTML}/kanban_frontend.css`,
+  fabcoind: `${path.fabcoinSrc}/fabcoind`,
+  fabcoinCli: `${path.fabcoinSrc}/fabcoin-cli`,
 };
 
 var url = {};

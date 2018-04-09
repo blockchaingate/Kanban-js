@@ -73,3 +73,25 @@ button.buttonProgress {
 button.buttonProgress:hover {
   background-color: lightgray;
 }
+
+error{
+  font-weight: bold;
+  color: red;
+}
+
+table.tableJSON{
+  border-collapse: collapse;
+  border: 1px black solid;
+}
+
+table.tableJSON th{
+  font-size: small;
+  font-weight: lighter;
+  border: 1px black solid;
+}
+
+table.tableJSON td{
+  font-size: small;
+  font-weight: lighter;
+  border: 1px black solid;
+}
