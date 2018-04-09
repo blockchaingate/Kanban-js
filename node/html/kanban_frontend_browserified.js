@@ -120,6 +120,7 @@ module.exports = {
 },{}],5:[function(require,module,exports){
 "use srict";
 const escapeHtml = require('escape-html');
+const submitRequests = require('./submit_requests');
 
 function writeJSONtoDOMComponent(inputJSON, theDomComponent){
   if (typeof theDomComponent === "string"){
@@ -135,9 +136,18 @@ function getTableHorizontallyLaidFromJSON(input){
     return input;
   if (typeof input === "boolean")
     return input;
-  if (typeof input !== "object"){
-    return typeof input;
+  
+  if (typeof input === "object"){
+    var result = "";
+    result += "<table class='tableJSON'>";
+    for (item in input){
+      result += `<tr><td>${item}</td><td>${input[item]}</td></tr>`; 
+    }
+    result += "</table>";
+    return result;
   }
+  
+  return typeof input;
 }
 
 function getLabelsRows(input){
@@ -168,7 +178,8 @@ function getLabelsRows(input){
   return result;
 }
 
-function getHtmlFromArrayOfObjects(inputJSON){
+function getHtmlFromArrayOfObjects(input){
+  var inputJSON = input; 
   if (typeof inputJSON === "string"){
     try {
       inputJSON = JSON.parse(inputJSON);
@@ -192,6 +203,7 @@ function getHtmlFromArrayOfObjects(inputJSON){
   }
   result += "</tr>";
   result += "</table>";
+  result += submitRequests.getToggleButton({label: "raw JSON", content: input});
   return result;
 }
 
@@ -199,9 +211,16 @@ module.exports = {
   writeJSONtoDOMComponent,
   getHtmlFromArrayOfObjects
 }
-},{"escape-html":1}],6:[function(require,module,exports){
+},{"./submit_requests":6,"escape-html":1}],6:[function(require,module,exports){
 "use srict";
 const escapeHtml = require('escape-html');
+
+function getToggleButton(buttonInfo){
+  return `<button class = "buttonProgress"
+    onclick="if (this.nextSibling.nextSibling.style.display === 'none')
+    {this.nextSibling.nextSibling.style.display = ''; this.childNodes[1].innerHTML = '&#9660;';} else {
+    this.nextSibling.nextSibling.style.display = 'none'; this.childNodes[1].innerHTML = '&#9668;';}"><span>${buttonInfo.label}</span><b>&#9668;</b></button><br><span class="spanRESTDeveloperInfo" style="display:none">${buttonInfo.content}</span>`;
+}
 
 function recordProgressDone(progress){
   if (progress === null || progress === undefined){
@@ -211,7 +230,7 @@ function recordProgressDone(progress){
     progress = document.getElementById(progress);
   }
   var theButton = progress.childNodes[0];
-  theButton.innerHTML = "<b style='color:green'>Received</b>";
+  theButton.childNodes[0].innerHTML = "<b style='color:green'>Received</b>";
 }
 
 function recordProgressStarted(progress, address){
@@ -221,11 +240,7 @@ function recordProgressStarted(progress, address){
   if (typeof progress === "string"){
     progress = document.getElementById(progress);
   }
-  progress.innerHTML = "<button class = \"buttonProgress\"" +
-  "onclick=\"if (this.nextSibling.nextSibling.style.display === 'none')" +
-  "{this.nextSibling.nextSibling.style.display = ''; } else {" +
-  "this.nextSibling.nextSibling.style.display = 'none';}\">" +
-  "<b style=\"color:orange\">Sent</b></button><br><span style=\"display:none\">" + address + "</span>";
+  progress.innerHTML = getToggleButton({content: address, label: "<b style=\"color:orange\">Sent</b>"});
 }
 
 function recordResult(resultText, resultSpan){
@@ -281,7 +296,8 @@ function submitGET(inputObject){
 }
 
 module.exports = {
-  submitGET
+  submitGET,
+  getToggleButton
 }
 },{"escape-html":1}],7:[function(require,module,exports){
 (function (__dirname){

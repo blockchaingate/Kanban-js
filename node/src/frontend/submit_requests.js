@@ -1,6 +1,13 @@
 "use srict";
 const escapeHtml = require('escape-html');
 
+function getToggleButton(buttonInfo){
+  return `<button class = "buttonProgress"
+    onclick="if (this.nextSibling.nextSibling.style.display === 'none')
+    {this.nextSibling.nextSibling.style.display = ''; this.childNodes[1].innerHTML = '&#9660;';} else {
+    this.nextSibling.nextSibling.style.display = 'none'; this.childNodes[1].innerHTML = '&#9668;';}"><span>${buttonInfo.label}</span><b>&#9668;</b></button><br><span class="spanRESTDeveloperInfo" style="display:none">${buttonInfo.content}</span>`;
+}
+
 function recordProgressDone(progress){
   if (progress === null || progress === undefined){
     return;
@@ -9,7 +16,7 @@ function recordProgressDone(progress){
     progress = document.getElementById(progress);
   }
   var theButton = progress.childNodes[0];
-  theButton.innerHTML = "<b style='color:green'>Received</b>";
+  theButton.childNodes[0].innerHTML = "<b style='color:green'>Received</b>";
 }
 
 function recordProgressStarted(progress, address){
@@ -19,11 +26,7 @@ function recordProgressStarted(progress, address){
   if (typeof progress === "string"){
     progress = document.getElementById(progress);
   }
-  progress.innerHTML = "<button class = \"buttonProgress\"" +
-  "onclick=\"if (this.nextSibling.nextSibling.style.display === 'none')" +
-  "{this.nextSibling.nextSibling.style.display = ''; } else {" +
-  "this.nextSibling.nextSibling.style.display = 'none';}\">" +
-  "<b style=\"color:orange\">Sent</b></button><br><span style=\"display:none\">" + address + "</span>";
+  progress.innerHTML = getToggleButton({content: address, label: "<b style=\"color:orange\">Sent</b>"});
 }
 
 function recordResult(resultText, resultSpan){
@@ -79,5 +82,6 @@ function submitGET(inputObject){
 }
 
 module.exports = {
-  submitGET
+  submitGET,
+  getToggleButton
 }

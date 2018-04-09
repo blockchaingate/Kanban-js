@@ -1,5 +1,6 @@
 "use srict";
 const escapeHtml = require('escape-html');
+const submitRequests = require('./submit_requests');
 
 function writeJSONtoDOMComponent(inputJSON, theDomComponent){
   if (typeof theDomComponent === "string"){
@@ -15,9 +16,18 @@ function getTableHorizontallyLaidFromJSON(input){
     return input;
   if (typeof input === "boolean")
     return input;
-  if (typeof input !== "object"){
-    return typeof input;
+  
+  if (typeof input === "object"){
+    var result = "";
+    result += "<table class='tableJSON'>";
+    for (item in input){
+      result += `<tr><td>${item}</td><td>${input[item]}</td></tr>`; 
+    }
+    result += "</table>";
+    return result;
   }
+  
+  return typeof input;
 }
 
 function getLabelsRows(input){
@@ -48,7 +58,8 @@ function getLabelsRows(input){
   return result;
 }
 
-function getHtmlFromArrayOfObjects(inputJSON){
+function getHtmlFromArrayOfObjects(input){
+  var inputJSON = input; 
   if (typeof inputJSON === "string"){
     try {
       inputJSON = JSON.parse(inputJSON);
@@ -72,6 +83,7 @@ function getHtmlFromArrayOfObjects(inputJSON){
   }
   result += "</tr>";
   result += "</table>";
+  result += submitRequests.getToggleButton({label: "raw JSON", content: input});
   return result;
 }
 

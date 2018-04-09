@@ -34,9 +34,11 @@ div.divMenuCollapsed{
 
 div.divMenu div{
   overflow: hidden;
+  
 }
 
 div.divMainPage{
+  overflow: auto;
   width: 90%;
   height: 100%;
 }
@@ -94,4 +96,10 @@ table.tableJSON td{
   font-size: small;
   font-weight: lighter;
   border: 1px black solid;
+}
+
+span.spanRESTDeveloperInfo{
+white-space: pre-wrap;
+word-wrap:break-word;
+transition: 2s all;  
 }

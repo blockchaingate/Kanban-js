@@ -27,7 +27,7 @@ function getPeerInfo(request, response){
       response.write(data.toString());
     });
     child.on ('exit', function(code){
-      console.log(`Ingester exited with code: ${code}`.green);
+      console.log(`RPC call exited with code: ${code}`.green);
       response.end();
     });
   } catch (e){
