@@ -26,7 +26,7 @@ function rpc_call(request, response, desiredCommand){
   if (theArguments === null){
     response.writeHead(400);
     if (errors.length > 0){
-      response.end(`{"error":"${escape(errors[0])}"`);
+      response.end(`{"error":"${errors[0]}"`);
     } else {
       response.end("Error while extracting rpc call arguments. ");      
     }
@@ -54,7 +54,7 @@ function rpc_call(request, response, desiredCommand){
         response.end(finalData);
       } else {
         response.writeHead(200);
-        response.end(`{"error": "${escape(finalData)}"}`);
+        response.end(`{"error": "${finalData}"}`);
       }
     });
   } catch (e){

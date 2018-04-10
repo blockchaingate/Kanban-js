@@ -3,8 +3,7 @@ const pathnames = require('../pathnames');
 const ids = require('./ids_dom_elements');
 const jsonToHtml = require('./json_to_html');
 
-function getBestBlockHash(output, blockHash,  progress){
-  blockHash = document.getElementById(blockHash);
+function getBestBlockHash(output,  progress){
   if (typeof progress === "undefined"){
     progress = ids.defaults.progressReport
   }

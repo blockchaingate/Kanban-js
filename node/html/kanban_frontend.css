@@ -20,7 +20,8 @@ div.divMenu{
   width: 10%;
   height: 100%;
   position: fixed;
-  right: 0.5%;
+  right: 0%;
+  top: 0%;
   overflow: hidden;
   background: black;
 }

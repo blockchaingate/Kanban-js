@@ -61,7 +61,7 @@ function getLabelsRows(input){
 }
 
 function getHtmlFromArrayOfObjects(input){
-  var inputJSON = input.replace(/\s/g, ""); 
+  var inputJSON = input.replace(/[\r\n]/g, " "); 
   if (typeof inputJSON === "string"){
     if (inputJSON[0] !== "{" && inputJSON[0] !== "[" && input[0] !== "\""){
       inputJSON = `"${inputJSON}"`;
@@ -72,26 +72,30 @@ function getHtmlFromArrayOfObjects(input){
       return `<error>Error while parsing ${escape(inputJSON)}: ${e}</error>`;
     }
   }
-  if (typeof inputJSON === "string"){
-    return inputJSON;
-  }
-  var labelsRows = getLabelsRows(inputJSON);
   var result = "";
-  result += "<table class='tableJSON'>";
-  result += "<tr>";
-  for (var counterColumn = 0; counterColumn < labelsRows.labels.length; counterColumn ++){
-    result += `<th>${labelsRows.labels[counterColumn]}</th>`;
+  if (typeof inputJSON === "object" && !Array.isArray(inputJSON)){
+    inputJSON = [inputJSON];
   }
-  for (var counterRow = 0; counterRow < labelsRows.rows.length; counterRow ++){
+  if (Array.isArray(inputJSON)){
+    var labelsRows = getLabelsRows(inputJSON);
+    result += "<table class='tableJSON'>";
     result += "<tr>";
     for (var counterColumn = 0; counterColumn < labelsRows.labels.length; counterColumn ++){
-      result += `<td>${getTableHorizontallyLaidFromJSON(labelsRows.rows[counterRow][counterColumn])}</td>`;
+      result += `<th>${labelsRows.labels[counterColumn]}</th>`;
+    }
+    for (var counterRow = 0; counterRow < labelsRows.rows.length; counterRow ++){
+      result += "<tr>";
+      for (var counterColumn = 0; counterColumn < labelsRows.labels.length; counterColumn ++){
+        result += `<td>${getTableHorizontallyLaidFromJSON(labelsRows.rows[counterRow][counterColumn])}</td>`;
+      }
+      result += "</tr>";
     }
     result += "</tr>";
+    result += "</table>";
+  } else {
+    result += inputJSON + "<br>";
   }
-  result += "</tr>";
-  result += "</table>";
-  result += submitRequests.getToggleButton({label: "raw JSON", content: input});
+  result += submitRequests.getToggleButton({label: "raw result", content: input});
   return result;
 }
 

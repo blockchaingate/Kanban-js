@@ -84,10 +84,11 @@ function getURLfromRPCLabel(theRPClabel, theArguments){
     theArguments = {};
   }
   for (var label in theArguments){
-    if (typeof theRPCCall[label] === "string" || theRPCCall[label] === null){
-      if (typeof theArguments[label] === "string"){
-        theRequest[label] = theRPCCall[label];
-      }
+    if (typeof theRPCCall[label] !== "string" && theRPCCall[label] !== null){
+      continue; // <- label not valid for this RPC call
+    }
+    if (typeof theArguments[label] === "string"){
+      theRequest[label] = theArguments[label];
     } 
   }
   return `${url.known.rpc}?command=${encodeURIComponent(JSON.stringify(theRequest))}`;

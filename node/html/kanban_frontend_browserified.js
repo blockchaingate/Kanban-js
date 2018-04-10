@@ -97,8 +97,7 @@ const pathnames = require('../pathnames');
 const ids = require('./ids_dom_elements');
 const jsonToHtml = require('./json_to_html');
 
-function getBestBlockHash(output, blockHash,  progress){
-  blockHash = document.getElementById(blockHash);
+function getBestBlockHash(output,  progress){
   if (typeof progress === "undefined"){
     progress = ids.defaults.progressReport
   }
@@ -114,18 +113,20 @@ module.exports = {
   getBestBlockHash
 }
 },{"../pathnames":10,"./ids_dom_elements":7,"./json_to_html":8,"./submit_requests":9}],5:[function(require,module,exports){
+"use strict";
 const submitRequests = require('./submit_requests');
 const pathnames = require('../pathnames');
 const ids = require('./ids_dom_elements');
 const jsonToHtml = require('./json_to_html');
 
-function getBlock(output, blockHash,  progress){
+function getBlock(output, blockHash, progress){
   blockHash = document.getElementById(blockHash);
   if (typeof progress === "undefined"){
     progress = ids.defaults.progressReport
   }
+  var theURL = pathnames.getURLfromRPCLabel(pathnames.rpcCalls.getBlock.rpcCallLabel, {blockHash: blockHash.value, verbosity: "1"});
   submitRequests.submitGET({
-    url: pathnames.getURLfromRPCLabel(pathnames.rpcCalls.getBlock.rpcCallLabel, {blockHash: blockHash.value}),
+    url: theURL,
     progress: progress,
     result : output,
     callback: jsonToHtml.writeJSONtoDOMComponent
@@ -232,7 +233,7 @@ function getLabelsRows(input){
 }
 
 function getHtmlFromArrayOfObjects(input){
-  var inputJSON = input.replace(/\s/g, ""); 
+  var inputJSON = input.replace(/[\r\n]/g, " "); 
   if (typeof inputJSON === "string"){
     if (inputJSON[0] !== "{" && inputJSON[0] !== "[" && input[0] !== "\""){
       inputJSON = `"${inputJSON}"`;
@@ -243,26 +244,30 @@ function getHtmlFromArrayOfObjects(input){
       return `<error>Error while parsing ${escape(inputJSON)}: ${e}</error>`;
     }
   }
-  if (typeof inputJSON === "string"){
-    return inputJSON;
-  }
-  var labelsRows = getLabelsRows(inputJSON);
   var result = "";
-  result += "<table class='tableJSON'>";
-  result += "<tr>";
-  for (var counterColumn = 0; counterColumn < labelsRows.labels.length; counterColumn ++){
-    result += `<th>${labelsRows.labels[counterColumn]}</th>`;
+  if (typeof inputJSON === "object" && !Array.isArray(inputJSON)){
+    inputJSON = [inputJSON];
   }
-  for (var counterRow = 0; counterRow < labelsRows.rows.length; counterRow ++){
+  if (Array.isArray(inputJSON)){
+    var labelsRows = getLabelsRows(inputJSON);
+    result += "<table class='tableJSON'>";
     result += "<tr>";
     for (var counterColumn = 0; counterColumn < labelsRows.labels.length; counterColumn ++){
-      result += `<td>${getTableHorizontallyLaidFromJSON(labelsRows.rows[counterRow][counterColumn])}</td>`;
+      result += `<th>${labelsRows.labels[counterColumn]}</th>`;
+    }
+    for (var counterRow = 0; counterRow < labelsRows.rows.length; counterRow ++){
+      result += "<tr>";
+      for (var counterColumn = 0; counterColumn < labelsRows.labels.length; counterColumn ++){
+        result += `<td>${getTableHorizontallyLaidFromJSON(labelsRows.rows[counterRow][counterColumn])}</td>`;
+      }
+      result += "</tr>";
     }
     result += "</tr>";
+    result += "</table>";
+  } else {
+    result += inputJSON + "<br>";
   }
-  result += "</tr>";
-  result += "</table>";
-  result += submitRequests.getToggleButton({label: "raw JSON", content: input});
+  result += submitRequests.getToggleButton({label: "raw result", content: input});
   return result;
 }
 
@@ -447,10 +452,11 @@ function getURLfromRPCLabel(theRPClabel, theArguments){
     theArguments = {};
   }
   for (var label in theArguments){
-    if (typeof theRPCCall[label] === "string" || theRPCCall[label] === null){
-      if (typeof theArguments[label] === "string"){
-        theRequest[label] = theRPCCall[label];
-      }
+    if (typeof theRPCCall[label] !== "string" && theRPCCall[label] !== null){
+      continue; // <- label not valid for this RPC call
+    }
+    if (typeof theArguments[label] === "string"){
+      theRequest[label] = theArguments[label];
     } 
   }
   return `${url.known.rpc}?command=${encodeURIComponent(JSON.stringify(theRequest))}`;
