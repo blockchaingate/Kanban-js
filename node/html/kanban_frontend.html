@@ -1,25 +1,57 @@
 <html>
 <script src = '/kanban_frontend_browserified.js'></script>
 <link rel = "stylesheet" type = "text/css" href = "/kanban_frontend.css">
-<body>
+<body onload="window.kanban.thePage.initialize();">
 <div class = "divPageAndMenu">
-  <div class = "divMainPage">
-    <button onclick = "window.kanban.rpc.getPeerInfoTestNet('divKanbanRPCOutput');" class = "buttonStandard">getPeerInfoTestNet</button>
-    <button onclick = "window.kanban.rpc.getBestBlockHash('divKanbanRPCOutput');" class = "buttonStandard">getLastBlockTestNet</button> 
-    <button onclick = "window.kanban.rpc.getBlock('divKanbanRPCOutput', 'inputBlockHash');" class = "buttonStandard">getBlockTestNet</button> 
-    <input type = "text" id = "inputBlockHash"></input>
-
-    <div id = "divKanbanRPCOutput"></div>
-    <span id = "spanProgressReport" class = "spanProgressReport"> </span>
+  <div class = "divMainPage" id = "pageRPCBlockInfo">
+    <div class = "divControlPanelDefault">
+        <label class = "containerRadioButton">
+          <input type = "radio" name = "net" checked = "checked" onchange = "window.kanban.rpc.setTestNet();">
+          <span class = "radioMark"></span>
+          TestNet
+        </label>
+        &nbsp;&nbsp;&nbsp;
+        <label class = "containerRadioButton">
+          <input type = "radio" name = "net" onchange = "window.kanban.rpc.setMainNet();">
+          <span class = "radioMark"></span>
+          MainNet
+        </label>
+    </div><br>
+    <div class = "divControlPanelDefault">
+        <label class = "containerRadioButton">
+            <input type = "radio" name = "rpcCall" onchange = "window.kanban.rpc.getPeerInfo();">
+            <span class = "radioMark"></span>
+            Peer info
+        </label>
+        <label class = "containerRadioButton">
+          <input type = "radio" name = "rpcCall" id = "radioBestBlockHash" onchange = "window.kanban.rpc.getBestBlockHash();" checked = "checked" >
+          <span class = "radioMark"></span>
+          Best block
+        </label>
+        <label class = "containerRadioButton">
+          <input type = "radio" name = "rpcCall" onchange = "window.kanban.rpc.getBlock();">
+          <span class = "radioMark"></span>
+          Block info
+        </label>
+      <input type = "text" id = "inputBlockHash" size = "60"></input>
+    </div><br>
+    <div class = "divControlPanelDefault">
+      <div id = "divKanbanRPCOutput"></div>
+    </div><br>
+    <div class = "divControlPanelDefault">
+      <span id = "spanProgressReport" class = "spanProgressReport"> </span>
+    </div>
   </div>
   <div class = "divMenu">
     <div style = "text-align:center">
       <img alt = "FAB Coin" src = "/fabcoin.svg" class = "imgFabLogo">
     </div>
+    <div class = "divMenuButtonPanel">
+    <div><button class = "buttonSelectPage" onclick = "window.kanban.thePage.selectPage('blockInfo')">Blocks</button> </div>
+    </div>
   </div>
 
 </div>
-  
 </body>  
 </html>
   

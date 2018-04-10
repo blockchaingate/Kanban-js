@@ -61,8 +61,9 @@ function getLabelsRows(input){
 }
 
 function getHtmlFromArrayOfObjects(input){
-  var inputJSON = input.replace(/[\r\n]/g, " "); 
+  var inputJSON = input;
   if (typeof inputJSON === "string"){
+    inputJSON = input.replace(/[\r\n]/g, " "); 
     if (inputJSON[0] !== "{" && inputJSON[0] !== "[" && input[0] !== "\""){
       inputJSON = `"${inputJSON}"`;
     }

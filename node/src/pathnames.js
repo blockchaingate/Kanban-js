@@ -52,21 +52,21 @@ var rpcCalls = {
   getPeerInfo: {
     rpcCallLabel: "getPeerInfo", //must be same as rpc label, used for autocomplete
     command: "getpeerinfo",
-    net: "--testnet",
+    net: "-testnet",
     cli: ["net", "command"]
   },
   getBlock: {
     rpcCallLabel: "getBlock", //must be same as rpc label, used for autocomplete
     command: "getblock",
     blockHash: null, // mandatory input
-    net: "--testnet",
+    net: "-testnet",
     verbosity: null, // mandatory input
     cli: ["net", "command", "blockHash", "verbosity"]
   },
   getBestBlockHash: {
     rpcCallLabel: "getBestBlockHash", //must be same as rpc label, used for autocomplete
     command: "getbestblockhash",
-    net: "--testnet",
+    net: "-testnet",
     cli: ["net", "command"]
   },
 }

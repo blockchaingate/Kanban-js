@@ -24,6 +24,7 @@ div.divMenu{
   top: 0%;
   overflow: hidden;
   background: black;
+  text-align: center;
 }
 
 div.divMenuCollapsed{
@@ -35,8 +36,20 @@ div.divMenuCollapsed{
   overflow: hidden;
 }
 
-div.divMenu div{
+div.divControlPanelDefault{
+  margin: 10px;
+  padding: 10px;
+
+  border: 1px solid black;
+  display: inline-block;
+}
+
+div.divMenuButtonPanel div{
   overflow: hidden;
+  width: 100%;
+  text-align: center;
+  margin-top: 10px;
+  flex: 1;
 }
 
 div.divMainPage{
@@ -58,6 +71,19 @@ span.spanProgressReport{
 
 div.pageMainWindow{
   margin-left: 12px;
+}
+
+button.buttonSelectPage{
+  border: 0;
+  background-color: lightblue;
+  transition: 2s all;
+  border-radius: 2px;
+  padding: 5px;
+  width: 120px;
+}
+
+button.buttonSelectPage:hover{
+  background-color: lightskyblue;
 }
 
 button.buttonStandard{
@@ -114,4 +140,64 @@ span.spanRESTDeveloperInfo{
 img.imgFabLogo{
   width: 100%;
   max-width: 100px;
+}
+
+/* Customize the label (the container) */
+.containerRadioButton {
+  position: relative;
+  padding-left: 20px;
+  cursor: pointer;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+}
+
+/* Hide the browser's default radio button */
+.containerRadioButton input {
+  position: absolute;
+  opacity: 0;
+}
+
+/* Create a custom radio button */
+.radioMark {
+  position: absolute;
+  top: 0px;
+  left: 0px;
+  height: 15px;
+  width: 15px;
+  background-color: #eee;
+  border-radius: 50%;
+}
+
+/* On mouse-over, add a grey background color */
+.containerRadioButton:hover input ~ .radioMark {
+  background-color: #ccc;
+}
+
+/* When the radio button is checked, add a blue background */
+.containerRadioButton input:checked ~ .radioMark {
+  background-color: lightskyblue;
+}
+
+/* Create the indicator (the dot/circle - hidden when not checked) */
+.radioMark:after {
+  content: "";
+  position: absolute;
+  display: none;
+}
+
+/* Show the indicator (dot/circle) when checked */
+.containerRadioButton input:checked ~ .radioMark:after {
+  display: block;
+}
+
+/* Style the indicator (dot/circle) */
+.containerRadioButton .radioMark:after {
+  top: 4px;
+  left: 4px;
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: white;
 }
