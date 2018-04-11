@@ -8,7 +8,8 @@ var defaults = {
   inputBestBlockIndex: "inputBestBlockIndex",
   rpcOutputBlockInfo: "divKanbanRPCOutputBlockInfo",
   rpcOutputTXInfo: "divKanbanRPCOutputTXInfo",
-  radioButtonBestBlock: "radioBestBlockHash"
+  radioButtonBestBlock: "radioBestBlockHash",
+  checkboxBlockVerbose: "checkboxBlockVerbose"
 }
 
 module.exports = {

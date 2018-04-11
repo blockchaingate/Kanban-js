@@ -31,13 +31,19 @@
           <span class = "radioMark"></span>
           Best block
         </label>
-        <input type = "text" id = "inputBestBlockIndex" size = "5" onchange="window.kanban.rpc.getBestBlockHash();"></input>
+        <input type = "text" id = "inputBestBlockIndex" size = "5" onchange = "window.kanban.rpc.getBestBlockHash();"></input>
         <label class = "containerRadioButton">
           <input type = "radio" name = "rpcCallBlockInfo" onchange = "window.kanban.rpc.getBlock();">
           <span class = "radioMark"></span>
           Block info
         </label>
-      <input type = "text" id = "inputBlockHash" size = "60"></input>
+      <input type = "text" id = "inputBlockHash" size = "60"></input> 
+      <label class = "containerCheckbox">
+        <input type = "checkbox" name = "verbose" id = "checkboxBlockVerbose" onchange = "window.kanban.rpc.getBlock();" checked = "checked" >
+        <span class = "checkMark"></span>
+        Verbose
+      </label>
+      
     </div><br>
     <div class = "divControlPanelDefault">
       <div id = "divKanbanRPCOutputBlockInfo"></div>
@@ -45,6 +51,8 @@
   </div> <!--pageRPCBlockInfo-->
   <div class = "divMainPage" id = "pageTXInfo" >
     <div class = "divControlPanelDefault">
+      <button class = "buttonStandard" onclick = "window.kanban.nodeCalls.synchronizeUnspentTransactions()">Synchronize</button>
+      &nbsp;&nbsp;&nbsp;
       <label class = "containerRadioButton">
         <input type = "radio" name = "rpcCallTxInfo" onchange = "window.kanban.rpc.getTXoutSetInfo();" checked = "checked">
         <span class = "radioMark"></span>

@@ -63,15 +63,23 @@ function setMainNet(){
 }
 
 function getBlockCallback(inputHex, outputComponent){
-  var theBlock = Block.fromHex(inputHex);
-  jsonToHtml.writeJSONtoDOMComponent(theBlock.toHumanReadableHex(), outputComponent);
-  getPage().pages.blockInfo.updateFunction = getBlock;
+  if (getPage().pages.blockInfo.verbosity === "0"){
+    var theBlock = Block.fromHex(inputHex);
+    jsonToHtml.writeJSONtoDOMComponent(theBlock.toHumanReadableHex(), outputComponent);
+    getPage().pages.blockInfo.updateFunction = getBlock;
+  } else {
+    jsonToHtml.writeJSONtoDOMComponent(inputHex, outputComponent);
+  }
 }
 function getBlock(){
+  getPage().pages.blockInfo.verbosity = "0";
+  if (document.getElementById(ids.defaults.checkboxBlockVerbose).checked){
+    getPage().pages.blockInfo.verbosity = "1";  
+  }
   var theURL = pathnames.getURLfromRPCLabel(
     pathnames.rpcCalls.getBlock.rpcCallLabel, {
       blockHash: getBlockHash().value, 
-      verbosity: "0",
+      verbosity: getPage().pages.blockInfo.verbosity,
       net: getPage().pages.blockInfo.currentNet,
     }
   );

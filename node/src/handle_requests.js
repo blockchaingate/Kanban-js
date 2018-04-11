@@ -6,6 +6,8 @@ const escapeHtml = require('escape-html');
 const queryString = require('querystring');
 const url  = require('url');
 const fabCli = require('./fabcoin_cli_call');
+const nodeHandlers = require('./node_handlers');
+
 function handle_requests(request, response){
   //console.log(`The url is: ${request.url}`.red);
   if (request.url in pathnames.url.synonyms){
@@ -26,6 +28,10 @@ function handle_requests(request, response){
   if (parsedURL.pathname === pathnames.url.known.rpc){
     return handleRPC(request, response);
   }
+  if (parsedURL.pathname === pathnames.url.known.node){
+    return handleNodeCall(request, response);
+  }
+  
   response.writeHead(200);
   response.end(`Uknown request ${escapeHtml(request.url)}`);
 }
@@ -44,6 +50,22 @@ function handleRPC(request, response){
   }
   return fabCli.rpc_call(request, response, queryCommand);
 }
+
+function handleNodeCall(request, response){
+  var parsedURL = null;
+  var query = null;
+  var queryCommand = null;
+  try {
+    parsedURL = url.parse(request.url);
+    query = queryString.parse(parsedURL.query);
+    queryCommand = JSON.parse(query.command);
+  } catch (e) {
+    response.writeHead(400);
+    return response.end(`Bad node call request: ${e}`);
+  }
+  return nodeHandlers.dispatch(request, response, queryCommand);
+}
+
 
 function handleFile(request, response){
   var thePathName = pathnames.url.whiteListed[request.url];

@@ -1,4 +1,12 @@
 "use strict";
+
+var nodeHandlers = null;
+try {
+  nodeHandlers = require('./node_handlers');
+} catch (e) {
+  nodeHandlers = {};
+}
+
 var path = {
   certificates: `${__dirname}/../certificates_secret`,
   HTML: `${__dirname}/../html`,
@@ -26,7 +34,8 @@ url.known = {
   frontEndBrowserifiedJS: "/kanban_frontend_browserified.js",
   frontEndHTML: "/kanban_frontend.html",
   frontEndCSS: "/kanban_frontend.css",
-  rpc: "/rpc"
+  rpc: "/rpc",
+  node: "/node"  
 };
 
 url.whiteListed = {};
@@ -41,6 +50,14 @@ url.synonyms = {
   "/" : url.known.frontEndHTML
 };
 
+var nodeCallLabel = "nodeCallLabel";
+
+var nodeCalls = {
+  computeUnspentTransactions: {
+    nodeCallLabel: "computeUnspentTransactions", // must be same as key label, used for autocomplete
+    handler: nodeHandlers.computeUnspentTransactions
+  }
+};
 
 var rpcCallLabel = "rpcCallLabel";
 /**
@@ -108,6 +125,12 @@ var rpcCalls = {
   }
 }
 
+function getURLfromNodeCallLabel(theNodeCallLabel){
+  var theRequest = {};
+  theRequest[nodeCallLabel] = theNodeCallLabel;
+  return `${url.known.node}?command=${encodeURIComponent(JSON.stringify(theRequest))}`;
+}
+
 function getURLfromRPCLabel(theRPClabel, theArguments){
   var theRequest = {};
   theRequest[rpcCallLabel] = theRPClabel;
@@ -170,7 +193,9 @@ module.exports = {
   path,
   url,
   rpcCalls,
+  nodeCalls,
   rpcCallLabel,
   getURLfromRPCLabel,
+  getURLfromNodeCallLabel,
   getRPCcallArguments,
 }

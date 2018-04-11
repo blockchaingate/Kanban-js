@@ -26,7 +26,7 @@ function recordProgressStarted(progress, address){
   if (typeof progress === "string"){
     progress = document.getElementById(progress);
   }
-  addressHTML = `<a href="${address}" target="_blank">${address}</a>`;
+  addressHTML = `<a href="${address}" target="_blank">${unescape(address)}</a>`;
   progress.innerHTML = getToggleButton({content: addressHTML, label: "<b style=\"color:orange\">Sent</b>"});
 }
 

@@ -8384,6 +8384,7 @@ function Block () {
 
 Block.fromBuffer = function (buffer) {
   if (buffer.length < 80){
+    //console.log("WARNING: small buffer");
     throw new Error(`Buffer too small (< 80 bytes). Buffer content: ${buffer.toString()}`);
   }
   var offset = 0;
@@ -9559,15 +9560,23 @@ function setMainNet(){
 }
 
 function getBlockCallback(inputHex, outputComponent){
-  var theBlock = Block.fromHex(inputHex);
-  jsonToHtml.writeJSONtoDOMComponent(theBlock.toHumanReadableHex(), outputComponent);
-  getPage().pages.blockInfo.updateFunction = getBlock;
+  if (getPage().pages.blockInfo.verbosity === "0"){
+    var theBlock = Block.fromHex(inputHex);
+    jsonToHtml.writeJSONtoDOMComponent(theBlock.toHumanReadableHex(), outputComponent);
+    getPage().pages.blockInfo.updateFunction = getBlock;
+  } else {
+    jsonToHtml.writeJSONtoDOMComponent(inputHex, outputComponent);
+  }
 }
 function getBlock(){
+  getPage().pages.blockInfo.verbosity = "0";
+  if (document.getElementById(ids.defaults.checkboxBlockVerbose).checked){
+    getPage().pages.blockInfo.verbosity = "1";  
+  }
   var theURL = pathnames.getURLfromRPCLabel(
     pathnames.rpcCalls.getBlock.rpcCallLabel, {
       blockHash: getBlockHash().value, 
-      verbosity: "0",
+      verbosity: getPage().pages.blockInfo.verbosity,
       net: getPage().pages.blockInfo.currentNet,
     }
   );
@@ -9702,13 +9711,14 @@ module.exports = {
   listAccounts,
   listUnspent
 }
-},{"../bitcoinjs_src/block":58,"../pathnames":71,"./ids_dom_elements":67,"./json_to_html":68,"./submit_requests":70}],66:[function(require,module,exports){
+},{"../bitcoinjs_src/block":58,"../pathnames":73,"./ids_dom_elements":67,"./json_to_html":68,"./submit_requests":71}],66:[function(require,module,exports){
 window.kanban = {};
 window.kanban.thePage = require('./main_page').getPage();
 window.kanban.rpc = require('./fabcoin_rpc');
+window.kanban.nodeCalls = require('./node_calls');
 window.kanban.ids = require('./ids_dom_elements');
 
-},{"./fabcoin_rpc":65,"./ids_dom_elements":67,"./main_page":69}],67:[function(require,module,exports){
+},{"./fabcoin_rpc":65,"./ids_dom_elements":67,"./main_page":69,"./node_calls":70}],67:[function(require,module,exports){
 "use strict";
 
 var defaults = {
@@ -9719,7 +9729,8 @@ var defaults = {
   inputBestBlockIndex: "inputBestBlockIndex",
   rpcOutputBlockInfo: "divKanbanRPCOutputBlockInfo",
   rpcOutputTXInfo: "divKanbanRPCOutputTXInfo",
-  radioButtonBestBlock: "radioBestBlockHash"
+  radioButtonBestBlock: "radioBestBlockHash",
+  checkboxBlockVerbose: "checkboxBlockVerbose"
 }
 
 module.exports = {
@@ -9832,7 +9843,7 @@ module.exports = {
   writeJSONtoDOMComponent,
   getHtmlFromArrayOfObjects
 }
-},{"./submit_requests":70,"escape-html":16}],69:[function(require,module,exports){
+},{"./submit_requests":71,"escape-html":16}],69:[function(require,module,exports){
 "use strict";
 const rpcCalls = require('./fabcoin_rpc');
 const ids = require('./ids_dom_elements');
@@ -9844,7 +9855,8 @@ function Page(){
         page: ids.defaults.pageBlockInfo
       },
       currentNet: "-testnet",
-      updateFunction: rpcCalls.getBestBlockHash
+      verbosity: "0",
+      updateFunction: rpcCalls.getBestBlockHash,
     },
     txInfo: {
       ids: {
@@ -9907,6 +9919,41 @@ module.exports = {
   getPage
 }
 },{"./fabcoin_rpc":65,"./ids_dom_elements":67}],70:[function(require,module,exports){
+"use strict";
+const submitRequests = require('./submit_requests');
+const pathnames = require('../pathnames');
+const ids = require('./ids_dom_elements');
+const jsonToHtml = require('./json_to_html');
+const Block = require('../bitcoinjs_src/block');
+
+function getPage(){
+  return window.kanban.thePage;
+}
+
+function getSpanProgress(){ 
+  return document.getElementById(ids.defaults.progressReport);
+}
+
+function getOutputTXInfoDiv(){
+  return document.getElementById(ids.defaults.rpcOutputTXInfo);
+}
+
+function synchronizeUnspentTransactionsCallBack(input, outputComponent){
+  jsonToHtml.writeJSONtoDOMComponent(input, outputComponent);
+}
+function synchronizeUnspentTransactions(){
+  submitRequests.submitGET({
+    url: pathnames.getURLfromNodeCallLabel(pathnames.nodeCalls.computeUnspentTransactions.nodeCallLabel),
+    progress: getSpanProgress(),
+    result : getOutputTXInfoDiv(),
+    callback: synchronizeUnspentTransactionsCallBack
+  });
+}
+
+module.exports = {
+  synchronizeUnspentTransactions
+}
+},{"../bitcoinjs_src/block":58,"../pathnames":73,"./ids_dom_elements":67,"./json_to_html":68,"./submit_requests":71}],71:[function(require,module,exports){
 "use srict";
 const escapeHtml = require('escape-html');
 
@@ -9935,7 +9982,7 @@ function recordProgressStarted(progress, address){
   if (typeof progress === "string"){
     progress = document.getElementById(progress);
   }
-  addressHTML = `<a href="${address}" target="_blank">${address}</a>`;
+  addressHTML = `<a href="${address}" target="_blank">${unescape(address)}</a>`;
   progress.innerHTML = getToggleButton({content: addressHTML, label: "<b style=\"color:orange\">Sent</b>"});
 }
 
@@ -9995,9 +10042,46 @@ module.exports = {
   submitGET,
   getToggleButton
 }
-},{"escape-html":16}],71:[function(require,module,exports){
+},{"escape-html":16}],72:[function(require,module,exports){
+"use strict";
+
+var numSimultaneousCalls = 0;
+var maxSimultaneousCalls = 4;
+
+function computeUnspentTransactions(id){
+
+}
+
+function dispatch(request, response, desiredCommand){
+  numSimultaneousCalls ++;
+  if (numSimultaneousCalls > maxSimultaneousCalls){
+    numSimultaneousCalls--;
+    response.writeHead(200);
+    response.end("Too many node calls");
+    return;
+  }
+  response.writeHead(200);
+  computeUnspentTransactions(numSimultaneousCalls);
+  response.end(JSON.stringify({
+    id : numSimultaneousCalls 
+  }));
+}
+
+module.exports = {
+  computeUnspentTransactions,
+  dispatch
+}
+},{}],73:[function(require,module,exports){
 (function (__dirname){
 "use strict";
+
+var nodeHandlers = null;
+try {
+  nodeHandlers = require('./node_handlers');
+} catch (e) {
+  nodeHandlers = {};
+}
+
 var path = {
   certificates: `${__dirname}/../certificates_secret`,
   HTML: `${__dirname}/../html`,
@@ -10025,7 +10109,8 @@ url.known = {
   frontEndBrowserifiedJS: "/kanban_frontend_browserified.js",
   frontEndHTML: "/kanban_frontend.html",
   frontEndCSS: "/kanban_frontend.css",
-  rpc: "/rpc"
+  rpc: "/rpc",
+  node: "/node"  
 };
 
 url.whiteListed = {};
@@ -10040,6 +10125,14 @@ url.synonyms = {
   "/" : url.known.frontEndHTML
 };
 
+var nodeCallLabel = "nodeCallLabel";
+
+var nodeCalls = {
+  computeUnspentTransactions: {
+    nodeCallLabel: "computeUnspentTransactions", // must be same as key label, used for autocomplete
+    handler: nodeHandlers.computeUnspentTransactions
+  }
+};
 
 var rpcCallLabel = "rpcCallLabel";
 /**
@@ -10107,6 +10200,12 @@ var rpcCalls = {
   }
 }
 
+function getURLfromNodeCallLabel(theNodeCallLabel){
+  var theRequest = {};
+  theRequest[nodeCallLabel] = theNodeCallLabel;
+  return `${url.known.node}?command=${encodeURIComponent(JSON.stringify(theRequest))}`;
+}
+
 function getURLfromRPCLabel(theRPClabel, theArguments){
   var theRequest = {};
   theRequest[rpcCallLabel] = theRPClabel;
@@ -10169,10 +10268,12 @@ module.exports = {
   path,
   url,
   rpcCalls,
+  nodeCalls,
   rpcCallLabel,
   getURLfromRPCLabel,
+  getURLfromNodeCallLabel,
   getRPCcallArguments,
 }
 
 }).call(this,"/src")
-},{}]},{},[66]);
+},{"./node_handlers":72}]},{},[66]);

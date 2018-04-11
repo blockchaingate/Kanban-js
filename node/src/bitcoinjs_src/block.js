@@ -20,6 +20,7 @@ function Block () {
 
 Block.fromBuffer = function (buffer) {
   if (buffer.length < 80){
+    //console.log("WARNING: small buffer");
     throw new Error(`Buffer too small (< 80 bytes). Buffer content: ${buffer.toString()}`);
   }
   var offset = 0;

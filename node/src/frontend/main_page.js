@@ -9,7 +9,8 @@ function Page(){
         page: ids.defaults.pageBlockInfo
       },
       currentNet: "-testnet",
-      updateFunction: rpcCalls.getBestBlockHash
+      verbosity: "0",
+      updateFunction: rpcCalls.getBestBlockHash,
     },
     txInfo: {
       ids: {
