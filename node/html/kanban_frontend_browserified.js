@@ -9573,6 +9573,7 @@ function getBlock(){
   if (document.getElementById(ids.defaults.checkboxBlockVerbose).checked){
     getPage().pages.blockInfo.verbosity = "1";  
   }
+  document.getElementById(ids.defaults.radioBlockInfo).checked = true;
   var theURL = pathnames.getURLfromRPCLabel(
     pathnames.rpcCalls.getBlock.rpcCallLabel, {
       blockHash: getBlockHash().value, 
@@ -9590,7 +9591,6 @@ function getBlock(){
 
 function getPeerInfoCallBack(input, outputComponent){
   jsonToHtml.writeJSONtoDOMComponent(input, outputComponent);
-  getPage().pages.blockInfo.updateFunction = getPeerInfo;  
 }
 function getPeerInfo(){
   submitRequests.submitGET({
@@ -9598,7 +9598,7 @@ function getPeerInfo(){
       net: getPage().pages.blockInfo.currentNet,
     }),
     progress: getSpanProgress(),
-    result : getOutputBlockInfoDiv(),
+    result : ids.defaults.rpcOutputNetwork,
     callback: getPeerInfoCallBack
   });
 }
@@ -9724,13 +9724,16 @@ window.kanban.ids = require('./ids_dom_elements');
 var defaults = {
   pageBlockInfo: "pageRPCBlockInfo",
   pageTXInfo: "pageTXInfo",
+  pageNetwork: "pageNetwork",
   progressReport: "spanProgressReport",
   inputBlockHash: "inputBlockHash",
   inputBestBlockIndex: "inputBestBlockIndex",
   rpcOutputBlockInfo: "divKanbanRPCOutputBlockInfo",
   rpcOutputTXInfo: "divKanbanRPCOutputTXInfo",
+  rpcOutputNetwork: "divKanbanRPCOutputNetwork",
   radioButtonBestBlock: "radioBestBlockHash",
-  checkboxBlockVerbose: "checkboxBlockVerbose"
+  radioBlockInfo: "radioBlockInfo",
+  checkboxBlockVerbose: "checkboxBlockVerbose",
 }
 
 module.exports = {
@@ -9863,6 +9866,12 @@ function Page(){
         page: ids.defaults.pageTXInfo
       },
       updateFunction: rpcCalls.getTXoutSetInfo
+    },
+    network: {
+      ids: {
+        page: ids.defaults.pageNetwork
+      },
+      updateFunction: rpcCalls.getPeerInfo
     }
   }
   this.currentPageLabel = null;

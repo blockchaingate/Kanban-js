@@ -17,6 +17,12 @@ function Page(){
         page: ids.defaults.pageTXInfo
       },
       updateFunction: rpcCalls.getTXoutSetInfo
+    },
+    network: {
+      ids: {
+        page: ids.defaults.pageNetwork
+      },
+      updateFunction: rpcCalls.getPeerInfo
     }
   }
   this.currentPageLabel = null;

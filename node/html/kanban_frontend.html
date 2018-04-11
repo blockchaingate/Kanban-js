@@ -22,18 +22,13 @@
   <div class = "divMainPage" id = "pageRPCBlockInfo">
     <div class = "divControlPanelDefault">
         <label class = "containerRadioButton">
-            <input type = "radio" name = "rpcCallBlockInfo" onchange = "window.kanban.rpc.getPeerInfo();">
-            <span class = "radioMark"></span>
-            Peer info
-        </label>
-        <label class = "containerRadioButton">
           <input type = "radio" name = "rpcCallBlockInfo" id = "radioBestBlockHash" onchange = "window.kanban.rpc.getBestBlockHash();" checked = "checked" >
           <span class = "radioMark"></span>
           Best block
         </label>
         <input type = "text" id = "inputBestBlockIndex" size = "5" onchange = "window.kanban.rpc.getBestBlockHash();"></input>
         <label class = "containerRadioButton">
-          <input type = "radio" name = "rpcCallBlockInfo" onchange = "window.kanban.rpc.getBlock();">
+          <input type = "radio" name = "rpcCallBlockInfo" id = "radioBlockInfo" onchange = "window.kanban.rpc.getBlock();">
           <span class = "radioMark"></span>
           Block info
         </label>
@@ -83,6 +78,18 @@
       <div id = "divKanbanRPCOutputTXInfo"></div>
     </div>
   </div> <!--pageTXInfo-->
+  <div class = "divMainPage" id = "pageNetwork">
+    <div class = "divControlPanelDefault">
+      <label class = "containerRadioButton">
+        <input type = "radio" name = "rpcCallNetwork" onchange = "window.kanban.rpc.getPeerInfo();" checked = "checked">
+        <span class = "radioMark"></span>
+        Peer info
+      </label>
+    </div>
+    <div class = "divControlPanelDefault">
+      <div id = "divKanbanRPCOutputNetwork"></div>
+    </div>
+  </div>
 
   <div class = "divMenu">
     <div style = "text-align:center">
@@ -91,6 +98,7 @@
     <div class = "divMenuButtonPanel">
       <div><button class = "buttonSelectPage" onclick = "window.kanban.thePage.selectPage('blockInfo');">Blocks</button> </div>
       <div><button class = "buttonSelectPage" onclick = "window.kanban.thePage.selectPage('txInfo');">Transactions</button> </div>
+      <div><button class = "buttonSelectPage" onclick = "window.kanban.thePage.selectPage('network');">Network</button> </div>
     </div>
   </div>
 
