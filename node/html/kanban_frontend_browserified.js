@@ -9509,15 +9509,23 @@ function getBlockHash(){
   return document.getElementById(ids.defaults.inputBlockHash);
 }
 
+function getBestBlockIndex(){
+  return document.getElementById(ids.defaults.inputBestBlockIndex);
+}
+
 function getSpanProgress(){ 
   return document.getElementById(ids.defaults.progressReport);
 }
 
-function getOutputDiv(){
-  return document.getElementById(ids.defaults.rpcOutput);
+function getOutputBlockInfoDiv(){
+  return document.getElementById(ids.defaults.rpcOutputBlockInfo);
 }
 
-function updatePage(){
+function getOutputTXInfoDiv(){
+  return document.getElementById(ids.defaults.rpcOutputTXInfo);
+}
+
+function updateBlockInfoPage(){
   if (getPage().pages.blockInfo.updateFunction === getBlock){
     document.getElementById(ids.defaults.radioButtonBestBlock).checked = true;
     getBestBlockHash();
@@ -9526,14 +9534,28 @@ function updatePage(){
   }
 }
 
+function updateTXInfoPage(){
+  getTXoutSetInfo();
+}
+
+function updatePages(){
+  var currentPage = getPage().pages[getPage().currentPageLabel]; 
+  if (currentPage === getPage().pages.txInfo){
+    return updateTXInfoPage();
+  }
+  if (currentPage === getPage().pages.blockInfo){
+    return updateBlockInfoPage();
+  }
+}
+
 function setTestNet(){
   getPage().pages.blockInfo.currentNet = "-testnet";
-  updatePage();
+  updatePages();
 }
 
 function setMainNet(){
   getPage().pages.blockInfo.currentNet = "";
-  updatePage();
+  updatePages();
 }
 
 function getBlockCallback(inputHex, outputComponent){
@@ -9552,7 +9574,7 @@ function getBlock(){
   submitRequests.submitGET({
     url: theURL,
     progress: getSpanProgress(),
-    result : getOutputDiv(),
+    result : getOutputBlockInfoDiv(),
     callback: getBlockCallback
   });
 }
@@ -9567,7 +9589,7 @@ function getPeerInfo(){
       net: getPage().pages.blockInfo.currentNet,
     }),
     progress: getSpanProgress(),
-    result : getOutputDiv(),
+    result : getOutputBlockInfoDiv(),
     callback: getPeerInfoCallBack
   });
 }
@@ -9578,14 +9600,94 @@ function getBestBlockHashCallback(inputHex, outputComponent){
   getPage().pages.blockInfo.updateFunction = getBestBlockHash;  
 }
 function getBestBlockHash(){
+  var index = getBestBlockIndex().value;  
+  var theURL = "";
+  if (index === null || index === undefined || index === ""){
+    theURL = pathnames.getURLfromRPCLabel(pathnames.rpcCalls.getBestBlockHash.rpcCallLabel,{
+      net: getPage().pages.blockInfo.currentNet
+    });
+  } else {
+    theURL = pathnames.getURLfromRPCLabel(pathnames.rpcCalls.getBlockHash.rpcCallLabel,{
+      net: getPage().pages.blockInfo.currentNet,
+      index: index
+    });
+  }
   submitRequests.submitGET({
-    url: pathnames.getURLfromRPCLabel(pathnames.rpcCalls.getBestBlockHash.rpcCallLabel,{
+    url: theURL,
+    progress: getSpanProgress(),
+    result : getOutputBlockInfoDiv(),
+    callback: getBestBlockHashCallback
+  });
+}
+
+function getTXoutSetInfoCallback(input, outputComponent){
+  jsonToHtml.writeJSONtoDOMComponent(input, outputComponent);
+}
+function getTXoutSetInfo(){
+  submitRequests.submitGET({
+    url: pathnames.getURLfromRPCLabel(pathnames.rpcCalls.getTXOutSetInfo.rpcCallLabel, {
       net: getPage().pages.blockInfo.currentNet,
     }),
     progress: getSpanProgress(),
-    result : getOutputDiv(),
-    callback: getBestBlockHashCallback
-  });
+    result : getOutputTXInfoDiv(),
+    callback: getTXoutSetInfoCallback
+  });  
+}
+
+function getTXoutCallback(input, outputComponent){
+  jsonToHtml.writeJSONtoDOMComponent(input, outputComponent);
+}
+function getTXout(){
+  submitRequests.submitGET({
+    url: pathnames.getURLfromRPCLabel(pathnames.rpcCalls.getTXOut.rpcCallLabel, {
+      net: getPage().pages.blockInfo.currentNet,
+    }),
+    progress: getSpanProgress(),
+    result : getOutputTXInfoDiv(),
+    callback: getTXoutCallback
+  });  
+}
+
+function getReceivedByAccountCallback(input, outputComponent){
+  jsonToHtml.writeJSONtoDOMComponent(input, outputComponent);
+}
+function getReceivedByAccount(){
+  submitRequests.submitGET({
+    url: pathnames.getURLfromRPCLabel(pathnames.rpcCalls.getReceivedByAccount.rpcCallLabel, {
+      net: getPage().pages.blockInfo.currentNet,
+    }),
+    progress: getSpanProgress(),
+    result : getOutputTXInfoDiv(),
+    callback: getReceivedByAccountCallback
+  });  
+}
+
+function listAccountsCallback(input, outputComponent){
+  jsonToHtml.writeJSONtoDOMComponent(input, outputComponent);
+}
+function listAccounts(){
+  submitRequests.submitGET({
+    url: pathnames.getURLfromRPCLabel(pathnames.rpcCalls.listAccounts.rpcCallLabel, {
+      net: getPage().pages.blockInfo.currentNet,
+    }),
+    progress: getSpanProgress(),
+    result : getOutputTXInfoDiv(),
+    callback: listAccountsCallback
+  });  
+}
+
+function listUnspentCallback(input, outputComponent){
+  jsonToHtml.writeJSONtoDOMComponent(input, outputComponent);
+}
+function listUnspent(){
+  submitRequests.submitGET({
+    url: pathnames.getURLfromRPCLabel(pathnames.rpcCalls.listUnspent.rpcCallLabel, {
+      net: getPage().pages.blockInfo.currentNet,
+    }),
+    progress: getSpanProgress(),
+    result : getOutputTXInfoDiv(),
+    callback: listUnspentCallback
+  });  
 }
 
 module.exports = {
@@ -9593,21 +9695,30 @@ module.exports = {
   getBestBlockHash,
   getBlock,
   setTestNet,
-  setMainNet
+  setMainNet,
+  getTXoutSetInfo,
+  getTXout,
+  getReceivedByAccount,
+  listAccounts,
+  listUnspent
 }
 },{"../bitcoinjs_src/block":58,"../pathnames":71,"./ids_dom_elements":67,"./json_to_html":68,"./submit_requests":70}],66:[function(require,module,exports){
 window.kanban = {};
 window.kanban.thePage = require('./main_page').getPage();
 window.kanban.rpc = require('./fabcoin_rpc');
+window.kanban.ids = require('./ids_dom_elements');
 
-},{"./fabcoin_rpc":65,"./main_page":69}],67:[function(require,module,exports){
+},{"./fabcoin_rpc":65,"./ids_dom_elements":67,"./main_page":69}],67:[function(require,module,exports){
 "use strict";
 
 var defaults = {
   pageBlockInfo: "pageRPCBlockInfo",
+  pageTXInfo: "pageTXInfo",
   progressReport: "spanProgressReport",
   inputBlockHash: "inputBlockHash",
-  rpcOutput: "divKanbanRPCOutput",
+  inputBestBlockIndex: "inputBestBlockIndex",
+  rpcOutputBlockInfo: "divKanbanRPCOutputBlockInfo",
+  rpcOutputTXInfo: "divKanbanRPCOutputTXInfo",
   radioButtonBestBlock: "radioBestBlockHash"
 }
 
@@ -9734,6 +9845,12 @@ function Page(){
       },
       currentNet: "-testnet",
       updateFunction: rpcCalls.getBestBlockHash
+    },
+    txInfo: {
+      ids: {
+        page: ids.defaults.pageTXInfo
+      },
+      updateFunction: rpcCalls.getTXoutSetInfo
     }
   }
   this.currentPageLabel = null;
@@ -9745,7 +9862,11 @@ Page.prototype.initialize = function(){
 }
 
 Page.prototype.initializeCurrentPage = function(){
+  for (var label in this.pages){
+    document.getElementById(this.pages[label].ids.page).style.display = "none";
+  }
   if (this.currentPageLabel in this.pages){
+    document.getElementById(this.pages[this.currentPageLabel].ids.page).style.display = "";
     var currentPage = this.pages[this.currentPageLabel]
     if (currentPage.updateFunction !== null && currentPage.updateFunction !== undefined){
       currentPage.updateFunction();
@@ -9761,7 +9882,7 @@ Page.prototype.selectPage = function(pageLabel){
 
 Page.prototype.storePageSettings = function(){
   try {
-    localStorage.setItem("currentPageLabel", this.currentPage);
+    localStorage.setItem("currentPageLabel", this.currentPageLabel);
   } catch (e) {
     console.log(`While trying to load local storage, got error: ${e}. Is local storage available?`);
   }  
@@ -9947,6 +10068,43 @@ var rpcCalls = {
     net: "-testnet",
     cli: ["net", "command"]
   },
+  getBlockHash: {
+    rpcCallLabel: "getBlockHash", //must be same as rpc label, used for autocomplete
+    command: "getblockhash",
+    index: "index",
+    net: "-testnet",
+    cli: ["net", "command", "index"]
+  },
+  getTXOutSetInfo: {
+    rpcCallLabel: "getTXOutSetInfo", //must be same as rpc label, used for autocomplete
+    command: "gettxoutsetinfo",
+    net: "-testnet",
+    cli: ["net", "command"]
+  },
+  listUnspent: {
+    rpcCallLabel: "listUnspent", //must be same as rpc label, used for autocomplete
+    command: "listunspent",
+    net: "-testnet",
+    cli: ["net", "command"]
+  },
+  getTXOut: {
+    rpcCallLabel: "getTXOut", //must be same as rpc label, used for autocomplete
+    command: "gettxout",
+    net: "-testnet",
+    cli: ["net", "command"]
+  },
+  getReceivedByAccount: {
+    rpcCallLabel: "getReceivedByAccount", //must be same as rpc label, used for autocomplete
+    command: "getreceivedbyaccount",
+    net: "-testnet",
+    cli: ["net", "command"]
+  },
+  listAccounts: {
+    rpcCallLabel: "listAccounts", //must be same as rpc label, used for autocomplete
+    command: "listaccounts",
+    net: "-testnet",
+    cli: ["net", "command"]
+  }
 }
 
 function getURLfromRPCLabel(theRPClabel, theArguments){

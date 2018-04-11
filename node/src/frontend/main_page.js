@@ -10,6 +10,12 @@ function Page(){
       },
       currentNet: "-testnet",
       updateFunction: rpcCalls.getBestBlockHash
+    },
+    txInfo: {
+      ids: {
+        page: ids.defaults.pageTXInfo
+      },
+      updateFunction: rpcCalls.getTXoutSetInfo
     }
   }
   this.currentPageLabel = null;
@@ -21,7 +27,11 @@ Page.prototype.initialize = function(){
 }
 
 Page.prototype.initializeCurrentPage = function(){
+  for (var label in this.pages){
+    document.getElementById(this.pages[label].ids.page).style.display = "none";
+  }
   if (this.currentPageLabel in this.pages){
+    document.getElementById(this.pages[this.currentPageLabel].ids.page).style.display = "";
     var currentPage = this.pages[this.currentPageLabel]
     if (currentPage.updateFunction !== null && currentPage.updateFunction !== undefined){
       currentPage.updateFunction();
@@ -37,7 +47,7 @@ Page.prototype.selectPage = function(pageLabel){
 
 Page.prototype.storePageSettings = function(){
   try {
-    localStorage.setItem("currentPageLabel", this.currentPage);
+    localStorage.setItem("currentPageLabel", this.currentPageLabel);
   } catch (e) {
     console.log(`While trying to load local storage, got error: ${e}. Is local storage available?`);
   }  

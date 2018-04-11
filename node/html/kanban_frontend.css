@@ -1,6 +1,6 @@
 div.divPageAndMenu{
-  display: flex;
-  flex-direction: row;
+/*  display: flex;
+  flex-direction: row;*/
   width: 100%;
   visibility: visible;
 }

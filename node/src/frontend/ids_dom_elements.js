@@ -2,9 +2,12 @@
 
 var defaults = {
   pageBlockInfo: "pageRPCBlockInfo",
+  pageTXInfo: "pageTXInfo",
   progressReport: "spanProgressReport",
   inputBlockHash: "inputBlockHash",
-  rpcOutput: "divKanbanRPCOutput",
+  inputBestBlockIndex: "inputBestBlockIndex",
+  rpcOutputBlockInfo: "divKanbanRPCOutputBlockInfo",
+  rpcOutputTXInfo: "divKanbanRPCOutputTXInfo",
   radioButtonBestBlock: "radioBestBlockHash"
 }
 

@@ -69,6 +69,43 @@ var rpcCalls = {
     net: "-testnet",
     cli: ["net", "command"]
   },
+  getBlockHash: {
+    rpcCallLabel: "getBlockHash", //must be same as rpc label, used for autocomplete
+    command: "getblockhash",
+    index: "index",
+    net: "-testnet",
+    cli: ["net", "command", "index"]
+  },
+  getTXOutSetInfo: {
+    rpcCallLabel: "getTXOutSetInfo", //must be same as rpc label, used for autocomplete
+    command: "gettxoutsetinfo",
+    net: "-testnet",
+    cli: ["net", "command"]
+  },
+  listUnspent: {
+    rpcCallLabel: "listUnspent", //must be same as rpc label, used for autocomplete
+    command: "listunspent",
+    net: "-testnet",
+    cli: ["net", "command"]
+  },
+  getTXOut: {
+    rpcCallLabel: "getTXOut", //must be same as rpc label, used for autocomplete
+    command: "gettxout",
+    net: "-testnet",
+    cli: ["net", "command"]
+  },
+  getReceivedByAccount: {
+    rpcCallLabel: "getReceivedByAccount", //must be same as rpc label, used for autocomplete
+    command: "getreceivedbyaccount",
+    net: "-testnet",
+    cli: ["net", "command"]
+  },
+  listAccounts: {
+    rpcCallLabel: "listAccounts", //must be same as rpc label, used for autocomplete
+    command: "listaccounts",
+    net: "-testnet",
+    cli: ["net", "command"]
+  }
 }
 
 function getURLfromRPCLabel(theRPClabel, theArguments){

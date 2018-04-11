@@ -13,15 +13,23 @@ function getBlockHash(){
   return document.getElementById(ids.defaults.inputBlockHash);
 }
 
+function getBestBlockIndex(){
+  return document.getElementById(ids.defaults.inputBestBlockIndex);
+}
+
 function getSpanProgress(){ 
   return document.getElementById(ids.defaults.progressReport);
 }
 
-function getOutputDiv(){
-  return document.getElementById(ids.defaults.rpcOutput);
+function getOutputBlockInfoDiv(){
+  return document.getElementById(ids.defaults.rpcOutputBlockInfo);
 }
 
-function updatePage(){
+function getOutputTXInfoDiv(){
+  return document.getElementById(ids.defaults.rpcOutputTXInfo);
+}
+
+function updateBlockInfoPage(){
   if (getPage().pages.blockInfo.updateFunction === getBlock){
     document.getElementById(ids.defaults.radioButtonBestBlock).checked = true;
     getBestBlockHash();
@@ -30,14 +38,28 @@ function updatePage(){
   }
 }
 
+function updateTXInfoPage(){
+  getTXoutSetInfo();
+}
+
+function updatePages(){
+  var currentPage = getPage().pages[getPage().currentPageLabel]; 
+  if (currentPage === getPage().pages.txInfo){
+    return updateTXInfoPage();
+  }
+  if (currentPage === getPage().pages.blockInfo){
+    return updateBlockInfoPage();
+  }
+}
+
 function setTestNet(){
   getPage().pages.blockInfo.currentNet = "-testnet";
-  updatePage();
+  updatePages();
 }
 
 function setMainNet(){
   getPage().pages.blockInfo.currentNet = "";
-  updatePage();
+  updatePages();
 }
 
 function getBlockCallback(inputHex, outputComponent){
@@ -56,7 +78,7 @@ function getBlock(){
   submitRequests.submitGET({
     url: theURL,
     progress: getSpanProgress(),
-    result : getOutputDiv(),
+    result : getOutputBlockInfoDiv(),
     callback: getBlockCallback
   });
 }
@@ -71,7 +93,7 @@ function getPeerInfo(){
       net: getPage().pages.blockInfo.currentNet,
     }),
     progress: getSpanProgress(),
-    result : getOutputDiv(),
+    result : getOutputBlockInfoDiv(),
     callback: getPeerInfoCallBack
   });
 }
@@ -82,14 +104,94 @@ function getBestBlockHashCallback(inputHex, outputComponent){
   getPage().pages.blockInfo.updateFunction = getBestBlockHash;  
 }
 function getBestBlockHash(){
+  var index = getBestBlockIndex().value;  
+  var theURL = "";
+  if (index === null || index === undefined || index === ""){
+    theURL = pathnames.getURLfromRPCLabel(pathnames.rpcCalls.getBestBlockHash.rpcCallLabel,{
+      net: getPage().pages.blockInfo.currentNet
+    });
+  } else {
+    theURL = pathnames.getURLfromRPCLabel(pathnames.rpcCalls.getBlockHash.rpcCallLabel,{
+      net: getPage().pages.blockInfo.currentNet,
+      index: index
+    });
+  }
   submitRequests.submitGET({
-    url: pathnames.getURLfromRPCLabel(pathnames.rpcCalls.getBestBlockHash.rpcCallLabel,{
+    url: theURL,
+    progress: getSpanProgress(),
+    result : getOutputBlockInfoDiv(),
+    callback: getBestBlockHashCallback
+  });
+}
+
+function getTXoutSetInfoCallback(input, outputComponent){
+  jsonToHtml.writeJSONtoDOMComponent(input, outputComponent);
+}
+function getTXoutSetInfo(){
+  submitRequests.submitGET({
+    url: pathnames.getURLfromRPCLabel(pathnames.rpcCalls.getTXOutSetInfo.rpcCallLabel, {
       net: getPage().pages.blockInfo.currentNet,
     }),
     progress: getSpanProgress(),
-    result : getOutputDiv(),
-    callback: getBestBlockHashCallback
-  });
+    result : getOutputTXInfoDiv(),
+    callback: getTXoutSetInfoCallback
+  });  
+}
+
+function getTXoutCallback(input, outputComponent){
+  jsonToHtml.writeJSONtoDOMComponent(input, outputComponent);
+}
+function getTXout(){
+  submitRequests.submitGET({
+    url: pathnames.getURLfromRPCLabel(pathnames.rpcCalls.getTXOut.rpcCallLabel, {
+      net: getPage().pages.blockInfo.currentNet,
+    }),
+    progress: getSpanProgress(),
+    result : getOutputTXInfoDiv(),
+    callback: getTXoutCallback
+  });  
+}
+
+function getReceivedByAccountCallback(input, outputComponent){
+  jsonToHtml.writeJSONtoDOMComponent(input, outputComponent);
+}
+function getReceivedByAccount(){
+  submitRequests.submitGET({
+    url: pathnames.getURLfromRPCLabel(pathnames.rpcCalls.getReceivedByAccount.rpcCallLabel, {
+      net: getPage().pages.blockInfo.currentNet,
+    }),
+    progress: getSpanProgress(),
+    result : getOutputTXInfoDiv(),
+    callback: getReceivedByAccountCallback
+  });  
+}
+
+function listAccountsCallback(input, outputComponent){
+  jsonToHtml.writeJSONtoDOMComponent(input, outputComponent);
+}
+function listAccounts(){
+  submitRequests.submitGET({
+    url: pathnames.getURLfromRPCLabel(pathnames.rpcCalls.listAccounts.rpcCallLabel, {
+      net: getPage().pages.blockInfo.currentNet,
+    }),
+    progress: getSpanProgress(),
+    result : getOutputTXInfoDiv(),
+    callback: listAccountsCallback
+  });  
+}
+
+function listUnspentCallback(input, outputComponent){
+  jsonToHtml.writeJSONtoDOMComponent(input, outputComponent);
+}
+function listUnspent(){
+  submitRequests.submitGET({
+    url: pathnames.getURLfromRPCLabel(pathnames.rpcCalls.listUnspent.rpcCallLabel, {
+      net: getPage().pages.blockInfo.currentNet,
+    }),
+    progress: getSpanProgress(),
+    result : getOutputTXInfoDiv(),
+    callback: listUnspentCallback
+  });  
 }
 
 module.exports = {
@@ -97,5 +199,10 @@ module.exports = {
   getBestBlockHash,
   getBlock,
   setTestNet,
-  setMainNet
+  setMainNet,
+  getTXoutSetInfo,
+  getTXout,
+  getReceivedByAccount,
+  listAccounts,
+  listUnspent
 }
