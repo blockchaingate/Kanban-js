@@ -66,7 +66,6 @@ function handleNodeCall(request, response){
   return nodeHandlers.dispatch(request, response, queryCommand);
 }
 
-
 function handleFile(request, response){
   var thePathName = pathnames.url.whiteListed[request.url];
   fs.readFile(thePathName, function(error, data){

@@ -16,13 +16,13 @@ function rpc_call(request, response, desiredCommand){
   }
   if (desiredCommand[pathnames.rpcCallLabel] === undefined){
     response.writeHead(400);
-    numberRequestsRunning--;
+    numberRequestsRunning --;
     return response.end(`Request is missing the ${pathnames.rpcCallLabel} entry. `);        
   }
   var theCallLabel = desiredCommand[pathnames.rpcCallLabel];
   if (!(theCallLabel in pathnames.rpcCalls)){
     response.writeHead(400);
-    numberRequestsRunning--;
+    numberRequestsRunning --;
     return response.end(`RPC call label ${theCallLabel} not found. `);    
   }
   var errors = [];
@@ -53,7 +53,7 @@ function rpc_call(request, response, desiredCommand){
     });
     child.on('exit', function(code){
       console.log(`RPC call exited with code: ${code}`.green);
-      numberRequestsRunning--;
+      numberRequestsRunning --;
       if (code === 0){
         response.writeHead(200);
         response.end(finalData);
@@ -64,7 +64,7 @@ function rpc_call(request, response, desiredCommand){
     });
   } catch (e){
     response.writeHead(500);
-    numberRequestsRunning--;
+    numberRequestsRunning --;
     response.end(`Eror: ${escapeHtml(e)}. `);
     console.log(`Error: ${e}`);
   }

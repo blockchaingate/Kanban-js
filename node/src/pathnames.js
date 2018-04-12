@@ -1,12 +1,5 @@
 "use strict";
 
-var nodeHandlers = null;
-try {
-  nodeHandlers = require('./node_handlers');
-} catch (e) {
-  nodeHandlers = {};
-}
-
 var path = {
   certificates: `${__dirname}/../certificates_secret`,
   HTML: `${__dirname}/../html`,
@@ -52,10 +45,18 @@ url.synonyms = {
 
 var nodeCallLabel = "nodeCallLabel";
 
+var nodeCallStatuses = {
+  starting: "Starting",
+  recentlyFinished: "Recently finished",
+  notFound: "Not found"
+};
+
 var nodeCalls = {
   computeUnspentTransactions: {
     nodeCallLabel: "computeUnspentTransactions", // must be same as key label, used for autocomplete
-    handler: nodeHandlers.computeUnspentTransactions
+  }, 
+  pollOngoing: {
+    nodeCallLabel: "pollOngoing",
   }
 };
 
@@ -194,7 +195,9 @@ module.exports = {
   url,
   rpcCalls,
   nodeCalls,
+  nodeCallStatuses,
   rpcCallLabel,
+  nodeCallLabel,
   getURLfromRPCLabel,
   getURLfromNodeCallLabel,
   getRPCcallArguments,

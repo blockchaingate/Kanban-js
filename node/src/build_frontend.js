@@ -5,7 +5,7 @@ const browserify = require('browserify');
 const colors = require('colors');
 
 function buildFrontEnd(){
-  console.log(`Master ${process.pid} is running.`.green);
+  console.log(`Process ${process.pid} running.`.green);
   //Run browserify
   var theBrowserifier = browserify();
   theBrowserifier.add(pathnames.pathname.frontEndNONBrowserifiedJS);

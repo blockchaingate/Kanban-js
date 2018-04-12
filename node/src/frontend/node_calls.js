@@ -17,18 +17,60 @@ function getOutputTXInfoDiv(){
   return document.getElementById(ids.defaults.rpcOutputTXInfo);
 }
 
-function synchronizeUnspentTransactionsCallBack(input, outputComponent){
-  jsonToHtml.writeJSONtoDOMComponent(input, outputComponent);
+var pollId = null;
+//var lastPollTime = null;
+var ongoingPolls = {};
+var finishedPolls = {};
+function doPollServer(){
+  //console.log("polling");
+  var numOngoingCalls = Object.keys(ongoingPolls).length;
+  if (numOngoingCalls === 0){
+    clearInterval(pollId);
+    pollId = null;
+  }
+  var resultHtml = "";
+  resultHtml += `Last updated: ${new Date()}.<br>`; 
+  resultHtml += jsonToHtml.getHtmlFromArrayOfObjects(ongoingPolls, true);
+  getOutputTXInfoDiv().innerHTML = resultHtml;
 }
+
+function clearPollId(){
+  if (pollId === null)
+    return;
+  clearInterval(pollId);
+  pollId = null;
+  //console.log("cleared poll");
+}
+
+function pollServerDoStart(){
+  clearPollId();
+  pollId = setInterval(doPollServer, 1000);
+}
+
+function pollServerStart(id, output){
+  clearPollId();
+  var callIdInfo = null;
+  try {
+    callIdInfo = JSON.parse(id);
+  } catch (e) {
+    output.innerHTML = `<error>Failed to extract job information. ${e}</error>`;
+    return;
+  }
+  ongoingPolls = callIdInfo;
+  pollServerDoStart();
+}
+
 function synchronizeUnspentTransactions(){
   submitRequests.submitGET({
     url: pathnames.getURLfromNodeCallLabel(pathnames.nodeCalls.computeUnspentTransactions.nodeCallLabel),
     progress: getSpanProgress(),
     result : getOutputTXInfoDiv(),
-    callback: synchronizeUnspentTransactionsCallBack
+    callback: pollServerStart
   });
 }
 
 module.exports = {
-  synchronizeUnspentTransactions
+  synchronizeUnspentTransactions,
+  pollServerDoStart,
+  clearPollId
 }

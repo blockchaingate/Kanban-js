@@ -60,7 +60,7 @@ function getLabelsRows(input){
   return result;
 }
 
-function getHtmlFromArrayOfObjects(input){
+function getHtmlFromArrayOfObjects(input, doIncludeTogglePolling){
   var inputJSON = input;
   if (typeof inputJSON === "string"){
     inputJSON = input.replace(/[\r\n]/g, " "); 
@@ -96,7 +96,11 @@ function getHtmlFromArrayOfObjects(input){
   } else {
     result += inputJSON + "<br>";
   }
-  result += submitRequests.getToggleButton({label: "raw result", content: input});
+  if (doIncludeTogglePolling === true){
+    result += submitRequests.getToggleButtonPausePolling({label: "raw result", content: JSON.stringify(input)});
+  } else {
+    result += submitRequests.getToggleButton({label: "raw result", content: JSON.stringify(input)});
+  }
   return result;
 }
 

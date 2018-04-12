@@ -14,6 +14,9 @@ const execSync = require('child_process').execSync;
 const handleRequest = require('./handle_requests');
 const colors = require('colors');
 const buildFrontEnd = require('./build_frontend');
+const gpuDB = require('./gpuDB');
+
+gpuDB.testGPU();
 
 // This line is from the Node.js HTTPS documentation.
 

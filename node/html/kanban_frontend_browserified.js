@@ -9711,7 +9711,7 @@ module.exports = {
   listAccounts,
   listUnspent
 }
-},{"../bitcoinjs_src/block":58,"../pathnames":73,"./ids_dom_elements":67,"./json_to_html":68,"./submit_requests":71}],66:[function(require,module,exports){
+},{"../bitcoinjs_src/block":58,"../pathnames":72,"./ids_dom_elements":67,"./json_to_html":68,"./submit_requests":71}],66:[function(require,module,exports){
 window.kanban = {};
 window.kanban.thePage = require('./main_page').getPage();
 window.kanban.rpc = require('./fabcoin_rpc');
@@ -9802,7 +9802,7 @@ function getLabelsRows(input){
   return result;
 }
 
-function getHtmlFromArrayOfObjects(input){
+function getHtmlFromArrayOfObjects(input, doIncludeTogglePolling){
   var inputJSON = input;
   if (typeof inputJSON === "string"){
     inputJSON = input.replace(/[\r\n]/g, " "); 
@@ -9838,7 +9838,11 @@ function getHtmlFromArrayOfObjects(input){
   } else {
     result += inputJSON + "<br>";
   }
-  result += submitRequests.getToggleButton({label: "raw result", content: input});
+  if (doIncludeTogglePolling === true){
+    result += submitRequests.getToggleButtonPausePolling({label: "raw result", content: JSON.stringify(input)});
+  } else {
+    result += submitRequests.getToggleButton({label: "raw result", content: JSON.stringify(input)});
+  }
   return result;
 }
 
@@ -9947,22 +9951,64 @@ function getOutputTXInfoDiv(){
   return document.getElementById(ids.defaults.rpcOutputTXInfo);
 }
 
-function synchronizeUnspentTransactionsCallBack(input, outputComponent){
-  jsonToHtml.writeJSONtoDOMComponent(input, outputComponent);
+var pollId = null;
+//var lastPollTime = null;
+var ongoingPolls = {};
+var finishedPolls = {};
+function doPollServer(){
+  //console.log("polling");
+  var numOngoingCalls = Object.keys(ongoingPolls).length;
+  if (numOngoingCalls === 0){
+    clearInterval(pollId);
+    pollId = null;
+  }
+  var resultHtml = "";
+  resultHtml += `Last updated: ${new Date()}.<br>`; 
+  resultHtml += jsonToHtml.getHtmlFromArrayOfObjects(ongoingPolls, true);
+  getOutputTXInfoDiv().innerHTML = resultHtml;
 }
+
+function clearPollId(){
+  if (pollId === null)
+    return;
+  clearInterval(pollId);
+  pollId = null;
+  //console.log("cleared poll");
+}
+
+function pollServerDoStart(){
+  clearPollId();
+  pollId = setInterval(doPollServer, 1000);
+}
+
+function pollServerStart(id, output){
+  clearPollId();
+  var callIdInfo = null;
+  try {
+    callIdInfo = JSON.parse(id);
+  } catch (e) {
+    output.innerHTML = `<error>Failed to extract job information. ${e}</error>`;
+    return;
+  }
+  ongoingPolls = callIdInfo;
+  pollServerDoStart();
+}
+
 function synchronizeUnspentTransactions(){
   submitRequests.submitGET({
     url: pathnames.getURLfromNodeCallLabel(pathnames.nodeCalls.computeUnspentTransactions.nodeCallLabel),
     progress: getSpanProgress(),
     result : getOutputTXInfoDiv(),
-    callback: synchronizeUnspentTransactionsCallBack
+    callback: pollServerStart
   });
 }
 
 module.exports = {
-  synchronizeUnspentTransactions
+  synchronizeUnspentTransactions,
+  pollServerDoStart,
+  clearPollId
 }
-},{"../bitcoinjs_src/block":58,"../pathnames":73,"./ids_dom_elements":67,"./json_to_html":68,"./submit_requests":71}],71:[function(require,module,exports){
+},{"../bitcoinjs_src/block":58,"../pathnames":72,"./ids_dom_elements":67,"./json_to_html":68,"./submit_requests":71}],71:[function(require,module,exports){
 "use srict";
 const escapeHtml = require('escape-html');
 
@@ -9971,6 +10017,13 @@ function getToggleButton(buttonInfo){
     onclick="if (this.nextSibling.nextSibling.style.display === 'none')
     {this.nextSibling.nextSibling.style.display = ''; this.childNodes[1].innerHTML = '&#9660;';} else {
     this.nextSibling.nextSibling.style.display = 'none'; this.childNodes[1].innerHTML = '&#9668;';}"><span>${buttonInfo.label}</span><b>&#9668;</b></button><br><span class="spanRESTDeveloperInfo" style="display:none">${buttonInfo.content}</span>`;
+}
+
+function getToggleButtonPausePolling(buttonInfo){
+  return `<button class = "buttonProgress"
+    onclick="if (this.nextSibling.nextSibling.style.display === 'none')
+    {this.nextSibling.nextSibling.style.display = ''; this.childNodes[1].innerHTML = '&#9660;'; window.kanban.nodeCalls.clearPollId();} else {
+    this.nextSibling.nextSibling.style.display = 'none'; this.childNodes[1].innerHTML = '&#9668;';window.kanban.nodeCalls.pollServerDoStart();}"><span>${buttonInfo.label}</span><b>&#9668;</b></button><br><span class="spanRESTDeveloperInfo" style="display:none">${buttonInfo.content}</span>`;
 }
 
 function recordProgressDone(progress){
@@ -10049,47 +10102,12 @@ function submitGET(inputObject){
 
 module.exports = {
   submitGET,
-  getToggleButton
+  getToggleButton,
+  getToggleButtonPausePolling
 }
 },{"escape-html":16}],72:[function(require,module,exports){
-"use strict";
-
-var numSimultaneousCalls = 0;
-var maxSimultaneousCalls = 4;
-
-function computeUnspentTransactions(id){
-
-}
-
-function dispatch(request, response, desiredCommand){
-  numSimultaneousCalls ++;
-  if (numSimultaneousCalls > maxSimultaneousCalls){
-    numSimultaneousCalls--;
-    response.writeHead(200);
-    response.end("Too many node calls");
-    return;
-  }
-  response.writeHead(200);
-  computeUnspentTransactions(numSimultaneousCalls);
-  response.end(JSON.stringify({
-    id : numSimultaneousCalls 
-  }));
-}
-
-module.exports = {
-  computeUnspentTransactions,
-  dispatch
-}
-},{}],73:[function(require,module,exports){
 (function (__dirname){
 "use strict";
-
-var nodeHandlers = null;
-try {
-  nodeHandlers = require('./node_handlers');
-} catch (e) {
-  nodeHandlers = {};
-}
 
 var path = {
   certificates: `${__dirname}/../certificates_secret`,
@@ -10136,10 +10154,18 @@ url.synonyms = {
 
 var nodeCallLabel = "nodeCallLabel";
 
+var nodeCallStatuses = {
+  starting: "Starting",
+  recentlyFinished: "Recently finished",
+  notFound: "Not found"
+};
+
 var nodeCalls = {
   computeUnspentTransactions: {
     nodeCallLabel: "computeUnspentTransactions", // must be same as key label, used for autocomplete
-    handler: nodeHandlers.computeUnspentTransactions
+  }, 
+  pollOngoing: {
+    nodeCallLabel: "pollOngoing",
   }
 };
 
@@ -10278,11 +10304,13 @@ module.exports = {
   url,
   rpcCalls,
   nodeCalls,
+  nodeCallStatuses,
   rpcCallLabel,
+  nodeCallLabel,
   getURLfromRPCLabel,
   getURLfromNodeCallLabel,
   getRPCcallArguments,
 }
 
 }).call(this,"/src")
-},{"./node_handlers":72}]},{},[66]);
+},{}]},{},[66]);
