@@ -7,12 +7,13 @@ var defaults = {
   progressReport: "spanProgressReport",
   inputBlockHash: "inputBlockHash",
   inputBestBlockIndex: "inputBestBlockIndex",
-  rpcOutputBlockInfo: "divKanbanRPCOutputBlockInfo",
-  rpcOutputTXInfo: "divKanbanRPCOutputTXInfo",
-  rpcOutputNetwork: "divKanbanRPCOutputNetwork",
+  outputRPCBlockInfo: "divKanbanRPCOutputBlockInfo",
+  outputRPCTXInfo: "divKanbanRPCOutputTXInfo",
+  outputRPCNetwork: "divKanbanRPCOutputNetwork",
   radioButtonBestBlock: "radioBestBlockHash",
   radioBlockInfo: "radioBlockInfo",
   checkboxBlockVerbose: "checkboxBlockVerbose",
+  outputGPUTest: "outputGPUTest"
 }
 
 module.exports = {

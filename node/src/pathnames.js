@@ -57,6 +57,9 @@ var nodeCalls = {
   }, 
   pollOngoing: {
     nodeCallLabel: "pollOngoing",
+  },
+  testGPUSha256: {
+    nodeCallLabel: "testGPUSha256"
   }
 };
 

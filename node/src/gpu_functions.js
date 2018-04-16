@@ -21,7 +21,7 @@ var currentPlatform = allPlatforms[0];
  
 var gpus = currentPlatform.gpuDevices()[0];
 //var testVecAdd = require("./opencl/test_vector_addition");
-var testSha256 = require("./opencl/test_sha256");
+var testSha256 = require("./opencl/test/test_sha256");
 
 function testGPU(){
   var info = {
@@ -31,7 +31,7 @@ function testGPU(){
     profile: currentPlatform.profile,
     extensions: currentPlatform.extensions
   };
-
+  console.log(`GPU information: ${info}`);
 }
 
 

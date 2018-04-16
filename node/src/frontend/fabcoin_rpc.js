@@ -22,11 +22,11 @@ function getSpanProgress(){
 }
 
 function getOutputBlockInfoDiv(){
-  return document.getElementById(ids.defaults.rpcOutputBlockInfo);
+  return document.getElementById(ids.defaults.outputRPCBlockInfo);
 }
 
 function getOutputTXInfoDiv(){
-  return document.getElementById(ids.defaults.rpcOutputTXInfo);
+  return document.getElementById(ids.defaults.outputRPCTXInfo);
 }
 
 function updateBlockInfoPage(){
@@ -101,7 +101,7 @@ function getPeerInfo(){
       net: getPage().pages.blockInfo.currentNet,
     }),
     progress: getSpanProgress(),
-    result : ids.defaults.rpcOutputNetwork,
+    result : ids.defaults.outputRPCNetwork,
     callback: getPeerInfoCallBack
   });
 }

@@ -16,7 +16,7 @@ var uint = ref.types.uint;
 var Bluebird = require("bluebird");
 var async = Bluebird.coroutine;
 
-var testSha256 = async(function*() {
+var sha256 = async(function*(message) {
   // Initialize OpenCL then we get host, device, context, and a queue
   var host = CLHost.createV11();
   var defs = host.cl.defs;
@@ -48,20 +48,15 @@ var testSha256 = async(function*() {
   if (!device) {
     throw new Error("No capable OpenCL 1.1 device has been found.");
   } else {
-    console.log("Running on device: " + device.name + " - " + device.platform.name);
+    console.log(`Running on device: ${device.name} - ${device.platform.name}`);
   }
-
-  console.log("Got to before context. ");
   var context = new CLContext(device);
-  console.log("Got to after context. ");
   var queue = new CLCommandQueue(context, device);
-  console.log("Got to after command queue. ");
   // Initialize data on the host side:
   
-  var message = "abc";
   var inputMessageStats = new Buffer(uint.size * 3);
   var inputSha256 = new Buffer(message.length);
-  var outputSha256reversed = new Buffer(32);
+  var outputSha256 = new Buffer(32);
   console.log("Got to before buffers");
   var clInputMessageStats = new CLBuffer(context, defs.CL_MEM_READ_ONLY, uint.size * 3);
   var clInputSha256 = new CLBuffer(context, defs.CL_MEM_READ_ONLY, message.length);
@@ -79,7 +74,7 @@ var testSha256 = async(function*() {
   //console.log(inputMessageStats.toString());
   queue.enqueueWriteBuffer(clInputMessageStats, 0, 3 * uint.size, inputMessageStats);
   queue.enqueueWriteBuffer(clInputSha256, 0, message.length, inputSha256);
-  queue.enqueueWriteBuffer(clOutputSha256, 0, 32, outputSha256reversed);
+  queue.enqueueWriteBuffer(clOutputSha256, 0, 32, outputSha256);
 
   // It's time to build the program.
   var kernelSourceCode = fs.readFileSync(path.join(cwd, "sha256.cl"), { encoding: "utf8" });
@@ -100,7 +95,7 @@ var testSha256 = async(function*() {
   kernel.setArg(1, clInputSha256);
   kernel.setArg(2, clOutputSha256);
   // Notice: in NOOOCL you have specify type of value arguments,
-  // because there is no C compatible type system exists in JavaScript.
+  // because there is no C compatible type system exists in JavaScript. 
   // Ranges:
   // Number of work items in each local work group
   var localSize = new NDRange(64);
@@ -115,15 +110,12 @@ var testSha256 = async(function*() {
   // We should query a waitable queue which returns an event for each enqueue operations,
   // and the event's promise can be used for continuation of the control flow on the host side.
   console.log("Waiting for result.");
-  yield queue.waitable().enqueueReadBuffer(clOutputSha256, 0, 32, outputSha256reversed).promise;
-  var outputSha256final = new Buffer(32);
-  for (var i = 0; i < 8; i ++){
-    for (var j = 0; j < 4; j++){
-      outputSha256final[i*4+j] = outputSha256reversed[i*4 + 3 - j];
-    }
-  }
-  console.log("Final sha256: " + outputSha256final.toString('hex'));
+  yield queue.waitable().enqueueReadBuffer(clOutputSha256, 0, 32, outputSha256).promise;
+  console.log("Final sha256: " + outputSha256.toString('hex'));
 });
 
 nooocl.scope(testSha256);
-console.log("(Everything after this point is asynchronous.)");
+
+module.exports = {
+  sha256
+}

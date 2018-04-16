@@ -1,5 +1,6 @@
 "use strict";
-const pathnames = require("./pathnames");
+const pathnames = require('./pathnames');
+const assert = require('assert')
 var numSimultaneousCalls = 0;
 var maxSimultaneousCalls = 4;
 
@@ -9,6 +10,11 @@ var recentlyFinishedCalls = {};
 function computeUnspentTransactions(id){
 
 }
+
+function testGPUSha256(id){
+
+}
+
 
 function pollOngoing(request, response, callIds){
   try {
@@ -37,7 +43,7 @@ function pollOngoing(request, response, callIds){
         message: recentlyFinishedCalls[currentId]
       };
       continue;
-    }
+    } 
     result[currentId] = {
       status: "notFound"
     };
@@ -49,6 +55,13 @@ function pollOngoing(request, response, callIds){
 var handlers = {};
 handlers[pathnames.nodeCalls.pollOngoing.nodeCallLabel] = pollOngoing;
 handlers[pathnames.nodeCalls.computeUnspentTransactions.nodeCallLabel] = computeUnspentTransactions;
+handlers[pathnames.nodeCalls.testGPUSha256] = testGPUSha256;
+
+for (var label in pathnames.nodeCalls){
+  if (handlers[pathnames.nodeCalls.pollOngoing.nodeCallLabel] === undefined){
+    assert.ok(false, `Handler of node call ${pathnames.nodeCalls.pollOngoing.nodeCallLabel} is not allowed to  be undefined. `);
+  }
+}
 
 function dispatch(request, response, desiredCommand){
   console.log(`command: ${JSON.stringify(desiredCommand)}, pathnames: ${pathnames}, nodeCallLabel = ${pathnames.nodeCallLabel}`);
@@ -74,7 +87,9 @@ function dispatch(request, response, desiredCommand){
   var timeInMilliseconds = (new Date()).getTime();
   var callId = `currentCommandLabel_${numOngoingCalls}_${timeInMilliseconds}`;
   ongoingCalls[callId] = pathnames.nodeCallStatuses.starting;
-  handlers[currentCommandLabel](request, response, desiredCommand);
+  process.nextTick(function(){
+    handlers[currentCommandLabel](request, response, desiredCommand);
+  });
   response.writeHead(200);
   response.end(JSON.stringify({
     callId : callId 

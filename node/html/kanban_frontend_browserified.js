@@ -9519,11 +9519,11 @@ function getSpanProgress(){
 }
 
 function getOutputBlockInfoDiv(){
-  return document.getElementById(ids.defaults.rpcOutputBlockInfo);
+  return document.getElementById(ids.defaults.outputRPCBlockInfo);
 }
 
 function getOutputTXInfoDiv(){
-  return document.getElementById(ids.defaults.rpcOutputTXInfo);
+  return document.getElementById(ids.defaults.outputRPCTXInfo);
 }
 
 function updateBlockInfoPage(){
@@ -9598,7 +9598,7 @@ function getPeerInfo(){
       net: getPage().pages.blockInfo.currentNet,
     }),
     progress: getSpanProgress(),
-    result : ids.defaults.rpcOutputNetwork,
+    result : ids.defaults.outputRPCNetwork,
     callback: getPeerInfoCallBack
   });
 }
@@ -9728,12 +9728,13 @@ var defaults = {
   progressReport: "spanProgressReport",
   inputBlockHash: "inputBlockHash",
   inputBestBlockIndex: "inputBestBlockIndex",
-  rpcOutputBlockInfo: "divKanbanRPCOutputBlockInfo",
-  rpcOutputTXInfo: "divKanbanRPCOutputTXInfo",
-  rpcOutputNetwork: "divKanbanRPCOutputNetwork",
+  outputRPCBlockInfo: "divKanbanRPCOutputBlockInfo",
+  outputRPCTXInfo: "divKanbanRPCOutputTXInfo",
+  outputRPCNetwork: "divKanbanRPCOutputNetwork",
   radioButtonBestBlock: "radioBestBlockHash",
   radioBlockInfo: "radioBlockInfo",
   checkboxBlockVerbose: "checkboxBlockVerbose",
+  outputGPUTest: "outputGPUTest"
 }
 
 module.exports = {
@@ -9948,7 +9949,11 @@ function getSpanProgress(){
 }
 
 function getOutputTXInfoDiv(){
-  return document.getElementById(ids.defaults.rpcOutputTXInfo);
+  return document.getElementById(ids.defaults.outputRPCTXInfo);
+}
+
+function getOutputTestGPU(){
+  return document.getElementById(ids.defaults.outputRPCTXInfo);
 }
 
 var pollId = null;
@@ -9994,6 +9999,15 @@ function pollServerStart(id, output){
   pollServerDoStart();
 }
 
+function testGPUSha256(){
+  submitRequests.submitGET({
+    url: pathnames.getURLfromNodeCallLabel(pathnames.nodeCalls.testGPUSha256.nodeCallLabel),
+    progress: getSpanProgress(),
+    result: getOutputTestGPU(),
+    callback: pollServerStart
+  });
+}
+
 function synchronizeUnspentTransactions(){
   submitRequests.submitGET({
     url: pathnames.getURLfromNodeCallLabel(pathnames.nodeCalls.computeUnspentTransactions.nodeCallLabel),
@@ -10005,6 +10019,7 @@ function synchronizeUnspentTransactions(){
 
 module.exports = {
   synchronizeUnspentTransactions,
+  testGPUSha256,
   pollServerDoStart,
   clearPollId
 }
@@ -10166,6 +10181,9 @@ var nodeCalls = {
   }, 
   pollOngoing: {
     nodeCallLabel: "pollOngoing",
+  },
+  testGPUSha256: {
+    nodeCallLabel: "testGPUSha256"
   }
 };
 

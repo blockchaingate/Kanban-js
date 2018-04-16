@@ -33,15 +33,16 @@ uint gamma0(uint x) {
 uint gamma1(uint x) {
   return rotr(x, 17) ^ rotr(x, 19) ^ (x >> 10);
 }
-__kernel void sha256GPU(__global uint *data_info, __global char *plain_key, __global uint *digest){
+__kernel void sha256GPU(__global uint* data_info, __global char* plain_key, __global char* result){
   int t, gid, msg_pad;
   int stop, mmod;
   uint i, ulen, item, total;
-  uint W[80], temp, A,B,C,D,E,F,G,H,T1,T2;
+  uint W[80], temp, A, B, C, D, E, F, G, H, T1, T2;
+  uint digest[8];
   uint num_keys = data_info[1];
   //printf("ulen: %u num_keys:%u\n", ulen, total);
   int current_pad;
-  uint K[64]={
+  uint K[64] = {
 0x428a2f98, 0x71374491, 0xb5c0fbcf, 0xe9b5dba5, 0x3956c25b, 0x59f111f1, 0x923f82a4, 0xab1c5ed5,
 0xd807aa98, 0x12835b01, 0x243185be, 0x550c7dc3, 0x72be5d74, 0x80deb1fe, 0x9bdc06a7, 0xc19bf174,
 0xe49b69c1, 0xefbe4786, 0x0fc19dc6, 0x240ca1cc, 0x2de92c6f, 0x4a7484aa, 0x5cb0a9dc, 0x76f988da,
@@ -63,8 +64,7 @@ __kernel void sha256GPU(__global uint *data_info, __global char *plain_key, __gl
   digest[5] = H5;
   digest[6] = H6;
   digest[7] = H7;
-  for(item=0; item<total; item++)
-  {
+  for (item = 0; item < total; item ++){
     A = digest[0];
     B = digest[1];
     C = digest[2];
@@ -75,22 +75,18 @@ __kernel void sha256GPU(__global uint *data_info, __global char *plain_key, __gl
     H = digest[7];
 #pragma unroll
     for (t = 0; t < 80; t++){
-    W[t] = 0x00000000;
+      W[t] = 0x00000000;
     }
     msg_pad=item*64;
-    if(ulen > msg_pad)
-    {
+    if(ulen > msg_pad){
       current_pad = (ulen-msg_pad)>64?64:(ulen-msg_pad);
-    }
-    else
-    {
+    } else {
       current_pad =-1;    
     }
   //  printf("current_pad: %d\n",current_pad);
-    if(current_pad>0)
-    {
-      i=current_pad;
-      stop =  i/4;
+    if (current_pad > 0){
+      i = current_pad;
+      stop = i/4;
   //    printf("i:%d, stop: %d msg_pad:%d\n",i,stop, msg_pad);
       for (t = 0 ; t < stop ; t++){
         W[t] = ((uchar)  plain_key[msg_pad + t * 4]) << 24;
@@ -115,15 +111,12 @@ __kernel void sha256GPU(__global uint *data_info, __global char *plain_key, __gl
       } else /*if (mmod == 0)*/ {
         W[t] =  0x80000000 ;
       }      
-      if (current_pad<56)
-      {
-        W[15] =  ulen*8 ;
+      if (current_pad < 56){
+        W[15] = ulen*8 ;
         //printf("ulen avlue 2 :w[15] :%u\n", W[15]);
       }
-    }
-    else if(current_pad <0)
-    {
-      if( ulen%64==0)
+    } else if(current_pad < 0){
+      if (ulen % 64 == 0)
         W[0]=0x80000000;
       W[15]=ulen*8;
       //printf("ulen avlue 3 :w[15] :%u\n", W[15]);
@@ -143,5 +136,10 @@ __kernel void sha256GPU(__global uint *data_info, __global char *plain_key, __gl
     digest[5] += F;
     digest[6] += G;
     digest[7] += H;
+  }
+  for (t = 0; t < 8; t ++) {
+    for (i = 0; i < 4; i ++) {
+      result[t * 4 + i] = (char) (digest[t] >> ((3 - i) * 8) );
+    }
   }
 }

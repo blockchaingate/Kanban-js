@@ -14,7 +14,11 @@ function getSpanProgress(){
 }
 
 function getOutputTXInfoDiv(){
-  return document.getElementById(ids.defaults.rpcOutputTXInfo);
+  return document.getElementById(ids.defaults.outputRPCTXInfo);
+}
+
+function getOutputTestGPU(){
+  return document.getElementById(ids.defaults.outputRPCTXInfo);
 }
 
 var pollId = null;
@@ -60,6 +64,15 @@ function pollServerStart(id, output){
   pollServerDoStart();
 }
 
+function testGPUSha256(){
+  submitRequests.submitGET({
+    url: pathnames.getURLfromNodeCallLabel(pathnames.nodeCalls.testGPUSha256.nodeCallLabel),
+    progress: getSpanProgress(),
+    result: getOutputTestGPU(),
+    callback: pollServerStart
+  });
+}
+
 function synchronizeUnspentTransactions(){
   submitRequests.submitGET({
     url: pathnames.getURLfromNodeCallLabel(pathnames.nodeCalls.computeUnspentTransactions.nodeCallLabel),
@@ -71,6 +84,7 @@ function synchronizeUnspentTransactions(){
 
 module.exports = {
   synchronizeUnspentTransactions,
+  testGPUSha256,
   pollServerDoStart,
   clearPollId
 }
