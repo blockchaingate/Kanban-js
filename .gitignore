@@ -1,4 +1,10 @@
-node/node_modules/
-node/certificates_secret/
+node_modules/
+certificates_secret/
 experimental/*
+src/opencl/build
+
+#visual studio code files:
 .vscode
+
+#qt creator files:
+*.user

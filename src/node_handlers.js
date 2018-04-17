@@ -1,6 +1,9 @@
 "use strict";
 const pathnames = require('./pathnames');
 const assert = require('assert')
+const randomString = require('randomstring');
+const sha256 = require('./opencl/sha256');
+
 var numSimultaneousCalls = 0;
 var maxSimultaneousCalls = 4;
 
@@ -11,10 +14,28 @@ function computeUnspentTransactions(id){
 
 }
 
-function testGPUSha256(id){
-
+var gpuTest = {
+  id: "",
+  counterSha: 0,
+  startTime: null
 }
-
+function testGPUSha256(){
+  if (gpuTest.counterSha > 10000000){
+    return;
+  }
+  if (gpuTest.counterSha === 0){
+    gpuTest.startTime = (new Date()).getTime();
+  }
+  var nextGoal = gpuTest.counterSha + 1000;
+  for (; gpuTest.counterSha ++; gpuTest.counterSha < nextGoal){ 
+    sha256.gpuSHA256(randomString.generate(100));
+    if (gpuTest.counterSha % 1000 === 0){
+      var time = ((new Date()).getTime() - gpuTest.startTime ) / 1000; 
+      console.log(`Computed ${gpuTest.counterSha} shas in ${time} second(s)`);
+    }
+  }
+  process.nextTick(testGPUSha256);
+}
 
 function pollOngoing(request, response, callIds){
   try {
@@ -55,7 +76,7 @@ function pollOngoing(request, response, callIds){
 var handlers = {};
 handlers[pathnames.nodeCalls.pollOngoing.nodeCallLabel] = pollOngoing;
 handlers[pathnames.nodeCalls.computeUnspentTransactions.nodeCallLabel] = computeUnspentTransactions;
-handlers[pathnames.nodeCalls.testGPUSha256] = testGPUSha256;
+handlers[pathnames.nodeCalls.testGPUSha256.nodeCallLabel] = testGPUSha256;
 
 for (var label in pathnames.nodeCalls){
   if (handlers[pathnames.nodeCalls.pollOngoing.nodeCallLabel] === undefined){

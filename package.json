@@ -29,6 +29,7 @@
     "escape-html": "^1.0.3",
     "mime-types": "^2.1.18",
     "nodemon": "^1.17.3",
-    "nooocl": "^0.12.5"
+    "nooocl": "^0.12.5",
+    "randomstring": "^1.1.5"
   }
 }
