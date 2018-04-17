@@ -33,11 +33,12 @@ uint gamma0(uint x) {
 uint gamma1(uint x) {
   return rotr(x, 17) ^ rotr(x, 19) ^ (x >> 10);
 }
-__kernel void sha256GPU(uint* ulen, __global char* plain_key, __global char* result){
+__kernel void sha256GPU(__global uint* ulenPointer, __global char* plain_key, __global char* result){
   int t, gid, msg_pad;
   int stop, mmod;
-  uint i, ulen, item, total;
+  uint i, item, total;
   uint W[80], temp, A, B, C, D, E, F, G, H, T1, T2;
+  uint ulen = *ulenPointer;
   uint digest[8];
   //uint num_keys = data_info[1];
   //printf("ulen: %u num_keys:%u\n", ulen, total);
