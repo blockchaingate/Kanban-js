@@ -1,7 +1,7 @@
 node_modules/
 certificates_secret/
 experimental/*
-src/opencl/build
+build/
 
 #visual studio code files:
 .vscode

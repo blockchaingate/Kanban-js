@@ -132,7 +132,7 @@ public:
 void GPUKernel::constructFromFileName(const std::string& fileNameNoExtension, GPU& ownerGPU)
 {
   this->name = fileNameNoExtension;
-  std::string fileName = "../cl/" + fileNameNoExtension + ".cl";
+  std::string fileName = "cl/" + fileNameNoExtension + ".cl";
   std::ifstream theFile(fileName);
   if (!theFile.is_open()) {
     std::cout << "Failed to open " << fileName;
