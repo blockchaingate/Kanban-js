@@ -127,7 +127,8 @@ public:
   void writeToBuffer(unsigned argumentNumber, const void* input, size_t size);
   void writeArgument(unsigned argumentNumber, uint input);
 
-  ~GPUKernel(){
+  ~GPUKernel()
+  {
     this->kernel = 0;
     this->program = 0;
     for (unsigned i = 0; i < this->inputs.size(); i++)
@@ -148,20 +149,25 @@ public:
   static std::string kernelSHA256;
 
   std::unordered_map<std::string, std::shared_ptr<GPUKernel> > theKernels;
-  cl_platform_id platformId;
+  cl_platform_id platformIds[2];
+  cl_uint numberOfPlatforms;
   cl_device_id deviceId;
   cl_context context;
   cl_command_queue commandQueue;
 
   void initialize()
-  { this->platformId = NULL;
+  {
     this->deviceId = NULL;
     this->context = 0;
     cl_uint ret_num_devices;
-    cl_uint ret_num_platforms;
     cl_int ret = 0;
-    ret = clGetPlatformIDs(1, &this->platformId, &ret_num_platforms);
-    ret = clGetDeviceIDs(this->platformId, CL_DEVICE_TYPE_DEFAULT, 1, &this->deviceId, &ret_num_devices);
+    ret = clGetPlatformIDs(2, this->platformIds, &this->numberOfPlatforms);
+    if (ret != CL_SUCCESS)
+    { std::cout << "Failed to get platforms. " << std::endl;
+      assert(false);
+    }
+    std::cout << "Number of platforms: " << this->numberOfPlatforms << std::endl;
+    ret = clGetDeviceIDs(this->platformIds[0], CL_DEVICE_TYPE_DEFAULT, 1, &this->deviceId, &ret_num_devices);
     std::cout << "Device name: " << getDeviceName(this->deviceId) << std::endl;
     std::cout << "Driver version: " << getDriverVersion(this->deviceId) << std::endl;
     std::cout << "Is little endian: " << getIsLittleEndian(this->deviceId) << std::endl;
