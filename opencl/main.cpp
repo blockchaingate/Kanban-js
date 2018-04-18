@@ -125,7 +125,7 @@ public:
   void writeToBuffer(unsigned argumentNumber, const std::vector<char>& input);
   void writeToBuffer(unsigned argumentNumber, const std::string& input);
   void writeToBuffer(unsigned argumentNumber, const void* input, size_t size);
-  //void writeArgument(unsigned argumentNumber, uint input);
+  void writeArgument(unsigned argumentNumber, uint input);
 
   ~GPUKernel(){
     this->kernel = 0;
@@ -186,8 +186,8 @@ public:
   { this->initialize();
     this->createKernel(
           this->kernelSHA256,
-          {"length", "message"},
-          {SharedMemory::typeUint, SharedMemory::typeVoidPointer},
+          {"offset", "length", "message"},
+          {SharedMemory::typeUint, SharedMemory::typeUint, SharedMemory::typeVoidPointer},
           {"result"},
           {SharedMemory::typeVoidPointer});
   }
@@ -298,7 +298,7 @@ void GPUKernel::constructArguments(
     current->name = argumentNames[i];
     current->flagIsHOSTWritable = true;
     current->typE = argumentTypes[i];
-    size_t defaultBufferSize = 120;
+    size_t defaultBufferSize = 10000000;
     current->theMemory = clCreateBuffer(this->owner->context, bufferFlag, defaultBufferSize, NULL, &ret);
     if (ret != CL_SUCCESS)
     {
@@ -361,9 +361,9 @@ void GPUKernel::writeToBuffer(unsigned argumentNumber, const void *input, size_t
   }
 }
 
-/*void GPUKernel::writeArgument(unsigned argumentNumber, uint input)
+void GPUKernel::writeArgument(unsigned argumentNumber, uint input)
 { //std::cout << "DEBUG: writing " << input;
-  std::cout << "Setting: argument number: " << argumentNumber << ", input: " << input << std::endl;
+  //std::cout << "Setting: argument number: " << argumentNumber << ", input: " << input << std::endl;
   std::shared_ptr<SharedMemory>& currentArgument =
       argumentNumber < this->inputs.size() ?
         this->inputs[argumentNumber] :
@@ -375,16 +375,25 @@ void GPUKernel::writeToBuffer(unsigned argumentNumber, const void *input, size_t
     std::cout << "Set kernel arg failed. " << std::endl;
     assert(false);
   }
-}*/
+}
 
 class testSHA256
 {
 public:
   static std::vector<std::vector<std::string> > knownSHA256s;
+  static std::string theBuffer;
+  static std::vector<uint> messageStarts;
+  static std::vector<uint> messageLengths;
   static void initialize();
+  static unsigned totalToCompute;
+
 };
 
 std::vector<std::vector<std::string> > testSHA256::knownSHA256s;
+std::string testSHA256::theBuffer;
+std::vector<uint> testSHA256::messageStarts;
+std::vector<uint> testSHA256::messageLengths;
+unsigned testSHA256::totalToCompute = 100000;
 
 void testSHA256::initialize()
 { testSHA256::knownSHA256s.push_back((std::vector<std::string>)
@@ -402,6 +411,14 @@ void testSHA256::initialize()
    "abcdefghbcdefghicdefghijdefghijkefghijklfghijklmghijklmnhijklmnoijklmnopjklmnopqklmnopqrlmnopqrsmnopqrstnopqrstu",
    "cf5b16a778af8380036ce59e7b0492370b249b11e8f07a51afac45037afee9d1"
   });
+  theBuffer.reserve(100 * testSHA256::totalToCompute);
+  for (unsigned i = 0; i < testSHA256::totalToCompute; i ++)
+  { unsigned testCounter = i % testSHA256::knownSHA256s.size();
+    std::string& currentMessage = testSHA256::knownSHA256s[testCounter][0];
+    testSHA256::messageStarts.push_back(theBuffer.size());
+    testSHA256::messageLengths.push_back(currentMessage.size());
+    theBuffer.append(currentMessage);
+  }
 }
 
 int main(void)
@@ -413,15 +430,16 @@ int main(void)
   std::shared_ptr<GPUKernel> theKernel = theGPU.theKernels[GPU::kernelSHA256];
   std::cout << "DEBUG: about to write to buffer. " << std::endl;
   testSHA256::initialize();
+
   auto timeStart = std::chrono::system_clock::now();
   unsigned largeTestCounter;
-  unsigned totalToCompute = 100000;
-  for (largeTestCounter = 0; largeTestCounter < totalToCompute; largeTestCounter ++)
-  { unsigned testCounter = largeTestCounter % testSHA256::knownSHA256s.size();
-    std::string& message = testSHA256::knownSHA256s[testCounter][0];
-    uint theLength = message.size();
-    theKernel->writeToBuffer(0, &theLength, sizeof(uint));
-    theKernel->writeToBuffer(1, message);
+  theKernel->writeToBuffer(2, testSHA256::theBuffer);
+
+  for (largeTestCounter = 0; largeTestCounter < testSHA256::totalToCompute; largeTestCounter ++)
+  { unsigned testCounteR = largeTestCounter % testSHA256::knownSHA256s.size();
+    theKernel->writeArgument(0, testSHA256::messageStarts[largeTestCounter]);
+    theKernel->writeArgument(1, testSHA256::messageLengths[largeTestCounter]);
+    //theKernel->writeToBuffer(0, &theLength, sizeof(uint));
     size_t local_item_size = 32; // Divide work items into groups of 64
     size_t global_item_size = 32; // Divide work items into groups of 64
     //std::cout << "DEBUG: Setting arguments ... " << std::endl;
@@ -446,9 +464,9 @@ int main(void)
     std::stringstream out;
     for (int i = 0; i < 32; i ++)
       out << std::hex << std::setw(2) << std::setfill('0') << ((int) (bufferOutput[i]));
-    if (out.str() != testSHA256::knownSHA256s[testCounter][1])
-    { std::cout << "\e[31mSha of " << testSHA256::knownSHA256s[testCounter][0] << " is wrongly computed to be: " << out.str()
-                << " instead of: " << testSHA256::knownSHA256s[testCounter][1] << "\e[39m" << std::endl;
+    if (out.str() != testSHA256::knownSHA256s[testCounteR][1])
+    { std::cout << "\e[31mSha of " << testSHA256::knownSHA256s[testCounteR][0] << " is wrongly computed to be: " << out.str()
+                << " instead of: " << testSHA256::knownSHA256s[testCounteR][1] << "\e[39m" << std::endl;
       assert(false);
     }
     if (largeTestCounter % 500 == 0)
@@ -461,7 +479,7 @@ int main(void)
   auto timeCurrent = std::chrono::system_clock::now();
   std::chrono::duration<double> elapsed_seconds = timeCurrent-timeStart;
   std::cout << "Computed " << largeTestCounter << " sha256s in " << elapsed_seconds.count() << " second(s). " << std::endl;
-  std::cout << "Speed: " << (totalToCompute / elapsed_seconds.count()) << " hashes per second. " << std::endl;
+  std::cout << "Speed: " << (testSHA256::totalToCompute / elapsed_seconds.count()) << " hashes per second. " << std::endl;
 
   return 0;
 }

@@ -7,3 +7,6 @@ SOURCES += \
 main.cpp
 
 LIBS+=-lOpenCL
+
+HEADERS += \
+    cl/sha256GPU.cl
