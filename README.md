@@ -14,6 +14,14 @@ To do: write installation instructions.
 ```
 sudo apt install ocl-icd-opencl-dev
 ```
+2. You may want to look into installing the Intel openCL drivers:
+
+https://software.intel.com/en-us/articles/sdk-for-opencl-gsg 
+
+For convenience, the openCL installation script is copied in our repository.
+
+!(intel openCL installation)(miscellaneous/INTEL_Apr_18_install_OCL_driver2.sh)
+
 
 ### Node.js installation instructions
 

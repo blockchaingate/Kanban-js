@@ -45,14 +45,14 @@ bool getIsLittleEndian(cl_device_id deviceId)
 long long getGlobalMemorySize(cl_device_id deviceId)
 { const size_t infoSize = sizeof(cl_ulong);
   char buffer[infoSize];
-  for (unsigned i = 0; i< infoSize; i++)
+  for (unsigned i = 0; i < infoSize; i ++)
     buffer[i] = 0;
   size_t outputBufferSize = 0;
   clGetDeviceInfo(deviceId, CL_DEVICE_GLOBAL_MEM_SIZE, infoSize, buffer, &outputBufferSize);
   long long result = 0;
-  for (unsigned i = 8; i != 0; i--)
+  for (unsigned i = 8; i != 0; i --)
   { result *= 256;
-    result += (int)( (unsigned char) buffer[i-1]);
+    result += (int)( (unsigned char) buffer[i - 1]);
   }
   std::cout << "global memory size: " << result << "\noutput buffer size: " << outputBufferSize << std::endl;
   return result;
@@ -65,7 +65,8 @@ std::string getDeviceName(cl_device_id deviceId)
 class SharedMemory
 {
 public:
-  enum{
+  enum
+  {
     typeVoidPointer,
     typeUint
   };
@@ -167,12 +168,19 @@ public:
       assert(false);
     }
     std::cout << "Number of platforms: " << this->numberOfPlatforms << std::endl;
-    ret = clGetDeviceIDs(this->platformIds[0], CL_DEVICE_TYPE_CPU, 2, this->allDevices, &this->numberOfDevices);
+    cl_device_type desiredDeviceType = CL_DEVICE_TYPE_CPU;
+    std::string deviceDescription = desiredDeviceType == CL_DEVICE_TYPE_CPU ? "CPU" : "GPU";
+    for (unsigned i = 0; i < this->numberOfPlatforms; i ++)
+    { ret = clGetDeviceIDs(this->platformIds[i], desiredDeviceType, 2, this->allDevices, &this->numberOfDevices);
+      if (ret == CL_SUCCESS)
+        break;
+    }
     if (ret != CL_SUCCESS)
-    { std::cout << "Failed to get devices. " << std::endl;
+    { std::cout << "Failed to get device of type: " << deviceDescription << std::endl;
       assert(false);
     }
-    std::cout << "Number of devices: " << this->numberOfDevices << std::endl;
+
+    std::cout << "Number of devices of type: " << deviceDescription << ": " << this->numberOfDevices << std::endl;
     this->currentDeviceId = this->allDevices[0];
     std::cout << "Device name: " << getDeviceName(this->currentDeviceId) << std::endl;
     std::cout << "Driver version: " << getDriverVersion(this->currentDeviceId) << std::endl;
@@ -198,8 +206,8 @@ public:
   { this->initialize();
     this->createKernel(
           this->kernelSHA256,
-          {"offset", "length", "message"},
-          {SharedMemory::typeUint, SharedMemory::typeUint, SharedMemory::typeVoidPointer},
+          {"offset", "length", "messageIndex", "message"},
+          {SharedMemory::typeUint, SharedMemory::typeUint, SharedMemory::typeUint, SharedMemory::typeVoidPointer},
           {"result"},
           {SharedMemory::typeVoidPointer});
   }
@@ -393,7 +401,8 @@ class testSHA256
 {
 public:
   static std::vector<std::vector<std::string> > knownSHA256s;
-  static std::string theBuffer;
+  static std::string inputBuffer;
+  static unsigned char outputBuffer[10000000];
   static std::vector<uint> messageStarts;
   static std::vector<uint> messageLengths;
   static void initialize();
@@ -402,7 +411,8 @@ public:
 };
 
 std::vector<std::vector<std::string> > testSHA256::knownSHA256s;
-std::string testSHA256::theBuffer;
+std::string testSHA256::inputBuffer;
+unsigned char testSHA256::outputBuffer[10000000];
 std::vector<uint> testSHA256::messageStarts;
 std::vector<uint> testSHA256::messageLengths;
 unsigned testSHA256::totalToCompute = 100000;
@@ -423,13 +433,15 @@ void testSHA256::initialize()
    "abcdefghbcdefghicdefghijdefghijkefghijklfghijklmghijklmnhijklmnoijklmnopjklmnopqklmnopqrlmnopqrsmnopqrstnopqrstu",
    "cf5b16a778af8380036ce59e7b0492370b249b11e8f07a51afac45037afee9d1"
   });
-  theBuffer.reserve(100 * testSHA256::totalToCompute);
+  testSHA256::inputBuffer.reserve(100 * testSHA256::totalToCompute);
   for (unsigned i = 0; i < testSHA256::totalToCompute; i ++)
   { unsigned testCounter = i % testSHA256::knownSHA256s.size();
     std::string& currentMessage = testSHA256::knownSHA256s[testCounter][0];
-    testSHA256::messageStarts.push_back(theBuffer.size());
+    testSHA256::messageStarts.push_back(testSHA256::inputBuffer.size());
     testSHA256::messageLengths.push_back(currentMessage.size());
-    theBuffer.append(currentMessage);
+    testSHA256::inputBuffer.append(currentMessage);
+    for (unsigned j = 0; j < 32; j ++)
+      testSHA256::outputBuffer[i * 32 + j] = 0;
   }
 }
 
@@ -444,13 +456,13 @@ int main(void)
   testSHA256::initialize();
 
   auto timeStart = std::chrono::system_clock::now();
-  unsigned largeTestCounter;
-  theKernel->writeToBuffer(2, testSHA256::theBuffer);
+  uint largeTestCounter;
+  theKernel->writeToBuffer(3, testSHA256::inputBuffer);
 
   for (largeTestCounter = 0; largeTestCounter < testSHA256::totalToCompute; largeTestCounter ++)
-  { unsigned testCounteR = largeTestCounter % testSHA256::knownSHA256s.size();
-    theKernel->writeArgument(0, testSHA256::messageStarts[largeTestCounter]);
+  { theKernel->writeArgument(0, testSHA256::messageStarts[largeTestCounter]);
     theKernel->writeArgument(1, testSHA256::messageLengths[largeTestCounter]);
+    theKernel->writeArgument(2, largeTestCounter);
     //theKernel->writeToBuffer(0, &theLength, sizeof(uint));
     size_t local_item_size = 32; // Divide work items into groups of 64
     size_t global_item_size = 32; // Divide work items into groups of 64
@@ -463,24 +475,6 @@ int main(void)
       assert(false);
     }
     //std::cout << "DEBUG: kernel enqueued, proceeding to read buffer. " << std::endl;
-    unsigned char bufferOutput[32];
-    cl_mem& result = theKernel->outputs[0]->theMemory;
-    ret = clEnqueueReadBuffer(
-          theGPU.commandQueue, result, CL_TRUE, 0,
-          32, bufferOutput, 0, NULL, NULL);
-    if (ret != CL_SUCCESS)
-    { std::cout << "Failed to enqueue read buffer. Return code: " << ret << ". " << std::endl;
-      assert(false);
-    }
-    //std::cout << "Got to here" << std::endl;
-    std::stringstream out;
-    for (int i = 0; i < 32; i ++)
-      out << std::hex << std::setw(2) << std::setfill('0') << ((int) (bufferOutput[i]));
-    if (out.str() != testSHA256::knownSHA256s[testCounteR][1])
-    { std::cout << "\e[31mSha of " << testSHA256::knownSHA256s[testCounteR][0] << " is wrongly computed to be: " << out.str()
-                << " instead of: " << testSHA256::knownSHA256s[testCounteR][1] << "\e[39m" << std::endl;
-      assert(false);
-    }
     if (largeTestCounter % 500 == 0)
     {
       auto timeCurrent = std::chrono::system_clock::now();
@@ -488,10 +482,34 @@ int main(void)
       std::cout << "Computed " << largeTestCounter << " sha256s in " << elapsed_seconds.count() << " second(s). " << std::endl;
     }
   }
+  cl_mem& result = theKernel->outputs[0]->theMemory;
+  cl_int ret = clEnqueueReadBuffer(
+        theGPU.commandQueue, result, CL_TRUE, 0,
+        32 * testSHA256::totalToCompute, testSHA256::outputBuffer, 0, NULL, NULL);
+  if (ret != CL_SUCCESS)
+  { std::cout << "Failed to enqueue read buffer. Return code: " << ret << ". " << std::endl;
+    assert(false);
+  }
   auto timeCurrent = std::chrono::system_clock::now();
   std::chrono::duration<double> elapsed_seconds = timeCurrent-timeStart;
   std::cout << "Computed " << largeTestCounter << " sha256s in " << elapsed_seconds.count() << " second(s). " << std::endl;
   std::cout << "Speed: " << (testSHA256::totalToCompute / elapsed_seconds.count()) << " hashes per second. " << std::endl;
 
+
+  std::cout << "Checking computations ..." << std::endl;
+  for (largeTestCounter = 0; largeTestCounter < testSHA256::totalToCompute; largeTestCounter ++)
+  { unsigned testCounteR = largeTestCounter % testSHA256::knownSHA256s.size();
+    std::stringstream out;
+    unsigned offset = largeTestCounter * 32;
+    for (unsigned i = offset; i < offset + 32; i ++)
+      out << std::hex << std::setw(2) << std::setfill('0') << ((int) ((unsigned) testSHA256::outputBuffer[i]));
+    if (out.str() != testSHA256::knownSHA256s[testCounteR][1])
+    { std::cout << "\e[31mSha of message index " << largeTestCounter
+                << ": " << testSHA256::knownSHA256s[testCounteR][0] << " is wrongly computed to be: " << out.str()
+                << " instead of: " << testSHA256::knownSHA256s[testCounteR][1] << "\e[39m" << std::endl;
+      assert(false);
+    }
+  }
+  std::cout << "\e[32mSuccess!\e[39m" << std::endl;
   return 0;
 }
