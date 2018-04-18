@@ -6,9 +6,10 @@
 #include <unordered_map>
 #include <assert.h>
 #include <memory>
-#include <vector>
 #include <iomanip>
 #include <vector>
+#include <chrono>
+#include <ctime>
 
 #define CL_USE_DEPRECATED_OPENCL_1_2_APIS
 //<- use opencl 1.1 instead of older versions.
@@ -37,7 +38,7 @@ std::string getDriverVersion(cl_device_id deviceId)
 bool getIsLittleEndian(cl_device_id deviceId)
 { std::string returnValue = getDeviceInfo(deviceId, CL_DEVICE_ENDIAN_LITTLE);
   bool result = (returnValue[0] == CL_TRUE);
-  std::cout << "Result: " << result << "Return value: " << returnValue << " CL_False: " << CL_FALSE << " cl_true: " << CL_TRUE << std::endl;
+//  std::cout << "Result: " << result << "Return value: " << returnValue << " CL_False: " << CL_FALSE << " cl_true: " << CL_TRUE << std::endl;
   return result;
 }
 
@@ -57,17 +58,29 @@ long long getGlobalMemorySize(cl_device_id deviceId)
   return result;
 }
 
+std::string getDeviceName(cl_device_id deviceId)
+{ return getDeviceInfo(deviceId, CL_DEVICE_NAME);
+}
+
 class SharedMemory
 {
 public:
+  enum{
+    typeVoidPointer,
+    typeUint
+  };
   std::string name;
   cl_mem theMemory;
   bool flagIsHOSTWritable;
+  int typE;
+  uint uintValue;
 
   SharedMemory()
   { this->name = "";
     this->flagIsHOSTWritable = true;
     this->theMemory = 0;
+    this->typE = this->typeVoidPointer;
+    this->uintValue = 0;
   }
   void ReleaseMe()
   { clReleaseMemObject(this->theMemory);
@@ -101,11 +114,19 @@ public:
   void constructFromFileName(
       const std::string& fileNameNoExtension,
       const std::vector<std::string>& inputNames,
+      const std::vector<int>& inputTypes,
       const std::vector<std::string>& outputNames,
+      const std::vector<int>& outputTypes,
       GPU& ownerGPU);
+  void constructArguments(
+      const std::vector<std::string>& argumentNames,
+      const std::vector<int>& argumentTypes,
+      bool isInput);
   void writeToBuffer(unsigned argumentNumber, const std::vector<char>& input);
   void writeToBuffer(unsigned argumentNumber, const std::string& input);
   void writeToBuffer(unsigned argumentNumber, const void* input, size_t size);
+  //void writeArgument(unsigned argumentNumber, uint input);
+
   ~GPUKernel(){
     this->kernel = 0;
     this->program = 0;
@@ -119,6 +140,7 @@ public:
     ret = clReleaseKernel(this->kernel);
   }
   void SetArguments();
+  void SetArguments(std::vector<std::shared_ptr<SharedMemory> >& theArgs, unsigned offset);
 };
 
 class GPU {
@@ -140,25 +162,44 @@ public:
     cl_int ret = 0;
     ret = clGetPlatformIDs(1, &this->platformId, &ret_num_platforms);
     ret = clGetDeviceIDs(this->platformId, CL_DEVICE_TYPE_DEFAULT, 1, &this->deviceId, &ret_num_devices);
+    std::cout << "Device name: " << getDeviceName(this->deviceId) << std::endl;
     std::cout << "Driver version: " << getDriverVersion(this->deviceId) << std::endl;
     std::cout << "Is little endian: " << getIsLittleEndian(this->deviceId) << std::endl;
     std::cout << "Memory: " << getGlobalMemorySize(this->deviceId) << std::endl;
     // Create an OpenCL context
-    this->context = clCreateContext( NULL, 1, &this->deviceId, NULL, NULL, &ret);
-    this->commandQueue = clCreateCommandQueue(this->context, this->deviceId, 0, &ret);
-
+    this->context = clCreateContext(NULL, 1, &this->deviceId, NULL, NULL, &ret);
+    if (ret != CL_SUCCESS)
+    {
+      std::cout << "Failed to create context. " << std::endl;
+      assert(false);
+    }
+    this->commandQueue = clCreateCommandQueue(this->context, this->deviceId,
+                                              CL_QUEUE_OUT_OF_ORDER_EXEC_MODE_ENABLE,
+                                              &ret);
+    if (ret != CL_SUCCESS)
+    {
+      std::cout << "Failed to create command queue. " << std::endl;
+      assert(false);
+    }
   }
   void initializeKernels()
   { this->initialize();
-    this->createKernel(this->kernelSHA256, {"length", "message"}, {"result"});
+    this->createKernel(
+          this->kernelSHA256,
+          {"length", "message"},
+          {SharedMemory::typeUint, SharedMemory::typeVoidPointer},
+          {"result"},
+          {SharedMemory::typeVoidPointer});
   }
   void createKernel(
       const std::string& fileNameNoExtension,
       const std::vector<std::string>& inputs,
-      const std::vector<std::string>& outputs)
+      const std::vector<int>& inputTypes,
+      const std::vector<std::string>& outputs,
+      const std::vector<int>& outputTypes)
   {
     std::shared_ptr<GPUKernel> incomingKernel = std::make_shared<GPUKernel>();
-    incomingKernel->constructFromFileName(fileNameNoExtension, inputs, outputs, *this);
+    incomingKernel->constructFromFileName(fileNameNoExtension, inputs, inputTypes, outputs, outputTypes, *this);
     this->theKernels[fileNameNoExtension] = incomingKernel;
   }
   ~GPU(){
@@ -178,7 +219,9 @@ std::string GPU::kernelSHA256 = "sha256GPU";
 void GPUKernel::constructFromFileName(
     const std::string& fileNameNoExtension,
     const std::vector<std::string>& inputNames,
+    const std::vector<int>& inputTypes,
     const std::vector<std::string>& outputNames,
+    const std::vector<int>& outputTypes,
     GPU& ownerGPU)
 {
   this->name = fileNameNoExtension;
@@ -190,7 +233,8 @@ void GPUKernel::constructFromFileName(
   }
   std::string source_str((std::istreambuf_iterator<char>(theFile)),
                           std::istreambuf_iterator<char>());
-  std::cout << "File read: \n" << source_str << std::endl;
+  std::cout << "Program file name: " << fileName << std::endl;
+  //std::cout << "File read: \n" << source_str << std::endl;
   size_t sourceSize = source_str.size();
   const char* sourceCString = source_str.c_str();
   cl_int ret;
@@ -205,7 +249,7 @@ void GPUKernel::constructFromFileName(
     assert(false);
   }
   // Build the program
-  std::cout << "DEBUG: About to build program. " << std::endl;
+  //std::cout << "DEBUG: About to build program. " << std::endl;
   ret = clBuildProgram(this->program, 1, &this->owner->deviceId, NULL, NULL, NULL);
   if (ret != CL_SUCCESS)
   {
@@ -228,53 +272,64 @@ void GPUKernel::constructFromFileName(
     assert(false);
   }
   std::cout << "DEBUG: Kernel created, setting buffers. " << std::endl;
-  size_t defaultBufferSize = 100000;
+  this->constructArguments(inputNames, inputTypes, true);
+  this->constructArguments(outputNames, outputTypes, false);
 
-  for (unsigned i = 0; i < inputNames.size(); i ++)
-  { this->inputs.push_back(std::make_shared<SharedMemory>());
-    std::shared_ptr<SharedMemory> current = this->inputs[this->inputs.size() - 1];
-    current->name = inputNames[i];
-    current->flagIsHOSTWritable = true;
-    current->theMemory = clCreateBuffer(this->owner->context, CL_MEM_READ_ONLY, defaultBufferSize, NULL, &ret);
-    if (ret != CL_SUCCESS)
-    { std::cout << "Failed to create buffer \e[31m" << current->name  << "\e[39m. Return code: " << ret << std::endl;
-      assert(false);
-    }
-  }
-  for (unsigned i = 0; i < outputNames.size(); i ++)
-  { this->outputs.push_back(std::make_shared<SharedMemory>());
-    std::shared_ptr<SharedMemory> current = this->outputs[this->outputs.size() - 1];
-    current->name = outputNames[i];
-    current->flagIsHOSTWritable = true;
-    current->theMemory = clCreateBuffer(this->owner->context, CL_MEM_WRITE_ONLY, defaultBufferSize, NULL, &ret);
-    if (ret != CL_SUCCESS)
-    { std::cout << "Failed to create buffer \e[31m" << current->name  << "\e[39m. Return code: " << ret << std::endl;
-      assert(false);
-    }
-  }
+
   this->SetArguments();
+}
+
+void GPUKernel::constructArguments(
+    const std::vector<std::string>& argumentNames,
+    const std::vector<int> &argumentTypes,
+    bool isInput)
+{
+  std::vector<std::shared_ptr<SharedMemory> >& theArgs = isInput ? this->inputs : this->outputs;
+  cl_int ret = CL_SUCCESS;
+  cl_mem_flags bufferFlag = isInput ? CL_MEM_READ_ONLY: CL_MEM_WRITE_ONLY;
+  if (theArgs.size() != 0)
+  {
+    std::cout << "Fatal error: arguments not empty. " << std::endl;
+    assert(false);
+  }
+  for (unsigned i = 0; i < argumentNames.size(); i ++)
+  { theArgs.push_back(std::make_shared<SharedMemory>());
+    std::shared_ptr<SharedMemory> current = theArgs[theArgs.size() - 1];
+    current->name = argumentNames[i];
+    current->flagIsHOSTWritable = true;
+    current->typE = argumentTypes[i];
+    size_t defaultBufferSize = 120;
+    current->theMemory = clCreateBuffer(this->owner->context, bufferFlag, defaultBufferSize, NULL, &ret);
+    if (ret != CL_SUCCESS)
+    {
+      std::cout << "Failed to create buffer \e[31m" << current->name  << "\e[39m. Return code: " << ret << std::endl;
+      assert(false);
+    }
+  }
+
 }
 
 void GPUKernel::SetArguments()
 {
-  cl_int ret;
-  //std::cout << "DEBUG: about to set length kernel arg: length is: " << this->length << ", its address is: " << &this->length << std::endl;
-  for (unsigned i = 0; i < this->inputs.size(); i ++)
+  this->SetArguments(this->inputs, 0);
+  this->SetArguments(this->outputs, this->inputs.size());
+}
+
+void GPUKernel::SetArguments(std::vector<std::shared_ptr<SharedMemory> >& theArgs, unsigned offset)
+{
+  cl_int ret = CL_SUCCESS;
+  std::cout << "DEBUG: kernel: setting " << theArgs.size() << " arguments. "<< std::endl;
+  for (unsigned i = 0; i < theArgs.size(); i ++)
   {
-    ret = clSetKernelArg(this->kernel, i, sizeof(cl_mem), (void *)& this->inputs[i]->theMemory);
+    std::shared_ptr<SharedMemory> current = theArgs[i];
+    if (current->typE == SharedMemory::typeVoidPointer)
+      ret = clSetKernelArg(this->kernel, i + offset, sizeof(cl_mem), (void *)& current->theMemory);
+    if (current->typE == SharedMemory::typeUint)
+      ret = clSetKernelArg(this->kernel, i + offset, sizeof(uint), &current->uintValue);
+
     if (ret != CL_SUCCESS)
     {
-      std::cout << "Failed to set argument " << this->inputs[i]->name << ". Return code: " << ret << ".\n";
-      assert(false);
-    }
-  }
-  unsigned argumentOffset = this->inputs.size();
-  for (unsigned i = 0; i < this->outputs.size(); i ++)
-  {
-    ret = clSetKernelArg(this->kernel, i + argumentOffset, sizeof(cl_mem), (void *)& this->outputs[i]->theMemory);
-    if (ret != CL_SUCCESS)
-    {
-      std::cout << "Failed to set argument " << this->outputs[i]->name << ". Return code: " << ret << ".\n";
+      std::cout << "Failed to set argument " << current->name << ". Return code: " << ret << ".\n";
       assert(false);
     }
   }
@@ -301,10 +356,26 @@ void GPUKernel::writeToBuffer(unsigned argumentNumber, const void *input, size_t
         0,
         NULL,
         NULL) != CL_SUCCESS)
-  { std::cout << "Enqueueing write buffer failed with input: " << input;
+  { std::cout << "Enqueueing write buffer failed with input: " << input << std::endl;
     assert(false);
   }
 }
+
+/*void GPUKernel::writeArgument(unsigned argumentNumber, uint input)
+{ //std::cout << "DEBUG: writing " << input;
+  std::cout << "Setting: argument number: " << argumentNumber << ", input: " << input << std::endl;
+  std::shared_ptr<SharedMemory>& currentArgument =
+      argumentNumber < this->inputs.size() ?
+        this->inputs[argumentNumber] :
+        this->outputs[argumentNumber - this->inputs.size()];
+  currentArgument->uintValue = input;
+  cl_int ret = clSetKernelArg(this->kernel, argumentNumber, sizeof(uint), &currentArgument->uintValue);
+  if (ret != CL_SUCCESS)
+  {
+    std::cout << "Set kernel arg failed. " << std::endl;
+    assert(false);
+  }
+}*/
 
 class testSHA256
 {
@@ -342,38 +413,55 @@ int main(void)
   std::shared_ptr<GPUKernel> theKernel = theGPU.theKernels[GPU::kernelSHA256];
   std::cout << "DEBUG: about to write to buffer. " << std::endl;
   testSHA256::initialize();
-  for (unsigned largeTestCounter = 0; largeTestCounter < 100000; largeTestCounter ++)
+  auto timeStart = std::chrono::system_clock::now();
+  unsigned largeTestCounter;
+  unsigned totalToCompute = 100000;
+  for (largeTestCounter = 0; largeTestCounter < totalToCompute; largeTestCounter ++)
   { unsigned testCounter = largeTestCounter % testSHA256::knownSHA256s.size();
-    std::string message = testSHA256::knownSHA256s[testCounter][0];
+    std::string& message = testSHA256::knownSHA256s[testCounter][0];
     uint theLength = message.size();
     theKernel->writeToBuffer(0, &theLength, sizeof(uint));
     theKernel->writeToBuffer(1, message);
-    size_t local_item_size = 1; // Divide work items into groups of 64
-    size_t global_item_size = 1; // Divide work items into groups of 64
-    cl_uint ret;
-    (void) ret;
+    size_t local_item_size = 32; // Divide work items into groups of 64
+    size_t global_item_size = 32; // Divide work items into groups of 64
     //std::cout << "DEBUG: Setting arguments ... " << std::endl;
     //std::cout << "DEBUG: arguments set, enqueueing kernel... " << std::endl;
-    ret = clEnqueueNDRangeKernel(theGPU.commandQueue, theKernel->kernel, 1, NULL,
+    cl_int ret = clEnqueueNDRangeKernel(theGPU.commandQueue, theKernel->kernel, 1, NULL,
             &global_item_size, &local_item_size, 0, NULL, NULL);
+    if (ret != CL_SUCCESS)
+    { std::cout << "Failed to enqueue kernel. Return code: " << ret << ". " << std::endl;
+      assert(false);
+    }
     //std::cout << "DEBUG: kernel enqueued, proceeding to read buffer. " << std::endl;
     unsigned char bufferOutput[32];
     cl_mem& result = theKernel->outputs[0]->theMemory;
     ret = clEnqueueReadBuffer(
           theGPU.commandQueue, result, CL_TRUE, 0,
           32, bufferOutput, 0, NULL, NULL);
+    if (ret != CL_SUCCESS)
+    { std::cout << "Failed to enqueue read buffer. Return code: " << ret << ". " << std::endl;
+      assert(false);
+    }
     //std::cout << "Got to here" << std::endl;
     std::stringstream out;
-    for (int i = 0; i < 32; i++)
+    for (int i = 0; i < 32; i ++)
       out << std::hex << std::setw(2) << std::setfill('0') << ((int) (bufferOutput[i]));
     if (out.str() != testSHA256::knownSHA256s[testCounter][1])
     { std::cout << "\e[31mSha of " << testSHA256::knownSHA256s[testCounter][0] << " is wrongly computed to be: " << out.str()
                 << " instead of: " << testSHA256::knownSHA256s[testCounter][1] << "\e[39m" << std::endl;
       assert(false);
     }
-    if (largeTestCounter % 1000 == 0){
-
+    if (largeTestCounter % 500 == 0)
+    {
+      auto timeCurrent = std::chrono::system_clock::now();
+      std::chrono::duration<double> elapsed_seconds = timeCurrent - timeStart;
+      std::cout << "Computed " << largeTestCounter << " sha256s in " << elapsed_seconds.count() << " second(s). " << std::endl;
     }
   }
+  auto timeCurrent = std::chrono::system_clock::now();
+  std::chrono::duration<double> elapsed_seconds = timeCurrent-timeStart;
+  std::cout << "Computed " << largeTestCounter << " sha256s in " << elapsed_seconds.count() << " second(s). " << std::endl;
+  std::cout << "Speed: " << (totalToCompute / elapsed_seconds.count()) << " hashes per second. " << std::endl;
+
   return 0;
 }
