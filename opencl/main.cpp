@@ -151,15 +151,15 @@ public:
   std::unordered_map<std::string, std::shared_ptr<GPUKernel> > theKernels;
   cl_platform_id platformIds[2];
   cl_uint numberOfPlatforms;
-  cl_device_id deviceId;
+  cl_device_id allDevices[2];
+  cl_uint numberOfDevices;
+  cl_device_id currentDeviceId;
   cl_context context;
   cl_command_queue commandQueue;
 
   void initialize()
   {
-    this->deviceId = NULL;
     this->context = 0;
-    cl_uint ret_num_devices;
     cl_int ret = 0;
     ret = clGetPlatformIDs(2, this->platformIds, &this->numberOfPlatforms);
     if (ret != CL_SUCCESS)
@@ -167,19 +167,25 @@ public:
       assert(false);
     }
     std::cout << "Number of platforms: " << this->numberOfPlatforms << std::endl;
-    ret = clGetDeviceIDs(this->platformIds[0], CL_DEVICE_TYPE_DEFAULT, 1, &this->deviceId, &ret_num_devices);
-    std::cout << "Device name: " << getDeviceName(this->deviceId) << std::endl;
-    std::cout << "Driver version: " << getDriverVersion(this->deviceId) << std::endl;
-    std::cout << "Is little endian: " << getIsLittleEndian(this->deviceId) << std::endl;
-    std::cout << "Memory: " << getGlobalMemorySize(this->deviceId) << std::endl;
+    ret = clGetDeviceIDs(this->platformIds[0], CL_DEVICE_TYPE_CPU, 2, this->allDevices, &this->numberOfDevices);
+    if (ret != CL_SUCCESS)
+    { std::cout << "Failed to get devices. " << std::endl;
+      assert(false);
+    }
+    std::cout << "Number of devices: " << this->numberOfDevices << std::endl;
+    this->currentDeviceId = this->allDevices[0];
+    std::cout << "Device name: " << getDeviceName(this->currentDeviceId) << std::endl;
+    std::cout << "Driver version: " << getDriverVersion(this->currentDeviceId) << std::endl;
+    std::cout << "Is little endian: " << getIsLittleEndian(this->currentDeviceId) << std::endl;
+    std::cout << "Memory: " << getGlobalMemorySize(this->currentDeviceId) << std::endl;
     // Create an OpenCL context
-    this->context = clCreateContext(NULL, 1, &this->deviceId, NULL, NULL, &ret);
+    this->context = clCreateContext(NULL, 1, &this->currentDeviceId, NULL, NULL, &ret);
     if (ret != CL_SUCCESS)
     {
       std::cout << "Failed to create context. " << std::endl;
       assert(false);
     }
-    this->commandQueue = clCreateCommandQueue(this->context, this->deviceId,
+    this->commandQueue = clCreateCommandQueue(this->context, this->currentDeviceId,
                                               CL_QUEUE_OUT_OF_ORDER_EXEC_MODE_ENABLE,
                                               &ret);
     if (ret != CL_SUCCESS)
@@ -256,13 +262,13 @@ void GPUKernel::constructFromFileName(
   }
   // Build the program
   //std::cout << "DEBUG: About to build program. " << std::endl;
-  ret = clBuildProgram(this->program, 1, &this->owner->deviceId, NULL, NULL, NULL);
+  ret = clBuildProgram(this->program, 1, &this->owner->currentDeviceId, NULL, NULL, NULL);
   if (ret != CL_SUCCESS)
   {
     std::cout << "Failed to build the program. Return code: " << ret << std::endl;
     char buffer[100000];
     size_t logSize;
-    clGetProgramBuildInfo(this->program, this->owner->deviceId, CL_PROGRAM_BUILD_LOG, 10000, &buffer, &logSize);
+    clGetProgramBuildInfo(this->program, this->owner->currentDeviceId, CL_PROGRAM_BUILD_LOG, 10000, &buffer, &logSize);
     std::string theLog(buffer, logSize);
     std::cout << theLog;
     assert(false);
