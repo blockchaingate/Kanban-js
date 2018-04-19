@@ -8,19 +8,14 @@
 const pathnames = require('./pathnames')
 const https = require('https');
 const http = require('http');
+const openCLDriver = require('./open_cl_driver');
+global.kanban = {};
+global.kanban.openCLDriver = new openCLDriver.OpenCLDriver();
 const handleRequests = require('./handle_requests');
 const fs = require('fs');
 const execSync = require('child_process').execSync;
-const handleRequest = require('./handle_requests');
 const colors = require('colors');
 const buildFrontEnd = require('./build_frontend');
-global.kanban = {
-  openCLDriverStarted: false,
-  openCLDriver: null
-};
-
-const gpuDB = require('./gpu_functions');
-gpuDB.testGPU();
 
 // This line is from the Node.js HTTPS documentation.
 
@@ -39,12 +34,12 @@ var options = {
 var portHttps = 52907;
 var portHttp = 51846;
 
-var serverHTTPS = https.createServer(options, handleRequest.handle_requests);
+var serverHTTPS = https.createServer(options, handleRequests.handle_requests);
 serverHTTPS.listen(portHttps, function(){
   console.log(`Listening on https port: ${portHttps}`.green);
 });
 
-var serverHTTP = http.createServer(handleRequest.handle_requests);
+var serverHTTP = http.createServer(handleRequests.handle_requests);
 serverHTTP.listen(portHttp, function(){
   console.log(`Listening on http port: ${portHttp}`.yellow);
 });

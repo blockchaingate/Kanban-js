@@ -7,6 +7,7 @@ var defaults = {
   progressReport: "spanProgressReport",
   inputBlockHash: "inputBlockHash",
   inputBestBlockIndex: "inputBestBlockIndex",
+  inputNodeCallTestOnePipeMessage: "inputNodeCallTestOnePipeMessage",
   outputRPCBlockInfo: "divKanbanRPCOutputBlockInfo",
   outputRPCTXInfo: "divKanbanRPCOutputTXInfo",
   outputRPCNetwork: "divKanbanRPCOutputNetwork",

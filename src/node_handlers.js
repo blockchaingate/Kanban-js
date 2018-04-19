@@ -2,6 +2,8 @@
 const pathnames = require('./pathnames');
 const assert = require('assert')
 const randomString = require('randomstring');
+const childProcess = require('child_process');
+const openCLDriver = require('./open_cl_driver');
 
 var numSimultaneousCalls = 0;
 var maxSimultaneousCalls = 4;
@@ -13,14 +15,6 @@ function computeUnspentTransactions(id){
 
 }
 
-
-function testPipe(request, response, desiredCommand){
-  if (global.kanban.openCLDriver === null){
-
-  }
-  response.writeHead(200);
-  response.end("Not implemented yet. ");
-}
 
 function pollOngoing(request, response, desiredCommand) {
   var callIds = desiredCommand.callIds;
@@ -65,7 +59,8 @@ handlersReturnImmediately[pathnames.nodeCalls.testGPUSha256.nodeCallLabel] = nul
 
 var handlersReturnWhenDone = {};
 handlersReturnWhenDone[pathnames.nodeCalls.pollOngoing.nodeCallLabel] = pollOngoing;
-handlersReturnWhenDone[pathnames.nodeCalls.testPipe.nodeCallLabel] = testPipe;
+handlersReturnWhenDone[pathnames.nodeCalls.testPipe.nodeCallLabel] = openCLDriver.testPipe;
+handlersReturnWhenDone[pathnames.nodeCalls.testPipeOneMessage.nodeCallLabel] = openCLDriver.testPipeOneMessage;
 
 for (var label in pathnames.nodeCalls) {
   var currentNodeCallLabel = pathnames.nodeCalls[label].nodeCallLabel;
@@ -96,6 +91,7 @@ function dispatch(request, response, desiredCommand){
     return response.end(`Command ${currentCommandLabel} not found`);
   }
   if (currentCommandLabel in handlersReturnWhenDone){
+    console.log(`About to call handler of: ${currentCommandLabel}`);
     return handlersReturnWhenDone[currentCommandLabel](request, response, desiredCommand);
   }
   var numOngoingCalls = Object.keys(ongoingCalls).length; 

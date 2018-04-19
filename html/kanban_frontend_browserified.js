@@ -9728,6 +9728,7 @@ var defaults = {
   progressReport: "spanProgressReport",
   inputBlockHash: "inputBlockHash",
   inputBestBlockIndex: "inputBestBlockIndex",
+  inputNodeCallTestOnePipeMessage: "inputNodeCallTestOnePipeMessage",
   outputRPCBlockInfo: "divKanbanRPCOutputBlockInfo",
   outputRPCTXInfo: "divKanbanRPCOutputTXInfo",
   outputRPCNetwork: "divKanbanRPCOutputNetwork",
@@ -10016,6 +10017,15 @@ function testPipe(){
   });
 }
 
+function testPipeOneMessage(){
+  var theMessage = document.getElementById(ids.defaults.inputNodeCallTestOnePipeMessage).value; 
+  submitRequests.submitGET({
+    url: pathnames.getURLfromNodeCallLabel(pathnames.nodeCalls.testPipeOneMessage.nodeCallLabel, { message: theMessage}),
+    progress: getSpanProgress(),
+    result: getOutputTestGPU()
+  });
+}
+
 function synchronizeUnspentTransactions(){
   submitRequests.submitGET({
     url: pathnames.getURLfromNodeCallLabel(pathnames.nodeCalls.computeUnspentTransactions.nodeCallLabel),
@@ -10029,6 +10039,7 @@ module.exports = {
   synchronizeUnspentTransactions,
   testGPUSha256,
   testPipe,
+  testPipeOneMessage,
   pollServerDoStart,
   clearPollId
 }
@@ -10134,6 +10145,7 @@ module.exports = {
 "use strict";
 
 var path = {
+  base: `${__dirname}/..`,
   certificates: `${__dirname}/../certificates_secret`,
   HTML: `${__dirname}/../html`,
   fabcoin: `${__dirname}/../../fabcoin-dev`,
@@ -10151,6 +10163,7 @@ var pathname = {
   frontEndCSS: `${path.HTML}/kanban_frontend.css`,
   fabcoind: `${path.fabcoinSrc}/fabcoind`,
   fabcoinCli: `${path.fabcoinSrc}/fabcoin-cli`,
+  openCLDriver: `${path.base}/build/kanban-gpu`
 };
 
 var url = {};
@@ -10196,6 +10209,9 @@ var nodeCalls = {
   },
   testPipe: {
     nodeCallLabel: "testPipe"
+  },
+  testPipeOneMessage: {
+    nodeCallLabel: "testPipeOneMessage"
   }
 };
 
@@ -10265,9 +10281,14 @@ var rpcCalls = {
   }
 }
 
-function getURLfromNodeCallLabel(theNodeCallLabel){
+function getURLfromNodeCallLabel(theNodeCallLabel, additionalArguments){
   var theRequest = {};
   theRequest[nodeCallLabel] = theNodeCallLabel;
+  if (typeof additionalArguments === "object") {
+    for (var label in additionalArguments) {
+      theRequest[label] = additionalArguments[label];
+    }
+  }
   return `${url.known.node}?command=${encodeURIComponent(JSON.stringify(theRequest))}`;
 }
 

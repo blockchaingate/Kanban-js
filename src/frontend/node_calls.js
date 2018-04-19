@@ -81,6 +81,15 @@ function testPipe(){
   });
 }
 
+function testPipeOneMessage(){
+  var theMessage = document.getElementById(ids.defaults.inputNodeCallTestOnePipeMessage).value; 
+  submitRequests.submitGET({
+    url: pathnames.getURLfromNodeCallLabel(pathnames.nodeCalls.testPipeOneMessage.nodeCallLabel, { message: theMessage}),
+    progress: getSpanProgress(),
+    result: getOutputTestGPU()
+  });
+}
+
 function synchronizeUnspentTransactions(){
   submitRequests.submitGET({
     url: pathnames.getURLfromNodeCallLabel(pathnames.nodeCalls.computeUnspentTransactions.nodeCallLabel),
@@ -94,6 +103,7 @@ module.exports = {
   synchronizeUnspentTransactions,
   testGPUSha256,
   testPipe,
+  testPipeOneMessage,
   pollServerDoStart,
   clearPollId
 }
