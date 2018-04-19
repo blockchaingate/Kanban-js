@@ -3,8 +3,8 @@
 var path = {
   certificates: `${__dirname}/../certificates_secret`,
   HTML: `${__dirname}/../html`,
-  fabcoin: `${__dirname}/../../../fabcoin-dev`,
-  fabcoinSrc: `${__dirname}/../../../fabcoin-dev/src`,
+  fabcoin: `${__dirname}/../../fabcoin-dev`,
+  fabcoinSrc: `${__dirname}/../../fabcoin-dev/src`,
 };
 
 var pathname = {
@@ -60,6 +60,9 @@ var nodeCalls = {
   },
   testGPUSha256: {
     nodeCallLabel: "testGPUSha256"
+  },
+  testPipe: {
+    nodeCallLabel: "testPipe"
   }
 };
 

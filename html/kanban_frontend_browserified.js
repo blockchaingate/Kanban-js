@@ -9731,10 +9731,10 @@ var defaults = {
   outputRPCBlockInfo: "divKanbanRPCOutputBlockInfo",
   outputRPCTXInfo: "divKanbanRPCOutputTXInfo",
   outputRPCNetwork: "divKanbanRPCOutputNetwork",
+  outputGPUTest: "divGPUTestOutput",
   radioButtonBestBlock: "radioBestBlockHash",
   radioBlockInfo: "radioBlockInfo",
   checkboxBlockVerbose: "checkboxBlockVerbose",
-  outputGPUTest: "outputGPUTest"
 }
 
 module.exports = {
@@ -9953,7 +9953,7 @@ function getOutputTXInfoDiv(){
 }
 
 function getOutputTestGPU(){
-  return document.getElementById(ids.defaults.outputRPCTXInfo);
+  return document.getElementById(ids.defaults.outputGPUTest);
 }
 
 var pollId = null;
@@ -10008,6 +10008,14 @@ function testGPUSha256(){
   });
 }
 
+function testPipe(){
+  submitRequests.submitGET({
+    url: pathnames.getURLfromNodeCallLabel(pathnames.nodeCalls.testPipe.nodeCallLabel),
+    progress: getSpanProgress(),
+    result: getOutputTestGPU()
+  });
+}
+
 function synchronizeUnspentTransactions(){
   submitRequests.submitGET({
     url: pathnames.getURLfromNodeCallLabel(pathnames.nodeCalls.computeUnspentTransactions.nodeCallLabel),
@@ -10020,6 +10028,7 @@ function synchronizeUnspentTransactions(){
 module.exports = {
   synchronizeUnspentTransactions,
   testGPUSha256,
+  testPipe,
   pollServerDoStart,
   clearPollId
 }
@@ -10127,8 +10136,8 @@ module.exports = {
 var path = {
   certificates: `${__dirname}/../certificates_secret`,
   HTML: `${__dirname}/../html`,
-  fabcoin: `${__dirname}/../../../fabcoin-dev`,
-  fabcoinSrc: `${__dirname}/../../../fabcoin-dev/src`,
+  fabcoin: `${__dirname}/../../fabcoin-dev`,
+  fabcoinSrc: `${__dirname}/../../fabcoin-dev/src`,
 };
 
 var pathname = {
@@ -10184,6 +10193,9 @@ var nodeCalls = {
   },
   testGPUSha256: {
     nodeCallLabel: "testGPUSha256"
+  },
+  testPipe: {
+    nodeCallLabel: "testPipe"
   }
 };
 

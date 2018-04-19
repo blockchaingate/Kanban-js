@@ -10,10 +10,10 @@ var defaults = {
   outputRPCBlockInfo: "divKanbanRPCOutputBlockInfo",
   outputRPCTXInfo: "divKanbanRPCOutputTXInfo",
   outputRPCNetwork: "divKanbanRPCOutputNetwork",
+  outputGPUTest: "divGPUTestOutput",
   radioButtonBestBlock: "radioBestBlockHash",
   radioBlockInfo: "radioBlockInfo",
   checkboxBlockVerbose: "checkboxBlockVerbose",
-  outputGPUTest: "outputGPUTest"
 }
 
 module.exports = {

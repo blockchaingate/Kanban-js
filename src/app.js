@@ -14,7 +14,11 @@ const execSync = require('child_process').execSync;
 const handleRequest = require('./handle_requests');
 const colors = require('colors');
 const buildFrontEnd = require('./build_frontend');
-global.kanban = {};
+global.kanban = {
+  openCLDriverStarted: false,
+  openCLDriver: null
+};
+
 const gpuDB = require('./gpu_functions');
 gpuDB.testGPU();
 

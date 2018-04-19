@@ -2,7 +2,6 @@
 const pathnames = require('./pathnames');
 const assert = require('assert')
 const randomString = require('randomstring');
-const sha256 = require('./opencl/sha256');
 
 var numSimultaneousCalls = 0;
 var maxSimultaneousCalls = 4;
@@ -14,34 +13,21 @@ function computeUnspentTransactions(id){
 
 }
 
-var gpuTest = {
-  id: "",
-  counterSha: 0,
-  startTime: null
-}
-function testGPUSha256(){
-  if (gpuTest.counterSha > 10000000){
-    return;
+
+function testPipe(request, response, desiredCommand){
+  if (global.kanban.openCLDriver === null){
+
   }
-  if (gpuTest.counterSha === 0){
-    gpuTest.startTime = (new Date()).getTime();
-  }
-  var nextGoal = gpuTest.counterSha + 1000;
-  for (; gpuTest.counterSha ++; gpuTest.counterSha < nextGoal){ 
-    sha256.gpuSHA256(randomString.generate(100));
-    if (gpuTest.counterSha % 1000 === 0){
-      var time = ((new Date()).getTime() - gpuTest.startTime ) / 1000; 
-      console.log(`Computed ${gpuTest.counterSha} shas in ${time} second(s)`);
-    }
-  }
-  process.nextTick(testGPUSha256);
+  response.writeHead(200);
+  response.end("Not implemented yet. ");
 }
 
-function pollOngoing(request, response, callIds){
+function pollOngoing(request, response, desiredCommand) {
+  var callIds = desiredCommand.callIds;
   try {
     if (! Array.isArray(callIds)){
       response.writeHead(400);
-      return response.end(`Expected callIds to be an array, got ${JSON.stringify(callIds)} instead. `)
+      return response.end(`Expected callIds to be an array, got ${JSON.stringify(callIds)} instead. `);
     }
   } catch (e) { //<- this shouldn't happen: someone sent us badly behaved bytes in callIds.
     response.writeHead(500);
@@ -73,14 +59,27 @@ function pollOngoing(request, response, callIds){
   response.end(JSON.stringify(response));  
 }
 
-var handlers = {};
-handlers[pathnames.nodeCalls.pollOngoing.nodeCallLabel] = pollOngoing;
-handlers[pathnames.nodeCalls.computeUnspentTransactions.nodeCallLabel] = computeUnspentTransactions;
-handlers[pathnames.nodeCalls.testGPUSha256.nodeCallLabel] = testGPUSha256;
+var handlersReturnImmediately = {};
+handlersReturnImmediately[pathnames.nodeCalls.computeUnspentTransactions.nodeCallLabel] = computeUnspentTransactions;
+handlersReturnImmediately[pathnames.nodeCalls.testGPUSha256.nodeCallLabel] = null;
 
-for (var label in pathnames.nodeCalls){
-  if (handlers[pathnames.nodeCalls.pollOngoing.nodeCallLabel] === undefined){
-    assert.ok(false, `Handler of node call ${pathnames.nodeCalls.pollOngoing.nodeCallLabel} is not allowed to  be undefined. `);
+var handlersReturnWhenDone = {};
+handlersReturnWhenDone[pathnames.nodeCalls.pollOngoing.nodeCallLabel] = pollOngoing;
+handlersReturnWhenDone[pathnames.nodeCalls.testPipe.nodeCallLabel] = testPipe;
+
+for (var label in pathnames.nodeCalls) {
+  var currentNodeCallLabel = pathnames.nodeCalls[label].nodeCallLabel;
+  if (
+    handlersReturnImmediately[currentNodeCallLabel] === undefined && 
+    handlersReturnWhenDone[currentNodeCallLabel] === undefined
+  ) {
+    assert.ok(false, `Handler of node call ${currentNodeCallLabel} is not allowed to  be undefined. `);
+  }
+  if (
+    handlersReturnImmediately[currentNodeCallLabel] !== undefined && 
+    handlersReturnWhenDone[currentNodeCallLabel] !== undefined
+  ) {
+    assert.ok(false, `Node call ${currentNodeCallLabel} must have only one type of handler. `);
   }
 }
 
@@ -96,8 +95,8 @@ function dispatch(request, response, desiredCommand){
     response.writeHead(400);
     return response.end(`Command ${currentCommandLabel} not found`);
   }
-  if (currentCommandLabel == pathnames.nodeCalls.pollOngoing.nodeCallLabel){
-    return pollOngoing(request, response, desiredCommand.callIds);
+  if (currentCommandLabel in handlersReturnWhenDone){
+    return handlersReturnWhenDone[currentCommandLabel](request, response, desiredCommand);
   }
   var numOngoingCalls = Object.keys(ongoingCalls).length; 
   if (numOngoingCalls > maxSimultaneousCalls){
@@ -109,7 +108,7 @@ function dispatch(request, response, desiredCommand){
   var callId = `currentCommandLabel_${numOngoingCalls}_${timeInMilliseconds}`;
   ongoingCalls[callId] = pathnames.nodeCallStatuses.starting;
   process.nextTick(function(){
-    handlers[currentCommandLabel](request, response, desiredCommand);
+    handlersReturnImmediately[currentCommandLabel](request, response, desiredCommand);
   });
   response.writeHead(200);
   response.end(JSON.stringify({
@@ -118,6 +117,6 @@ function dispatch(request, response, desiredCommand){
 }
 
 module.exports = {
-  handlers,
+  handlersReturnImmediately,
   dispatch
 }
