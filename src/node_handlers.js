@@ -4,12 +4,7 @@ const assert = require('assert')
 const randomString = require('randomstring');
 const childProcess = require('child_process');
 const openCLDriver = require('./open_cl_driver');
-
-var numSimultaneousCalls = 0;
-var maxSimultaneousCalls = 4;
-
-var ongoingCalls = {};
-var recentlyFinishedCalls = {};
+var jobs = global.kanban.jobs;
 
 function computeUnspentTransactions(id){
 
@@ -29,37 +24,38 @@ function pollOngoing(request, response, desiredCommand) {
   }
   var numIdsToReport = Math.min(maxSimultaneousCalls, callIds.length);
   var result = {};
+  console.log(`Extracting ids from: ${JSON.stringify(callIds)}`);
   for (var counterIds = 0; counterIds < callIds.length; counterIds ++){
     var currentId = callIds[counterIds];
-    if (currentId in ongoingCalls){
+    if (currentId in jobs.ongoing){
       result[currentId] = {
         status: "ongoing", 
-        message: ongoingCalls[currentId]
+        message: jobs.ongoing[currentId]
       };
       continue;
     } 
-    if (currentId in recentlyFinishedCalls){
+    if (currentId in jobs.recentlyFinished){
       result[currentId] = {
         status: "recentlyFinished",
-        message: recentlyFinishedCalls[currentId]
+        message: jobs.recentlyFinished[currentId]
       };
       continue;
     } 
     result[currentId] = {
-      status: "notFound"
+      status: `Job ${currentId} not found. `
     };
   }
   response.writeHead(200);
-  response.end(JSON.stringify(response));  
+  response.end(JSON.stringify(result));  
 }
 
 var handlersReturnImmediately = {};
 handlersReturnImmediately[pathnames.nodeCalls.computeUnspentTransactions.nodeCallLabel] = computeUnspentTransactions;
 handlersReturnImmediately[pathnames.nodeCalls.testGPUSha256.nodeCallLabel] = null;
+handlersReturnImmediately[pathnames.nodeCalls.testPipeBackEnd.nodeCallLabel] = openCLDriver.testPipeBackEnd;
 
 var handlersReturnWhenDone = {};
 handlersReturnWhenDone[pathnames.nodeCalls.pollOngoing.nodeCallLabel] = pollOngoing;
-handlersReturnWhenDone[pathnames.nodeCalls.testPipe.nodeCallLabel] = openCLDriver.testPipe;
 handlersReturnWhenDone[pathnames.nodeCalls.testPipeOneMessage.nodeCallLabel] = openCLDriver.testPipeOneMessage;
 
 for (var label in pathnames.nodeCalls) {
@@ -78,8 +74,10 @@ for (var label in pathnames.nodeCalls) {
   }
 }
 
+var numSimultaneousCalls = 0;
+var maxSimultaneousCalls = 4;
 function dispatch(request, response, desiredCommand){
-  console.log(`command: ${JSON.stringify(desiredCommand)}, pathnames: ${pathnames}, nodeCallLabel = ${pathnames.nodeCallLabel}`);
+  console.log(`command: ${JSON.stringify(desiredCommand)}, nodeCallLabel = ${pathnames.nodeCallLabel}`);
   var isGood = false;
   var currentCommandLabel = desiredCommand[pathnames.nodeCallLabel];
   console.log(`nodecalllabel: ${pathnames.nodeCallLabel}, currentCommandLabel: ${JSON.stringify(currentCommandLabel)}`);
@@ -91,21 +89,16 @@ function dispatch(request, response, desiredCommand){
     return response.end(`Command ${currentCommandLabel} not found`);
   }
   if (currentCommandLabel in handlersReturnWhenDone){
-    console.log(`About to call handler of: ${currentCommandLabel}`);
+    console.log(`About to call handler of: ${currentCommandLabel} with input command: ${JSON.stringify(desiredCommand)}`);
     return handlersReturnWhenDone[currentCommandLabel](request, response, desiredCommand);
   }
-  var numOngoingCalls = Object.keys(ongoingCalls).length; 
+  var numOngoingCalls = jobs.getNumberOfJobs(); 
   if (numOngoingCalls > maxSimultaneousCalls){
     response.writeHead(200);
     response.end(`Maximum number of ongoing calls reached: ${numOngoingCalls}. `);
     return;
   }
-  var timeInMilliseconds = (new Date()).getTime();
-  var callId = `currentCommandLabel_${numOngoingCalls}_${timeInMilliseconds}`;
-  ongoingCalls[callId] = pathnames.nodeCallStatuses.starting;
-  process.nextTick(function(){
-    handlersReturnImmediately[currentCommandLabel](request, response, desiredCommand);
-  });
+  var callId = jobs.addJob(handlersReturnImmediately[currentCommandLabel], currentCommandLabel);
   response.writeHead(200);
   response.end(JSON.stringify({
     callId : callId 

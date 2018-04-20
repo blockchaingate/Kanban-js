@@ -30,6 +30,7 @@
     "mime-types": "^2.1.18",
     "nodemon": "^1.17.3",
     "nooocl": "^0.12.5",
+    "random-seed": "^0.3.0",
     "randomstring": "^1.1.5"
   }
 }

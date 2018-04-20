@@ -4,6 +4,7 @@ const pathnames = require('../pathnames');
 const ids = require('./ids_dom_elements');
 const jsonToHtml = require('./json_to_html');
 const Block = require('../bitcoinjs_src/block');
+const jobsServerSide = require('../jobs');
 
 function getPage(){
   return window.kanban.thePage;
@@ -23,19 +24,49 @@ function getOutputTestGPU(){
 
 var pollId = null;
 //var lastPollTime = null;
-var ongoingPolls = {};
-var finishedPolls = {};
-function doPollServer(){
+
+
+if (window.kanban.jobs === undefined || window.kanban.jobs === null){
+  window.kanban.jobs = new jobsServerSide.Jobs();
+}
+
+var jobs = window.kanban.jobs;
+
+function doPollServer(output){
+  console.log(jobs.getOngoingIds());
+  submitRequests.submitGET({
+    url: pathnames.getURLfromNodeCallLabel(pathnames.nodeCalls.pollOngoing.nodeCallLabel, {callIds: jobs.getOngoingIds()}),
+    progress: getSpanProgress(),
+    result: output,
+    callback: doPollServerCallback
+  });
+}
+
+function doPollServerCallback(inputText, output){
   //console.log("polling");
-  var numOngoingCalls = Object.keys(ongoingPolls).length;
+  var numOngoingCalls = jobs.getNumberOfJobs();
   if (numOngoingCalls === 0){
     clearInterval(pollId);
     pollId = null;
   }
   var resultHtml = "";
   resultHtml += `Last updated: ${new Date()}.<br>`; 
-  resultHtml += jsonToHtml.getHtmlFromArrayOfObjects(ongoingPolls, true);
-  getOutputTXInfoDiv().innerHTML = resultHtml;
+  var outputElement, outputId;
+  if (typeof output === "string"){
+    outputId = output;
+    outputElement = document.getElementById(output);
+  } else {
+    outputId = output.id;
+    outputElement = output;
+  }
+  try {
+    jobs.ongoing = JSON.parse(inputText);
+  } catch (e) {
+    console.log(`${e}`);
+    return;
+  }
+  resultHtml += jsonToHtml.getHtmlFromArrayOfObjects(jobs.ongoing, true, outputId);
+  outputElement.innerHTML = resultHtml;
 }
 
 function clearPollId(){
@@ -46,9 +77,9 @@ function clearPollId(){
   //console.log("cleared poll");
 }
 
-function pollServerDoStart(){
+function pollServerDoStart(output){
   clearPollId();
-  pollId = setInterval(doPollServer, 1000);
+  pollId = setInterval(doPollServer.bind(null, output), 1000);
 }
 
 function pollServerStart(id, output){
@@ -56,12 +87,12 @@ function pollServerStart(id, output){
   var callIdInfo = null;
   try {
     callIdInfo = JSON.parse(id);
+    jobs.ongoing[callIdInfo.callId] = callIdInfo;
   } catch (e) {
     output.innerHTML = `<error>Failed to extract job information. ${e}</error>`;
     return;
   }
-  ongoingPolls = callIdInfo;
-  pollServerDoStart();
+  pollServerDoStart(output);
 }
 
 function testGPUSha256(){
@@ -73,11 +104,12 @@ function testGPUSha256(){
   });
 }
 
-function testPipe(){
+function testPipeBackEnd(){
   submitRequests.submitGET({
-    url: pathnames.getURLfromNodeCallLabel(pathnames.nodeCalls.testPipe.nodeCallLabel),
+    url: pathnames.getURLfromNodeCallLabel(pathnames.nodeCalls.testPipeBackEnd.nodeCallLabel),
     progress: getSpanProgress(),
-    result: getOutputTestGPU()
+    result: getOutputTestGPU(),
+    callback: pollServerStart
   });
 }
 
@@ -102,7 +134,7 @@ function synchronizeUnspentTransactions(){
 module.exports = {
   synchronizeUnspentTransactions,
   testGPUSha256,
-  testPipe,
+  testPipeBackEnd,
   testPipeOneMessage,
   pollServerDoStart,
   clearPollId

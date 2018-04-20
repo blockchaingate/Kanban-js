@@ -23,7 +23,7 @@ function getTableHorizontallyLaidFromJSON(input){
     var result = "";
     result += "<table class='tableJSON'>";
     for (item in input){
-      result += `<tr><td>${item}</td><td>${input[item]}</td></tr>`; 
+      result += `<tr><td>${item}</td><td>${getTableHorizontallyLaidFromJSON(input[item])}</td></tr>`; 
     }
     result += "</table>";
     return result;
@@ -60,7 +60,7 @@ function getLabelsRows(input){
   return result;
 }
 
-function getHtmlFromArrayOfObjects(input, doIncludeTogglePolling){
+function getHtmlFromArrayOfObjects(input, doIncludeTogglePolling, outputPolling){
   var inputJSON = input;
   if (typeof inputJSON === "string"){
     inputJSON = input.replace(/[\r\n]/g, " "); 
@@ -97,7 +97,7 @@ function getHtmlFromArrayOfObjects(input, doIncludeTogglePolling){
     result += inputJSON + "<br>";
   }
   if (doIncludeTogglePolling === true){
-    result += submitRequests.getToggleButtonPausePolling({label: "raw result", content: JSON.stringify(input)});
+    result += submitRequests.getToggleButtonPausePolling({label: "raw result", content: JSON.stringify(input), output: outputPolling});
   } else {
     result += submitRequests.getToggleButton({label: "raw result", content: JSON.stringify(input)});
   }

@@ -59,12 +59,13 @@ var nodeCalls = {
   }, 
   pollOngoing: {
     nodeCallLabel: "pollOngoing",
+    required: ["callIds"]
   },
   testGPUSha256: {
     nodeCallLabel: "testGPUSha256"
   },
-  testPipe: {
-    nodeCallLabel: "testPipe"
+  testPipeBackEnd: {
+    nodeCallLabel: "testPipeBackEnd"
   },
   testPipeOneMessage: {
     nodeCallLabel: "testPipeOneMessage"
@@ -138,11 +139,22 @@ var rpcCalls = {
 }
 
 function getURLfromNodeCallLabel(theNodeCallLabel, additionalArguments){
+  var theNodeCall = nodeCalls[theNodeCallLabel];
+  if (theNodeCall === undefined){
+    throw(`Node call ${theNodeCallLabel} not registered in the nodeCalls data structure. `);
+  }
   var theRequest = {};
   theRequest[nodeCallLabel] = theNodeCallLabel;
   if (typeof additionalArguments === "object") {
     for (var label in additionalArguments) {
       theRequest[label] = additionalArguments[label];
+    }
+  }
+  if (theNodeCall.required !== undefined){
+    for (var counterRequiredArguments = 0; counterRequiredArguments < theNodeCall.required.length; counterRequiredArguments ++){
+      if (!(theNodeCall.required[counterRequiredArguments] in theRequest)){
+        throw (`Mandatory argument ${theNodeCall.required[counterRequiredArguments]} missing.`);
+      }
     }
   }
   return `${url.known.node}?command=${encodeURIComponent(JSON.stringify(theRequest))}`;

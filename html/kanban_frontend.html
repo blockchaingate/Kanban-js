@@ -91,8 +91,10 @@
 </div>
 <div class = "divMainPage" id = "pageGPUtest">
   <div class = "divControlPanelDefault">
-    <input type = "text" id = "inputNodeCallTestOnePipeMessage" placeholder="Test one pipe message"></input>
+    <input type = "text" id = "inputNodeCallTestOnePipeMessage" placeholder = "Test one pipe message"></input>
     <button class = "buttonStandard" onclick = "window.kanban.nodeCalls.testPipeOneMessage();">Test pipe</button>
+    <button class = "buttonStandard" onclick = "window.kanban.nodeCalls.testPipeBackEnd();">Test pipe backend&lt;-&gt;GPU</button>
+    <button class = "buttonStandard" onclick = "window.kanban.nodeCalls.testPipeBrowserToGPU();">Test pipe browser&lt;-&gt;backend&lt;-&gt;GPU</button>
     <button class = "buttonStandard" onclick = "window.kanban.nodeCalls.testGPUSha256();">Random string SHA 256</button>
   </div><br>
   <div class = "divControlPanelDefault">

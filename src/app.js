@@ -9,8 +9,11 @@ const pathnames = require('./pathnames')
 const https = require('https');
 const http = require('http');
 const openCLDriver = require('./open_cl_driver');
-global.kanban = {};
-global.kanban.openCLDriver = new openCLDriver.OpenCLDriver();
+const jobs = require('./jobs');
+global.kanban = {
+  openCLDriver: new openCLDriver.OpenCLDriver(),
+  jobs: new jobs.Jobs()
+};
 const handleRequests = require('./handle_requests');
 const fs = require('fs');
 const execSync = require('child_process').execSync;
