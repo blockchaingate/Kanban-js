@@ -13,14 +13,10 @@ function computeUnspentTransactions(id){
 
 function pollOngoing(request, response, desiredCommand) {
   var callIds = desiredCommand.callIds;
-  try {
-    if (! Array.isArray(callIds)){
-      response.writeHead(400);
-      return response.end(`Expected callIds to be an array, got ${JSON.stringify(callIds)} instead. `);
-    }
-  } catch (e) { //<- this shouldn't happen: someone sent us badly behaved bytes in callIds.
-    response.writeHead(500);
-    return response.end("Internal server error while processing malformed input in pollOngoing");
+  console.log(`Call ids so far: ${JSON.stringify(callIds)}`);
+  if (! Array.isArray(callIds)) {
+    callIds = [];
+    callIds = callIds.concat(Object.keys(jobs.ongoing), Object.keys(jobs.recentlyFinished));
   }
   var numIdsToReport = Math.min(maxSimultaneousCalls, callIds.length);
   var result = {};
@@ -36,13 +32,13 @@ function pollOngoing(request, response, desiredCommand) {
     } 
     if (currentId in jobs.recentlyFinished){
       result[currentId] = {
-        status: "recentlyFinished",
+        status: pathnames.nodeCallStatuses.recentlyFinished,
         message: jobs.recentlyFinished[currentId]
       };
       continue;
     } 
     result[currentId] = {
-      status: `Job ${currentId} not found. `
+      status: pathnames.nodeCallStatuses.notFound
     };
   }
   response.writeHead(200);

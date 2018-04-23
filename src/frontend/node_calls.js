@@ -23,8 +23,6 @@ function getOutputTestGPU(){
 }
 
 var pollId = null;
-//var lastPollTime = null;
-
 
 if (window.kanban.jobs === undefined || window.kanban.jobs === null){
   window.kanban.jobs = new jobsServerSide.Jobs();
@@ -35,7 +33,7 @@ var jobs = window.kanban.jobs;
 function doPollServer(output){
   console.log(jobs.getOngoingIds());
   submitRequests.submitGET({
-    url: pathnames.getURLfromNodeCallLabel(pathnames.nodeCalls.pollOngoing.nodeCallLabel, {callIds: jobs.getOngoingIds()}),
+    url: pathnames.getURLfromNodeCallLabel(pathnames.nodeCalls.pollOngoing.nodeCallLabel),
     progress: getSpanProgress(),
     result: output,
     callback: doPollServerCallback
@@ -61,6 +59,23 @@ function doPollServerCallback(inputText, output){
   }
   try {
     jobs.ongoing = JSON.parse(inputText);
+    for (var callId in jobs.ongoing){
+      if (jobs.ongoing[callId].status === pathnames.nodeCallStatuses.notFound){
+        delete jobs.ongoing[callId];
+      }
+    }
+
+    var foundOngoing = false;
+    resultHtml += `${Object.keys(jobs.ongoing).length} job(s).<br>`;
+    for (var callId in jobs.ongoing){
+      if (jobs.ongoing[callId].status !== pathnames.nodeCallStatuses.recentlyFinished){
+        foundOngoing = true;
+        break;
+      }
+    }
+    if (!foundOngoing){
+      clearInterval(pollId);
+    }
   } catch (e) {
     console.log(`${e}`);
     return;

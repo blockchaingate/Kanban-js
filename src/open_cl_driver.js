@@ -14,18 +14,19 @@ function OpenCLDriver(){
   this.remaining = {};
   this.testMessages = [];
   this.numLargeTestMessages = 1;
-  this.numSmallTestMessages = 0;
-  this.largeTestMessageApproximateTopSizeInMultiplesOf32 = 100; //100000;
+  this.numSmallTestMessages = 1;
+  this.largeTestMessageApproximateTopSizeInMultiplesOf32 = 100000;
   this.smallTestMessageApproximateTopSizeInMultiplesOf32 = 1000;
-  this.totalToTest = 2;//100000;
+  this.totalToTest = 20;
   this.testGotBackFromCPPSoFar = 0;
   this.testScheduledSoFar = 0;
+  this.currentCPPBuffer = "";
 }
 
-OpenCLDriver.prototype.generateMessages = function(numMessages, highBoundary){
+OpenCLDriver.prototype.generateMessages = function(numMessages, highBoundary) {
   var theGenerator = new pseudoRandomGenerator.create("Default pseudo-random seed.");
   var totalMessages = this.numLargeTestMessages + this.numSmallTestMessages;
-  for (var counterMessage = 0; counterMessage < numMessages; counterMessage ++){
+  for (var counterMessage = 0; counterMessage < numMessages; counterMessage ++) {
     var sizeDivBy32 = theGenerator(highBoundary);
     var sha256 = crypto.createHash('sha256');
     sha256.update(`${sizeDivBy32}`);
@@ -48,8 +49,31 @@ OpenCLDriver.prototype.initTestMessages = function (callId){
   jobs.setStatus(callId, "Generating test messages. ");
   this.generateMessages(this.numLargeTestMessages, this.largeTestMessageApproximateTopSizeInMultiplesOf32);
   this.generateMessages(this.numSmallTestMessages, this.smallTestMessageApproximateTopSizeInMultiplesOf32);
-//  this.testMessages[0] = randomString.generate(2000) + "\n" + randomString.generate(2000);
   jobs.setStatus(callId, "Generated test messages, starting test. ");
+}
+
+OpenCLDriver.prototype.processOutput = function(chunk){
+  var parsed = null;
+  try {
+    parsed = JSON.parse(chunk);
+  } catch (e) { 
+    console.log(`Failed to parse:` + `${chunk}`.red + `\nError: ` + `${e}`.red);
+    return false;
+  }
+  if (this.remaining[parsed.id].flagIsTest === true) {
+    console.log(`Completed computation: ${parsed.id}`.green);
+    this.testGotBackFromCPPSoFar ++;
+    if (this.testGotBackFromCPPSoFar >= this.totalToTest){
+      var jobs = global.kanban.jobs;
+      jobs.finishJob(this.remaining[parsed.id].callId);
+    }
+  }
+  console.log(`About to write back to id: ${parsed.id}`.yellow);
+  if (this.remaining[parsed.id].response !== null && this.remaining[parsed.id].response !== undefined) {
+    this.remaining[parsed.id].response.writeHead(200);
+    this.remaining[parsed.id].response.end(JSON.stringify(parsed));  
+  }
+  return true;
 }
 
 OpenCLDriver.prototype.start = function (){
@@ -57,9 +81,14 @@ OpenCLDriver.prototype.start = function (){
     return;
   }
   this.started = true;
-  this.handleExecutable = childProcess.execFile(
+  this.handleExecutable = childProcess.spawn(  
+  //<- Warning: at the time of writing, childProcess.execFile will not flush the 
+  //stdout buffer properly. 
+  //Is the intended nodejs behavior? 
+  //At any rate, use childProcess.spawn().
     pathnames.pathname.openCLDriver, {
-      maxBuffer: 10000000,
+      maxBuffer: 10000000, //Please note: this code should work with a small buffer too, say about 1000.
+      //If not, it's a bug.
       encoding: 'binary'
     },
     function(code, stdout, stderr){
@@ -72,19 +101,21 @@ OpenCLDriver.prototype.start = function (){
     }
   );
   console.log(`Process: ${pathnames.pathname.openCLDriver} spawned`.green);
-  try{
+  try {
     this.handleExecutable.stdout.on('data', function(data){
       console.log(`Incoming data:\n${data}`.yellow);
       var theOpenCLDriver = global.kanban.openCLDriver;
-      var parsed = JSON.parse(data);
-      if (theOpenCLDriver.remaining[parsed.id].response === undefined || theOpenCLDriver.remaining[parsed.id].response === null){
-        console.log(`Completed computation: ${parsed.id}`.green);
-        theOpenCLDriver.testGotBackFromCPPSoFar ++;
-        return;
+      theOpenCLDriver.currentCPPBuffer += data;
+      var chunks = theOpenCLDriver.currentCPPBuffer.split("\n");
+      theOpenCLDriver.currentCPPBuffer = "";
+      for (var counterChunks = 0; counterChunks < chunks.length; counterChunks ++){
+        if (chunks[counterChunks] === "")
+          break;
+        if (!theOpenCLDriver.processOutput(chunks[counterChunks])){
+          theOpenCLDriver.currentCPPBuffer = chunks[counterChunks];
+          break;
+        }
       }
-      console.log("About to write back ...".yellow);
-      theOpenCLDriver.remaining[parsed.id].response.writeHead(200);
-      theOpenCLDriver.remaining[parsed.id].response.end(data);    
     });
     //this.handleExecutable.stdout.on('error', function(error){
     //  console.log(`Error in gpu output: ${error}`.red);
@@ -103,6 +134,7 @@ OpenCLDriver.prototype.start = function (){
 
 OpenCLDriver.prototype.testPipeOneMessage = function (request, response, desiredCommand) {
   console.log("Got to here");
+  this.testGotBackFromCPPSoFar = 0;
   var messageType = typeof desiredCommand.message;
   if (messageType !== "string"){
     response.writeHead(200);
@@ -152,11 +184,15 @@ OpenCLDriver.prototype.testPipeBackEnd = function (callId, recursionDepth) {
   
   this.initTestMessages(callId);
   var jobs = global.kanban.jobs;
-  jobs.setStatus(callId, this.getTestProgress());
   if (recursionDepth >= this.totalToTest){
     return;
   }
   var theIndex = recursionDepth % this.testMessages.length;
+  this.remaining[this.numProcessed] = {
+    flagIsTest: true,
+    callId: callId
+  }
+  jobs.setStatus(callId, this.getTestProgress());
   this.pipeOneMessage(this.testMessages[theIndex]);
   this.testScheduledSoFar ++;
   recursionDepth ++;

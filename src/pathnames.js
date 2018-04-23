@@ -58,8 +58,7 @@ var nodeCalls = {
     nodeCallLabel: "computeUnspentTransactions", // must be same as key label, used for autocomplete
   }, 
   pollOngoing: {
-    nodeCallLabel: "pollOngoing",
-    required: ["callIds"]
+    nodeCallLabel: "pollOngoing"
   },
   testGPUSha256: {
     nodeCallLabel: "testGPUSha256"
@@ -138,7 +137,7 @@ var rpcCalls = {
   }
 }
 
-function getURLfromNodeCallLabel(theNodeCallLabel, additionalArguments){
+function getURLfromNodeCallLabel(theNodeCallLabel, additionalArguments) {
   var theNodeCall = nodeCalls[theNodeCallLabel];
   if (theNodeCall === undefined){
     throw(`Node call ${theNodeCallLabel} not registered in the nodeCalls data structure. `);

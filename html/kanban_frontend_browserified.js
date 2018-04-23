@@ -10771,8 +10771,6 @@ function getOutputTestGPU(){
 }
 
 var pollId = null;
-//var lastPollTime = null;
-
 
 if (window.kanban.jobs === undefined || window.kanban.jobs === null){
   window.kanban.jobs = new jobsServerSide.Jobs();
@@ -10783,7 +10781,7 @@ var jobs = window.kanban.jobs;
 function doPollServer(output){
   console.log(jobs.getOngoingIds());
   submitRequests.submitGET({
-    url: pathnames.getURLfromNodeCallLabel(pathnames.nodeCalls.pollOngoing.nodeCallLabel, {callIds: jobs.getOngoingIds()}),
+    url: pathnames.getURLfromNodeCallLabel(pathnames.nodeCalls.pollOngoing.nodeCallLabel),
     progress: getSpanProgress(),
     result: output,
     callback: doPollServerCallback
@@ -10809,6 +10807,23 @@ function doPollServerCallback(inputText, output){
   }
   try {
     jobs.ongoing = JSON.parse(inputText);
+    for (var callId in jobs.ongoing){
+      if (jobs.ongoing[callId].status === pathnames.nodeCallStatuses.notFound){
+        delete jobs.ongoing[callId];
+      }
+    }
+
+    var foundOngoing = false;
+    resultHtml += `${Object.keys(jobs.ongoing).length} job(s).<br>`;
+    for (var callId in jobs.ongoing){
+      if (jobs.ongoing[callId].status !== pathnames.nodeCallStatuses.recentlyFinished){
+        foundOngoing = true;
+        break;
+      }
+    }
+    if (!foundOngoing){
+      clearInterval(pollId);
+    }
   } catch (e) {
     console.log(`${e}`);
     return;
@@ -10995,9 +11010,11 @@ function Jobs(){
   this.recentlyFinished = {};
   this.jobHandler = null;
   this.totalJobs = 0;
+  this.maxRecentlyFinishedJobsToRetain = 10;
+  this.numRecentlyFinishedJobsToRetainOnPrune = 3;
 }
 
-Jobs.prototype.getNumberOfJobs = function(){
+Jobs.prototype.getNumberOfJobs = function() {
   return Object.keys(this.ongoing).length;
 }
 
@@ -11005,16 +11022,34 @@ Jobs.prototype.getOngoingIds = function(){
   return Object.keys(this.ongoing);
 }
 
-Jobs.prototype.setStatus = function(id, message){
-  if (! (id in this.ongoing)){
-    console.log(`Error: bad job id`.red);
+Jobs.prototype.setStatus = function(id, message) {
+  if (!(id in this.ongoing)){
+    console.log(`Error: bad job id: ${id}`.red);
     return;
   }
   console.log(`job id ${id} status: ${message}`);
   this.ongoing[id].status = message;
 }
 
-Jobs.prototype.addJob = function (jobHandler, jobFunctionLabel){
+Jobs.prototype.finishJob = function (id, message) {
+  console.log(`Finishing job ${id}`);
+  this.recentlyFinished[id] = {
+    message: message
+  };
+  if (id in this.ongoing){
+    delete this.ongoing[id];
+  }
+  if (Object.keys(this.recentlyFinished).length > this.maxRecentlyFinishedJobsToRetain){
+    var keysOrdered = Object.keys(this.recentlyFinished).sort();
+    var totalToDelete = this.maxRecentlyFinishedJobsToRetain - this.numRecentlyFinishedJobsToRetainOnPrune;
+    for (var counterKeys = 0 ; counterKeys < totalToDelete; counterKeys ++){
+      delete this.recentlyFinished[keysOrdered[counterKeys]];
+    }
+    console.log(`After pruning, remaining jobs: ${JSON.stringify(this.recentlyFinished)}`);
+  }
+}
+
+Jobs.prototype.addJob = function (jobHandler, jobFunctionLabel) {
   var timeInMilliseconds = (new Date()).getTime();
   this.totalJobs ++;
   var callId = `currentCommandLabel_${this.totalJobs}_${this.getNumberOfJobs()}_${timeInMilliseconds}`;
@@ -11096,8 +11131,7 @@ var nodeCalls = {
     nodeCallLabel: "computeUnspentTransactions", // must be same as key label, used for autocomplete
   }, 
   pollOngoing: {
-    nodeCallLabel: "pollOngoing",
-    required: ["callIds"]
+    nodeCallLabel: "pollOngoing"
   },
   testGPUSha256: {
     nodeCallLabel: "testGPUSha256"
@@ -11176,7 +11210,7 @@ var rpcCalls = {
   }
 }
 
-function getURLfromNodeCallLabel(theNodeCallLabel, additionalArguments){
+function getURLfromNodeCallLabel(theNodeCallLabel, additionalArguments) {
   var theNodeCall = nodeCalls[theNodeCallLabel];
   if (theNodeCall === undefined){
     throw(`Node call ${theNodeCallLabel} not registered in the nodeCalls data structure. `);

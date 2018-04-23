@@ -1,4 +1,4 @@
-#include <sstream>
+  #include <sstream>
 #include <iostream>
 #include <assert.h>
 #include <iomanip>
@@ -16,12 +16,28 @@ std::string getHex(const std::string& other)
   return out.str();
 }
 
+std::string shortenString(const std::string& input, int numCharactersToRetain)
+{ if (numCharactersToRetain <= 0)
+    return input;
+  int numCharsAtEnds = numCharactersToRetain / 2;
+  int numCharsToSuppress = ((unsigned) input.size()) - numCharsAtEnds * 2;
+  if (numCharsToSuppress <= 0 || (unsigned) numCharsAtEnds > input.size())
+    return input;
+  std::stringstream out;
+  for (int i = 0; i < numCharsAtEnds; i ++)
+    out << input[i];
+  out << "...(" << numCharsToSuppress << " omitted)...";
+  for (int i = 0; i < numCharsAtEnds; i ++)
+    out << input[input.size() - numCharsAtEnds + i];
+  return out.str();
+}
+
 int main(void)
 {
   std::string inputString, inputMeta;
   int lastInputSize = 0;
-  int messageId = -1;
-  int runId = -1;
+  int messageId = - 1;
+  int runId = - 1;
   while (true)
   { //lastInputSize =
     runId ++;
@@ -29,16 +45,16 @@ int main(void)
     {
       std::cin.getline(inputBufferMetaData, 10);
       inputMeta.assign(inputBufferMetaData);
-      std::cerr << "Run id: " << runId << "\n";
-      std::cerr << "size input: " << inputMeta << "\n";
+      //std::cerr << "Run id: " << runId << "\n";
+      //std::cerr << "size input: " << inputMeta << "\n";
       lastInputSize = std::stoi(inputMeta);
       std::cin.getline(inputBufferMetaData, 10);
       inputMeta.assign(inputBufferMetaData);
-      std::cerr << "id input: " << inputMeta << "\n";
+      //std::cerr << "id input: " << inputMeta << "\n";
       messageId = std::stoi(inputBufferMetaData);
     }
     catch (int e)
-    { std::cerr << "Bad stoi with input: " << inputMeta;
+    { //std::cerr << "Bad stoi with input: " << inputMeta;
       std::cout << "Bad stoi with input: " << inputMeta;
       return - 1;
     }
@@ -62,9 +78,10 @@ int main(void)
       std::cout.flush();
       return - 1;
     }
-    std::cerr << "\nTellg: " << std::cin.tellg() << "\n";
+    //std::cerr << "\nTellg: " << std::cin.tellg() << "\n";
     std::cout << "{\"id\":" << messageId << ","
-    << "\"message\": \"" << ++ totalCouts << "; got " << inputString.size() << " bytes: " << getHex(inputString) << "\"}";
+    << "\"message\": \"" << ++ totalCouts << "; got " << inputString.size() << " bytes. "
+    << "\"}\n";
     std::cout.flush();
   }
   return 0;
