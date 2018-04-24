@@ -6,10 +6,22 @@ const childProcess = require('child_process');
 const pseudoRandomGenerator = require('random-seed');
 const crypto = require('crypto');
 const miscellaneous = require('./miscellaneous');
+const net = require('net');
 
 function OpenCLDriver(){
   this.started = false;
+  this.connected = false;
   this.handleExecutable = null;
+  this.gpuConnections = {
+    metaData: null,
+    data: null,
+    output: null
+  };
+  this.gpuConnectionPorts = {
+    metaData: "49201",
+    data: "48201",
+    output: "47201"
+  }
   this.numProcessed = 0;
   this.remaining = {};
   this.testMessages = [];
@@ -60,13 +72,22 @@ OpenCLDriver.prototype.processOutput = function(chunk){
     console.log(`Failed to parse:` + `${chunk}`.red + `\nError: ` + `${e}`.red);
     return false;
   }
-  if (this.remaining[parsed.id].flagIsTest === true) {
-    console.log(`Completed computation: ${parsed.id}`.green);
-    this.testGotBackFromCPPSoFar ++;
-    if (this.testGotBackFromCPPSoFar >= this.totalToTest){
-      var jobs = global.kanban.jobs;
-      jobs.finishJob(this.remaining[parsed.id].callId);
+  if (parsed.id === undefined){
+    console.log(`Chunk ${chunk} doesn't have an id.`.red);
+    return false;    
+  }
+  if (parsed.id in this.remaining){ 
+    if (this.remaining[parsed.id].flagIsTest === true) {
+      console.log(`Completed computation: ${parsed.id}`.green);
+      this.testGotBackFromCPPSoFar ++;
+      if (this.testGotBackFromCPPSoFar >= this.totalToTest){
+        var jobs = global.kanban.jobs;
+        jobs.finishJob(this.remaining[parsed.id].callId);
+      }
     }
+  } else {
+    console.log(`Uknown job id: ${parsed.id}. Chunk: ${chunk}` );
+    return false;
   }
   console.log(`About to write back to id: ${parsed.id}`.yellow);
   if (this.remaining[parsed.id].response !== null && this.remaining[parsed.id].response !== undefined) {
@@ -81,56 +102,101 @@ OpenCLDriver.prototype.start = function (){
     return;
   }
   this.started = true;
+  this.connected = false;
   this.handleExecutable = childProcess.spawn(  
   //<- Warning: at the time of writing, childProcess.execFile will not flush the 
   //stdout buffer properly. 
   //Is the intended nodejs behavior? 
   //At any rate, use childProcess.spawn().
-    pathnames.pathname.openCLDriver, {
-      maxBuffer: 10000000, //Please note: this code should work with a small buffer too, say about 1000.
+    pathnames.pathname.openCLDriverExecutable, {
+      maxBuffer: 1000000, //Please note: this code should work with a small buffer too, say about 1000.
       //If not, it's a bug.
+      stdio: ['pipe', 'pipe', 'pipe'],
+      shell: false,
+      cwd: pathnames.path.openCLDriverBuildPath,
       encoding: 'binary'
     },
     function(code, stdout, stderr){
       console.log(`OpenCL driver exited with code: ${code}.`.red);
-      //console.log(stdout);
-      //console.log(stderr);
       var theOpenCLDriver = global.kanban.openCLDriver;
       theOpenCLDriver.started = false;
       theOpenCLDriver.handleExecutable = null;
     }
   );
-  console.log(`Process: ${pathnames.pathname.openCLDriver} spawned`.green);
-  try {
-    this.handleExecutable.stdout.on('data', function(data){
-      console.log(`Incoming data:\n${data}`.yellow);
-      var theOpenCLDriver = global.kanban.openCLDriver;
-      theOpenCLDriver.currentCPPBuffer += data;
-      var chunks = theOpenCLDriver.currentCPPBuffer.split("\n");
-      theOpenCLDriver.currentCPPBuffer = "";
-      for (var counterChunks = 0; counterChunks < chunks.length; counterChunks ++){
-        if (chunks[counterChunks] === "")
-          break;
-        if (!theOpenCLDriver.processOutput(chunks[counterChunks])){
-          theOpenCLDriver.currentCPPBuffer = chunks[counterChunks];
-          break;
-        }
-      }
-    });
-    //this.handleExecutable.stdout.on('error', function(error){
-    //  console.log(`Error in gpu output: ${error}`.red);
-    //});
-    //this.handleExecutable.stdin.on('error', function(error){
-    //  console.log(`Error in gpu input: ${error}`.red);
-    //});
-    //this.handleExecutable.on('error', function(error){
-    //  console.log(`${error}`.red);    
-    //});
-  } catch (e){
-    console.log(`Fatal exception ${e}.`);
-  }
-  console.log("Got to here");
+  console.log(`Process: ${pathnames.pathname.openCLDriverExecutable} spawned`.green);
+  this.handleExecutable.stdout.on('data', function(data){
+    console.log(data.toString());
+  });
+  this.handleExecutable.stderr.on('data', function(data){
+    console.log(data);
+  });
 }
+
+OpenCLDriver.prototype.connectOutput = function (){
+  console.log(`trying to connect to: output`.blue);
+  this.gpuConnections.output = net.connect({port: this.gpuConnectionPorts.output}, function(){
+    console.log(`Connected to port ${kanban.openCLDriver.gpuConnectionPorts.output}`.green);
+    kanban.openCLDriver.connected = true;
+  });
+  this.gpuConnections.output.on('data', function(data){
+    kanban.openCLDriver.processOutput(data);
+  });
+  this.gpuConnections.output.on('error', function(error){
+    console.log(`Output pipe error: ${error}`.red);
+    if (global.kanban.openCLDriver.connected){
+      return;
+    }
+    if (global.kanban.openCLDriver.connectPipeTimer !== null && global.kanban.openCLDriver.connectPipeTimer !== undefined){
+      clearTimeout(global.kanban.openCLDriver.connectPipeTimer);
+    } 
+    global.kanban.openCLDriver.connectPipeTimer = setTimeout(global.kanban.openCLDriver.connectOutput.bind(global.kanban.openCLDriver), 1000);
+  });
+}
+
+OpenCLDriver.prototype.connectData = function (){
+  console.log(`trying to connect to: metadata`.blue);
+  this.gpuConnections.data = net.connect({port: this.gpuConnectionPorts.data}, function(){
+    console.log(`Connected to port ${kanban.openCLDriver.gpuConnectionPorts.data}`.green);
+    kanban.openCLDriver.connectOutput();
+  });
+  this.gpuConnections.data.on('error', function(error){
+    console.log(`Data pipe error: ${error}`.red);
+    if (global.kanban.openCLDriver.connected){
+      return;
+    }
+    if (global.kanban.openCLDriver.connectPipeTimer !== null && global.kanban.openCLDriver.connectPipeTimer !== undefined){
+      clearTimeout(global.kanban.openCLDriver.connectPipeTimer);
+    } 
+    global.kanban.openCLDriver.connectPipeTimer = setTimeout(global.kanban.openCLDriver.connectData.bind(global.kanban.openCLDriver), 1000);
+  });
+}
+
+OpenCLDriver.prototype.connect = function (){
+  if (this.connected){
+    return;
+  }
+  console.log(`trying to connect to: metadata`.blue);
+  this.gpuConnections.metaData = net.connect({port: this.gpuConnectionPorts.metaData}, function(){
+    console.log(`Connected to port ${kanban.openCLDriver.gpuConnectionPorts.metaData}`.green);
+    kanban.openCLDriver.connectData();
+  });
+  this.gpuConnections.metaData.on('error', function(error){
+    console.log(`Meta data pipe error: ${error}`.red);
+    if (global.kanban.openCLDriver.connected){
+      return;
+    }
+    if (global.kanban.openCLDriver.connectPipeTimer !== null && global.kanban.openCLDriver.connectPipeTimer !== undefined){
+      clearTimeout(global.kanban.openCLDriver.connectPipeTimer);
+    } 
+    global.kanban.openCLDriver.connectPipeTimer = setTimeout(global.kanban.openCLDriver.connect.bind(global.kanban.openCLDriver), 1000);
+  });
+}
+
+OpenCLDriver.prototype.startAndConnect = function (){
+  this.start();
+  this.connect();
+}
+
 
 OpenCLDriver.prototype.testPipeOneMessage = function (request, response, desiredCommand) {
   console.log("Got to here");
@@ -154,17 +220,25 @@ OpenCLDriver.prototype.testPipeOneMessage = function (request, response, desired
 }
 
 OpenCLDriver.prototype.pipeOneMessage = function (message) {
-  this.start();
-  if (this.remaining[this.numProcessed] === undefined){
+  this.startAndConnect();
+  if (!this.connected) {
+    clearTimeout(this.connectGPUtimer);
+    this.connectGPUtimer = setTimeout(this.pipeOneMessage.bind(this, message), 300);
+    return;
+  }
+  this.pipeOneMessagePartTwo(message);
+}
+
+OpenCLDriver.prototype.pipeOneMessagePartTwo = function (message) {
+  if (this.remaining[this.numProcessed] === undefined) {
     this.remaining[this.numProcessed] = {};
   }
   try {
     console.log("About to write ... ".blue);
     var buffer = new Buffer(message, 'binary');
     var theLength = buffer.byteLength;
-    this.handleExecutable.stdin.write(`${theLength}\n`);
-    this.handleExecutable.stdin.write(`${this.numProcessed}\n`);
-    this.handleExecutable.stdin.write(buffer);
+    this.gpuConnections.metaData.write(`${theLength}\n${this.numProcessed}\n`);
+    this.gpuConnections.data.write(buffer);
     let bufferHex = Buffer.from(message, 'binary');
     console.log(`Wrote all ${message.length} bytes : ${miscellaneous.shortenString(bufferHex.toString('hex'), 2000)}`.blue);
   } catch (e){

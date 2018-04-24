@@ -8,3 +8,5 @@ build/
 
 #qt creator files:
 *.user
+
+logfiles/

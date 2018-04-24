@@ -6,6 +6,7 @@ var path = {
   HTML: `${__dirname}/../html`,
   fabcoin: `${__dirname}/../../fabcoin-dev`,
   fabcoinSrc: `${__dirname}/../../fabcoin-dev/src`,
+  openCLDriverBuildPath: `${__dirname}/../build`,
 };
 
 var pathname = {
@@ -19,7 +20,7 @@ var pathname = {
   frontEndCSS: `${path.HTML}/kanban_frontend.css`,
   fabcoind: `${path.fabcoinSrc}/fabcoind`,
   fabcoinCli: `${path.fabcoinSrc}/fabcoin-cli`,
-  openCLDriver: `${path.base}/build/kanban-gpu`
+  openCLDriverExecutable: `${path.openCLDriverBuildPath}/kanban-gpu`
 };
 
 var url = {};
