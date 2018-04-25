@@ -10,20 +10,63 @@
 #include <sys/socket.h> //<- sockets and related data structures
 #include <netinet/in.h> // <- addresses and similar
 #include <netdb.h> //<-addrinfo and related data structures defined here
+#include <assert.h>
 
 Logger logServer("../logfiles/logServer.txt", "[ServerGPU] ");
+
+PipeBasic::PipeBasic(int inputCapacity, const std::string& inputName)
+{
+  this->capacity = inputCapacity;
+  this->length = 0;
+  this->position = 0;
+  this->fileDescriptor = - 1;
+  this->buffer = new char[inputCapacity];
+  this->name = inputName;
+}
+
+PipeBasic::~PipeBasic()
+{
+  delete [] this->buffer;
+  this->buffer = 0;
+  if (this->fileDescriptor >= 0)
+    close (this->fileDescriptor);
+  this->fileDescriptor = -1;
+}
+
+MessagePipeline::MessagePipeline()
+{
+  this->bufferCapacityData = 50000000;
+  this->bufferCapacityMetaData = 1000000;
+  //Pipe buffers start.
+  this->inputMeta = new PipeBasic(this->bufferCapacityMetaData, "metaData");
+  this->inputData = new PipeBasic(this->bufferCapacityData, "data");
+  this->bufferOutputGPU = new char[this->bufferCapacityData];
+  //Pipe buffers end.
+}
 
 Server::Server()
 {
   this->flagInitialized = false;
   this->listeningSocketData = - 1;
   this->listeningSocketMetaData = - 1;
-  this->fileDescriptorData = - 1;
-  this->fileDescriptorMetaData = - 1;
   this->portMetaData = - 1;
   this->portData = - 1;
   this->portOutputData = - 1;
-  this->currentMessageLength = - 1;
+}
+
+MessagePipeline::~MessagePipeline()
+{
+  //Pipe buffers start.
+  delete this->inputData;
+  this->inputData = 0;
+  delete this->inputMeta;
+  this->inputMeta = 0;
+  delete [] this->bufferOutputGPU;
+  this->bufferOutputGPU = 0;
+  //Pipe buffers end.
+  if (this->fileDescriptorOutputData >= 0)
+    close (this->fileDescriptorOutputData);
+  this->fileDescriptorOutputData = - 1;
 }
 
 Server::~Server()
@@ -34,27 +77,20 @@ Server::~Server()
     close(this->listeningSocketMetaData);
   if (this->listeningSocketOutputData >= 0)
     close(this->listeningSocketOutputData);
-
-  if (this->fileDescriptorData >= 0)
-    close (this->fileDescriptorData);
-  if (this->fileDescriptorMetaData >= 0)
-    close (this->fileDescriptorMetaData);
-  if (this->fileDescriptorOutputData >= 0)
-    close (this->fileDescriptorOutputData);
   this->listeningSocketData = - 1;
   this->listeningSocketMetaData = - 1;
   this->listeningSocketOutputData = - 1;
-  this->fileDescriptorData = - 1;
-  this->fileDescriptorMetaData = - 1;
-  this->fileDescriptorOutputData = - 1;
 }
 
 bool Server::initialize()
 {
   if (this->flagInitialized)
     return true;
+  logServer << "Creating GPU ..." << Logger::endL;
   this->theGPU = std::make_shared<GPU>();
+  logServer << "GPU created, initializing kernels..." << Logger::endL;
   this->theGPU->initializeKernels();
+  logServer << "Kernels initialized, initializing ports..." << Logger::endL;
   if (!this->initializePorts())
     return false;
   logServer << "Server ports opened ..." << Logger::endL;
@@ -139,11 +175,11 @@ bool Server::initializePorts()
 
 bool Server::acceptAll()
 {
-  if (!this->acceptOneSocket(this->listeningSocketMetaData, this->fileDescriptorMetaData, this->portMetaData))
+  if (!this->acceptOneSocket(this->listeningSocketMetaData, this->thePipe.inputMeta->fileDescriptor, this->portMetaData))
     return false;
-  if (!this->acceptOneSocket(this->listeningSocketData, this->fileDescriptorData, this->portData))
+  if (!this->acceptOneSocket(this->listeningSocketData, this->thePipe.inputData->fileDescriptor, this->portData))
     return false;
-  if (!this->acceptOneSocket(this->listeningSocketOutputData, this->fileDescriptorOutputData, this->portOutputData))
+  if (!this->acceptOneSocket(this->listeningSocketOutputData, this->thePipe.fileDescriptorOutputData, this->portOutputData))
     return false;
   return true;
 }
@@ -167,7 +203,8 @@ bool Server::acceptOneSocket(int theSocket, int& outputFileDescriptor, const std
 }
 
 bool Server::listenOneSocket(int theSocket, int& outputFileDescriptor, const std::string& port)
-{ (void) outputFileDescriptor;
+{
+  (void) outputFileDescriptor;
   logServer << "Listening to port: " << port << Logger::endL;
   int success = listen(theSocket, 100);
   logServer << "After listen function to port: " << port << Logger::endL;
@@ -181,124 +218,155 @@ bool Server::listenOneSocket(int theSocket, int& outputFileDescriptor, const std
 
 bool Server::listenAll()
 {
-  if (!this->listenOneSocket(this->listeningSocketMetaData, this->fileDescriptorMetaData, this->portMetaData))
+  if (!this->listenOneSocket(this->listeningSocketMetaData, this->thePipe.inputMeta->fileDescriptor, this->portMetaData))
     return false;
-  if (!this->listenOneSocket(this->listeningSocketData, this->fileDescriptorData, this->portData))
+  if (!this->listenOneSocket(this->listeningSocketData, this->thePipe.inputMeta->fileDescriptor, this->portData))
     return false;
-  if (!this->listenOneSocket(this->listeningSocketOutputData, this->fileDescriptorOutputData, this->portOutputData))
+  if (!this->listenOneSocket(this->listeningSocketOutputData, this->thePipe.fileDescriptorOutputData, this->portOutputData))
     return false;
   return true;
 }
 
-const int bufferSizeMain = 50000000; //50MB should be a good maximum for a single computational request, may need to be increased.
-char bufferInputMain[bufferSizeMain];
-char bufferOutputGPU[bufferSizeMain];
-
-const int bufferSizeMetaData = 1000; //50MB should be a good maximum for a single computational request, may need to be increased.
-char bufferInputMetaData[bufferSizeMetaData];
-
-
-bool Server::ReadOneSmallString(std::string& output)
+void MessageFromNode::reset()
 {
-  int metaDataBytes = read(this->fileDescriptorMetaData, bufferInputMetaData, bufferSizeMetaData);
-  if (metaDataBytes < 0)
+  this->id = "";
+  this->length = - 1;
+  this->theMessage = "";
+}
+
+bool PipeBasic::ReadMore()
+{
+  if (this->position < this->length)
+    return true;
+  this->position = 0;
+  this->length = 0;
+  this->length = read(this->fileDescriptor, this->buffer, this->capacity);
+  if (this->length < 0)
   {
-    logServer << "Failed to read metadata. " << Logger::endL;
+    logServer << "Failed to read " << this->name << ". " << strerror(errno) << Logger::endL;
     return false;
   }
-  output.assign(bufferInputMetaData, metaDataBytes);
+  if (this->length == 0)
+  {
+    logServer << "Error: got zero bytes from " << this->name << ". " << Logger::endL;
+    return false;
+  }
   return true;
 }
 
-bool Server::ReadNextMetaDataPiece(std::string& output)
+char PipeBasic::GetChar()
 {
+  if (this->position >= this->length)
+  {
+    logServer << "Pipe basic fatal error. " << Logger::endL;
+    assert(false);
+  }
+  char result = this->buffer[this->position];
+  this->position ++;
+  return result;
+}
+
+bool MessagePipeline::ReadOne()
+{
+  std::string currentMetaData;
+  this->currentMessage.reset();
   while (true)
-  { auto theIndex = this->queueMetaData.find('\n');
-    if (theIndex == std::string::npos)
-    { std::string buffer;
-      if (!this->ReadOneSmallString(buffer))
-        return false;
-      this->queueMetaData += buffer;
+  { if (!this->inputMeta->ReadMore())
+      return false;
+    char currentChar = this->inputMeta->GetChar();
+    if (currentChar != '\n')
+    {
+      currentMetaData.push_back(currentChar);
       continue;
     }
-    output = this->queueMetaData.substr(0, theIndex);
-    this->queueMetaData = this->queueMetaData.substr(theIndex + 1);
-    break;
+    if (this->currentMessage.length < 0)
+    { std::stringstream lengthReader(currentMetaData);
+      lengthReader >> this->currentMessage.length;
+      if (this->currentMessage.length <= 0)
+      {
+        logServer << "Failed to read current message length, got: "<< this->currentMessage.length << ". " << Logger::endL;
+        return false;
+      }
+      currentMetaData = "";
+    } else
+    {
+      this->currentMessage.id = currentMetaData;
+      break;
+    }
   }
-  logServer << "Read meta data: " << output << Logger::endL;
+  while (true)
+  {
+    if (!this->inputData->ReadMore())
+      return false;
+    int remainingLength = this->currentMessage.length - this->currentMessage.theMessage.size();
+    if (this->inputData->position + remainingLength <= this->inputData->length)
+    { this->currentMessage.theMessage.append(&this->inputData->buffer[this->inputData->position], remainingLength);
+      this->inputData->position += remainingLength;
+      break;
+    }
+    int numBytesThatCanBeRead = this->inputData->length - this->inputData->position;
+    this->currentMessage.theMessage.append(& this->inputData->buffer[this->inputData->position], numBytesThatCanBeRead);
+    this->inputData->position += numBytesThatCanBeRead;
+  }
+  this->messageQueue.push(this->currentMessage);
   return true;
 }
 
-bool Server::ReadNextMetaData()
+bool MessagePipeline::ReadNext()
 {
-  if (!this->ReadNextMetaDataPiece(this->currentMessageLengthString))
-    return false;
-  if (!this->ReadNextMetaDataPiece(this->currentMessageId))
-    return false;
-  std::stringstream lengthReader(this->currentMessageLengthString);
-  lengthReader >> this->currentMessageLength;
+  if (!this->messageQueue.empty())
+    return true;
+//  bool
+  do
+  {
+    if (!this->ReadOne())
+      return false;
+  } while (this->inputMeta->position < this->inputMeta->length);
   return true;
 }
 
 bool Server::RunOnce()
 {
-  if (!this->ReadNextMetaData())
+  if (!this->thePipe.ReadNext())
     return false;
-  int numReadSoFar = 0;
-  int lastReadBytes = 0;
-  std::string currentMessage = "";
-  //logServer << "About to read main message, expecting: " << this->currentMessageLength << " bytes. " << Logger::endL;
-  while (numReadSoFar < this->currentMessageLength)
-  { lastReadBytes = read(this->fileDescriptorData, bufferInputMain, bufferSizeMain);
-    //logServer << "Just read: " << lastReadBytes << " bytes out of " << this->currentMessageLength << Logger::endL;
-    numReadSoFar += lastReadBytes;
-    if (lastReadBytes < this->currentMessageLength)
-    {
-      std::string incoming(bufferInputMain, lastReadBytes);
-      currentMessage += incoming;
-    }
-  }
   std::shared_ptr<GPUKernel> theKernel = this->theGPU->theKernels[GPU::kernelSHA256];
-  if (lastReadBytes == this->currentMessageLength)
-  {
-    theKernel->writeToBuffer(3, bufferInputMain, lastReadBytes);
-    currentMessage.assign(bufferInputMain, lastReadBytes);
-    //logServer << "Writing " << lastReadBytes << " bytes. Message: " << currentMessage << Logger::endL;
-  } else
-  {
-    theKernel->writeToBuffer(3, currentMessage);
-    //logServer << "Writing " << currentMessage << ". " << Logger::endL;
-  }
-  theKernel->writeArgument(0, 0);
-  theKernel->writeArgument(1, numReadSoFar);
-  theKernel->writeArgument(2, 0);
-  cl_int ret = clEnqueueNDRangeKernel(
-        this->theGPU->commandQueue, theKernel->kernel, 1, NULL,
-        &theKernel->global_item_size, &theKernel->local_item_size, 0, NULL, NULL);
-  if (ret != CL_SUCCESS)
-  {
-    logServer << "Failed to enqueue kernel. Return code: " << ret << ". ";
-    return false;
-  }
-  cl_mem& result = theKernel->outputs[0]->theMemory;
-  ret = clEnqueueReadBuffer(this->theGPU->commandQueue, result, CL_TRUE, 0, 32, bufferOutputGPU, 0, NULL, NULL);
-  if (ret != CL_SUCCESS)
-  { logServer << "Failed to read buffer. " << Logger::endL;
-    return false;
-  }
-  std::string outputBinary(bufferOutputGPU, 32);
-  std::stringstream output;
-  output << "{\"id\":\"" << this->currentMessageId << "\", \"result\": \"" << Miscellaneous::toStringHex(outputBinary) << "\"}\n";
 
-  //std::stringstream output;
-  //output << "{\"id\":\"" << this->currentMessageId << "\", \"result\": \"received: " << numReadSoFar << " bytes\"}\n";
-
-  //logServer << "About to write: " << output.str() << Logger::endL;
-  int numWrittenBytes = write(this->fileDescriptorOutputData, output.str().c_str(), output.str().size());
-  if (numWrittenBytes < 0)
+  while(!this->thePipe.messageQueue.empty())
   {
-    logServer << "Error writing bytes. " << Logger::endL;
-    return false;
+    MessageFromNode& theMessage = this->thePipe.messageQueue.front();
+    logServer << "Processing message: " << theMessage.id << ", " << theMessage.length << " bytes. " << Logger::endL;
+    theKernel->writeToBuffer(3, theMessage.theMessage);
+    theKernel->writeArgument(0, 0);
+    theKernel->writeArgument(1, theMessage.length);
+    theKernel->writeArgument(2, 0);
+    cl_int ret = clEnqueueNDRangeKernel(
+          this->theGPU->commandQueue, theKernel->kernel, 1, NULL,
+          &theKernel->global_item_size, &theKernel->local_item_size, 0, NULL, NULL);
+    if (ret != CL_SUCCESS)
+    {
+      logServer << "Failed to enqueue kernel. Return code: " << ret << ". ";
+      return false;
+    }
+    cl_mem& result = theKernel->outputs[0]->theMemory;
+    ret = clEnqueueReadBuffer(this->theGPU->commandQueue, result, CL_TRUE, 0, 32, this->thePipe.bufferOutputGPU, 0, NULL, NULL);
+    if (ret != CL_SUCCESS)
+    {
+      logServer << "Failed to read buffer. " << Logger::endL;
+      return false;
+    }
+    std::string outputBinary(this->thePipe.bufferOutputGPU, 32);
+    std::stringstream output;
+    output << "{\"id\":\"" << theMessage.id << "\", \"result\": \"" << Miscellaneous::toStringHex(outputBinary) << "\"}\n";
+
+    logServer << "Computation " << theMessage.id << " completed, writing ..." << Logger::endL;
+    int numWrittenBytes = write(this->thePipe.fileDescriptorOutputData, output.str().c_str(), output.str().size());
+    logServer << "Computation " << theMessage.id << " completed and sent." << Logger::endL;
+    if (numWrittenBytes < 0)
+    {
+      logServer << "Error writing bytes. " << Logger::endL;
+      return false;
+    }
+    this->thePipe.messageQueue.pop();
   }
   return true;
 }

@@ -25,12 +25,15 @@ function OpenCLDriver(){
   this.numProcessed = 0;
   this.remaining = {};
   this.testMessages = [];
+  this.testMessageResults = {};
   this.numLargeTestMessages = 1;
-  this.numSmallTestMessages = 1;
+  this.numSmallTestMessages = 2;
   this.largeTestMessageApproximateTopSizeInMultiplesOf32 = 100000;
   this.smallTestMessageApproximateTopSizeInMultiplesOf32 = 1000;
-  this.totalToTest = 20;
+  this.totalToTest = 6;
   this.testGotBackFromCPPSoFar = 0;
+  this.testBytesProcessedSoFar = 0;
+  this.testStartTime = null;
   this.testScheduledSoFar = 0;
   this.currentCPPBuffer = "";
 }
@@ -64,7 +67,48 @@ OpenCLDriver.prototype.initTestMessages = function (callId){
   jobs.setStatus(callId, "Generated test messages, starting test. ");
 }
 
-OpenCLDriver.prototype.processOutput = function(chunk){
+OpenCLDriver.prototype.processOutput = function(data){
+  var splitData = data.toString().split("\n");
+  for (var counterData = 0; counterData < splitData.length; counterData ++){
+    if (splitData[counterData].length === 0)
+      continue;
+    this.processOutputOneChunk(splitData[counterData]);
+  }
+  return true;
+}
+
+OpenCLDriver.prototype.processOneTestJob = function(parsedOutput, gpuJob){
+  if (gpuJob.flagIsTest !== true) {
+    return;
+  }
+  console.log(`Completed computation: ${parsedOutput.id}`.green);
+  this.testGotBackFromCPPSoFar ++;
+  if (parsedOutput.result === undefined){
+    console.log(`GPU message has no result entry: ${JSON.stringify(parsedOutput)}`.red);
+    assert(false);
+  }
+  var theMessageIndex = gpuJob.messageIndex;
+  if (theMessageIndex === undefined){
+    console.log(`Test job has no message index: ${JSON.stringify(gpuJob)}`.red);
+    assert(false);  
+  }
+  this.testBytesProcessedSoFar += this.testMessages[theMessageIndex].length;
+  if (this.testMessageResults[theMessageIndex] === undefined){
+    this.testMessageResults[theMessageIndex] = parsedOutput.result;
+  } else { 
+    if (this.testMessageResults[theMessageIndex] != parsedOutput.result){
+      console.log(`Inconsistent SHA256: message of index: ${theMessageIndex} first sha-ed to: ${this.testMessageResults[theMessageIndex]}, but now is sha-ed to ${parsedOutput.result}` );
+      assert(false);
+    }
+  }  
+  var jobs = global.kanban.jobs;
+  jobs.setStatus(gpuJob.callId, this.getTestProgress());
+  if (this.testGotBackFromCPPSoFar >= this.totalToTest){
+    jobs.finishJob(gpuJob.callId, this.getTestProgress());
+  }
+}
+
+OpenCLDriver.prototype.processOutputOneChunk = function(chunk){
   var parsed = null;
   try {
     parsed = JSON.parse(chunk);
@@ -76,23 +120,16 @@ OpenCLDriver.prototype.processOutput = function(chunk){
     console.log(`Chunk ${chunk} doesn't have an id.`.red);
     return false;    
   }
-  if (parsed.id in this.remaining){ 
-    if (this.remaining[parsed.id].flagIsTest === true) {
-      console.log(`Completed computation: ${parsed.id}`.green);
-      this.testGotBackFromCPPSoFar ++;
-      if (this.testGotBackFromCPPSoFar >= this.totalToTest){
-        var jobs = global.kanban.jobs;
-        jobs.finishJob(this.remaining[parsed.id].callId);
-      }
-    }
-  } else {
+  if (!(parsed.id in this.remaining)) {
     console.log(`Uknown job id: ${parsed.id}. Chunk: ${chunk}` );
     return false;
-  }
+  } 
+  var gpuJob = this.remaining[parsed.id];
+  this.processOneTestJob(parsed, gpuJob)
   console.log(`About to write back to id: ${parsed.id}`.yellow);
-  if (this.remaining[parsed.id].response !== null && this.remaining[parsed.id].response !== undefined) {
-    this.remaining[parsed.id].response.writeHead(200);
-    this.remaining[parsed.id].response.end(JSON.stringify(parsed));  
+  if (gpuJob.response !== null && gpuJob.response !== undefined) {
+    gpuJob.response.writeHead(200);
+    gpuJob.response.end(JSON.stringify(parsed));  
   }
   return true;
 }
@@ -154,7 +191,7 @@ OpenCLDriver.prototype.connectOutput = function (){
 }
 
 OpenCLDriver.prototype.connectData = function (){
-  console.log(`trying to connect to: metadata`.blue);
+  console.log(`trying to connect to: data`.blue);
   this.gpuConnections.data = net.connect({port: this.gpuConnectionPorts.data}, function(){
     console.log(`Connected to port ${kanban.openCLDriver.gpuConnectionPorts.data}`.green);
     kanban.openCLDriver.connectOutput();
@@ -197,7 +234,7 @@ OpenCLDriver.prototype.startAndConnect = function (){
   this.connect();
 }
 
-OpenCLDriver.prototype.testPipeBackEndOneMessage = function (request, response, desiredCommand) {
+OpenCLDriver.prototype.testBackEndSha256OneMessage = function (request, response, desiredCommand) {
   console.log("Got to here");
   this.testGotBackFromCPPSoFar = 0;
   var messageType = typeof desiredCommand.message;
@@ -234,10 +271,10 @@ OpenCLDriver.prototype.pipeOneMessagePartTwo = function (message) {
   }
   try {
     //console.log("About to write ... ".blue);
-    var buffer = new Buffer(message, 'binary');
-    var theLength = buffer.byteLength;
-    this.gpuConnections.metaData.write(`${theLength}\n${this.numProcessed}\n`);
-    this.gpuConnections.data.write(buffer);
+    var bufferData = new Buffer(message, 'binary');
+    var theLength = bufferData.byteLength;
+    this.gpuConnections.metaData.write(`${theLength}\n${this.numProcessed}\n`, 'utf8');
+    this.gpuConnections.data.write(bufferData, 'binary');
     //let bufferHex = Buffer.from(message, 'binary');
     //console.log(`Wrote all ${message.length} bytes : ${miscellaneous.shortenString(bufferHex.toString('hex'), 2000)}`.blue);
   } catch (e){
@@ -248,10 +285,15 @@ OpenCLDriver.prototype.pipeOneMessagePartTwo = function (message) {
 }
 
 OpenCLDriver.prototype.getTestProgress = function () {
-  return `Progress: scheduled ${this.testScheduledSoFar} out of ${this.totalToTest}, completed ${this.testGotBackFromCPPSoFar}.`;
+  var currentTime = (new Date()).getTime();
+  var elapsedSoFar = (currentTime - this.testStartTime)/1000;
+  var bytesPerSecondInMB = ((this.testBytesProcessedSoFar / elapsedSoFar) / 1000000).toFixed(3);
+
+  return `Progress: scheduled ${this.testScheduledSoFar} out of ${this.totalToTest}, completed ${this.testGotBackFromCPPSoFar}.<br>
+  ${elapsedSoFar} second(s) elapsed. ${this.testBytesProcessedSoFar} bytes processed, speed: ${bytesPerSecondInMB} MB/s.`;
 }
 
-OpenCLDriver.prototype.testPipeBackEndMultiple = function (callId, recursionDepth) {
+OpenCLDriver.prototype.testBackEndSha256Multiple = function (callId, recursionDepth) {
   //setImmediate(this.pipeOneMessage.bind(this,"abc".repeat(1000070)));
   //setImmediate(this.pipeOneMessage.bind(this,"cabc".repeat(100001)));
   
@@ -263,25 +305,33 @@ OpenCLDriver.prototype.testPipeBackEndMultiple = function (callId, recursionDept
   var theIndex = recursionDepth % this.testMessages.length;
   this.remaining[this.numProcessed] = {
     flagIsTest: true,
+    messageIndex: theIndex,
     callId: callId
   }
   jobs.setStatus(callId, this.getTestProgress());
   this.pipeOneMessage(this.testMessages[theIndex]);
   this.testScheduledSoFar ++;
   recursionDepth ++;
-  setImmediate(this.testPipeBackEndMultiple.bind(this, callId, recursionDepth));
+  setImmediate(this.testBackEndSha256Multiple.bind(this, callId, recursionDepth));
 }
 
-function testPipeBackEndMultiple(callId){
-  global.kanban.openCLDriver.testPipeBackEndMultiple(callId, 0);
+OpenCLDriver.prototype.testBackEndSha256MultipleStart = function (callId) {
+  this.testGotBackFromCPPSoFar = 0;
+  this.testMessageResults = {};
+  this.testStartTime = (new Date()).getTime();
+  this.testBackEndSha256Multiple(callId, 0);
 }
 
-function testPipeBackEndOneMessage(request, response, desiredCommand){
-  global.kanban.openCLDriver.testPipeBackEndOneMessage(request, response, desiredCommand);
+function testBackEndSha256Multiple(callId){
+  global.kanban.openCLDriver.testBackEndSha256MultipleStart(callId);
+}
+
+function testBackEndSha256OneMessage(request, response, desiredCommand){
+  global.kanban.openCLDriver.testBackEndSha256OneMessage(request, response, desiredCommand);
 }
 
 module.exports = {
   OpenCLDriver,
-  testPipeBackEndMultiple,
-  testPipeBackEndOneMessage
+  testBackEndSha256Multiple,
+  testBackEndSha256OneMessage
 }

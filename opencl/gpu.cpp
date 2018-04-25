@@ -108,7 +108,8 @@ void GPU::initialize()
   cl_int ret = 0;
   ret = clGetPlatformIDs(2, this->platformIds, &this->numberOfPlatforms);
   if (ret != CL_SUCCESS)
-  { logGPU << "Failed to get platforms.\n";
+  {
+    logGPU << "Failed to get platforms.\n";
     throw (std::string) "Failed to get platforms";
     std::exit(- 1);
     assert(false);
@@ -120,12 +121,14 @@ void GPU::initialize()
   cl_device_type desiredDeviceType = CL_DEVICE_TYPE_GPU;
   std::string deviceDescription = desiredDeviceType == CL_DEVICE_TYPE_CPU ? "CPU" : "GPU";
   for (unsigned i = 0; i < this->numberOfPlatforms; i ++)
-  { ret = clGetDeviceIDs(this->platformIds[i], desiredDeviceType, 2, this->allDevices, &this->numberOfDevices);
+  {
+    ret = clGetDeviceIDs(this->platformIds[i], desiredDeviceType, 2, this->allDevices, &this->numberOfDevices);
     if (ret == CL_SUCCESS)
       break;
   }
   if (ret != CL_SUCCESS)
-  { logGPU << "Failed to get device of type: " << deviceDescription << "\n";
+  {
+    logGPU << "Failed to get device of type: " << deviceDescription << "\n";
     throw (std::string) "Failed to get device. ";
     std::exit(- 1);
     assert(false);
@@ -143,7 +146,9 @@ void GPU::initialize()
     logGPU << "Memory: " << OpenCLFunctions::getGlobalMemorySize(this->currentDeviceId) << "\n";
   }
   // Create an OpenCL context
+  logGPU << "About to create GPU context ..." << Logger::endL;
   this->context = clCreateContext(NULL, 1, &this->currentDeviceId, NULL, NULL, &ret);
+  logGPU << "Context created." << Logger::endL;
   if (ret != CL_SUCCESS)
   {
     std::cerr << "Failed to create context.\n";
@@ -152,9 +157,11 @@ void GPU::initialize()
     std::exit(- 1);
     assert(false);
   }
+  logGPU << "About to create GPU queue ..." << Logger::endL;
   this->commandQueue = clCreateCommandQueue(this->context, this->currentDeviceId,
                                             CL_QUEUE_OUT_OF_ORDER_EXEC_MODE_ENABLE,
                                             &ret);
+  logGPU << "GPU queue created." << Logger::endL;
   if (ret != CL_SUCCESS)
   {
     logGPU << "Failed to create command queue.\n";
@@ -223,7 +230,7 @@ void GPUKernel::constructFromFileName(
   {
     logGPU << "Program file name: " << fileName << "\n";
   }
-  //std::cout << "File read: \n" << source_str << std::endl;
+  logGPU << "Source file read: \n" << fileName << Logger::endL;
   size_t sourceSize = source_str.size();
   const char* sourceCString = source_str.c_str();
   cl_int ret;
@@ -238,9 +245,9 @@ void GPUKernel::constructFromFileName(
     std::exit(-1);
     assert(false);
   }
-  // Build the program
-  //std::cout << "DEBUG: About to build program. " << std::endl;
+  logGPU << "Building program ..." << Logger::endL;
   ret = clBuildProgram(this->program, 1, &this->owner->currentDeviceId, NULL, NULL, NULL);
+  logGPU << "Program built." << Logger::endL;
   if (ret != CL_SUCCESS)
   {
     std::cerr << "Failed to build the program. Return code: " << ret << std::endl;
@@ -250,11 +257,10 @@ void GPUKernel::constructFromFileName(
     std::string theLog(buffer, logSize);
     std::cerr << theLog;
     std::cerr.flush();
-    std::exit(-1);
+    std::exit(- 1);
     assert(false);
   }
-  //std::cout << "DEBUG: Program built, creating kernel. " << std::endl;
-  // Create the OpenCL kernel
+  logGPU << "Creating openCL kernel..." << Logger::endL;
   this->kernel = clCreateKernel(this->program, this->name.c_str(), &ret);
   if (ret != CL_SUCCESS)
   {
@@ -265,7 +271,7 @@ void GPUKernel::constructFromFileName(
     std::exit(-1);
     assert(false);
   }
-  //std::cout << "DEBUG: Kernel created, setting buffers. " << std::endl;
+  logGPU << "Kernel created, allocating buffers..." << Logger::endL;
   this->constructArguments(inputNames, inputTypes, true);
   this->constructArguments(outputNames, outputTypes, false);
   this->SetArguments();

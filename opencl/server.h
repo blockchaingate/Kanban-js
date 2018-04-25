@@ -1,7 +1,57 @@
 #ifndef SERVER_H_header
 #define SERVER_H_header
 #include <memory>
+#include <queue>
 #include "gpu.h"
+
+class MessageFromNode
+{
+public:
+  std::string theMessage;
+  int length;
+  std::string id;
+  void reset();
+  MessageFromNode()
+  {
+    this->reset();
+  }
+};
+
+class PipeBasic
+{
+public:
+  int position;
+  int length;
+  int capacity;
+  char* buffer;
+  int fileDescriptor;
+  std::string name;
+  char GetChar();
+  bool ReadMore();
+  PipeBasic(int inputCapacity, const std::string& inputName);
+  ~PipeBasic();
+};
+
+class MessagePipeline
+{
+  bool ReadOne();
+public:
+  int fileDescriptorOutputData;
+
+  int bufferCapacityData; //Size of main message pipe
+  int bufferCapacityMetaData; //Size of metadata pipe
+
+  std::queue<MessageFromNode> messageQueue;
+
+  MessageFromNode currentMessage;
+
+  PipeBasic* inputData;
+  PipeBasic* inputMeta;
+  char* bufferOutputGPU;
+  bool ReadNext();
+  MessagePipeline();
+  ~MessagePipeline();
+};
 
 class Server
 {
@@ -11,21 +61,16 @@ public:
   int listeningSocketMetaData;
   int listeningSocketData;
   int listeningSocketOutputData;
-  int fileDescriptorMetaData;
-  int fileDescriptorData;
-  int fileDescriptorOutputData;
-  std::string currentMessageLengthString;
-  int currentMessageLength;
+
+  MessagePipeline thePipe;
+
+
   std::string portMetaData;
   std::string portData;
   std::string portOutputData;
-  std::string currentMessageId;
   std::string queueMetaData;
   Server();
   ~Server();
-  bool ReadOneSmallString(std::string& output);
-  bool ReadNextMetaDataPiece(std::string& output);
-  bool ReadNextMetaData();
   bool Run();
   bool RunOnce();
   bool initialize();

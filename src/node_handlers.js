@@ -13,7 +13,7 @@ function computeUnspentTransactions(id){
 
 function pollOngoing(request, response, desiredCommand) {
   var callIds = desiredCommand.callIds;
-  console.log(`Call ids so far: ${JSON.stringify(callIds)}`);
+  //console.log(`Call ids so far: ${JSON.stringify(callIds)}`);
   if (! Array.isArray(callIds)) {
     callIds = [];
     callIds = callIds.concat(Object.keys(jobs.ongoing), Object.keys(jobs.recentlyFinished));
@@ -48,11 +48,11 @@ function pollOngoing(request, response, desiredCommand) {
 var handlersReturnImmediately = {};
 handlersReturnImmediately[pathnames.nodeCalls.computeUnspentTransactions.nodeCallLabel] = computeUnspentTransactions;
 handlersReturnImmediately[pathnames.nodeCalls.testGPUSha256.nodeCallLabel] = null;
-handlersReturnImmediately[pathnames.nodeCalls.testPipeBackEndMultiple.nodeCallLabel] = openCLDriver.testPipeBackEndMultiple;
+handlersReturnImmediately[pathnames.nodeCalls.testBackEndSha256Multiple.nodeCallLabel] = openCLDriver.testBackEndSha256Multiple;
 
 var handlersReturnWhenDone = {};
 handlersReturnWhenDone[pathnames.nodeCalls.pollOngoing.nodeCallLabel] = pollOngoing;
-handlersReturnWhenDone[pathnames.nodeCalls.testPipeBackEndOneMessage.nodeCallLabel] = openCLDriver.testPipeBackEndOneMessage;
+handlersReturnWhenDone[pathnames.nodeCalls.testBackEndSha256OneMessage.nodeCallLabel] = openCLDriver.testBackEndSha256OneMessage;
 
 for (var label in pathnames.nodeCalls) {
   var currentNodeCallLabel = pathnames.nodeCalls[label].nodeCallLabel;
@@ -73,10 +73,10 @@ for (var label in pathnames.nodeCalls) {
 var numSimultaneousCalls = 0;
 var maxSimultaneousCalls = 4;
 function dispatch(request, response, desiredCommand){
-  console.log(`command: ${JSON.stringify(desiredCommand)}, nodeCallLabel = ${pathnames.nodeCallLabel}`);
+  //console.log(`command: ${JSON.stringify(desiredCommand)}, nodeCallLabel = ${pathnames.nodeCallLabel}`);
   var isGood = false;
   var currentCommandLabel = desiredCommand[pathnames.nodeCallLabel];
-  console.log(`nodecalllabel: ${pathnames.nodeCallLabel}, currentCommandLabel: ${JSON.stringify(currentCommandLabel)}`);
+  //console.log(`nodecalllabel: ${pathnames.nodeCallLabel}, currentCommandLabel: ${JSON.stringify(currentCommandLabel)}`);
   if (typeof currentCommandLabel === "string") {
     isGood = currentCommandLabel in pathnames.nodeCalls;
   }
@@ -85,7 +85,7 @@ function dispatch(request, response, desiredCommand){
     return response.end(`Command ${currentCommandLabel} not found`);
   }
   if (currentCommandLabel in handlersReturnWhenDone){
-    console.log(`About to call handler of: ${currentCommandLabel} with input command: ${JSON.stringify(desiredCommand)}`);
+    //console.log(`About to call handler of: ${currentCommandLabel} with input command: ${JSON.stringify(desiredCommand)}`);
     return handlersReturnWhenDone[currentCommandLabel](request, response, desiredCommand);
   }
   var numOngoingCalls = jobs.getNumberOfJobs(); 

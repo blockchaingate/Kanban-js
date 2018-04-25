@@ -10867,19 +10867,19 @@ function testGPUSha256(){
   });
 }
 
-function testPipeBackEndMultiple(){
+function testBackEndSha256Multiple(){
   submitRequests.submitGET({
-    url: pathnames.getURLfromNodeCallLabel(pathnames.nodeCalls.testPipeBackEndMultiple.nodeCallLabel),
+    url: pathnames.getURLfromNodeCallLabel(pathnames.nodeCalls.testBackEndSha256Multiple.nodeCallLabel),
     progress: getSpanProgress(),
     result: getOutputTestGPU(),
     callback: pollServerStart
   });
 }
 
-function testPipeBackEndOneMessage(){
+function testBackEndSha256OneMessage(){
   var theMessage = document.getElementById(ids.defaults.inputNodeCallTestOnePipeMessage).value; 
   submitRequests.submitGET({
-    url: pathnames.getURLfromNodeCallLabel(pathnames.nodeCalls.testPipeBackEndOneMessage.nodeCallLabel, { message: theMessage}),
+    url: pathnames.getURLfromNodeCallLabel(pathnames.nodeCalls.testBackEndSha256OneMessage.nodeCallLabel, { message: theMessage}),
     progress: getSpanProgress(),
     result: getOutputTestGPU()
   });
@@ -10897,8 +10897,8 @@ function synchronizeUnspentTransactions(){
 module.exports = {
   synchronizeUnspentTransactions,
   testGPUSha256,
-  testPipeBackEndMultiple,
-  testPipeBackEndOneMessage,
+  testBackEndSha256Multiple,
+  testBackEndSha256OneMessage,
   pollServerDoStart,
   clearPollId
 }
@@ -11137,11 +11137,11 @@ var nodeCalls = {
   testGPUSha256: {
     nodeCallLabel: "testGPUSha256"
   },
-  testPipeBackEndMultiple: {
-    nodeCallLabel: "testPipeBackEndMultiple"
+  testBackEndSha256Multiple: {
+    nodeCallLabel: "testBackEndSha256Multiple"
   },
-  testPipeBackEndOneMessage: {
-    nodeCallLabel: "testPipeBackEndOneMessage"
+  testBackEndSha256OneMessage: {
+    nodeCallLabel: "testBackEndSha256OneMessage"
   }
 };
 

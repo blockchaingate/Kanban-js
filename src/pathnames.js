@@ -64,11 +64,11 @@ var nodeCalls = {
   testGPUSha256: {
     nodeCallLabel: "testGPUSha256"
   },
-  testPipeBackEndMultiple: {
-    nodeCallLabel: "testPipeBackEndMultiple"
+  testBackEndSha256Multiple: {
+    nodeCallLabel: "testBackEndSha256Multiple"
   },
-  testPipeBackEndOneMessage: {
-    nodeCallLabel: "testPipeBackEndOneMessage"
+  testBackEndSha256OneMessage: {
+    nodeCallLabel: "testBackEndSha256OneMessage"
   }
 };
 
