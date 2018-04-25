@@ -44,7 +44,7 @@ __constant uint K[64] = {
 0x748f82ee, 0x78a5636f, 0x84c87814, 0x8cc70208, 0x90befffa, 0xa4506ceb, 0xbef9a3f7, 0xc67178f2
 };
 
-__kernel void sha256GPU(uint offset, uint length, uint messageIndex, __global char* plain_key, __global char* result){
+__kernel void sha256GPU(uint offset, uint length, uint messageIndex, __global const char* plain_key, __global char* result){
   int t, gid, msg_pad, currentIndex, lomc;
   int stop, mmod;
   uint i, item, total;

@@ -99,7 +99,7 @@ bool Server::initialize()
   if (!this->acceptAll())
     return false;
 
-  logServer << "connections accepted." << Logger::endL;
+  logServer << "All connections accepted." << Logger::endL;
   return true;
 }
 
@@ -231,6 +231,7 @@ void MessageFromNode::reset()
 {
   this->id = "";
   this->length = - 1;
+  this->command = "";
   this->theMessage = "";
 }
 
@@ -288,7 +289,13 @@ bool MessagePipeline::ReadOne()
         return false;
       }
       currentMetaData = "";
-    } else
+    }
+    else if (currentMessage.command == "")
+    {
+      this->currentMessage.command = currentMetaData;
+      currentMetaData = "";
+    }
+    else
     {
       this->currentMessage.id = currentMetaData;
       break;
@@ -321,7 +328,8 @@ bool MessagePipeline::ReadNext()
   {
     if (!this->ReadOne())
       return false;
-  } while (this->inputMeta->position < this->inputMeta->length);
+  }
+  while (this->inputMeta->position < this->inputMeta->length);
   return true;
 }
 
@@ -329,44 +337,89 @@ bool Server::RunOnce()
 {
   if (!this->thePipe.ReadNext())
     return false;
-  std::shared_ptr<GPUKernel> theKernel = this->theGPU->theKernels[GPU::kernelSHA256];
-
-  while(!this->thePipe.messageQueue.empty())
+  while (!this->thePipe.messageQueue.empty())
   {
     MessageFromNode& theMessage = this->thePipe.messageQueue.front();
-    logServer << "Processing message: " << theMessage.id << ", " << theMessage.length << " bytes. " << Logger::endL;
-    theKernel->writeToBuffer(3, theMessage.theMessage);
-    theKernel->writeArgument(0, 0);
-    theKernel->writeArgument(1, theMessage.length);
-    theKernel->writeArgument(2, 0);
-    cl_int ret = clEnqueueNDRangeKernel(
-          this->theGPU->commandQueue, theKernel->kernel, 1, NULL,
-          &theKernel->global_item_size, &theKernel->local_item_size, 0, NULL, NULL);
-    if (ret != CL_SUCCESS)
-    {
-      logServer << "Failed to enqueue kernel. Return code: " << ret << ". ";
+    if (!this->ExecuteNodeCommand(theMessage))
       return false;
-    }
-    cl_mem& result = theKernel->outputs[0]->theMemory;
-    ret = clEnqueueReadBuffer(this->theGPU->commandQueue, result, CL_TRUE, 0, 32, this->thePipe.bufferOutputGPU, 0, NULL, NULL);
-    if (ret != CL_SUCCESS)
-    {
-      logServer << "Failed to read buffer. " << Logger::endL;
-      return false;
-    }
-    std::string outputBinary(this->thePipe.bufferOutputGPU, 32);
-    std::stringstream output;
-    output << "{\"id\":\"" << theMessage.id << "\", \"result\": \"" << Miscellaneous::toStringHex(outputBinary) << "\"}\n";
-
-    logServer << "Computation " << theMessage.id << " completed, writing ..." << Logger::endL;
-    int numWrittenBytes = write(this->thePipe.fileDescriptorOutputData, output.str().c_str(), output.str().size());
-    logServer << "Computation " << theMessage.id << " completed and sent." << Logger::endL;
-    if (numWrittenBytes < 0)
-    {
-      logServer << "Error writing bytes. " << Logger::endL;
-      return false;
-    }
     this->thePipe.messageQueue.pop();
+  }
+  return true;
+}
+
+bool Server::ExecuteNodeCommand(MessageFromNode &theMessage)
+{
+  logServer << "Processing message: " << theMessage.id << ", " << "command: " << theMessage.command
+            << ", " << theMessage.length << " bytes. " << Logger::endL;
+  if (theMessage.command == "SHA256")
+    return this->ExecuteSha256(theMessage);
+  if (theMessage.command == "testBuffer")
+    return this->ExecuteTestBuffer(theMessage);
+  logServer << "Fatal error: unknown command. Message: " << theMessage.id << ", " << "command: " << theMessage.command
+            << ", " << theMessage.length << " bytes. " << Logger::endL;
+  return false;
+}
+
+bool Server::ExecuteSha256(MessageFromNode &theMessage)
+{
+  std::shared_ptr<GPUKernel> theKernel = this->theGPU->theKernels[GPU::kernelSHA256];
+  theKernel->writeToBuffer(3, theMessage.theMessage);
+  theKernel->writeArgument(0, 0);
+  theKernel->writeArgument(1, theMessage.length);
+  theKernel->writeArgument(2, 0);
+  cl_int ret = clEnqueueNDRangeKernel(
+        this->theGPU->commandQueue, theKernel->kernel, 1, NULL,
+        &theKernel->global_item_size, &theKernel->local_item_size, 0, NULL, NULL);
+  if (ret != CL_SUCCESS)
+  {
+    logServer << "Failed to enqueue kernel. Return code: " << ret << ". ";
+    return false;
+  }
+  cl_mem& result = theKernel->outputs[0]->theMemory;
+  ret = clEnqueueReadBuffer(this->theGPU->commandQueue, result, CL_TRUE, 0, 32, this->thePipe.bufferOutputGPU, 0, NULL, NULL);
+  if (ret != CL_SUCCESS)
+  {
+    logServer << "Failed to read buffer. " << Logger::endL;
+    return false;
+  }
+  std::string outputBinary(this->thePipe.bufferOutputGPU, 32);
+  std::stringstream output;
+  output << "{\"id\":\"" << theMessage.id << "\", \"result\": \"" << Miscellaneous::toStringHex(outputBinary) << "\"}\n";
+
+  logServer << "Computation " << theMessage.id << " completed, writing ..." << Logger::endL;
+  int numWrittenBytes = write(this->thePipe.fileDescriptorOutputData, output.str().c_str(), output.str().size());
+  logServer << "Computation " << theMessage.id << " completed and sent." << Logger::endL;
+  if (numWrittenBytes < 0)
+  {
+    logServer << "Error writing bytes. " << Logger::endL;
+    return false;
+  }
+  return true;
+}
+
+bool Server::ExecuteTestBuffer(MessageFromNode &theMessage)
+{
+  std::shared_ptr<GPUKernel> theKernel = this->theGPU->theKernels[GPU::kernelTestBuffer];
+  theKernel->writeToBuffer(0, theMessage.theMessage);
+  cl_int ret = clEnqueueNDRangeKernel(
+        this->theGPU->commandQueue, theKernel->kernel, 1, NULL,
+        &theKernel->global_item_size, &theKernel->local_item_size, 0, NULL, NULL);
+  if (ret != CL_SUCCESS)
+  {
+    logServer << "Failed to enqueue kernel. Return code: " << ret << ". ";
+    return false;
+  }
+  std::stringstream output;
+  output << "{\"id\":\"" << theMessage.id << "\", \"result\": \""
+         << theMessage.length << " bytes successfully sent to GPU. No useful work performed.\"}\n";
+
+  logServer << "Computation " << theMessage.id << " completed, writing ..." << Logger::endL;
+  int numWrittenBytes = write(this->thePipe.fileDescriptorOutputData, output.str().c_str(), output.str().size());
+  logServer << "Computation " << theMessage.id << " completed and sent." << Logger::endL;
+  if (numWrittenBytes < 0)
+  {
+    logServer << "Error writing bytes. " << Logger::endL;
+    return false;
   }
   return true;
 }

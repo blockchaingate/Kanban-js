@@ -69,7 +69,18 @@ var nodeCalls = {
   },
   testBackEndSha256OneMessage: {
     nodeCallLabel: "testBackEndSha256OneMessage"
+  },
+  testBackEndPipeMultiple: {
+    nodeCallLabel: "testBackEndPipeMultiple"
+  },
+  testBackEndPipeOneMessage: {
+    nodeCallLabel: "testBackEndPipeOneMessage"
   }
+};
+
+var gpuCommands = {
+  SHA256: "SHA256",
+  testBuffer: "testBuffer"
 };
 
 var rpcCallLabel = "rpcCallLabel";
@@ -229,4 +240,5 @@ module.exports = {
   getURLfromRPCLabel,
   getURLfromNodeCallLabel,
   getRPCcallArguments,
+  gpuCommands
 }

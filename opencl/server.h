@@ -10,6 +10,7 @@ public:
   std::string theMessage;
   int length;
   std::string id;
+  std::string command;
   void reset();
   MessageFromNode()
   {
@@ -73,6 +74,9 @@ public:
   ~Server();
   bool Run();
   bool RunOnce();
+  bool ExecuteNodeCommand(MessageFromNode& theMessage);
+  bool ExecuteSha256(MessageFromNode& theMessage);
+  bool ExecuteTestBuffer(MessageFromNode& theMessage);
   bool initialize();
   bool initializePorts();
   bool initializeOneSocketAndPort(int& outputSocket, std::string& outputPort, std::vector<std::string>& portsToTry);

@@ -26,11 +26,13 @@ function OpenCLDriver(){
   this.remaining = {};
   this.testMessages = [];
   this.testMessageResults = {};
-  this.numLargeTestMessages = 1;
-  this.numSmallTestMessages = 2;
+  this.numLargeTestMessages = 100;
+  this.numSmallTestMessages = 900;
   this.largeTestMessageApproximateTopSizeInMultiplesOf32 = 100000;
   this.smallTestMessageApproximateTopSizeInMultiplesOf32 = 1000;
-  this.totalToTest = 6;
+  this.totalToTestSha256 = 10000;
+  this.totalToTestBuffer = 100000;
+  this.totalToTest = - 1;
   this.testGotBackFromCPPSoFar = 0;
   this.testBytesProcessedSoFar = 0;
   this.testStartTime = null;
@@ -235,7 +237,6 @@ OpenCLDriver.prototype.startAndConnect = function (){
 }
 
 OpenCLDriver.prototype.testBackEndSha256OneMessage = function (request, response, desiredCommand) {
-  console.log("Got to here");
   this.testGotBackFromCPPSoFar = 0;
   var messageType = typeof desiredCommand.message;
   if (messageType !== "string"){
@@ -252,20 +253,40 @@ OpenCLDriver.prototype.testBackEndSha256OneMessage = function (request, response
     response: response,
     command: desiredCommand
   }
-  this.pipeOneMessage(desiredCommand.message);
+  this.pipeOneMessage(desiredCommand.message, pathnames.gpuCommands.SHA256);
 }
 
-OpenCLDriver.prototype.pipeOneMessage = function (message) {
+OpenCLDriver.prototype.testBackEndPipeOneMessage = function (request, response, desiredCommand) {
+  this.testGotBackFromCPPSoFar = 0;
+  var messageType = typeof desiredCommand.message;
+  if (messageType !== "string"){
+    response.writeHead(200);
+    return response.end(`Wrong message type: ${messageType}.`);
+  }
+  if (desiredCommand.message === ""){
+    response.writeHead(200);
+    return response.end(`Empty string not allowed. `);
+  }
+  console.log(`About to pipe one message... ${JSON.stringify(desiredCommand)}`);
+  this.remaining[this.numProcessed] = {
+    request: request,
+    response: response,
+    command: desiredCommand
+  }
+  this.pipeOneMessage(desiredCommand.message, pathnames.gpuCommands.testBuffer);
+}
+
+OpenCLDriver.prototype.pipeOneMessage = function (message, command) {
   this.startAndConnect();
   if (!this.connected) {
     clearTimeout(this.connectGPUtimer);
-    this.connectGPUtimer = setTimeout(this.pipeOneMessage.bind(this, message), 300);
+    this.connectGPUtimer = setTimeout(this.pipeOneMessage.bind(this, message, command), 300);
     return;
   }
-  this.pipeOneMessagePartTwo(message);
+  this.pipeOneMessagePartTwo(message, command);
 }
 
-OpenCLDriver.prototype.pipeOneMessagePartTwo = function (message) {
+OpenCLDriver.prototype.pipeOneMessagePartTwo = function (message, command) {
   if (this.remaining[this.numProcessed] === undefined) {
     this.remaining[this.numProcessed] = {};
   }
@@ -273,7 +294,7 @@ OpenCLDriver.prototype.pipeOneMessagePartTwo = function (message) {
     //console.log("About to write ... ".blue);
     var bufferData = new Buffer(message, 'binary');
     var theLength = bufferData.byteLength;
-    this.gpuConnections.metaData.write(`${theLength}\n${this.numProcessed}\n`, 'utf8');
+    this.gpuConnections.metaData.write(`${theLength}\n${command}\n${this.numProcessed}\n`, 'utf8');
     this.gpuConnections.data.write(bufferData, 'binary');
     //let bufferHex = Buffer.from(message, 'binary');
     //console.log(`Wrote all ${message.length} bytes : ${miscellaneous.shortenString(bufferHex.toString('hex'), 2000)}`.blue);
@@ -309,14 +330,49 @@ OpenCLDriver.prototype.testBackEndSha256Multiple = function (callId, recursionDe
     callId: callId
   }
   jobs.setStatus(callId, this.getTestProgress());
-  this.pipeOneMessage(this.testMessages[theIndex]);
+  this.pipeOneMessage(this.testMessages[theIndex], pathnames.gpuCommands.SHA256);
   this.testScheduledSoFar ++;
   recursionDepth ++;
   setImmediate(this.testBackEndSha256Multiple.bind(this, callId, recursionDepth));
 }
 
+OpenCLDriver.prototype.testBackEndPipeMultiple = function (callId, recursionDepth) {
+  //setImmediate(this.pipeOneMessage.bind(this,"abc".repeat(1000070)));
+  //setImmediate(this.pipeOneMessage.bind(this,"cabc".repeat(100001)));
+  
+  this.initTestMessages(callId);
+  var jobs = global.kanban.jobs;
+  if (recursionDepth >= this.totalToTest){
+    return;
+  }
+  var theIndex = recursionDepth % this.testMessages.length;
+  this.remaining[this.numProcessed] = {
+    flagIsTest: true,
+    messageIndex: theIndex,
+    callId: callId
+  }
+  jobs.setStatus(callId, this.getTestProgress());
+  this.pipeOneMessage(this.testMessages[theIndex], pathnames.gpuCommands.testBuffer);
+  this.testScheduledSoFar ++;
+  recursionDepth ++;
+  setImmediate(this.testBackEndPipeMultiple.bind(this, callId, recursionDepth));
+}
+
+OpenCLDriver.prototype.testBackEndPipeMultipleStart = function (callId) {
+  this.testGotBackFromCPPSoFar = 0;
+  this.testBytesProcessedSoFar = 0;
+  this.testScheduledSoFar = 0;
+  this.totalToTest = this.totalToTestBuffer;
+  this.testMessageResults = {};
+  this.testStartTime = (new Date()).getTime();
+  this.testBackEndPipeMultiple(callId, 0);
+}
+
 OpenCLDriver.prototype.testBackEndSha256MultipleStart = function (callId) {
   this.testGotBackFromCPPSoFar = 0;
+  this.testBytesProcessedSoFar = 0;
+  this.testScheduledSoFar = 0;
+  this.totalToTest = this.totalToTestSha256;
   this.testMessageResults = {};
   this.testStartTime = (new Date()).getTime();
   this.testBackEndSha256Multiple(callId, 0);
@@ -330,8 +386,18 @@ function testBackEndSha256OneMessage(request, response, desiredCommand){
   global.kanban.openCLDriver.testBackEndSha256OneMessage(request, response, desiredCommand);
 }
 
+function testBackEndPipeMultiple(callId){
+  global.kanban.openCLDriver.testBackEndPipeMultipleStart(callId);
+}
+
+function testBackEndPipeOneMessage(request, response, desiredCommand){
+  global.kanban.openCLDriver.testBackEndPipeOneMessage(request, response, desiredCommand);
+}
+
 module.exports = {
   OpenCLDriver,
   testBackEndSha256Multiple,
-  testBackEndSha256OneMessage
+  testBackEndSha256OneMessage,
+  testBackEndPipeMultiple,
+  testBackEndPipeOneMessage
 }

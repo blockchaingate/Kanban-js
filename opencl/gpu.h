@@ -88,6 +88,7 @@ public:
 class GPU {
 public:
   static std::string kernelSHA256;
+  static std::string kernelTestBuffer;
   std::unordered_map<std::string, std::shared_ptr<GPUKernel> > theKernels;
   cl_platform_id platformIds[2];
   cl_uint numberOfPlatforms;

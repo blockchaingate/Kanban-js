@@ -92,9 +92,19 @@
 <div class = "divMainPage" id = "pageGPUtest">
   <div class = "divControlPanelDefault"><b>Tests</b><br>
     <input type = "text" id = "inputNodeCallTestOnePipeMessage" placeholder = "SHA256 one message"></input>
-    <button class = "buttonStandard" onclick = "window.kanban.nodeCalls.testBackEndSha256OneMessage();">One browser &#8644; node &#8644; CPP &#8644; GPU</button>
-    <button class = "buttonStandard" onclick = "window.kanban.nodeCalls.testBackEndSha256Multiple();">Multiple browser &#8644; node &#8644; CPP &#8644; GPU</button>
-    <!--button class = "buttonStandard" onclick = "window.kanban.nodeCalls.testGPUSha256();">Random string SHA 256</button-->
+    <table>
+      <tr><th>Command</th> <th>Test One</th> <th>Test multiple</th></tr>
+      <tr>
+        <td>Browser &#8644; node &#8644; CPP &#8644; GPU [SHA256]</td> 
+        <td><button class = "buttonStandard" onclick = "window.kanban.nodeCalls.testBackEndSha256OneMessage();">Test one</button></td>
+        <td><button class = "buttonStandard" onclick = "window.kanban.nodeCalls.testBackEndSha256Multiple();">Test multiple</button></td>
+      </tr>
+      <tr>
+        <td>Browser &#8644; node &#8644; CPP &#8644; GPU[do nothing]</td>
+        <td><button class = "buttonStandard" onclick = "window.kanban.nodeCalls.testBackEndPipeOneMessage();">Test one</button></td>
+        <td><button class = "buttonStandard" onclick = "window.kanban.nodeCalls.testBackEndPipeMultiple();">Test multiple</button></td>
+      </tr>
+    </table>    
   </div><br>
   <div class = "divControlPanelDefault">
     <div id = "divGPUTestOutput"></div>    

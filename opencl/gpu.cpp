@@ -179,6 +179,12 @@ void GPU::initializeKernels()
         {SharedMemory::typeUint, SharedMemory::typeUint, SharedMemory::typeUint, SharedMemory::typeVoidPointer},
         {"result"},
         {SharedMemory::typeVoidPointer});
+  this->createKernel(
+        this->kernelTestBuffer,
+        {"buffer"},
+        {SharedMemory::typeVoidPointer},
+        {},
+        {});
 }
 
 void GPU::createKernel(
@@ -206,6 +212,7 @@ GPU::~GPU()
 }
 
 std::string GPU::kernelSHA256 = "sha256GPU";
+std::string GPU::kernelTestBuffer = "testBuffer";
 
 void GPUKernel::constructFromFileName(
     const std::string& fileNameNoExtension,

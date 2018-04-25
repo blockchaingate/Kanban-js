@@ -10779,7 +10779,7 @@ if (window.kanban.jobs === undefined || window.kanban.jobs === null) {
 var jobs = window.kanban.jobs;
 
 function doPollServer(output) {
-  console.log(jobs.getOngoingIds());
+  //console.log(jobs.getOngoingIds());
   submitRequests.submitGET({
     url: pathnames.getURLfromNodeCallLabel(pathnames.nodeCalls.pollOngoing.nodeCallLabel),
     progress: getSpanProgress(),
@@ -10885,6 +10885,24 @@ function testBackEndSha256OneMessage(){
   });
 }
 
+function testBackEndPipeMultiple(){
+  submitRequests.submitGET({
+    url: pathnames.getURLfromNodeCallLabel(pathnames.nodeCalls.testBackEndPipeMultiple.nodeCallLabel),
+    progress: getSpanProgress(),
+    result: getOutputTestGPU(),
+    callback: pollServerStart
+  });
+}
+
+function testBackEndPipeOneMessage(){
+  var theMessage = document.getElementById(ids.defaults.inputNodeCallTestOnePipeMessage).value; 
+  submitRequests.submitGET({
+    url: pathnames.getURLfromNodeCallLabel(pathnames.nodeCalls.testBackEndPipeOneMessage.nodeCallLabel, { message: theMessage}),
+    progress: getSpanProgress(),
+    result: getOutputTestGPU()
+  });
+}
+
 function synchronizeUnspentTransactions(){
   submitRequests.submitGET({
     url: pathnames.getURLfromNodeCallLabel(pathnames.nodeCalls.computeUnspentTransactions.nodeCallLabel),
@@ -10899,6 +10917,8 @@ module.exports = {
   testGPUSha256,
   testBackEndSha256Multiple,
   testBackEndSha256OneMessage,
+  testBackEndPipeMultiple,
+  testBackEndPipeOneMessage,
   pollServerDoStart,
   clearPollId
 }
@@ -11142,7 +11162,18 @@ var nodeCalls = {
   },
   testBackEndSha256OneMessage: {
     nodeCallLabel: "testBackEndSha256OneMessage"
+  },
+  testBackEndPipeMultiple: {
+    nodeCallLabel: "testBackEndPipeMultiple"
+  },
+  testBackEndPipeOneMessage: {
+    nodeCallLabel: "testBackEndPipeOneMessage"
   }
+};
+
+var gpuCommands = {
+  SHA256: "SHA256",
+  testBuffer: "testBuffer"
 };
 
 var rpcCallLabel = "rpcCallLabel";
@@ -11302,6 +11333,7 @@ module.exports = {
   getURLfromRPCLabel,
   getURLfromNodeCallLabel,
   getRPCcallArguments,
+  gpuCommands
 }
 
 }).call(this,"/src")
