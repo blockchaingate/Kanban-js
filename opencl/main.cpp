@@ -1,5 +1,6 @@
 #include "gpu.h"
 #include "server.h"
+#include "logging.h"
 #include <sstream>
 #include <iostream>
 #include <assert.h>
@@ -19,10 +20,14 @@ char inputBufferMetaData[bufferSizeMetaData];
 char gpuOutputBuffer[bufferSize];
 int totalCouts = 0;
 
+extern Logger logServer;
+
 int main(void)
 {
   Server theServer;
   if (!theServer.Run())
+  { logServer << "Graceful exit with errors. ";
     return - 1;
+  }
   return 0;
 }

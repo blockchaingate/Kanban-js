@@ -11,7 +11,7 @@
 #include <netinet/in.h> // <- addresses and similar
 #include <netdb.h> //<-addrinfo and related data structures defined here
 
-Logger logServer("../logfiles/logServer.txt");
+Logger logServer("../logfiles/logServer.txt", "ServerGPU: ");
 
 Server::Server()
 {
@@ -117,7 +117,7 @@ bool Server::initializeOneSocketAndPort(int& outputSocket, std::string& outputPo
       {
         close(outputSocket);
         outputSocket= - 1;
-        logServer << "Error: bind failed at port: " << portsToTry[i] << Logger::endL;
+        logServer << "Error: bind failed at port: " << portsToTry[i] << ". " << strerror(errno) << Logger::endL;
         continue;
       }
       return true;

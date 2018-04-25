@@ -26,6 +26,7 @@ if (!fs.existsSync(pathnames.pathname.privateKey)) {
   console.log(`Private key file: ${pathnames.pathname.privateKey} appears not to exist. Let me create that for you. Answer all prompts please (enter for defaults). `);
   execSync(`openssl req -new -newkey rsa:2048 -days 3000 -nodes -x509 -subj "/C=CA/ST=ON/L=Markham/O=FA Enterprise System/CN=none" -keyout ${pathnames.pathname.privateKey} -out ${pathnames.pathname.certificate}`);
 }
+global.kanban.openCLDriver.startAndConnect();
 
 buildFrontEnd.buildFrontEnd();
 
