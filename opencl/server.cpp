@@ -11,7 +11,7 @@
 #include <netinet/in.h> // <- addresses and similar
 #include <netdb.h> //<-addrinfo and related data structures defined here
 
-Logger logServer("../logfiles/logServer.txt", "ServerGPU: ");
+Logger logServer("../logfiles/logServer.txt", "[ServerGPU] ");
 
 Server::Server()
 {
@@ -247,10 +247,10 @@ bool Server::RunOnce()
   int numReadSoFar = 0;
   int lastReadBytes = 0;
   std::string currentMessage = "";
-  logServer << "About to read main message, expecting: " << this->currentMessageLength << " bytes. " << Logger::endL;
+  //logServer << "About to read main message, expecting: " << this->currentMessageLength << " bytes. " << Logger::endL;
   while (numReadSoFar < this->currentMessageLength)
   { lastReadBytes = read(this->fileDescriptorData, bufferInputMain, bufferSizeMain);
-    logServer << "Just read: " << lastReadBytes << " bytes out of " << this->currentMessageLength << Logger::endL;
+    //logServer << "Just read: " << lastReadBytes << " bytes out of " << this->currentMessageLength << Logger::endL;
     numReadSoFar += lastReadBytes;
     if (lastReadBytes < this->currentMessageLength)
     {
@@ -263,11 +263,11 @@ bool Server::RunOnce()
   {
     theKernel->writeToBuffer(3, bufferInputMain, lastReadBytes);
     currentMessage.assign(bufferInputMain, lastReadBytes);
-    logServer << "Writing " << lastReadBytes << " bytes. Message: " << currentMessage << Logger::endL;
+    //logServer << "Writing " << lastReadBytes << " bytes. Message: " << currentMessage << Logger::endL;
   } else
   {
     theKernel->writeToBuffer(3, currentMessage);
-    logServer << "Writing " << currentMessage << ". " << Logger::endL;
+    //logServer << "Writing " << currentMessage << ". " << Logger::endL;
   }
   theKernel->writeArgument(0, 0);
   theKernel->writeArgument(1, numReadSoFar);
@@ -293,7 +293,7 @@ bool Server::RunOnce()
   //std::stringstream output;
   //output << "{\"id\":\"" << this->currentMessageId << "\", \"result\": \"received: " << numReadSoFar << " bytes\"}\n";
 
-  logServer << "About to write: " << output.str() << Logger::endL;
+  //logServer << "About to write: " << output.str() << Logger::endL;
   int numWrittenBytes = write(this->fileDescriptorOutputData, output.str().c_str(), output.str().size());
   if (numWrittenBytes < 0)
   {

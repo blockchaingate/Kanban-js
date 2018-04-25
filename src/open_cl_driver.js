@@ -197,8 +197,7 @@ OpenCLDriver.prototype.startAndConnect = function (){
   this.connect();
 }
 
-
-OpenCLDriver.prototype.testPipeOneMessage = function (request, response, desiredCommand) {
+OpenCLDriver.prototype.testPipeBackEndOneMessage = function (request, response, desiredCommand) {
   console.log("Got to here");
   this.testGotBackFromCPPSoFar = 0;
   var messageType = typeof desiredCommand.message;
@@ -234,13 +233,13 @@ OpenCLDriver.prototype.pipeOneMessagePartTwo = function (message) {
     this.remaining[this.numProcessed] = {};
   }
   try {
-    console.log("About to write ... ".blue);
+    //console.log("About to write ... ".blue);
     var buffer = new Buffer(message, 'binary');
     var theLength = buffer.byteLength;
     this.gpuConnections.metaData.write(`${theLength}\n${this.numProcessed}\n`);
     this.gpuConnections.data.write(buffer);
-    let bufferHex = Buffer.from(message, 'binary');
-    console.log(`Wrote all ${message.length} bytes : ${miscellaneous.shortenString(bufferHex.toString('hex'), 2000)}`.blue);
+    //let bufferHex = Buffer.from(message, 'binary');
+    //console.log(`Wrote all ${message.length} bytes : ${miscellaneous.shortenString(bufferHex.toString('hex'), 2000)}`.blue);
   } catch (e){
     console.log(e);
     assert(false);
@@ -252,7 +251,7 @@ OpenCLDriver.prototype.getTestProgress = function () {
   return `Progress: scheduled ${this.testScheduledSoFar} out of ${this.totalToTest}, completed ${this.testGotBackFromCPPSoFar}.`;
 }
 
-OpenCLDriver.prototype.testPipeBackEnd = function (callId, recursionDepth) {
+OpenCLDriver.prototype.testPipeBackEndMultiple = function (callId, recursionDepth) {
   //setImmediate(this.pipeOneMessage.bind(this,"abc".repeat(1000070)));
   //setImmediate(this.pipeOneMessage.bind(this,"cabc".repeat(100001)));
   
@@ -270,24 +269,19 @@ OpenCLDriver.prototype.testPipeBackEnd = function (callId, recursionDepth) {
   this.pipeOneMessage(this.testMessages[theIndex]);
   this.testScheduledSoFar ++;
   recursionDepth ++;
-  setImmediate(this.testPipeBackEnd.bind(this, callId, recursionDepth));
+  setImmediate(this.testPipeBackEndMultiple.bind(this, callId, recursionDepth));
 }
 
-function testPipeBrowserToGPU(request, response, desiredCommand){
-  global.kanban.openCLDriver.testPipeOneMessage(request, response, desiredCommand);
+function testPipeBackEndMultiple(callId){
+  global.kanban.openCLDriver.testPipeBackEndMultiple(callId, 0);
 }
 
-function testPipeBackEnd(callId){
-  global.kanban.openCLDriver.testPipeBackEnd(callId, 0);
-}
-
-function testPipeOneMessage(request, response, desiredCommand){
-  global.kanban.openCLDriver.testPipeOneMessage(request, response, desiredCommand);
+function testPipeBackEndOneMessage(request, response, desiredCommand){
+  global.kanban.openCLDriver.testPipeBackEndOneMessage(request, response, desiredCommand);
 }
 
 module.exports = {
   OpenCLDriver,
-  testPipeBrowserToGPU,
-  testPipeBackEnd,
-  testPipeOneMessage
+  testPipeBackEndMultiple,
+  testPipeBackEndOneMessage
 }

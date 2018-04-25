@@ -10,8 +10,11 @@ public:
   enum logModifiers{ endL};
   friend Logger& operator << (Logger& inputLogger, logModifiers other)
   { if (other == Logger::endL)
+    {
       std::cout << std::endl;
-   inputLogger.flagExtraDescription = true;
+      inputLogger.theFile << "\n";
+    }
+    inputLogger.flagExtraDescription = true;
     return inputLogger;
   }
   template<typename any>

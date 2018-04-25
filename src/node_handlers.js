@@ -48,11 +48,11 @@ function pollOngoing(request, response, desiredCommand) {
 var handlersReturnImmediately = {};
 handlersReturnImmediately[pathnames.nodeCalls.computeUnspentTransactions.nodeCallLabel] = computeUnspentTransactions;
 handlersReturnImmediately[pathnames.nodeCalls.testGPUSha256.nodeCallLabel] = null;
-handlersReturnImmediately[pathnames.nodeCalls.testPipeBackEnd.nodeCallLabel] = openCLDriver.testPipeBackEnd;
+handlersReturnImmediately[pathnames.nodeCalls.testPipeBackEndMultiple.nodeCallLabel] = openCLDriver.testPipeBackEndMultiple;
 
 var handlersReturnWhenDone = {};
 handlersReturnWhenDone[pathnames.nodeCalls.pollOngoing.nodeCallLabel] = pollOngoing;
-handlersReturnWhenDone[pathnames.nodeCalls.testPipeOneMessage.nodeCallLabel] = openCLDriver.testPipeOneMessage;
+handlersReturnWhenDone[pathnames.nodeCalls.testPipeBackEndOneMessage.nodeCallLabel] = openCLDriver.testPipeBackEndOneMessage;
 
 for (var label in pathnames.nodeCalls) {
   var currentNodeCallLabel = pathnames.nodeCalls[label].nodeCallLabel;

@@ -8,7 +8,7 @@
 
 #define MAX_SOURCE_SIZE (0x100000)
 
-Logger logGPU("../logfiles/logGPU.txt", "GPU: ");
+Logger logGPU("../logfiles/logGPU.txt", "[GPU] ");
 
 
 std::string OpenCLFunctions::getDeviceInfo(cl_device_id deviceId, cl_device_info informationRequested)

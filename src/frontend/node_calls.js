@@ -119,19 +119,19 @@ function testGPUSha256(){
   });
 }
 
-function testPipeBackEnd(){
+function testPipeBackEndMultiple(){
   submitRequests.submitGET({
-    url: pathnames.getURLfromNodeCallLabel(pathnames.nodeCalls.testPipeBackEnd.nodeCallLabel),
+    url: pathnames.getURLfromNodeCallLabel(pathnames.nodeCalls.testPipeBackEndMultiple.nodeCallLabel),
     progress: getSpanProgress(),
     result: getOutputTestGPU(),
     callback: pollServerStart
   });
 }
 
-function testPipeOneMessage(){
+function testPipeBackEndOneMessage(){
   var theMessage = document.getElementById(ids.defaults.inputNodeCallTestOnePipeMessage).value; 
   submitRequests.submitGET({
-    url: pathnames.getURLfromNodeCallLabel(pathnames.nodeCalls.testPipeOneMessage.nodeCallLabel, { message: theMessage}),
+    url: pathnames.getURLfromNodeCallLabel(pathnames.nodeCalls.testPipeBackEndOneMessage.nodeCallLabel, { message: theMessage}),
     progress: getSpanProgress(),
     result: getOutputTestGPU()
   });
@@ -149,8 +149,8 @@ function synchronizeUnspentTransactions(){
 module.exports = {
   synchronizeUnspentTransactions,
   testGPUSha256,
-  testPipeBackEnd,
-  testPipeOneMessage,
+  testPipeBackEndMultiple,
+  testPipeBackEndOneMessage,
   pollServerDoStart,
   clearPollId
 }
