@@ -17,3 +17,7 @@ HEADERS += \
     server.h \
     logging.h \
     miscellaneous.h
+
+DISTFILES += \
+    cl/secp256k1.cl \
+    cl/testBuffer.cl

@@ -11,6 +11,21 @@ in this repository is considered restricted intellectual property of FA Enterpri
 
 We will add an appropriate license (that will most likely be the MIT license) as soon as we free/open-source the project.
 
+
+## List of projects used
+
+This section contains a (possibly incomplete) list of software projects whose code was used in Kanban
+
+1. Node.js (MIT license).
+2. BitcoinJS (MIT license).
+3. Code from https://github.com/Fruneng/opencl_sha_al_im (MIT license).
+4. Code from https://raw.githubusercontent.com/hhanh00/secp256k1-cl (MIT license).
+
+
+
+## Licenses
+This section contains software licenses from various projects used in our code base, where applicable. 
+
 *******************************************************
 
 Parts of this software are based on BitcoinJS

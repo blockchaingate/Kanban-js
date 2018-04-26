@@ -30,7 +30,7 @@ function OpenCLDriver(){
   this.numSmallTestMessages = 900;
   this.largeTestMessageApproximateTopSizeInMultiplesOf32 = 100000;
   this.smallTestMessageApproximateTopSizeInMultiplesOf32 = 1000;
-  this.totalToTestSha256 = 10000;
+  this.totalToTestSha256 = 50000;
   this.totalToTestBuffer = 100000;
   this.totalToTest = - 1;
   this.testGotBackFromCPPSoFar = 0;
