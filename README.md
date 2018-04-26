@@ -18,9 +18,7 @@ sudo apt install ocl-icd-opencl-dev
 
 https://software.intel.com/en-us/articles/sdk-for-opencl-gsg 
 
-For convenience, the openCL installation script is copied in our repository.
-
-!(intel openCL installation)(miscellaneous/INTEL_Apr_18_install_OCL_driver2.sh)
+For convenience, the openCL installation script is copied in our repository: [intel openCL installation](miscellaneous/INTEL_Apr_18_install_OCL_driver2.sh)
 
 
 ### Node.js installation instructions
@@ -28,8 +26,8 @@ For convenience, the openCL installation script is copied in our repository.
 
 #### Ubuntu 16.04
 1. Intall nodejs. 
-1.1. If for some reason you installed a wrong version of nodejs 
- - for example, you installed the default which 
+
+1.1. If for some reason you installed a wrong version of nodejs - for example, you installed the default which 
 is outdated at the time of writing this readme - then you may:
 ```
 sudo apt remove nodejs
