@@ -12,11 +12,18 @@
 } while(0)
 
 
-#define ECMULT_TABLE_GET_GEJ(r,pre,n,w) ECMULT_TABLE_GET((r),(pre),(n),(w),secp256k1_gej_neg)
-#define ECMULT_TABLE_GET_GE(r,pre,n,w)  ECMULT_TABLE_GET((r),(pre),(n),(w),secp256k1_ge_neg)
+#define ECMULT_TABLE_GET_GEJ(r,pre,n,w) ECMULT_TABLE_GET((r),(pre),(n),(w),ECNegateProjective)
+#define ECMULT_TABLE_GET_GE(r,pre,n,w)  ECMULT_TABLE_GET((r),(pre),(n),(w),ECNegatePoint)
 
+//Representations of large integers. 
+//Each large integer X is represented as:
+//X = sum(i=0..9, n[i]*2^(26*i) ) mod theFieldPrime
+//For example, the integer
+//7 * 2^52 + 5 * 2^26 + 3
+//is represented by 
+//n[0] = 3, n[1] = 5, n[2] = 7
+//(all remaining elements are zero). 
 typedef struct {
-  // X = sum(i=0..9, elem[i]*2^26) mod n
   unsigned int n[10];
 } fieldElement;
 
@@ -37,10 +44,10 @@ typedef struct {
   fieldElement y; // actual Y: (y/z)^3
   fieldElement z;
   int infinity; // whether this represents the point at infinity
-} secp256k1ProjectivePoint;
+} ECProjectivePoint;
 
 typedef struct {
-	secp256k1ProjectivePoint a;
+	ECProjectivePoint a;
 	char wnaf_na[257];  //wnaf = windowed non-adjacent form
 	short bits_na;
 	short wnaf_ng_1[129];
@@ -70,67 +77,67 @@ typedef struct {
   unsigned char v[32];
 } b32_t;
     
-void secp256k1_gej_set_infinity(secp256k1ProjectivePoint *r) {
-  r->infinity = 1;
+void MakeInfinity(ECProjectivePoint* output) {
+  output->infinity = 1;
 }
-void secp256k1_gej_neg(secp256k1ProjectivePoint *r, __global const secp256k1ProjectivePoint *a);
-void secp256k1_ge_neg(ECPoint *r, __constant const ECPoint *a);
+void ECNegateProjective(ECProjectivePoint *r, __global const ECProjectivePoint *a);
+void ECNegatePoint(ECPoint *r, __constant const ECPoint *a);
 
-void ECMultiplicaitonTablePrecompute(__global secp256k1ProjectivePoint *pre, __global secp256k1ProjectivePoint *a, int w);
-void secp256k1_gej_double(secp256k1ProjectivePoint *r, secp256k1ProjectivePoint *a);
-void secp256k1_gej_add(__global secp256k1ProjectivePoint *r, const secp256k1ProjectivePoint *a, __global const secp256k1ProjectivePoint *b);
-void secp256k1_gej_add_local(secp256k1ProjectivePoint *pr, const secp256k1ProjectivePoint *pa, const secp256k1ProjectivePoint *pb);
-void secp256k1_gej_add_ge(secp256k1ProjectivePoint *r, const secp256k1ProjectivePoint *a, const ECPoint *b);
+void ECPrecomputeMultiplicationTable(__global ECProjectivePoint *pre, __global ECProjectivePoint *a, int w);
+void ECDoubleProjective(ECProjectivePoint *r, ECProjectivePoint *a);
+void ECAddProjective_Global(__global ECProjectivePoint *r, const ECProjectivePoint *a, __global const ECProjectivePoint *b);
+void ECAddProjective_Local(ECProjectivePoint *pr, const ECProjectivePoint *pa, const ECProjectivePoint *pb);
+void secp256k1_gej_add_ge(ECProjectivePoint *r, const ECProjectivePoint *a, const ECPoint *b);
 
 void fieldElementNormalize(fieldElement *r);    
 void secp256k1_fe_mul(fieldElement *r, const fieldElement *a, const fieldElement *b);
 void secp256k1_fe_mul_int(fieldElement *r, int a);
 void secp256k1_fe_add(fieldElement *r, const fieldElement *a);
-void secp256k1_fe_sqr(fieldElement *r, const fieldElement *a);
+void ECSquareFieldElement(fieldElement *r, const fieldElement *a);
 void secp256k1_fe_negate(fieldElement *r, const fieldElement *a, int m);
-int secp256k1_fe_is_zero(const fieldElement *a);
+int ECIsZeroFieldElement(const fieldElement *a);
 void secp256k1_fe_get_b32(unsigned char *r, const fieldElement *a);
-void secp256k1_gej_get_x(fieldElement *r, const secp256k1ProjectivePoint *a);
+void secp256k1_gej_get_x(fieldElement *r, const ECProjectivePoint *a);
 void secp256k1_fe_inv_var(fieldElement *r, const fieldElement *a);
 
-__kernel void ECMultiplicaitonTablePrecompute(__global secp256k1ProjectivePoint *pre, __global secp256k1ProjectivePoint *pa, int w) {
+__kernel void ECPrecomputeMultiplicationTable(__global ECProjectivePoint *outputPrecomputed, __global ECProjectivePoint *pa, int w) {
   int ind = get_global_id(0);
   int sz = (1 << (w-2));
-  secp256k1ProjectivePoint a = pa[ind];
-  pre[ind * sz] = a;
-  secp256k1ProjectivePoint d; secp256k1_gej_double(&d, &a);
+  ECProjectivePoint a = pa[ind];
+  outputPrecomputed[ind * sz] = a;
+  ECProjectivePoint d; ECDoubleProjective(&d, &a);
   for (int i = 1; i < sz; i ++) {
-    secp256k1_gej_add(&pre[ind * sz + i], &d, &pre[ind * sz + i - 1]);
+    ECAddProjective_Global(&outputPrecomputed[ind * sz + i], &d, &outputPrecomputed[ind * sz + i - 1]);
   }
 }
 
-__kernel void test_ecmult_table_precomp_gej(__global secp256k1ProjectivePoint *pre, __global secp256k1ProjectivePoint *pa, int w) {
+__kernel void test_ecmult_table_precomp_gej(__global ECProjectivePoint *pre, __global ECProjectivePoint *pa, int w) {
   int ind = get_global_id(0);
   pre[ind] = pa[ind];
   // pre[ind].infinity = 2;
 }
 
-__kernel void secp256k1_ecmult(__global b32_t *pr, __global secp256k1ProjectivePoint *ppre_a, __global ECMultiplicationParametersDevice *pParams, __constant const secp256k1_ecmult_consts_t *multiplicationConstants) {
+__kernel void secp256k1_ecmult(__global b32_t *pr, __global ECProjectivePoint *ppre_a, __global ECMultiplicationParametersDevice *pParams, __constant const secp256k1_ecmult_consts_t *multiplicationConstants) {
   int ind = get_global_id(0);
   int sz = (1 << (WINDOW_A-2));
 
   ECMultiplicationParametersDevice params = pParams[ind];
-  __global secp256k1ProjectivePoint *pre_a = &ppre_a[ind * sz];
+  __global ECProjectivePoint *pre_a = &ppre_a[ind * sz];
   __global b32_t *ppr = &pr[ind];
   
-  secp256k1ProjectivePoint r;
-  secp256k1_gej_set_infinity(&r);
-  secp256k1ProjectivePoint tmpj;
+  ECProjectivePoint r;
+  MakeInfinity(&r);
+  ECProjectivePoint tmpj;
   ECPoint tmpa;
 
   short bits = max(params.bits_na, params.bits_ng_1);
   bits = max(bits, params.bits_ng_128);
   for (int i=bits-1; i>=0; i--) {
-    secp256k1_gej_double(&r, &r);
+    ECDoubleProjective(&r, &r);
     int n;
     if (i < params.bits_na && (n = params.wnaf_na[i])) {
       ECMULT_TABLE_GET_GEJ(&tmpj, pre_a, n, WINDOW_A);
-      secp256k1_gej_add_local(&r, &r, &tmpj);
+      ECAddProjective_Local(&r, &r, &tmpj);
     }
     if (i < params.bits_ng_1 && (n = params.wnaf_ng_1[i])) {
       ECMULT_TABLE_GET_GE(&tmpa, multiplicationConstants->precomputedGenerator, n, WINDOW_G);
@@ -149,7 +156,7 @@ __kernel void secp256k1_ecmult(__global b32_t *pr, __global secp256k1ProjectiveP
   *ppr = b32;
 }
                       
-void secp256k1_gej_neg(secp256k1ProjectivePoint *output, __global const secp256k1ProjectivePoint *input) {
+void ECNegateProjective(ECProjectivePoint* output, __global const ECProjectivePoint* input) {
   output->infinity = input->infinity;
   output->x = input->x;
   output->y = input->y;
@@ -158,45 +165,60 @@ void secp256k1_gej_neg(secp256k1ProjectivePoint *output, __global const secp256k
   secp256k1_fe_negate(&output->y, &output->y, 1);
 }
 
-void secp256k1_ge_neg(ECPoint *r, __constant const ECPoint *a) {
-  r->infinity = a->infinity;
-  r->x = a->x;
-  r->y = a->y;
-  fieldElementNormalize(&r->y);
-  secp256k1_fe_negate(&r->y, &r->y, 1);
+void ECNegatePoint(ECPoint* output, __constant const ECPoint* input) {
+  output->infinity = input->infinity;
+  output->x = input->x;
+  output->y = input->y;
+  fieldElementNormalize(&output->y);
+  secp256k1_fe_negate(&output->y, &output->y, 1);
 }
 
 typedef unsigned int uint32_t;
 typedef unsigned long uint64_t;
 
-void fieldElementNormalize(fieldElement *inputOutput) {
-//    fog("normalize in: ", r);
+/*
+Ensures each element of the input is of magnitude smaller than 2^26.
+If some input has more than 26 bits, carries over the extra bits to
+the higher order terms.
+*/
+void fieldElementNormalize(fieldElement* inputOutput) {
+//    fog("normalize in: ", inputOutput);
   uint32_t c;
-  c = r->n[0];
+  c = inputOutput->n[0];
   uint32_t t0 = c & 0x3FFFFFFUL;
-  c = (c >> 26) + r->n[1];
+  c = (c >> 26) + inputOutput->n[1];
   uint32_t t1 = c & 0x3FFFFFFUL;
-  c = (c >> 26) + r->n[2];
+  c = (c >> 26) + inputOutput->n[2];
   uint32_t t2 = c & 0x3FFFFFFUL;
-  c = (c >> 26) + r->n[3];
+  c = (c >> 26) + inputOutput->n[3];
   uint32_t t3 = c & 0x3FFFFFFUL;
-  c = (c >> 26) + r->n[4];
+  c = (c >> 26) + inputOutput->n[4];
   uint32_t t4 = c & 0x3FFFFFFUL;
-  c = (c >> 26) + r->n[5];
+  c = (c >> 26) + inputOutput->n[5];
   uint32_t t5 = c & 0x3FFFFFFUL;
-  c = (c >> 26) + r->n[6];
+  c = (c >> 26) + inputOutput->n[6];
   uint32_t t6 = c & 0x3FFFFFFUL;
-  c = (c >> 26) + r->n[7];
+  c = (c >> 26) + inputOutput->n[7];
   uint32_t t7 = c & 0x3FFFFFFUL;
-  c = (c >> 26) + r->n[8];
+  c = (c >> 26) + inputOutput->n[8];
   uint32_t t8 = c & 0x3FFFFFFUL;
-  c = (c >> 26) + r->n[9];
+  c = (c >> 26) + inputOutput->n[9];
   uint32_t t9 = c & 0x03FFFFFUL;
   c >>= 22;
-/*    r->n[0] = t0; r->n[1] = t1; r->n[2] = t2; r->n[3] = t3; r->n[4] = t4;
-    r->n[5] = t5; r->n[6] = t6; r->n[7] = t7; r->n[8] = t8; r->n[9] = t9;
-    fog("         tm1: ", r);
-    fprintf(stderr, "out c= %08lx\n", (unsigned long)c);*/
+/*    
+  inputOutput->n[0] = t0; 
+  inputOutput->n[1] = t1; 
+  inputOutput->n[2] = t2; 
+  inputOutput->n[3] = t3; 
+  inputOutput->n[4] = t4;
+  inputOutput->n[5] = t5; 
+  inputOutput->n[6] = t6; 
+  inputOutput->n[7] = t7; 
+  inputOutput->n[8] = t8; 
+  inputOutput->n[9] = t9;
+  fog("         tm1: ", inputOutput);
+    fprintf(stderr, "out c= %08lx\n", (unsigned long)c);
+  */
 
   // The following code will not modify the t's if c is initially 0.
   uint32_t d = c * 0x3D1UL + t0;
@@ -219,9 +241,19 @@ void fieldElementNormalize(fieldElement *inputOutput) {
   t8 = d & 0x3FFFFFFUL;
   d = (d >> 26) + t9;
   t9 = d & 0x03FFFFFUL;
-/*    r->n[0] = t0; r->n[1] = t1; r->n[2] = t2; r->n[3] = t3; r->n[4] = t4;
-    r->n[5] = t5; r->n[6] = t6; r->n[7] = t7; r->n[8] = t8; r->n[9] = t9;
-    fog("         tm2: ", r); */
+/*    
+  inputOutput->n[0] = t0; 
+  inputOutput->n[1] = t1; 
+  inputOutput->n[2] = t2; 
+  inputOutput->n[3] = t3; 
+  inputOutput->n[4] = t4;
+  inputOutput->n[5] = t5; 
+  inputOutput->n[6] = t6; 
+  inputOutput->n[7] = t7; 
+  inputOutput->n[8] = t8; 
+  inputOutput->n[9] = t9;
+    fog("         tm2: ", inputOutput); 
+*/
 
     // Subtract p if result >= p
   uint64_t low = ((uint64_t)t1 << 26) | t0;
@@ -237,37 +269,35 @@ void fieldElementNormalize(fieldElement *inputOutput) {
   low -= (~mask & 0xFFFFEFFFFFC2FUL);
 
   // push internal variables back
-  r->n[0] = low & 0x3FFFFFFUL; r->n[1] = (low >> 26) & 0x3FFFFFFUL; r->n[2] = t2; r->n[3] = t3; r->n[4] = t4;
-  r->n[5] = t5; r->n[6] = t6; r->n[7] = t7; r->n[8] = t8; r->n[9] = t9;
-/*    fog("         out: ", r);*/
-
-#ifdef VERIFY
-  r->magnitude = 1;
-  r->normalized = 1;
-#endif
+  inputOutput->n[0] = low & 0x3FFFFFFUL; 
+  inputOutput->n[1] = (low >> 26) & 0x3FFFFFFUL; 
+  inputOutput->n[2] = t2; 
+  inputOutput->n[3] = t3; 
+  inputOutput->n[4] = t4;
+  inputOutput->n[5] = t5; 
+  inputOutput->n[6] = t6; 
+  inputOutput->n[7] = t7; 
+  inputOutput->n[8] = t8; 
+  inputOutput->n[9] = t9;
+/*    fog("         out: ", inputOutput);*/
 }
 
-void static inline secp256k1_fe_set_int(fieldElement *r, int a) {
-  r->n[0] = a;
-  r->n[1] = r->n[2] = r->n[3] = r->n[4] = r->n[5] = r->n[6] = r->n[7] = r->n[8] = r->n[9] = 0;
-#ifdef VERIFY
-  r->magnitude = 1;
-  r->normalized = 1;
-#endif
+void static inline ECSetFieldElementToInt32(fieldElement *output, int input) {
+  output->n[0] = input;
+  output->n[1] = output->n[2] = output->n[3] = output->n[4] = output->n[5] = output->n[6] = output->n[7] = output->n[8] = output->n[9] = 0;
 }
 
 // TODO: not constant time!
-int secp256k1_fe_is_zero(const fieldElement *a) {
+int ECIsZeroFieldElement(const fieldElement *a) {
 #ifdef VERIFY
   assert(a->normalized);
 #endif
-  return (a->n[0] == 0 && a->n[1] == 0 && a->n[2] == 0 && a->n[3] == 0 && a->n[4] == 0 && a->n[5] == 0 && a->n[6] == 0 && a->n[7] == 0 && a->n[8] == 0 && a->n[9] == 0);
+  return (a->n[0] == 0 && a->n[1] == 0 && a->n[2] == 0 && 
+          a->n[3] == 0 && a->n[4] == 0 && a->n[5] == 0 && 
+          a->n[6] == 0 && a->n[7] == 0 && a->n[8] == 0 && a->n[9] == 0);
 }
 
 int static inline secp256k1_fe_is_odd(const fieldElement *a) {
-#ifdef VERIFY
-  assert(a->normalized);
-#endif
   return a->n[0] & 1;
 }
 
@@ -281,20 +311,16 @@ int secp256k1_fe_equal(const fieldElement *a, const fieldElement *b) {
           a->n[5] == b->n[5] && a->n[6] == b->n[6] && a->n[7] == b->n[7] && a->n[8] == b->n[8] && a->n[9] == b->n[9]);
 }
 
-void secp256k1_fe_set_b32(fieldElement *r, const unsigned char *a) {
-  r->n[0] = r->n[1] = r->n[2] = r->n[3] = r->n[4] = 0;
-  r->n[5] = r->n[6] = r->n[7] = r->n[8] = r->n[9] = 0;
+void secp256k1_fe_set_b32(fieldElement *output, const unsigned char *input) {
+  output->n[0] = output->n[1] = output->n[2] = output->n[3] = output->n[4] = 0;
+  output->n[5] = output->n[6] = output->n[7] = output->n[8] = output->n[9] = 0;
   for (int i = 0; i < 32; i ++) {
     for (int j = 0; j < 4; j ++) {
       int limb = (8 * i + 2 * j) / 26;
       int shift = (8 * i + 2 * j) % 26;
-      r->n[limb] |= (uint32_t)((a[31-i] >> (2*j)) & 0x3) << shift;
+      output->n[limb] |= (uint32_t)((output[31-i] >> (2*j)) & 0x3) << shift;
     }
   }
-#ifdef VERIFY
-  r->magnitude = 1;
-  r->normalized = 1;
-#endif
 }
 
 /** Convert a field element to a 32-byte big endian value. Requires the input to be normalized */
@@ -514,7 +540,7 @@ void secp256k1_fe_mul_inner(const uint32_t *a, const uint32_t *b, uint32_t *r) {
   r[2] = t2 + d;
 }
 
-void secp256k1_fe_sqr_inner(const uint32_t *a, uint32_t *r) {
+void ECSquareFieldElement_Inner(uint32_t* output, const uint32_t* input) {
   uint64_t c = (uint64_t)a[0] * a[0];
   uint32_t t0 = c & 0x3FFFFFFUL; c = c >> 26;
   c = c + (uint64_t)(a[0]*2) * a[1];
@@ -629,71 +655,71 @@ void secp256k1_fe_mul(fieldElement *r, const fieldElement *a, const fieldElement
   secp256k1_fe_mul_inner(a->n, b->n, r->n);
 }
 
-void secp256k1_fe_sqr(fieldElement *r, const fieldElement *a) {
+void ECSquareFieldElement(fieldElement* output, const fieldElement* input) {
 #ifdef VERIFY
-  assert(a->magnitude <= 8);
-  r->magnitude = 1;
-  r->normalized = 0;
+  assert(input->magnitude <= 8);
+  output->magnitude = 1;
+  output->normalized = 0;
 #endif
-    secp256k1_fe_sqr_inner(a->n, r->n);
+  ECSquareFieldElement_Inner(r->n, a->n);
 }
 
-void secp256k1_gej_double(secp256k1ProjectivePoint *r, secp256k1ProjectivePoint *a) {
-  fieldElement t5 = a->y;
+void ECDoubleProjective(ECProjectivePoint *output, ECProjectivePoint *input) {
+  fieldElement t5 = input->y;
   fieldElementNormalize(&t5);
-  if (a->infinity || secp256k1_fe_is_zero(&t5)) {
-      r->infinity = 1;
+  if (input->infinity || ECIsZeroFieldElement(&t5)) {
+      output->infinity = 1;
       return;
   }
 
   fieldElement t1,t2,t3,t4;
-  secp256k1_fe_mul(&r->z, &t5, &a->z);
-  secp256k1_fe_mul_int(&r->z, 2);       // Z' = 2*Y*Z (2)
-  secp256k1_fe_sqr(&t1, &a->x);
+  secp256k1_fe_mul(&output->z, &t5, &input->z);
+  secp256k1_fe_mul_int(&output->z, 2);       // Z' = 2*Y*Z (2)
+  ECSquareFieldElement(&t1, &input->x);
   secp256k1_fe_mul_int(&t1, 3);         // T1 = 3*X^2 (3)
-  secp256k1_fe_sqr(&t2, &t1);           // T2 = 9*X^4 (1)
-  secp256k1_fe_sqr(&t3, &t5);
+  ECSquareFieldElement(&t2, &t1);           // T2 = 9*X^4 (1)
+  ECSquareFieldElement(&t3, &t5);
   secp256k1_fe_mul_int(&t3, 2);         // T3 = 2*Y^2 (2)
-  secp256k1_fe_sqr(&t4, &t3);
+  ECSquareFieldElement(&t4, &t3);
   secp256k1_fe_mul_int(&t4, 2);         // T4 = 8*Y^4 (2)
-  secp256k1_fe_mul(&t3, &a->x, &t3);    // T3 = 2*X*Y^2 (1)
-  r->x = t3;
-  secp256k1_fe_mul_int(&r->x, 4);       // X' = 8*X*Y^2 (4)
-  secp256k1_fe_negate(&r->x, &r->x, 4); // X' = -8*X*Y^2 (5)
-  secp256k1_fe_add(&r->x, &t2);         // X' = 9*X^4 - 8*X*Y^2 (6)
+  secp256k1_fe_mul(&t3, &input->x, &t3);    // T3 = 2*X*Y^2 (1)
+  output->x = t3;
+  secp256k1_fe_mul_int(&output->x, 4);       // X' = 8*X*Y^2 (4)
+  secp256k1_fe_negate(&output->x, &output->x, 4); // X' = -8*X*Y^2 (5)
+  secp256k1_fe_add(&output->x, &t2);         // X' = 9*X^4 - 8*X*Y^2 (6)
   secp256k1_fe_negate(&t2, &t2, 1);     // T2 = -9*X^4 (2)
   secp256k1_fe_mul_int(&t3, 6);         // T3 = 12*X*Y^2 (6)
   secp256k1_fe_add(&t3, &t2);           // T3 = 12*X*Y^2 - 9*X^4 (8)
-  secp256k1_fe_mul(&r->y, &t1, &t3);    // Y' = 36*X^3*Y^2 - 27*X^6 (1)
+  secp256k1_fe_mul(&output->y, &t1, &t3);    // Y' = 36*X^3*Y^2 - 27*X^6 (1)
   secp256k1_fe_negate(&t2, &t4, 2);     // T2 = -8*Y^4 (3)
-  secp256k1_fe_add(&r->y, &t2);         // Y' = 36*X^3*Y^2 - 27*X^6 - 8*Y^4 (4)
-  r->infinity = 0;
+  secp256k1_fe_add(&output->y, &t2);         // Y' = 36*X^3*Y^2 - 27*X^6 - 8*Y^4 (4)
+  output->infinity = 0;
 }
 
-void secp256k1_gej_add(__global secp256k1ProjectivePoint *pr, const secp256k1ProjectivePoint *pa, __global const secp256k1ProjectivePoint *pb) {
-  secp256k1ProjectivePoint b, r;
-  b = *pb;
-  secp256k1_gej_add_local(&r, pa, &b);
-  *pr = r;
+void ECAddProjective_Global(__global ECProjectivePoint *output, const ECProjectivePoint* left, __global const ECProjectivePoint* right) {
+  ECProjectivePoint b, r;
+  b = *right;
+  ECAddProjective_Local(&r, left, &b);
+  *output = r;
 }
 
-void secp256k1_gej_add_local(secp256k1ProjectivePoint *pr, const secp256k1ProjectivePoint *pa, const secp256k1ProjectivePoint *pb) {
-  if (pa->infinity) {
-      *pr = *pb;
-      return;
+void ECAddProjective_Local(ECProjectivePoint* output, const ECProjectivePoint* left, const ECProjectivePoint* right) {
+  if (left->infinity) {
+    *output = *right;
+    return;
   }
-  if (pb->infinity) {
-      *pr = *pa;
-      return;
+  if (right->infinity) {
+    *output = *left;
+    return;
   }
   
-  secp256k1ProjectivePoint a = *pa;
-  secp256k1ProjectivePoint b = *pb;
-  secp256k1ProjectivePoint r;
+  ECProjectivePoint a = *left;
+  ECProjectivePoint b = *right;
+  ECProjectivePoint r;
   
   r.infinity = 0;
-  fieldElement z22; secp256k1_fe_sqr(&z22, &b.z);
-  fieldElement z12; secp256k1_fe_sqr(&z12, &a.z);
+  fieldElement z22; ECSquareFieldElement(&z22, &b.z);
+  fieldElement z12; ECSquareFieldElement(&z12, &a.z);
   fieldElement u1; secp256k1_fe_mul(&u1, &a.x, &z22);
   fieldElement u2; secp256k1_fe_mul(&u2, &b.x, &z12);
   fieldElement s1; secp256k1_fe_mul(&s1, &a.y, &z22); secp256k1_fe_mul(&s1, &s1, &b.z);
@@ -701,19 +727,19 @@ void secp256k1_gej_add_local(secp256k1ProjectivePoint *pr, const secp256k1Projec
   fieldElementNormalize(&u1);
   fieldElementNormalize(&u2);
   if (secp256k1_fe_equal(&u1, &u2)) {
-      fieldElementNormalize(&s1);
-      fieldElementNormalize(&s2);
-      if (secp256k1_fe_equal(&s1, &s2)) {
-          secp256k1_gej_double(&r, &a);
-      } else {
-          r.infinity = 1;
-      }
-      return;
+    fieldElementNormalize(&s1);
+    fieldElementNormalize(&s2);
+    if (secp256k1_fe_equal(&s1, &s2)) {
+        ECDoubleProjective(&r, &a);
+    } else {
+        r.infinity = 1;
+    }
+    return;
   }
   fieldElement h; secp256k1_fe_negate(&h, &u1, 1); secp256k1_fe_add(&h, &u2);
   fieldElement i; secp256k1_fe_negate(&i, &s1, 1); secp256k1_fe_add(&i, &s2);
-  fieldElement i2; secp256k1_fe_sqr(&i2, &i);
-  fieldElement h2; secp256k1_fe_sqr(&h2, &h);
+  fieldElement i2; ECSquareFieldElement(&i2, &i);
+  fieldElement h2; ECSquareFieldElement(&h2, &h);
   fieldElement h3; secp256k1_fe_mul(&h3, &h, &h2);
   secp256k1_fe_mul(&r.z, &a.z, &b.z); secp256k1_fe_mul(&r.z, &r.z, &h);
   fieldElement t; secp256k1_fe_mul(&t, &u1, &h2);
@@ -722,15 +748,15 @@ void secp256k1_gej_add_local(secp256k1ProjectivePoint *pr, const secp256k1Projec
   secp256k1_fe_mul(&h3, &h3, &s1); secp256k1_fe_negate(&h3, &h3, 1);
   secp256k1_fe_add(&r.y, &h3);
   
-  *pr = r;
+  *output = r;
 }
 
-void secp256k1_gej_add_ge(secp256k1ProjectivePoint *r, const secp256k1ProjectivePoint *a, const ECPoint *b) {
+void secp256k1_gej_add_ge(ECProjectivePoint *r, const ECProjectivePoint *a, const ECPoint *b) {
   if (a->infinity) {
     r->infinity = b->infinity;
     r->x = b->x;
     r->y = b->y;
-    secp256k1_fe_set_int(&r->z, 1);
+    ECSetFieldElementToInt32(&r->z, 1);
     return;
   }
   if (b->infinity) {
@@ -738,7 +764,7 @@ void secp256k1_gej_add_ge(secp256k1ProjectivePoint *r, const secp256k1Projective
     return;
   }
   r->infinity = 0;
-  fieldElement z12; secp256k1_fe_sqr(&z12, &a->z);
+  fieldElement z12; ECSquareFieldElement(&z12, &a->z);
   fieldElement u1 = a->x; fieldElementNormalize(&u1);
   fieldElement u2; secp256k1_fe_mul(&u2, &b->x, &z12);
   fieldElement s1 = a->y; fieldElementNormalize(&s1);
@@ -749,7 +775,7 @@ void secp256k1_gej_add_ge(secp256k1ProjectivePoint *r, const secp256k1Projective
     fieldElementNormalize(&s1);
     fieldElementNormalize(&s2);
     if (secp256k1_fe_equal(&s1, &s2)) {
-      secp256k1_gej_double(r, a);
+      ECDoubleProjective(r, a);
     } else {
       r->infinity = 1;
     }
@@ -757,8 +783,8 @@ void secp256k1_gej_add_ge(secp256k1ProjectivePoint *r, const secp256k1Projective
   }
   fieldElement h; secp256k1_fe_negate(&h, &u1, 1); secp256k1_fe_add(&h, &u2);
   fieldElement i; secp256k1_fe_negate(&i, &s1, 1); secp256k1_fe_add(&i, &s2);
-  fieldElement i2; secp256k1_fe_sqr(&i2, &i);
-  fieldElement h2; secp256k1_fe_sqr(&h2, &h);
+  fieldElement i2; ECSquareFieldElement(&i2, &i);
+  fieldElement h2; ECSquareFieldElement(&h2, &h);
   fieldElement h3; secp256k1_fe_mul(&h3, &h, &h2);
   r->z = a->z; secp256k1_fe_mul(&r->z, &r->z, &h);
   fieldElement t; secp256k1_fe_mul(&t, &u1, &h2);
@@ -768,8 +794,8 @@ void secp256k1_gej_add_ge(secp256k1ProjectivePoint *r, const secp256k1Projective
   secp256k1_fe_add(&r->y, &h3);
 }
 
-void secp256k1_gej_get_x(fieldElement *r, const secp256k1ProjectivePoint *a) {
-  fieldElement zi2; secp256k1_fe_inv_var(&zi2, &a->z); secp256k1_fe_sqr(&zi2, &zi2);
+void secp256k1_gej_get_x(fieldElement *r, const ECProjectivePoint *a) {
+  fieldElement zi2; secp256k1_fe_inv_var(&zi2, &a->z); ECSquareFieldElement(&zi2, &zi2);
   secp256k1_fe_mul(r, &a->x, &zi2);
 }
 
@@ -779,59 +805,59 @@ void secp256k1_fe_inv(fieldElement *r, const fieldElement *a) {
   // [1], [2], 3, 6, 9, 11, [22], 44, 88, 176, 220, [223]
 
   fieldElement x2;
-  secp256k1_fe_sqr(&x2, a);
+  ECSquareFieldElement(&x2, a);
   secp256k1_fe_mul(&x2, &x2, a);
 
   fieldElement x3;
-  secp256k1_fe_sqr(&x3, &x2);
+  ECSquareFieldElement(&x3, &x2);
   secp256k1_fe_mul(&x3, &x3, a);
 
   fieldElement x6 = x3;
-  for (int j=0; j<3; j++) secp256k1_fe_sqr(&x6, &x6);
+  for (int j=0; j<3; j++) ECSquareFieldElement(&x6, &x6);
   secp256k1_fe_mul(&x6, &x6, &x3);
 
   fieldElement x9 = x6;
-  for (int j=0; j<3; j++) secp256k1_fe_sqr(&x9, &x9);
+  for (int j=0; j<3; j++) ECSquareFieldElement(&x9, &x9);
   secp256k1_fe_mul(&x9, &x9, &x3);
 
   fieldElement x11 = x9;
-  for (int j=0; j<2; j++) secp256k1_fe_sqr(&x11, &x11);
+  for (int j=0; j<2; j++) ECSquareFieldElement(&x11, &x11);
   secp256k1_fe_mul(&x11, &x11, &x2);
 
   fieldElement x22 = x11;
-  for (int j=0; j<11; j++) secp256k1_fe_sqr(&x22, &x22);
+  for (int j=0; j<11; j++) ECSquareFieldElement(&x22, &x22);
   secp256k1_fe_mul(&x22, &x22, &x11);
 
   fieldElement x44 = x22;
-  for (int j=0; j<22; j++) secp256k1_fe_sqr(&x44, &x44);
+  for (int j=0; j<22; j++) ECSquareFieldElement(&x44, &x44);
   secp256k1_fe_mul(&x44, &x44, &x22);
 
   fieldElement x88 = x44;
-  for (int j=0; j<44; j++) secp256k1_fe_sqr(&x88, &x88);
+  for (int j=0; j<44; j++) ECSquareFieldElement(&x88, &x88);
   secp256k1_fe_mul(&x88, &x88, &x44);
 
   fieldElement x176 = x88;
-  for (int j=0; j<88; j++) secp256k1_fe_sqr(&x176, &x176);
+  for (int j=0; j<88; j++) ECSquareFieldElement(&x176, &x176);
   secp256k1_fe_mul(&x176, &x176, &x88);
 
   fieldElement x220 = x176;
-  for (int j=0; j<44; j++) secp256k1_fe_sqr(&x220, &x220);
+  for (int j=0; j<44; j++) ECSquareFieldElement(&x220, &x220);
   secp256k1_fe_mul(&x220, &x220, &x44);
 
   fieldElement x223 = x220;
-  for (int j=0; j<3; j++) secp256k1_fe_sqr(&x223, &x223);
+  for (int j=0; j<3; j++) ECSquareFieldElement(&x223, &x223);
   secp256k1_fe_mul(&x223, &x223, &x3);
 
   // The final result is then assembled using a sliding window over the blocks.
 
   fieldElement t1 = x223;
-  for (int j=0; j<23; j++) secp256k1_fe_sqr(&t1, &t1);
+  for (int j=0; j<23; j++) ECSquareFieldElement(&t1, &t1);
   secp256k1_fe_mul(&t1, &t1, &x22);
-  for (int j=0; j<5; j++) secp256k1_fe_sqr(&t1, &t1);
+  for (int j=0; j<5; j++) ECSquareFieldElement(&t1, &t1);
   secp256k1_fe_mul(&t1, &t1, a);
-  for (int j=0; j<3; j++) secp256k1_fe_sqr(&t1, &t1);
+  for (int j=0; j<3; j++) ECSquareFieldElement(&t1, &t1);
   secp256k1_fe_mul(&t1, &t1, &x2);
-  for (int j=0; j<2; j++) secp256k1_fe_sqr(&t1, &t1);
+  for (int j=0; j<2; j++) ECSquareFieldElement(&t1, &t1);
   secp256k1_fe_mul(r, &t1, a);
 }
 
