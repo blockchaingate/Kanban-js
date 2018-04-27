@@ -548,7 +548,7 @@ void ECMultiplyFieldElementsInner(uint32_t *output, const uint32_t *a, const uin
   output[7] = c & 0x3FFFFFFUL; c = c >> 26;
   c = c + t8 + (uint64_t)t17 * 0x400UL + (uint64_t)t18 * 0x3D10UL;
   output[8] = c & 0x3FFFFFFUL; c = c >> 26;
-  c = c + t9 + (uint64_t)t18 * 0x400UL + (uint64_t)t19 * 0x1000003D10UL; // 0x1000003D10UL equals 2^4*(2^{32} + 977)
+  c = c + t9 + (uint64_t)t18 * 0x400UL + (uint64_t)t19 * 0x1000003D10UL; // 0x1000003D10UL equals 2^4*(2^{32} + 977)  
   output[9] = c & 0x03FFFFFUL; c = c >> 22;
   uint64_t d = t0 + c * 0x3D1UL;
   output[0] = d & 0x3FFFFFFUL; d = d >> 26;
@@ -683,7 +683,7 @@ void ECDoubleProjective(ECProjectivePoint *output, ECProjectivePoint *input) {
       return;
   }
 
-  fieldElement t1,t2,t3,t4;
+  fieldElement t1, t2, t3, t4;
   ECMultiplyFieldElements(&output->z, &t5, &input->z);
   ECMultiplyFieldElementByInt(&output->z, 2);       // Z' = 2*Y*Z (2)
   ECSquareFieldElement(&t1, &input->x);

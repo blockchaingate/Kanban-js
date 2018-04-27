@@ -1,0 +1,68 @@
+%Verify the secp256k1 parameters 
+
+p = 2^256 - 2^32 - 977;
+genX =
+(ConvertHexToInteger("
+79BE667E F9DCBBAC 55A06295 CE870B07 
+029BFCDB 2DCE28D9 59F2815B 16F81798
+")) mod p;
+genY = 
+(ConvertHexToInteger("
+483ADA77 26A3C465 5DA4FBFC 0E1108A8 
+FD17B448 A6855419 9C47D08F FB10D4B8
+")) mod p;
+
+genY^2- genX^3-7
+
+%Plot the elliptic curve. 
+
+Plot2D( \sqrt(x^3+7), -\sqrt[3]7+0.001, 5, red, 1, 2000)+
+Plot2D( -\sqrt(x^3+7), -\sqrt[3]7+0.001, 5, red, 1, 2000)
+
+
+%Find equations for P so that 2Q + P = 0
+
+
+
+theEquation = MakeExpression( MakeRationalFunction(  (2y_1)^2   (( 3x_1^2 /(2 y_1) (x-x_1)+y_1)^2-x^3-7)));
+leadingCF= CoefficientOf(x^3, theEquation);
+theConstTerm = ConstantTerm(x, theEquation);
+theSolution = - theConstTerm /leadingCF / x_1^2;
+
+simplifiedSolution = (x_1 = x; y_1 = y; theSolution)_3;
+theDen = Denominator{}(simplifiedSolution);
+theNumSimplified =  PolyDivRemainder( Numerator{}simplifiedSolution , y^2-x^3-7);
+
+finalAnswer = MakeExpression( MakeRationalFunction( theNumSimplified /theDen))
+
+
+%Verify tangent computations visually.
+
+%HideLHS
+
+q = MakeInputBox(name=q, value=RandomInteger(-10,10 ));
+a = 1+ q/10;
+
+yPos{}{{x}} = (x^3+7)^{DoubleValue 0.5};
+yNeg{}{{x}} = - \sqrt (x^3+7);
+
+
+p{}{{x}} =  \frac{x^{4}-56 x}{4 (x^3+7)};
+
+leftPoint = (a, yPos{}a);
+
+
+yTan{}{{x}} =  3 (leftPoint_1) ^2 /(2leftPoint_2) ( x - leftPoint_1 ) + leftPoint_2;
+
+rightPoint = (p{}a, yTan{}(p{}a));
+
+Plot2D( yPos{}x, -\sqrt[3]7, 5)
++
+Plot2D( yNeg{}x, -\sqrt[3]7, 5)
++
+PlotCurve (  (leftPoint_1  t+ (1-t)rightPoint_1, leftPoint_2  t+ (1-t)rightPoint_2) , -1,2, green   ) +
+PlotPoint (leftPoint, blue)+
+PlotPoint (rightPoint, purple)
+;
+ 
+ 
