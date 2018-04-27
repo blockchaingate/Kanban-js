@@ -10,3 +10,10 @@ build/
 *.user
 
 logfiles/
+
+*.aux
+*.gz
+*.out
+*.log
+*.bbl
+*.blg

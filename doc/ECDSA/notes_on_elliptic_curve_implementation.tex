@@ -1,0 +1,91 @@
+\documentclass{article}
+%\usepackage{authblk}
+\usepackage{amssymb, amsmath}
+\usepackage{hyperref}
+\usepackage{verbatim}
+
+%\author[1]{Todor Milev}
+\date{April 2018}
+%\affil[1]{FA Enterprise System}
+\title{Elliptic curve secp256k1 \\ Implementation notes}
+\author{Todor Milev\footnote{FA Enterprise System}\\ todor@fa.biz}
+\newcommand{\secpTwoFiveSixKone}{{\bf secp256k1}}
+\renewcommand{\mod}{{~~~\bf mod~}}
+\begin{document}
+\maketitle
+\section{Introdution}
+Public/private key cryptography is arguably the most important aspect of modern crypto-currency systems. The somewhat slow execution of private/public key cryptography algorithms appears to be one of the main bottlenecks of FAB's Kanban system. 
+
+
+Following Bitcoin, FAB coin uses the standard public/private key cryptography ECDSA over \secpTwoFiveSixKone. Here, ECDSA stands for Elliptic Curve Digital Signature Algorithm and \secpTwoFiveSixKone{} stands for the elliptic curve:
+
+\[
+y^2 = x^3 + 7
+\]
+(we specify the base point later), over the finite field:
+
+\[
+\mathbb Z / p\mathbb Z, 
+\]
+where
+\begin{equation}\label{eqThePrime}
+p= 2^{256} - 2^{32} - 977.
+\end{equation}
+
+In this document, we discuss and document technical details of FAB's implementation of ECDSA over  \secpTwoFiveSixKone{}. Our openCL implementation is based on the project \cite{secp256k1:openCLimplementationHanh0}, which is in turn based on the C project libsecp256k1 \cite{Wuille:secp256k1}.
+
+\section{Operations in $\mathbb Z / p\mathbb Z$}
+Recall from (\ref{eqThePrime}) that $p$ is the prime given by
+\[
+p= 2^{256} - 2^{32} - 977.
+\]
+In this section, we describe our implementation of $Z / p\mathbb Z$.
+\subsection{Representations of numbers}
+A number in $x$ in $\mathbb Z / p\mathbb Z$ is represented by a large integer $X$, in turn represented by a sequence of $10$ small integers $x_0,\dots, x_9$ for which $0 \leq x_i < 2^{32}$ and such that
+\[
+X = \sum_{i=0}^{9} x_i \left(2^{26}\right)^i.
+\]
+The representations of $x$ is not unique but becomes so when we request that 
+\[
+0\leq x_i < 2^{26}
+\]
+and 
+\[
+0 \leq X < p = 2^{256} - 2^{32} - 977.
+\]
+We say that the unique representation $x_0, \dots, x_9$ of $x$ above is its \emph{normal form} (and $x$ is \emph{normalized}). Two elements of $ \mathbb Z / p \mathbb Z$ are equal if and only if their normal forms are equal. We will not assume that a number $x$ is represented by its normal form as some of the operations described below do not require that.
+
+In what follows, we shall use the notation
+\[
+a'=a \mod q
+\]
+to denote remainder $0\leq a' <q$  of $a$ when dividing $a$ by $q$.
+\subsection{Computing the normal form of $x$}
+
+\subsection{Multiplying two elements}
+Let $a$ be an element represented by the large integer $A$ represented by $a_0, \dots, a_9$ and $b$ be represented by the large integer $B$ represented by $b_0, \dots, b_9$. In this section, we show how to compute a representation of $a\cdot b$. This operation is implemented in the function \verb|ECMultiplyFieldElementsInner|. 
+
+Set 
+\[
+d= 2^{26}
+\]
+and compute as follows.
+\[
+\begin{array}{rcl}
+\displaystyle a\cdot b&=&\displaystyle A\cdot B \mod p\\
+&=&\displaystyle \left(\sum_{i=0}^9 a_i d^i \right) \left(\sum_{j=0}^9 b_j d^j\right)   \mod p\\
+&=&\displaystyle  \sum_{k=0}^{18} \left(\sum_{i=0}^k a_i b_{k-i} \right) d^k  \mod p
+\end{array}
+\]
+Let $A\cdot B = \sum_{k=0}^{19} t_k d^k$ with $0\leq t_k < d$ be the unique representation of $A\cdot B$ base $d$. Set
+\[
+\bar t_k = \left(\sum_{i=0}^k a_i b_{k-i} \right).
+\]
+Then the $t_k$'s can be computed from the $\bar t_k$'s consecutively as:
+ 
+
+
+
+\bibliographystyle{plain}
+\bibliography{../bibliography.bib}
+\end{document}
