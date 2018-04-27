@@ -10,7 +10,7 @@
 \title{Elliptic curve secp256k1 \\ Implementation notes}
 \author{Todor Milev\footnote{FA Enterprise System}\\ todor@fa.biz}
 \newcommand{\secpTwoFiveSixKone}{{\bf secp256k1}}
-\renewcommand{\mod}{{~~~\bf mod~}}
+\renewcommand{\mod}{{~\bf mod~}}
 \begin{document}
 \maketitle
 \section{Introdution}
@@ -59,30 +59,108 @@ In what follows, we shall use the notation
 \[
 a'=a \mod q
 \]
-to denote remainder $0\leq a' <q$  of $a$ when dividing $a$ by $q$.
-\subsection{Computing the normal form of $x$}
+to denote remainder $0\leq a' <q$  of $a$ when dividing $a$ by $q$. For the rest of this section, we also set 
+\[
+d= 2^{26}.
+\]
+In this way the normal form of a large number $X$ is its $d$-base representation (here $d$ is the ``digit'' of the base).
+
+\subsection{Computing the normal form of $x$}\label{secNormalFormOfFieldElement}
 
 \subsection{Multiplying two elements}
-Let $a$ be an element represented by the large integer $A$ represented by $a_0, \dots, a_9$ and $b$ be represented by the large integer $B$ represented by $b_0, \dots, b_9$. In this section, we show how to compute a representation of $a\cdot b$. This operation is implemented in the function \verb|ECMultiplyFieldElementsInner|. 
+Let $a$ be an element represented by $A = \sum a_i d^i$ with $a_0, \dots, a_8<2^{30}$ and $a_9<2^{22}$. Likewise, let $b$ be represented by $B=\sum b_j d^j$ with analogous inequalities on the coefficients $b_j$. In this section, we show how to compute the normal form of $a\cdot b$. This operation is implemented in the function \verb|ECMultiplyFieldElementsInner|. 
 
-Set 
-\[
-d= 2^{26}
-\]
-and compute as follows.
+Compute as follows.
 \[
 \begin{array}{rcl}
-\displaystyle a\cdot b&=&\displaystyle A\cdot B \mod p\\
-&=&\displaystyle \left(\sum_{i=0}^9 a_i d^i \right) \left(\sum_{j=0}^9 b_j d^j\right)   \mod p\\
-&=&\displaystyle  \sum_{k=0}^{18} \left(\sum_{i=0}^k a_i b_{k-i} \right) d^k  \mod p
+\displaystyle A\cdot B &=&\displaystyle \left(\sum_{i=0}^9 a_i d^i \right) \left(\sum_{j=0}^9 b_j d^j\right) \\
+&=&\displaystyle  \sum_{k=0}^{18} \left(\underbrace{ \sum_{i=0}^k a_i b_{k-i} }_{=\bar t_k} \right) d^k \\
+&=&\displaystyle \sum_{k=0}^{18} \bar t^k d^k,
 \end{array}
 \]
-Let $A\cdot B = \sum_{k=0}^{19} t_k d^k$ with $0\leq t_k < d$ be the unique representation of $A\cdot B$ base $d$. Set
+where we have set $\displaystyle \bar t_k = \left(\sum_{i=0}^k a_i b_{k-i} \right)$. Since $0\leq a_i,b_i < d$, the $\bar t_k$'s are smaller than $2^{64}$ and can be computed by standard arithmetic using the \verb|uint64_t| integer type of the GPU. 
+
+Let
 \[
-\bar t_k = \left(\sum_{i=0}^k a_i b_{k-i} \right).
+A\cdot B = \sum_{k=0}^{19} t_k d^k
+\] 
+with $0\leq t_k < d$ be the unique representation of $A\cdot B$ base $d$. Then the $t_k$ can be computed from the $\bar t_k$'s consecutively via 
+\[
+\begin{array}{rcl}
+\displaystyle t_0 &= &\displaystyle \bar t_0 \mod d\\
+\displaystyle c_0 &= &\displaystyle \left\lfloor \frac{\bar t_0}{d} \right\rfloor\\ \\\hline \\
+\displaystyle t_1 &= &\displaystyle c_0 + \bar t_0 \mod d\\
+\displaystyle c_1 &= &\displaystyle \left\lfloor \frac{c_0 + \bar t_0}{d} \right\rfloor \\
+\displaystyle t_2 &= &\displaystyle c_1 + \bar t_1 \mod d\\
+\displaystyle c_2 &= &\displaystyle \left\lfloor \frac{c_1 + \bar t_1}{d} \right\rfloor \\
+&\vdots&\\
+\displaystyle t_{18} &= &\displaystyle c_{17} + \bar t_{17} \mod d\\
+\displaystyle c_{18} &= &\displaystyle \left\lfloor \frac{c_{17} + \bar t_{17}}{d} \right\rfloor \\ \\ \hline
+\displaystyle t_{19} &= &\displaystyle  c_{18}.
+\end{array}
 \]
-Then the $t_k$'s can be computed from the $\bar t_k$'s consecutively as:
- 
+In the above, all computations except the first and the last are similar, as indicated by the horizontal line, and $\lfloor\bullet \rfloor$ stands as usual for the floor function. Both $\mod d$ and division by $d$ are carried out by bit-shift operations and are therefore fast.
+
+Let $S = (A\cdot B \mod p)$; computing the normal form $S = \sum s_i d^i$, $0\leq s_i < d$, $S < p$ is the final aim of the present discussion. Since $2^{256} \mod p = 2^{32}+977$, it follows that 
+\begin{equation} \label{eqReducet0plust10dPower10}
+\begin{array}{rcll}
+t_0+ t_{10} d^{10} \mod p 
+&=&\displaystyle t_0+t_{10} 2^{26\cdot 10} &\mod p\\
+&=&\displaystyle t_0 + t_{10} \cdot 2^4\cdot 2^{256}  &\mod p\\
+&=&\displaystyle t_0 + t_{10} 2^4 \left(2^{32} + 977 \right)&\mod p\\
+&=&\displaystyle \left(t_0 +t_{10}2^4\cdot 977\right) + t_{10} 2^{10}\cdot d&\mod p \\
+\displaystyle \text{set }g_{0} = t_0 +t_{10}2^4\cdot 977 \mod d \\
+\displaystyle \text{set }f_{0} =\left\lfloor \frac{t_0 +t_{10}2^4\cdot 977}{d}\right\rfloor \\
+&=& g_0 + \left(\underbrace{ f_0+t_{10} 2^{10}}_{=h_0}\right) d &\mod p.
+\end{array}
+\end{equation}
+Set $\displaystyle h_0 = f_0+t_{10} 2^{10}$ as indicated above. The computation above shows how ``reduce'' the $d$-digit $t_{10}$ by modifying the two least significant $d$-digits. Accounting for the ``carry-over'' digit $h_0$, we can continue with this process for the next pair of digits $ t_1 d+t_{11} d^{11}$, and so on. This is done below (similar steps have been omitted).
+\[
+\begin{array}{rcll}
+h_0 d +t_1 d+ t_{11} d^{11} \mod p 
+&=&\displaystyle \left(h_0+t_1+t_{11} d^{10}\right) d &\mod p\\
+&=& \dots \text{compute as in (\ref{eqReducet0plust10dPower10})} \dots\\
+\displaystyle \text{set }g_{1} = h_0+t_1 +t_{11}2^4\cdot 977 \mod d \\
+\displaystyle \text{set }f_{1} =\left\lfloor \frac{h_0+t_1 +t_{11}2^4\cdot 977}{d}\right\rfloor \\
+&=& g_1d + \left(\underbrace{ f_1+t_{11} 2^{10}}_{=h_1}\right) d^2 &\mod p\\
+&\vdots&\\
+h_8 d^9 + t_{9} d^9 + t_{19} d^{19}\mod p &=& \dots\\
+\displaystyle \text{set }g_{9} = h_8+t_9 +t_{19}2^4\cdot 977 \mod d \\
+\displaystyle \text{set }f_{9} =\left\lfloor \frac{h_8+t_9 +t_{19}2^4\cdot 977}{d}\right\rfloor \\
+&=&g_9 d^9 + \left( \underbrace{f_9+t_{19} 2^{10}}_{=h_9}\right)d^{10} &\mod p.
+\end{array}
+\]
+In the computations above, $t_{19}$ is maximum $26$ bits long and so
+\begin{equation}\label{eqh9inequality}
+h_9 < f_9 + 2^{26}2^{10} < 2^{37}.
+\end{equation}
+In order to obtain the normal form of $S$, we need to modify the digits $g_9$ and $h_9$ as follows.
+\[
+\begin{array}{rcll}
+\displaystyle g_9 d^9 + h_9 d^{10} \mod p &=&\displaystyle  (g_9+h_9 d )d^9 &\mod p \\
+\displaystyle \text{set }r =g_9 + h_9 d \mod 2^{22}\\
+\displaystyle \text{set }m = \left\lfloor \frac{g_9 + h_9 d }{2^{22}} \right\rfloor\\
+&=& \left( r + m \cdot 2^{22} \right) d^9  &\mod p\\
+&=& r d^9 + m 2^{256} &\mod p\\
+&=& r d^9 + m\left(2^{32}+977\right) &\mod p.\\
+\end{array}
+\]
+From inequality (\ref{eqh9inequality}), we get that $h_9 d < 2^{37} 2^{26} = 2^{63}$, and so the computations above fit in \verb|uint64_t| type. Again using (\ref{eqh9inequality}) we get the following estimates for the sizes of digits.
+\[
+\begin{array}{rcl}
+
+\displaystyle g_9+ h_9 d &<& \displaystyle 2^{64}\\
+\displaystyle m=\left\lfloor \frac{g_9 + h_9 d }{2^{22}} \right\rfloor&<& \displaystyle \frac{2^{64}}{2^{22}} = 2^{42}\\
+m\left(2^{32}+977\right) &<& 2^{33}\cdot 2^{42} = 2^{75} < d^3.
+\end{array}
+\]
+Thus the number $m\left(2^{32}+977\right)$ can be written in the form $z_0 + z_1 d + z_2 d^2 $ with $0\leq z_0, z_1, z_2 < d$. Collecting the information so far, we get 
+\begin{equation}\label{eqAtimesBalmostNormalForm}
+A\cdot B \mod p = (z_0 + g_0) + (z_1 + g_1)d + (z_2+g_2)d^2 + \sum _{k=3}^{8} g_k d^k + r d^9,
+\end{equation}
+where $z_0+g_0 < 2d$, $z_1+g_1 <2d$, $z_2+g_2<2d$, $g_k< d$, $r < 2^{22}$. Except in the cases when $z_i+g_i\geq d$, this expression is normalized. To ensure our result is normalized, we need to reduce the representation above according to Section \ref{secNormalFormOfFieldElement}. This does not need to be done immediately as the form \eqref{eqAtimesBalmostNormalForm} satisfies all assumptions of the present discussion. 
+
+
 
 
 

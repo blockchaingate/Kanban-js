@@ -408,7 +408,7 @@ void secp256k1_fe_add(fieldElement *elementToAddInto, const fieldElement *other)
   elementToAddInto->n[9] += other->n[9];
 }
 
-void ECMultiplyFieldElements_inner(uint32_t *output, const uint32_t *a, const uint32_t *b) {
+void ECMultiplyFieldElementsInner(uint32_t *output, const uint32_t *a, const uint32_t *b) {
   uint64_t c = (uint64_t)a[0] * b[0];
   uint32_t t0 = c & 0x3FFFFFFUL; c = c >> 26;
   c = c + (uint64_t)a[0] * b[1] +
@@ -548,7 +548,7 @@ void ECMultiplyFieldElements_inner(uint32_t *output, const uint32_t *a, const ui
   output[7] = c & 0x3FFFFFFUL; c = c >> 26;
   c = c + t8 + (uint64_t)t17 * 0x400UL + (uint64_t)t18 * 0x3D10UL;
   output[8] = c & 0x3FFFFFFUL; c = c >> 26;
-  c = c + t9 + (uint64_t)t18 * 0x400UL + (uint64_t)t19 * 0x1000003D10UL;
+  c = c + t9 + (uint64_t)t18 * 0x400UL + (uint64_t)t19 * 0x1000003D10UL; // 0x1000003D10UL equals 2^4*(2^{32} + 977)
   output[9] = c & 0x03FFFFFUL; c = c >> 22;
   uint64_t d = t0 + c * 0x3D1UL;
   output[0] = d & 0x3FFFFFFUL; d = d >> 26;
@@ -652,7 +652,7 @@ void ECSquareFieldElement_Inner(uint32_t* output, const uint32_t* input) {
   output[7] = c & 0x3FFFFFFUL; c = c >> 26;
   c = c + t8 + (uint64_t)t17*0x400UL + (uint64_t)t18 * 0x3D10UL;
   output[8] = c & 0x3FFFFFFUL; c = c >> 26;
-  c = c + t9 + (uint64_t)t18*0x400UL + (uint64_t)t19 * 0x1000003D10UL;
+  c = c + t9 + (uint64_t)t18*0x400UL + (uint64_t)t19 * 0x1000003D10UL; // 0x1000003D10UL equals 2^4*(2^{32} + 977)
   output[9] = c & 0x03FFFFFUL; c = c >> 22;
   uint64_t d = t0 + c * 0x3D1UL;
   output[0] = d & 0x3FFFFFFUL; d = d >> 26;
@@ -663,7 +663,7 @@ void ECSquareFieldElement_Inner(uint32_t* output, const uint32_t* input) {
 
 
 void ECMultiplyFieldElements(fieldElement* output, const fieldElement* inputLeft, const fieldElement* inputRight) {
-  ECMultiplyFieldElements_inner(output->n, inputLeft->n, inputRight->n, );
+  ECMultiplyFieldElementsInner(output->n, inputLeft->n, inputRight->n, );
 }
 
 void ECSquareFieldElement(fieldElement* output, const fieldElement* input) {
