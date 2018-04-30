@@ -22,16 +22,7 @@ int totalCouts = 0;
 
 extern Logger logServer;
 
-Logger logTest("../logfiles/logTest.txt", "[test] ");
-
-#include "cl/secp256k1_opencl.h"
-int mainTest()
-{
-
-  //secp256k1_ecdsa_sig_verify();
-
-  return 0;
-}
+extern int mainTest();
 
 int main(int numberOfArguments, char *arguments[])
 {

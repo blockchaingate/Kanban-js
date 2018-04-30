@@ -1,5 +1,7 @@
 #ifndef LOGGING_H_header
 #define LOGGING_H_header
+#include <fstream>
+#include <iostream>
 
 class Logger
 {

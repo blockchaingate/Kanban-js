@@ -7,7 +7,8 @@ SOURCES += \
 main.cpp \
     gpu.cpp \
     server.cpp \
-    miscellaneous.cpp
+    miscellaneous.cpp \
+    test.cpp
 
 LIBS+=-lOpenCL
 

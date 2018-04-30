@@ -1388,6 +1388,230 @@ static void secp256k1_fe_from_storage(secp256k1_fe *r, const secp256k1_fe_storag
 //******end of field_10x26_impl.h******
 
 
+//******Contents of field_impl.h******
+
+static int secp256k1_fe_equal_var(const secp256k1_fe *a, const secp256k1_fe *b) {
+    secp256k1_fe na;
+    secp256k1_fe_negate(&na, a, 1);
+    secp256k1_fe_add(&na, b);
+    return secp256k1_fe_normalizes_to_zero_var(&na);
+}
+
+static int secp256k1_fe_sqrt_var(secp256k1_fe *r, const secp256k1_fe *a) {
+    secp256k1_fe x2, x3, x6, x9, x11, x22, x44, x88, x176, x220, x223, t1;
+    int j;
+
+    /** The binary representation of (p + 1)/4 has 3 blocks of 1s, with lengths in
+     *  { 2, 22, 223 }. Use an addition chain to calculate 2^n - 1 for each block:
+     *  1, [2], 3, 6, 9, 11, [22], 44, 88, 176, 220, [223]
+     */
+
+    secp256k1_fe_sqr(&x2, a);
+    secp256k1_fe_mul(&x2, &x2, a);
+
+    secp256k1_fe_sqr(&x3, &x2);
+    secp256k1_fe_mul(&x3, &x3, a);
+
+    x6 = x3;
+    for (j=0; j<3; j++) {
+        secp256k1_fe_sqr(&x6, &x6);
+    }
+    secp256k1_fe_mul(&x6, &x6, &x3);
+
+    x9 = x6;
+    for (j=0; j<3; j++) {
+        secp256k1_fe_sqr(&x9, &x9);
+    }
+    secp256k1_fe_mul(&x9, &x9, &x3);
+
+    x11 = x9;
+    for (j=0; j<2; j++) {
+        secp256k1_fe_sqr(&x11, &x11);
+    }
+    secp256k1_fe_mul(&x11, &x11, &x2);
+
+    x22 = x11;
+    for (j=0; j<11; j++) {
+        secp256k1_fe_sqr(&x22, &x22);
+    }
+    secp256k1_fe_mul(&x22, &x22, &x11);
+
+    x44 = x22;
+    for (j=0; j<22; j++) {
+        secp256k1_fe_sqr(&x44, &x44);
+    }
+    secp256k1_fe_mul(&x44, &x44, &x22);
+
+    x88 = x44;
+    for (j=0; j<44; j++) {
+        secp256k1_fe_sqr(&x88, &x88);
+    }
+    secp256k1_fe_mul(&x88, &x88, &x44);
+
+    x176 = x88;
+    for (j=0; j<88; j++) {
+        secp256k1_fe_sqr(&x176, &x176);
+    }
+    secp256k1_fe_mul(&x176, &x176, &x88);
+
+    x220 = x176;
+    for (j=0; j<44; j++) {
+        secp256k1_fe_sqr(&x220, &x220);
+    }
+    secp256k1_fe_mul(&x220, &x220, &x44);
+
+    x223 = x220;
+    for (j=0; j<3; j++) {
+        secp256k1_fe_sqr(&x223, &x223);
+    }
+    secp256k1_fe_mul(&x223, &x223, &x3);
+
+    /* The final result is then assembled using a sliding window over the blocks. */
+
+    t1 = x223;
+    for (j=0; j<23; j++) {
+        secp256k1_fe_sqr(&t1, &t1);
+    }
+    secp256k1_fe_mul(&t1, &t1, &x22);
+    for (j=0; j<6; j++) {
+        secp256k1_fe_sqr(&t1, &t1);
+    }
+    secp256k1_fe_mul(&t1, &t1, &x2);
+    secp256k1_fe_sqr(&t1, &t1);
+    secp256k1_fe_sqr(r, &t1);
+
+    /* Check that a square root was actually calculated */
+
+    secp256k1_fe_sqr(&t1, r);
+    return secp256k1_fe_equal_var(&t1, a);
+}
+
+static void secp256k1_fe_inv(secp256k1_fe *r, const secp256k1_fe *a) {
+    secp256k1_fe x2, x3, x6, x9, x11, x22, x44, x88, x176, x220, x223, t1;
+    int j;
+
+    /** The binary representation of (p - 2) has 5 blocks of 1s, with lengths in
+     *  { 1, 2, 22, 223 }. Use an addition chain to calculate 2^n - 1 for each block:
+     *  [1], [2], 3, 6, 9, 11, [22], 44, 88, 176, 220, [223]
+     */
+
+    secp256k1_fe_sqr(&x2, a);
+    secp256k1_fe_mul(&x2, &x2, a);
+
+    secp256k1_fe_sqr(&x3, &x2);
+    secp256k1_fe_mul(&x3, &x3, a);
+
+    x6 = x3;
+    for (j=0; j<3; j++) {
+        secp256k1_fe_sqr(&x6, &x6);
+    }
+    secp256k1_fe_mul(&x6, &x6, &x3);
+
+    x9 = x6;
+    for (j=0; j<3; j++) {
+        secp256k1_fe_sqr(&x9, &x9);
+    }
+    secp256k1_fe_mul(&x9, &x9, &x3);
+
+    x11 = x9;
+    for (j=0; j<2; j++) {
+        secp256k1_fe_sqr(&x11, &x11);
+    }
+    secp256k1_fe_mul(&x11, &x11, &x2);
+
+    x22 = x11;
+    for (j=0; j<11; j++) {
+        secp256k1_fe_sqr(&x22, &x22);
+    }
+    secp256k1_fe_mul(&x22, &x22, &x11);
+
+    x44 = x22;
+    for (j=0; j<22; j++) {
+        secp256k1_fe_sqr(&x44, &x44);
+    }
+    secp256k1_fe_mul(&x44, &x44, &x22);
+
+    x88 = x44;
+    for (j=0; j<44; j++) {
+        secp256k1_fe_sqr(&x88, &x88);
+    }
+    secp256k1_fe_mul(&x88, &x88, &x44);
+
+    x176 = x88;
+    for (j=0; j<88; j++) {
+        secp256k1_fe_sqr(&x176, &x176);
+    }
+    secp256k1_fe_mul(&x176, &x176, &x88);
+
+    x220 = x176;
+    for (j=0; j<44; j++) {
+        secp256k1_fe_sqr(&x220, &x220);
+    }
+    secp256k1_fe_mul(&x220, &x220, &x44);
+
+    x223 = x220;
+    for (j=0; j<3; j++) {
+        secp256k1_fe_sqr(&x223, &x223);
+    }
+    secp256k1_fe_mul(&x223, &x223, &x3);
+
+    /* The final result is then assembled using a sliding window over the blocks. */
+
+    t1 = x223;
+    for (j=0; j<23; j++) {
+        secp256k1_fe_sqr(&t1, &t1);
+    }
+    secp256k1_fe_mul(&t1, &t1, &x22);
+    for (j=0; j<5; j++) {
+        secp256k1_fe_sqr(&t1, &t1);
+    }
+    secp256k1_fe_mul(&t1, &t1, a);
+    for (j=0; j<3; j++) {
+        secp256k1_fe_sqr(&t1, &t1);
+    }
+    secp256k1_fe_mul(&t1, &t1, &x2);
+    for (j=0; j<2; j++) {
+        secp256k1_fe_sqr(&t1, &t1);
+    }
+    secp256k1_fe_mul(r, a, &t1);
+}
+
+static void secp256k1_fe_inv_var(secp256k1_fe *r, const secp256k1_fe *a) {
+    secp256k1_fe_inv(r, a);
+}
+
+static void secp256k1_fe_inv_all_var(size_t len, secp256k1_fe *r, const secp256k1_fe *a) {
+    secp256k1_fe u;
+    size_t i;
+    if (len < 1) {
+        return;
+    }
+
+    VERIFY_CHECK((r + len <= a) || (a + len <= r));
+
+    r[0] = a[0];
+
+    i = 0;
+    while (++i < len) {
+        secp256k1_fe_mul(&r[i], &r[i - 1], &a[i]);
+    }
+
+    secp256k1_fe_inv_var(&u, &r[--i]);
+
+    while (i > 0) {
+        size_t j = i--;
+        secp256k1_fe_mul(&r[j], &r[i], &u);
+        secp256k1_fe_mul(&u, &u, &a[j]);
+    }
+
+    r[0] = u;
+}
+//******end of field_impl.h******
+
+
+//******Contents of group.h******
+
+
 //******Contents of group.h******
 
 /** A group element of the secp256k1 curve, in affine coordinates. */
@@ -2936,8 +3160,286 @@ static void secp256k1_scalar_split_lambda(secp256k1_scalar *r1, secp256k1_scalar
 
 /** Multiply a and b (without taking the modulus!), divide by 2**shift, and round to the nearest integer. Shift must be at least 256. */
 static void secp256k1_scalar_mul_shift_var(secp256k1_scalar *r, const secp256k1_scalar *a, const secp256k1_scalar *b, unsigned int shift);
-
 //******end of scalar.h******
+
+
+//******Contents of scalar_impl.h******
+#include <string.h>
+
+static void secp256k1_scalar_inverse(secp256k1_scalar *r, const secp256k1_scalar *x) {
+    secp256k1_scalar *t;
+    int i;
+    /* First compute x ^ (2^N - 1) for some values of N. */
+    secp256k1_scalar x2, x3, x4, x6, x7, x8, x15, x30, x60, x120, x127;
+
+    secp256k1_scalar_sqr(&x2,  x);
+    secp256k1_scalar_mul(&x2, &x2,  x);
+
+    secp256k1_scalar_sqr(&x3, &x2);
+    secp256k1_scalar_mul(&x3, &x3,  x);
+
+    secp256k1_scalar_sqr(&x4, &x3);
+    secp256k1_scalar_mul(&x4, &x4,  x);
+
+    secp256k1_scalar_sqr(&x6, &x4);
+    secp256k1_scalar_sqr(&x6, &x6);
+    secp256k1_scalar_mul(&x6, &x6, &x2);
+
+    secp256k1_scalar_sqr(&x7, &x6);
+    secp256k1_scalar_mul(&x7, &x7,  x);
+
+    secp256k1_scalar_sqr(&x8, &x7);
+    secp256k1_scalar_mul(&x8, &x8,  x);
+
+    secp256k1_scalar_sqr(&x15, &x8);
+    for (i = 0; i < 6; i++) {
+        secp256k1_scalar_sqr(&x15, &x15);
+    }
+    secp256k1_scalar_mul(&x15, &x15, &x7);
+
+    secp256k1_scalar_sqr(&x30, &x15);
+    for (i = 0; i < 14; i++) {
+        secp256k1_scalar_sqr(&x30, &x30);
+    }
+    secp256k1_scalar_mul(&x30, &x30, &x15);
+
+    secp256k1_scalar_sqr(&x60, &x30);
+    for (i = 0; i < 29; i++) {
+        secp256k1_scalar_sqr(&x60, &x60);
+    }
+    secp256k1_scalar_mul(&x60, &x60, &x30);
+
+    secp256k1_scalar_sqr(&x120, &x60);
+    for (i = 0; i < 59; i++) {
+        secp256k1_scalar_sqr(&x120, &x120);
+    }
+    secp256k1_scalar_mul(&x120, &x120, &x60);
+
+    secp256k1_scalar_sqr(&x127, &x120);
+    for (i = 0; i < 6; i++) {
+        secp256k1_scalar_sqr(&x127, &x127);
+    }
+    secp256k1_scalar_mul(&x127, &x127, &x7);
+
+    /* Then accumulate the final result (t starts at x127). */
+    t = &x127;
+    for (i = 0; i < 2; i++) { /* 0 */
+        secp256k1_scalar_sqr(t, t);
+    }
+    secp256k1_scalar_mul(t, t, x); /* 1 */
+    for (i = 0; i < 4; i++) { /* 0 */
+        secp256k1_scalar_sqr(t, t);
+    }
+    secp256k1_scalar_mul(t, t, &x3); /* 111 */
+    for (i = 0; i < 2; i++) { /* 0 */
+        secp256k1_scalar_sqr(t, t);
+    }
+    secp256k1_scalar_mul(t, t, x); /* 1 */
+    for (i = 0; i < 2; i++) { /* 0 */
+        secp256k1_scalar_sqr(t, t);
+    }
+    secp256k1_scalar_mul(t, t, x); /* 1 */
+    for (i = 0; i < 2; i++) { /* 0 */
+        secp256k1_scalar_sqr(t, t);
+    }
+    secp256k1_scalar_mul(t, t, x); /* 1 */
+    for (i = 0; i < 4; i++) { /* 0 */
+        secp256k1_scalar_sqr(t, t);
+    }
+    secp256k1_scalar_mul(t, t, &x3); /* 111 */
+    for (i = 0; i < 3; i++) { /* 0 */
+        secp256k1_scalar_sqr(t, t);
+    }
+    secp256k1_scalar_mul(t, t, &x2); /* 11 */
+    for (i = 0; i < 4; i++) { /* 0 */
+        secp256k1_scalar_sqr(t, t);
+    }
+    secp256k1_scalar_mul(t, t, &x3); /* 111 */
+    for (i = 0; i < 5; i++) { /* 00 */
+        secp256k1_scalar_sqr(t, t);
+    }
+    secp256k1_scalar_mul(t, t, &x3); /* 111 */
+    for (i = 0; i < 4; i++) { /* 00 */
+        secp256k1_scalar_sqr(t, t);
+    }
+    secp256k1_scalar_mul(t, t, &x2); /* 11 */
+    for (i = 0; i < 2; i++) { /* 0 */
+        secp256k1_scalar_sqr(t, t);
+    }
+    secp256k1_scalar_mul(t, t, x); /* 1 */
+    for (i = 0; i < 2; i++) { /* 0 */
+        secp256k1_scalar_sqr(t, t);
+    }
+    secp256k1_scalar_mul(t, t, x); /* 1 */
+    for (i = 0; i < 5; i++) { /* 0 */
+        secp256k1_scalar_sqr(t, t);
+    }
+    secp256k1_scalar_mul(t, t, &x4); /* 1111 */
+    for (i = 0; i < 2; i++) { /* 0 */
+        secp256k1_scalar_sqr(t, t);
+    }
+    secp256k1_scalar_mul(t, t, x); /* 1 */
+    for (i = 0; i < 3; i++) { /* 00 */
+        secp256k1_scalar_sqr(t, t);
+    }
+    secp256k1_scalar_mul(t, t, x); /* 1 */
+    for (i = 0; i < 4; i++) { /* 000 */
+        secp256k1_scalar_sqr(t, t);
+    }
+    secp256k1_scalar_mul(t, t, x); /* 1 */
+    for (i = 0; i < 2; i++) { /* 0 */
+        secp256k1_scalar_sqr(t, t);
+    }
+    secp256k1_scalar_mul(t, t, x); /* 1 */
+    for (i = 0; i < 10; i++) { /* 0000000 */
+        secp256k1_scalar_sqr(t, t);
+    }
+    secp256k1_scalar_mul(t, t, &x3); /* 111 */
+    for (i = 0; i < 4; i++) { /* 0 */
+        secp256k1_scalar_sqr(t, t);
+    }
+    secp256k1_scalar_mul(t, t, &x3); /* 111 */
+    for (i = 0; i < 9; i++) { /* 0 */
+        secp256k1_scalar_sqr(t, t);
+    }
+    secp256k1_scalar_mul(t, t, &x8); /* 11111111 */
+    for (i = 0; i < 2; i++) { /* 0 */
+        secp256k1_scalar_sqr(t, t);
+    }
+    secp256k1_scalar_mul(t, t, x); /* 1 */
+    for (i = 0; i < 3; i++) { /* 00 */
+        secp256k1_scalar_sqr(t, t);
+    }
+    secp256k1_scalar_mul(t, t, x); /* 1 */
+    for (i = 0; i < 3; i++) { /* 00 */
+        secp256k1_scalar_sqr(t, t);
+    }
+    secp256k1_scalar_mul(t, t, x); /* 1 */
+    for (i = 0; i < 5; i++) { /* 0 */
+        secp256k1_scalar_sqr(t, t);
+    }
+    secp256k1_scalar_mul(t, t, &x4); /* 1111 */
+    for (i = 0; i < 2; i++) { /* 0 */
+        secp256k1_scalar_sqr(t, t);
+    }
+    secp256k1_scalar_mul(t, t, x); /* 1 */
+    for (i = 0; i < 5; i++) { /* 000 */
+        secp256k1_scalar_sqr(t, t);
+    }
+    secp256k1_scalar_mul(t, t, &x2); /* 11 */
+    for (i = 0; i < 4; i++) { /* 00 */
+        secp256k1_scalar_sqr(t, t);
+    }
+    secp256k1_scalar_mul(t, t, &x2); /* 11 */
+    for (i = 0; i < 2; i++) { /* 0 */
+        secp256k1_scalar_sqr(t, t);
+    }
+    secp256k1_scalar_mul(t, t, x); /* 1 */
+    for (i = 0; i < 8; i++) { /* 000000 */
+        secp256k1_scalar_sqr(t, t);
+    }
+    secp256k1_scalar_mul(t, t, &x2); /* 11 */
+    for (i = 0; i < 3; i++) { /* 0 */
+        secp256k1_scalar_sqr(t, t);
+    }
+    secp256k1_scalar_mul(t, t, &x2); /* 11 */
+    for (i = 0; i < 3; i++) { /* 00 */
+        secp256k1_scalar_sqr(t, t);
+    }
+    secp256k1_scalar_mul(t, t, x); /* 1 */
+    for (i = 0; i < 6; i++) { /* 00000 */
+        secp256k1_scalar_sqr(t, t);
+    }
+    secp256k1_scalar_mul(t, t, x); /* 1 */
+    for (i = 0; i < 8; i++) { /* 00 */
+        secp256k1_scalar_sqr(t, t);
+    }
+    secp256k1_scalar_mul(r, t, &x6); /* 111111 */
+}
+
+static int secp256k1_scalar_is_even(const secp256k1_scalar *a) {
+    /* d[0] is present and is the lowest word for all representations */
+    return !(a->d[0] & 1);
+}
+
+static void secp256k1_scalar_inverse_var(secp256k1_scalar *r, const secp256k1_scalar *x) {
+  secp256k1_scalar_inverse(r, x);
+}
+
+#ifdef USE_ENDOMORPHISM
+/**
+ * The Secp256k1 curve has an endomorphism, where lambda * (x, y) = (beta * x, y), where
+ * lambda is {0x53,0x63,0xad,0x4c,0xc0,0x5c,0x30,0xe0,0xa5,0x26,0x1c,0x02,0x88,0x12,0x64,0x5a,
+ *            0x12,0x2e,0x22,0xea,0x20,0x81,0x66,0x78,0xdf,0x02,0x96,0x7c,0x1b,0x23,0xbd,0x72}
+ *
+ * "Guide to Elliptic Curve Cryptography" (Hankerson, Menezes, Vanstone) gives an algorithm
+ * (algorithm 3.74) to find k1 and k2 given k, such that k1 + k2 * lambda == k mod n, and k1
+ * and k2 have a small size.
+ * It relies on constants a1, b1, a2, b2. These constants for the value of lambda above are:
+ *
+ * - a1 =      {0x30,0x86,0xd2,0x21,0xa7,0xd4,0x6b,0xcd,0xe8,0x6c,0x90,0xe4,0x92,0x84,0xeb,0x15}
+ * - b1 =     -{0xe4,0x43,0x7e,0xd6,0x01,0x0e,0x88,0x28,0x6f,0x54,0x7f,0xa9,0x0a,0xbf,0xe4,0xc3}
+ * - a2 = {0x01,0x14,0xca,0x50,0xf7,0xa8,0xe2,0xf3,0xf6,0x57,0xc1,0x10,0x8d,0x9d,0x44,0xcf,0xd8}
+ * - b2 =      {0x30,0x86,0xd2,0x21,0xa7,0xd4,0x6b,0xcd,0xe8,0x6c,0x90,0xe4,0x92,0x84,0xeb,0x15}
+ *
+ * The algorithm then computes c1 = round(b1 * k / n) and c2 = round(b2 * k / n), and gives
+ * k1 = k - (c1*a1 + c2*a2) and k2 = -(c1*b1 + c2*b2). Instead, we use modular arithmetic, and
+ * compute k1 as k - k2 * lambda, avoiding the need for constants a1 and a2.
+ *
+ * g1, g2 are precomputed constants used to replace division with a rounded multiplication
+ * when decomposing the scalar for an endomorphism-based point multiplication.
+ *
+ * The possibility of using precomputed estimates is mentioned in "Guide to Elliptic Curve
+ * Cryptography" (Hankerson, Menezes, Vanstone) in section 3.5.
+ *
+ * The derivation is described in the paper "Efficient Software Implementation of Public-Key
+ * Cryptography on Sensor Networks Using the MSP430X Microcontroller" (Gouvea, Oliveira, Lopez),
+ * Section 4.3 (here we use a somewhat higher-precision estimate):
+ * d = a1*b2 - b1*a2
+ * g1 = round((2^272)*b2/d)
+ * g2 = round((2^272)*b1/d)
+ *
+ * (Note that 'd' is also equal to the curve order here because [a1,b1] and [a2,b2] are found
+ * as outputs of the Extended Euclidean Algorithm on inputs 'order' and 'lambda').
+ *
+ * The function below splits a in r1 and r2, such that r1 + lambda * r2 == a (mod order).
+ */
+
+static void secp256k1_scalar_split_lambda(secp256k1_scalar *r1, secp256k1_scalar *r2, const secp256k1_scalar *a) {
+    secp256k1_scalar c1, c2;
+    static const secp256k1_scalar minus_lambda = SECP256K1_SCALAR_CONST(
+        0xAC9C52B3UL, 0x3FA3CF1FUL, 0x5AD9E3FDUL, 0x77ED9BA4UL,
+        0xA880B9FCUL, 0x8EC739C2UL, 0xE0CFC810UL, 0xB51283CFUL
+    );
+    static const secp256k1_scalar minus_b1 = SECP256K1_SCALAR_CONST(
+        0x00000000UL, 0x00000000UL, 0x00000000UL, 0x00000000UL,
+        0xE4437ED6UL, 0x010E8828UL, 0x6F547FA9UL, 0x0ABFE4C3UL
+    );
+    static const secp256k1_scalar minus_b2 = SECP256K1_SCALAR_CONST(
+        0xFFFFFFFFUL, 0xFFFFFFFFUL, 0xFFFFFFFFUL, 0xFFFFFFFEUL,
+        0x8A280AC5UL, 0x0774346DUL, 0xD765CDA8UL, 0x3DB1562CUL
+    );
+    static const secp256k1_scalar g1 = SECP256K1_SCALAR_CONST(
+        0x00000000UL, 0x00000000UL, 0x00000000UL, 0x00003086UL,
+        0xD221A7D4UL, 0x6BCDE86CUL, 0x90E49284UL, 0xEB153DABUL
+    );
+    static const secp256k1_scalar g2 = SECP256K1_SCALAR_CONST(
+        0x00000000UL, 0x00000000UL, 0x00000000UL, 0x0000E443UL,
+        0x7ED6010EUL, 0x88286F54UL, 0x7FA90ABFUL, 0xE4C42212UL
+    );
+    VERIFY_CHECK(r1 != a);
+    VERIFY_CHECK(r2 != a);
+    /* these _var calls are constant time since the shift amount is constant */
+    secp256k1_scalar_mul_shift_var(&c1, a, &g1, 272);
+    secp256k1_scalar_mul_shift_var(&c2, a, &g2, 272);
+    secp256k1_scalar_mul(&c1, &c1, &minus_b1);
+    secp256k1_scalar_mul(&c2, &c2, &minus_b2);
+    secp256k1_scalar_add(r2, &c1, &c2);
+    secp256k1_scalar_mul(r1, r2, &minus_lambda);
+    secp256k1_scalar_add(r1, r1, a);
+}
+#endif
+//******end of scalar_impl.h******
 
 
 //******Contents of ecmult.h******
@@ -2950,7 +3452,7 @@ typedef struct {
 } secp256k1_ecmult_context;
 
 static void secp256k1_ecmult_context_init(secp256k1_ecmult_context *ctx);
-static void secp256k1_ecmult_context_build(secp256k1_ecmult_context *ctx, const secp256k1_callback *cb);
+static void secp256k1_ecmult_context_build(secp256k1_ecmult_context *output, const secp256k1_callback *cb);
 static void secp256k1_ecmult_context_clone(secp256k1_ecmult_context *dst,
                                            const secp256k1_ecmult_context *src, const secp256k1_callback *cb);
 static void secp256k1_ecmult_context_clear(secp256k1_ecmult_context *ctx);
@@ -3096,36 +3598,20 @@ static void secp256k1_ecmult_context_init(secp256k1_ecmult_context *ctx) {
 #endif
 }
 
-static void secp256k1_ecmult_context_build(secp256k1_ecmult_context *ctx, const secp256k1_callback *cb) {
+static void secp256k1_ecmult_context_build(secp256k1_ecmult_context *output, const secp256k1_callback *cb) {
     secp256k1_gej gj;
 
-    if (ctx->pre_g != NULL) {
+    if (output->pre_g != NULL) {
         return;
     }
 
     /* get the generator */
     secp256k1_gej_set_ge(&gj, &secp256k1_ge_const_g);
 
-    ctx->pre_g = (secp256k1_ge_storage (*)[])checked_malloc(cb, sizeof((*ctx->pre_g)[0]) * ECMULT_TABLE_SIZE(WINDOW_G));
+    output->pre_g = (secp256k1_ge_storage (*)[])checked_malloc(cb, sizeof((*output->pre_g)[0]) * ECMULT_TABLE_SIZE(WINDOW_G));
 
     /* precompute the tables with odd multiples */
-    secp256k1_ecmult_odd_multiples_table_storage_var(ECMULT_TABLE_SIZE(WINDOW_G), *ctx->pre_g, &gj, cb);
-
-#ifdef USE_ENDOMORPHISM
-    {
-        secp256k1_gej g_128j;
-        int i;
-
-        ctx->pre_g_128 = (secp256k1_ge_storage (*)[])checked_malloc(cb, sizeof((*ctx->pre_g_128)[0]) * ECMULT_TABLE_SIZE(WINDOW_G));
-
-        /* calculate 2^128*generator */
-        g_128j = gj;
-        for (i = 0; i < 128; i++) {
-            secp256k1_gej_double_var(&g_128j, &g_128j, NULL);
-        }
-        secp256k1_ecmult_odd_multiples_table_storage_var(ECMULT_TABLE_SIZE(WINDOW_G), *ctx->pre_g_128, &g_128j, cb);
-    }
-#endif
+    secp256k1_ecmult_odd_multiples_table_storage_var(ECMULT_TABLE_SIZE(WINDOW_G), *output->pre_g, &gj, cb);
 }
 
 static void secp256k1_ecmult_context_clone(secp256k1_ecmult_context *dst,
@@ -3934,6 +4420,8 @@ static void secp256k1_rfc6979_hmac_sha256_finalize(secp256k1_rfc6979_hmac_sha256
 #ifdef USE_ECMULT_STATIC_PRECOMPUTATION
 //#include "ecmult_static_context.h"
 #endif
+// One must call secp256k1_ecmult_gen_context_init on a newly created generator context.
+ 
 static void secp256k1_ecmult_gen_context_init(secp256k1_ecmult_gen_context *ctx) {
     ctx->prec = NULL;
 }
@@ -4037,6 +4525,7 @@ static void secp256k1_ecmult_gen_context_clear(secp256k1_ecmult_gen_context *ctx
 }
 
 static void secp256k1_ecmult_gen(const secp256k1_ecmult_gen_context *ctx, secp256k1_gej *r, const secp256k1_scalar *gn) {
+    logTest << "DEBUG: inside: secp256k1_ecmult_gen" << Logger::endL;
     secp256k1_ge add;
     secp256k1_ge_storage adds;
     secp256k1_scalar gnb;
@@ -4047,9 +4536,9 @@ static void secp256k1_ecmult_gen(const secp256k1_ecmult_gen_context *ctx, secp25
     /* Blind scalar/point multiplication by computing (n-b)G + bG instead of nG. */
     secp256k1_scalar_add(&gnb, gn, &ctx->blind);
     add.infinity = 0;
-    for (j = 0; j < 64; j++) {
+    for (j = 0; j < 64; j ++) {
         bits = secp256k1_scalar_get_bits(&gnb, j * 4, 4);
-        for (i = 0; i < 16; i++) {
+        for (i = 0; i < 16; i ++) {
             /** This uses a conditional move to avoid any secret data in array indexes.
              *   _Any_ use of secret indexes has been demonstrated to result in timing
              *   sidechannels, even when the cache-line access patterns are uniform.
@@ -4346,8 +4835,9 @@ static int secp256k1_ecdsa_sig_sign(const secp256k1_ecmult_gen_context *ctx, sec
     secp256k1_ge r;
     secp256k1_scalar n;
     int overflow = 0;
-
+    logTest << "DEBUG: here I am pt 1." << Logger::endL;
     secp256k1_ecmult_gen(ctx, &rp, nonce);
+    logTest << "DEBUG: here I am pt 2." << Logger::endL;
     secp256k1_ge_set_gej(&r, &rp);
     secp256k1_fe_normalize(&r.x);
     secp256k1_fe_normalize(&r.y);
