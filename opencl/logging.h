@@ -5,7 +5,7 @@ class Logger
 {
 public:
   std::fstream theFile;
-  std::string description;
+  std::string descriptionPrependToLogs;
   bool flagExtraDescription;
   enum logModifiers{ endL};
   friend Logger& operator << (Logger& inputLogger, logModifiers other)
@@ -22,17 +22,17 @@ public:
   { if (inputLogger.flagExtraDescription)
     {
       inputLogger.flagExtraDescription = false;
-      std::cout << inputLogger.description;
+      std::cout << inputLogger.descriptionPrependToLogs;
     }
     inputLogger.theFile << other;
     inputLogger.theFile.flush();
     std::cout << other;
     return inputLogger;
   }
-  Logger(const std::string& pathname, const std::string& inputDescription)
+  Logger(const std::string& pathname, const std::string& inputDescriptionPrependToLogs)
   { this->theFile.open(pathname, std::fstream::out | std::fstream::trunc);
     this->flagExtraDescription = true;
-    this->description = inputDescription;
+    this->descriptionPrependToLogs = inputDescriptionPrependToLogs;
   }
   ~Logger()
   { this->theFile.close();
