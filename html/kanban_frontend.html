@@ -90,19 +90,24 @@
   </div>
 </div>
 <div class = "divMainPage" id = "pageGPUtest">
-  <div class = "divControlPanelDefault"><b>Tests</b><br>
-    <input type = "text" id = "inputNodeCallTestOnePipeMessage" placeholder = "SHA256 one message"></input>
+  <div class = "divControlPanelDefault"><br>
+    
     <table>
       <tr><th>Command</th> <th>Test One</th> <th>Test multiple</th></tr>
       <tr>
         <td>Browser &#8644; node &#8644; CPP &#8644; GPU [SHA256]</td> 
-        <td><button class = "buttonStandard" onclick = "window.kanban.nodeCalls.testBackEndSha256OneMessage();">Test one</button></td>
-        <td><button class = "buttonStandard" onclick = "window.kanban.nodeCalls.testBackEndSha256Multiple();">Test multiple</button></td>
+        <td><button class = "buttonStandard" onclick = "window.kanban.nodeCalls.testBackEndSha256OneMessage();">one</button><input type = "text" id = "inputNodeCallTestOnePipeMessage" placeholder = "SHA256 one message"></input></td>
+        <td><button class = "buttonStandard" onclick = "window.kanban.nodeCalls.testBackEndSha256Multiple();">multiple</button></td>
       </tr>
       <tr>
         <td>Browser &#8644; node &#8644; CPP &#8644; GPU[do nothing]</td>
-        <td><button class = "buttonStandard" onclick = "window.kanban.nodeCalls.testBackEndPipeOneMessage();">Test one</button></td>
-        <td><button class = "buttonStandard" onclick = "window.kanban.nodeCalls.testBackEndPipeMultiple();">Test multiple</button></td>
+        <td><button class = "buttonStandard" onclick = "window.kanban.nodeCalls.testBackEndPipeOneMessage();">one</button></td>
+        <td><button class = "buttonStandard" onclick = "window.kanban.nodeCalls.testBackEndPipeMultiple();">multiple</button></td>
+      </tr>
+      <tr>
+        <td>Browser &#8644; node &#8644; CPP &#8644; GPU[(secp256k1 gen.)^n]</td>
+        <td><button class = "buttonStandard" onclick = "window.kanban.nodeCalls.testBackEndPipeOneMessage();">one</button><input type = "text" id = "inputNodeCallTestSecp256k1GeneratorPowerN" placeholder = "Exponent in hex" value = ""></input></td>
+        <td><!--button class = "buttonStandard" onclick = "window.kanban.nodeCalls.testBackEndPipeMultiple();">multiple</button--></td>
       </tr>
     </table>    
   </div><br>

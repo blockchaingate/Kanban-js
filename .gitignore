@@ -10,6 +10,7 @@ build/
 *.user
 
 logfiles/
+opencl/secp256k1
 
 *.aux
 *.gz
