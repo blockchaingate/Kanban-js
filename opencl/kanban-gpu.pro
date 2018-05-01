@@ -16,8 +16,7 @@ HEADERS += \
     gpu.h \
     server.h \
     logging.h \
-    miscellaneous.h \
-    cl/secp256k1_opencl.h
+    miscellaneous.h
 
 DISTFILES += \
     cl/testBuffer.cl

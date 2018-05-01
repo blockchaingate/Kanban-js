@@ -211,7 +211,7 @@ GPU::~GPU()
 
 std::string GPU::kernelSHA256 = "sha256GPU";
 std::string GPU::kernelTestBuffer = "testBuffer";
-std::string GPU::kernelVerifySignature = "secp256k1";
+std::string GPU::kernelVerifySignature = "secp256k1_opencl_header";
 
 const int maxProgramBuildBufferSize = 10000000;
 char programBuildBuffer[maxProgramBuildBufferSize];
