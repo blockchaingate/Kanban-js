@@ -64,31 +64,32 @@ public:
   std::string name;
   size_t local_item_size; // Divide work items into groups of 64
   size_t global_item_size; // Divide work items into groups of 64
-  void constructFromFileName(
+  bool constructFromFileName(
       const std::string& fileNameNoExtension,
       const std::vector<std::string>& inputNames,
       const std::vector<int>& inputTypes,
       const std::vector<std::string>& outputNames,
       const std::vector<int>& outputTypes,
       GPU& ownerGPU);
-  void constructArguments(
+  bool constructArguments(
       const std::vector<std::string>& argumentNames,
       const std::vector<int>& argumentTypes,
       bool isInput);
   void writeToBuffer(unsigned argumentNumber, const std::vector<char>& input);
-  void writeToBuffer(unsigned argumentNumber, const std::string& input);
-  void writeToBuffer(unsigned argumentNumber, const void* input, size_t size);
-  void writeArgument(unsigned argumentNumber, uint input);
+  bool writeToBuffer(unsigned argumentNumber, const std::string& input);
+  bool writeToBuffer(unsigned argumentNumber, const void* input, size_t size);
+  bool writeArgument(unsigned argumentNumber, uint input);
   GPUKernel();
   ~GPUKernel();
-  void SetArguments();
-  void SetArguments(std::vector<std::shared_ptr<SharedMemory> >& theArgs, unsigned offset);
+  bool SetArguments();
+  bool SetArguments(std::vector<std::shared_ptr<SharedMemory> >& theArgs, unsigned offset);
 };
 
 class GPU {
 public:
   static std::string kernelSHA256;
   static std::string kernelTestBuffer;
+  static std::string kernelVerifySignature;
   std::unordered_map<std::string, std::shared_ptr<GPUKernel> > theKernels;
   cl_platform_id platformIds[2];
   cl_uint numberOfPlatforms;
@@ -98,10 +99,10 @@ public:
   cl_context context;
   cl_command_queue commandQueue;
   bool flagVerbose;
-  void initialize();
-  void initializeKernels();
+  bool initialize();
+  bool initializeKernels();
   GPU();
-  void createKernel(
+  bool createKernel(
       const std::string& fileNameNoExtension,
       const std::vector<std::string>& inputs,
       const std::vector<int>& inputTypes,

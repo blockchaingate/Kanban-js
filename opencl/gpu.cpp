@@ -102,17 +102,15 @@ GPU::GPU()
   this->flagVerbose = false;
 }
 
-void GPU::initialize()
+bool GPU::initialize()
 {
   this->context = 0;
   cl_int ret = 0;
   ret = clGetPlatformIDs(2, this->platformIds, &this->numberOfPlatforms);
   if (ret != CL_SUCCESS)
   {
-    logGPU << "Failed to get platforms.\n";
-    throw (std::string) "Failed to get platforms";
-    std::exit(- 1);
-    assert(false);
+    logGPU << "Failed to get platforms." << Logger::endL;
+    return false;
   }
   if (this->flagVerbose)
   {
@@ -128,10 +126,8 @@ void GPU::initialize()
   }
   if (ret != CL_SUCCESS)
   {
-    logGPU << "Failed to get device of type: " << deviceDescription << "\n";
-    throw (std::string) "Failed to get device. ";
-    std::exit(- 1);
-    assert(false);
+    logGPU << "Failed to get device of type: " << deviceDescription << Logger::endL;
+    return false;
   }
   if (this->flagVerbose)
   {
@@ -151,11 +147,8 @@ void GPU::initialize()
   logGPU << "Context created." << Logger::endL;
   if (ret != CL_SUCCESS)
   {
-    std::cerr << "Failed to create context.\n";
-    std::cerr.flush();
-    throw (std::string) "Failed to create context. ";
-    std::exit(- 1);
-    assert(false);
+    logGPU << "Failed to create context." << Logger::endL;
+    return false;
   }
   logGPU << "About to create GPU queue ..." << Logger::endL;
   this->commandQueue = clCreateCommandQueue(this->context, this->currentDeviceId,
@@ -164,30 +157,33 @@ void GPU::initialize()
   logGPU << "GPU queue created." << Logger::endL;
   if (ret != CL_SUCCESS)
   {
-    logGPU << "Failed to create command queue.\n";
-    throw (std::string) "Failed to create command queue. ";
-    std::exit(-1);
-    assert(false);
+    logGPU << "Failed to create command queue." << Logger::endL;
+    return false;
+
   }
+  return true;
 }
 
-void GPU::initializeKernels()
+bool GPU::initializeKernels()
 { this->initialize();
-  this->createKernel(
+  if (!this->createKernel(
         this->kernelSHA256,
         {"offset", "length", "messageIndex", "message"},
         {SharedMemory::typeUint, SharedMemory::typeUint, SharedMemory::typeUint, SharedMemory::typeVoidPointer},
         {"result"},
-        {SharedMemory::typeVoidPointer});
-  this->createKernel(
+        {SharedMemory::typeVoidPointer}))
+    return false;
+  if (!this->createKernel(
         this->kernelTestBuffer,
         {"buffer"},
         {SharedMemory::typeVoidPointer},
         {},
-        {});
+        {}))
+    return false;
+  return true;
 }
 
-void GPU::createKernel(
+bool GPU::createKernel(
      const std::string& fileNameNoExtension,
      const std::vector<std::string>& inputs,
      const std::vector<int>& inputTypes,
@@ -195,8 +191,10 @@ void GPU::createKernel(
      const std::vector<int>& outputTypes)
 {
   std::shared_ptr<GPUKernel> incomingKernel = std::make_shared<GPUKernel>();
-  incomingKernel->constructFromFileName(fileNameNoExtension, inputs, inputTypes, outputs, outputTypes, *this);
+  if (!incomingKernel->constructFromFileName(fileNameNoExtension, inputs, inputTypes, outputs, outputTypes, *this))
+    return false;
   this->theKernels[fileNameNoExtension] = incomingKernel;
+  return true;
 }
 
 GPU::~GPU()
@@ -213,8 +211,12 @@ GPU::~GPU()
 
 std::string GPU::kernelSHA256 = "sha256GPU";
 std::string GPU::kernelTestBuffer = "testBuffer";
+std::string GPU::kernelVerifySignature = "secp256k1";
 
-void GPUKernel::constructFromFileName(
+const int maxProgramBuildBufferSize = 10000000;
+char programBuildBuffer[maxProgramBuildBufferSize];
+
+bool GPUKernel::constructFromFileName(
     const std::string& fileNameNoExtension,
     const std::vector<std::string>& inputNames,
     const std::vector<int>& inputTypes,
@@ -229,7 +231,7 @@ void GPUKernel::constructFromFileName(
   if (!theFile.is_open())
   {
     logGPU << "Failed to open " << fileName << "\n";
-    assert (false);
+    return false;
   }
   std::string source_str((std::istreambuf_iterator<char>(theFile)),
                           std::istreambuf_iterator<char>());
@@ -247,44 +249,48 @@ void GPUKernel::constructFromFileName(
     (const size_t *)& sourceSize, &ret);
   if (ret != CL_SUCCESS)
   {
-    std::cerr << "Failed to create program from source. " << std::endl;
-    std::cerr.flush();
-    std::exit(-1);
-    assert(false);
+    logGPU << "Failed to create program from source. " << Logger::endL;
+    return false;
   }
   logGPU << "Building program ..." << Logger::endL;
   ret = clBuildProgram(this->program, 1, &this->owner->currentDeviceId, NULL, NULL, NULL);
-  logGPU << "Program built." << Logger::endL;
   if (ret != CL_SUCCESS)
   {
-    std::cerr << "Failed to build the program. Return code: " << ret << std::endl;
-    char buffer[100000];
+    logGPU << "Failed to build the program. Return code: " << ret << Logger::endL;
     size_t logSize;
-    clGetProgramBuildInfo(this->program, this->owner->currentDeviceId, CL_PROGRAM_BUILD_LOG, 10000, &buffer, &logSize);
-    std::string theLog(buffer, logSize);
-    std::cerr << theLog;
-    std::cerr.flush();
-    std::exit(- 1);
-    assert(false);
+    ret = clGetProgramBuildInfo(
+            this->program, this->owner->currentDeviceId,
+            CL_PROGRAM_BUILD_LOG, maxProgramBuildBufferSize,
+            &programBuildBuffer, &logSize);
+    if (ret != CL_SUCCESS)
+    {
+      logGPU << "Failed to fetch program build info, return code: " << ret << Logger::endL;
+      return false;
+    }
+    if (logSize > 0)
+      logSize --;
+    std::string theLog(programBuildBuffer, logSize);
+    logGPU << theLog;
+    return false;
   }
+  logGPU << "Program built." << Logger::endL;
   logGPU << "Creating openCL kernel..." << Logger::endL;
   this->kernel = clCreateKernel(this->program, this->name.c_str(), &ret);
   if (ret != CL_SUCCESS)
   {
-    std::cerr << "Failed to allocate kernel. Return code: " << ret << std::endl;
-    std::cerr << "Please note we \e[31mrequire the __kernel function name be the same\e[39m as the no-extension filename: \e[31m"
-              << this->name << "\e[39m." << std::endl;
-    std::cerr.flush();
-    std::exit(-1);
-    assert(false);
+    logGPU << "Failed to allocate kernel. Return code: " << ret << Logger::endL;
+    logGPU << "Please note we \e[31mrequire the __kernel function name be the same\e[39m as the no-extension filename: \e[31m"
+           << this->name << "\e[39m." << Logger::endL;
+    return false;
   }
   logGPU << "Kernel created, allocating buffers..." << Logger::endL;
   this->constructArguments(inputNames, inputTypes, true);
   this->constructArguments(outputNames, outputTypes, false);
   this->SetArguments();
+  return true;
 }
 
-void GPUKernel::constructArguments(
+bool GPUKernel::constructArguments(
     const std::vector<std::string>& argumentNames,
     const std::vector<int> &argumentTypes,
     bool isInput)
@@ -294,10 +300,8 @@ void GPUKernel::constructArguments(
   cl_mem_flags bufferFlag = isInput ? CL_MEM_READ_ONLY: CL_MEM_WRITE_ONLY;
   if (theArgs.size() != 0)
   {
-    std::cerr << "Fatal error: arguments not empty. " << std::endl;
-    std::cerr.flush();
-    std::exit(-1);
-    assert(false);
+    logGPU << "Fatal error: arguments not empty. " << Logger::endL;
+    return false;
   }
   for (unsigned i = 0; i < argumentNames.size(); i ++)
   {
@@ -310,22 +314,23 @@ void GPUKernel::constructArguments(
     current->theMemory = clCreateBuffer(this->owner->context, bufferFlag, defaultBufferSize, NULL, &ret);
     if (ret != CL_SUCCESS)
     {
-      std::cerr << "Failed to create buffer \e[31m" << current->name  << "\e[39m. Return code: " << ret << std::endl;
-      std::cerr.flush();
-      std::exit(-1);
-      assert(false);
+      logGPU << "Failed to create buffer \e[31m" << current->name  << "\e[39m. Return code: " << ret << Logger::endL;
+      return false;
     }
   }
-
+  return true;
 }
 
-void GPUKernel::SetArguments()
+bool GPUKernel::SetArguments()
 {
-  this->SetArguments(this->inputs, 0);
-  this->SetArguments(this->outputs, this->inputs.size());
+  if (!this->SetArguments(this->inputs, 0))
+    return false;
+  if (!this->SetArguments(this->outputs, this->inputs.size()))
+    return false;
+  return true;
 }
 
-void GPUKernel::SetArguments(std::vector<std::shared_ptr<SharedMemory> >& theArgs, unsigned offset)
+bool GPUKernel::SetArguments(std::vector<std::shared_ptr<SharedMemory> >& theArgs, unsigned offset)
 {
   cl_int ret = CL_SUCCESS;
   //std::cout << "DEBUG: kernel: setting " << theArgs.size() << " arguments. "<< std::endl;
@@ -339,20 +344,19 @@ void GPUKernel::SetArguments(std::vector<std::shared_ptr<SharedMemory> >& theArg
 
     if (ret != CL_SUCCESS)
     {
-      std::cerr << "Failed to set argument " << current->name << ". Return code: " << ret << ".\n";
-      std::cerr.flush();
-      std::exit(-1);
-      assert(false);
+      logGPU << "Failed to set argument " << current->name << ". Return code: " << ret << "." << Logger::endL;
+      return false;
     }
   }
+  return true;
 }
 
-void GPUKernel::writeToBuffer(unsigned argumentNumber, const std::string& input)
+bool GPUKernel::writeToBuffer(unsigned argumentNumber, const std::string& input)
 {
   return this->writeToBuffer(argumentNumber, input.c_str(), input.size());
 }
 
-void GPUKernel::writeToBuffer(unsigned argumentNumber, const void *input, size_t size)
+bool GPUKernel::writeToBuffer(unsigned argumentNumber, const void *input, size_t size)
 {
   //std::cout << "DEBUG: writing " << input;
   //std::cout << " in buffeR: " << &bufferToWriteInto << std::endl;
@@ -370,14 +374,13 @@ void GPUKernel::writeToBuffer(unsigned argumentNumber, const void *input, size_t
         0,
         NULL,
         NULL) != CL_SUCCESS)
-  { std::cerr << "Enqueueing write buffer failed with input: " << input << std::endl;
-    std::cerr.flush();
-    std::exit(-1);
-    assert(false);
+  { logGPU << "Enqueueing write buffer failed with input: " << input << Logger::endL;
+    return false;
   }
+  return true;
 }
 
-void GPUKernel::writeArgument(unsigned argumentNumber, uint input)
+bool GPUKernel::writeArgument(unsigned argumentNumber, uint input)
 {
   //std::cout << "DEBUG: writing " << input;
   //std::cout << "Setting: argument number: " << argumentNumber << ", input: " << input << std::endl;
@@ -389,11 +392,10 @@ void GPUKernel::writeArgument(unsigned argumentNumber, uint input)
   cl_int ret = clSetKernelArg(this->kernel, argumentNumber, sizeof(uint), &currentArgument->uintValue);
   if (ret != CL_SUCCESS)
   {
-    std::cerr << "Set kernel arg failed. " << std::endl;
-    std::cerr.flush();
-    std::exit(-1);
-    assert(false);
+    logGPU << "Set kernel arg failed. " << Logger::endL;
+    return false;
   }
+  return true;
 }
 
 std::vector<std::vector<std::string> > testSHA256::knownSHA256s;
@@ -458,9 +460,8 @@ int testGPU(void)
             &theKernel->global_item_size, &theKernel->local_item_size, 0, NULL, NULL);
     if (ret != CL_SUCCESS)
     {
-      std::cerr << "Failed to enqueue kernel. Return code: " << ret << ". " << std::endl;
-      std::exit(- 1);
-      assert(false);
+      logGPU << "Failed to enqueue kernel. Return code: " << ret << ". " << Logger::endL;
+      return false;
     }
     //std::cout << "DEBUG: kernel enqueued, proceeding to read buffer. " << std::endl;
     if (largeTestCounter % 500 == 0)
@@ -476,9 +477,8 @@ int testGPU(void)
         32 * testSHA256::totalToCompute, testSHA256::outputBuffer, 0, NULL, NULL);
   if (ret != CL_SUCCESS)
   {
-    std::cerr << "Failed to enqueue read buffer. Return code: " << ret << ". " << std::endl;
-    std::exit(- 1);
-    assert(false);
+    logGPU << "Failed to enqueue read buffer. Return code: " << ret << ". " << Logger::endL;
+    return false;
   }
   auto timeCurrent = std::chrono::system_clock::now();
   std::chrono::duration<double> elapsed_seconds = timeCurrent - timeStart;
@@ -496,11 +496,11 @@ int testGPU(void)
       out << std::hex << std::setw(2) << std::setfill('0') << ((int) ((unsigned) testSHA256::outputBuffer[i]));
     if (out.str() != testSHA256::knownSHA256s[testCounteR][1])
     {
-      std::cerr << "\e[31mSha of message index " << largeTestCounter
-                << ": " << testSHA256::knownSHA256s[testCounteR][0] << " is wrongly computed to be: " << out.str()
-                << " instead of: " << testSHA256::knownSHA256s[testCounteR][1] << "\e[39m" << std::endl;
-      std::exit(-1);
+      logGPU << "\e[31mSha of message index " << largeTestCounter
+             << ": " << testSHA256::knownSHA256s[testCounteR][0] << " is wrongly computed to be: " << out.str()
+             << " instead of: " << testSHA256::knownSHA256s[testCounteR][1] << "\e[39m" << Logger::endL;
       assert(false);
+      return -1;
     }
   }
   std::cout << "\e[32mSuccess!\e[39m" << std::endl;

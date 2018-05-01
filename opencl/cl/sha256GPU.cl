@@ -84,40 +84,40 @@ __kernel void sha256GPU(uint offset, uint length, uint messageIndex, __global co
     } else {
       current_pad = - 1;    
     }
-  //  printf("current_pad: %d\n",current_pad);
+    //  printf("current_pad: %d\n",current_pad);
     if (current_pad > 0){
       i = current_pad;
       stop = i / 4;
-  //    printf("i:%d, stop: %d msg_pad:%d\n",i,stop, msg_pad);
+    //    printf("i:%d, stop: %d msg_pad:%d\n",i,stop, msg_pad);
       for (t = 0 ; t < stop ; t++){
-	W[t] = ((uchar)  plain_key[currentIndex]) << 24;
-	currentIndex ++;
+        W[t] = ((uchar)  plain_key[currentIndex]) << 24;
+        currentIndex ++;
         W[t] |= ((uchar) plain_key[currentIndex]) << 16;
-	currentIndex ++;
+        currentIndex ++;
         W[t] |= ((uchar) plain_key[currentIndex]) << 8;
-	currentIndex ++;
+        currentIndex ++;
         W[t] |= (uchar)  plain_key[currentIndex];
-	currentIndex ++;
+        currentIndex ++;
         //printf("W[%u]: %u\n",t,W[t]);
       }
       mmod = i % 4;
       if ( mmod == 3){
         W[t] = ((uchar)  plain_key[currentIndex]) << 24;
-	currentIndex++;
+	      currentIndex++;
         W[t] |= ((uchar) plain_key[currentIndex]) << 16;
-	currentIndex++;
+	      currentIndex++;
         W[t] |= ((uchar) plain_key[currentIndex]) << 8;
-	currentIndex++;
+	      currentIndex++;
         W[t] |=  ((uchar) 0x80) ;
       } else if (mmod == 2) {
         W[t] = ((uchar)  plain_key[currentIndex]) << 24;
-	currentIndex++;
+	      currentIndex++;
         W[t] |= ((uchar) plain_key[currentIndex]) << 16;
-	currentIndex++;
+	      currentIndex++;
         W[t] |=  0x8000 ;
       } else if (mmod == 1) {
         W[t] = ((uchar)  plain_key[currentIndex]) << 24;
-	currentIndex++;
+	      currentIndex++;
         W[t] |=  0x800000 ;
       } else /*if (mmod == 0)*/ {
         W[t] =  0x80000000 ;

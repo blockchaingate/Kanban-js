@@ -18,7 +18,7 @@
   3)  refactor (or write new) tests and benchmarks to match our 
       system's setup;
   4)  introduce cosmetic changes to match FA's variable/class naming 
-      style. The primary aim Step 3 is to introduce our team
+      style. The primary aim Step 4 is to introduce our team
       to the inner workings of Pieter Wuille's code, while trying to  
       preserve his code's aesthetics. 
   Henceforth, we will try to keep FA's comments 
@@ -26,6 +26,30 @@
   Pieter Wuille's comments written in the multi-line comment style. 
  **********************************************************************/
 
+
+//******openCL macros.******
+// In what follows, we include infrastructure needed to make openCL compile. 
+#define USE_OPEN_CL
+#ifdef USE_OPEN_CL //USE_OPEN_CL
+
+#ifndef uint32_t
+#define uint32_t unsigned int
+#endif
+
+
+#endif //USE_OPEN_CL
+
+//******end of openCL macros.******
+
+__kernel void sha256GPU(
+  __global const unsigned char* signatureR, 
+  __global const unsigned char* signatureS, 
+  __global const unsigned char* publicKey, 
+  __global const unsigned char* message,
+  __global const unsigned char* output
+) {
+
+}
 
 //******Contents of field_10x26.h******
 // Representations of elements of the field 
@@ -4421,7 +4445,7 @@ static void secp256k1_rfc6979_hmac_sha256_finalize(secp256k1_rfc6979_hmac_sha256
 //#include "ecmult_static_context.h"
 #endif
 // One must call secp256k1_ecmult_gen_context_init on a newly created generator context.
- 
+
 static void secp256k1_ecmult_gen_context_init(secp256k1_ecmult_gen_context *ctx) {
     ctx->prec = NULL;
 }
