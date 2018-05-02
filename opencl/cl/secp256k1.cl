@@ -1,307 +1,8 @@
-/**********************************************************************
- * Copyright (c) 2018 FA Enterprise System                            *
- * Distributed under the MIT software license.                        *
- * This file is a modified copy of                                    *
- * Pieter Wuille's sipa library (https://github.com/sipa/secp256k1).  *
- **********************************************************************/
-/**********************************************************************
- * Copyright (c) 2013, 2014 Pieter Wuille                             *
- * Distributed under the MIT software license, see                    *
- * http://www.opensource.org/licenses/mit-license.php.                *
- **********************************************************************/
+// See the comments in secp256k1.h for license information
 
-/**********************************************************************
-  At the time of writing (April 2018), the modifications of the library
-  are intended to:
-  1)  port the library to openCL;
-  2)  introduce openCL-related optimizations;
-  3)  refactor (or write new) tests and benchmarks to match our 
-      system's setup;
-  4)  introduce cosmetic changes to match FA's variable/class naming 
-      style. The primary aim Step 4 is to introduce our team
-      to the inner workings of Pieter Wuille's code, while trying to  
-      preserve his code's aesthetics. 
-  Henceforth, we will try to keep FA's comments 
-  in the double-forward slash style, so as to distinguish from 
-  Pieter Wuille's comments written in the multi-line comment style. 
- **********************************************************************/
-
-/**********************************************************************
-  Plan for openCL port.
-  1.The present file is compiled both as a C program and 
-    as an openCL program. While we commit to keep both builds working 
-    in the future, for the time being, in the current development branch, 
-    only the openCL build is expected to work. 
-  2.To make this file into an openCL program, we use the file
-    
-    secp256k1_opencl_header.cl
-    
-    which internally includes this file.
-  3. This file is made into a C program using the file
-    
-    secp256k1_c_header.c
-
-    which internally includes this file.
- **********************************************************************/
-
-#ifndef MACRO_USE_openCL
-#define __constant const
-#else
-void memcpy(unsigned char* destination, const unsigned char* source, int amount){
-  int i;
-  for (i = 0; i < amount; i ++){
-    destination[i] = source[i];
-  }
-}
-
-void memset (unsigned char* destination, unsigned char value, int amountToSet){
-  int i;
-  for (i = 0; i < amountToSet; i ++){
-    destination[i] = value;
-  }
-}
-#endif
-
-//******Contents of field_10x26.h******
-// Representations of elements of the field 
-//
-// Z / (thePrime Z)
-//
-// where
-//
-// thePrime = 2^256 - 2^32 - 977.
-//
-// We represent each element of our field by a 
-// large integer X, given by a sequence
-// n_0, \dots, n_{9} with
-//
-// X = \sum_{i = 0}^{9}  n_i 2^{26 i},
-//
-// where 0\leq n_i < 2^{32}.
-//
-// The representation above is not unique  
-// as the n_i's are allowed to be larger than 2^{26}. 
-//
-// We call a representation {n_i} ``normalized'' if 
-//
-// X < thePrime.
-// 
-// For example, the element
-//
-// 7 * 2^52 + 5 * 2^26 + 3
-//
-// is represented by 
-// n_0 = 3, n_1 = 5, n_2 = 7
-// (all remaining elements are zero). 
-//
-// To make the representation {n_i} unique, we need to have both
-//
-// X < thePrime
-//
-// and 0 \leq  n_i < 2^{26}.
-//
-//
-// In particular, n_{10} < 2^{22} is needed.
-// However, in the case that n_{10} = 2^{22} - 1 
-// the inequality n_{10} < 2^{22} does not guarantee that
-//
-// X < thePrime 
-//
-// If that is the case, 
-// additional reductions are needed to ensure that the 
-// representation is normal. 
-// 
-typedef struct {
-    /* X = sum(i=0..9, elem[i]*2^26) mod n */
-    uint32_t n[10];
-#ifdef VERIFY
-    int magnitude;
-    int normalized;
-#endif
-} secp256k1_fe;
-
-/* Unpacks a constant into a overlapping multi-limbed FE element. */
-#define SECP256K1_FE_CONST_INNER(d7, d6, d5, d4, d3, d2, d1, d0) { \
-    (d0) & 0x3FFFFFFUL, \
-    (((uint32_t)d0) >> 26) | (((uint32_t)(d1) & 0xFFFFFUL) << 6), \
-    (((uint32_t)d1) >> 20) | (((uint32_t)(d2) & 0x3FFFUL) << 12), \
-    (((uint32_t)d2) >> 14) | (((uint32_t)(d3) & 0xFFUL) << 18), \
-    (((uint32_t)d3) >> 8) | (((uint32_t)(d4) & 0x3UL) << 24), \
-    (((uint32_t)d4) >> 2) & 0x3FFFFFFUL, \
-    (((uint32_t)d4) >> 28) | (((uint32_t)(d5) & 0x3FFFFFUL) << 4), \
-    (((uint32_t)d5) >> 22) | (((uint32_t)(d6) & 0xFFFFUL) << 10), \
-    (((uint32_t)d6) >> 16) | (((uint32_t)(d7) & 0x3FFUL) << 16), \
-    (((uint32_t)d7) >> 10) \
-}
-
-#ifdef VERIFY
-#define SECP256K1_FE_CONST(d7, d6, d5, d4, d3, d2, d1, d0) {SECP256K1_FE_CONST_INNER((d7), (d6), (d5), (d4), (d3), (d2), (d1), (d0)), 1, 1}
-#else
-#define SECP256K1_FE_CONST(d7, d6, d5, d4, d3, d2, d1, d0) {SECP256K1_FE_CONST_INNER((d7), (d6), (d5), (d4), (d3), (d2), (d1), (d0))}
-#endif
-
-typedef struct {
-    uint32_t n[8];
-} secp256k1_fe_storage;
-
-#define SECP256K1_FE_STORAGE_CONST(d7, d6, d5, d4, d3, d2, d1, d0) {{ (d0), (d1), (d2), (d3), (d4), (d5), (d6), (d7) }}
-#define SECP256K1_FE_STORAGE_CONST_GET(d) d.n[7], d.n[6], d.n[5], d.n[4],d.n[3], d.n[2], d.n[1], d.n[0]
-
-//******end of field_10x26.h******
-
-
-//******Contents of field.h******
-/** Field element module.
- *
- *  Field elements can be represented in several ways, but code accessing
- *  it (and implementations) need to take certain properties into account.
- *  - Each field element can be normalized or not.
- *  - Each field element has a magnitude, which represents how far away
- *    its representation is from normalization. Normalized elements
- *    always have a magnitude of 1, but a magnitude of 1 doesn't imply
- *    normality.
- */
-
-/** Normalize a field element. */
-static void secp256k1_fe_normalize(secp256k1_fe* inputOutput); //original name: secp256k1_fe_normalize
-
-/** Weakly normalize a field element: reduce it magnitude to 1, but don't fully normalize. */
-static void secp256k1_fe_normalize_weak(secp256k1_fe* inputOutput); //original name: secp256k1_fe_normalize_weak
-
-/** Normalize a field element, without constant-time guarantee. */
-static void secp256k1_fe_normalize_var(secp256k1_fe* inputOutput); //original name: secp256k1_fe_normalize_var
-
-/** Verify whether a field element represents zero i.e. would normalize to a zero value. The field
- *  implementation may optionally normalize the input, but this should not be relied upon. */
-static int secp256k1_fe_normalizes_to_zero(secp256k1_fe *inputOutput); // original name: secp256k1_fe_normalizes_to_zero
-
-/** Verify whether a field element represents zero i.e. would normalize to a zero value. The field
- *  implementation may optionally normalize the input, but this should not be relied upon. */
-static int secp256k1_fe_normalizes_to_zero_var(secp256k1_fe *inputOutput); // original name: secp256k1_fe_normalizes_to_zero_var
-
-/** Set a field element equal to a small integer. Resulting field element is normalized. */
-static void secp256k1_fe_set_int(secp256k1_fe *r, int a); //original name: secp256k1_fe_set_int
-
-/** Verify whether a field element is zero. Requires the input to be normalized. */
-static int secp256k1_fe_is_zero(const secp256k1_fe *a); //original name: secp256k1_fe_is_zero
-
-/** Check the "oddness" of a field element. Requires the input to be normalized. */
-static int secp256k1_fe_is_odd(const secp256k1_fe *a); //original name: secp256k1_fe_is_odd
-
-/** Compare two field elements. Requires magnitude-1 inputs. */
-static int secp256k1_fe_equal_var(__constant secp256k1_fe *a, __constant secp256k1_fe *b); //original name: secp256k1_fe_equal_var
-
-/** Compare two field elements. Requires both inputs to be normalized */
-static int secp256k1_fe_cmp_var(const secp256k1_fe *a, const secp256k1_fe *b); //original name: secp256k1_fe_cmp_var
-
-/** Set a field element equal to 32-byte big endian value. If successful, the resulting field element is normalized. */
-static int secp256k1_fe_set_b32(secp256k1_fe *r, const unsigned char *a); //original name: secp256k1_fe_set_b32
-
-/** Convert a field element to a 32-byte big endian value. Requires the input to be normalized */
-static void secp256k1_fe_get_b32(unsigned char *r, const secp256k1_fe *a); //original name: secp256k1_fe_get_b32
-
-/** Set a field element equal to the additive inverse of another. Takes a maximum magnitude of the input
- *  as an argument. The magnitude of the output is one higher. */
-static void secp256k1_fe_negate(secp256k1_fe *r, __constant secp256k1_fe *a, int m); //original name: secp256k1_fe_negate
-
-/** Multiplies the passed field element with a small integer constant. Multiplies the magnitude by that
- *  small integer. */
-static void secp256k1_fe_mul_int(secp256k1_fe *r, int a); //original name: secp256k1_fe_mul_int
-
-/** Adds a field element to another. The result has the sum of the inputs' magnitudes as magnitude. */
-static void secp256k1_fe_add(secp256k1_fe *r, __constant secp256k1_fe *a); //original name: secp256k1_fe_add
-
-/** Sets a field element to be the product of two others. Requires the inputs' magnitudes to be at most 8.
- *  The output magnitude is 1 (but not guaranteed to be normalized). */
-static void secp256k1_fe_mul(secp256k1_fe *r, const secp256k1_fe *a, __constant secp256k1_fe *b); //original name: secp256k1_fe_mul
-
-/** Sets a field element to be the square of another. Requires the input's magnitude to be at most 8.
- *  The output magnitude is 1 (but not guaranteed to be normalized). */
-static void secp256k1_fe_sqr(secp256k1_fe *r, __constant secp256k1_fe *a); //original name: secp256k1_fe_sqr
-
-/** Sets a field element to be the (modular) square root (if any exist) of another. Requires the
- *  input's magnitude to be at most 8. The output magnitude is 1 (but not guaranteed to be
- *  normalized). Return value indicates whether a square root was found. */
-static int secp256k1_fe_sqrt_var(secp256k1_fe *r, __constant secp256k1_fe *a); //original name: secp256k1_fe_sqrt_var
-
-/** Sets a field element to be the (modular) inverse of another. Requires the input's magnitude to be
- *  at most 8. The output magnitude is 1 (but not guaranteed to be normalized). */
-static void secp256k1_fe_inv(secp256k1_fe *r, const secp256k1_fe *a); //original name: secp256k1_fe_inv
-
-/** Potentially faster version of secp256k1_fe_inv, without constant-time guarantee. */
-static void secp256k1_fe_inv_var(secp256k1_fe *r, const secp256k1_fe *a); //original name: secp256k1_fe_inv_var
-
-/** Calculate the (modular) inverses of a batch of field elements. Requires the inputs' magnitudes to be
- *  at most 8. The output magnitudes are 1 (but not guaranteed to be normalized). The inputs and
- *  outputs must not overlap in memory. */
-static void secp256k1_fe_inv_all_var(size_t len, secp256k1_fe *r, const secp256k1_fe *a); //original name: secp256k1_fe_inv_all_var
-
-/** Convert a field element to the storage type. */
-static void secp256k1_fe_to_storage(secp256k1_fe_storage *r, const secp256k1_fe *a); //original name: secp256k1_fe_to_storage
-
-/** Convert a field element back from the storage type. */
-static void secp256k1_fe_from_storage(secp256k1_fe *r, const secp256k1_fe_storage *a); //original name: secp256k1_fe_from_storage
-
-/** If flag is true, set *r equal to *a; otherwise leave it. Constant-time. */
-static void secp256k1_fe_storage_cmov(secp256k1_fe_storage *r, const secp256k1_fe_storage *a, int flag); //original name: secp256k1_fe_storage_cmov
-
-/** If flag is true, set *r equal to *a; otherwise leave it. Constant-time. */
-static void secp256k1_fe_cmov(secp256k1_fe *r, const secp256k1_fe *a, int flag); //original name: secp256k1_fe_cmov
-//******end of field.h******
-
-
-//******Contents of util.h******
-typedef struct {
-    void (*fn)(const char *text, void* data);
-    const void* data;
-} secp256k1_callback;
-
-static void secp256k1_callback_call(const secp256k1_callback * const cb, const char * const text) {
-    cb->fn(text, (void*)cb->data);
-}
-#ifdef VERIFY
-#define VERIFY_CHECK CHECK
-#define VERIFY_SETUP(stmt) do { stmt; } while(0)
-#else
-#ifndef VERIFY_CHECK
-  #define VERIFY_CHECK(cond) do { (void)(cond); } while(0)
-#endif
-#define VERIFY_SETUP(stmt)
-#endif
-
-#ifndef MACRO_USE_openCL
-static void *checked_malloc(const secp256k1_callback* cb, size_t size) {
-    void *ret = malloc(size);
-    if (ret == NULL) {
-        secp256k1_callback_call(cb, "Out of memory");
-    }
-    return ret;
-}
-#endif
-
-//removed:
-//#if defined(SECP256K1_BUILD) && defined(VERIFY)
-//# define SECP256K1_RESTRICT
-//#else
-//# if (!defined(__STDC_VERSION__) || (__STDC_VERSION__ < 199901L) )
-//#  if SECP256K1_GNUC_PREREQ(3,0)
-//#   define SECP256K1_RESTRICT __restrict__
-//#  elif (defined(_MSC_VER) && _MSC_VER >= 1400)
-//#   define SECP256K1_RESTRICT __restrict
-//#  else
-//#   define SECP256K1_RESTRICT
-//#  endif
-//# else
-//#define SECP256K1_RESTRICT
-//# endif
-//#endif
-
-//******end of util.h******
-
+#include "../opencl/cl/secp256k1.h"
 
 //******Contents of field_10x26_impl.h******
-
-// #include "util.h" //
 
 #ifdef VERIFY
 static void secp256k1_fe_verify(const secp256k1_fe *a) {
@@ -331,12 +32,12 @@ static void secp256k1_fe_verify(const secp256k1_fe *a) {
   VERIFY_CHECK(r == 1);
 }
 #else
-static void secp256k1_fe_verify(const secp256k1_fe *a) {
+void secp256k1_fe_verify(const secp256k1_fe *a) {
     (void)a;
 }
 #endif
 
-static void secp256k1_fe_normalize(secp256k1_fe *r) {
+void secp256k1_fe_normalize(secp256k1_fe *r) {
   uint32_t t0 = r->n[0], t1 = r->n[1], t2 = r->n[2], t3 = r->n[3], t4 = r->n[4],
            t5 = r->n[5], t6 = r->n[6], t7 = r->n[7], t8 = r->n[8], t9 = r->n[9];
 
@@ -391,7 +92,7 @@ static void secp256k1_fe_normalize(secp256k1_fe *r) {
 #endif
 }
 
-static void secp256k1_fe_normalize_weak(secp256k1_fe *r) {
+void secp256k1_fe_normalize_weak(secp256k1_fe *r) {
   uint32_t t0 = r->n[0], t1 = r->n[1], t2 = r->n[2], t3 = r->n[3], t4 = r->n[4],
            t5 = r->n[5], t6 = r->n[6], t7 = r->n[7], t8 = r->n[8], t9 = r->n[9];
 
@@ -422,7 +123,7 @@ static void secp256k1_fe_normalize_weak(secp256k1_fe *r) {
 #endif
 }
 
-static void secp256k1_fe_normalize_var(secp256k1_fe *r) {
+void secp256k1_fe_normalize_var(secp256k1_fe *r) {
     uint32_t t0 = r->n[0], t1 = r->n[1], t2 = r->n[2], t3 = r->n[3], t4 = r->n[4],
              t5 = r->n[5], t6 = r->n[6], t7 = r->n[7], t8 = r->n[8], t9 = r->n[9];
 
@@ -478,7 +179,7 @@ static void secp256k1_fe_normalize_var(secp256k1_fe *r) {
 #endif
 }
 
-static int secp256k1_fe_normalizes_to_zero(secp256k1_fe *r) {
+int secp256k1_fe_normalizes_to_zero(secp256k1_fe *r) {
     uint32_t t0 = r->n[0], t1 = r->n[1], t2 = r->n[2], t3 = r->n[3], t4 = r->n[4],
              t5 = r->n[5], t6 = r->n[6], t7 = r->n[7], t8 = r->n[8], t9 = r->n[9];
 
@@ -507,7 +208,7 @@ static int secp256k1_fe_normalizes_to_zero(secp256k1_fe *r) {
     return (z0 == 0) | (z1 == 0x3FFFFFFUL);
 }
 
-static int secp256k1_fe_normalizes_to_zero_var(secp256k1_fe *r) {
+int secp256k1_fe_normalizes_to_zero_var(secp256k1_fe *r) {
     uint32_t t0, t1, t2, t3, t4, t5, t6, t7, t8, t9;
     uint32_t z0, z1;
     uint32_t x;
@@ -559,7 +260,7 @@ static int secp256k1_fe_normalizes_to_zero_var(secp256k1_fe *r) {
     return (z0 == 0) | (z1 == 0x3FFFFFFUL);
 }
 
-static void secp256k1_fe_set_int(secp256k1_fe *r, int a) {
+void secp256k1_fe_set_int(secp256k1_fe *r, int a) {
     r->n[0] = a;
     r->n[1] = r->n[2] = r->n[3] = r->n[4] = r->n[5] = r->n[6] = r->n[7] = r->n[8] = r->n[9] = 0;
 #ifdef VERIFY
@@ -569,7 +270,7 @@ static void secp256k1_fe_set_int(secp256k1_fe *r, int a) {
 #endif
 }
 
-static int secp256k1_fe_is_zero(const secp256k1_fe *a) {
+int secp256k1_fe_is_zero(const secp256k1_fe *a) {
     const uint32_t *t = a->n;
 #ifdef VERIFY
     VERIFY_CHECK(a->normalized);
@@ -578,7 +279,7 @@ static int secp256k1_fe_is_zero(const secp256k1_fe *a) {
     return (t[0] | t[1] | t[2] | t[3] | t[4] | t[5] | t[6] | t[7] | t[8] | t[9]) == 0;
 }
 
-static int secp256k1_fe_is_odd(const secp256k1_fe *a) {
+int secp256k1_fe_is_odd(const secp256k1_fe *a) {
 #ifdef VERIFY
     VERIFY_CHECK(a->normalized);
     secp256k1_fe_verify(a);
@@ -597,7 +298,7 @@ static void secp256k1_fe_clear(secp256k1_fe *a) {
     }
 }
 
-static int secp256k1_fe_cmp_var(const secp256k1_fe *a, const secp256k1_fe *b) {
+int secp256k1_fe_cmp_var(const secp256k1_fe *a, const secp256k1_fe *b) {
     int i;
 #ifdef VERIFY
     VERIFY_CHECK(a->normalized);
@@ -616,7 +317,7 @@ static int secp256k1_fe_cmp_var(const secp256k1_fe *a, const secp256k1_fe *b) {
     return 0;
 }
 
-static int secp256k1_fe_set_b32(secp256k1_fe *r, const unsigned char *a) {
+int secp256k1_fe_set_b32(secp256k1_fe *r, const unsigned char *a) {
     int i;
     r->n[0] = r->n[1] = r->n[2] = r->n[3] = r->n[4] = 0;
     r->n[5] = r->n[6] = r->n[7] = r->n[8] = r->n[9] = 0;
@@ -640,7 +341,7 @@ static int secp256k1_fe_set_b32(secp256k1_fe *r, const unsigned char *a) {
 }
 
 /** Convert a field element to a 32-byte big endian value. Requires the input to be normalized */
-static void secp256k1_fe_get_b32(unsigned char *r, const secp256k1_fe *a) {
+void secp256k1_fe_get_b32(unsigned char *r, const secp256k1_fe *a) {
     int i;
 #ifdef VERIFY
     VERIFY_CHECK(a->normalized);
@@ -658,7 +359,7 @@ static void secp256k1_fe_get_b32(unsigned char *r, const secp256k1_fe *a) {
     }
 }
 
-static void secp256k1_fe_negate(secp256k1_fe *r, __constant secp256k1_fe *a, int m) {
+void secp256k1_fe_negate(secp256k1_fe *r, __constant secp256k1_fe *a, int m) {
 #ifdef VERIFY
     VERIFY_CHECK(a->magnitude <= m);
     secp256k1_fe_verify(a);
@@ -680,7 +381,7 @@ static void secp256k1_fe_negate(secp256k1_fe *r, __constant secp256k1_fe *a, int
 #endif
 }
 
-static void secp256k1_fe_mul_int(secp256k1_fe *r, int a) {
+void secp256k1_fe_mul_int(secp256k1_fe *r, int a) {
     r->n[0] *= a;
     r->n[1] *= a;
     r->n[2] *= a;
@@ -698,7 +399,7 @@ static void secp256k1_fe_mul_int(secp256k1_fe *r, int a) {
 #endif
 }
 
-static void secp256k1_fe_add(secp256k1_fe *r, __constant secp256k1_fe *a) {
+void secp256k1_fe_add(secp256k1_fe *r, __constant secp256k1_fe *a) {
 #ifdef VERIFY
     secp256k1_fe_verify(a);
 #endif
@@ -1329,7 +1030,7 @@ static void secp256k1_fe_sqr_inner(uint32_t *r, __constant uint32_t *a) {
 }
 
 
-static void secp256k1_fe_mul(secp256k1_fe *r, const secp256k1_fe *a, __constant secp256k1_fe *b) {
+void secp256k1_fe_mul(secp256k1_fe *r, const secp256k1_fe *a, __constant secp256k1_fe *b) {
 #ifdef VERIFY
     VERIFY_CHECK(a->magnitude <= 8);
     VERIFY_CHECK(b->magnitude <= 8);
@@ -1345,7 +1046,7 @@ static void secp256k1_fe_mul(secp256k1_fe *r, const secp256k1_fe *a, __constant 
 #endif
 }
 
-static void secp256k1_fe_sqr(secp256k1_fe *r, __constant secp256k1_fe *a) {
+void secp256k1_fe_sqr(secp256k1_fe *r, __constant secp256k1_fe *a) {
 #ifdef VERIFY
     VERIFY_CHECK(a->magnitude <= 8);
     secp256k1_fe_verify(a);
@@ -1358,7 +1059,7 @@ static void secp256k1_fe_sqr(secp256k1_fe *r, __constant secp256k1_fe *a) {
 #endif
 }
 
-static void secp256k1_fe_cmov(secp256k1_fe *r, const secp256k1_fe *a, int flag) {
+void secp256k1_fe_cmov(secp256k1_fe *r, const secp256k1_fe *a, int flag) {
     uint32_t mask0, mask1;
     mask0 = flag + ~((uint32_t)0);
     mask1 = ~mask0;
@@ -1380,7 +1081,7 @@ static void secp256k1_fe_cmov(secp256k1_fe *r, const secp256k1_fe *a, int flag) 
 #endif
 }
 
-static void secp256k1_fe_storage_cmov(secp256k1_fe_storage *r, const secp256k1_fe_storage *a, int flag) {
+void secp256k1_fe_storage_cmov(secp256k1_fe_storage *r, const secp256k1_fe_storage *a, int flag) {
     uint32_t mask0, mask1;
     mask0 = flag + ~((uint32_t)0);
     mask1 = ~mask0;
@@ -1394,7 +1095,7 @@ static void secp256k1_fe_storage_cmov(secp256k1_fe_storage *r, const secp256k1_f
     r->n[7] = (r->n[7] & mask0) | (a->n[7] & mask1);
 }
 
-static void secp256k1_fe_to_storage(secp256k1_fe_storage *r, const secp256k1_fe *a) {
+void secp256k1_fe_to_storage(secp256k1_fe_storage *r, const secp256k1_fe *a) {
 #ifdef VERIFY
     VERIFY_CHECK(a->normalized);
 #endif
@@ -1408,7 +1109,7 @@ static void secp256k1_fe_to_storage(secp256k1_fe_storage *r, const secp256k1_fe 
     r->n[7] = a->n[8] >> 16 | a->n[9] << 10;
 }
 
-static void secp256k1_fe_from_storage(secp256k1_fe *r, const secp256k1_fe_storage *a) {
+void secp256k1_fe_from_storage(secp256k1_fe *r, const secp256k1_fe_storage *a) {
     r->n[0] = a->n[0] & 0x3FFFFFFUL;
     r->n[1] = a->n[0] >> 26 | ((a->n[1] << 6) & 0x3FFFFFFUL);
     r->n[2] = a->n[1] >> 20 | ((a->n[2] << 12) & 0x3FFFFFFUL);
@@ -1429,14 +1130,14 @@ static void secp256k1_fe_from_storage(secp256k1_fe *r, const secp256k1_fe_storag
 
 //******Contents of field_impl.h******
 
-static int secp256k1_fe_equal_var(__constant secp256k1_fe *a, __constant secp256k1_fe *b) {
+int secp256k1_fe_equal_var(__constant secp256k1_fe *a, __constant secp256k1_fe *b) {
     secp256k1_fe na;
     secp256k1_fe_negate(&na, a, 1);
     secp256k1_fe_add(&na, b);
     return secp256k1_fe_normalizes_to_zero_var(&na);
 }
 
-static int secp256k1_fe_sqrt_var(secp256k1_fe *r, __constant secp256k1_fe *a) {
+int secp256k1_fe_sqrt_var(secp256k1_fe *r, __constant secp256k1_fe *a) {
     secp256k1_fe x2, x3, x6, x9, x11, x22, x44, x88, x176, x220, x223, t1;
     int j;
 
@@ -1525,7 +1226,7 @@ static int secp256k1_fe_sqrt_var(secp256k1_fe *r, __constant secp256k1_fe *a) {
     return secp256k1_fe_equal_var((__constant secp256k1_fe *) &t1, (__constant secp256k1_fe *) a);
 }
 
-static void secp256k1_fe_inv(secp256k1_fe *r, const secp256k1_fe *a) {
+void secp256k1_fe_inv(secp256k1_fe *r, const secp256k1_fe *a) {
     secp256k1_fe x2, x3, x6, x9, x11, x22, x44, x88, x176, x220, x223, t1;
     int j;
 
@@ -1615,11 +1316,11 @@ static void secp256k1_fe_inv(secp256k1_fe *r, const secp256k1_fe *a) {
     secp256k1_fe_mul(r, a, (__constant secp256k1_fe *) &t1);
 }
 
-static void secp256k1_fe_inv_var(secp256k1_fe *r, const secp256k1_fe *a) {
+void secp256k1_fe_inv_var(secp256k1_fe *r, const secp256k1_fe *a) {
     secp256k1_fe_inv(r, a);
 }
 
-static void secp256k1_fe_inv_all_var(size_t len, secp256k1_fe *r, const secp256k1_fe *a) {
+void secp256k1_fe_inv_all_var(size_t len, secp256k1_fe *r, const secp256k1_fe *a) {
     secp256k1_fe u;
     size_t i;
     if (len < 1) {
@@ -1646,141 +1347,6 @@ static void secp256k1_fe_inv_all_var(size_t len, secp256k1_fe *r, const secp256k
     r[0] = u;
 }
 //******end of field_impl.h******
-
-
-//******Contents of group.h******
-
-
-//******Contents of group.h******
-
-/** A group element of the secp256k1 curve, in affine coordinates. */
-typedef struct {
-    secp256k1_fe x;
-    secp256k1_fe y;
-    int infinity; /* whether this represents the point at infinity */
-} secp256k1_ge;
-
-#define SECP256K1_GE_CONST(a, b, c, d, e, f, g, h, i, j, k, l, m, n, o, p) {SECP256K1_FE_CONST((a),(b),(c),(d),(e),(f),(g),(h)), SECP256K1_FE_CONST((i),(j),(k),(l),(m),(n),(o),(p)), 0}
-#define SECP256K1_GE_CONST_INFINITY {SECP256K1_FE_CONST(0, 0, 0, 0, 0, 0, 0, 0), SECP256K1_FE_CONST(0, 0, 0, 0, 0, 0, 0, 0), 1}
-
-/** A group element of the secp256k1 curve, in jacobian coordinates.
- *  y^2 = x^3 + 7
- *  (Y/Z^3)^2 = (X/Z^2)^3 + 7
- *  Y^2 / Z^6 = X^3 / Z^6 + 7
- *  Y^2 = X^3 + 7*Z^6
- */
-typedef struct {
-    secp256k1_fe x; /* actual (affine) x: secp256k1_gej.x / secp256k1_gej.z^2 */
-    secp256k1_fe y; /* actual (affine) y: secp256k1_gej.y / secp256k1_gej.z^3 */
-    secp256k1_fe z;
-    int infinity; /* whether this represents the point at infinity */
-} secp256k1_gej;
-
-#define SECP256K1_GEJ_CONST(a, b, c, d, e, f, g, h, i, j, k, l, m, n, o, p) {SECP256K1_FE_CONST((a),(b),(c),(d),(e),(f),(g),(h)), SECP256K1_FE_CONST((i),(j),(k),(l),(m),(n),(o),(p)), SECP256K1_FE_CONST(0, 0, 0, 0, 0, 0, 0, 1), 0}
-#define SECP256K1_GEJ_CONST_INFINITY {SECP256K1_FE_CONST(0, 0, 0, 0, 0, 0, 0, 0), SECP256K1_FE_CONST(0, 0, 0, 0, 0, 0, 0, 0), SECP256K1_FE_CONST(0, 0, 0, 0, 0, 0, 0, 0), 1}
-
-typedef struct {
-    secp256k1_fe_storage x;
-    secp256k1_fe_storage y;
-} secp256k1_ge_storage;
-
-#define SECP256K1_GE_STORAGE_CONST(a, b, c, d, e, f, g, h, i, j, k, l, m, n, o, p) {SECP256K1_FE_STORAGE_CONST((a),(b),(c),(d),(e),(f),(g),(h)), SECP256K1_FE_STORAGE_CONST((i),(j),(k),(l),(m),(n),(o),(p))}
-
-#define SECP256K1_GE_STORAGE_CONST_GET(t) SECP256K1_FE_STORAGE_CONST_GET(t.x), SECP256K1_FE_STORAGE_CONST_GET(t.y)
-
-/** Set a group element equal to the point with given X and Y coordinates */
-static void secp256k1_ge_set_xy(secp256k1_ge *r, const secp256k1_fe *x, const secp256k1_fe *y);
-
-/** Set a group element (affine) equal to the point with the given X coordinate, and given oddness
- *  for Y. Return value indicates whether the result is valid. */
-static int secp256k1_ge_set_xo_var(secp256k1_ge *r, const secp256k1_fe *x, int odd);
-
-/** Check whether a group element is the point at infinity. */
-static int secp256k1_ge_is_infinity(const secp256k1_ge *a);
-
-/** Check whether a group element is valid (i.e., on the curve). */
-static int secp256k1_ge_is_valid_var(const secp256k1_ge *a);
-
-static void secp256k1_ge_neg(secp256k1_ge *r, const secp256k1_ge *a);
-
-/** Set a group element equal to another which is given in jacobian coordinates */
-static void secp256k1_ge_set_gej(secp256k1_ge *r, secp256k1_gej *a);
-
-/** Set a batch of group elements equal to the inputs given in jacobian coordinates */
-static void secp256k1_ge_set_all_gej_var(size_t len, secp256k1_ge *outputPoints, const secp256k1_gej *outputPointsJacobian, const secp256k1_callback *cb);
-
-/** Set a batch of group elements equal to the inputs given in jacobian
- *  coordinates (with known z-ratios). zr must contain the known z-ratios such
- *  that mul(a[i].z, zr[i+1]) == a[i+1].z. zr[0] is ignored. */
-static void secp256k1_ge_set_table_gej_var(size_t len, secp256k1_ge *r, const secp256k1_gej *a, const secp256k1_fe *zr);
-
-/** Bring a batch inputs given in jacobian coordinates (with known z-ratios) to
- *  the same global z "denominator". zr must contain the known z-ratios such
- *  that mul(a[i].z, zr[i+1]) == a[i+1].z. zr[0] is ignored. The x and y
- *  coordinates of the result are stored in r, the common z coordinate is
- *  stored in globalz. */
-static void secp256k1_ge_globalz_set_table_gej(size_t len, secp256k1_ge *r, secp256k1_fe *globalz, const secp256k1_gej *a, const secp256k1_fe *zr);
-
-/** Set a group element (jacobian) equal to the point at infinity. */
-static void secp256k1_gej_set_infinity(secp256k1_gej *r);
-
-/** Set a group element (jacobian) equal to another which is given in affine coordinates. */
-static void secp256k1_gej_set_ge(secp256k1_gej *r, __constant secp256k1_ge *a);
-
-/** Compare the X coordinate of a group element (jacobian). */
-static int secp256k1_gej_eq_x_var(const secp256k1_fe *x, const secp256k1_gej *a);
-
-/** Set r equal to the inverse of a (i.e., mirrored around the X axis) */
-static void secp256k1_gej_neg(secp256k1_gej *r, const secp256k1_gej *a);
-
-/** Check whether a group element is the point at infinity. */
-static int secp256k1_gej_is_infinity(const secp256k1_gej *a);
-
-/** Set r equal to the double of a. If rzr is not-NULL, r->z = a->z * *rzr (where infinity means an implicit z = 0).
- * a may not be zero. Constant time. */
-static void secp256k1_gej_double_nonzero(secp256k1_gej *r, const secp256k1_gej *a, secp256k1_fe *rzr);
-
-/** Set r equal to the double of a. If rzr is not-NULL, r->z = a->z * *rzr (where infinity means an implicit z = 0). */
-static void secp256k1_gej_double_var(secp256k1_gej *r, const secp256k1_gej *a, secp256k1_fe *rzr);
-
-/** Set r equal to the sum of a and b. If rzr is non-NULL, r->z = a->z * *rzr (a cannot be infinity in that case). */
-static void secp256k1_gej_add_var(secp256k1_gej *r, const secp256k1_gej *a, const secp256k1_gej *b, secp256k1_fe *rzr);
-
-/** Set r equal to the sum of a and b (with b given in affine coordinates, and not infinity). */
-static void secp256k1_gej_add_ge(secp256k1_gej *r, const secp256k1_gej *a, const secp256k1_ge *b);
-
-/** Set r equal to the sum of a and b (with b given in affine coordinates). This is more efficient
-    than secp256k1_gej_add_var. It is identical to secp256k1_gej_add_ge but without constant-time
-    guarantee, and b is allowed to be infinity. If rzr is non-NULL, r->z = a->z * *rzr (a cannot be infinity in that case). */
-static void secp256k1_gej_add_ge_var(secp256k1_gej *r, const secp256k1_gej *a, __constant secp256k1_ge *b, secp256k1_fe *rzr);
-
-/** Set r equal to the sum of a and b (with the inverse of b's Z coordinate passed as bzinv). */
-static void secp256k1_gej_add_zinv_var(secp256k1_gej *r, const secp256k1_gej *a, const secp256k1_ge *b, const secp256k1_fe *bzinv);
-
-#ifdef USE_ENDOMORPHISM
-/** Set r to be equal to lambda times a, where lambda is chosen in a way such that this is very fast. */
-static void secp256k1_ge_mul_lambda(secp256k1_ge *r, const secp256k1_ge *a);
-#endif
-
-/** Clear a secp256k1_gej to prevent leaking sensitive information. */
-static void secp256k1_gej_clear(secp256k1_gej *r);
-
-/** Clear a secp256k1_ge to prevent leaking sensitive information. */
-static void secp256k1_ge_clear(secp256k1_ge *r);
-
-/** Convert a group element to the storage type. */
-static void secp256k1_ge_to_storage(secp256k1_ge_storage *r, const secp256k1_ge *a);
-
-/** Convert a group element back from the storage type. */
-static void secp256k1_ge_from_storage(secp256k1_ge *r, const secp256k1_ge_storage *a);
-
-/** If flag is true, set *r equal to *a; otherwise leave it. Constant-time. */
-static void secp256k1_ge_storage_cmov(secp256k1_ge_storage *r, const secp256k1_ge_storage *a, int flag);
-
-/** Rescale a jacobian point by b which must be non-zero. Constant-time. */
-static void secp256k1_gej_rescale(secp256k1_gej *r, const secp256k1_fe *b);
-
-//******end of group.h******
 
 
 //******Contents of group_impl.h******
@@ -1810,23 +1376,23 @@ static void secp256k1_ge_set_gej_zinv(secp256k1_ge *r, const secp256k1_gej *a, c
     r->infinity = a->infinity;
 }
 
-static void secp256k1_ge_set_xy(secp256k1_ge *r, const secp256k1_fe *x, const secp256k1_fe *y) {
+void secp256k1_ge_set_xy(secp256k1_ge *r, const secp256k1_fe *x, const secp256k1_fe *y) {
     r->infinity = 0;
     r->x = *x;
     r->y = *y;
 }
 
-static int secp256k1_ge_is_infinity(const secp256k1_ge *a) {
+int secp256k1_ge_is_infinity(const secp256k1_ge *a) {
     return a->infinity;
 }
 
-static void secp256k1_ge_neg(secp256k1_ge *r, const secp256k1_ge *a) {
+void secp256k1_ge_neg(secp256k1_ge *r, const secp256k1_ge *a) {
     *r = *a;
     secp256k1_fe_normalize_weak(&r->y);
     secp256k1_fe_negate(&r->y, (__constant secp256k1_fe *) &r->y, 1);
 }
 
-static void secp256k1_ge_set_gej(secp256k1_ge *r, secp256k1_gej *a) {
+void secp256k1_ge_set_gej(secp256k1_ge *r, secp256k1_gej *a) {
     secp256k1_fe z2, z3;
     r->infinity = a->infinity;
     secp256k1_fe_inv(&a->z, &a->z);
@@ -1855,23 +1421,12 @@ static void secp256k1_ge_set_gej_var(secp256k1_ge *r, secp256k1_gej *a) {
     r->y = a->y;
 }
 
-#ifdef MACRO_USE_openCL
-#define MACRO_PRECOMPUTED_GENERATOR_POWERS_LENGTH 1024
-__constant secp256k1_fe precomputedGeneratorPowersBuffer[MACRO_PRECOMPUTED_GENERATOR_POWERS_LENGTH]; 
-__constant secp256k1_fe precomputedGeneratorPowersInversesBuffer[MACRO_PRECOMPUTED_GENERATOR_POWERS_LENGTH]; 
-#endif
-
-static void secp256k1_ge_set_all_gej_var(size_t len, secp256k1_ge *outputPoints, const secp256k1_gej *outputPointsJacobian, const secp256k1_callback *cb) {
+void secp256k1_ge_set_all_gej_var(size_t len, secp256k1_ge *outputPoints, const secp256k1_gej *outputPointsJacobian, const secp256k1_callback *cb) {
   secp256k1_fe *az;
   secp256k1_fe *azi;
   size_t i;
   size_t count = 0;
-
-#ifndef MACRO_USE_openCL
   az = (secp256k1_fe *) checked_malloc(cb, sizeof(secp256k1_fe) * len);
-#else
-  az = (secp256k1_fe *) precomputedGeneratorPowersBuffer; 
-#endif
 
   for (i = 0; i < len; i++) {
       if (!outputPointsJacobian[i].infinity) {
@@ -1879,15 +1434,9 @@ static void secp256k1_ge_set_all_gej_var(size_t len, secp256k1_ge *outputPoints,
       }
   }
 
-#ifndef MACRO_USE_openCL
   azi = (secp256k1_fe *) checked_malloc(cb, sizeof(secp256k1_fe) * count);
-#else
-  azi = (secp256k1_fe *) precomputedGeneratorPowersInversesBuffer;
-#endif
   secp256k1_fe_inv_all_var(count, azi, az);
-#ifndef MACRO_USE_openCL
   free(az);
-#endif
 
   count = 0;
   for (i = 0; i < len; i++) {
@@ -1896,12 +1445,10 @@ static void secp256k1_ge_set_all_gej_var(size_t len, secp256k1_ge *outputPoints,
           secp256k1_ge_set_gej_zinv(&outputPoints[i], &outputPointsJacobian[i], &azi[count++]);
       }
   }
-#ifndef MACRO_USE_openCL
   free(azi);
-#endif
 }
 
-static void secp256k1_ge_set_table_gej_var(size_t len, secp256k1_ge *r, const secp256k1_gej *a, const secp256k1_fe *zr) {
+void secp256k1_ge_set_table_gej_var(size_t len, secp256k1_ge *r, const secp256k1_gej *a, const secp256k1_fe *zr) {
     size_t i = len - 1;
     secp256k1_fe zi;
 
@@ -1919,7 +1466,7 @@ static void secp256k1_ge_set_table_gej_var(size_t len, secp256k1_ge *r, const se
     }
 }
 
-static void secp256k1_ge_globalz_set_table_gej(size_t len, secp256k1_ge *r, secp256k1_fe *globalz, const secp256k1_gej *a, const secp256k1_fe *zr) {
+void secp256k1_ge_globalz_set_table_gej(size_t len, secp256k1_ge *r, secp256k1_fe *globalz, const secp256k1_gej *a, const secp256k1_fe *zr) {
     size_t i = len - 1;
     secp256k1_fe zs;
 
@@ -1942,27 +1489,27 @@ static void secp256k1_ge_globalz_set_table_gej(size_t len, secp256k1_ge *r, secp
     }
 }
 
-static void secp256k1_gej_set_infinity(secp256k1_gej *r) {
+void secp256k1_gej_set_infinity(secp256k1_gej *r) {
     r->infinity = 1;
     secp256k1_fe_set_int(&r->x, 0);
     secp256k1_fe_set_int(&r->y, 0);
     secp256k1_fe_set_int(&r->z, 0);
 }
 
-static void secp256k1_gej_clear(secp256k1_gej *r) {
+void secp256k1_gej_clear(secp256k1_gej *r) {
     r->infinity = 0;
     secp256k1_fe_clear(&r->x);
     secp256k1_fe_clear(&r->y);
     secp256k1_fe_clear(&r->z);
 }
 
-static void secp256k1_ge_clear(secp256k1_ge *r) {
+void secp256k1_ge_clear(secp256k1_ge *r) {
     r->infinity = 0;
     secp256k1_fe_clear(&r->x);
     secp256k1_fe_clear(&r->y);
 }
 
-static int secp256k1_ge_set_xo_var(secp256k1_ge *r, const secp256k1_fe *x, int odd) {
+int secp256k1_ge_set_xo_var(secp256k1_ge *r, const secp256k1_fe *x, int odd) {
     secp256k1_fe x2, x3, c;
     r->x = *x;
     secp256k1_fe_sqr(&x2, (__constant secp256k1_fe *) x);
@@ -1980,14 +1527,14 @@ static int secp256k1_ge_set_xo_var(secp256k1_ge *r, const secp256k1_fe *x, int o
     return 1;
 }
 
-static void secp256k1_gej_set_ge(secp256k1_gej *r, __constant secp256k1_ge *a) {
+void secp256k1_gej_set_ge(secp256k1_gej *r, __constant secp256k1_ge *a) {
    r->infinity = a->infinity;
    r->x = a->x;
    r->y = a->y;
    secp256k1_fe_set_int(&r->z, 1);
 }
 
-static int secp256k1_gej_eq_x_var(const secp256k1_fe *x, const secp256k1_gej *a) {
+int secp256k1_gej_eq_x_var(const secp256k1_fe *x, const secp256k1_gej *a) {
     secp256k1_fe r, r2;
     VERIFY_CHECK(!a->infinity);
     secp256k1_fe_sqr(&r, (__constant secp256k1_fe *) &a->z); 
@@ -1996,7 +1543,7 @@ static int secp256k1_gej_eq_x_var(const secp256k1_fe *x, const secp256k1_gej *a)
     return secp256k1_fe_equal_var((__constant secp256k1_fe *) &r, (__constant secp256k1_fe *) &r2);
 }
 
-static void secp256k1_gej_neg(secp256k1_gej *r, const secp256k1_gej *a) {
+void secp256k1_gej_neg(secp256k1_gej *r, const secp256k1_gej *a) {
     r->infinity = a->infinity;
     r->x = a->x;
     r->y = a->y;
@@ -2005,11 +1552,11 @@ static void secp256k1_gej_neg(secp256k1_gej *r, const secp256k1_gej *a) {
     secp256k1_fe_negate(&r->y, (__constant secp256k1_fe *) &r->y, 1);
 }
 
-static int secp256k1_gej_is_infinity(const secp256k1_gej *a) {
+int secp256k1_gej_is_infinity(const secp256k1_gej *a) {
     return a->infinity;
 }
 
-static int secp256k1_gej_is_valid_var(const secp256k1_gej *a) {
+int secp256k1_gej_is_valid_var(const secp256k1_gej *a) {
     secp256k1_fe y2, x3, z2, z6;
     if (a->infinity) {
         return 0;
@@ -2031,7 +1578,7 @@ static int secp256k1_gej_is_valid_var(const secp256k1_gej *a) {
     return secp256k1_fe_equal_var((__constant secp256k1_fe *) &y2, (__constant secp256k1_fe *) &x3);
 }
 
-static int secp256k1_ge_is_valid_var(const secp256k1_ge *a) {
+int secp256k1_ge_is_valid_var(const secp256k1_ge *a) {
     secp256k1_fe y2, x3, c;
     if (a->infinity) {
         return 0;
@@ -2046,7 +1593,7 @@ static int secp256k1_ge_is_valid_var(const secp256k1_ge *a) {
     return secp256k1_fe_equal_var((__constant secp256k1_fe *) &y2, (__constant secp256k1_fe *) &x3);
 }
 
-static void secp256k1_gej_double_var(secp256k1_gej *r, const secp256k1_gej *a, secp256k1_fe *rzr) {
+void secp256k1_gej_double_var(secp256k1_gej *r, const secp256k1_gej *a, secp256k1_fe *rzr) {
     /* Operations: 3 mul, 4 sqr, 0 normalize, 12 mul_int/add/negate */
     secp256k1_fe t1,t2,t3,t4;
     /** For secp256k1, 2Q is infinity if and only if Q is infinity. This is because if 2Q = infinity,
@@ -2089,12 +1636,12 @@ static void secp256k1_gej_double_var(secp256k1_gej *r, const secp256k1_gej *a, s
     secp256k1_fe_add(&r->y, (__constant secp256k1_fe *) &t2);         /* Y' = 36*X^3*Y^2 - 27*X^6 - 8*Y^4 (4) */
 }
 
-static void secp256k1_gej_double_nonzero(secp256k1_gej *r, const secp256k1_gej *a, secp256k1_fe *rzr) {
+void secp256k1_gej_double_nonzero(secp256k1_gej *r, const secp256k1_gej *a, secp256k1_fe *rzr) {
     VERIFY_CHECK(!secp256k1_gej_is_infinity(a));
     secp256k1_gej_double_var(r, a, rzr);
 }
 
-static void secp256k1_gej_add_var(secp256k1_gej *r, const secp256k1_gej *a, const secp256k1_gej *b, secp256k1_fe *rzr) {
+void secp256k1_gej_add_var(secp256k1_gej *r, const secp256k1_gej *a, const secp256k1_gej *b, secp256k1_fe *rzr) {
     /* Operations: 12 mul, 4 sqr, 2 normalize, 12 mul_int/add/negate */
     secp256k1_fe z22, z12, u1, u2, s1, s2, h, i, i2, h2, h3, t;
 
@@ -2157,7 +1704,7 @@ static void secp256k1_gej_add_var(secp256k1_gej *r, const secp256k1_gej *a, cons
     secp256k1_fe_add(&r->y, (__constant secp256k1_fe *) &h3);
 }
 
-static void secp256k1_gej_add_ge_var(secp256k1_gej *r, const secp256k1_gej *a, __constant secp256k1_ge *b, secp256k1_fe *rzr) {
+void secp256k1_gej_add_ge_var(secp256k1_gej *r, const secp256k1_gej *a, __constant secp256k1_ge *b, secp256k1_fe *rzr) {
     /* 8 mul, 3 sqr, 4 normalize, 12 mul_int/add/negate */
     secp256k1_fe z12, u1, u2, s1, s2, h, i, i2, h2, h3, t;
     if (a->infinity) {
@@ -2215,7 +1762,7 @@ static void secp256k1_gej_add_ge_var(secp256k1_gej *r, const secp256k1_gej *a, _
     secp256k1_fe_add(&r->y, (__constant secp256k1_fe *) &h3);
 }
 
-static void secp256k1_gej_add_zinv_var(secp256k1_gej *r, const secp256k1_gej *a, const secp256k1_ge *b, const secp256k1_fe *bzinv) {
+void secp256k1_gej_add_zinv_var(secp256k1_gej *r, const secp256k1_gej *a, const secp256k1_ge *b, const secp256k1_fe *bzinv) {
     /* 9 mul, 3 sqr, 4 normalize, 12 mul_int/add/negate */
     secp256k1_fe az, z12, u1, u2, s1, s2, h, i, i2, h2, h3, t;
 
@@ -2285,7 +1832,7 @@ static void secp256k1_gej_add_zinv_var(secp256k1_gej *r, const secp256k1_gej *a,
 }
 
 
-static void secp256k1_gej_add_ge(secp256k1_gej *r, const secp256k1_gej *a, const secp256k1_ge *b) {
+void secp256k1_gej_add_ge(secp256k1_gej *r, const secp256k1_gej *a, const secp256k1_ge *b) {
     /* Operations: 7 mul, 5 sqr, 4 normalize, 21 mul_int/add/negate/cmov */
     static const secp256k1_fe fe_1 = SECP256K1_FE_CONST(0, 0, 0, 0, 0, 0, 0, 1);
     secp256k1_fe zz, u1, u2, s1, s2, t, tt, m, n, q, rr;
@@ -2407,7 +1954,7 @@ static void secp256k1_gej_add_ge(secp256k1_gej *r, const secp256k1_gej *a, const
     r->infinity = infinity;
 }
 
-static void secp256k1_gej_rescale(secp256k1_gej *r, const secp256k1_fe *s) {
+void secp256k1_gej_rescale(secp256k1_gej *r, const secp256k1_fe *s) {
     /* Operations: 4 mul, 1 sqr */
     secp256k1_fe zz;
     VERIFY_CHECK(!secp256k1_fe_is_zero(s));
@@ -2418,7 +1965,7 @@ static void secp256k1_gej_rescale(secp256k1_gej *r, const secp256k1_fe *s) {
     secp256k1_fe_mul(&r->z, &r->z, (__constant secp256k1_fe *) s);                  /* r->z *= s   */
 }
 
-static void secp256k1_ge_to_storage(secp256k1_ge_storage *r, const secp256k1_ge *a) {
+void secp256k1_ge_to_storage(secp256k1_ge_storage *r, const secp256k1_ge *a) {
     secp256k1_fe x, y;
     VERIFY_CHECK(!a->infinity);
     x = a->x;
@@ -2429,13 +1976,13 @@ static void secp256k1_ge_to_storage(secp256k1_ge_storage *r, const secp256k1_ge 
     secp256k1_fe_to_storage(&r->y, &y);
 }
 
-static void secp256k1_ge_from_storage(secp256k1_ge *r, const secp256k1_ge_storage *a) {
+void secp256k1_ge_from_storage(secp256k1_ge *r, const secp256k1_ge_storage *a) {
     secp256k1_fe_from_storage(&r->x, &a->x);
     secp256k1_fe_from_storage(&r->y, &a->y);
     r->infinity = 0;
 }
 
-static void secp256k1_ge_storage_cmov(secp256k1_ge_storage *r, const secp256k1_ge_storage *a, int flag) {
+void secp256k1_ge_storage_cmov(secp256k1_ge_storage *r, const secp256k1_ge_storage *a, int flag) {
     secp256k1_fe_storage_cmov(&r->x, &a->x, flag);
     secp256k1_fe_storage_cmov(&r->y, &a->y, flag);
 }
@@ -2452,17 +1999,6 @@ static void secp256k1_ge_mul_lambda(secp256k1_ge *r, const secp256k1_ge *a) {
 #endif
 
 //******end of group_impl.h******
-
-
-//******Contents of scalar_8x32.h******
-
-/** A scalar modulo the group order of the secp256k1 curve. */
-typedef struct {
-    uint32_t d[8];
-} secp256k1_scalar;
-
-#define SECP256K1_SCALAR_CONST(d7, d6, d5, d4, d3, d2, d1, d0) {{(d0), (d1), (d2), (d3), (d4), (d5), (d6), (d7)}}
-//******end of scalar_8x32.h******
 
 
 //******Contents of scalar_8x32_impl.h******
@@ -2672,7 +2208,7 @@ static void secp256k1_scalar_negate(secp256k1_scalar *r, const secp256k1_scalar 
     r->d[7] = t & nonzero;
 }
 
-static int secp256k1_scalar_is_one(const secp256k1_scalar *a) {
+int secp256k1_scalar_is_one(const secp256k1_scalar *a) {
     return ((a->d[0] ^ 1) | a->d[1] | a->d[2] | a->d[3] | a->d[4] | a->d[5] | a->d[6] | a->d[7]) == 0;
 }
 
@@ -3152,11 +2688,11 @@ static void secp256k1_scalar_split_128(secp256k1_scalar *r1, secp256k1_scalar *r
 }
 #endif
 
-static int secp256k1_scalar_eq(const secp256k1_scalar *a, const secp256k1_scalar *b) {
+int secp256k1_scalar_eq(const secp256k1_scalar *a, const secp256k1_scalar *b) {
     return ((a->d[0] ^ b->d[0]) | (a->d[1] ^ b->d[1]) | (a->d[2] ^ b->d[2]) | (a->d[3] ^ b->d[3]) | (a->d[4] ^ b->d[4]) | (a->d[5] ^ b->d[5]) | (a->d[6] ^ b->d[6]) | (a->d[7] ^ b->d[7])) == 0;
 }
 
-static void secp256k1_scalar_mul_shift_var(secp256k1_scalar *r, const secp256k1_scalar *a, const secp256k1_scalar *b, unsigned int shift) {
+void secp256k1_scalar_mul_shift_var(secp256k1_scalar *r, const secp256k1_scalar *a, const secp256k1_scalar *b, unsigned int shift) {
     uint32_t l[16];
     unsigned int shiftlimbs;
     unsigned int shiftlow;
@@ -3228,7 +2764,7 @@ static void secp256k1_scalar_negate(secp256k1_scalar *r, const secp256k1_scalar 
 static int secp256k1_scalar_is_zero(const secp256k1_scalar *a);
 
 /** Check whether a scalar equals one. */
-static int secp256k1_scalar_is_one(const secp256k1_scalar *a);
+int secp256k1_scalar_is_one(const secp256k1_scalar *a);
 
 /** Check whether a scalar, considered as an nonnegative integer, is even. */
 static int secp256k1_scalar_is_even(const secp256k1_scalar *a);
@@ -3249,7 +2785,7 @@ static int secp256k1_scalar_cond_negate(secp256k1_scalar *a, int flag);
 #endif
 
 /** Compare two scalars. */
-static int secp256k1_scalar_eq(const secp256k1_scalar *a, const secp256k1_scalar *b);
+int secp256k1_scalar_eq(const secp256k1_scalar *a, const secp256k1_scalar *b);
 
 #ifdef USE_ENDOMORPHISM
 /** Find r1 and r2 such that r1+r2*2^128 = a. */
@@ -3259,7 +2795,7 @@ static void secp256k1_scalar_split_lambda(secp256k1_scalar *r1, secp256k1_scalar
 #endif
 
 /** Multiply a and b (without taking the modulus!), divide by 2**shift, and round to the nearest integer. Shift must be at least 256. */
-static void secp256k1_scalar_mul_shift_var(secp256k1_scalar *r, const secp256k1_scalar *a, const secp256k1_scalar *b, unsigned int shift);
+void secp256k1_scalar_mul_shift_var(secp256k1_scalar *r, const secp256k1_scalar *a, const secp256k1_scalar *b, unsigned int shift);
 //******end of scalar.h******
 
 
@@ -3541,24 +3077,6 @@ static void secp256k1_scalar_split_lambda(secp256k1_scalar *r1, secp256k1_scalar
 //******end of scalar_impl.h******
 
 
-//******Contents of ecmult.h******
-typedef struct {
-    /* For accelerating the computation of a*P + b*G: */
-    secp256k1_ge_storage (*pre_g)[];    /* odd multiples of the generator */
-} secp256k1_ecmult_context;
-
-static void secp256k1_ecmult_context_init(secp256k1_ecmult_context *ctx);
-static void secp256k1_ecmult_context_build(secp256k1_ecmult_context *output, const secp256k1_callback *cb);
-//static void secp256k1_ecmult_context_clone(secp256k1_ecmult_context *dst,
-//                                           const secp256k1_ecmult_context *src, const secp256k1_callback *cb);
-static void secp256k1_ecmult_context_clear(secp256k1_ecmult_context *ctx);
-static int secp256k1_ecmult_context_is_built(const secp256k1_ecmult_context *ctx);
-
-/** Double multiply: R = na*A + ng*G */
-static void secp256k1_ecmult(const secp256k1_ecmult_context *ctx, secp256k1_gej *r, const secp256k1_gej *a, const secp256k1_scalar *na, const secp256k1_scalar *ng);
-//******end of ecmult.h******
-
-
 //******Contents of ecmult_impl.h******
 
 /* optimal for 128-bit and 256-bit exponents. */
@@ -3644,23 +3162,11 @@ static void secp256k1_ecmult_odd_multiples_table_globalz_windowa(secp256k1_ge *p
     secp256k1_ge_globalz_set_table_gej(ECMULT_TABLE_SIZE(WINDOW_A), pre, globalz, prej, zr);
 }
 
-#ifdef MACRO_USE_openCL
-
-__constant secp256k1_gej precomputedGeneratorJacobianBufferFor_ecmult_odd_multiples_table_storage_var[ECMULT_TABLE_SIZE(WINDOW_G)];
-__constant secp256k1_ge precomputedGeneratorBufferFor_ecmult_odd_multiples_table_storage_var[ECMULT_TABLE_SIZE(WINDOW_G)];
-__constant secp256k1_fe bufferFor_ecmult_odd_multiples_table_storage_var[ECMULT_TABLE_SIZE(WINDOW_G)];
-#endif
 
 static void secp256k1_ecmult_odd_multiples_table_storage_var(int n, secp256k1_ge_storage *pre, const secp256k1_gej *a, const secp256k1_callback *cb) {
-#ifndef MACRO_USE_openCL
   secp256k1_gej *prej = (secp256k1_gej*) checked_malloc(cb, sizeof(secp256k1_gej) * n);
   secp256k1_ge *prea = (secp256k1_ge*) checked_malloc(cb, sizeof(secp256k1_ge) * n);
   secp256k1_fe *zr = (secp256k1_fe*) checked_malloc(cb, sizeof(secp256k1_fe) * n);
-#else
-  secp256k1_gej *prej = (secp256k1_gej*) precomputedGeneratorJacobianBufferFor_ecmult_odd_multiples_table_storage_var;
-  secp256k1_ge *prea = (secp256k1_ge*) precomputedGeneratorBufferFor_ecmult_odd_multiples_table_storage_var;
-  secp256k1_fe *zr = (secp256k1_fe*) bufferFor_ecmult_odd_multiples_table_storage_var;
-#endif
 
   int i;
 
@@ -3672,12 +3178,9 @@ static void secp256k1_ecmult_odd_multiples_table_storage_var(int n, secp256k1_ge
   for (i = 0; i < n; i++) {
       secp256k1_ge_to_storage(&pre[i], &prea[i]);
   }
-
-#ifndef MACRO_USE_openCL
   free(prea);
   free(prej);
   free(zr);
-#endif
 }
 
 /** The following two macro retrieves a particular odd multiple from a table
@@ -3705,15 +3208,11 @@ static void secp256k1_ecmult_odd_multiples_table_storage_var(int n, secp256k1_ge
   } \
 } while(0)
 
-static void secp256k1_ecmult_context_init(secp256k1_ecmult_context *ctx) {
+void secp256k1_ecmult_context_init(secp256k1_ecmult_context *ctx) {
   ctx->pre_g = NULL;
 }
 
-#ifdef MACRO_USE_openCL
-__constant secp256k1_ge_storage bufferOddPrecomputedGeneratorsFor_secp256k1_ecmult_context_build[ECMULT_TABLE_SIZE(WINDOW_G)];
-#endif
-
-static void secp256k1_ecmult_context_build(secp256k1_ecmult_context *output, const secp256k1_callback *cb) {
+void secp256k1_ecmult_context_build(secp256k1_ecmult_context *output, const secp256k1_callback *cb) {
   secp256k1_gej gj;
 
   if (output->pre_g != NULL) {
@@ -3723,11 +3222,7 @@ static void secp256k1_ecmult_context_build(secp256k1_ecmult_context *output, con
   /* get the generator */
   secp256k1_gej_set_ge(&gj, &secp256k1_ge_const_g);
 
-#ifndef MACRO_USE_openCL
   output->pre_g = (secp256k1_ge_storage (*)[]) checked_malloc(cb, sizeof((*output->pre_g)[0]) * ECMULT_TABLE_SIZE(WINDOW_G));
-#else
-  output->pre_g = (secp256k1_ge_storage (*)[]) bufferOddPrecomputedGeneratorsFor_secp256k1_ecmult_context_build;
-#endif
   /* precompute the tables with odd multiples */
   secp256k1_ecmult_odd_multiples_table_storage_var(ECMULT_TABLE_SIZE(WINDOW_G), *output->pre_g, &gj, cb);
 }
@@ -3746,11 +3241,11 @@ static void secp256k1_ecmult_context_build(secp256k1_ecmult_context *output, con
 //  }
 //}
 
-static int secp256k1_ecmult_context_is_built(const secp256k1_ecmult_context *ctx) {
+int secp256k1_ecmult_context_is_built(const secp256k1_ecmult_context *ctx) {
   return ctx->pre_g != NULL;
 }
 
-static void secp256k1_ecmult_context_clear(secp256k1_ecmult_context *ctx) {
+void secp256k1_ecmult_context_clear(secp256k1_ecmult_context *ctx) {
   secp256k1_ecmult_context_init(ctx);
 }
 
@@ -3777,9 +3272,7 @@ static int secp256k1_ecmult_wnaf(int *wnaf, int len, const secp256k1_scalar *a, 
   for (i = 0; i < len; i ++){
     wnaf[i] = 0;
   }  
-#ifndef MACRO_USE_openCL
   memset(wnaf, 0, len * sizeof(wnaf[0]));
-#endif
   if (secp256k1_scalar_get_bits(&s, 255, 1)) {
     secp256k1_scalar_negate(&s, &s);
     sign = - 1;
@@ -3817,50 +3310,20 @@ static int secp256k1_ecmult_wnaf(int *wnaf, int len, const secp256k1_scalar *a, 
   return last_set_bit + 1;
 }
 
-static void secp256k1_ecmult(const secp256k1_ecmult_context *ctx, secp256k1_gej *r, const secp256k1_gej *a, const secp256k1_scalar *na, const secp256k1_scalar *ng) {
+void secp256k1_ecmult(const secp256k1_ecmult_context *ctx, secp256k1_gej *r, const secp256k1_gej *a, const secp256k1_scalar *na, const secp256k1_scalar *ng) {
     secp256k1_ge pre_a[ECMULT_TABLE_SIZE(WINDOW_A)];
     secp256k1_ge tmpa;
     secp256k1_fe Z;
-#ifdef USE_ENDOMORPHISM
-    secp256k1_ge pre_a_lam[ECMULT_TABLE_SIZE(WINDOW_A)];
-    secp256k1_scalar na_1, na_lam;
-    /* Splitted G factors. */
-    secp256k1_scalar ng_1, ng_128;
-    int wnaf_na_1[130];
-    int wnaf_na_lam[130];
-    int bits_na_1;
-    int bits_na_lam;
-    int wnaf_ng_1[129];
-    int bits_ng_1;
-    int wnaf_ng_128[129];
-    int bits_ng_128;
-#else
     int wnaf_na[256];
     int bits_na;
     int wnaf_ng[256];
     int bits_ng;
-#endif
     int i;
     int bits;
 
-#ifdef USE_ENDOMORPHISM
-    /* split na into na_1 and na_lam (where na = na_1 + na_lam*lambda, and na_1 and na_lam are ~128 bit) */
-    secp256k1_scalar_split_lambda(&na_1, &na_lam, na);
-
-    /* build wnaf representation for na_1 and na_lam. */
-    bits_na_1   = secp256k1_ecmult_wnaf(wnaf_na_1,   130, &na_1,   WINDOW_A);
-    bits_na_lam = secp256k1_ecmult_wnaf(wnaf_na_lam, 130, &na_lam, WINDOW_A);
-    VERIFY_CHECK(bits_na_1 <= 130);
-    VERIFY_CHECK(bits_na_lam <= 130);
-    bits = bits_na_1;
-    if (bits_na_lam > bits) {
-        bits = bits_na_lam;
-    }
-#else
     /* build wnaf representation for na. */
     bits_na     = secp256k1_ecmult_wnaf(wnaf_na,     256, na,      WINDOW_A);
     bits = bits_na;
-#endif
 
     /* Calculate odd multiples of a.
      * All multiples are brought to the same Z 'denominator', which is stored
@@ -3941,7 +3404,7 @@ static void secp256k1_ecmult(const secp256k1_ecmult_context *ctx, secp256k1_gej 
 
 
 //******Contents of ecmult_const.h******
-static void secp256k1_ecmult_const(secp256k1_gej *r, const secp256k1_ge *a, const secp256k1_scalar *q);
+void secp256k1_ecmult_const(secp256k1_gej *r, const secp256k1_ge *a, const secp256k1_scalar *q);
 //******end of ecmult_const.h******
 
 
@@ -4056,7 +3519,7 @@ static int secp256k1_wnaf_const(int *wnaf, secp256k1_scalar s, int w) {
 }
 
 
-static void secp256k1_ecmult_const(secp256k1_gej *r, const secp256k1_ge *a, const secp256k1_scalar *scalar) {
+void secp256k1_ecmult_const(secp256k1_gej *r, const secp256k1_ge *a, const secp256k1_scalar *scalar) {
     secp256k1_ge pre_a[ECMULT_TABLE_SIZE(WINDOW_A)];
     secp256k1_ge tmpa;
     secp256k1_fe Z;
@@ -4191,39 +3654,6 @@ static void secp256k1_ecmult_const(secp256k1_gej *r, const secp256k1_ge *a, cons
 #endif
 }
 //******end of ecmult_const_impl.h******
-
-
-//******Content from ecmult_gen.h******
-
-typedef struct {
-    /* For accelerating the computation of a*G:
-     * To harden against timing attacks, use the following mechanism:
-     * * Break up the multiplicand into groups of 4 bits, called n_0, n_1, n_2, ..., n_63.
-     * * Compute sum(n_i * 16^i * G + U_i, i=0..63), where:
-     *   * U_i = U * 2^i (for i=0..62)
-     *   * U_i = U * (1-2^63) (for i=63)
-     *   where U is a point with no known corresponding scalar. Note that sum(U_i, i=0..63) = 0.
-     * For each i, and each of the 16 possible values of n_i, (n_i * 16^i * G + U_i) is
-     * precomputed (call it prec(i, n_i)). The formula now becomes sum(prec(i, n_i), i=0..63).
-     * None of the resulting prec group elements have a known scalar, and neither do any of
-     * the intermediate sums while computing a*G.
-     */
-    secp256k1_ge_storage (*prec)[64][16]; /* prec[j][i] = 16^j * i * G + U_i */
-    secp256k1_scalar blind;
-    secp256k1_gej initial;
-} secp256k1_ecmult_gen_context;
-
-static void secp256k1_ecmult_gen_context_init(secp256k1_ecmult_gen_context* ctx);
-static void secp256k1_ecmult_gen_context_build(secp256k1_ecmult_gen_context* ctx, const secp256k1_callback* cb);
-static void secp256k1_ecmult_gen_context_clear(secp256k1_ecmult_gen_context* ctx);
-static int secp256k1_ecmult_gen_context_is_built(const secp256k1_ecmult_gen_context* ctx);
-
-/** Multiply with the generator: R = a*G */
-static void secp256k1_ecmult_gen(const secp256k1_ecmult_gen_context* ctx, secp256k1_gej *r, const secp256k1_scalar *a);
-
-static void secp256k1_ecmult_gen_blind(secp256k1_ecmult_gen_context *ctx, const unsigned char *seed32);
-
-//******end of ecmult_gen.h******
 
 
 //******Content from hash.h******
@@ -4376,17 +3806,11 @@ static void secp256k1_sha256_transform(uint32_t* s, const uint32_t* chunk) {
 static void secp256k1_sha256_write(secp256k1_sha256_t *hash, const unsigned char *data, size_t len) {
   size_t bufsize = hash->bytes & 0x3F;
   hash->bytes += len;
-  int numBytesToCopy, i;
+  int numBytesToCopy;
   while (bufsize + len >= 64) {
     /* Fill the buffer, and process it. */
     numBytesToCopy = 64 - bufsize;
-#ifndef MACRO_USE_openCL 
     memcpy(((unsigned char*)hash->buf) + bufsize, data, 64 - bufsize);
-#else
-    for (i = 0; i < numBytesToCopy; i++){
-      ((unsigned char*)hash->buf)[i + bufsize] = data[i];
-    }
-#endif    
     data += numBytesToCopy;
     len -= numBytesToCopy;
     secp256k1_sha256_transform(hash->s, hash->buf);
@@ -4394,13 +3818,7 @@ static void secp256k1_sha256_write(secp256k1_sha256_t *hash, const unsigned char
   }
   if (len) {
     /* Fill the buffer with what remains. */
-#ifndef MACRO_USE_openCL 
     memcpy(((unsigned char*)hash->buf) + bufsize, data, len);
-#else
-    for (i = 0; i < len; i ++){
-      ((unsigned char*)hash->buf)[i + bufsize] = data[i];
-    }
-#endif
   }
 }
 
@@ -4417,13 +3835,7 @@ static void secp256k1_sha256_finalize(secp256k1_sha256_t *hash, unsigned char *o
     out[i] = BE32(hash->s[i]);
     hash->s[i] = 0;
   }
-#ifndef MACRO_USE_openCL
   memcpy(out32, (const unsigned char*)out, 32);
-#else
-  for (i = 0; i < 32; i ++){
-    out32[i] = ((const unsigned char*)out)[i];
-  }
-#endif
 }
 
 static void secp256k1_hmac_sha256_initialize(secp256k1_hmac_sha256_t *hash, const unsigned char *key, size_t keylen) {
@@ -4550,15 +3962,11 @@ static void secp256k1_rfc6979_hmac_sha256_finalize(secp256k1_rfc6979_hmac_sha256
 //******Content from ecmult_gen_impl.h******
 
 // secp256k1_ecmult_gen_context_init must be called on each newly created generator context.
-static void secp256k1_ecmult_gen_context_init(secp256k1_ecmult_gen_context *ctx) {
+void secp256k1_ecmult_gen_context_init(secp256k1_ecmult_gen_context *ctx) {
   ctx->prec = NULL;
 }
 
-#ifdef MACRO_USE_openCL
-__constant secp256k1_ge_storage bufferSecp256k1_ge_storageFor_secp256k1_ecmult_gen_context_build[64][16];
-#endif
-
-static void secp256k1_ecmult_gen_context_build(secp256k1_ecmult_gen_context *ctx, const secp256k1_callback* cb) {
+void secp256k1_ecmult_gen_context_build(secp256k1_ecmult_gen_context *ctx, const secp256k1_callback* cb) {
   secp256k1_ge prec[1024];
   secp256k1_gej gj;
   secp256k1_gej nums_gej;
@@ -4567,12 +3975,7 @@ static void secp256k1_ecmult_gen_context_build(secp256k1_ecmult_gen_context *ctx
   if (ctx->prec != NULL) {
     return;
   }
-#ifndef MACRO_USE_openCL
   ctx->prec = (secp256k1_ge_storage (*)[64][16])checked_malloc(cb, sizeof(*ctx->prec));
-#else
-  ctx->prec = (secp256k1_ge_storage (*)[64][16]) &bufferSecp256k1_ge_storageFor_secp256k1_ecmult_gen_context_build;
-#endif
-
 
   /* get the generator */
   secp256k1_gej_set_ge(&gj, &secp256k1_ge_const_g);
@@ -4624,22 +4027,20 @@ static void secp256k1_ecmult_gen_context_build(secp256k1_ecmult_gen_context *ctx
   secp256k1_ecmult_gen_blind(ctx, NULL);
 }
 
-static int secp256k1_ecmult_gen_context_is_built(const secp256k1_ecmult_gen_context* ctx) {
+int secp256k1_ecmult_gen_context_is_built(const secp256k1_ecmult_gen_context* ctx) {
     return ctx->prec != NULL;
 }
 
-static void secp256k1_ecmult_gen_context_clear(secp256k1_ecmult_gen_context *ctx) {
+void secp256k1_ecmult_gen_context_clear(secp256k1_ecmult_gen_context *ctx) {
 #ifndef USE_ECMULT_STATIC_PRECOMPUTATION
-#ifndef MACRO_USE_openCL
-    free(ctx->prec);
+  free(ctx->prec);
 #endif
-#endif
-    secp256k1_scalar_clear(&ctx->blind);
-    secp256k1_gej_clear(&ctx->initial);
-    ctx->prec = NULL;
+  secp256k1_scalar_clear(&ctx->blind);
+  secp256k1_gej_clear(&ctx->initial);
+  ctx->prec = NULL;
 }
 
-static void secp256k1_ecmult_gen(const secp256k1_ecmult_gen_context *ctx, secp256k1_gej *r, const secp256k1_scalar *gn) {
+void secp256k1_ecmult_gen(const secp256k1_ecmult_gen_context *ctx, secp256k1_gej *r, const secp256k1_scalar *gn) {
     secp256k1_ge add;
     secp256k1_ge_storage adds;
     secp256k1_scalar gnb;
@@ -4674,7 +4075,7 @@ static void secp256k1_ecmult_gen(const secp256k1_ecmult_gen_context *ctx, secp25
 }
 
 /* Setup blinding values for secp256k1_ecmult_gen. */
-static void secp256k1_ecmult_gen_blind(secp256k1_ecmult_gen_context *ctx, const unsigned char *seed32) {
+void secp256k1_ecmult_gen_blind(secp256k1_ecmult_gen_context *ctx, const unsigned char *seed32) {
     secp256k1_scalar b;
     secp256k1_gej gb;
     secp256k1_fe s;
@@ -4727,15 +4128,6 @@ static void secp256k1_ecmult_gen_blind(secp256k1_ecmult_gen_context *ctx, const 
 //******end of ecmult_gen_impl.h******
 
 
-//******Contents of ecdsa.h******
-static int secp256k1_ecdsa_sig_parse(secp256k1_scalar *r, secp256k1_scalar *s, const unsigned char *sig, size_t size);
-static int secp256k1_ecdsa_sig_serialize(unsigned char *sig, size_t *size, const secp256k1_scalar *r, const secp256k1_scalar *s);
-static int secp256k1_ecdsa_sig_verify(const secp256k1_ecmult_context *ctx, const secp256k1_scalar* r, const secp256k1_scalar* s, const secp256k1_ge *pubkey, const secp256k1_scalar *message);
-static int secp256k1_ecdsa_sig_sign(const secp256k1_ecmult_gen_context *ctx, secp256k1_scalar* r, secp256k1_scalar* s, const secp256k1_scalar *seckey, const secp256k1_scalar *message, const secp256k1_scalar *nonce, int *recid);
-static int secp256k1_ecdsa_sig_recover(const secp256k1_ecmult_context *ctx, const secp256k1_scalar* r, const secp256k1_scalar* s, secp256k1_ge *pubkey, const secp256k1_scalar *message, int recid);
-//******end of ecdsa.h******
-
-
 //******Contents of ecdsa_impl.h******
 
 /** Group order for secp256k1 defined as 'n' in "Standards for Efficient Cryptography" (SEC2) 2.7.1
@@ -4769,7 +4161,7 @@ static __constant secp256k1_fe secp256k1_ecdsa_const_p_minus_order = SECP256K1_F
     0, 0, 0, 1, 0x45512319UL, 0x50B75FC4UL, 0x402DA172UL, 0x2FC9BAEEUL
 );
 
-static int secp256k1_ecdsa_sig_parse(secp256k1_scalar *rr, secp256k1_scalar *rs, const unsigned char *sig, size_t size) {
+int secp256k1_ecdsa_sig_parse(secp256k1_scalar *rr, secp256k1_scalar *rs, const unsigned char *sig, size_t size) {
     unsigned char ra[32] = {0}, sa[32] = {0};
     const unsigned char *rp;
     const unsigned char *sp;
@@ -4832,7 +4224,7 @@ static int secp256k1_ecdsa_sig_parse(secp256k1_scalar *rr, secp256k1_scalar *rs,
     return 1;
 }
 
-static int secp256k1_ecdsa_sig_serialize(unsigned char *sig, size_t *size, const secp256k1_scalar* ar, const secp256k1_scalar* as) {
+int secp256k1_ecdsa_sig_serialize(unsigned char *sig, size_t *size, const secp256k1_scalar* ar, const secp256k1_scalar* as) {
     unsigned char r[33] = {0}, s[33] = {0};
     unsigned char *rp = r, *sp = s;
     size_t lenR = 33, lenS = 33;
@@ -4856,7 +4248,7 @@ static int secp256k1_ecdsa_sig_serialize(unsigned char *sig, size_t *size, const
     return 1;
 }
 
-static int secp256k1_ecdsa_sig_verify(const secp256k1_ecmult_context *ctx, const secp256k1_scalar *sigr, const secp256k1_scalar *sigs, const secp256k1_ge *pubkey, const secp256k1_scalar *message) {
+int secp256k1_ecdsa_sig_verify(const secp256k1_ecmult_context *ctx, const secp256k1_scalar *sigr, const secp256k1_scalar *sigs, const secp256k1_ge *pubkey, const secp256k1_scalar *message) {
     unsigned char c[32];
     secp256k1_scalar sn, u1, u2;
     secp256k1_fe xr;
@@ -4910,7 +4302,7 @@ static int secp256k1_ecdsa_sig_verify(const secp256k1_ecmult_context *ctx, const
     return 0;
 }
 
-static int secp256k1_ecdsa_sig_recover(const secp256k1_ecmult_context *ctx, const secp256k1_scalar *sigr, const secp256k1_scalar* sigs, secp256k1_ge *pubkey, const secp256k1_scalar *message, int recid) {
+int secp256k1_ecdsa_sig_recover(const secp256k1_ecmult_context *ctx, const secp256k1_scalar *sigr, const secp256k1_scalar* sigs, secp256k1_ge *pubkey, const secp256k1_scalar *message, int recid) {
     unsigned char brx[32];
     secp256k1_fe fx;
     secp256k1_ge x;
@@ -4943,7 +4335,7 @@ static int secp256k1_ecdsa_sig_recover(const secp256k1_ecmult_context *ctx, cons
     return !secp256k1_gej_is_infinity(&qj);
 }
 
-static int secp256k1_ecdsa_sig_sign(const secp256k1_ecmult_gen_context *ctx, secp256k1_scalar *sigr, secp256k1_scalar *sigs, const secp256k1_scalar *seckey, const secp256k1_scalar *message, const secp256k1_scalar *nonce, int *recid) {
+int secp256k1_ecdsa_sig_sign(const secp256k1_ecmult_gen_context *ctx, secp256k1_scalar *sigr, secp256k1_scalar *sigs, const secp256k1_scalar *seckey, const secp256k1_scalar *message, const secp256k1_scalar *nonce, int *recid) {
     unsigned char b[32];
     secp256k1_gej rp;
     secp256k1_ge r;

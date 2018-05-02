@@ -2,12 +2,12 @@
 #include <sstream>
 #include <iomanip>
 #include "gpu.h"
+#include "cl/secp256k1.h"
 
 
 Logger logTest("../logfiles/logTest.txt", "[test] ");
 
 
-#include "cl/secp256k1_c_header.c"
 secp256k1_callback criticalFailure;
 
 void criticalFailureHandler(const char *text, void* data)

@@ -11,7 +11,8 @@ std::string Miscellaneous::toStringHex(const std::string& other)
 }
 
 std::string Miscellaneous::toStringShorten(const std::string& input, int numCharactersToRetain)
-{ if (numCharactersToRetain <= 0)
+{
+  if (numCharactersToRetain <= 0)
     return input;
   int numCharsAtEnds = numCharactersToRetain / 2;
   int numCharsToSuppress = ((unsigned) input.size()) - numCharsAtEnds * 2;

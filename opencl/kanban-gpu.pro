@@ -4,11 +4,12 @@ CONFIG -= app_bundle
 CONFIG -= qt
 
 SOURCES += \
-main.cpp \
+    main.cpp \
     gpu.cpp \
     server.cpp \
     miscellaneous.cpp \
-    test.cpp
+    test.cpp \
+    cl/secp256k1_c.cpp
 
 LIBS+=-lOpenCL
 
@@ -16,7 +17,8 @@ HEADERS += \
     gpu.h \
     server.h \
     logging.h \
-    miscellaneous.h
+    miscellaneous.h \
+    cl/secp256k1.h
 
 DISTFILES += \
     cl/testBuffer.cl

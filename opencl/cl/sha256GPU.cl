@@ -11,29 +11,30 @@
 #define H5 0x9b05688c
 #define H6 0x1f83d9ab
 #define H7 0x5be0cd19
-uint rotr(uint x, int n) {
+uint32_t rotr(uint32_t x, int n) {
   if (n < 32) return (x >> n) | (x << (32 - n));
   return x;
 }
-uint ch(uint x, uint y, uint z) {
+uint32_t ch(uint32_t x, uint32_t y, uint32_t z) {
   return (x & y) ^ (~x & z);
 }
-uint maj(uint x, uint y, uint z) {
+uint32_t maj(uint32_t x, uint32_t y, uint32_t z) {
   return (x & y) ^ (x & z) ^ (y & z);
 }
-uint sigma0(uint x) {
+uint32_t sigma0(uint32_t x) {
   return rotr(x, 2) ^ rotr(x, 13) ^ rotr(x, 22);
 }
-uint sigma1(uint x) {
+uint32_t sigma1(uint32_t x) {
   return rotr(x, 6) ^ rotr(x, 11) ^ rotr(x, 25);
 }
-uint gamma0(uint x) {
+uint32_t gamma0(uint32_t x) {
   return rotr(x, 7) ^ rotr(x, 18) ^ (x >> 3);
 }
-uint gamma1(uint x) {
+uint32_t gamma1(uint32_t x) {
   return rotr(x, 17) ^ rotr(x, 19) ^ (x >> 10);
 }
-__constant uint K[64] = {
+
+__constant uint32_t K[64] = {
 0x428a2f98, 0x71374491, 0xb5c0fbcf, 0xe9b5dba5, 0x3956c25b, 0x59f111f1, 0x923f82a4, 0xab1c5ed5,
 0xd807aa98, 0x12835b01, 0x243185be, 0x550c7dc3, 0x72be5d74, 0x80deb1fe, 0x9bdc06a7, 0xc19bf174,
 0xe49b69c1, 0xefbe4786, 0x0fc19dc6, 0x240ca1cc, 0x2de92c6f, 0x4a7484aa, 0x5cb0a9dc, 0x76f988da,
@@ -44,13 +45,13 @@ __constant uint K[64] = {
 0x748f82ee, 0x78a5636f, 0x84c87814, 0x8cc70208, 0x90befffa, 0xa4506ceb, 0xbef9a3f7, 0xc67178f2
 };
 
-__kernel void sha256GPU(uint offset, uint length, uint messageIndex, __global const char* plain_key, __global char* result) {
+__kernel void sha256GPU(uint32_t offset, uint32_t length, uint32_t messageIndex, __global const char* plain_key, __global char* result) {
   int t, gid, msg_pad, currentIndex, lomc;
   int stop, mmod;
-  uint i, item, total;
-  uint W[80], temp, A, B, C, D, E, F, G, H, T1, T2;
-  uint digest[8];
-  //uint num_keys = data_info[1];
+  uint32_t i, item, total;
+  uint32_t W[80], temp, A, B, C, D, E, F, G, H, T1, T2;
+  uint32_t digest[8];
+  //uint32_t num_keys = data_info[1];
   //printf("length: %u num_keys:%u\n", length, total);
   int current_pad;
   msg_pad = 0;
@@ -148,7 +149,7 @@ __kernel void sha256GPU(uint offset, uint length, uint messageIndex, __global co
     digest[6] += G;
     digest[7] += H;
   }
-  uint resultOffset = messageIndex * 32;
+  uint32_t resultOffset = messageIndex * 32;
   for (t = 0; t < 8; t ++) {
     for (i = 0; i < 4; i ++) {
       result[resultOffset + t * 4 + i] = (unsigned char) (digest[t] >> ((3 - i) * 8) );

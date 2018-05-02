@@ -211,7 +211,7 @@ GPU::~GPU()
 
 std::string GPU::kernelSHA256 = "sha256GPU";
 std::string GPU::kernelTestBuffer = "testBuffer";
-std::string GPU::kernelVerifySignature = "secp256k1_opencl_header";
+std::string GPU::kernelVerifySignature = "secp256k1_opencl";
 
 const int maxProgramBuildBufferSize = 10000000;
 char programBuildBuffer[maxProgramBuildBufferSize];
@@ -287,6 +287,7 @@ bool GPUKernel::constructFromFileName(
   this->constructArguments(inputNames, inputTypes, true);
   this->constructArguments(outputNames, outputTypes, false);
   this->SetArguments();
+  logGPU << "Kernel creation successful. " << Logger::endL;
   return true;
 }
 
