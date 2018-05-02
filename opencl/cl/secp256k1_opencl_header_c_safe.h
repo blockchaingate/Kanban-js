@@ -13,8 +13,8 @@ typedef struct {
 } memoryPool;
 
 typedef struct {
-    void (*fn)(const char *text, void* data);
-    const void* data;
+  void (*fn)(const char *text, void* data);
+  const void* data;
 } secp256k1_callback;
 
 #endif //MACRO_secp256k1_opencl_header_c_safe_H

@@ -4042,12 +4042,12 @@ void secp256k1_ecmult_gen_context_build(
 }
 
 int secp256k1_ecmult_gen_context_is_built(const secp256k1_ecmult_gen_context* ctx) {
-    return ctx->prec != NULL;
+  return ctx->prec != NULL;
 }
 
-void secp256k1_ecmult_gen_context_clear(secp256k1_ecmult_gen_context *ctx) {
+void secp256k1_ecmult_gen_context_clear(secp256k1_ecmult_gen_context *ctx, memoryPool* theMemory) {
 #ifndef USE_ECMULT_STATIC_PRECOMPUTATION
-  free(ctx->prec);
+  freeWithContext(ctx->prec, theMemory);
 #endif
   secp256k1_scalar_clear(&ctx->blind);
   secp256k1_gej_clear(&ctx->initial);

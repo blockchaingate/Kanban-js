@@ -162,8 +162,7 @@ bool Server::initializeOneSocketAndPort(int& outputSocket, std::string& outputPo
   return false;
 }
 
-bool Server::initializePorts()
-{
+bool Server::initializePorts() {
   if (!this->initializeOneSocketAndPort(this->listeningSocketMetaData, this->portMetaData, portsToTryMetaData))
     return false;
   if (!this->initializeOneSocketAndPort(this->listeningSocketData, this->portData, portsToTryData))
@@ -173,8 +172,7 @@ bool Server::initializePorts()
   return true;
 }
 
-bool Server::acceptAll()
-{
+bool Server::acceptAll() {
   if (!this->acceptOneSocket(this->listeningSocketMetaData, this->thePipe.inputMeta->fileDescriptor, this->portMetaData))
     return false;
   if (!this->acceptOneSocket(this->listeningSocketData, this->thePipe.inputData->fileDescriptor, this->portData))
@@ -184,8 +182,7 @@ bool Server::acceptAll()
   return true;
 }
 
-bool Server::acceptOneSocket(int theSocket, int& outputFileDescriptor, const std::string& port)
-{
+bool Server::acceptOneSocket(int theSocket, int& outputFileDescriptor, const std::string& port) {
   logServer << "About to accept socket, port: " << theSocket << ", " << port << Logger::endL;
   struct sockaddr cli_addr;
   socklen_t clilen;
@@ -193,8 +190,7 @@ bool Server::acceptOneSocket(int theSocket, int& outputFileDescriptor, const std
   clilen = sizeof(cli_addr);
   outputFileDescriptor = accept(theSocket, &cli_addr, &clilen);
   logServer << "Accepted socket, port: " << theSocket << ", " << port << Logger::endL;
-  if (outputFileDescriptor < 0)
-  {
+  if (outputFileDescriptor < 0) {
     logServer << "Error on accept: " << port << Logger::endL;
     return false;
   }
@@ -202,22 +198,19 @@ bool Server::acceptOneSocket(int theSocket, int& outputFileDescriptor, const std
   return true;
 }
 
-bool Server::listenOneSocket(int theSocket, int& outputFileDescriptor, const std::string& port)
-{
+bool Server::listenOneSocket(int theSocket, int& outputFileDescriptor, const std::string& port) {
   (void) outputFileDescriptor;
   logServer << "Listening to port: " << port << Logger::endL;
   int success = listen(theSocket, 100);
   logServer << "After listen function to port: " << port << Logger::endL;
-  if (success != 0)
-  {
+  if (success != 0) {
     logServer << "Failed listening. " << strerror(errno);
     return false;
   }
   return true;
 }
 
-bool Server::listenAll()
-{
+bool Server::listenAll() {
   if (!this->listenOneSocket(this->listeningSocketMetaData, this->thePipe.inputMeta->fileDescriptor, this->portMetaData))
     return false;
   if (!this->listenOneSocket(this->listeningSocketData, this->thePipe.inputMeta->fileDescriptor, this->portData))
@@ -227,38 +220,32 @@ bool Server::listenAll()
   return true;
 }
 
-void MessageFromNode::reset()
-{
+void MessageFromNode::reset() {
   this->id = "";
   this->length = - 1;
   this->command = "";
   this->theMessage = "";
 }
 
-bool PipeBasic::ReadMore()
-{
+bool PipeBasic::ReadMore() {
   if (this->position < this->length)
     return true;
   this->position = 0;
   this->length = 0;
   this->length = read(this->fileDescriptor, this->buffer, this->capacity);
-  if (this->length < 0)
-  {
+  if (this->length < 0) {
     logServer << "Failed to read " << this->name << ". " << strerror(errno) << Logger::endL;
     return false;
   }
-  if (this->length == 0)
-  {
+  if (this->length == 0) {
     logServer << "Error: got zero bytes from " << this->name << ". " << Logger::endL;
     return false;
   }
   return true;
 }
 
-char PipeBasic::GetChar()
-{
-  if (this->position >= this->length)
-  {
+char PipeBasic::GetChar() {
+  if (this->position >= this->length) {
     logServer << "Pipe basic fatal error. " << Logger::endL;
     assert(false);
   }
@@ -267,47 +254,39 @@ char PipeBasic::GetChar()
   return result;
 }
 
-bool MessagePipeline::ReadOne()
-{
+bool MessagePipeline::ReadOne() {
   std::string currentMetaData;
   this->currentMessage.reset();
   while (true) {
     if (!this->inputMeta->ReadMore())
       return false;
     char currentChar = this->inputMeta->GetChar();
-    if (currentChar != '\n')
-    {
+    if (currentChar != '\n') {
       currentMetaData.push_back(currentChar);
       continue;
     }
-    if (this->currentMessage.length < 0)
-    { std::stringstream lengthReader(currentMetaData);
+    if (this->currentMessage.length < 0) {
+      std::stringstream lengthReader(currentMetaData);
       lengthReader >> this->currentMessage.length;
-      if (this->currentMessage.length <= 0)
-      {
+      if (this->currentMessage.length <= 0) {
         logServer << "Failed to read current message length, got: "<< this->currentMessage.length << ". " << Logger::endL;
         return false;
       }
       currentMetaData = "";
-    }
-    else if (currentMessage.command == "")
-    {
+    } else if (currentMessage.command == "") {
       this->currentMessage.command = currentMetaData;
       currentMetaData = "";
-    }
-    else
-    {
+    } else {
       this->currentMessage.id = currentMetaData;
       break;
     }
   }
-  while (true)
-  {
+  while (true) {
     if (!this->inputData->ReadMore())
       return false;
     int remainingLength = this->currentMessage.length - this->currentMessage.theMessage.size();
-    if (this->inputData->position + remainingLength <= this->inputData->length)
-    { this->currentMessage.theMessage.append(&this->inputData->buffer[this->inputData->position], remainingLength);
+    if (this->inputData->position + remainingLength <= this->inputData->length) {
+      this->currentMessage.theMessage.append(&this->inputData->buffer[this->inputData->position], remainingLength);
       this->inputData->position += remainingLength;
       break;
     }
@@ -319,13 +298,11 @@ bool MessagePipeline::ReadOne()
   return true;
 }
 
-bool MessagePipeline::ReadNext()
-{
+bool MessagePipeline::ReadNext() {
   if (!this->messageQueue.empty())
     return true;
 //  bool
-  do
-  {
+  do {
     if (!this->ReadOne())
       return false;
   }
@@ -333,12 +310,10 @@ bool MessagePipeline::ReadNext()
   return true;
 }
 
-bool Server::RunOnce()
-{
+bool Server::RunOnce() {
   if (!this->thePipe.ReadNext())
     return false;
-  while (!this->thePipe.messageQueue.empty())
-  {
+  while (!this->thePipe.messageQueue.empty()) {
     MessageFromNode& theMessage = this->thePipe.messageQueue.front();
     if (!this->ExecuteNodeCommand(theMessage))
       return false;
@@ -347,8 +322,7 @@ bool Server::RunOnce()
   return true;
 }
 
-bool Server::ExecuteNodeCommand(MessageFromNode &theMessage)
-{
+bool Server::ExecuteNodeCommand(MessageFromNode &theMessage) {
   logServer << "Processing message: " << theMessage.id << ", " << "command: " << theMessage.command
             << ", " << theMessage.length << " bytes. " << Logger::endL;
   if (theMessage.command == "SHA256")

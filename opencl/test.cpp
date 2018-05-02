@@ -6,6 +6,7 @@
 
 
 Logger logTest("../logfiles/logTest.txt", "[test] ");
+extern Logger logServer;
 
 
 secp256k1_callback criticalFailure;
@@ -33,24 +34,48 @@ std::string toStringSecp256k1_ECPoint(secp256k1_ge& input) {
   return out.str();
 }
 
-int mainTest() {
+const unsigned int GPUMemoryAvailable = 10000000; //for the time being, this should be equal to defaultBufferSize from gpu.cpp
+unsigned char bufferGPUMemory[GPUMemoryAvailable];
+
+bool testGPU(secp256k1_scalar& signatureR, secp256k1_scalar& signatureS, secp256k1_ge& publicKey, secp256k1_scalar& message) {
   GPU theGPU;
-  theGPU.initialize();
-  if (!theGPU.createKernel(
-    theGPU.kernelVerifySignature,
-    {"signatureR", "signatureS", "publicKey", "message"},
-    {
-      SharedMemory::typeVoidPointer, SharedMemory::typeVoidPointer,
-      SharedMemory::typeVoidPointer, SharedMemory::typeVoidPointer
-    },
-    {"result"},
-    {SharedMemory::typeVoidPointer}
-  )) {
-    logTest << "Failed to create kernel" << Logger::endL;
-    return - 1;
+  if (!theGPU.initializeKernels())
+    return false;
+
+  memoryPool thePool;
+  thePool.deallocated = 0;
+  thePool.totalMemory = GPUMemoryAvailable;
+  thePool.memory = 0;
+
+
+  std::shared_ptr<GPUKernel> theKernel = theGPU.theKernels[GPU::kernelVerifySignature];
+  theKernel->writeToBuffer(1, &thePool, sizeof(memoryPool));
+
+  theKernel->writeToBuffer(3, &signatureR, sizeof(signatureR));
+  theKernel->writeToBuffer(4, &signatureS, sizeof(signatureS));
+  theKernel->writeToBuffer(5, &publicKey, sizeof(publicKey));
+  theKernel->writeToBuffer(6, &message, sizeof(message));
+
+  cl_int ret = clEnqueueNDRangeKernel(
+    theGPU.commandQueue, theKernel->kernel, 1, NULL,
+    &theKernel->global_item_size, &theKernel->local_item_size, 0, NULL, NULL
+  );
+  if (ret != CL_SUCCESS) {
+    logServer << "Failed to enqueue kernel. Return code: " << ret << ". ";
+    return false;
   }
+  cl_mem& result = theKernel->outputs[0]->theMemory;
+  unsigned char resultChar;
+  ret = clEnqueueReadBuffer(theGPU.commandQueue, result, CL_TRUE, 0, 1, &resultChar, 0, NULL, NULL);
+  if (ret != CL_SUCCESS) {
+    logServer << "Failed to read buffer. Return code: " << ret << Logger::endL;
+    return false;
+  }
+  logServer << "Return of GPU verification: " << (int) resultChar << Logger::endL;
+  return true;
+}
 
-
+int mainTest() {
   logTest << "Got to here. " << Logger::endL;
   criticalFailure.data = 0;
   criticalFailure.fn = criticalFailureHandler;
@@ -95,5 +120,7 @@ int mainTest() {
   logTest << "nonce: " << toStringSecp256k1_Scalar(nonce) << Logger::endL;
   logTest << "outputR: " << toStringSecp256k1_Scalar(signatureR) << Logger::endL;
   logTest << "outputS: " << toStringSecp256k1_Scalar(signatureS) << Logger::endL;
+  if (!testGPU(signatureR, signatureS, publicKey, message))
+    return -1;
   return 0;
 }

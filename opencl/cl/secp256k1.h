@@ -460,7 +460,7 @@ typedef struct {
 
 void secp256k1_ecmult_gen_context_init(secp256k1_ecmult_gen_context* ctx);
 void secp256k1_ecmult_gen_context_build(secp256k1_ecmult_gen_context* ctx, const secp256k1_callback* cb, memoryPool* theMemory);
-void secp256k1_ecmult_gen_context_clear(secp256k1_ecmult_gen_context* ctx);
+void secp256k1_ecmult_gen_context_clear(secp256k1_ecmult_gen_context* ctx, memoryPool* theMemory);
 int secp256k1_ecmult_gen_context_is_built(const secp256k1_ecmult_gen_context* ctx);
 
 /** Multiply with the generator: R = a*G */

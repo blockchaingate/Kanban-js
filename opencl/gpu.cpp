@@ -42,7 +42,7 @@ long long OpenCLFunctions::getGlobalMemorySize(cl_device_id deviceId) {
   long long result = 0;
   for (unsigned i = 8; i != 0; i --) {
     result *= 256;
-    result += (int)( (unsigned char) buffer[i - 1]);
+    result += (int) ((unsigned char) buffer[i - 1]);
   }
   return result;
 }
@@ -163,6 +163,18 @@ bool GPU::initializeKernels() {
         {}
   ))
     return false;
+  if (!this->createKernel(
+        this->kernelVerifySignature,
+        {"output", "outputInputMemoryPool", "outputInputMemoryBuffer"},
+        {
+          SharedMemory::typeVoidPointer, SharedMemory::typeVoidPointer,
+          SharedMemory::typeVoidPointer
+        },
+        {"inputSignatureR", "inputSignatureS", "inputPublicKey", "inputMessage"},
+        {SharedMemory::typeVoidPointer, SharedMemory::typeVoidPointer, SharedMemory::typeVoidPointer, SharedMemory::typeVoidPointer}
+  ))
+    return false;
+
   return true;
 }
 
@@ -231,7 +243,7 @@ bool GPUKernel::constructFromFileName(
     logGPU << "Failed to create program from source. " << Logger::endL;
     return false;
   }
-  logGPU << "Building program ..." << Logger::endL;
+  logGPU << "Building program: " << this->name << "..." << Logger::endL;
   ret = clBuildProgram(this->program, 1, &this->owner->currentDeviceId, NULL, NULL, NULL);
   if (ret != CL_SUCCESS) {
     logGPU << "Failed to build the program. Return code: " << ret << Logger::endL;
