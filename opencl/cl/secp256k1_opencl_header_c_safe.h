@@ -6,9 +6,9 @@ typedef struct {
   unsigned char* memory;
   unsigned int totalMemory;
   int numberOfObjectAllocated;
-  int* objectStarts;
-  int* objectLengths;
-  unsigned char* errorBuffer;
+  int objectStarts[MACRO_MaxNumberOfObjectsInMemoryPool];
+  int objectLengths[MACRO_MaxNumberOfObjectsInMemoryPool];
+  unsigned char errorBuffer[1000];
   int deallocated;
 } memoryPool;
 

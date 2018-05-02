@@ -48,17 +48,17 @@ class GPU;
 ///
 /// In the class to follow, we make the following assumptions on the code given in the
 /// .cl file that corresponds to the kernel.
-/// 1. Every kernel function has its input arguments listed before its output arguments.
+/// 1. Every kernel function has its output arguments listed before its input arguments.
 /// For example, a kernel function can be declared along the lines of:
-/// __kernel void myFunction(__global uint* input1, __global char* input2, __global char* output1, global char* output2, global char* output3)
-/// 2. The input arguments correspond to the elements of this->inputs, respecting the order of the this->inputs vector.
-/// 3. Likewise the output arguments correspond to the elements of this->outputs.
+/// __kernel void myFunction( __global char* output1, global char* output2, global char* output3, __global uint* input1, __global char* input2)
+/// 2. The output arguments correspond to the elements of this->outputs.
+/// 3. Likewise the input arguments correspond to the elements of this->inputs, respecting the order of the this->inputs vector.
 
 class GPUKernel{
 public:
   GPU* owner;
-  std::vector<std::shared_ptr<SharedMemory> > inputs;
   std::vector<std::shared_ptr<SharedMemory> > outputs;
+  std::vector<std::shared_ptr<SharedMemory> > inputs;
   cl_program program;
   cl_kernel kernel;
   std::string name;
@@ -66,10 +66,10 @@ public:
   size_t global_item_size; // Divide work items into groups of 64
   bool constructFromFileName(
       const std::string& fileNameNoExtension,
-      const std::vector<std::string>& inputNames,
-      const std::vector<int>& inputTypes,
       const std::vector<std::string>& outputNames,
       const std::vector<int>& outputTypes,
+      const std::vector<std::string>& inputNames,
+      const std::vector<int>& inputTypes,
       GPU& ownerGPU);
   bool constructArguments(
       const std::vector<std::string>& argumentNames,
@@ -102,12 +102,11 @@ public:
   bool initialize();
   bool initializeKernels();
   GPU();
-  bool createKernel(
-      const std::string& fileNameNoExtension,
-      const std::vector<std::string>& inputs,
-      const std::vector<int>& inputTypes,
+  bool createKernel(const std::string& fileNameNoExtension,
       const std::vector<std::string>& outputs,
-      const std::vector<int>& outputTypes);
+      const std::vector<int>& outputTypes,
+      const std::vector<std::string>& inputs,
+      const std::vector<int>& inputTypes);
   ~GPU();
 };
 

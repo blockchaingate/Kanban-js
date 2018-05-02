@@ -271,8 +271,8 @@ bool MessagePipeline::ReadOne()
 {
   std::string currentMetaData;
   this->currentMessage.reset();
-  while (true)
-  { if (!this->inputMeta->ReadMore())
+  while (true) {
+    if (!this->inputMeta->ReadMore())
       return false;
     char currentChar = this->inputMeta->GetChar();
     if (currentChar != '\n')
@@ -360,25 +360,23 @@ bool Server::ExecuteNodeCommand(MessageFromNode &theMessage)
   return false;
 }
 
-bool Server::ExecuteSha256(MessageFromNode &theMessage)
-{
+bool Server::ExecuteSha256(MessageFromNode &theMessage) {
   std::shared_ptr<GPUKernel> theKernel = this->theGPU->theKernels[GPU::kernelSHA256];
-  theKernel->writeToBuffer(3, theMessage.theMessage);
-  theKernel->writeArgument(0, 0);
-  theKernel->writeArgument(1, theMessage.length);
-  theKernel->writeArgument(2, 0);
+  theKernel->writeToBuffer(4, theMessage.theMessage);
+  theKernel->writeArgument(1, 0);
+  theKernel->writeArgument(2, theMessage.length);
+  theKernel->writeArgument(3, 0);
   cl_int ret = clEnqueueNDRangeKernel(
-        this->theGPU->commandQueue, theKernel->kernel, 1, NULL,
-        &theKernel->global_item_size, &theKernel->local_item_size, 0, NULL, NULL);
-  if (ret != CL_SUCCESS)
-  {
+    this->theGPU->commandQueue, theKernel->kernel, 1, NULL,
+    &theKernel->global_item_size, &theKernel->local_item_size, 0, NULL, NULL
+  );
+  if (ret != CL_SUCCESS) {
     logServer << "Failed to enqueue kernel. Return code: " << ret << ". ";
     return false;
   }
   cl_mem& result = theKernel->outputs[0]->theMemory;
   ret = clEnqueueReadBuffer(this->theGPU->commandQueue, result, CL_TRUE, 0, 32, this->thePipe.bufferOutputGPU, 0, NULL, NULL);
-  if (ret != CL_SUCCESS)
-  {
+  if (ret != CL_SUCCESS) {
     logServer << "Failed to read buffer. " << Logger::endL;
     return false;
   }
@@ -389,23 +387,21 @@ bool Server::ExecuteSha256(MessageFromNode &theMessage)
   logServer << "Computation " << theMessage.id << " completed, writing ..." << Logger::endL;
   int numWrittenBytes = write(this->thePipe.fileDescriptorOutputData, output.str().c_str(), output.str().size());
   logServer << "Computation " << theMessage.id << " completed and sent." << Logger::endL;
-  if (numWrittenBytes < 0)
-  {
+  if (numWrittenBytes < 0) {
     logServer << "Error writing bytes. " << Logger::endL;
     return false;
   }
   return true;
 }
 
-bool Server::ExecuteTestBuffer(MessageFromNode &theMessage)
-{
+bool Server::ExecuteTestBuffer(MessageFromNode &theMessage) {
   std::shared_ptr<GPUKernel> theKernel = this->theGPU->theKernels[GPU::kernelTestBuffer];
   theKernel->writeToBuffer(0, theMessage.theMessage);
   cl_int ret = clEnqueueNDRangeKernel(
-        this->theGPU->commandQueue, theKernel->kernel, 1, NULL,
-        &theKernel->global_item_size, &theKernel->local_item_size, 0, NULL, NULL);
-  if (ret != CL_SUCCESS)
-  {
+    this->theGPU->commandQueue, theKernel->kernel, 1, NULL,
+    &theKernel->global_item_size, &theKernel->local_item_size, 0, NULL, NULL
+  );
+  if (ret != CL_SUCCESS) {
     logServer << "Failed to enqueue kernel. Return code: " << ret << ". ";
     return false;
   }
@@ -416,8 +412,7 @@ bool Server::ExecuteTestBuffer(MessageFromNode &theMessage)
   logServer << "Computation " << theMessage.id << " completed, writing ..." << Logger::endL;
   int numWrittenBytes = write(this->thePipe.fileDescriptorOutputData, output.str().c_str(), output.str().size());
   logServer << "Computation " << theMessage.id << " completed and sent." << Logger::endL;
-  if (numWrittenBytes < 0)
-  {
+  if (numWrittenBytes < 0) {
     logServer << "Error writing bytes. " << Logger::endL;
     return false;
   }

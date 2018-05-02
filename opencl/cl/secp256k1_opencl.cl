@@ -5,11 +5,12 @@
 #include "../opencl/cl/secp256k1_opencl_header_c_unsafe.h"
 
 __kernel void secp256k1_opencl(
-  __global unsigned char* signatureR, 
+  __global unsigned char* output,
+  __global memoryPool* theMemory,
+  __global unsigned char* signatureR,  
   __global unsigned char* signatureS, 
   __global unsigned char* publicKey, 
-  __global unsigned char* message ,
-  __global unsigned char* output
+  __global unsigned char* message
 ) {
 
 }

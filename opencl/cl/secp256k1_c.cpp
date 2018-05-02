@@ -12,7 +12,7 @@ void* checked_malloc(const secp256k1_callback* cb, size_t size, memoryPool* theM
   (void) theMemory;
   void *ret = malloc(size);
   if (ret == NULL) {
-      secp256k1_callback_call(cb, "Out of memory");
+    secp256k1_callback_call(cb, "Out of memory");
   }
   return ret;
 }
@@ -23,7 +23,7 @@ void freeWithContext(void* pointer, memoryPool* theMemory) {
 }
 
 void secp256k1_callback_call(const secp256k1_callback * const cb, const char * const text) {
-    cb->fn(text, (void*)cb->data);
+  cb->fn(text, (void*)cb->data);
 }
 
 

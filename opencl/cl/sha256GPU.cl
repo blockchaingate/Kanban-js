@@ -45,7 +45,7 @@ __constant uint32_t K[64] = {
 0x748f82ee, 0x78a5636f, 0x84c87814, 0x8cc70208, 0x90befffa, 0xa4506ceb, 0xbef9a3f7, 0xc67178f2
 };
 
-__kernel void sha256GPU(uint32_t offset, uint32_t length, uint32_t messageIndex, __global const char* plain_key, __global char* result) {
+__kernel void sha256GPU(__global char* result, uint32_t offset, uint32_t length, uint32_t messageIndex, __global const char* plain_key) {
   int t, gid, msg_pad, currentIndex, lomc;
   int stop, mmod;
   uint32_t i, item, total;
@@ -76,7 +76,7 @@ __kernel void sha256GPU(uint32_t offset, uint32_t length, uint32_t messageIndex,
     G = digest[6];
     H = digest[7];
 #pragma unroll
-    for (t = 0; t < 80; t++){
+    for (t = 0; t < 80; t ++) {
       W[t] = 0x00000000;
     }
     lomc = length + offset - currentIndex;
@@ -86,11 +86,11 @@ __kernel void sha256GPU(uint32_t offset, uint32_t length, uint32_t messageIndex,
       current_pad = - 1;    
     }
     //  printf("current_pad: %d\n",current_pad);
-    if (current_pad > 0){
+    if (current_pad > 0) {
       i = current_pad;
       stop = i / 4;
     //    printf("i:%d, stop: %d msg_pad:%d\n",i,stop, msg_pad);
-      for (t = 0 ; t < stop ; t++){
+      for (t = 0 ; t < stop ; t++) {
         W[t] = ((uchar)  plain_key[currentIndex]) << 24;
         currentIndex ++;
         W[t] |= ((uchar) plain_key[currentIndex]) << 16;
@@ -102,7 +102,7 @@ __kernel void sha256GPU(uint32_t offset, uint32_t length, uint32_t messageIndex,
         //printf("W[%u]: %u\n",t,W[t]);
       }
       mmod = i % 4;
-      if ( mmod == 3){
+      if ( mmod == 3) {
         W[t] = ((uchar)  plain_key[currentIndex]) << 24;
 	      currentIndex++;
         W[t] |= ((uchar) plain_key[currentIndex]) << 16;
