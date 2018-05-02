@@ -45,14 +45,11 @@
  **********************************************************************/
 
 
+#include "../opencl/cl/secp256k1_opencl_header_c_safe.h"
 #ifndef SECP256k1_H_header
 #define SECP256k1_H_header
 
 //******Contents of util.h******
-typedef struct {
-    void (*fn)(const char *text, void* data);
-    const void* data;
-} secp256k1_callback;
 
 static void secp256k1_callback_call(const secp256k1_callback * const cb, const char * const text) {
     cb->fn(text, (void*)cb->data);
@@ -67,6 +64,7 @@ static void secp256k1_callback_call(const secp256k1_callback * const cb, const c
 #define VERIFY_SETUP(stmt)
 #endif
 
+
 #ifndef MACRO_USE_openCL
 static void *checked_malloc(const secp256k1_callback* cb, size_t size) {
   void *ret = malloc(size);
@@ -78,7 +76,6 @@ static void *checked_malloc(const secp256k1_callback* cb, size_t size) {
 
 #define __constant const
 #define ___static__constant static const
-
 #endif
 //removed:
 //#if defined(SECP256K1_BUILD) && defined(VERIFY)
@@ -227,7 +224,7 @@ int secp256k1_fe_is_zero(const secp256k1_fe *a); //original name: secp256k1_fe_i
 int secp256k1_fe_is_odd(const secp256k1_fe *a); //original name: secp256k1_fe_is_odd
 
 /** Compare two field elements. Requires magnitude-1 inputs. */
-int secp256k1_fe_equal_var(__constant secp256k1_fe *a, __constant secp256k1_fe *b); //original name: secp256k1_fe_equal_var
+int secp256k1_fe_equal_var(const secp256k1_fe *a, const secp256k1_fe *b); //original name: secp256k1_fe_equal_var
 
 /** Compare two field elements. Requires both inputs to be normalized */
 int secp256k1_fe_cmp_var(const secp256k1_fe *a, const secp256k1_fe *b); //original name: secp256k1_fe_cmp_var
@@ -240,27 +237,27 @@ void secp256k1_fe_get_b32(unsigned char *r, const secp256k1_fe *a); //original n
 
 /** Set a field element equal to the additive inverse of another. Takes a maximum magnitude of the input
  *  as an argument. The magnitude of the output is one higher. */
-void secp256k1_fe_negate(secp256k1_fe *r, __constant secp256k1_fe *a, int m); //original name: secp256k1_fe_negate
+void secp256k1_fe_negate(secp256k1_fe *r, const secp256k1_fe *a, int m); //original name: secp256k1_fe_negate
 
 /** Multiplies the passed field element with a small integer constant. Multiplies the magnitude by that
  *  small integer. */
 void secp256k1_fe_mul_int(secp256k1_fe *r, int a); //original name: secp256k1_fe_mul_int
 
 /** Adds a field element to another. The result has the sum of the inputs' magnitudes as magnitude. */
-void secp256k1_fe_add(secp256k1_fe *r, __constant secp256k1_fe *a); //original name: secp256k1_fe_add
+void secp256k1_fe_add(secp256k1_fe *r, const secp256k1_fe *a); //original name: secp256k1_fe_add
 
 /** Sets a field element to be the product of two others. Requires the inputs' magnitudes to be at most 8.
  *  The output magnitude is 1 (but not guaranteed to be normalized). */
-void secp256k1_fe_mul(secp256k1_fe *r, const secp256k1_fe *a, __constant secp256k1_fe *b); //original name: secp256k1_fe_mul
+void secp256k1_fe_mul(secp256k1_fe *r, const secp256k1_fe *a, const secp256k1_fe *b); //original name: secp256k1_fe_mul
 
 /** Sets a field element to be the square of another. Requires the input's magnitude to be at most 8.
  *  The output magnitude is 1 (but not guaranteed to be normalized). */
-void secp256k1_fe_sqr(secp256k1_fe *r, __constant secp256k1_fe *a); //original name: secp256k1_fe_sqr
+void secp256k1_fe_sqr(secp256k1_fe *r, const secp256k1_fe *a); //original name: secp256k1_fe_sqr
 
 /** Sets a field element to be the (modular) square root (if any exist) of another. Requires the
  *  input's magnitude to be at most 8. The output magnitude is 1 (but not guaranteed to be
  *  normalized). Return value indicates whether a square root was found. */
-int secp256k1_fe_sqrt_var(secp256k1_fe *r, __constant secp256k1_fe *a); //original name: secp256k1_fe_sqrt_var
+int secp256k1_fe_sqrt_var(secp256k1_fe *r, const secp256k1_fe *a); //original name: secp256k1_fe_sqrt_var
 
 /** Sets a field element to be the (modular) inverse of another. Requires the input's magnitude to be
  *  at most 8. The output magnitude is 1 (but not guaranteed to be normalized). */
@@ -373,7 +370,7 @@ void secp256k1_ge_globalz_set_table_gej(size_t len, secp256k1_ge *r, secp256k1_f
 void secp256k1_gej_set_infinity(secp256k1_gej *r);
 
 /** Set a group element (jacobian) equal to another which is given in affine coordinates. */
-void secp256k1_gej_set_ge(secp256k1_gej *r, __constant secp256k1_ge *a);
+void secp256k1_gej_set_ge(secp256k1_gej *r, const secp256k1_ge *a);
 
 /** Compare the X coordinate of a group element (jacobian). */
 int secp256k1_gej_eq_x_var(const secp256k1_fe *x, const secp256k1_gej *a);
@@ -400,7 +397,7 @@ void secp256k1_gej_add_ge(secp256k1_gej *r, const secp256k1_gej *a, const secp25
 /** Set r equal to the sum of a and b (with b given in affine coordinates). This is more efficient
     than secp256k1_gej_add_var. It is identical to secp256k1_gej_add_ge but without constant-time
     guarantee, and b is allowed to be infinity. If rzr is non-NULL, r->z = a->z * *rzr (a cannot be infinity in that case). */
-void secp256k1_gej_add_ge_var(secp256k1_gej *r, const secp256k1_gej *a, __constant secp256k1_ge *b, secp256k1_fe *rzr);
+void secp256k1_gej_add_ge_var(secp256k1_gej *r, const secp256k1_gej *a, const secp256k1_ge *b, secp256k1_fe *rzr);
 
 /** Set r equal to the sum of a and b (with the inverse of b's Z coordinate passed as bzinv). */
 void secp256k1_gej_add_zinv_var(secp256k1_gej *r, const secp256k1_gej *a, const secp256k1_ge *b, const secp256k1_fe *bzinv);
