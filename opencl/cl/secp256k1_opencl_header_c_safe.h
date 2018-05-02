@@ -1,12 +1,13 @@
 //Header needed to convert secp256k1.cl to an openCL program.
 #ifndef MACRO_secp256k1_opencl_header_c_safe_H
 #define MACRO_secp256k1_opencl_header_c_safe_H
+#define MACRO_MaxNumberOfObjectsInMemoryPool 10
 typedef struct {
   unsigned char* memory;
-  unsigned int size;
+  unsigned int totalMemory;
   int numberOfObjectAllocated;
-  unsigned int* objectStarts;
-  unsigned int* objectLengths;
+  int* objectStarts;
+  int* objectLengths;
   unsigned char* errorBuffer;
   int deallocated;
 } memoryPool;
