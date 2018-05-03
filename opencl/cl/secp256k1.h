@@ -48,7 +48,7 @@
 #ifndef SECP256k1_H_header
 #define SECP256k1_H_header
 
-//******Contents of util.h******
+//******From util.h******
 typedef struct {
   void (*fn)(const char *text, void* data);
   const void* data;
@@ -66,8 +66,8 @@ void secp256k1_callback_call(const secp256k1_callback * const cb, const char * c
 #endif
 
 
-#ifndef MACRO_USE_openCL
 void* checked_malloc(const secp256k1_callback* cb, size_t size);
+#ifndef MACRO_USE_openCL
 #define __constant const
 #define ___static__constant static const
 #endif
@@ -91,7 +91,7 @@ void* checked_malloc(const secp256k1_callback* cb, size_t size);
 //******end of util.h******
 
 
-//******Contents of field_10x26.h******
+//******From field_10x26.h******
 // Representations of elements of the field 
 //
 // Z / (thePrime Z)
@@ -179,7 +179,7 @@ typedef struct {
 //******end of field_10x26.h******
 
 
-//******Contents of field.h******
+//******From field.h******
 /** Field element module.
  *
  *  Field elements can be represented in several ways, but code accessing
@@ -279,7 +279,7 @@ void secp256k1_fe_cmov(secp256k1_fe *r, const secp256k1_fe *a, int flag); //orig
 //******end of field.h******
 
 
-//******Contents of scalar_8x32.h******
+//******From scalar_8x32.h******
 
 /** A scalar modulo the group order of the secp256k1 curve. */
 typedef struct {
@@ -290,7 +290,7 @@ typedef struct {
 //******end of scalar_8x32.h******
 
 
-//******Contents of group.h******
+//******From group.h******
 
 /** A group element of the secp256k1 curve, in affine coordinates. */
 typedef struct {
@@ -363,9 +363,6 @@ void secp256k1_ge_globalz_set_table_gej(size_t len, secp256k1_ge *r, secp256k1_f
 /** Set a group element (jacobian) equal to the point at infinity. */
 void secp256k1_gej_set_infinity(secp256k1_gej *r);
 
-/** Set a group element (jacobian) equal to another which is given in affine coordinates. */
-void secp256k1_gej_set_ge(secp256k1_gej *r, const secp256k1_ge *a);
-
 /** Compare the X coordinate of a group element (jacobian). */
 int secp256k1_gej_eq_x_var(const secp256k1_fe *x, const secp256k1_gej *a);
 
@@ -422,14 +419,13 @@ void secp256k1_gej_rescale(secp256k1_gej *r, const secp256k1_fe *b);
 //******end of group.h******
 
 
-//******Contents of ecmult.h******
+//******From ecmult.h******
 typedef struct {
     /* For accelerating the computation of a*P + b*G: */
     secp256k1_ge_storage (*pre_g)[];    /* odd multiples of the generator */
 } secp256k1_ecmult_context;
 
 void secp256k1_ecmult_context_init(secp256k1_ecmult_context *ctx);
-void secp256k1_ecmult_context_build(secp256k1_ecmult_context *output, const secp256k1_callback *cb);
 //static void secp256k1_ecmult_context_clone(secp256k1_ecmult_context *dst,
 //                                           const secp256k1_ecmult_context *src, const secp256k1_callback *cb);
 void secp256k1_ecmult_context_clear(secp256k1_ecmult_context *ctx);
@@ -471,14 +467,23 @@ void secp256k1_ecmult_gen(const secp256k1_ecmult_gen_context* ctx, secp256k1_gej
 void secp256k1_ecmult_gen_blind(secp256k1_ecmult_gen_context *ctx, const unsigned char *seed32);
 //******end of ecmult_gen.h******
 
-
-//******Contents of ecdsa.h******
+//******From ecdsa.h******
 int secp256k1_ecdsa_sig_parse(secp256k1_scalar *r, secp256k1_scalar *s, const unsigned char *sig, size_t size);
 int secp256k1_ecdsa_sig_serialize(unsigned char *sig, size_t *size, const secp256k1_scalar *r, const secp256k1_scalar *s);
-int secp256k1_ecdsa_sig_verify(const secp256k1_ecmult_context *ctx, const secp256k1_scalar* r, const secp256k1_scalar* s, const secp256k1_ge *pubkey, const secp256k1_scalar *message);
 int secp256k1_ecdsa_sig_sign(const secp256k1_ecmult_gen_context *ctx, secp256k1_scalar* r, secp256k1_scalar* s, const secp256k1_scalar *seckey, const secp256k1_scalar *message, const secp256k1_scalar *nonce, int *recid);
 int secp256k1_ecdsa_sig_recover(const secp256k1_ecmult_context *ctx, const secp256k1_scalar* r, const secp256k1_scalar* s, secp256k1_ge *pubkey, const secp256k1_scalar *message, int recid);
 //******end of ecdsa.h******
+
+
+///////////////////////
+///////////////////////
+#include "../opencl/cl/secp256k1_set_address_space__constant__global.h"
+#include "../opencl/cl/secp256k1_parametric_address_space.h"
+///////////////////////
+#include "../opencl/cl/secp256k1_set_address_space__default.h"
+#include "../opencl/cl/secp256k1_parametric_address_space.h"
+///////////////////////
+///////////////////////
 
 
 #endif //SECP256k1_H_header
