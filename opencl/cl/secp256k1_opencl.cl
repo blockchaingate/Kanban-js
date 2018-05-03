@@ -14,7 +14,7 @@ __kernel void secp256k1_opencl(
   __global unsigned char* publicKey, 
   __global unsigned char* message
 ) {
-  theMemory->memory = (unsigned char*) theMemoryBuffer;
+  theMemory->memory = (unsigned char *) theMemoryBuffer;
   secp256k1_ecmult_context theContext;
   secp256k1_ecmult_context_build(&theContext, NULL, (memoryPool*) theMemory);
   *output = secp256k1_ecdsa_sig_verify(

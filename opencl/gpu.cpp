@@ -244,7 +244,13 @@ bool GPUKernel::constructFromFileName(
     return false;
   }
   logGPU << "Building program: " << this->name << "..." << Logger::endL;
-  ret = clBuildProgram(this->program, 1, &this->owner->currentDeviceId, NULL, NULL, NULL);
+  //std::string programOptions = "-cl-std=CL2.0";
+  ret = clBuildProgram(
+    this->program, 1, &this->owner->currentDeviceId,
+    NULL,
+    //programOptions.c_str(),
+    NULL, NULL
+  );
   if (ret != CL_SUCCESS) {
     logGPU << "Failed to build the program. Return code: " << ret << Logger::endL;
     size_t logSize;
