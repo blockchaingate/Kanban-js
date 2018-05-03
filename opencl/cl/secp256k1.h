@@ -45,11 +45,14 @@
  **********************************************************************/
 
 
-#include "../opencl/cl/secp256k1_opencl_header_c_safe.h"
 #ifndef SECP256k1_H_header
 #define SECP256k1_H_header
 
 //******Contents of util.h******
+typedef struct {
+  void (*fn)(const char *text, void* data);
+  const void* data;
+} secp256k1_callback;
 
 void secp256k1_callback_call(const secp256k1_callback * const cb, const char * const text);
 #ifdef VERIFY
@@ -64,8 +67,7 @@ void secp256k1_callback_call(const secp256k1_callback * const cb, const char * c
 
 
 #ifndef MACRO_USE_openCL
-void* checked_malloc(const secp256k1_callback* cb, size_t size, memoryPool* theMemory);
-void freeWithContext(void* pointer, memoryPool* theMemory);
+void* checked_malloc(const secp256k1_callback* cb, size_t size);
 #define __constant const
 #define ___static__constant static const
 #endif
@@ -344,7 +346,7 @@ void secp256k1_ge_neg(secp256k1_ge *r, const secp256k1_ge *a);
 void secp256k1_ge_set_gej(secp256k1_ge *r, secp256k1_gej *a);
 
 /** Set a batch of group elements equal to the inputs given in jacobian coordinates */
-void secp256k1_ge_set_all_gej_var(size_t len, secp256k1_ge *outputPoints, const secp256k1_gej *outputPointsJacobian, const secp256k1_callback *cb, memoryPool* theMemory);
+void secp256k1_ge_set_all_gej_var(size_t len, secp256k1_ge *outputPoints, const secp256k1_gej *outputPointsJacobian, const secp256k1_callback *cb);
 
 /** Set a batch of group elements equal to the inputs given in jacobian
  *  coordinates (with known z-ratios). zr must contain the known z-ratios such
@@ -427,7 +429,7 @@ typedef struct {
 } secp256k1_ecmult_context;
 
 void secp256k1_ecmult_context_init(secp256k1_ecmult_context *ctx);
-void secp256k1_ecmult_context_build(secp256k1_ecmult_context *output, const secp256k1_callback *cb, memoryPool* theMemory);
+void secp256k1_ecmult_context_build(secp256k1_ecmult_context *output, const secp256k1_callback *cb);
 //static void secp256k1_ecmult_context_clone(secp256k1_ecmult_context *dst,
 //                                           const secp256k1_ecmult_context *src, const secp256k1_callback *cb);
 void secp256k1_ecmult_context_clear(secp256k1_ecmult_context *ctx);
@@ -459,8 +461,8 @@ typedef struct {
 } secp256k1_ecmult_gen_context;
 
 void secp256k1_ecmult_gen_context_init(secp256k1_ecmult_gen_context* ctx);
-void secp256k1_ecmult_gen_context_build(secp256k1_ecmult_gen_context* ctx, const secp256k1_callback* cb, memoryPool* theMemory);
-void secp256k1_ecmult_gen_context_clear(secp256k1_ecmult_gen_context* ctx, memoryPool* theMemory);
+void secp256k1_ecmult_gen_context_build(secp256k1_ecmult_gen_context* ctx, const secp256k1_callback* cb);
+void secp256k1_ecmult_gen_context_clear(secp256k1_ecmult_gen_context* ctx);
 int secp256k1_ecmult_gen_context_is_built(const secp256k1_ecmult_gen_context* ctx);
 
 /** Multiply with the generator: R = a*G */

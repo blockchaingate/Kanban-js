@@ -42,14 +42,8 @@ bool testGPU(secp256k1_scalar& signatureR, secp256k1_scalar& signatureS, secp256
   if (!theGPU.initializeKernels())
     return false;
 
-  memoryPool thePool;
-  thePool.deallocated = 0;
-  thePool.totalMemory = GPUMemoryAvailable;
-  thePool.memory = 0;
-
 
   std::shared_ptr<GPUKernel> theKernel = theGPU.theKernels[GPU::kernelVerifySignature];
-  theKernel->writeToBuffer(1, &thePool, sizeof(memoryPool));
 
   theKernel->writeToBuffer(3, &signatureR, sizeof(signatureR));
   theKernel->writeToBuffer(4, &signatureS, sizeof(signatureS));
@@ -81,12 +75,12 @@ int mainTest() {
   criticalFailure.fn = criticalFailureHandler;
   secp256k1_ecmult_context multiplicationContext;
   secp256k1_ecmult_context_init(&multiplicationContext);
-  secp256k1_ecmult_context_build(&multiplicationContext, &criticalFailure, NULL);
+  secp256k1_ecmult_context_build(&multiplicationContext, &criticalFailure);
   logTest << "Got to here pt 2. " << Logger::endL;
   secp256k1_ecmult_gen_context generatorContext;
   logTest << "Got to here pt 3. " << Logger::endL;
   secp256k1_ecmult_gen_context_init(&generatorContext);
-  secp256k1_ecmult_gen_context_build(&generatorContext, &criticalFailure, NULL);
+  secp256k1_ecmult_gen_context_build(&generatorContext, &criticalFailure);
   logTest << "Got to here pt 4. " << Logger::endL;
   secp256k1_scalar signatureS, signatureR;
   secp256k1_scalar secretKey = SECP256K1_SCALAR_CONST(

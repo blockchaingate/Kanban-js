@@ -8,18 +8,12 @@
 #include <stdlib.h>
 #include "cl/secp256k1.cl"
 
-void* checked_malloc(const secp256k1_callback* cb, size_t size, memoryPool* theMemory) {
-  (void) theMemory;
+void* checked_malloc(const secp256k1_callback* cb, size_t size) {
   void *ret = malloc(size);
   if (ret == NULL) {
     secp256k1_callback_call(cb, "Out of memory");
   }
   return ret;
-}
-
-void freeWithContext(void* pointer, memoryPool* theMemory) {
-  (void) theMemory;
-  free(pointer);
 }
 
 void secp256k1_callback_call(const secp256k1_callback * const cb, const char * const text) {
