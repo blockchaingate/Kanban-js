@@ -16,61 +16,6 @@ void criticalFailureHandler(const char *text, void* data){
   logTest << text;
 }
 
-std::string toStringSecp256k1_FieldElement(const secp256k1_fe& input) {
-  std::stringstream out;
-  for (int i = 9; i >= 0; i --)
-    out << std::hex << std::setfill('0') << std::setw(8) << input.n[i];
-  return out.str();
-}
-
-std::string toStringSecp256k1_FieldElementStorage(const secp256k1_fe_storage& input) {
-  std::stringstream out;
-  for (int i = 7; i >= 0; i --)
-    out << std::hex << std::setfill('0') << std::setw(8) << input.n[i];
-  return out.str();
-}
-
-std::string toStringSecp256k1_Scalar(const secp256k1_scalar& input) {
-  std::stringstream out;
-  for (int i = 7; i >= 0; i --)
-    out << std::hex << std::setfill('0') << std::setw(8) << input.d[i];
-  return out.str();
-}
-
-std::string toStringSecp256k1_ECPoint(const secp256k1_ge& input) {
-  std::stringstream out;
-  out << "\nx: " << toStringSecp256k1_FieldElement(input.x);
-  out << "\ny: " << toStringSecp256k1_FieldElement(input.y);
-  return out.str();
-}
-
-std::string toStringSecp256k1_ECPointStorage(const secp256k1_ge_storage& input) {
-  std::stringstream out;
-  out << "\nx: " << toStringSecp256k1_FieldElementStorage(input.x);
-  out << "\ny: " << toStringSecp256k1_FieldElementStorage(input.y);
-  return out.str();
-}
-
-std::string toStringSecp256k1_MultiplicationContext(const secp256k1_ecmult_context& multiplicationContext) {
-  std::stringstream out;
-  for (int i = 0; i < ECMULT_TABLE_SIZE(WINDOW_G); i++){
-    out << i << ":" << toStringSecp256k1_ECPointStorage((*multiplicationContext.pre_g)[i]) << ", ";
-  }
-  return out.str();
-}
-
-std::string toStringSecp256k1_GeneratorContext(const secp256k1_ecmult_gen_context& generatorContext) {
-  std::stringstream out;
-  out << "Generator context. Blind: " << toStringSecp256k1_Scalar(generatorContext.blind) << "\n";
-
-  for (int i = 0; i < 64; i ++) {
-    for (int j = 0; j < 16; j++) {
-      out << "p_" << i << "_" << j << ": " << toStringSecp256k1_ECPointStorage((*generatorContext.prec)[i][j]) << ", ";
-    }
-    out << "\n";
-  }
-  return out.str();
-}
 
 const unsigned int GPUMemoryAvailable = 10000000; //for the time being, this should be equal to defaultBufferSize from gpu.cpp
 unsigned char bufferGPUMemory[GPUMemoryAvailable];
@@ -108,19 +53,17 @@ bool testGPU(secp256k1_scalar& signatureR, secp256k1_scalar& signatureS, secp256
 }
 
 int mainTest() {
-  logTest << "Got to here. " << Logger::endL;
   criticalFailure.data = 0;
   criticalFailure.fn = criticalFailureHandler;
   secp256k1_ecmult_context multiplicationContext;
   secp256k1_ecmult_context_init(&multiplicationContext);
   secp256k1_ecmult_context_build(&multiplicationContext, &criticalFailure);
-  logTest << "DEBUG: generatorContext: " << toStringSecp256k1_MultiplicationContext(multiplicationContext) << Logger::endL;
-  logTest << "Got to here pt 2. " << Logger::endL;
+  logTest << "DEBUG: multiplicationContext:\n" << toStringSecp256k1_MultiplicationContext(multiplicationContext) << Logger::endL;
   secp256k1_ecmult_gen_context generatorContext;
-  logTest << "Got to here pt 3. " << Logger::endL;
   secp256k1_ecmult_gen_context_init(&generatorContext);
   secp256k1_ecmult_gen_context_build(&generatorContext, &criticalFailure);
-  logTest << "DEBUG: generatorContext: " << toStringSecp256k1_GeneratorContext(generatorContext) << Logger::endL;
+  logTest << "\n**********\n"
+          << "DEBUG: generatorContext: " << toStringSecp256k1_GeneratorContext(generatorContext) << Logger::endL;
   secp256k1_scalar signatureS, signatureR;
   secp256k1_scalar secretKey = SECP256K1_SCALAR_CONST(
     13, 17, 19, 0, 0, 0, 0, 0

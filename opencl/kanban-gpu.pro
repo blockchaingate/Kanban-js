@@ -9,7 +9,8 @@ SOURCES += \
     server.cpp \
     miscellaneous.cpp \
     test.cpp \
-    cl/secp256k1_c.cpp
+    cl/secp256k1_c.cpp \
+    cl/secp256k1_to_string_methods.cpp
 
 LIBS+=-lOpenCL
 
