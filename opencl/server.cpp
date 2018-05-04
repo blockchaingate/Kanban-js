@@ -107,8 +107,7 @@ bool Server::Run()
 {
   if (!this->initialize())
     return false;
-  while (this->RunOnce())
-  {
+  while (this->RunOnce()) {
   }
   return false;
 }
@@ -127,30 +126,24 @@ bool Server::initializeOneSocketAndPort(int& outputSocket, std::string& outputPo
   hints.ai_socktype = SOCK_STREAM;
   hints.ai_flags = AI_PASSIVE; // use my IP
   int yes = 1;
-  for (unsigned i = 0; i < portsToTry.size(); i ++)
-  {
+  for (unsigned i = 0; i < portsToTry.size(); i ++) {
     outputPort = portsToTry[i];
     int rv = getaddrinfo(NULL, portsToTry[i].c_str(), &hints, &serverInfo);
-    if (rv != 0)
-    {
+    if (rv != 0) {
       logServer << "Getaddrinfo failed. " << gai_strerror(rv) << Logger::endL;
       return false;
     }
-    for (p = serverInfo; p != NULL; p = p->ai_next)
-    {
+    for (p = serverInfo; p != NULL; p = p->ai_next) {
       outputSocket = socket(p->ai_family, p->ai_socktype, p->ai_protocol);
-      if (outputSocket == - 1)
-      {
+      if (outputSocket == - 1) {
         logServer << "Error: socket failed.\n" << Logger::endL;
         continue;
       }
-      if (setsockopt(outputSocket, SOL_SOCKET, SO_REUSEADDR, &yes, sizeof(int)) == - 1)
-      {
+      if (setsockopt(outputSocket, SOL_SOCKET, SO_REUSEADDR, &yes, sizeof(int)) == - 1) {
         logServer << "Error: setsockopt failed, error: \n" << strerror(errno) << Logger::endL;
         return false;
       }
-      if (bind(outputSocket, p->ai_addr, p->ai_addrlen) == - 1)
-      {
+      if (bind(outputSocket, p->ai_addr, p->ai_addrlen) == - 1) {
         close(outputSocket);
         outputSocket= - 1;
         logServer << "Error: bind failed at port: " << portsToTry[i] << ". " << strerror(errno) << Logger::endL;

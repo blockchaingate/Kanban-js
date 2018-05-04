@@ -32,9 +32,8 @@ std::string toStringSecp256k1_Scalar(const secp256k1_scalar& input) {
 
 std::string toStringSecp256k1_ECPoint(const secp256k1_ge& input) {
   std::stringstream out;
-  out << "x: " << toStringSecp256k1_FieldElement(input.x);
-  out << "; y: ";
-  out << "x: " << toStringSecp256k1_FieldElement(input.y);
+  out << "\nx: " << toStringSecp256k1_FieldElement(input.x);
+  out << "\ny: " << toStringSecp256k1_FieldElement(input.y);
   return out.str();
 }
 

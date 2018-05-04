@@ -1166,6 +1166,10 @@ int APPEND_ADDRESS_SPACE(secp256k1_ecdsa_sig_verify)(
   secp256k1_gej pubkeyj;
   secp256k1_gej pr;
   logGPU << "DEBUG: verifying. Context is: " << ctx << Logger::endL;
+  logGPU << "DEBUG: sigR: " << toStringSecp256k1_Scalar(*sigr) << Logger::endL;
+  logGPU << "DEBUG: sigS: " << toStringSecp256k1_Scalar(*sigs) << Logger::endL;
+  logGPU << "DEBUG: pubkey: " << toStringSecp256k1_ECPoint(*pubkey) << Logger::endL;
+  logGPU << "DEBUG: message: " << toStringSecp256k1_Scalar(*message) << Logger::endL;
   if (APPEND_ADDRESS_SPACE(secp256k1_scalar_is_zero)(sigr) || APPEND_ADDRESS_SPACE(secp256k1_scalar_is_zero)(sigs)) {
     return 0;
   }
