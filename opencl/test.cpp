@@ -23,6 +23,13 @@ std::string toStringSecp256k1_FieldElement(const secp256k1_fe& input) {
   return out.str();
 }
 
+std::string toStringSecp256k1_FieldElementStorage(const secp256k1_fe_storage& input) {
+  std::stringstream out;
+  for (int i = 7; i >= 0; i --)
+    out << std::hex << std::setfill('0') << std::setw(8) << input.n[i];
+  return out.str();
+}
+
 std::string toStringSecp256k1_Scalar(const secp256k1_scalar& input) {
   std::stringstream out;
   for (int i = 7; i >= 0; i --)
@@ -34,6 +41,34 @@ std::string toStringSecp256k1_ECPoint(const secp256k1_ge& input) {
   std::stringstream out;
   out << "\nx: " << toStringSecp256k1_FieldElement(input.x);
   out << "\ny: " << toStringSecp256k1_FieldElement(input.y);
+  return out.str();
+}
+
+std::string toStringSecp256k1_ECPointStorage(const secp256k1_ge_storage& input) {
+  std::stringstream out;
+  out << "\nx: " << toStringSecp256k1_FieldElementStorage(input.x);
+  out << "\ny: " << toStringSecp256k1_FieldElementStorage(input.y);
+  return out.str();
+}
+
+std::string toStringSecp256k1_MultiplicationContext(const secp256k1_ecmult_context& multiplicationContext) {
+  std::stringstream out;
+  for (int i = 0; i < ECMULT_TABLE_SIZE(WINDOW_G); i++){
+    out << i << ":" << toStringSecp256k1_ECPointStorage((*multiplicationContext.pre_g)[i]) << ", ";
+  }
+  return out.str();
+}
+
+std::string toStringSecp256k1_GeneratorContext(const secp256k1_ecmult_gen_context& generatorContext) {
+  std::stringstream out;
+  out << "Generator context. Blind: " << toStringSecp256k1_Scalar(generatorContext.blind) << "\n";
+
+  for (int i = 0; i < 64; i ++) {
+    for (int j = 0; j < 16; j++) {
+      out << "p_" << i << "_" << j << ": " << toStringSecp256k1_ECPointStorage((*generatorContext.prec)[i][j]) << ", ";
+    }
+    out << "\n";
+  }
   return out.str();
 }
 
@@ -79,12 +114,13 @@ int mainTest() {
   secp256k1_ecmult_context multiplicationContext;
   secp256k1_ecmult_context_init(&multiplicationContext);
   secp256k1_ecmult_context_build(&multiplicationContext, &criticalFailure);
+  logTest << "DEBUG: generatorContext: " << toStringSecp256k1_MultiplicationContext(multiplicationContext) << Logger::endL;
   logTest << "Got to here pt 2. " << Logger::endL;
   secp256k1_ecmult_gen_context generatorContext;
   logTest << "Got to here pt 3. " << Logger::endL;
   secp256k1_ecmult_gen_context_init(&generatorContext);
   secp256k1_ecmult_gen_context_build(&generatorContext, &criticalFailure);
-  logTest << "Got to here pt 4. " << Logger::endL;
+  logTest << "DEBUG: generatorContext: " << toStringSecp256k1_GeneratorContext(generatorContext) << Logger::endL;
   secp256k1_scalar signatureS, signatureR;
   secp256k1_scalar secretKey = SECP256K1_SCALAR_CONST(
     13, 17, 19, 0, 0, 0, 0, 0
@@ -107,6 +143,8 @@ int mainTest() {
 
   logTest << "Got to here pt 5. " << Logger::endL;
   secp256k1_ecdsa_sig_sign(&generatorContext, &signatureR, &signatureS, &secretKey, &message, &nonce, &recId);
+  logTest << "SigR: " << toStringSecp256k1_Scalar(signatureR) << Logger::endL;
+  logTest << "SigS: " << toStringSecp256k1_Scalar(signatureS) << Logger::endL;
 
   int signatureResult = secp256k1_ecdsa_sig_verify(&multiplicationContext, &signatureR, &signatureS, &publicKey, &message);
   logTest << "DEBUG: signature verification: " << signatureResult << Logger::endL;

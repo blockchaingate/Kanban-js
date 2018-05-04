@@ -349,9 +349,29 @@ void secp256k1_gej_rescale(secp256k1_gej *r, const secp256k1_fe *b);
 
 
 //******From ecmult.h******
+
+/* optimal for 128-bit and 256-bit exponents. */
+#define WINDOW_A 5
+
+/** larger numbers may result in slightly better performance, at the cost of
+    exponentially larger precomputed tables. */
+//#ifdef USE_ENDOMORPHISM
+///** Two tables for window size 15: 1.375 MiB. */
+//#define WINDOW_G 15
+//#else
+/** One table for window size 16: 1.375 MiB. */
+#define WINDOW_G 16
+//#endif
+
+/** The number of entries a table with precomputed multiples needs to have. */
+#define ECMULT_TABLE_SIZE(w) (1 << ((w)-2))
+//ECMULT_TABLE_SIZE(WINDOW_A) equals 2^3 = 8
+//ECMULT_TABLE_SIZE(WINDOW_G) equals 2^14 = 16384
+
 typedef struct {
-    /* For accelerating the computation of a*P + b*G: */
-    secp256k1_ge_storage (*pre_g)[];    /* odd multiples of the generator */
+  /* For accelerating the computation of a*P + b*G: */
+  //Size when constructed: ECMULT_TABLE_SIZE(WINDOW_G)
+  secp256k1_ge_storage (*pre_g)[];    /* odd multiples of the generator */
 } secp256k1_ecmult_context;
 
 void secp256k1_ecmult_context_init(secp256k1_ecmult_context *ctx);

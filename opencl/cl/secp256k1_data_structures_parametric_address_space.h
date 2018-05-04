@@ -66,19 +66,18 @@ typedef struct {
 } APPEND_ADDRESS_SPACE(secp256k1_fe);
 
 typedef struct {
-    uint32_t n[8];
+  uint32_t n[8];
 } APPEND_ADDRESS_SPACE(secp256k1_fe_storage);
 //******End of field_10x26_impl.h******
-
 
 
 //******From group.h******
 
 /** A group element of the secp256k1 curve, in affine coordinates. */
 typedef struct {
-    secp256k1_fe x;
-    secp256k1_fe y;
-    int infinity; /* whether this represents the point at infinity */
+  secp256k1_fe x;
+  secp256k1_fe y;
+  int infinity; /* whether this represents the point at infinity */
 } APPEND_ADDRESS_SPACE(secp256k1_ge);
 
 /** A group element of the secp256k1 curve, in jacobian coordinates.
@@ -88,10 +87,10 @@ typedef struct {
  *  Y^2 = X^3 + 7*Z^6
  */
 typedef struct {
-    secp256k1_fe x; /* actual (affine) x: secp256k1_gej.x / secp256k1_gej.z^2 */
-    secp256k1_fe y; /* actual (affine) y: secp256k1_gej.y / secp256k1_gej.z^3 */
-    secp256k1_fe z;
-    int infinity; /* whether this represents the point at infinity */
+  secp256k1_fe x; /* actual (affine) x: secp256k1_gej.x / secp256k1_gej.z^2 */
+  secp256k1_fe y; /* actual (affine) y: secp256k1_gej.y / secp256k1_gej.z^3 */
+  secp256k1_fe z;
+  int infinity; /* whether this represents the point at infinity */
 } APPEND_ADDRESS_SPACE(secp256k1_gej);
 
 typedef struct {

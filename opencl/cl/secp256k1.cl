@@ -2280,26 +2280,9 @@ static void secp256k1_scalar_split_lambda(secp256k1_scalar *r1, secp256k1_scalar
 
 //******From ecmult_impl.h******
 
-/* optimal for 128-bit and 256-bit exponents. */
-#define WINDOW_A 5
-
-/** larger numbers may result in slightly better performance, at the cost of
-    exponentially larger precomputed tables. */
-//#ifdef USE_ENDOMORPHISM
-///** Two tables for window size 15: 1.375 MiB. */
-//#define WINDOW_G 15
-//#else
-/** One table for window size 16: 1.375 MiB. */
-#define WINDOW_G 16
-//#endif
-
-/** The number of entries a table with precomputed multiples needs to have. */
-#define ECMULT_TABLE_SIZE(w) (1 << ((w)-2))
-//ECMULT_TABLE_SIZE(WINDOW_A) equals 2^3 = 8
-//ECMULT_TABLE_SIZE(WINDOW_G) equals 2^14 = 16384
 
 /** Fill a table 'prej' with precomputed odd multiples of a. Prej will contain
- *  the values [1*a,3*a,...,(2*n-1)*a], so it space for n values. zr[0] will
+ *  the values [1*a,3*a,...,(2*n-1)*a], so it has space for n values. zr[0] will
  *  contain prej[0].z / a.z. The other zr[i] values = prej[i].z / prej[i-1].z.
  *  Prej's Z values are undefined, except for the last value.
  */
