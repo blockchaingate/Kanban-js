@@ -1,0 +1,21 @@
+#ifdef ADDRESS_SPACE_ONE
+#undef ADDRESS_SPACE_CONSTANT
+#undef ADDRESS_SPACE_ONE
+#undef ADDRESS_SPACE_TWO
+#undef APPEND_ADDRESS_SPACE_ONE
+#undef APPEND_ADDRESS_SPACE_TWO
+#endif 
+
+#ifdef APPEND_ADDRESS_SPACE
+#undef APPEND_ADDRESS_SPACE
+#endif
+
+#define ADDRESS_SPACE_CONSTANT __constant
+#define ADDRESS_SPACE_ONE __global
+#define ADDRESS_SPACE_TWO __global
+#define APPEND_ADDRESS_SPACE(X) X ## __global__global
+#define APPEND_ADDRESS_SPACE_ONE(X) X ## __global
+#define APPEND_ADDRESS_SPACE_TWO(X) X ## __global
+
+
+

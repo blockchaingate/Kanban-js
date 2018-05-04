@@ -95,10 +95,10 @@ void* checked_malloc(const secp256k1_callback* cb, size_t size);
 
 ///////////////////////
 ///////////////////////
-#include "../opencl/cl/secp256k1_set_address_space__default.h"
+#include "../opencl/cl/secp256k1_set_1_address_space__default.h"
 #include "../opencl/cl/secp256k1_data_structures_parametric_address_space.h"
 ///////////////////////
-//#include "../opencl/cl/secp256k1_set_address_space__constant__constant__global.h"
+//#include "../opencl/cl/secp256k1_set_address_space__constant__global__global.h"
 //#include "../opencl/cl/secp256k1_data_structures_parametric_address_space.h"
 ///////////////////////
 ///////////////////////
@@ -174,9 +174,6 @@ int secp256k1_fe_is_odd(const secp256k1_fe *a); //original name: secp256k1_fe_is
 /** Compare two field elements. Requires magnitude-1 inputs. */
 int secp256k1_fe_equal_var(const secp256k1_fe *a, const secp256k1_fe *b); //original name: secp256k1_fe_equal_var
 
-/** Compare two field elements. Requires both inputs to be normalized */
-int secp256k1_fe_cmp_var(const secp256k1_fe *a, const secp256k1_fe *b); //original name: secp256k1_fe_cmp_var
-
 /** Set a field element equal to 32-byte big endian value. If successful, the resulting field element is normalized. */
 int secp256k1_fe_set_b32(secp256k1_fe *r, const unsigned char *a); //original name: secp256k1_fe_set_b32
 
@@ -190,9 +187,6 @@ void secp256k1_fe_negate(secp256k1_fe *r, const secp256k1_fe *a, int m); //origi
 /** Multiplies the passed field element with a small integer constant. Multiplies the magnitude by that
  *  small integer. */
 void secp256k1_fe_mul_int(secp256k1_fe *r, int a); //original name: secp256k1_fe_mul_int
-
-/** Adds a field element to another. The result has the sum of the inputs' magnitudes as magnitude. */
-void secp256k1_fe_add(secp256k1_fe *r, const secp256k1_fe *a); //original name: secp256k1_fe_add
 
 /** Sets a field element to be the product of two others. Requires the inputs' magnitudes to be at most 8.
  *  The output magnitude is 1 (but not guaranteed to be normalized). */
@@ -314,11 +308,6 @@ void secp256k1_gej_add_var(secp256k1_gej *r, const secp256k1_gej *a, const secp2
 /** Set r equal to the sum of a and b (with b given in affine coordinates, and not infinity). */
 void secp256k1_gej_add_ge(secp256k1_gej *r, const secp256k1_gej *a, const secp256k1_ge *b);
 
-/** Set r equal to the sum of a and b (with b given in affine coordinates). This is more efficient
-    than secp256k1_gej_add_var. It is identical to secp256k1_gej_add_ge but without constant-time
-    guarantee, and b is allowed to be infinity. If rzr is non-NULL, r->z = a->z * *rzr (a cannot be infinity in that case). */
-void secp256k1_gej_add_ge_var(secp256k1_gej *r, const secp256k1_gej *a, const secp256k1_ge *b, secp256k1_fe *rzr);
-
 /** Set r equal to the sum of a and b (with the inverse of b's Z coordinate passed as bzinv). */
 void secp256k1_gej_add_zinv_var(secp256k1_gej *r, const secp256k1_gej *a, const secp256k1_ge *b, const secp256k1_fe *bzinv);
 
@@ -426,11 +415,24 @@ int secp256k1_ecdsa_sig_recover(const secp256k1_ecmult_context *ctx, const secp2
 
 ///////////////////////
 ///////////////////////
-#include "../opencl/cl/secp256k1_set_address_space__constant__constant__global.h"
-#include "../opencl/cl/secp256k1_parametric_address_space.h"
+#include "../opencl/cl/secp256k1_set_1_address_space__global.h"
+#include "../opencl/cl/secp256k1_1_parametric_address_space.h"
 ///////////////////////
-#include "../opencl/cl/secp256k1_set_address_space__default.h"
-#include "../opencl/cl/secp256k1_parametric_address_space.h"
+#include "../opencl/cl/secp256k1_set_1_address_space__constant.h"
+#include "../opencl/cl/secp256k1_1_parametric_address_space.h"
+///////////////////////
+#include "../opencl/cl/secp256k1_set_1_address_space__default.h"
+#include "../opencl/cl/secp256k1_1_parametric_address_space.h"
+///////////////////////
+///////////////////////
+
+///////////////////////
+///////////////////////
+#include "../opencl/cl/secp256k1_set_2_address_spaces__global__global.h"
+#include "../opencl/cl/secp256k1_2_parametric_address_spaces.h"
+///////////////////////
+#include "../opencl/cl/secp256k1_set_2_address_spaces__default.h"
+#include "../opencl/cl/secp256k1_2_parametric_address_spaces.h"
 ///////////////////////
 ///////////////////////
 

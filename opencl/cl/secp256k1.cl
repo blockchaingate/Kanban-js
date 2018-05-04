@@ -988,7 +988,7 @@ void secp256k1_gej_set_ge__global(secp256k1_gej *r, __global const secp256k1_ge 
    secp256k1_fe_set_int(&r->z, 1);
 }
 
-void secp256k1_gej_set_ge__constant__constant__global(secp256k1_gej *r, __constant const secp256k1_ge *a) {
+void secp256k1_gej_set_ge__constant__global__global(secp256k1_gej *r, __global const secp256k1_ge *a) {
    r->infinity = a->infinity;
    r->x = a->x;
    r->y = a->y;
@@ -1167,8 +1167,6 @@ int secp256k1_gej_eq_x_var(const secp256k1_fe *x, const secp256k1_gej *a) {
   VERIFY_CHECK(!a->infinity);
   secp256k1_fe_sqr(&r, &a->z); //r = z^2
   secp256k1_fe_mul(&r, &r, x); //r = x z^2
-  logGPU << "DEBUG: r  = " << toStringSecp256k1_FieldElement(r) << Logger::endL;
-  logGPU << "DEBUG: r2 = " << toStringSecp256k1_FieldElement(r2) << Logger::endL;
   r2 = a->x;
   secp256k1_fe_normalize_weak(&r2);
   return secp256k1_fe_equal_var(&r, &r2);
@@ -3050,6 +3048,15 @@ static void secp256k1_rfc6979_hmac_sha256_finalize(secp256k1_rfc6979_hmac_sha256
 
 
 //******From ecmult_gen_impl.h******
+/** Generator for secp256k1, value 'g' defined in
+ *  "Standards for Efficient Cryptography" (SEC2) 2.7.1.
+ */
+___static__constant secp256k1_ge secp256k1_ge_const_g = SECP256K1_GE_CONST(
+    0x79BE667EUL, 0xF9DCBBACUL, 0x55A06295UL, 0xCE870B07UL,
+    0x029BFCDBUL, 0x2DCE28D9UL, 0x59F2815BUL, 0x16F81798UL,
+    0x483ADA77UL, 0x26A3C465UL, 0x5DA4FBFCUL, 0x0E1108A8UL,
+    0xFD17B448UL, 0xA6855419UL, 0x9C47D08FUL, 0xFB10D4B8UL
+);
 
 // secp256k1_ecmult_gen_context_init must be called on each newly created generator context.
 void secp256k1_ecmult_gen_context_init(secp256k1_ecmult_gen_context *ctx) {
@@ -3107,6 +3114,37 @@ void secp256k1_ecmult_gen(const secp256k1_ecmult_gen_context *ctx, secp256k1_gej
 
 
 //******From ecdsa_impl.h******
+
+/** Group order for secp256k1 defined as 'n' in "Standards for Efficient Cryptography" (SEC2) 2.7.1
+ *  sage: for t in xrange(1023, -1, -1):
+ *     ..   p = 2**256 - 2**32 - t
+ *     ..   if p.is_prime():
+ *     ..     print '%x'%p
+ *     ..     break
+ *   'fffffffffffffffffffffffffffffffffffffffffffffffffffffffefffffc2f'
+ *  sage: a = 0
+ *  sage: b = 7
+ *  sage: F = FiniteField (p)
+ *  sage: '%x' % (EllipticCurve ([F (a), F (b)]).order())
+ *   'fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364141'
+ */
+___static__constant secp256k1_fe secp256k1_ecdsa_const_order_as_fe = SECP256K1_FE_CONST(
+    0xFFFFFFFFUL, 0xFFFFFFFFUL, 0xFFFFFFFFUL, 0xFFFFFFFEUL,
+    0xBAAEDCE6UL, 0xAF48A03BUL, 0xBFD25E8CUL, 0xD0364141UL
+);
+
+/** Difference between field and order, values 'p' and 'n' values defined in
+ *  "Standards for Efficient Cryptography" (SEC2) 2.7.1.
+ *  sage: p = 0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFEFFFFFC2F
+ *  sage: a = 0
+ *  sage: b = 7
+ *  sage: F = FiniteField (p)
+ *  sage: '%x' % (p - EllipticCurve ([F (a), F (b)]).order())
+ *   '14551231950b75fc4402da1722fc9baee'
+ */
+___static__constant secp256k1_fe secp256k1_ecdsa_const_p_minus_order = SECP256K1_FE_CONST(
+    0, 0, 0, 1, 0x45512319UL, 0x50B75FC4UL, 0x402DA172UL, 0x2FC9BAEEUL
+);
 
 int secp256k1_ecdsa_sig_parse(secp256k1_scalar *rr, secp256k1_scalar *rs, const unsigned char *sig, size_t size) {
     unsigned char ra[32] = {0}, sa[32] = {0};
@@ -3240,11 +3278,24 @@ int secp256k1_ecdsa_sig_sign(const secp256k1_ecmult_gen_context *ctx, secp256k1_
 
 ///////////////////////
 ///////////////////////
-#include "../opencl/cl/secp256k1_set_address_space__constant__constant__global.h"
-#include "../opencl/cl/secp256k1_parametric_address_space.cl"
+#include "../opencl/cl/secp256k1_set_1_address_space__global.h"
+#include "../opencl/cl/secp256k1_1_parametric_address_space.cl"
 ///////////////////////
-#include "../opencl/cl/secp256k1_set_address_space__default.h"
-#include "../opencl/cl/secp256k1_parametric_address_space.cl"
+#include "../opencl/cl/secp256k1_set_1_address_space__constant.h"
+#include "../opencl/cl/secp256k1_1_parametric_address_space.cl"
+///////////////////////
+#include "../opencl/cl/secp256k1_set_1_address_space__default.h"
+#include "../opencl/cl/secp256k1_1_parametric_address_space.cl"
+///////////////////////
+///////////////////////
+
+///////////////////////
+///////////////////////
+#include "../opencl/cl/secp256k1_set_2_address_spaces__global__global.h"
+#include "../opencl/cl/secp256k1_2_parametric_address_spaces.cl"
+///////////////////////
+#include "../opencl/cl/secp256k1_set_2_address_spaces__default.h"
+#include "../opencl/cl/secp256k1_2_parametric_address_spaces.cl"
 ///////////////////////
 ///////////////////////
 

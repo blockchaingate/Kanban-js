@@ -24,14 +24,18 @@ bool testGPU(secp256k1_scalar& signatureR, secp256k1_scalar& signatureS, secp256
   GPU theGPU;
   if (!theGPU.initializeKernels())
     return false;
+  secp256k1_ecmult_context multiplicationContext;
+  secp256k1_ecmult_context_init(&multiplicationContext);
+  secp256k1_ecmult_context_build(&multiplicationContext, &criticalFailure);
 
 
   std::shared_ptr<GPUKernel> theKernel = theGPU.theKernels[GPU::kernelVerifySignature];
 
-  theKernel->writeToBuffer(3, &signatureR, sizeof(signatureR));
-  theKernel->writeToBuffer(4, &signatureS, sizeof(signatureS));
-  theKernel->writeToBuffer(5, &publicKey, sizeof(publicKey));
-  theKernel->writeToBuffer(6, &message, sizeof(message));
+  theKernel->writeToBuffer(1, &signatureR, sizeof(multiplicationContext));
+  theKernel->writeToBuffer(2, &signatureR, sizeof(signatureR));
+  theKernel->writeToBuffer(3, &signatureS, sizeof(signatureS));
+  theKernel->writeToBuffer(4, &publicKey, sizeof(publicKey));
+  theKernel->writeToBuffer(5, &message, sizeof(message));
 
   cl_int ret = clEnqueueNDRangeKernel(
     theGPU.commandQueue, theKernel->kernel, 1, NULL,
@@ -42,13 +46,13 @@ bool testGPU(secp256k1_scalar& signatureR, secp256k1_scalar& signatureS, secp256
     return false;
   }
   cl_mem& result = theKernel->outputs[0]->theMemory;
-  unsigned char resultChar;
+  unsigned char resultChar[1];
   ret = clEnqueueReadBuffer(theGPU.commandQueue, result, CL_TRUE, 0, 1, &resultChar, 0, NULL, NULL);
   if (ret != CL_SUCCESS) {
     logServer << "Failed to read buffer. Return code: " << ret << Logger::endL;
     return false;
   }
-  logServer << "Return of GPU verification: " << (int) resultChar << Logger::endL;
+  logServer << "Return of GPU verification: " << (int) resultChar[0] << Logger::endL;
   return true;
 }
 

@@ -23,13 +23,13 @@ void free(void* input){
 
 __kernel void secp256k1_opencl(
   __global unsigned char* output,
-  __constant secp256k1_ecmult_context* theContext,
+  __global secp256k1_ecmult_context* theContext,
   __global unsigned char* signatureR,  
   __global unsigned char* signatureS, 
   __global unsigned char* publicKey, 
   __global unsigned char* message
 ) {
-  *output = secp256k1_ecdsa_sig_verify__constant__constant__global(
+  *output = secp256k1_ecdsa_sig_verify__global__global(
     theContext, 
     (__global const secp256k1_scalar *) signatureR, 
     (__global const secp256k1_scalar *) signatureS, 
