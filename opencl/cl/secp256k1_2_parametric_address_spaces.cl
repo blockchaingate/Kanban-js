@@ -8,12 +8,13 @@
 // APPEND_ADDRESS_SPACE_ONE
 // APPEND_ADDRESS_SPACE_TWO
 
-int APPEND_ADDRESS_SPACE(secp256k1_ecdsa_sig_verify)(
+char APPEND_ADDRESS_SPACE(secp256k1_ecdsa_sig_verify)(
   ADDRESS_SPACE_ONE const secp256k1_ecmult_context *ctx, 
   ADDRESS_SPACE_TWO const secp256k1_scalar *sigr, 
   ADDRESS_SPACE_TWO const secp256k1_scalar *sigs, 
   ADDRESS_SPACE_TWO const secp256k1_ge *pubkey, 
-  ADDRESS_SPACE_TWO const secp256k1_scalar *message
+  ADDRESS_SPACE_TWO const secp256k1_scalar *message, 
+  unsigned char* comments
 ) {
   unsigned char c[32];
   secp256k1_scalar sn, u1, u2;
@@ -21,6 +22,8 @@ int APPEND_ADDRESS_SPACE(secp256k1_ecdsa_sig_verify)(
   secp256k1_gej pubkeyj;
   secp256k1_gej pr;
   if (APPEND_ADDRESS_SPACE_TWO(secp256k1_scalar_is_zero)(sigr) || APPEND_ADDRESS_SPACE_TWO(secp256k1_scalar_is_zero)(sigs)) {
+    comments[0] = (unsigned char) 7;
+    return 7;
     return 0;
   }
 
@@ -31,6 +34,8 @@ int APPEND_ADDRESS_SPACE(secp256k1_ecdsa_sig_verify)(
 
   APPEND_ADDRESS_SPACE_ONE(secp256k1_ecmult)(ctx, &pr, &pubkeyj, &u2, &u1);
   if (secp256k1_gej_is_infinity(&pr)) {
+    comments[0] = (unsigned char) 8;
+    return 8;
     return 0;
   }
   APPEND_ADDRESS_SPACE_TWO(secp256k1_scalar_get_b32)(c, sigr);
@@ -52,20 +57,35 @@ int APPEND_ADDRESS_SPACE(secp256k1_ecdsa_sig_verify)(
    *  Thus, we can avoid the inversion, but we have to check both cases separately.
    *  secp256k1_gej_eq_x implements the (xr * pr.z^2 mod p == pr.x) test.
    */
+   
+    secp256k1_fe_get_b32(c, &xr);
+    memoryCopy(comments + 1, c, 32);
+    secp256k1_fe_get_b32(c, &pr.x);
+    memoryCopy(comments + 33, c, 32);    
+    secp256k1_fe_get_b32(c, &pr.z);
+    memoryCopy(comments + 65, c, 32);    
+
   if (secp256k1_gej_eq_x_var(&xr, &pr)) {
-    /* xr.x == xr * xr.z^2 mod p, so the signature is valid. */
+    /* pr.x == xr * pr.z^2 mod p, so the signature is valid. */
+    comments[0] = (unsigned char) 1;
     return 1;
   }
   //openCL note: secp256k1_ecdsa_const_p_minus_order is always in the __constant address space.
   if (secp256k1_fe_cmp_var__constant(&xr, &secp256k1_ecdsa_const_p_minus_order) >= 0) {
     /* xr + p >= n, so we can skip testing the second case. */
+    comments[0] = (unsigned char) 9;
+    return 9;
     return 0;
   }
   //openCL note: secp256k1_ecdsa_const_p_minus_order is always in the __constant address space.
   secp256k1_fe_add__constant(&xr, &secp256k1_ecdsa_const_order_as_fe);
   if (secp256k1_gej_eq_x_var(&xr, &pr)) {
-    /* (xr + n) * pr.z^2 mod p == pr.x, so the signature is valid. */
+    /* (xr + n) * pr.z^2 mod p == pr.
+    x, so the signature is valid. */
+    comments[0] = (unsigned char) 1;
     return 1;
   }
+  comments[0] = (unsigned char) 10;
+  return 10;
   return 0;
 }

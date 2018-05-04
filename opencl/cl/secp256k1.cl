@@ -3226,10 +3226,10 @@ int secp256k1_ecdsa_sig_serialize(unsigned char *sig, size_t *size, const secp25
     sig[1] = 4 + lenS + lenR;
     sig[2] = 0x02;
     sig[3] = lenR;
-    memoryCopy(sig+4, rp, lenR);
-    sig[4+lenR] = 0x02;
-    sig[5+lenR] = lenS;
-    memoryCopy(sig+lenR+6, sp, lenS);
+    memoryCopy(sig + 4, rp, lenR);
+    sig[4 + lenR] = 0x02;
+    sig[5 + lenR] = lenS;
+    memoryCopy(sig + lenR + 6, sp, lenS);
     return 1;
 }
 

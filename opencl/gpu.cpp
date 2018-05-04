@@ -306,7 +306,7 @@ bool GPUKernel::constructArguments(
     size_t defaultBufferSize = 10000000;
     current->theMemory = clCreateBuffer(this->owner->context, bufferFlag, defaultBufferSize, NULL, &ret);
     if (ret != CL_SUCCESS) {
-      logGPU << "Failed to create buffer \e[31m" << current->name  << "\e[39m. Return code: " << ret << Logger::endL;
+      logGPU << "Failed to create buffer \e[31m" << current->name << "\e[39m. Return code: " << ret << Logger::endL;
       return false;
     }
   }
