@@ -417,63 +417,63 @@ void APPEND_ADDRESS_SPACE(secp256k1_fe_mul)(secp256k1_fe *r, const secp256k1_fe 
 //******From group_impl.h******
 
 void APPEND_ADDRESS_SPACE(secp256k1_gej_add_ge_var)(secp256k1_gej *r, const secp256k1_gej *a, ADDRESS_SPACE_CONTEXT const secp256k1_ge *b, secp256k1_fe *rzr) {
-    /* 8 mul, 3 sqr, 4 normalize, 12 mul_int/add/negate */
-    secp256k1_fe z12, u1, u2, s1, s2, h, i, i2, h2, h3, t;
-    if (a->infinity) {
-        VERIFY_CHECK(rzr == NULL);
-        APPEND_ADDRESS_SPACE(secp256k1_gej_set_ge)(r, b);
-        return;
-    }
-    if (b->infinity) {
-        if (rzr != NULL) {
-            secp256k1_fe_set_int(rzr, 1);
-        }
-        *r = *a;
-        return;
-    }
-    r->infinity = 0;
-
-    secp256k1_fe_sqr(&z12, &a->z);
-    u1 = a->x; secp256k1_fe_normalize_weak(&u1);
-    //Multiplication order matters due to openCL 1.2's address space restrictions
-    APPEND_ADDRESS_SPACE(secp256k1_fe_mul)(&u2, &z12, &b->x);
-    s1 = a->y; secp256k1_fe_normalize_weak(&s1);
-    //Multiplication order matters due to openCL 1.2's address space restrictions
-    APPEND_ADDRESS_SPACE(secp256k1_fe_mul)(&s2, &z12, &b->y); 
-    secp256k1_fe_mul(&s2, &s2, &a->z);
-    secp256k1_fe_negate(&h, &u1, 1); 
-    secp256k1_fe_add(&h, &u2);
-    secp256k1_fe_negate(&i, &s1, 1); 
-    secp256k1_fe_add(&i, &s2);
-    if (secp256k1_fe_normalizes_to_zero_var(&h)) {
-        if (secp256k1_fe_normalizes_to_zero_var(&i)) {
-            secp256k1_gej_double_var(r, a, rzr);
-        } else {
-            if (rzr != NULL) {
-                secp256k1_fe_set_int(rzr, 0);
-            }
-            r->infinity = 1;
-        }
-        return;
-    }
-    secp256k1_fe_sqr(&i2, &i);
-    secp256k1_fe_sqr(&h2, &h);
-    secp256k1_fe_mul(&h3, &h, &h2);
+  /* 8 mul, 3 sqr, 4 normalize, 12 mul_int/add/negate */
+  secp256k1_fe z12, u1, u2, s1, s2, h, i, i2, h2, h3, t;
+  if (a->infinity) {
+    VERIFY_CHECK(rzr == NULL);
+    APPEND_ADDRESS_SPACE(secp256k1_gej_set_ge)(r, b);
+    return;
+  }
+  if (b->infinity) {
     if (rzr != NULL) {
-        *rzr = h;
+      secp256k1_fe_set_int(rzr, 1);
     }
-    secp256k1_fe_mul(&r->z, &a->z, &h);
-    secp256k1_fe_mul(&t, &u1, &h2);
-    r->x = t; secp256k1_fe_mul_int(&r->x, 2); 
-    secp256k1_fe_add(&r->x, &h3); 
-    secp256k1_fe_negate(&r->x, &r->x, 3); 
-    secp256k1_fe_add(&r->x, &i2);
-    secp256k1_fe_negate(&r->y, &r->x, 5); 
-    secp256k1_fe_add(&r->y, &t); 
-    secp256k1_fe_mul(&r->y, &r->y, &i);
-    secp256k1_fe_mul(&h3, &h3, &s1); 
-    secp256k1_fe_negate(&h3, &h3, 1);
-    secp256k1_fe_add(&r->y, &h3);
+    *r = *a;
+    return;
+  }
+  r->infinity = 0;
+
+  secp256k1_fe_sqr(&z12, &a->z);
+  u1 = a->x; secp256k1_fe_normalize_weak(&u1);
+  //Multiplication order matters due to openCL 1.2's address space restrictions
+  APPEND_ADDRESS_SPACE(secp256k1_fe_mul)(&u2, &z12, &b->x);
+  s1 = a->y; secp256k1_fe_normalize_weak(&s1);
+  //Multiplication order matters due to openCL 1.2's address space restrictions
+  APPEND_ADDRESS_SPACE(secp256k1_fe_mul)(&s2, &z12, &b->y);
+  secp256k1_fe_mul(&s2, &s2, &a->z);
+  secp256k1_fe_negate(&h, &u1, 1);
+  secp256k1_fe_add(&h, &u2);
+  secp256k1_fe_negate(&i, &s1, 1);
+  secp256k1_fe_add(&i, &s2);
+  if (secp256k1_fe_normalizes_to_zero_var(&h)) {
+    if (secp256k1_fe_normalizes_to_zero_var(&i)) {
+      secp256k1_gej_double_var(r, a, rzr);
+    } else {
+      if (rzr != NULL) {
+        secp256k1_fe_set_int(rzr, 0);
+      }
+      r->infinity = 1;
+    }
+    return;
+  }
+  secp256k1_fe_sqr(&i2, &i);
+  secp256k1_fe_sqr(&h2, &h);
+  secp256k1_fe_mul(&h3, &h, &h2);
+  if (rzr != NULL) {
+    *rzr = h;
+  }
+  secp256k1_fe_mul(&r->z, &a->z, &h);
+  secp256k1_fe_mul(&t, &u1, &h2);
+  r->x = t; secp256k1_fe_mul_int(&r->x, 2);
+  secp256k1_fe_add(&r->x, &h3);
+  secp256k1_fe_negate(&r->x, &r->x, 3);
+  secp256k1_fe_add(&r->x, &i2);
+  secp256k1_fe_negate(&r->y, &r->x, 5);
+  secp256k1_fe_add(&r->y, &t);
+  secp256k1_fe_mul(&r->y, &r->y, &i);
+  secp256k1_fe_mul(&h3, &h3, &s1);
+  secp256k1_fe_negate(&h3, &h3, 1);
+  secp256k1_fe_add(&r->y, &h3);
 }
 //******end of group_impl.h******
 
@@ -523,7 +523,7 @@ void APPEND_ADDRESS_SPACE(secp256k1_ecmult_gen_context_build)(
   if (ctx->prec != NULL) {
     return;
   }
-  ctx->prec = (secp256k1_ge_storage (*)[64][16])checked_malloc(cb, sizeof(*ctx->prec));
+  ctx->prec = (secp256k1_ge_storage (*)[64][16]) checked_malloc(cb, sizeof(*ctx->prec));
 
   /* get the generator */
   //openCL note: secp256k1_ge_const_g is always in the __constant address space.
@@ -531,13 +531,17 @@ void APPEND_ADDRESS_SPACE(secp256k1_ecmult_gen_context_build)(
 
   /* Construct a group element with no known corresponding scalar (nothing up my sleeve). */
   {
-    //The line below does not compile in openCL 1.2
-    //static const unsigned char nums_b32[33] = "The scalar for this x is unknown";
+    //Warning: the string below is used as a random seed for generating an element on the curve.
+    //It is not an error message, but rather a sequence of pseudorandom bytes
+    // serving as an essentail constant for the library.
+    //Static does not compile in openCL 1.2
+    //static
+    const unsigned char nums_b32[33] = "The scalar for this x is unknown";
     secp256k1_fe nums_x;
     secp256k1_ge nums_ge;
     
     //The line below does not compile in openCL 1.2
-    //VERIFY_CHECK(secp256k1_fe_set_b32(&nums_x, nums_b32));
+    VERIFY_CHECK(secp256k1_fe_set_b32(&nums_x, nums_b32));
     VERIFY_CHECK(secp256k1_ge_set_xo_var(&nums_ge, &nums_x, 0));
     secp256k1_gej_set_ge(&nums_gej, &nums_ge);
     /* Add G to make the bits in x uniformly distributed. */
@@ -555,7 +559,7 @@ void APPEND_ADDRESS_SPACE(secp256k1_ecmult_gen_context_build)(
       /* Set precj[j*16 .. j*16+15] to (numsbase, numsbase + gbase, ..., numsbase + 15*gbase). */
       precj[j*16] = numsbase;
       for (i = 1; i < 16; i++) {
-        secp256k1_gej_add_var(&precj[j*16 + i], &precj[j*16 + i - 1], &gbase, NULL);
+        secp256k1_gej_add_var(&precj[j * 16 + i], &precj[j * 16 + i - 1], &gbase, NULL);
       }
       /* Multiply gbase by 16. */
       for (i = 0; i < 4; i++) {
