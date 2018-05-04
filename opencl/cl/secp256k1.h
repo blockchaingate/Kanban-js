@@ -68,8 +68,8 @@ void secp256k1_callback_call(const secp256k1_callback * const cb, const char * c
 
 void* checked_malloc(const secp256k1_callback* cb, size_t size);
 #ifndef MACRO_USE_openCL
-#define __constant const
 #define ___static__constant static const
+#define __constant 
 #endif
 //removed:
 //#if defined(SECP256K1_BUILD) && defined(VERIFY)
@@ -91,63 +91,20 @@ void* checked_malloc(const secp256k1_callback* cb, size_t size);
 //******end of util.h******
 
 
+
+///////////////////////
+///////////////////////
+#include "../opencl/cl/secp256k1_set_address_space__default.h"
+#include "../opencl/cl/secp256k1_data_structures_parametric_address_space.h"
+///////////////////////
+//#include "../opencl/cl/secp256k1_set_address_space__constant__constant__global.h"
+//#include "../opencl/cl/secp256k1_data_structures_parametric_address_space.h"
+///////////////////////
+///////////////////////
+
+
+
 //******From field_10x26.h******
-// Representations of elements of the field 
-//
-// Z / (thePrime Z)
-//
-// where
-//
-// thePrime = 2^256 - 2^32 - 977.
-//
-// We represent each element of our field by a 
-// large integer X, given by a sequence
-// n_0, \dots, n_{9} with
-//
-// X = \sum_{i = 0}^{9}  n_i 2^{26 i},
-//
-// where 0\leq n_i < 2^{32}.
-//
-// The representation above is not unique  
-// as the n_i's are allowed to be larger than 2^{26}. 
-//
-// We call a representation {n_i} ``normalized'' if 
-//
-// X < thePrime.
-// 
-// For example, the element
-//
-// 7 * 2^52 + 5 * 2^26 + 3
-//
-// is represented by 
-// n_0 = 3, n_1 = 5, n_2 = 7
-// (all remaining elements are zero). 
-//
-// To make the representation {n_i} unique, we need to have both
-//
-// X < thePrime
-//
-// and 0 \leq  n_i < 2^{26}.
-//
-//
-// In particular, n_{10} < 2^{22} is needed.
-// However, in the case that n_{10} = 2^{22} - 1 
-// the inequality n_{10} < 2^{22} does not guarantee that
-//
-// X < thePrime 
-//
-// If that is the case, 
-// additional reductions are needed to ensure that the 
-// representation is normal. 
-// 
-typedef struct {
-    /* X = sum(i=0..9, elem[i]*2^26) mod n */
-    uint32_t n[10];
-#ifdef VERIFY
-    int magnitude;
-    int normalized;
-#endif
-} secp256k1_fe;
 
 /* Unpacks a constant into a overlapping multi-limbed FE element. */
 #define SECP256K1_FE_CONST_INNER(d7, d6, d5, d4, d3, d2, d1, d0) { \
@@ -168,10 +125,6 @@ typedef struct {
 #else
 #define SECP256K1_FE_CONST(d7, d6, d5, d4, d3, d2, d1, d0) {SECP256K1_FE_CONST_INNER((d7), (d6), (d5), (d4), (d3), (d2), (d1), (d0))}
 #endif
-
-typedef struct {
-    uint32_t n[8];
-} secp256k1_fe_storage;
 
 #define SECP256K1_FE_STORAGE_CONST(d7, d6, d5, d4, d3, d2, d1, d0) {{ (d0), (d1), (d2), (d3), (d4), (d5), (d6), (d7) }}
 #define SECP256K1_FE_STORAGE_CONST_GET(d) d.n[7], d.n[6], d.n[5], d.n[4],d.n[3], d.n[2], d.n[1], d.n[0]
@@ -292,36 +245,11 @@ typedef struct {
 
 //******From group.h******
 
-/** A group element of the secp256k1 curve, in affine coordinates. */
-typedef struct {
-    secp256k1_fe x;
-    secp256k1_fe y;
-    int infinity; /* whether this represents the point at infinity */
-} secp256k1_ge;
-
 #define SECP256K1_GE_CONST(a, b, c, d, e, f, g, h, i, j, k, l, m, n, o, p) {SECP256K1_FE_CONST((a),(b),(c),(d),(e),(f),(g),(h)), SECP256K1_FE_CONST((i),(j),(k),(l),(m),(n),(o),(p)), 0}
 #define SECP256K1_GE_CONST_INFINITY {SECP256K1_FE_CONST(0, 0, 0, 0, 0, 0, 0, 0), SECP256K1_FE_CONST(0, 0, 0, 0, 0, 0, 0, 0), 1}
 
-/** A group element of the secp256k1 curve, in jacobian coordinates.
- *  y^2 = x^3 + 7
- *  (Y/Z^3)^2 = (X/Z^2)^3 + 7
- *  Y^2 / Z^6 = X^3 / Z^6 + 7
- *  Y^2 = X^3 + 7*Z^6
- */
-typedef struct {
-    secp256k1_fe x; /* actual (affine) x: secp256k1_gej.x / secp256k1_gej.z^2 */
-    secp256k1_fe y; /* actual (affine) y: secp256k1_gej.y / secp256k1_gej.z^3 */
-    secp256k1_fe z;
-    int infinity; /* whether this represents the point at infinity */
-} secp256k1_gej;
-
 #define SECP256K1_GEJ_CONST(a, b, c, d, e, f, g, h, i, j, k, l, m, n, o, p) {SECP256K1_FE_CONST((a),(b),(c),(d),(e),(f),(g),(h)), SECP256K1_FE_CONST((i),(j),(k),(l),(m),(n),(o),(p)), SECP256K1_FE_CONST(0, 0, 0, 0, 0, 0, 0, 1), 0}
 #define SECP256K1_GEJ_CONST_INFINITY {SECP256K1_FE_CONST(0, 0, 0, 0, 0, 0, 0, 0), SECP256K1_FE_CONST(0, 0, 0, 0, 0, 0, 0, 0), SECP256K1_FE_CONST(0, 0, 0, 0, 0, 0, 0, 0), 1}
-
-typedef struct {
-    secp256k1_fe_storage x;
-    secp256k1_fe_storage y;
-} secp256k1_ge_storage;
 
 #define SECP256K1_GE_STORAGE_CONST(a, b, c, d, e, f, g, h, i, j, k, l, m, n, o, p) {SECP256K1_FE_STORAGE_CONST((a),(b),(c),(d),(e),(f),(g),(h)), SECP256K1_FE_STORAGE_CONST((i),(j),(k),(l),(m),(n),(o),(p))}
 
@@ -477,7 +405,7 @@ int secp256k1_ecdsa_sig_recover(const secp256k1_ecmult_context *ctx, const secp2
 
 ///////////////////////
 ///////////////////////
-#include "../opencl/cl/secp256k1_set_address_space__constant__global.h"
+#include "../opencl/cl/secp256k1_set_address_space__constant__constant__global.h"
 #include "../opencl/cl/secp256k1_parametric_address_space.h"
 ///////////////////////
 #include "../opencl/cl/secp256k1_set_address_space__default.h"

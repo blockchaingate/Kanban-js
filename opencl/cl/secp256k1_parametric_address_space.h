@@ -3,7 +3,9 @@
 //
 // ADDRESS_SPACE_INPUTS 
 // ADDRESS_SPACE_CONTEXT
+// ADDRESS_SPACE_CONSTANT
 // APPEND_ADDRESS_SPACE
+// APPEND_ADDRESS_SPACE_INPUTS
 // DO_RESERVE_STATIC_CONST
 
 void APPEND_ADDRESS_SPACE(memoryCopy)(unsigned char* destination, const unsigned char* source, int amount) {
@@ -32,12 +34,29 @@ int APPEND_ADDRESS_SPACE(secp256k1_ecdsa_sig_verify)(
 
 
 //******From group.h******
-/** Set a group element (jacobian) equal to another which is given in affine coordinates. */
-void APPEND_ADDRESS_SPACE(secp256k1_gej_set_ge)(
-  secp256k1_gej *r, 
-  ADDRESS_SPACE_CONTEXT const secp256k1_ge *a
-);
 //******End of group.h******
+
+//******From scalar.h******
+/** Compute the inverse of a scalar (modulo the group order). */
+static void APPEND_ADDRESS_SPACE(secp256k1_scalar_inverse)(secp256k1_scalar *r, ADDRESS_SPACE_INPUTS const secp256k1_scalar *a);
+
+/** Compute the inverse of a scalar (modulo the group order), without constant-time guarantee. */
+static void APPEND_ADDRESS_SPACE(secp256k1_scalar_inverse_var)(secp256k1_scalar *r, ADDRESS_SPACE_INPUTS const secp256k1_scalar *a);
+
+/** Multiply a and b (without taking the modulus!), divide by 2**shift, and round to the nearest integer. Shift must be at least 256. */
+void APPEND_ADDRESS_SPACE(secp256k1_scalar_mul_shift_var)(secp256k1_scalar *r, const secp256k1_scalar *a, const secp256k1_scalar *b, unsigned int shift);
+//******End of scalar.h******
+
+
+//******From scalar_8x32_impl.h******
+static int APPEND_ADDRESS_SPACE(secp256k1_scalar_is_zero)(ADDRESS_SPACE_INPUTS const secp256k1_scalar *a);
+
+static void APPEND_ADDRESS_SPACE(secp256k1_scalar_mul_512)(
+  uint32_t *l, 
+  const secp256k1_scalar *a, 
+  ADDRESS_SPACE_INPUTS const secp256k1_scalar *b
+);
+//******end of scalar_8x32_impl.h******
 
 
 //******From ecmult_impl.h******

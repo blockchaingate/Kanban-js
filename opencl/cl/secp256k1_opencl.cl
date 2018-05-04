@@ -29,12 +29,12 @@ __kernel void secp256k1_opencl(
   __global unsigned char* publicKey, 
   __global unsigned char* message
 ) {
-  *output = secp256k1_ecdsa_sig_verify__constant__global(
+  *output = secp256k1_ecdsa_sig_verify__constant__constant__global(
     theContext, 
-    (const __global secp256k1_scalar *) signatureR, 
-    (const __global secp256k1_scalar *) signatureS, 
-    (const __global secp256k1_ge *) publicKey, 
-    (const __global secp256k1_scalar *) message
+    (__global const secp256k1_scalar *) signatureR, 
+    (__global const secp256k1_scalar *) signatureS, 
+    (__global const secp256k1_ge *) publicKey, 
+    (__global const secp256k1_scalar *) message
   );
 }
 
