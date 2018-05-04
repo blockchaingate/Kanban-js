@@ -10,6 +10,20 @@
 #include "../opencl/cl/secp256k1.h"
 
 
+void APPEND_ADDRESS_SPACE(memoryCopy)(unsigned char* destination, const unsigned char* source, int amount) {
+  int i;
+  for (i = 0; i < amount; i ++){
+    destination[i] = source[i];
+  }
+}
+
+void APPEND_ADDRESS_SPACE(memorySet) (unsigned char* destination, unsigned char value, int amountToSet){
+  int i;
+  for (i = 0; i < amountToSet; i ++){
+    destination[i] = value;
+  }
+}
+
 //******From field_10x26_impl.h******
 
 void APPEND_ADDRESS_SPACE(secp256k1_fe_add)(secp256k1_fe *r, ADDRESS_SPACE_CONTEXT const secp256k1_fe *a) {
@@ -731,11 +745,11 @@ static void APPEND_ADDRESS_SPACE(secp256k1_scalar_get_b32)(unsigned char *bin, A
     bin[28] = a->d[0] >> 24; bin[29] = a->d[0] >> 16; bin[30] = a->d[0] >> 8; bin[31] = a->d[0];
 }
 
-static int APPEND_ADDRESS_SPACE(secp256k1_scalar_is_zero)(ADDRESS_SPACE_INPUTS const secp256k1_scalar *a) {
+int APPEND_ADDRESS_SPACE(secp256k1_scalar_is_zero)(ADDRESS_SPACE_INPUTS const secp256k1_scalar *a) {
     return (a->d[0] | a->d[1] | a->d[2] | a->d[3] | a->d[4] | a->d[5] | a->d[6] | a->d[7]) == 0;
 }
 
-static void APPEND_ADDRESS_SPACE(secp256k1_scalar_mul_512)(
+void APPEND_ADDRESS_SPACE(secp256k1_scalar_mul_512)(
   uint32_t *l, 
   const secp256k1_scalar *a, 
   ADDRESS_SPACE_INPUTS const secp256k1_scalar *b
@@ -907,7 +921,7 @@ static void APPEND_ADDRESS_SPACE(secp256k1_scalar_sqr)(secp256k1_scalar *r, ADDR
 
 //******From scalar_impl.h******
 
-static void APPEND_ADDRESS_SPACE(secp256k1_scalar_inverse)(secp256k1_scalar *r, ADDRESS_SPACE_INPUTS const secp256k1_scalar *x) {
+void APPEND_ADDRESS_SPACE(secp256k1_scalar_inverse)(secp256k1_scalar *r, ADDRESS_SPACE_INPUTS const secp256k1_scalar *x) {
     secp256k1_scalar *t;
     int i;
     /* First compute x ^ (2^N - 1) for some values of N. */
@@ -1098,7 +1112,7 @@ static void APPEND_ADDRESS_SPACE(secp256k1_scalar_inverse)(secp256k1_scalar *r, 
     secp256k1_scalar_mul(r, t, &x6); /* 111111 */
 }
 
-static void APPEND_ADDRESS_SPACE(secp256k1_scalar_inverse_var)(secp256k1_scalar *r, ADDRESS_SPACE_INPUTS const secp256k1_scalar *x) {
+void APPEND_ADDRESS_SPACE(secp256k1_scalar_inverse_var)(secp256k1_scalar *r, ADDRESS_SPACE_INPUTS const secp256k1_scalar *x) {
   APPEND_ADDRESS_SPACE(secp256k1_scalar_inverse)(r, x);
 }
 //******end of scalar_impl.h******
@@ -1151,7 +1165,7 @@ int APPEND_ADDRESS_SPACE(secp256k1_ecdsa_sig_verify)(
   secp256k1_fe xr;
   secp256k1_gej pubkeyj;
   secp256k1_gej pr;
-
+  logGPU << "DEBUG: verifying. Context is: " << ctx << Logger::endL;
   if (APPEND_ADDRESS_SPACE(secp256k1_scalar_is_zero)(sigr) || APPEND_ADDRESS_SPACE(secp256k1_scalar_is_zero)(sigs)) {
     return 0;
   }
@@ -1184,13 +1198,17 @@ int APPEND_ADDRESS_SPACE(secp256k1_ecdsa_sig_verify)(
    *  Thus, we can avoid the inversion, but we have to check both cases separately.
    *  secp256k1_gej_eq_x implements the (xr * pr.z^2 mod p == pr.x) test.
    */
+  logGPU << "DEBUG: got to the real part. \nXr = " << toStringSecp256k1_FieldElement(xr) << Logger::endL;
   if (secp256k1_gej_eq_x_var(&xr, &pr)) {
     /* xr.x == xr * xr.z^2 mod p, so the signature is valid. */
     return 1;
   }
+  logGPU << "DEBUG: secp256k1_ecdsa_const_p_minus_order= "
+         << toStringSecp256k1_FieldElement(secp256k1_ecdsa_const_p_minus_order) << Logger::endL;
   //openCL note: secp256k1_ecdsa_const_p_minus_order is always in the __constant address space.
   if (secp256k1_fe_cmp_var__constant__constant__global(&xr, &secp256k1_ecdsa_const_p_minus_order) >= 0) {
     /* xr + p >= n, so we can skip testing the second case. */
+    logGPU << "Signature not valid. " << Logger::endL;
     return 0;
   }
   //openCL note: secp256k1_ecdsa_const_p_minus_order is always in the __constant address space.

@@ -8,19 +8,10 @@
 // APPEND_ADDRESS_SPACE_INPUTS
 // DO_RESERVE_STATIC_CONST
 
-void APPEND_ADDRESS_SPACE(memoryCopy)(unsigned char* destination, const unsigned char* source, int amount) {
-  int i;
-  for (i = 0; i < amount; i ++){
-    destination[i] = source[i];
-  }
-}
 
-void APPEND_ADDRESS_SPACE(memorySet) (unsigned char* destination, unsigned char value, int amountToSet){
-  int i;
-  for (i = 0; i < amountToSet; i ++){
-    destination[i] = value;
-  }
-}
+void APPEND_ADDRESS_SPACE(memoryCopy)(unsigned char* destination, const unsigned char* source, int amount);
+
+void APPEND_ADDRESS_SPACE(memorySet) (unsigned char* destination, unsigned char value, int amountToSet);
 
 //******From ecdsa.h******
 int APPEND_ADDRESS_SPACE(secp256k1_ecdsa_sig_verify)(
@@ -38,10 +29,10 @@ int APPEND_ADDRESS_SPACE(secp256k1_ecdsa_sig_verify)(
 
 //******From scalar.h******
 /** Compute the inverse of a scalar (modulo the group order). */
-static void APPEND_ADDRESS_SPACE(secp256k1_scalar_inverse)(secp256k1_scalar *r, ADDRESS_SPACE_INPUTS const secp256k1_scalar *a);
+void APPEND_ADDRESS_SPACE(secp256k1_scalar_inverse)(secp256k1_scalar *r, ADDRESS_SPACE_INPUTS const secp256k1_scalar *a);
 
 /** Compute the inverse of a scalar (modulo the group order), without constant-time guarantee. */
-static void APPEND_ADDRESS_SPACE(secp256k1_scalar_inverse_var)(secp256k1_scalar *r, ADDRESS_SPACE_INPUTS const secp256k1_scalar *a);
+void APPEND_ADDRESS_SPACE(secp256k1_scalar_inverse_var)(secp256k1_scalar *r, ADDRESS_SPACE_INPUTS const secp256k1_scalar *a);
 
 /** Multiply a and b (without taking the modulus!), divide by 2**shift, and round to the nearest integer. Shift must be at least 256. */
 void APPEND_ADDRESS_SPACE(secp256k1_scalar_mul_shift_var)(secp256k1_scalar *r, const secp256k1_scalar *a, const secp256k1_scalar *b, unsigned int shift);
@@ -49,9 +40,9 @@ void APPEND_ADDRESS_SPACE(secp256k1_scalar_mul_shift_var)(secp256k1_scalar *r, c
 
 
 //******From scalar_8x32_impl.h******
-static int APPEND_ADDRESS_SPACE(secp256k1_scalar_is_zero)(ADDRESS_SPACE_INPUTS const secp256k1_scalar *a);
+int APPEND_ADDRESS_SPACE(secp256k1_scalar_is_zero)(ADDRESS_SPACE_INPUTS const secp256k1_scalar *a);
 
-static void APPEND_ADDRESS_SPACE(secp256k1_scalar_mul_512)(
+void APPEND_ADDRESS_SPACE(secp256k1_scalar_mul_512)(
   uint32_t *l, 
   const secp256k1_scalar *a, 
   ADDRESS_SPACE_INPUTS const secp256k1_scalar *b

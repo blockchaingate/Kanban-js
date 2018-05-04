@@ -2,7 +2,7 @@
 #include <sstream>
 #include <iomanip>
 #include "gpu.h"
-#include "cl/secp256k1.h"
+#include "cl/secp256k1_cpp.h"
 
 
 Logger logTest("../logfiles/logTest.txt", "[test] ");
@@ -16,21 +16,25 @@ void criticalFailureHandler(const char *text, void* data){
   logTest << text;
 }
 
-std::string toStringSecp256k1_Scalar(secp256k1_scalar& input) {
+std::string toStringSecp256k1_FieldElement(const secp256k1_fe& input) {
   std::stringstream out;
-  for (int i = 0; i < 8; i ++)
+  for (int i = 9; i >= 0; i --)
+    out << std::hex << std::setfill('0') << std::setw(8) << input.n[i];
+  return out.str();
+}
+
+std::string toStringSecp256k1_Scalar(const secp256k1_scalar& input) {
+  std::stringstream out;
+  for (int i = 7; i >= 0; i --)
     out << std::hex << std::setfill('0') << std::setw(8) << input.d[i];
   return out.str();
 }
 
-std::string toStringSecp256k1_ECPoint(secp256k1_ge& input) {
+std::string toStringSecp256k1_ECPoint(const secp256k1_ge& input) {
   std::stringstream out;
-  out << "x: ";
-  for (int i = 0; i < 10; i ++)
-    out << std::hex << std::setfill('0') << std::setw(8) << input.x.n[i];
+  out << "x: " << toStringSecp256k1_FieldElement(input.x);
   out << "; y: ";
-  for (int i = 0; i < 10; i ++)
-    out << std::hex << std::setfill('0') << std::setw(8) << input.y.n[i];
+  out << "x: " << toStringSecp256k1_FieldElement(input.y);
   return out.str();
 }
 
@@ -106,7 +110,7 @@ int mainTest() {
   secp256k1_ecdsa_sig_sign(&generatorContext, &signatureR, &signatureS, &secretKey, &message, &nonce, &recId);
 
   int signatureResult = secp256k1_ecdsa_sig_verify(&multiplicationContext, &signatureR, &signatureS, &publicKey, &message);
-  logTest << "DEBUG: signature result: " << signatureResult << Logger::endL;
+  logTest << "DEBUG: signature verification: " << signatureResult << Logger::endL;
 
   logTest << "Got to here pt 6. " << Logger::endL;
   logTest << "secret: " << toStringSecp256k1_Scalar(secretKey) << Logger::endL;

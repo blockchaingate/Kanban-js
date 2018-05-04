@@ -6,6 +6,12 @@
 #include <string.h>
 #include <stdint.h>
 #include <stdlib.h>
+#include "logging.h"
+extern Logger logGPU;
+#include "cl/secp256k1_cpp.h"
+#include <iomanip>
+#include <sstream>
+
 #include "cl/secp256k1.cl"
 
 void* checked_malloc(const secp256k1_callback* cb, size_t size) {

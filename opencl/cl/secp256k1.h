@@ -70,6 +70,7 @@ void* checked_malloc(const secp256k1_callback* cb, size_t size);
 #ifndef MACRO_USE_openCL
 #define ___static__constant static const
 #define __constant 
+#define __global
 #endif
 //removed:
 //#if defined(SECP256K1_BUILD) && defined(VERIFY)

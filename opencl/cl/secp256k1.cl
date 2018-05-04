@@ -1163,12 +1163,15 @@ int secp256k1_ge_set_xo_var(secp256k1_ge *r, const secp256k1_fe *x, int odd) {
 }
 
 int secp256k1_gej_eq_x_var(const secp256k1_fe *x, const secp256k1_gej *a) {
-    secp256k1_fe r, r2;
-    VERIFY_CHECK(!a->infinity);
-    secp256k1_fe_sqr(&r, &a->z); 
-    secp256k1_fe_mul(&r, &r, x);
-    r2 = a->x; secp256k1_fe_normalize_weak(&r2);
-    return secp256k1_fe_equal_var(&r, &r2);
+  secp256k1_fe r, r2;
+  VERIFY_CHECK(!a->infinity);
+  secp256k1_fe_sqr(&r, &a->z); //r = z^2
+  secp256k1_fe_mul(&r, &r, x); //r = x z^2
+  logGPU << "DEBUG: r  = " << toStringSecp256k1_FieldElement(r) << Logger::endL;
+  logGPU << "DEBUG: r2 = " << toStringSecp256k1_FieldElement(r2) << Logger::endL;
+  r2 = a->x;
+  secp256k1_fe_normalize_weak(&r2);
+  return secp256k1_fe_equal_var(&r, &r2);
 }
 
 void secp256k1_gej_neg(secp256k1_gej *r, const secp256k1_gej *a) {
@@ -2154,7 +2157,7 @@ static void secp256k1_scalar_sqr(secp256k1_scalar *r, const secp256k1_scalar *a)
 static void secp256k1_scalar_negate(secp256k1_scalar *r, const secp256k1_scalar *a);
 
 /** Check whether a scalar equals zero. */
-static int secp256k1_scalar_is_zero(const secp256k1_scalar *a);
+int secp256k1_scalar_is_zero(const secp256k1_scalar *a);
 
 /** Check whether a scalar equals one. */
 int secp256k1_scalar_is_one(const secp256k1_scalar *a);
