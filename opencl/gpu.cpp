@@ -102,7 +102,7 @@ bool GPU::initialize() {
   if (this->flagVerbose) {
     logGPU << "Number of platforms: " << this->numberOfPlatforms << "\n";
   }
-  cl_device_type desiredDeviceType = CL_DEVICE_TYPE_CPU;
+  cl_device_type desiredDeviceType = CL_DEVICE_TYPE_GPU;
   std::string deviceDescription = desiredDeviceType == CL_DEVICE_TYPE_CPU ? "CPU" : "GPU";
   for (unsigned i = 0; i < this->numberOfPlatforms; i ++) {
     ret = clGetDeviceIDs(this->platformIds[i], desiredDeviceType, 2, this->allDevices, &this->numberOfDevices);
@@ -165,13 +165,12 @@ bool GPU::initializeKernels() {
     return false;
   if (!this->createKernel(
         this->kernelVerifySignature,
-        {"output", "outputInputMemoryPool", "outputInputMemoryBuffer"},
+        {"output"},
         {
-          SharedMemory::typeVoidPointer, SharedMemory::typeVoidPointer,
-          SharedMemory::typeVoidPointer
+          SharedMemory::typeVoidPointer,
         },
-        {"inputSignatureR", "inputSignatureS", "inputPublicKey", "inputMessage"},
-        {SharedMemory::typeVoidPointer, SharedMemory::typeVoidPointer, SharedMemory::typeVoidPointer, SharedMemory::typeVoidPointer}
+        {"inputMultiplicationTable", "inputSignatureR", "inputSignatureS", "inputPublicKey", "inputMessage"},
+        {SharedMemory::typeVoidPointer, SharedMemory::typeVoidPointer, SharedMemory::typeVoidPointer, SharedMemory::typeVoidPointer, SharedMemory::typeVoidPointer}
   ))
     return false;
 
