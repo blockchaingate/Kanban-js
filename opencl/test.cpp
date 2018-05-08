@@ -21,17 +21,18 @@ void printComments(unsigned char* comments) {
 }
 
 const unsigned int GPUMemoryAvailable = 10000000; //for the time being, this should be equal to defaultBufferSize from gpu.cpp
-unsigned char bufferMultiplicationContexts[GPUMemoryAvailable];
+unsigned char buffer__C_PU__MultiplicationContexts[GPUMemoryAvailable];
+unsigned char buffer__G_PU__MultiplicationContexts[GPUMemoryAvailable];
 
 int mainTest() {
   secp256k1_ecmult_context multiplicationContextCPU;
+  initializeMemoryPool(9000000, buffer__C_PU__MultiplicationContexts);
   secp256k1_ecmult_context_init(&multiplicationContextCPU);
-  secp256k1_ecmult_context_build(&multiplicationContextCPU);
+  secp256k1_ecmult_context_build(&multiplicationContextCPU, buffer__C_PU__MultiplicationContexts);
   logTest << "DEBUG: multiplicationContext:\n CPU:\n" << toStringSecp256k1_MultiplicationContext(multiplicationContextCPU) << Logger::endL;
-  free(multiplicationContextCPU.pre_g);
   secp256k1_ecmult_context_clear(&multiplicationContextCPU);
 
-
+/*
   GPU theGPU;
   if (!theGPU.initializeKernels())
     return false;
@@ -47,20 +48,20 @@ int mainTest() {
   }
   cl_mem& result = kernelContexts->outputs[0]->theMemory;
   for (int i = 0 ; i< 9000000; i ++) {
-    bufferMultiplicationContexts[i] = 0;
+    buffer__G_PU__MultiplicationContexts[i] = 0;
   }
-  ret = clEnqueueReadBuffer(theGPU.commandQueue, result, CL_TRUE, 0, 9000000, &bufferMultiplicationContexts, 0, NULL, NULL);
+  ret = clEnqueueReadBuffer(theGPU.commandQueue, result, CL_TRUE, 0, 9000000, &buffer__G_PU__MultiplicationContexts, 0, NULL, NULL);
   if (ret != CL_SUCCESS) {
     logServer << "Failed to read buffer. Return code: " << ret << Logger::endL;
     return - 1;
   }
   secp256k1_ecmult_context multiplicationContextGPU;
   secp256k1_ecmult_context_init(&multiplicationContextGPU);
-  multiplicationContextGPU.pre_g = (secp256k1_ge_storage(*)[]) bufferMultiplicationContexts;
+  multiplicationContextGPU.pre_g = (secp256k1_ge_storage(*)[]) buffer__G_PU__MultiplicationContexts;
   logTest << "DEBUG: multiplicationContext:\n CPU:\n" << toStringSecp256k1_MultiplicationContext(multiplicationContextGPU) << Logger::endL;
 
 
-
+*/
   /*
   secp256k1_ecmult_gen_context generatorContext;
   secp256k1_ecmult_gen_context_init(&generatorContext);

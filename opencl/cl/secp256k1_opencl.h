@@ -16,10 +16,6 @@
 
 #include "../opencl/cl/secp256k1.h"
 
-void free(void* input){
-  
-}
-
-void* checked_malloc(size_t size) {
-  return NULL;
+void assertFalse(unsigned char* memoryPool){
+  //to do: do something with the memory pool to signal back to the CPU that things have gone wrong.
 }

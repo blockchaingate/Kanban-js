@@ -15,11 +15,10 @@ extern Logger logGPU;
 
 #include "cl/secp256k1.cl"
 
-void* checked_malloc(size_t size) {
-  void *ret = malloc(size);
-  if (ret == NULL) {
-    assert(false);
-  }
-  return ret;
+void assertFalse(const char* errorMessage, unsigned char* memoryPool) {
+  (void) memoryPool;
+  std::string errorMessageString(errorMessage);
+  std::cout << errorMessageString << std::endl;
+  assert(false);
 }
 

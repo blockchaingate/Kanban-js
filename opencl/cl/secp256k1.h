@@ -59,13 +59,27 @@
 #define VERIFY_SETUP(stmt)
 #endif
 
-
-void* checked_malloc(size_t size);
 #ifndef MACRO_USE_openCL
 #define ___static__constant static const
 #define __constant 
 #define __global
 #endif
+
+
+//Memory pool format:
+//First 4 bytes: total memory pool size. 
+//Next 4 bytes: total memory consumed from the memory pool, including the first 8 bytes.
+__global void* checked_malloc(unsigned int size, __global unsigned char* memoryPool);
+void writeToMemoryPool(unsigned int numberToWrite, __global unsigned char* memoryPoolPointer);
+
+void initializeMemoryPool(unsigned int totalSize, __global unsigned char* memoryPool);
+
+void assertFalse(const char* errorMessage, __global unsigned char* memoryPool);
+
+void freeMemory(void* any);
+void freeMemory__global(__global void* any);
+
+
 //removed:
 //#if defined(SECP256K1_BUILD) && defined(VERIFY)
 //# define SECP256K1_RESTRICT
@@ -265,7 +279,12 @@ void secp256k1_ge_neg(secp256k1_ge *r, const secp256k1_ge *a);
 void secp256k1_ge_set_gej(secp256k1_ge *r, secp256k1_gej *a);
 
 /** Set a batch of group elements equal to the inputs given in jacobian coordinates */
-void secp256k1_ge_set_all_gej_var(size_t len, secp256k1_ge *outputPoints, const secp256k1_gej *outputPointsJacobian);
+void secp256k1_ge_set_all_gej_var(
+  size_t len, 
+  secp256k1_ge *outputPoints, 
+  const secp256k1_gej *outputPointsJacobian,
+  __global unsigned char* memoryPool
+);
 
 /** Set a batch of group elements equal to the inputs given in jacobian
  *  coordinates (with known z-ratios). zr must contain the known z-ratios such
@@ -407,7 +426,7 @@ void secp256k1_ecmult_gen(__global const secp256k1_ecmult_gen_context* ctx, secp
 void secp256k1_scalar_copy__from__global(secp256k1_scalar* output, __global const secp256k1_scalar* input);
 
 //******From ecmult_impl.h******
-void secp256k1_ecmult_context_build(__global secp256k1_ecmult_context *output);
+void secp256k1_ecmult_context_build(__global secp256k1_ecmult_context *output, unsigned char *memoryPool);
 void secp256k1_gej_copy__from__global(secp256k1_gej* output, __global secp256k1_gej* input);
 //******End of ecmult_impl.h******
 
