@@ -260,6 +260,16 @@ int secp256k1_fe_normalizes_to_zero_var(secp256k1_fe *r) {
     return (z0 == 0) | (z1 == 0x3FFFFFFUL);
 }
 
+void secp256k1_fe_set_int__global(__global secp256k1_fe *r, int a) {
+    r->n[0] = a;
+    r->n[1] = r->n[2] = r->n[3] = r->n[4] = r->n[5] = r->n[6] = r->n[7] = r->n[8] = r->n[9] = 0;
+#ifdef VERIFY
+    r->magnitude = 1;
+    r->normalized = 1;
+    secp256k1_fe_verify(r);
+#endif
+}
+
 void secp256k1_fe_set_int(secp256k1_fe *r, int a) {
     r->n[0] = a;
     r->n[1] = r->n[2] = r->n[3] = r->n[4] = r->n[5] = r->n[6] = r->n[7] = r->n[8] = r->n[9] = 0;
@@ -739,6 +749,22 @@ void secp256k1_fe_from_storage(secp256k1_fe *r, const secp256k1_fe_storage *a) {
     r->normalized = 1;
 #endif
 }
+
+
+void secp256k1_fe_copy__from__global(secp256k1_fe* output, __global secp256k1_fe* input){
+  output->n[0] = input->n[0];
+  output->n[1] = input->n[1];
+  output->n[2] = input->n[2];
+  output->n[3] = input->n[3];
+  output->n[4] = input->n[4];
+  output->n[5] = input->n[5];
+  output->n[6] = input->n[6];
+  output->n[7] = input->n[7];
+  output->n[8] = input->n[8];
+  output->n[9] = input->n[9];
+}
+
+
 //******end of field_10x26_impl.h******
 
 
@@ -968,31 +994,31 @@ void secp256k1_fe_inv_all_var(size_t len, secp256k1_fe *r, const secp256k1_fe *a
 //*******************************************************
 //Various versions of assigning memory coming from different address spaces
 void secp256k1_gej_set_ge(secp256k1_gej *r, const secp256k1_ge *a) {
-   r->infinity = a->infinity;
-   r->x = a->x;
-   r->y = a->y;
-   secp256k1_fe_set_int(&r->z, 1);
+  r->infinity = a->infinity;
+  r->x = a->x;
+  r->y = a->y;
+  secp256k1_fe_set_int(&r->z, 1);
 }
 
 void secp256k1_gej_set_ge__constant(secp256k1_gej *r, __constant const secp256k1_ge *a) {
-   r->infinity = a->infinity;
-   r->x = a->x;
-   r->y = a->y;
-   secp256k1_fe_set_int(&r->z, 1);
+  r->infinity = a->infinity;
+  r->x = a->x;
+  r->y = a->y;
+  secp256k1_fe_set_int(&r->z, 1);
 }
 
 void secp256k1_gej_set_ge__global(secp256k1_gej *r, __global const secp256k1_ge *a) {
-   r->infinity = a->infinity;
-   r->x = a->x;
-   r->y = a->y;
-   secp256k1_fe_set_int(&r->z, 1);
+  r->infinity = a->infinity;
+  r->x = a->x;
+  r->y = a->y;
+  secp256k1_fe_set_int(&r->z, 1);
 }
 
-void secp256k1_gej_set_ge__constant__global__global(secp256k1_gej *r, __global const secp256k1_ge *a) {
-   r->infinity = a->infinity;
-   r->x = a->x;
-   r->y = a->y;
-   secp256k1_fe_set_int(&r->z, 1);
+void secp256k1_gej_set_ge__constant__global(__global secp256k1_gej *r, __constant const secp256k1_ge *a) {
+  r->infinity = a->infinity;
+  r->x = a->x;
+  r->y = a->y;
+  secp256k1_fe_set_int__global(&r->z, 1);
 }
 
 //*******************************************************
@@ -1054,14 +1080,13 @@ static void secp256k1_ge_set_gej_var(secp256k1_ge *r, secp256k1_gej *a) {
 
 void secp256k1_ge_set_all_gej_var(
   size_t len, secp256k1_ge *outputPoints, 
-  const secp256k1_gej *outputPointsJacobian, 
-  const secp256k1_callback *cb
+  const secp256k1_gej *outputPointsJacobian
 ) {
   secp256k1_fe *az;
   secp256k1_fe *azi;
   size_t i;
   size_t count = 0;
-  az = (secp256k1_fe *) checked_malloc(cb, sizeof(secp256k1_fe) * len);
+  az = (secp256k1_fe *) checked_malloc(sizeof(secp256k1_fe) * len);
 
   for (i = 0; i < len; i++) {
       if (!outputPointsJacobian[i].infinity) {
@@ -1069,7 +1094,7 @@ void secp256k1_ge_set_all_gej_var(
       }
   }
 
-  azi = (secp256k1_fe *) checked_malloc(cb, sizeof(secp256k1_fe) * count);
+  azi = (secp256k1_fe *) checked_malloc(sizeof(secp256k1_fe) * count);
   secp256k1_fe_inv_all_var(count, azi, az);
   free(az);
 
@@ -2132,9 +2157,6 @@ static void secp256k1_scalar_set_b32(secp256k1_scalar *r, const unsigned char *b
 /** Set a scalar to an unsigned integer. */
 static void secp256k1_scalar_set_int(secp256k1_scalar *r, unsigned int v);
 
-/** Convert a scalar to a byte array. */
-static void secp256k1_scalar_get_b32(unsigned char *bin, const secp256k1_scalar* a);
-
 /** Add two scalars together (modulo the group order). Returns whether it overflowed. */
 static int secp256k1_scalar_add(secp256k1_scalar *r, const secp256k1_scalar *a, const secp256k1_scalar *b);
 
@@ -2348,12 +2370,11 @@ static void secp256k1_ecmult_odd_multiples_table_globalz_windowa(secp256k1_ge *p
 static void secp256k1_ecmult_odd_multiples_table_storage_var(
   int n, 
   secp256k1_ge_storage *pre, 
-  const secp256k1_gej *a, 
-  const secp256k1_callback *cb
+  const secp256k1_gej *a
 ) {
-  secp256k1_gej *prej = (secp256k1_gej*) checked_malloc(cb, sizeof(secp256k1_gej) * n);
-  secp256k1_ge *prea = (secp256k1_ge*) checked_malloc(cb, sizeof(secp256k1_ge) * n);
-  secp256k1_fe *zr = (secp256k1_fe*) checked_malloc(cb, sizeof(secp256k1_fe) * n);
+  secp256k1_gej *prej = (secp256k1_gej*) checked_malloc(sizeof(secp256k1_gej) * n);
+  secp256k1_ge *prea = (secp256k1_ge*) checked_malloc(sizeof(secp256k1_ge) * n);
+  secp256k1_fe *zr = (secp256k1_fe*) checked_malloc(sizeof(secp256k1_fe) * n);
 
   int i;
 
@@ -3058,6 +3079,142 @@ ___static__constant secp256k1_ge secp256k1_ge_const_g = SECP256K1_GE_CONST(
     0xFD17B448UL, 0xA6855419UL, 0x9C47D08FUL, 0xFB10D4B8UL
 );
 
+void secp256k1_gej_copy__from__global(secp256k1_gej* output, __global secp256k1_gej* input){
+  output->infinity = input->infinity;
+  secp256k1_fe_copy__from__global(&output->x, &input->x);
+  secp256k1_fe_copy__from__global(&output->y, &input->y);
+  secp256k1_fe_copy__from__global(&output->z, &input->z);
+}
+
+void secp256k1_ecmult_gen_context_build(
+  __global secp256k1_ecmult_gen_context *ctx
+) {
+  secp256k1_ge prec[1024];
+  secp256k1_gej gj;
+  secp256k1_gej nums_gej;
+  int i, j;
+
+  if (ctx->prec != NULL) {
+    return;
+  }
+  ctx->prec = (secp256k1_ge_storage (*)[64][16]) checked_malloc(sizeof(*ctx->prec));
+
+  /* get the generator */
+  //openCL note: secp256k1_ge_const_g is always in the __constant address space.
+  secp256k1_gej_set_ge__constant(&gj, &secp256k1_ge_const_g);
+
+  /* Construct a group element with no known corresponding scalar (nothing up my sleeve). */
+  {
+    //Warning: the string below is used as a random seed for generating an element on the curve.
+    //It is not an error message, but rather a sequence of pseudorandom bytes
+    // serving as an essentail constant for the library.
+    //Static does not compile in openCL 1.2
+    //static
+    const unsigned char nums_b32[33] = "The scalar for this x is unknown";
+    secp256k1_fe nums_x;
+    secp256k1_ge nums_ge;
+    
+    //The line below does not compile in openCL 1.2
+    VERIFY_CHECK(secp256k1_fe_set_b32(&nums_x, nums_b32));
+    VERIFY_CHECK(secp256k1_ge_set_xo_var(&nums_ge, &nums_x, 0));
+    secp256k1_gej_set_ge(&nums_gej, &nums_ge);
+    /* Add G to make the bits in x uniformly distributed. */
+    secp256k1_gej_add_ge_var__constant(&nums_gej, &nums_gej, &secp256k1_ge_const_g, NULL);
+  }
+
+  /* compute prec. */
+  {
+    secp256k1_gej precj[1024]; /* Jacobian versions of prec. */
+    secp256k1_gej gbase;
+    secp256k1_gej numsbase;
+    gbase = gj; /* 16^j * G */
+    numsbase = nums_gej; /* 2^j * nums. */
+    for (j = 0; j < 64; j++) {
+      /* Set precj[j*16 .. j*16+15] to (numsbase, numsbase + gbase, ..., numsbase + 15*gbase). */
+      precj[j*16] = numsbase;
+      for (i = 1; i < 16; i++) {
+        secp256k1_gej_add_var(&precj[j * 16 + i], &precj[j * 16 + i - 1], &gbase, NULL);
+      }
+      /* Multiply gbase by 16. */
+      for (i = 0; i < 4; i++) {
+        secp256k1_gej_double_var(&gbase, &gbase, NULL);
+      }
+      /* Multiply numbase by 2. */
+      secp256k1_gej_double_var(&numsbase, &numsbase, NULL);
+      if (j == 62) {
+        /* In the last iteration, numsbase is (1 - 2^j) * nums instead. */
+        secp256k1_gej_neg(&numsbase, &numsbase);
+        secp256k1_gej_add_var(&numsbase, &numsbase, &nums_gej, NULL);
+      }
+    }
+    secp256k1_ge_set_all_gej_var(1024, prec, precj);
+  }
+  for (j = 0; j < 64; j++) {
+    for (i = 0; i < 16; i++) {
+      secp256k1_ge_to_storage(&(*ctx->prec)[j][i], &prec[j*16 + i]);
+    }
+  }
+  secp256k1_ecmult_gen_blind(ctx, NULL);
+}
+
+/* Setup blinding values for secp256k1_ecmult_gen. */
+void secp256k1_ecmult_gen_blind(__global secp256k1_ecmult_gen_context *ctx, const unsigned char *seed32) {
+    secp256k1_scalar b, blindPoint;
+    secp256k1_gej gb, initialPoint;
+    secp256k1_fe s;
+    unsigned char nonce32[32];
+    secp256k1_rfc6979_hmac_sha256_t rng;
+    int retry;
+    unsigned char keydata[64] = {0};
+    if (seed32 == NULL) {
+      /* When seed is NULL, reset the initial point and blinding value. */
+      //Note: secp256k1_ge_const_g is in the __constant address space
+      secp256k1_gej_set_ge__constant(&initialPoint, &secp256k1_ge_const_g);
+      secp256k1_gej_neg(&initialPoint, &initialPoint);
+      secp256k1_gej_copy__to__global(&ctx->initial, &initialPoint);
+      secp256k1_scalar_set_int(&blindPoint, 1);
+      secp256k1_scalar_copy__to__global(&ctx->blind, &blindPoint);
+    }
+    /* The prior blinding value (if not reset) is chained forward by including it in the hash. */
+    secp256k1_scalar_get_b32__global(nonce32, &ctx->blind);
+    /** Using a CSPRNG allows a failure free interface, avoids needing large amounts of random data,
+     *   and guards against weak or adversarial seeds.  This is a simpler and safer interface than
+     *   asking the caller for blinding values directly and expecting them to retry on failure.
+     */
+    memoryCopy(keydata, nonce32, 32);
+    if (seed32 != NULL) {
+      memoryCopy(keydata + 32, seed32, 32);
+    }
+    secp256k1_rfc6979_hmac_sha256_initialize(&rng, keydata, seed32 ? 64 : 32);
+    memorySet(keydata, 0, sizeof(keydata));
+    /* Retry for out of range results to achieve uniformity. */
+    do {
+        secp256k1_rfc6979_hmac_sha256_generate(&rng, nonce32, 32);
+        retry = !secp256k1_fe_set_b32(&s, nonce32);
+        retry |= secp256k1_fe_is_zero(&s);
+    } while (retry);
+    /* Randomize the projection to defend against multiplier sidechannels. */
+    secp256k1_gej_copy__from__global(&initialPoint, &ctx->initial);
+    secp256k1_gej_rescale(&initialPoint, &s);
+    secp256k1_gej_copy__to__global(&ctx->initial, &initialPoint);
+    secp256k1_fe_clear(&s);
+    do {
+        secp256k1_rfc6979_hmac_sha256_generate(&rng, nonce32, 32);
+        secp256k1_scalar_set_b32(&b, nonce32, &retry);
+        /* A blinding value of 0 works, but would undermine the projection hardening. */
+        retry |= secp256k1_scalar_is_zero(&b);
+    } while (retry);
+    secp256k1_rfc6979_hmac_sha256_finalize(&rng);
+    memorySet(nonce32, 0, 32);
+    secp256k1_ecmult_gen(ctx, &gb, &b);
+    secp256k1_scalar_negate(&b, &b);
+    ctx->blind = b;
+    ctx->initial = gb;
+    secp256k1_scalar_clear(&b);
+    secp256k1_gej_clear(&gb);
+}
+
+
 // secp256k1_ecmult_gen_context_init must be called on each newly created generator context.
 void secp256k1_ecmult_gen_context_init(secp256k1_ecmult_gen_context *ctx) {
   ctx->prec = NULL;
@@ -3076,16 +3233,50 @@ void secp256k1_ecmult_gen_context_clear(secp256k1_ecmult_gen_context *ctx) {
   ctx->prec = NULL;
 }
 
-void secp256k1_ecmult_gen(const secp256k1_ecmult_gen_context *ctx, secp256k1_gej *r, const secp256k1_scalar *gn) {
+void secp256k1_ecmult_context_build(
+  __global secp256k1_ecmult_context *output
+) {
+  secp256k1_gej gj;
+
+  if (output->pre_g != NULL) {
+    return;
+  }
+
+  /* get the generator */
+  //openCL note: secp256k1_ge_const_g is always in the __constant address space.
+  secp256k1_gej_set_ge__constant(&gj, &secp256k1_ge_const_g);
+
+  output->pre_g = (secp256k1_ge_storage (*)[]) checked_malloc(sizeof((*output->pre_g)[0]) * ECMULT_TABLE_SIZE(WINDOW_G));
+  /* precompute the tables with odd multiples */
+  secp256k1_ecmult_odd_multiples_table_storage_var(ECMULT_TABLE_SIZE(WINDOW_G), *output->pre_g, &gj);
+}
+
+void secp256k1_scalar_copy__from__global(secp256k1_scalar* output, __global const secp256k1_scalar* input){
+  output->d[0] = input->d[0];
+  output->d[1] = input->d[1];
+  output->d[2] = input->d[2];
+  output->d[3] = input->d[3];
+  output->d[4] = input->d[4];
+  output->d[5] = input->d[5];
+  output->d[6] = input->d[6];
+  output->d[7] = input->d[7];
+}
+
+void secp256k1_ecmult_gen(
+  __global const secp256k1_ecmult_gen_context *ctx, 
+  secp256k1_gej *r, 
+  const secp256k1_scalar *gn
+) {
     secp256k1_ge add;
     secp256k1_ge_storage adds;
-    secp256k1_scalar gnb;
+    secp256k1_scalar gnb, blind;
     int bits;
     int i, j;
     memorySet((unsigned char*) &adds, 0, sizeof(adds));
     *r = ctx->initial;
     /* Blind scalar/point multiplication by computing (n-b)G + bG instead of nG. */
-    secp256k1_scalar_add(&gnb, gn, &ctx->blind);
+    secp256k1_scalar_copy__from__global(&blind, &ctx->blind);
+    secp256k1_scalar_add(&gnb, gn, &blind);
     add.infinity = 0;
     for (j = 0; j < 64; j ++) {
         bits = secp256k1_scalar_get_bits(&gnb, j * 4, 4);
@@ -3109,7 +3300,6 @@ void secp256k1_ecmult_gen(const secp256k1_ecmult_gen_context *ctx, secp256k1_gej
     secp256k1_ge_clear(&add);
     secp256k1_scalar_clear(&gnb);
 }
-
 //******end of ecmult_gen_impl.h******
 
 
@@ -3233,7 +3423,7 @@ int secp256k1_ecdsa_sig_serialize(unsigned char *sig, size_t *size, const secp25
     return 1;
 }
 
-int secp256k1_ecdsa_sig_sign(const secp256k1_ecmult_gen_context *ctx, secp256k1_scalar *sigr, secp256k1_scalar *sigs, const secp256k1_scalar *seckey, const secp256k1_scalar *message, const secp256k1_scalar *nonce, int *recid) {
+int secp256k1_ecdsa_sig_sign(__global const secp256k1_ecmult_gen_context *ctx, secp256k1_scalar *sigr, secp256k1_scalar *sigs, const secp256k1_scalar *seckey, const secp256k1_scalar *message, const secp256k1_scalar *nonce, int *recid) {
     unsigned char b[32];
     secp256k1_gej rp;
     secp256k1_ge r;

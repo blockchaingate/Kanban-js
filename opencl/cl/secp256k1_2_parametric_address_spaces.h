@@ -8,6 +8,7 @@
 // APPEND_ADDRESS_SPACE_ONE
 // APPEND_ADDRESS_SPACE_TWO
 
+
 //******From ecdsa.h******
 char APPEND_ADDRESS_SPACE(secp256k1_ecdsa_sig_verify)(
   ADDRESS_SPACE_ONE const secp256k1_ecmult_context *ctx, 

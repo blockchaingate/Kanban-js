@@ -6,6 +6,7 @@
 #include <string.h>
 #include <stdint.h>
 #include <stdlib.h>
+#include <assert.h>
 #include "logging.h"
 extern Logger logGPU;
 #include "cl/secp256k1_cpp.h"
@@ -14,16 +15,11 @@ extern Logger logGPU;
 
 #include "cl/secp256k1.cl"
 
-void* checked_malloc(const secp256k1_callback* cb, size_t size) {
+void* checked_malloc(size_t size) {
   void *ret = malloc(size);
   if (ret == NULL) {
-    secp256k1_callback_call(cb, "Out of memory");
+    assert(false);
   }
   return ret;
 }
-
-void secp256k1_callback_call(const secp256k1_callback * const cb, const char * const text) {
-  cb->fn(text, (void*)cb->data);
-}
-
 

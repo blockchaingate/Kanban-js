@@ -49,12 +49,6 @@
 #define SECP256k1_H_header
 
 //******From util.h******
-typedef struct {
-  void (*fn)(const char *text, void* data);
-  const void* data;
-} secp256k1_callback;
-
-void secp256k1_callback_call(const secp256k1_callback * const cb, const char * const text);
 #ifdef VERIFY
 #define VERIFY_CHECK CHECK
 #define VERIFY_SETUP(stmt) do { stmt; } while(0)
@@ -66,7 +60,7 @@ void secp256k1_callback_call(const secp256k1_callback * const cb, const char * c
 #endif
 
 
-void* checked_malloc(const secp256k1_callback* cb, size_t size);
+void* checked_malloc(size_t size);
 #ifndef MACRO_USE_openCL
 #define ___static__constant static const
 #define __constant 
@@ -129,6 +123,8 @@ void* checked_malloc(const secp256k1_callback* cb, size_t size);
 
 #define SECP256K1_FE_STORAGE_CONST(d7, d6, d5, d4, d3, d2, d1, d0) {{ (d0), (d1), (d2), (d3), (d4), (d5), (d6), (d7) }}
 #define SECP256K1_FE_STORAGE_CONST_GET(d) d.n[7], d.n[6], d.n[5], d.n[4],d.n[3], d.n[2], d.n[1], d.n[0]
+
+void secp256k1_fe_copy__from__global(secp256k1_fe* output, __global secp256k1_fe* input);
 
 //******end of field_10x26.h******
 
@@ -269,7 +265,7 @@ void secp256k1_ge_neg(secp256k1_ge *r, const secp256k1_ge *a);
 void secp256k1_ge_set_gej(secp256k1_ge *r, secp256k1_gej *a);
 
 /** Set a batch of group elements equal to the inputs given in jacobian coordinates */
-void secp256k1_ge_set_all_gej_var(size_t len, secp256k1_ge *outputPoints, const secp256k1_gej *outputPointsJacobian, const secp256k1_callback *cb);
+void secp256k1_ge_set_all_gej_var(size_t len, secp256k1_ge *outputPoints, const secp256k1_gej *outputPointsJacobian);
 
 /** Set a batch of group elements equal to the inputs given in jacobian
  *  coordinates (with known z-ratios). zr must contain the known z-ratios such
@@ -395,20 +391,31 @@ typedef struct {
 } secp256k1_ecmult_gen_context;
 
 void secp256k1_ecmult_gen_context_init(secp256k1_ecmult_gen_context* ctx);
-void secp256k1_ecmult_gen_context_build(secp256k1_ecmult_gen_context* ctx, const secp256k1_callback* cb);
 void secp256k1_ecmult_gen_context_clear(secp256k1_ecmult_gen_context* ctx);
 int secp256k1_ecmult_gen_context_is_built(const secp256k1_ecmult_gen_context* ctx);
 
-/** Multiply with the generator: R = a*G */
-void secp256k1_ecmult_gen(const secp256k1_ecmult_gen_context* ctx, secp256k1_gej *r, const secp256k1_scalar *a);
+void secp256k1_ecmult_gen_blind(__global secp256k1_ecmult_gen_context *ctx, const unsigned char *seed32);
 
-void secp256k1_ecmult_gen_blind(secp256k1_ecmult_gen_context *ctx, const unsigned char *seed32);
+void secp256k1_ecmult_gen_context_build(__global secp256k1_ecmult_gen_context* ctx);
+
+/** Multiply with the generator: R = a*G */
+void secp256k1_ecmult_gen(__global const secp256k1_ecmult_gen_context* ctx, secp256k1_gej *r, const secp256k1_scalar *a);
+
 //******end of ecmult_gen.h******
+
+
+void secp256k1_scalar_copy__from__global(secp256k1_scalar* output, __global const secp256k1_scalar* input);
+
+//******From ecmult_impl.h******
+void secp256k1_ecmult_context_build(__global secp256k1_ecmult_context *output);
+void secp256k1_gej_copy__from__global(secp256k1_gej* output, __global secp256k1_gej* input);
+//******End of ecmult_impl.h******
+
 
 //******From ecdsa.h******
 int secp256k1_ecdsa_sig_parse(secp256k1_scalar *r, secp256k1_scalar *s, const unsigned char *sig, size_t size);
 int secp256k1_ecdsa_sig_serialize(unsigned char *sig, size_t *size, const secp256k1_scalar *r, const secp256k1_scalar *s);
-int secp256k1_ecdsa_sig_sign(const secp256k1_ecmult_gen_context *ctx, secp256k1_scalar* r, secp256k1_scalar* s, const secp256k1_scalar *seckey, const secp256k1_scalar *message, const secp256k1_scalar *nonce, int *recid);
+int secp256k1_ecdsa_sig_sign(__global const secp256k1_ecmult_gen_context *ctx, secp256k1_scalar* r, secp256k1_scalar* s, const secp256k1_scalar *seckey, const secp256k1_scalar *message, const secp256k1_scalar *nonce, int *recid);
 int secp256k1_ecdsa_sig_recover(const secp256k1_ecmult_context *ctx, const secp256k1_scalar* r, const secp256k1_scalar* s, secp256k1_ge *pubkey, const secp256k1_scalar *message, int recid);
 //******end of ecdsa.h******
 

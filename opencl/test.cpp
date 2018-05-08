@@ -8,18 +8,6 @@
 Logger logTest("../logfiles/logTest.txt", "[test] ");
 extern Logger logServer;
 
-
-secp256k1_callback criticalFailure;
-
-void criticalFailureHandler(const char *text, void* data){
-  (void) data;
-  logTest << text;
-}
-
-
-const unsigned int GPUMemoryAvailable = 10000000; //for the time being, this should be equal to defaultBufferSize from gpu.cpp
-unsigned char bufferGPUMemory[GPUMemoryAvailable];
-
 void printComments(unsigned char* comments) {
   std::string resultString((char*) comments, 999);
   char returnGPU = resultString[0];
@@ -32,13 +20,48 @@ void printComments(unsigned char* comments) {
   logServer << "extraMessage pr.z: " << Miscellaneous::toStringHex(extraMessage3) << Logger::endL;
 }
 
+const unsigned int GPUMemoryAvailable = 10000000; //for the time being, this should be equal to defaultBufferSize from gpu.cpp
+unsigned char bufferMultiplicationContexts[GPUMemoryAvailable];
+
 int mainTest() {
-  criticalFailure.data = 0;
-  criticalFailure.fn = criticalFailureHandler;
-  secp256k1_ecmult_context multiplicationContext;
-  secp256k1_ecmult_context_init(&multiplicationContext);
-  secp256k1_ecmult_context_build(&multiplicationContext, &criticalFailure);
-  logTest << "DEBUG: multiplicationContext:\n" << toStringSecp256k1_MultiplicationContext(multiplicationContext) << Logger::endL;
+  secp256k1_ecmult_context multiplicationContextCPU;
+  secp256k1_ecmult_context_init(&multiplicationContextCPU);
+  secp256k1_ecmult_context_build(&multiplicationContextCPU);
+  logTest << "DEBUG: multiplicationContext:\n CPU:\n" << toStringSecp256k1_MultiplicationContext(multiplicationContextCPU) << Logger::endL;
+  free(multiplicationContextCPU.pre_g);
+  secp256k1_ecmult_context_clear(&multiplicationContextCPU);
+
+
+  GPU theGPU;
+  if (!theGPU.initializeKernels())
+    return false;
+  std::shared_ptr<GPUKernel> kernelContexts = theGPU.theKernels[GPU::kernelInitializeContexts];
+
+  cl_int ret = clEnqueueNDRangeKernel(
+    theGPU.commandQueue, kernelContexts->kernel, 1, NULL,
+    &kernelContexts->global_item_size, &kernelContexts->local_item_size, 0, NULL, NULL
+  );
+  if (ret != CL_SUCCESS) {
+    logServer << "Failed to enqueue kernel. Return code: " << ret << ". ";
+    return 0;
+  }
+  cl_mem& result = kernelContexts->outputs[0]->theMemory;
+  for (int i = 0 ; i< 9000000; i ++) {
+    bufferMultiplicationContexts[i] = 0;
+  }
+  ret = clEnqueueReadBuffer(theGPU.commandQueue, result, CL_TRUE, 0, 9000000, &bufferMultiplicationContexts, 0, NULL, NULL);
+  if (ret != CL_SUCCESS) {
+    logServer << "Failed to read buffer. Return code: " << ret << Logger::endL;
+    return - 1;
+  }
+  secp256k1_ecmult_context multiplicationContextGPU;
+  secp256k1_ecmult_context_init(&multiplicationContextGPU);
+  multiplicationContextGPU.pre_g = (secp256k1_ge_storage(*)[]) bufferMultiplicationContexts;
+  logTest << "DEBUG: multiplicationContext:\n CPU:\n" << toStringSecp256k1_MultiplicationContext(multiplicationContextGPU) << Logger::endL;
+
+
+
+  /*
   secp256k1_ecmult_gen_context generatorContext;
   secp256k1_ecmult_gen_context_init(&generatorContext);
   secp256k1_ecmult_gen_context_build(&generatorContext, &criticalFailure);
@@ -117,6 +140,6 @@ int mainTest() {
     logServer << "Failed to read buffer. Return code: " << ret << Logger::endL;
     return - 1;
   }
-  printComments(resultChar);
+  printComments(resultChar);*/
   return 0;
 }
