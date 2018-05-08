@@ -89,7 +89,8 @@ class GPU {
 public:
   static std::string kernelSHA256;
   static std::string kernelTestBuffer;
-  static std::string kernelInitializeContexts;
+  static std::string kernelInitializeMultiplicationContext;
+  static std::string kernelInitializeGeneratorContext;
   static std::string kernelVerifySignature;
   std::unordered_map<std::string, std::shared_ptr<GPUKernel> > theKernels;
   cl_platform_id platformIds[2];

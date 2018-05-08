@@ -2,12 +2,43 @@
 
 #include "../opencl/cl/secp256k1.h"
 
-
+//Except for initializations, the crypto code does not
+//(or at least, should not) allocate any memory.
+//The memory pool is a structure that holds all
+//"dynamically" allocated memory during initializations.
+//All memory in the memory pool is allocated once by our C++ driver
+//and passed as a pointer to each openCL execution.
+//In turn, the crypto library "allocates" memory from that pool
+//via checked_malloc(...). This (is supposed to) happen only once,
+//during initializations/precomputations.
+//
+//The memory pool is immutable: it cannot grow, cannot be resized.
+//Pointers to elements in the pool can safeley be referenced as the pool does not move.
+//
+//Please pay attention when storing pointers into the memory pool:
+//GPU pointers may be 32 bit (as is the case on my system),
+//while CPU pointers are typically 64 bit (as is the case on my system).
+//This means that pointers allocated inside the memory pool by openCL should
+//only be referenced by openCL and not by the C++ driver.
+//
+//Useful output recorded in the memory pool is referenced
+//by setting the third reserved byte quadruple
+//(bytes 8-12) to the the unsigned int position of
+//the first byte where the output is located. Naturally,
+//no data in the output should not be interpretted as a pointer.
+//
+//
+//Memory pool format:
+//The first 12 bytes are reserved.
+//First 4 bytes: total memory pool size.
+//Next 4 bytes: total memory consumed from the memory pool, including the first 12 bytes.
+//Next 4 bytes: reserved for the unsigned int position of the first byte of the output.
 void initializeMemoryPool(unsigned int totalSize, __global unsigned char* memoryPool) {
   unsigned int i;
   writeToMemoryPool(totalSize, memoryPool);
-  writeToMemoryPool(8, memoryPool + 4);
-  for (i = 8; i < totalSize; i++){
+  writeToMemoryPool(12, memoryPool + 4);
+  writeToMemoryPool(0, memoryPool + 8);
+  for (i = 12; i < totalSize; i++){
     memoryPool[i] = 0;
   }
 }
@@ -27,10 +58,8 @@ unsigned int readFromMemoryPool(__global unsigned char* memoryPoolPointer) {
    memoryPoolPointer[3];
 }
 
-//Memory pool format:
-//First 4 bytes: total memory pool size. 
-//Next 4 bytes: total memory consumed from the memory pool, including the first 8 bytes.
-void* checked_malloc(unsigned int size, __global unsigned char* memoryPool) {
+//Memory pool format: in the notes before the definition of initializeMemoryPool.
+__global void* checked_malloc(unsigned int size, __global unsigned char* memoryPool) {
   unsigned int oldSize, newSize;
   unsigned int maxSize;
   oldSize = readFromMemoryPool(memoryPool + 4);
@@ -2476,10 +2505,6 @@ static void secp256k1_ecmult_odd_multiples_table_storage_var(
   } \
 } while(0)
 
-void secp256k1_ecmult_context_init(secp256k1_ecmult_context *ctx) {
-  ctx->pre_g = NULL;
-}
-
 //static void secp256k1_ecmult_context_clone(
 //  secp256k1_ecmult_context *dst,
 //  const secp256k1_ecmult_context *src, 
@@ -2496,10 +2521,6 @@ void secp256k1_ecmult_context_init(secp256k1_ecmult_context *ctx) {
 
 int secp256k1_ecmult_context_is_built(const secp256k1_ecmult_context *ctx) {
   return ctx->pre_g != NULL;
-}
-
-void secp256k1_ecmult_context_clear(secp256k1_ecmult_context *ctx) {
-  secp256k1_ecmult_context_init(ctx);
 }
 
 /** Convert a number to WNAF notation. The number becomes represented by sum(2^i * wnaf[i], i=0..bits),
@@ -3305,7 +3326,8 @@ void secp256k1_ecmult_context_build(
   /* get the generator */
   //openCL note: secp256k1_ge_const_g is always in the __constant address space.
   secp256k1_gej_set_ge__constant(&gj, &secp256k1_ge_const_g);
-
+  unsigned int currentMemoryPoolSize = readFromMemoryPool(memoryPool + 4);
+  writeToMemoryPool(currentMemoryPoolSize, memoryPool + 8);
   output->pre_g = (secp256k1_ge_storage (*)[]) checked_malloc(sizeof((*output->pre_g)[0]) * ECMULT_TABLE_SIZE(WINDOW_G), memoryPool);
   /* precompute the tables with odd multiples */
   secp256k1_ecmult_odd_multiples_table_storage_var(ECMULT_TABLE_SIZE(WINDOW_G), *output->pre_g, &gj, memoryPool);

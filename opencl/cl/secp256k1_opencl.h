@@ -16,6 +16,6 @@
 
 #include "../opencl/cl/secp256k1.h"
 
-void assertFalse(unsigned char* memoryPool){
+void assertFalse(__constant const char* errorMessage, __global unsigned char* memoryPool){
   //to do: do something with the memory pool to signal back to the CPU that things have gone wrong.
 }

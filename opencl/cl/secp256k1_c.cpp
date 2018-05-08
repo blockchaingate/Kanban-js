@@ -15,7 +15,7 @@ extern Logger logGPU;
 
 #include "cl/secp256k1.cl"
 
-void assertFalse(const char* errorMessage, unsigned char* memoryPool) {
+void assertFalse(__constant const char* errorMessage, unsigned char* memoryPool) {
   (void) memoryPool;
   std::string errorMessageString(errorMessage);
   std::cout << errorMessageString << std::endl;

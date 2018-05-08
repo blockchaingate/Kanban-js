@@ -66,15 +66,15 @@
 #endif
 
 
-//Memory pool format:
-//First 4 bytes: total memory pool size. 
-//Next 4 bytes: total memory consumed from the memory pool, including the first 8 bytes.
+//Memory pool format: in the notes before the definition of initializeMemoryPool.
 __global void* checked_malloc(unsigned int size, __global unsigned char* memoryPool);
 void writeToMemoryPool(unsigned int numberToWrite, __global unsigned char* memoryPoolPointer);
+unsigned int readFromMemoryPool(__global unsigned char* memoryPoolPointer);
 
+//Memory pool format: in the notes before the definition of initializeMemoryPool.
 void initializeMemoryPool(unsigned int totalSize, __global unsigned char* memoryPool);
 
-void assertFalse(const char* errorMessage, __global unsigned char* memoryPool);
+void assertFalse(__constant const char* errorMessage, __global unsigned char* memoryPool);
 
 void freeMemory(void* any);
 void freeMemory__global(__global void* any);
@@ -378,10 +378,8 @@ typedef struct {
   secp256k1_ge_storage (*pre_g)[];    /* odd multiples of the generator */
 } secp256k1_ecmult_context;
 
-void secp256k1_ecmult_context_init(secp256k1_ecmult_context *ctx);
 //static void secp256k1_ecmult_context_clone(secp256k1_ecmult_context *dst,
 //                                           const secp256k1_ecmult_context *src, const secp256k1_callback *cb);
-void secp256k1_ecmult_context_clear(secp256k1_ecmult_context *ctx);
 int secp256k1_ecmult_context_is_built(const secp256k1_ecmult_context *ctx);
 
 /** Double multiply: R = na*A + ng*G */
@@ -415,7 +413,7 @@ int secp256k1_ecmult_gen_context_is_built(const secp256k1_ecmult_gen_context* ct
 
 void secp256k1_ecmult_gen_blind(__global secp256k1_ecmult_gen_context *ctx, const unsigned char *seed32);
 
-void secp256k1_ecmult_gen_context_build(__global secp256k1_ecmult_gen_context* ctx);
+void secp256k1_ecmult_gen_context_build(__global secp256k1_ecmult_gen_context* ctx, __global unsigned char* memoryPool);
 
 /** Multiply with the generator: R = a*G */
 void secp256k1_ecmult_gen(__global const secp256k1_ecmult_gen_context* ctx, secp256k1_gej *r, const secp256k1_scalar *a);
@@ -426,7 +424,7 @@ void secp256k1_ecmult_gen(__global const secp256k1_ecmult_gen_context* ctx, secp
 void secp256k1_scalar_copy__from__global(secp256k1_scalar* output, __global const secp256k1_scalar* input);
 
 //******From ecmult_impl.h******
-void secp256k1_ecmult_context_build(__global secp256k1_ecmult_context *output, unsigned char *memoryPool);
+void secp256k1_ecmult_context_build(__global secp256k1_ecmult_context *output, __global unsigned char *memoryPool);
 void secp256k1_gej_copy__from__global(secp256k1_gej* output, __global secp256k1_gej* input);
 //******End of ecmult_impl.h******
 

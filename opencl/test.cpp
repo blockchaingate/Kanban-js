@@ -21,47 +21,43 @@ void printComments(unsigned char* comments) {
 }
 
 const unsigned int GPUMemoryAvailable = 10000000; //for the time being, this should be equal to defaultBufferSize from gpu.cpp
-unsigned char buffer__C_PU__MultiplicationContexts[GPUMemoryAvailable];
-unsigned char buffer__G_PU__MultiplicationContexts[GPUMemoryAvailable];
+unsigned char bufferCentralPUMultiplicationContext[GPUMemoryAvailable];
+unsigned char bufferGraphicsPUMultiplicationContext[GPUMemoryAvailable];
 
 int mainTest() {
-  secp256k1_ecmult_context multiplicationContextCPU;
-  initializeMemoryPool(9000000, buffer__C_PU__MultiplicationContexts);
-  secp256k1_ecmult_context_init(&multiplicationContextCPU);
-  secp256k1_ecmult_context_build(&multiplicationContextCPU, buffer__C_PU__MultiplicationContexts);
-  logTest << "DEBUG: multiplicationContext:\n CPU:\n" << toStringSecp256k1_MultiplicationContext(multiplicationContextCPU) << Logger::endL;
-  secp256k1_ecmult_context_clear(&multiplicationContextCPU);
+  initializeMemoryPool(9000000, bufferCentralPUMultiplicationContext);
+  secp256k1_ecmult_context* multiplicationContextCentralPU = (secp256k1_ecmult_context*) checked_malloc(sizeof(secp256k1_ecmult_context), bufferCentralPUMultiplicationContext);
+  multiplicationContextCentralPU->pre_g = NULL;
+  secp256k1_ecmult_context_build(multiplicationContextCentralPU, bufferCentralPUMultiplicationContext);
+  logTest << "DEBUG: multiplicationContext:\n CPU:\n" << toStringSecp256k1_MultiplicationContext(*multiplicationContextCentralPU) << Logger::endL;
 
-/*
+
   GPU theGPU;
   if (!theGPU.initializeKernels())
     return false;
-  std::shared_ptr<GPUKernel> kernelContexts = theGPU.theKernels[GPU::kernelInitializeContexts];
+  std::shared_ptr<GPUKernel> kernelMultiplicationContext = theGPU.theKernels[GPU::kernelInitializeMultiplicationContext];
 
   cl_int ret = clEnqueueNDRangeKernel(
-    theGPU.commandQueue, kernelContexts->kernel, 1, NULL,
-    &kernelContexts->global_item_size, &kernelContexts->local_item_size, 0, NULL, NULL
+    theGPU.commandQueue, kernelMultiplicationContext->kernel, 1, NULL,
+    &kernelMultiplicationContext->global_item_size, &kernelMultiplicationContext->local_item_size, 0, NULL, NULL
   );
   if (ret != CL_SUCCESS) {
     logServer << "Failed to enqueue kernel. Return code: " << ret << ". ";
     return 0;
   }
-  cl_mem& result = kernelContexts->outputs[0]->theMemory;
+  cl_mem& result = kernelMultiplicationContext->outputs[0]->theMemory;
   for (int i = 0 ; i< 9000000; i ++) {
-    buffer__G_PU__MultiplicationContexts[i] = 0;
+    bufferGraphicsPUMultiplicationContext[i] = 0;
   }
-  ret = clEnqueueReadBuffer(theGPU.commandQueue, result, CL_TRUE, 0, 9000000, &buffer__G_PU__MultiplicationContexts, 0, NULL, NULL);
+  ret = clEnqueueReadBuffer(theGPU.commandQueue, result, CL_TRUE, 0, 9000000, &bufferGraphicsPUMultiplicationContext, 0, NULL, NULL);
   if (ret != CL_SUCCESS) {
     logServer << "Failed to read buffer. Return code: " << ret << Logger::endL;
     return - 1;
   }
-  secp256k1_ecmult_context multiplicationContextGPU;
-  secp256k1_ecmult_context_init(&multiplicationContextGPU);
-  multiplicationContextGPU.pre_g = (secp256k1_ge_storage(*)[]) buffer__G_PU__MultiplicationContexts;
-  logTest << "DEBUG: multiplicationContext:\n CPU:\n" << toStringSecp256k1_MultiplicationContext(multiplicationContextGPU) << Logger::endL;
-
-
-*/
+  uint32_t outputPosition = readFromMemoryPool(bufferGraphicsPUMultiplicationContext + 8);
+  secp256k1_ecmult_context multiplicationContextGraphicsPU;
+  multiplicationContextGraphicsPU.pre_g = (secp256k1_ge_storage(*)[]) (bufferGraphicsPUMultiplicationContext + outputPosition);
+  logTest << "DEBUG: multiplicationContext:\n CPU:\n" << toStringSecp256k1_MultiplicationContext(multiplicationContextGraphicsPU) << Logger::endL;
   /*
   secp256k1_ecmult_gen_context generatorContext;
   secp256k1_ecmult_gen_context_init(&generatorContext);
@@ -131,7 +127,6 @@ int mainTest() {
     return 0;
   }
   cl_mem& result = theKernel->outputs[0]->theMemory;
-  secp256k1_ecmult_context_clear(&multiplicationContext);
   secp256k1_ecmult_gen_context_clear(&generatorContext);
   for (int i = 0 ; i< 900; i ++) {
     resultChar[i] = 0;

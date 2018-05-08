@@ -164,8 +164,18 @@ bool GPU::initializeKernels() {
   ))
     return false;
   if (!this->createKernel(
-        this->kernelInitializeContexts,
-        {"outputContexts"},
+        this->kernelInitializeMultiplicationContext,
+        {"outputMultiplicationContext"},
+        {
+          SharedMemory::typeVoidPointer,
+        },
+        {},
+        {}
+  ))
+    return false;
+  if (!this->createKernel(
+        this->kernelInitializeGeneratorContext,
+        {"outputGeneratorContext"},
         {
           SharedMemory::typeVoidPointer,
         },
@@ -213,7 +223,8 @@ GPU::~GPU() {
 
 std::string GPU::kernelSHA256 = "sha256GPU";
 std::string GPU::kernelTestBuffer = "testBuffer";
-std::string GPU::kernelInitializeContexts = "secp256k1_opencl_compute_contexts";
+std::string GPU::kernelInitializeMultiplicationContext = "secp256k1_opencl_compute_multiplication_context";
+std::string GPU::kernelInitializeGeneratorContext = "secp256k1_opencl_compute_generator_context";
 std::string GPU::kernelVerifySignature = "secp256k1_opencl_verify_signature";
 
 const int maxProgramBuildBufferSize = 10000000;
