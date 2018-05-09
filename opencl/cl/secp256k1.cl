@@ -33,7 +33,7 @@
 //First 4 bytes: total memory pool size.
 //Next 4 bytes: total memory consumed from the memory pool, including the first 12 bytes.
 //Next 4 bytes: reserved for the unsigned int position of the first byte of the output.
-void initializeMemoryPool(unsigned int totalSize, __global unsigned char* memoryPool) {
+void initializeMemoryPool(unsigned int totalSize, __global char* memoryPool) {
   unsigned int i;
   writeToMemoryPool(totalSize, memoryPool);
   writeToMemoryPool(12, &memoryPool[4]);
@@ -45,7 +45,7 @@ void initializeMemoryPool(unsigned int totalSize, __global unsigned char* memory
   checked_malloc(10000, memoryPool);
 }
 
-void writeStringToMemoryPoolLog(__constant const char* message, unsigned int length, __global unsigned char* memoryPool) {
+void writeStringToMemoryPoolLog(__constant const char* message, unsigned int length, __global char* memoryPool) {
   unsigned int i;
   for (i = 0; i < length; i ++) {
     memoryPool[i + 12] = (unsigned char) message[i];
@@ -58,14 +58,14 @@ void writeStringToMemoryPoolLog(__constant const char* message, unsigned int len
   }
 }
 
-void writeToMemoryPool(unsigned int numberToWrite, __global unsigned char* memoryPoolPointer) {
+void writeToMemoryPool(unsigned int numberToWrite, __global char* memoryPoolPointer) {
   memoryPoolPointer[0] = (unsigned char) (numberToWrite >> 24);
   memoryPoolPointer[1] = (unsigned char) (numberToWrite >> 16);
   memoryPoolPointer[2] = (unsigned char) (numberToWrite >> 8 );
   memoryPoolPointer[3] = (unsigned char) (numberToWrite      );
 }
 
-unsigned int readFromMemoryPool(__global const unsigned char* memoryPoolPointer) {
+int readFromMemoryPool(__global const char* memoryPoolPointer) {
   return 
   ((unsigned int) (memoryPoolPointer[0] << 24)) +
   ((unsigned int) (memoryPoolPointer[1] << 16)) +
@@ -74,7 +74,7 @@ unsigned int readFromMemoryPool(__global const unsigned char* memoryPoolPointer)
 }
 
 //Memory pool format: in the notes before the definition of initializeMemoryPool.
-__global void* checked_malloc(unsigned int size, __global unsigned char* memoryPool) {
+__global void* checked_malloc(unsigned int size, __global char* memoryPool) {
   unsigned int oldSize, newSize;
   unsigned int maxSize;
   oldSize = readFromMemoryPool(memoryPool + 4);
@@ -1147,7 +1147,7 @@ void secp256k1_ge_set_all_gej_var(
   size_t len, 
   secp256k1_ge *outputPoints, 
   const secp256k1_gej *outputPointsJacobian,
-  __global unsigned char* memoryPool
+  __global char* memoryPool
 ) {
   __global secp256k1_fe *az;
   __global secp256k1_fe *azi;
@@ -2505,7 +2505,7 @@ static void secp256k1_ecmult_odd_multiples_table_globalz_windowa(
   secp256k1_ge *pre, 
   secp256k1_fe *globalz, 
   const secp256k1_gej *a,
-  __global unsigned char* memoryPool
+  __global char* memoryPool
   ) {
     __global secp256k1_gej* prej = (__global secp256k1_gej*) checked_malloc(sizeof(secp256k1_gej) * ECMULT_TABLE_SIZE(WINDOW_A), memoryPool);
     __global secp256k1_fe* zr =    (__global secp256k1_fe* ) checked_malloc(sizeof(secp256k1_fe ) * ECMULT_TABLE_SIZE(WINDOW_A), memoryPool);
@@ -2520,7 +2520,7 @@ static void secp256k1_ecmult_odd_multiples_table_storage_var(
   int n, 
   __global secp256k1_ge_storage *pre, 
   const secp256k1_gej *a,
-  __global unsigned char* memoryPool
+  __global char* memoryPool
 ) {
   __global secp256k1_gej* prej = (__global secp256k1_gej*) checked_malloc(sizeof(secp256k1_gej) * n, memoryPool);
   __global secp256k1_ge* prea = (__global secp256k1_ge*) checked_malloc(sizeof(secp256k1_ge) * n, memoryPool);
@@ -2612,7 +2612,7 @@ void secp256k1_ecmult(
   const secp256k1_gej *a,
   const secp256k1_scalar *na,
   const secp256k1_scalar *ng,
-  __global unsigned char* memoryPool
+  __global char* memoryPool
 ) {
   secp256k1_ge pre_a[ECMULT_TABLE_SIZE(WINDOW_A)];
   secp256k1_ge tmpa;
@@ -2812,7 +2812,7 @@ void secp256k1_ecmult_const(
   secp256k1_gej *r, 
   const secp256k1_ge *a, 
   const secp256k1_scalar *scalar, 
-  __global unsigned char* memoryPool
+  __global char* memoryPool
 ) {
     secp256k1_ge pre_a[ECMULT_TABLE_SIZE(WINDOW_A)];
     secp256k1_ge tmpa;
@@ -3281,7 +3281,7 @@ void secp256k1_gej_copy__from__global(secp256k1_gej* output, __global const secp
 
 void secp256k1_ecmult_gen_context_build(
   __global secp256k1_ecmult_gen_context *ctx,
-  __global unsigned char* memoryPool
+  __global char* memoryPool
 ) {
   secp256k1_ge prec[1024];
   secp256k1_gej gj;
@@ -3427,7 +3427,7 @@ void secp256k1_ecmult_gen_context_clear(secp256k1_ecmult_gen_context *ctx) {
 
 void secp256k1_ecmult_context_build(
   __global secp256k1_ecmult_context* output,
-  __global unsigned char* memoryPool
+  __global char* memoryPool
 ) {
   writeStringToMemoryPoolLog("At the start of context_build. \0", 33, memoryPool);
   
@@ -3440,7 +3440,7 @@ void secp256k1_ecmult_context_build(
   /* get the generator */
   //openCL note: secp256k1_ge_const_g is always in the __constant address space.
   secp256k1_gej_set_ge__constant(&gj, &secp256k1_ge_const_g);
-  unsigned int currentMemoryPoolSize = readFromMemoryPool(memoryPool + 4);
+  int currentMemoryPoolSize = readFromMemoryPool(memoryPool + 4);
   writeToMemoryPool(currentMemoryPoolSize, memoryPool + 8);
   output->pre_g = (__global secp256k1_ge_storage (*)[]) checked_malloc(ECMULT_TABLE_SIZE(WINDOW_G) * sizeof((*output->pre_g)[0]), memoryPool);
   /* precompute the tables with odd multiples */
@@ -3666,7 +3666,7 @@ int secp256k1_ecdsa_sig_recover(
   secp256k1_ge *pubkey, 
   const secp256k1_scalar *message, 
   int recid,
-  __global unsigned char* memoryPool
+  __global char* memoryPool
 ) {
   unsigned char brx[32];
   secp256k1_fe fx;
@@ -3709,7 +3709,7 @@ char secp256k1_ecdsa_sig_verify(
   __global const secp256k1_ge *pubkey, 
   __global const secp256k1_scalar *message, 
   __global unsigned char* comments, 
-  __global unsigned char* memoryPool
+  __global char* memoryPool
 ) {
   unsigned char c[32];
   secp256k1_scalar sn, u1, u2;

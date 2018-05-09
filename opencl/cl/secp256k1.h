@@ -53,21 +53,17 @@
 #define __global
 #endif
 
-typedef struct {
-  unsigned char errors[1000];
-} memoryPoolLog;
+//Memory pool format: in the notes before the definition of initializeMemoryPool.
+__global void* checked_malloc(unsigned int size, __global char* memoryPool);
+void writeToMemoryPool(unsigned int numberToWrite, __global char* memoryPoolPointer);
+void writeStringToMemoryPoolLog(__constant const char* message, unsigned int length, __global char *memoryPool);
+
+int readFromMemoryPool(__global const char* memoryPoolPointer);
 
 //Memory pool format: in the notes before the definition of initializeMemoryPool.
-__global void* checked_malloc(unsigned int size, __global unsigned char* memoryPool);
-void writeToMemoryPool(unsigned int numberToWrite, __global unsigned char* memoryPoolPointer);
-void writeStringToMemoryPoolLog(__constant const char* message, unsigned int length, __global unsigned char* memoryPool);
+void initializeMemoryPool(unsigned int totalSize, __global char* memoryPool);
 
-unsigned int readFromMemoryPool(__global const unsigned char* memoryPoolPointer);
-
-//Memory pool format: in the notes before the definition of initializeMemoryPool.
-void initializeMemoryPool(unsigned int totalSize, __global unsigned char* memoryPool);
-
-void assertFalse(__constant const char* errorMessage, __global unsigned char* memoryPool);
+void assertFalse(__constant const char* errorMessage, __global char *memoryPool);
 
 void freeMemory(void* any);
 void freeMemory__global(__global void* any);
@@ -366,7 +362,7 @@ void secp256k1_ecmult(
   const secp256k1_gej *a, 
   const secp256k1_scalar *na, 
   const secp256k1_scalar *ng,
-  __global unsigned char* memoryPool
+  __global char* memoryPool
 );
 //******end of ecmult.h******
 

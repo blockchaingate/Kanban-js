@@ -21,15 +21,15 @@ void printComments(unsigned char* comments) {
 }
 
 const unsigned int GPUMemoryAvailable = 10000000; //for the time being, this should be equal to defaultBufferSize from gpu.cpp
-unsigned char bufferCentralPUMultiplicationContext[GPUMemoryAvailable];
-unsigned char bufferGraphicsPUMultiplicationContext[GPUMemoryAvailable];
+char bufferCentralPUMultiplicationContext[GPUMemoryAvailable];
+char bufferGraphicsPUMultiplicationContext[GPUMemoryAvailable];
 
 
 extern void secp256k1_opencl_compute_multiplication_context(
-  __global unsigned char* outputMemoryPoolContainingMultiplicationContext
+  __global char* outputMemoryPoolContainingMultiplicationContext
 );
 
-void testPrintMultiplicationContext(const unsigned char* theMemoryPool, const std::string& computationID){
+void testPrintMultiplicationContext(const char* theMemoryPool, const std::string& computationID){
   uint32_t outputPositionCentralPU = readFromMemoryPool(&theMemoryPool[8]);
   logTest << computationID << Logger::endL;
   std::string memoryPoolPrintout;
@@ -45,11 +45,12 @@ void testPrintMultiplicationContext(const unsigned char* theMemoryPool, const st
   << toStringSecp256k1_MultiplicationContext(multiplicationContextCentralPU, false) << Logger::endL;
 }
 
-int mainTest() {
+int mainTest() {  
   secp256k1_opencl_compute_multiplication_context(bufferCentralPUMultiplicationContext);
   testPrintMultiplicationContext(bufferCentralPUMultiplicationContext, "Central PU");
 
   GPU theGPU;
+
   if (!theGPU.initializeKernels())
     return false;
   std::shared_ptr<GPUKernel> kernelMultiplicationContext = theGPU.theKernels[GPU::kernelInitializeMultiplicationContext];
@@ -66,7 +67,8 @@ int mainTest() {
   for (int i = 0; i < 9000000; i ++) {
     bufferGraphicsPUMultiplicationContext[i] = 0;
   }
-  ret = clEnqueueReadBuffer(theGPU.commandQueue, result, CL_TRUE, 2, 9000000, &bufferGraphicsPUMultiplicationContext, 0, NULL, NULL);
+  logServer << "DEBUG: got to here. " << Logger::endL;
+  ret = clEnqueueReadBuffer(theGPU.commandQueue, result, CL_TRUE, 0, 9000000, (void*) &bufferGraphicsPUMultiplicationContext, 0, NULL, NULL);
   if (ret != CL_SUCCESS) {
     logServer << "Failed to read buffer. Return code: " << ret << Logger::endL;
     return - 1;

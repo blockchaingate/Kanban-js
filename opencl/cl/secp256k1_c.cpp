@@ -18,7 +18,7 @@ extern Logger logGPU;
 
 #include "cl/kernels/secp256k1_opencl_compute_multiplication_context.cl"
 #include "cl/kernels/secp256k1_opencl_compute_generator_context.cl"
-void assertFalse(__constant const char* errorMessage, unsigned char* memoryPool) {
+void assertFalse(__constant const char* errorMessage, __global char* memoryPool) {
   (void) memoryPool;
   std::string errorMessageString(errorMessage);
   std::cout << errorMessageString << std::endl;

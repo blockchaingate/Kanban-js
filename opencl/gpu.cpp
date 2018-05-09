@@ -147,6 +147,8 @@ bool GPU::initialize() {
 
 bool GPU::initializeKernels() {
   this->initialize();
+
+
   //if (!this->createKernel(
   //      this->kernelSHA256,
   //      {"result"},

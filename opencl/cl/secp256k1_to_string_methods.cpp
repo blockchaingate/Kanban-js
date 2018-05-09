@@ -76,7 +76,7 @@ std::string toStringSecp256k1_GeneratorContext(const secp256k1_ecmult_gen_contex
   return out.str();
 }
 
-std::string toStringErrorLog(const unsigned char* memoryPool){
+std::string toStringErrorLog(const char* memoryPool){
   std::string result;
   for (int i = 12; i < 1000; i++) {
     if (memoryPool[i] == '\0')

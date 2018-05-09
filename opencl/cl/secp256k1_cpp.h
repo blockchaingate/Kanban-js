@@ -12,6 +12,6 @@ std::string toStringSecp256k1_MultiplicationContext(const secp256k1_ecmult_conte
 std::string toStringSecp256k1_GeneratorContext(const secp256k1_ecmult_gen_context& generatorContext);
 
 
-std::string toStringErrorLog(const unsigned char* memoryPool);
+std::string toStringErrorLog(const char* memoryPool);
 #endif //SECP256K1_CPP_H_header
 
