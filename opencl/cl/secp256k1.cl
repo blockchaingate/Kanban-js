@@ -29,7 +29,7 @@
 //
 //
 //Memory pool format:
-//The first 12 bytes are reserved.
+//The first 10012 bytes are reserved.
 //First 4 bytes: total memory pool size.
 //Next 4 bytes: total memory consumed from the memory pool, including the first 12 bytes.
 //Next 4 bytes: reserved for the unsigned int position of the first byte of the output.
@@ -38,8 +38,19 @@ void initializeMemoryPool(unsigned int totalSize, __global unsigned char* memory
   writeToMemoryPool(totalSize, memoryPool);
   writeToMemoryPool(12, memoryPool + 4);
   writeToMemoryPool(0, memoryPool + 8);
-  for (i = 12; i < totalSize; i ++){
-    memoryPool[i] = 0;
+  for (i = 12; i < totalSize; i +=4){
+    //memoryPool[i] = 0;
+    writeToMemoryPool(i, memoryPool + i);
+  }
+  checked_malloc(10000, memoryPool);
+}
+
+void writeStringToMemoryPoolLog(__constant const char* message, __global unsigned char* memoryPool) {
+  int i;
+  for (i = 0; i < 1000; i ++) {
+    memoryPool[i + 12] = (unsigned char) message[i];
+    if (message[i] == 0)
+      break;
   }
 }
 
@@ -1190,45 +1201,44 @@ void secp256k1_ge_set_table_gej_var(
   }
   /* Compute the inverse of the last z coordinate, and use it to compute the last affine output. */
   secp256k1_gej_copy__from__global(&globalToLocalGEJ1, &a[i]);
-  logGPU << "DEBUG: at onset: a: "
-  << toStringSecp256k1_ECPointProjective(a[i]) 
-  << "\n copy: " << toStringSecp256k1_ECPointProjective(globalToLocalGEJ1) 
-  << Logger::endL;
-
+  //logGPU << "DEBUG: at onset: a: "
+  //<< toStringSecp256k1_ECPointProjective(a[i]) 
+  //<< "\n copy: " << toStringSecp256k1_ECPointProjective(globalToLocalGEJ1) 
+  //<< Logger::endL;
   secp256k1_fe_inv(&zi, &globalToLocalGEJ1.z);
-  logGPU << "DEBUG: z inverse: "
-  << toStringSecp256k1_FieldElement(zi) 
-  << Logger::endL;
+  //logGPU << "DEBUG: z inverse: "
+  //<< toStringSecp256k1_FieldElement(zi) 
+  //<< Logger::endL;
   secp256k1_ge_set_gej_zinv(&globalToLocalGE1, &globalToLocalGEJ1, &zi);
-  logGPU << "DEBUG: globalToLocalGE1 inside secp256k1_ge_set_table_gej_var: "
-  << toStringSecp256k1_ECPoint(globalToLocalGE1) << Logger::endL;
+  //logGPU << "DEBUG: globalToLocalGE1 inside secp256k1_ge_set_table_gej_var: "
+  //<< toStringSecp256k1_ECPoint(globalToLocalGE1) << Logger::endL;
 
   secp256k1_ge_copy__to__global(&r[i], &globalToLocalGE1);
-  logGPU << "DEBUG: r[i] after first copy : "
-  << toStringSecp256k1_ECPoint(globalToLocalGE1) << Logger::endL;
+  //logGPU << "DEBUG: r[i] after first copy : "
+  //<< toStringSecp256k1_ECPoint(globalToLocalGE1) << Logger::endL;
 
   /* Work out way backwards, using the z-ratios to scale the x/y values. */
   while (i > 0) {
     secp256k1_fe_mul__global(&zi, &zi, &zr[i]);
-    logGPU << "DEBUG: zri @ loop start: "
-    << toStringSecp256k1_FieldElement(zr[i]) 
-    << Logger::endL;
-    logGPU << "DEBUG: z inverse @ loop start: "
-    << toStringSecp256k1_FieldElement(zi) 
-    << Logger::endL;
+    //logGPU << "DEBUG: zri @ loop start: "
+    //<< toStringSecp256k1_FieldElement(zr[i]) 
+    //<< Logger::endL;
+    //logGPU << "DEBUG: z inverse @ loop start: "
+    //<< toStringSecp256k1_FieldElement(zi) 
+    //<< Logger::endL;
     i--;
     secp256k1_gej_copy__from__global(&globalToLocalGEJ1, &a[i]);
-    logGPU << "DEBUG: globalToLocalGEJ1 inside secp256k1_ge_set_table_gej_var: "
-    << toStringSecp256k1_ECPointProjective(globalToLocalGEJ1) << Logger::endL;
-    logGPU << "DEBUG: zi inside secp256k1_ge_set_table_gej_var: "
-    << toStringSecp256k1_FieldElement(zi) << Logger::endL;
+    //logGPU << "DEBUG: globalToLocalGEJ1 inside secp256k1_ge_set_table_gej_var: "
+    //<< toStringSecp256k1_ECPointProjective(globalToLocalGEJ1) << Logger::endL;
+    //logGPU << "DEBUG: zi inside secp256k1_ge_set_table_gej_var: "
+    //<< toStringSecp256k1_FieldElement(zi) << Logger::endL;
 
     secp256k1_ge_set_gej_zinv(&globalToLocalGE1, &globalToLocalGEJ1, &zi);
-    logGPU << "DEBUG: globalToLocalGE1 inside secp256k1_ge_set_table_gej_var: "
-    << toStringSecp256k1_ECPoint(globalToLocalGE1) << Logger::endL;
+    //logGPU << "DEBUG: globalToLocalGE1 inside secp256k1_ge_set_table_gej_var: "
+    //<< toStringSecp256k1_ECPoint(globalToLocalGE1) << Logger::endL;
     secp256k1_ge_copy__to__global(&r[i], &globalToLocalGE1);
-    logGPU << "DEBUG: r[i] inside secp256k1_ge_set_table_gej_var: "
-    << toStringSecp256k1_ECPoint(r[i]) << Logger::endL;
+    //logGPU << "DEBUG: r[i] inside secp256k1_ge_set_table_gej_var: "
+    //<< toStringSecp256k1_ECPoint(r[i]) << Logger::endL;
   }
 }
 
@@ -2454,6 +2464,8 @@ static void secp256k1_ecmult_odd_multiples_table(
     secp256k1_gej_copy__from__global(&globalToLocal2, &prej[i - 1]);
     secp256k1_fe_copy__from__global(&globalToLocalFE1, &zr[i]);
     secp256k1_gej_add_ge_var(&globalToLocal1, &globalToLocal2, &d_ge, &globalToLocalFE1);
+    //<- warning: secp256k1_gej_add_ge_var modifies its last argument.
+    //Failure to carry out the next command resulted in a bug. 
     secp256k1_fe_copy__to__global(&zr[i], &globalToLocalFE1);
     secp256k1_gej_copy__to__global(&prej[i], &globalToLocal1);
     //logGPU << "DEBUG: prej[i]: " << toStringSecp256k1_ECPointProjective( prej[i]) << Logger::endL;
@@ -2521,8 +2533,8 @@ static void secp256k1_ecmult_odd_multiples_table_storage_var(
   for (i = 0; i < n; i ++) {
     secp256k1_ge_copy__from__global(&globalToLocalGE, &prea[i]);
     secp256k1_ge_to__global__storage(&pre[i], &globalToLocalGE);
-    logGPU << "DEBUG: " << i << ": " << toStringSecp256k1_ECPointStorage(pre[i]) << Logger::endL;
-//           << toStringSecp256k1_ECPoint(prea[i]) << Logger::endL;
+    //logGPU << "DEBUG: " << i << ": " << toStringSecp256k1_ECPointStorage(pre[i]) << Logger::endL;
+    //<< toStringSecp256k1_ECPoint(prea[i]) << Logger::endL;
   }
   freeMemory__global(prea);
   freeMemory__global(prej);
@@ -3413,12 +3425,14 @@ void secp256k1_ecmult_context_build(
   __global secp256k1_ecmult_context* output,
   __global unsigned char* memoryPool
 ) {
+  writeStringToMemoryPoolLog("At the start of context_build. \0", memoryPool);
+  
   secp256k1_gej gj;
 
   if (output->pre_g != NULL) {
     return;
   }
-
+  writeStringToMemoryPoolLog("Got to building context.\0", memoryPool);
   /* get the generator */
   //openCL note: secp256k1_ge_const_g is always in the __constant address space.
   secp256k1_gej_set_ge__constant(&gj, &secp256k1_ge_const_g);

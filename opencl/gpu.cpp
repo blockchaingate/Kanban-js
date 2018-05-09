@@ -102,7 +102,7 @@ bool GPU::initialize() {
   if (this->flagVerbose) {
     logGPU << "Number of platforms: " << this->numberOfPlatforms << "\n";
   }
-  cl_device_type desiredDeviceType = CL_DEVICE_TYPE_GPU;
+  cl_device_type desiredDeviceType = CL_DEVICE_TYPE_CPU;
   std::string deviceDescription = desiredDeviceType == CL_DEVICE_TYPE_CPU ? "CPU" : "GPU";
   for (unsigned i = 0; i < this->numberOfPlatforms; i ++) {
     ret = clGetDeviceIDs(this->platformIds[i], desiredDeviceType, 2, this->allDevices, &this->numberOfDevices);
@@ -173,16 +173,16 @@ bool GPU::initializeKernels() {
         {}
   ))
     return false;
-  if (!this->createKernel(
-        this->kernelInitializeGeneratorContext,
-        {"outputGeneratorContext"},
-        {
-          SharedMemory::typeVoidPointer,
-        },
-        {},
-        {}
-  ))
-    return false;
+  //if (!this->createKernel(
+  //      this->kernelInitializeGeneratorContext,
+  //      {"outputGeneratorContext"},
+  //      {
+  //        SharedMemory::typeVoidPointer,
+  //      },
+  //      {},
+  //      {}
+  //))
+  //  return false;
   //if (!this->createKernel(
   //      this->kernelVerifySignature,
   //      {"output"},

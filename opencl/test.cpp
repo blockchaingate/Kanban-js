@@ -29,16 +29,21 @@ extern void secp256k1_opencl_compute_multiplication_context(
   __global unsigned char* outputMemoryPoolContainingMultiplicationContext
 );
 
+void testPrintMultiplicationContext(unsigned char* theMemoryPool, const std::string& computationID){
+  uint32_t outputPositionCentralPU = readFromMemoryPool(theMemoryPool + 8);
+  logTest << computationID << Logger::endL;
+  logTest << "Computation log:\n"
+  << toStringErrorLog(theMemoryPool) << Logger::endL;
+  logTest << "outputPosition: " << outputPositionCentralPU << Logger::endL;
+  secp256k1_ecmult_context multiplicationContextCentralPU;
+  multiplicationContextCentralPU.pre_g = (secp256k1_ge_storage(*)[]) (theMemoryPool + outputPositionCentralPU);
+  logTest << "multiplicationContext:\n"
+  << toStringSecp256k1_MultiplicationContext(multiplicationContextCentralPU, false) << Logger::endL;
+}
+
 int mainTest() {
   secp256k1_opencl_compute_multiplication_context(bufferCentralPUMultiplicationContext);
-
-  uint32_t outputPositionCentralPU = readFromMemoryPool(bufferCentralPUMultiplicationContext + 8);
-  logTest << "DEBUG: outputPositionCentralPU: " << outputPositionCentralPU << Logger::endL;
-  secp256k1_ecmult_context multiplicationContextCentralPU;
-  multiplicationContextCentralPU.pre_g = (secp256k1_ge_storage(*)[]) (bufferCentralPUMultiplicationContext + outputPositionCentralPU);
-  logTest << "DEBUG: multiplicationContext:\n Central PU:\n"
-  << toStringSecp256k1_MultiplicationContext(multiplicationContextCentralPU) << Logger::endL;
-
+  testPrintMultiplicationContext(bufferCentralPUMultiplicationContext, "Central PU");
 
   GPU theGPU;
   if (!theGPU.initializeKernels())
@@ -62,11 +67,7 @@ int mainTest() {
     logServer << "Failed to read buffer. Return code: " << ret << Logger::endL;
     return - 1;
   }
-  uint32_t outputPosition = readFromMemoryPool(bufferGraphicsPUMultiplicationContext + 8);
-  logTest << "DEBUG: outputPositionCentralPU: " << outputPositionCentralPU << Logger::endL;
-  secp256k1_ecmult_context multiplicationContextGraphicsPU;
-  multiplicationContextGraphicsPU.pre_g = (secp256k1_ge_storage(*)[]) (bufferGraphicsPUMultiplicationContext + outputPosition);
-  logTest << "DEBUG: multiplicationContext:\n CPU:\n" << toStringSecp256k1_MultiplicationContext(multiplicationContextGraphicsPU) << Logger::endL;
+  testPrintMultiplicationContext(bufferGraphicsPUMultiplicationContext, "Graphics PU");
   /*
   secp256k1_ecmult_gen_context generatorContext;
   secp256k1_ecmult_gen_context_init(&generatorContext);

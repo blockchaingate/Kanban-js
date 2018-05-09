@@ -626,8 +626,8 @@ void APPEND_ADDRESS_SPACE(secp256k1_ge_to__global__storage)(__global secp256k1_g
   secp256k1_fe_normalize(&x);
   y = a->y;
   secp256k1_fe_normalize(&y);
-  secp256k1_fe_to_storage(&r->x, &x);
-  secp256k1_fe_to_storage(&r->y, &y);
+  secp256k1_fe_to__global__storage(&r->x, &x);
+  secp256k1_fe_to__global__storage(&r->y, &y);
 }
 //******end of group.h******
 
