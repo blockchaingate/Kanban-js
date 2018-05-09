@@ -29,9 +29,13 @@ extern void secp256k1_opencl_compute_multiplication_context(
   __global unsigned char* outputMemoryPoolContainingMultiplicationContext
 );
 
-void testPrintMultiplicationContext(unsigned char* theMemoryPool, const std::string& computationID){
-  uint32_t outputPositionCentralPU = readFromMemoryPool(theMemoryPool + 8);
+void testPrintMultiplicationContext(const unsigned char* theMemoryPool, const std::string& computationID){
+  uint32_t outputPositionCentralPU = readFromMemoryPool(&theMemoryPool[8]);
   logTest << computationID << Logger::endL;
+  std::string memoryPoolPrintout;
+  memoryPoolPrintout.assign((const char*) theMemoryPool, 1000);
+  logTest << "First 1000 characters of the memory pool: "
+  << Miscellaneous::toStringHex(memoryPoolPrintout) << Logger::endL;
   logTest << "Computation log:\n"
   << toStringErrorLog(theMemoryPool) << Logger::endL;
   logTest << "outputPosition: " << outputPositionCentralPU << Logger::endL;
@@ -62,7 +66,7 @@ int mainTest() {
   for (int i = 0; i < 9000000; i ++) {
     bufferGraphicsPUMultiplicationContext[i] = 0;
   }
-  ret = clEnqueueReadBuffer(theGPU.commandQueue, result, CL_TRUE, 0, 9000000, &bufferGraphicsPUMultiplicationContext, 0, NULL, NULL);
+  ret = clEnqueueReadBuffer(theGPU.commandQueue, result, CL_TRUE, 2, 9000000, &bufferGraphicsPUMultiplicationContext, 0, NULL, NULL);
   if (ret != CL_SUCCESS) {
     logServer << "Failed to read buffer. Return code: " << ret << Logger::endL;
     return - 1;

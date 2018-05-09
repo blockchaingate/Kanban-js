@@ -36,32 +36,36 @@
 void initializeMemoryPool(unsigned int totalSize, __global unsigned char* memoryPool) {
   unsigned int i;
   writeToMemoryPool(totalSize, memoryPool);
-  writeToMemoryPool(12, memoryPool + 4);
-  writeToMemoryPool(0, memoryPool + 8);
-  for (i = 12; i < totalSize; i +=4){
-    //memoryPool[i] = 0;
-    writeToMemoryPool(i, memoryPool + i);
+  writeToMemoryPool(12, &memoryPool[4]);
+  writeToMemoryPool(0, &memoryPool[8]);
+  for (i = 12; i + 4 < totalSize; i += 4){
+    //memoryPool[i] = (unsigned char) 0;
+    writeToMemoryPool(i, &memoryPool[i]);
   }
   checked_malloc(10000, memoryPool);
 }
 
-void writeStringToMemoryPoolLog(__constant const char* message, __global unsigned char* memoryPool) {
-  int i;
-  for (i = 0; i < 1000; i ++) {
+void writeStringToMemoryPoolLog(__constant const char* message, unsigned int length, __global unsigned char* memoryPool) {
+  unsigned int i;
+  for (i = 0; i < length; i ++) {
     memoryPool[i + 12] = (unsigned char) message[i];
+    memoryPool[i + 13] = (unsigned char) 0; // <- ensure our string is null-terminated, independent of whether message is.
     if (message[i] == 0)
       break;
+    if (i > 1000) {
+      break;
+    }
   }
 }
 
 void writeToMemoryPool(unsigned int numberToWrite, __global unsigned char* memoryPoolPointer) {
-  memoryPoolPointer[0] = numberToWrite >> 24;
-  memoryPoolPointer[1] = numberToWrite >> 16;
-  memoryPoolPointer[2] = numberToWrite >> 8;
-  memoryPoolPointer[3] = numberToWrite;
+  memoryPoolPointer[0] = (unsigned char) (numberToWrite >> 24);
+  memoryPoolPointer[1] = (unsigned char) (numberToWrite >> 16);
+  memoryPoolPointer[2] = (unsigned char) (numberToWrite >> 8 );
+  memoryPoolPointer[3] = (unsigned char) (numberToWrite      );
 }
 
-unsigned int readFromMemoryPool(__global unsigned char* memoryPoolPointer) {
+unsigned int readFromMemoryPool(__global const unsigned char* memoryPoolPointer) {
   return 
   ((unsigned int) (memoryPoolPointer[0] << 24)) +
   ((unsigned int) (memoryPoolPointer[1] << 16)) +
@@ -3425,14 +3429,14 @@ void secp256k1_ecmult_context_build(
   __global secp256k1_ecmult_context* output,
   __global unsigned char* memoryPool
 ) {
-  writeStringToMemoryPoolLog("At the start of context_build. \0", memoryPool);
+  writeStringToMemoryPoolLog("At the start of context_build. \0", 33, memoryPool);
   
   secp256k1_gej gj;
 
   if (output->pre_g != NULL) {
     return;
   }
-  writeStringToMemoryPoolLog("Got to building context.\0", memoryPool);
+  writeStringToMemoryPoolLog("Got to building context.\0", 26, memoryPool);
   /* get the generator */
   //openCL note: secp256k1_ge_const_g is always in the __constant address space.
   secp256k1_gej_set_ge__constant(&gj, &secp256k1_ge_const_g);
