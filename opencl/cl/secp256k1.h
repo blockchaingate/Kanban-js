@@ -54,16 +54,16 @@
 #endif
 
 //Memory pool format: in the notes before the definition of initializeMemoryPool.
-__global void* checked_malloc(unsigned int size, __global char* memoryPool);
-void writeToMemoryPool(unsigned int numberToWrite, __global char* memoryPoolPointer);
-void writeStringToMemoryPoolLog(__constant const char* message, unsigned int length, __global char *memoryPool);
+__global void* checked_malloc(unsigned int size, __global unsigned char* memoryPool);
+void writeToMemoryPool(unsigned int numberToWrite, __global unsigned char* memoryPoolPointer);
+void writeStringToMemoryPoolLog(__constant const char* message, __global unsigned char* memoryPool);
 
-int readFromMemoryPool(__global const char* memoryPoolPointer);
+unsigned int readFromMemoryPool(__global const unsigned char *memoryPoolPointer);
 
 //Memory pool format: in the notes before the definition of initializeMemoryPool.
-void initializeMemoryPool(unsigned int totalSize, __global char* memoryPool);
+void initializeMemoryPool(unsigned int totalSize, __global unsigned char* memoryPool);
 
-void assertFalse(__constant const char* errorMessage, __global char *memoryPool);
+void assertFalse(__constant const char* errorMessage, __global unsigned char *memoryPool);
 
 void freeMemory(void* any);
 void freeMemory__global(__global void* any);
@@ -259,7 +259,7 @@ void secp256k1_ge_set_all_gej_var(
   size_t len, 
   secp256k1_ge *outputPoints, 
   const secp256k1_gej *outputPointsJacobian,
-  __global char* memoryPool
+  __global unsigned char* memoryPool
 );
 
 /** Set a batch of group elements equal to the inputs given in jacobian
@@ -362,7 +362,7 @@ void secp256k1_ecmult(
   const secp256k1_gej *a, 
   const secp256k1_scalar *na, 
   const secp256k1_scalar *ng,
-  __global char* memoryPool
+  __global unsigned char* memoryPool
 );
 //******end of ecmult.h******
 
@@ -393,7 +393,7 @@ int secp256k1_ecmult_gen_context_is_built(const secp256k1_ecmult_gen_context* ct
 
 void secp256k1_ecmult_gen_blind(__global secp256k1_ecmult_gen_context *ctx, const unsigned char *seed32);
 
-void secp256k1_ecmult_gen_context_build(__global secp256k1_ecmult_gen_context* ctx, __global char* memoryPool);
+void secp256k1_ecmult_gen_context_build(__global secp256k1_ecmult_gen_context* ctx, __global unsigned char* memoryPool);
 
 /** Multiply with the generator: R = a*G */
 void secp256k1_ecmult_gen(__global const secp256k1_ecmult_gen_context* ctx, secp256k1_gej *r, const secp256k1_scalar *a);
@@ -404,7 +404,7 @@ void secp256k1_ecmult_gen(__global const secp256k1_ecmult_gen_context* ctx, secp
 void secp256k1_scalar_copy__from__global(secp256k1_scalar* output, __global const secp256k1_scalar* input);
 
 //******From ecmult_impl.h******
-void secp256k1_ecmult_context_build(__global secp256k1_ecmult_context *output, __global char *memoryPool);
+void secp256k1_ecmult_context_build(__global secp256k1_ecmult_context *output, __global unsigned char* memoryPool);
 void secp256k1_gej_copy__from__global(secp256k1_gej* output, __global const secp256k1_gej* input);
 //******End of ecmult_impl.h******
 
@@ -420,7 +420,7 @@ int secp256k1_ecdsa_sig_recover(
   secp256k1_ge *pubkey, 
   const secp256k1_scalar *message, 
   int recid,
-  __global char* memoryPool
+  __global unsigned char* memoryPool
 );
 
 char secp256k1_ecdsa_sig_verify(
@@ -430,7 +430,7 @@ char secp256k1_ecdsa_sig_verify(
   __global const secp256k1_ge *pubkey, 
   __global const secp256k1_scalar *message, 
   __global unsigned char* comments, 
-  __global char* memoryPool
+  __global unsigned char* memoryPool
 );
 
 //******end of ecdsa.h******

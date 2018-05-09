@@ -21,15 +21,15 @@ void printComments(unsigned char* comments) {
 }
 
 const unsigned int GPUMemoryAvailable = 10000000; //for the time being, this should be equal to defaultBufferSize from gpu.cpp
-char bufferCentralPUMultiplicationContext[GPUMemoryAvailable];
-char bufferGraphicsPUMultiplicationContext[GPUMemoryAvailable];
+unsigned char bufferCentralPUMultiplicationContext[GPUMemoryAvailable];
+unsigned char bufferGraphicsPUMultiplicationContext[GPUMemoryAvailable];
 
 
 extern void secp256k1_opencl_compute_multiplication_context(
-  __global char* outputMemoryPoolContainingMultiplicationContext
+  __global unsigned char* outputMemoryPoolContainingMultiplicationContext
 );
 
-void testPrintMultiplicationContext(const char* theMemoryPool, const std::string& computationID){
+void testPrintMultiplicationContext(const unsigned char* theMemoryPool, const std::string& computationID){
   uint32_t outputPositionCentralPU = readFromMemoryPool(&theMemoryPool[8]);
   logTest << computationID << Logger::endL;
   std::string memoryPoolPrintout;

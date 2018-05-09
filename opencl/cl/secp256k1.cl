@@ -54,20 +54,23 @@
 //In addition, the following 10000 bytes may be reserved for debugging purposes 
 //(printf is not guaranteed to work out-of-the-box in older openCL versions).
 //
-void initializeMemoryPool(unsigned int totalSize, __global char* memoryPool) {
+void initializeMemoryPool(unsigned int totalSize, __global unsigned char* memoryPool) {
   unsigned int i;
   writeToMemoryPool(totalSize, memoryPool);
   writeToMemoryPool(12, &memoryPool[4]);
   writeToMemoryPool(0, &memoryPool[8]);
-  for (i = 12; i + 4 < totalSize; i += 4){
-    //memoryPool[i] = (unsigned char) 0;
-    writeToMemoryPool(i, &memoryPool[i]);
+  //for (i = 12; i + 4 < totalSize; i += 4){
+  //  writeToMemoryPool(i, &memoryPool[i]);
+  //}
+  for (i = 12; i < totalSize; i ++) {
+    memoryPool[i] = (unsigned char) 0;
   }
   checked_malloc(10000, memoryPool);
 }
 
-void writeStringToMemoryPoolLog(__constant const char* message, unsigned int length, __global char* memoryPool) {
-  unsigned int i;
+void writeStringToMemoryPoolLog(__constant const char* message, __global unsigned char* memoryPool) {
+  unsigned int i, length;
+  length = 1000;
   for (i = 0; i < length; i ++) {
     memoryPool[i + 12] = (unsigned char) message[i];
     memoryPool[i + 13] = (unsigned char) 0; // <- ensure our string is null-terminated, independent of whether message is.
@@ -79,23 +82,23 @@ void writeStringToMemoryPoolLog(__constant const char* message, unsigned int len
   }
 }
 
-void writeToMemoryPool(unsigned int numberToWrite, __global char* memoryPoolPointer) {
+void writeToMemoryPool(unsigned int numberToWrite, __global unsigned char* memoryPoolPointer) {
   memoryPoolPointer[0] = (unsigned char) (numberToWrite >> 24);
   memoryPoolPointer[1] = (unsigned char) (numberToWrite >> 16);
   memoryPoolPointer[2] = (unsigned char) (numberToWrite >> 8 );
   memoryPoolPointer[3] = (unsigned char) (numberToWrite      );
 }
 
-int readFromMemoryPool(__global const char* memoryPoolPointer) {
+unsigned int readFromMemoryPool(__global const unsigned char* memoryPoolPointer) {
   return 
   ((unsigned int) (memoryPoolPointer[0] << 24)) +
   ((unsigned int) (memoryPoolPointer[1] << 16)) +
   ((unsigned int) (memoryPoolPointer[2] <<  8)) +
-  ((unsigned int)  memoryPoolPointer[3]       ) ;
+  ((unsigned int) memoryPoolPointer[3]       ) ;
 }
 
 //Memory pool format: in the notes before the definition of initializeMemoryPool.
-__global void* checked_malloc(unsigned int size, __global char* memoryPool) {
+__global void* checked_malloc(unsigned int size, __global unsigned char* memoryPool) {
   unsigned int oldSize, newSize;
   unsigned int maxSize;
   oldSize = readFromMemoryPool(memoryPool + 4);
@@ -1168,7 +1171,7 @@ void secp256k1_ge_set_all_gej_var(
   size_t len, 
   secp256k1_ge *outputPoints, 
   const secp256k1_gej *outputPointsJacobian,
-  __global char* memoryPool
+  __global unsigned char* memoryPool
 ) {
   __global secp256k1_fe *az;
   __global secp256k1_fe *azi;
@@ -2526,7 +2529,7 @@ static void secp256k1_ecmult_odd_multiples_table_globalz_windowa(
   secp256k1_ge *pre, 
   secp256k1_fe *globalz, 
   const secp256k1_gej *a,
-  __global char* memoryPool
+  __global unsigned char* memoryPool
   ) {
     __global secp256k1_gej* prej = (__global secp256k1_gej*) checked_malloc(sizeof(secp256k1_gej) * ECMULT_TABLE_SIZE(WINDOW_A), memoryPool);
     __global secp256k1_fe* zr =    (__global secp256k1_fe* ) checked_malloc(sizeof(secp256k1_fe ) * ECMULT_TABLE_SIZE(WINDOW_A), memoryPool);
@@ -2541,7 +2544,7 @@ static void secp256k1_ecmult_odd_multiples_table_storage_var(
   int n, 
   __global secp256k1_ge_storage *pre, 
   const secp256k1_gej *a,
-  __global char* memoryPool
+  __global unsigned char* memoryPool
 ) {
   __global secp256k1_gej* prej = (__global secp256k1_gej*) checked_malloc(sizeof(secp256k1_gej) * n, memoryPool);
   __global secp256k1_ge* prea = (__global secp256k1_ge*) checked_malloc(sizeof(secp256k1_ge) * n, memoryPool);
@@ -2633,7 +2636,7 @@ void secp256k1_ecmult(
   const secp256k1_gej *a,
   const secp256k1_scalar *na,
   const secp256k1_scalar *ng,
-  __global char* memoryPool
+  __global unsigned char* memoryPool
 ) {
   secp256k1_ge pre_a[ECMULT_TABLE_SIZE(WINDOW_A)];
   secp256k1_ge tmpa;
@@ -2713,7 +2716,7 @@ void secp256k1_ecmult_const(
   secp256k1_gej *r, 
   const secp256k1_ge *a, 
   const secp256k1_scalar *q,
-  __global char* memoryPool
+  __global unsigned char* memoryPool
 );
 //******end of ecmult_const.h******
 
@@ -2833,7 +2836,7 @@ void secp256k1_ecmult_const(
   secp256k1_gej *r, 
   const secp256k1_ge *a, 
   const secp256k1_scalar *scalar, 
-  __global char* memoryPool
+  __global unsigned char* memoryPool
 ) {
     secp256k1_ge pre_a[ECMULT_TABLE_SIZE(WINDOW_A)];
     secp256k1_ge tmpa;
@@ -3302,7 +3305,7 @@ void secp256k1_gej_copy__from__global(secp256k1_gej* output, __global const secp
 
 void secp256k1_ecmult_gen_context_build(
   __global secp256k1_ecmult_gen_context *ctx,
-  __global char* memoryPool
+  __global unsigned char* memoryPool
 ) {
   secp256k1_ge prec[1024];
   secp256k1_gej gj;
@@ -3364,9 +3367,9 @@ void secp256k1_ecmult_gen_context_build(
     }
     secp256k1_ge_set_all_gej_var(1024, prec, precj, memoryPool);
   }
-  for (j = 0; j < 64; j++) {
-    for (i = 0; i < 16; i++) {
-      secp256k1_ge_to__global__storage(&(*ctx->prec)[j][i], &prec[j*16 + i]);
+  for (j = 0; j < 64; j ++) {
+    for (i = 0; i < 16; i ++) {
+      secp256k1_ge_to__global__storage(&(*ctx->prec)[j][i], &prec[j * 16 + i]);
     }
   }
   secp256k1_ecmult_gen_blind(ctx, NULL);
@@ -3446,18 +3449,21 @@ void secp256k1_ecmult_gen_context_clear(secp256k1_ecmult_gen_context *ctx) {
   ctx->prec = NULL;
 }
 
+__constant static const char message2[50] = "At the start of context_build.\0";
+__constant static const char message3[50] = "Got to building context.\0";
+
 void secp256k1_ecmult_context_build(
   __global secp256k1_ecmult_context* output,
-  __global char* memoryPool
+  __global unsigned char* memoryPool
 ) {
-  writeStringToMemoryPoolLog("At the start of context_build. \0", 33, memoryPool);
+  writeStringToMemoryPoolLog(message2, memoryPool);
   
   secp256k1_gej gj;
 
   if (output->pre_g != NULL) {
     return;
   }
-  writeStringToMemoryPoolLog("Got to building context.\0", 26, memoryPool);
+  writeStringToMemoryPoolLog(message3, memoryPool);
   /* get the generator */
   //openCL note: secp256k1_ge_const_g is always in the __constant address space.
   secp256k1_gej_set_ge__constant(&gj, &secp256k1_ge_const_g);
@@ -3687,7 +3693,7 @@ int secp256k1_ecdsa_sig_recover(
   secp256k1_ge *pubkey, 
   const secp256k1_scalar *message, 
   int recid,
-  __global char* memoryPool
+  __global unsigned char* memoryPool
 ) {
   unsigned char brx[32];
   secp256k1_fe fx;
@@ -3730,7 +3736,7 @@ char secp256k1_ecdsa_sig_verify(
   __global const secp256k1_ge *pubkey, 
   __global const secp256k1_scalar *message, 
   __global unsigned char* comments, 
-  __global char* memoryPool
+  __global unsigned char* memoryPool
 ) {
   unsigned char c[32];
   secp256k1_scalar sn, u1, u2;
