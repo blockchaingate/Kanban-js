@@ -2,6 +2,23 @@
 
 #include "../opencl/cl/secp256k1.h"
 
+#ifndef FILE_secp256k1_CL_INCLUDED_MUST_GUARD_DUE_TO_OPENCL_COMPILER_BUG
+#define FILE_secp256k1_CL_INCLUDED_MUST_GUARD_DUE_TO_OPENCL_COMPILER_BUG
+////////////////////////////////////////////////
+//<- This file is guarded due to an open cl compiler bug 
+//(as of May 9 2018 using stock ubuntu openCL libraries) which requires that
+//the __kernel entry point of an openCL program be located immediately inside the 
+//first included file. 
+//In particular kernel entry points are not allowed
+//to reside other files included with #include directives.
+//At the time of writing, this weird behavior manifests itself only on GPU builds and not on 
+//for openCL CPU builds. Furthermore the manifestation is different on (my) NVIDIA and intel graphics cards:
+//the former fails to run with an "out of resources " error, and the latter runs 
+//producing random bytes. 
+////////////////////////////////////////////////
+
+
+
 //Except for initializations, the crypto code does not
 //(or at least, should not) allocate any memory.
 //The memory pool is a structure that holds all
@@ -12,7 +29,7 @@
 //via checked_malloc(...). This (is supposed to) happen only once,
 //during initializations/precomputations.
 //
-//The memory pool is immutable: it cannot grow, cannot be resized.
+//The memory pool is immutable: it cannot grow / be resized.
 //Pointers to elements in the pool can safeley be referenced as the pool does not move.
 //
 //Please pay attention when storing pointers into the memory pool:
@@ -29,10 +46,14 @@
 //
 //
 //Memory pool format:
-//The first 10012 bytes are reserved.
+//The first 12 bytes are reserved.
 //First 4 bytes: total memory pool size.
 //Next 4 bytes: total memory consumed from the memory pool, including the first 12 bytes.
 //Next 4 bytes: reserved for the unsigned int position of the first byte of the output.
+//
+//In addition, the following 10000 bytes may be reserved for debugging purposes 
+//(printf is not guaranteed to work out-of-the-box in older openCL versions).
+//
 void initializeMemoryPool(unsigned int totalSize, __global char* memoryPool) {
   unsigned int i;
   writeToMemoryPool(totalSize, memoryPool);
@@ -2692,7 +2713,7 @@ void secp256k1_ecmult_const(
   secp256k1_gej *r, 
   const secp256k1_ge *a, 
   const secp256k1_scalar *q,
-  __global unsigned char* memoryPool
+  __global char* memoryPool
 );
 //******end of ecmult_const.h******
 
@@ -3810,3 +3831,5 @@ char secp256k1_ecdsa_sig_verify(
 #include "../opencl/cl/secp256k1_2_parametric_address_spaces.cl"
 ///////////////////////
 ///////////////////////
+
+#endif //FILE_secp256k1_CL_INCLUDED_MUST_GUARD_DUE_TO_OPENCL_COMPILER_BUG

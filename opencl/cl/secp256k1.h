@@ -259,7 +259,7 @@ void secp256k1_ge_set_all_gej_var(
   size_t len, 
   secp256k1_ge *outputPoints, 
   const secp256k1_gej *outputPointsJacobian,
-  __global unsigned char* memoryPool
+  __global char* memoryPool
 );
 
 /** Set a batch of group elements equal to the inputs given in jacobian
@@ -393,7 +393,7 @@ int secp256k1_ecmult_gen_context_is_built(const secp256k1_ecmult_gen_context* ct
 
 void secp256k1_ecmult_gen_blind(__global secp256k1_ecmult_gen_context *ctx, const unsigned char *seed32);
 
-void secp256k1_ecmult_gen_context_build(__global secp256k1_ecmult_gen_context* ctx, __global unsigned char* memoryPool);
+void secp256k1_ecmult_gen_context_build(__global secp256k1_ecmult_gen_context* ctx, __global char* memoryPool);
 
 /** Multiply with the generator: R = a*G */
 void secp256k1_ecmult_gen(__global const secp256k1_ecmult_gen_context* ctx, secp256k1_gej *r, const secp256k1_scalar *a);
@@ -404,7 +404,7 @@ void secp256k1_ecmult_gen(__global const secp256k1_ecmult_gen_context* ctx, secp
 void secp256k1_scalar_copy__from__global(secp256k1_scalar* output, __global const secp256k1_scalar* input);
 
 //******From ecmult_impl.h******
-void secp256k1_ecmult_context_build(__global secp256k1_ecmult_context *output, __global unsigned char *memoryPool);
+void secp256k1_ecmult_context_build(__global secp256k1_ecmult_context *output, __global char *memoryPool);
 void secp256k1_gej_copy__from__global(secp256k1_gej* output, __global const secp256k1_gej* input);
 //******End of ecmult_impl.h******
 
@@ -420,7 +420,7 @@ int secp256k1_ecdsa_sig_recover(
   secp256k1_ge *pubkey, 
   const secp256k1_scalar *message, 
   int recid,
-  __global unsigned char* memoryPool
+  __global char* memoryPool
 );
 
 char secp256k1_ecdsa_sig_verify(
@@ -430,7 +430,7 @@ char secp256k1_ecdsa_sig_verify(
   __global const secp256k1_ge *pubkey, 
   __global const secp256k1_scalar *message, 
   __global unsigned char* comments, 
-  __global unsigned char* memoryPool
+  __global char* memoryPool
 );
 
 //******end of ecdsa.h******
