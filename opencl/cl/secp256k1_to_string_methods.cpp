@@ -49,11 +49,11 @@ std::string toStringSecp256k1_ECPointStorage(const secp256k1_ge_storage& input) 
 
 std::string toStringSecp256k1_MultiplicationContext(const secp256k1_ecmult_context& multiplicationContext, bool fullDetail) {
   std::stringstream out;
-  int topSuppressBoundary = ECMULT_TABLE_SIZE(WINDOW_G) - 20;
+  int topSuppressBoundary = ECMULT_TABLE_SIZE(WINDOW_G) - 10;
   for (int i = 0; i < ECMULT_TABLE_SIZE(WINDOW_G); i++){
     if (!fullDetail) {
-      if (i >= 21 && i < topSuppressBoundary){
-        if (i == 21)
+      if (i >= 10 && i < topSuppressBoundary){
+        if (i == 10)
           out << "...\n";
         continue;
       }
