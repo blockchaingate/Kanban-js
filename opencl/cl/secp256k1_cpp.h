@@ -9,7 +9,7 @@ std::string toStringSecp256k1_ECPointProjective(const secp256k1_gej& input);
 
 std::string toStringSecp256k1_ECPointStorage(const secp256k1_ge_storage& input);
 std::string toStringSecp256k1_MultiplicationContext(const secp256k1_ecmult_context& multiplicationContext, bool fullDetail);
-std::string toStringSecp256k1_GeneratorContext(const secp256k1_ecmult_gen_context& generatorContext);
+std::string toStringSecp256k1_GeneratorContext(const secp256k1_ecmult_gen_context& generatorContext, bool fullDetail);
 
 
 std::string toStringErrorLog(const unsigned char* memoryPool);

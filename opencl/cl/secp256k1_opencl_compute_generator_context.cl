@@ -7,13 +7,22 @@
 //To do: make the header file structure more intuitive.
 #endif
 
+__constant static const char messageGeneratorContext1[50] = "initialized mempool.\0";
+
 __kernel void secp256k1_opencl_compute_generator_context(
   __global unsigned char* outputMemoryPoolContainingGeneratorContext
 ) {
-  (void) outputMemoryPoolContainingGeneratorContext;
-  //secp256k1_ecmult_gen_context_build(
-  //  (__global secp256k1_ecmult_gen_context*) outputMemoryPoolContainingGeneratorContext
-  //);
+  initializeMemoryPool(1000000, outputMemoryPoolContainingGeneratorContext);
+  writeStringToMemoryPoolLog(messageGeneratorContext1, outputMemoryPoolContainingGeneratorContext);
+  
+  writeCurrentMemoryPoolSizeAsOutput(0, outputMemoryPoolContainingGeneratorContext);
+
+  __global secp256k1_ecmult_gen_context* generatorContext = (__global secp256k1_ecmult_gen_context*) checked_malloc(
+    sizeof(secp256k1_ecmult_gen_context), outputMemoryPoolContainingGeneratorContext
+  );
+  generatorContext->prec = NULL;
+
+  secp256k1_ecmult_gen_context_build(generatorContext, outputMemoryPoolContainingGeneratorContext);
 }
 
 #include "../opencl/cl/secp256k1.cl"

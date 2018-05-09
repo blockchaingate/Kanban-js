@@ -39,32 +39,40 @@
 //only be referenced by openCL and not by the C++ driver.
 //
 //Useful output recorded in the memory pool is referenced
-//by setting the third reserved byte quadruple
-//(bytes 8-12) to the the unsigned int position of
+//by setting the third, fourth, ... reserved byte quadruples
+//(bytes of indeces 7-11, 12-15, ...) to the the unsigned int position of
 //the first byte where the output is located. Naturally,
 //no data in the output should not be interpretted as a pointer.
 //
 //
 //Memory pool format:
-//The first 12 bytes are reserved.
+//The first 8 + MACRO_numberOfOutputs bytes are reserved.
 //First 4 bytes: total memory pool size.
 //Next 4 bytes: total memory consumed from the memory pool, including the first 12 bytes.
-//Next 4 bytes: reserved for the unsigned int position of the first byte of the output.
+//Next 4 * numberOfOutputs bytes: reserved for the unsigned int position of the first byte(s) of the output(s).
 //
 //In addition, the following 10000 bytes may be reserved for debugging purposes 
 //(printf is not guaranteed to work out-of-the-box in older openCL versions).
 //
+
 void initializeMemoryPool(unsigned int totalSize, __global unsigned char* memoryPool) {
   unsigned int i;
   writeToMemoryPool(totalSize, memoryPool);
-  writeToMemoryPool(12, &memoryPool[4]);
-  writeToMemoryPool(0, &memoryPool[8]);
+  unsigned int reservedBytes = 8 + 4 * MACRO_numberOfOutputs;
+  writeToMemoryPool(reservedBytes, &memoryPool[4]);
+  for (i = 0; i < MACRO_numberOfOutputs; i ++){
+    writeToMemoryPool(0, &memoryPool[8 + 4 * i]);
+  }
+  for (i = reservedBytes; i < totalSize; i ++) {
+    memoryPool[i] = (unsigned char) 0;
+  }
+  //Use this snippet if you want initialize the RAM 
+  //with some pattern other than zeroes (say, you doubt the memory is accessed properly).
   //for (i = 12; i + 4 < totalSize; i += 4){
   //  writeToMemoryPool(i, &memoryPool[i]);
   //}
-  for (i = 12; i < totalSize; i ++) {
-    memoryPool[i] = (unsigned char) 0;
-  }
+
+  //Allocate buffer for error messages:
   checked_malloc(10000, memoryPool);
 }
 
@@ -87,6 +95,19 @@ void writeToMemoryPool(unsigned int numberToWrite, __global unsigned char* memor
   memoryPoolPointer[1] = (unsigned char) (numberToWrite >> 16);
   memoryPoolPointer[2] = (unsigned char) (numberToWrite >> 8 );
   memoryPoolPointer[3] = (unsigned char) (numberToWrite      );
+}
+
+void writeCurrentMemoryPoolSizeAsOutput(unsigned int argumentIndex, __global unsigned char* memoryPool) {
+  unsigned int currentSize;
+  if (argumentIndex >= MACRO_numberOfOutputs) {
+    assertFalse("Argument index too large", memoryPool);
+  }
+  currentSize = readMemoryPoolSize(memoryPool);
+  writeToMemoryPool(currentSize, &memoryPool[8 + 4 * argumentIndex]);
+}
+
+unsigned int readMemoryPoolSize(__global const unsigned char* memoryPool) {
+  return readFromMemoryPool(&memoryPool[4]);
 }
 
 unsigned int readFromMemoryPool(__global const unsigned char* memoryPoolPointer) {
@@ -3315,8 +3336,11 @@ void secp256k1_ecmult_gen_context_build(
   if (ctx->prec != NULL) {
     return;
   }
-  ctx->prec = (__global secp256k1_ge_storage (*)[64][16]) checked_malloc(sizeof(*ctx->prec), memoryPool);
 
+  writeCurrentMemoryPoolSizeAsOutput(1, memoryPool);
+//  ctx->prec = (__global secp256k1_ge_storage (*)[64][16]) checked_malloc(sizeof(*ctx->prec), memoryPool);
+  ctx->prec = (__global secp256k1_ge_storage (*)[]) checked_malloc(sizeof((*ctx->prec)[0]) * 16 * 64, memoryPool);
+  writeToMemoryPool(sizeof((*ctx->prec)[0]) * 16 * 64, &memoryPool[16]);
   /* get the generator */
   //openCL note: secp256k1_ge_const_g is always in the __constant address space.
   secp256k1_gej_set_ge__constant(&gj, &secp256k1_ge_const_g);
@@ -3347,14 +3371,14 @@ void secp256k1_ecmult_gen_context_build(
     secp256k1_gej numsbase;
     gbase = gj; /* 16^j * G */
     numsbase = nums_gej; /* 2^j * nums. */
-    for (j = 0; j < 64; j++) {
+    for (j = 0; j < 64; j ++) {
       /* Set precj[j*16 .. j*16+15] to (numsbase, numsbase + gbase, ..., numsbase + 15*gbase). */
-      precj[j*16] = numsbase;
-      for (i = 1; i < 16; i++) {
+      precj[j * 16] = numsbase;
+      for (i = 1; i < 16; i ++) {
         secp256k1_gej_add_var(&precj[j * 16 + i], &precj[j * 16 + i - 1], &gbase, NULL);
       }
       /* Multiply gbase by 16. */
-      for (i = 0; i < 4; i++) {
+      for (i = 0; i < 4; i ++) {
         secp256k1_gej_double_var(&gbase, &gbase, NULL);
       }
       /* Multiply numbase by 2. */
@@ -3369,7 +3393,9 @@ void secp256k1_ecmult_gen_context_build(
   }
   for (j = 0; j < 64; j ++) {
     for (i = 0; i < 16; i ++) {
-      secp256k1_ge_to__global__storage(&(*ctx->prec)[j][i], &prec[j * 16 + i]);
+      //original version:
+      //secp256k1_ge_to__global__storage(&(*ctx->prec)[j][i], &prec[j * 16 + i]);
+      secp256k1_ge_to__global__storage(&(*ctx->prec)[j * 16 + i], &prec[j * 16 + i]);
     }
   }
   secp256k1_ecmult_gen_blind(ctx, NULL);
@@ -3467,8 +3493,7 @@ void secp256k1_ecmult_context_build(
   /* get the generator */
   //openCL note: secp256k1_ge_const_g is always in the __constant address space.
   secp256k1_gej_set_ge__constant(&gj, &secp256k1_ge_const_g);
-  int currentMemoryPoolSize = readFromMemoryPool(memoryPool + 4);
-  writeToMemoryPool(currentMemoryPoolSize, memoryPool + 8);
+  writeCurrentMemoryPoolSizeAsOutput(0, memoryPool);
   output->pre_g = (__global secp256k1_ge_storage (*)[]) checked_malloc(ECMULT_TABLE_SIZE(WINDOW_G) * sizeof((*output->pre_g)[0]), memoryPool);
   /* precompute the tables with odd multiples */
   secp256k1_ecmult_odd_multiples_table_storage_var(ECMULT_TABLE_SIZE(WINDOW_G), *output->pre_g, &gj, memoryPool);
@@ -3514,7 +3539,9 @@ void secp256k1_ecmult_gen(
              *    by Dag Arne Osvik, Adi Shamir, and Eran Tromer
              *    (http://www.tau.ac.il/~tromer/papers/cache.pdf)
              */
-            secp256k1_ge_storage_cmov__global(&adds, &(*ctx->prec)[j][i], i == bits);
+          secp256k1_ge_storage_cmov__global(&adds, &(*ctx->prec)[16 * j + i], i == bits);
+          //original version:
+          //secp256k1_ge_storage_cmov__global(&adds, &(*ctx->prec)[j][i], i == bits);
         }
         secp256k1_ge_from_storage(&add, &adds);
         secp256k1_gej_add_ge(r, r, &add);

@@ -20,21 +20,37 @@ void printComments(unsigned char* comments) {
   logServer << "extraMessage pr.z: " << Miscellaneous::toStringHex(extraMessage3) << Logger::endL;
 }
 
-const unsigned int GPUMemoryAvailable = 10000000; //for the time being, this should be equal to defaultBufferSize from gpu.cpp
-unsigned char bufferCentralPUMultiplicationContext[GPUMemoryAvailable];
-unsigned char bufferGraphicsPUMultiplicationContext[GPUMemoryAvailable];
+unsigned char bufferCentralPUMultiplicationContext[6000000]; //6MB for computing multiplication context
+unsigned char bufferGraphicsPUMultiplicationContext[6000000];
+
+unsigned char bufferCentralPUGeneratorContext[2000000]; //1MB for computing generators
+unsigned char bufferGraphicsPUGeneratorContext[2000000];
 
 
-extern void secp256k1_opencl_compute_multiplication_context(
-  __global unsigned char* outputMemoryPoolContainingMultiplicationContext
-);
+void getGeneratorContext(
+  const unsigned char* theMemoryPool,
+  secp256k1_ecmult_gen_context& outputGeneratorContext
+){
+  secp256k1_ecmult_gen_context_init(&outputGeneratorContext);
+  uint32_t outputPositionGeneratorContextStruct = readFromMemoryPool(&theMemoryPool[8]);
+  uint32_t outputPositionGeneratorContextContent = readFromMemoryPool(&theMemoryPool[12]);
+
+  logTest << "GOT to here pt 1 " << Logger::endL;
+  outputGeneratorContext = *((secp256k1_ecmult_gen_context*) &theMemoryPool[outputPositionGeneratorContextStruct]);
+  logTest << "GOT to here pt 2 " << Logger::endL;
+  outputGeneratorContext.prec = NULL;
+  logTest << "GOT to here pt 3 " << Logger::endL;
+  outputGeneratorContext.prec = (secp256k1_ge_storage (*)[]) &theMemoryPool[outputPositionGeneratorContextContent];
+  logTest << "GOT to here pt 4. Prec pointer:  " << std::hex << ((long) outputGeneratorContext.prec)
+  << "\nMemory pool pointer: " << std::hex << ((long) theMemoryPool) << Logger::endL;
+}
 
 void testPrintMultiplicationContext(const unsigned char* theMemoryPool, const std::string& computationID){
   uint32_t outputPositionCentralPU = readFromMemoryPool(&theMemoryPool[8]);
   logTest << computationID << Logger::endL;
   std::string memoryPoolPrintout;
   memoryPoolPrintout.assign((const char*) theMemoryPool, 1000);
-  logTest << "First 1000 characters of the memory pool: "
+  logTest << "First 1000 hex-formatted characters of the memory pool: "
   << Miscellaneous::toStringHex(memoryPoolPrintout) << Logger::endL;
   logTest << "Computation log:\n"
   << toStringErrorLog(theMemoryPool) << Logger::endL;
@@ -45,42 +61,38 @@ void testPrintMultiplicationContext(const unsigned char* theMemoryPool, const st
   << toStringSecp256k1_MultiplicationContext(multiplicationContextCentralPU, false) << Logger::endL;
 }
 
+void testPrintGeneratorContext(const unsigned char* theMemoryPool, const std::string& computationID) {
+  logTest << computationID << Logger::endL;
+  uint32_t outputPositionGeneratorContextStruct = readFromMemoryPool(&theMemoryPool[8]);
+  uint32_t outputPositionGeneratorContextContent = readFromMemoryPool(&theMemoryPool[12]);
+  uint32_t sizePrec = readFromMemoryPool(&theMemoryPool[16]);
+  logTest << "Context struct position: " << outputPositionGeneratorContextStruct << Logger::endL;
+  logTest << "Context content position: " << outputPositionGeneratorContextContent << Logger::endL;
+  logTest << "sizePrec: " << sizePrec << Logger::endL;
+
+  secp256k1_ecmult_gen_context theGeneratorContext;
+  getGeneratorContext(bufferCentralPUMultiplicationContext, theGeneratorContext);
+  logTest << "generatorContext:\n" << toStringSecp256k1_GeneratorContext(theGeneratorContext, false) << Logger::endL;
+}
+
+extern void secp256k1_opencl_compute_multiplication_context(
+  __global unsigned char* outputMemoryPoolContainingMultiplicationContext
+);
+extern void secp256k1_opencl_compute_generator_context(
+  __global unsigned char* outputMemoryPoolContainingGeneratorContext
+);
+
 int mainTest() {  
   secp256k1_opencl_compute_multiplication_context(bufferCentralPUMultiplicationContext);
   testPrintMultiplicationContext(bufferCentralPUMultiplicationContext, "Central PU");
+  secp256k1_opencl_compute_generator_context(bufferCentralPUGeneratorContext);
+  testPrintGeneratorContext(bufferCentralPUGeneratorContext, "Central PU");
+  secp256k1_ecmult_gen_context theGeneratorContext;
+  secp256k1_ecmult_gen_context_init(&theGeneratorContext);
+  getGeneratorContext(bufferCentralPUMultiplicationContext, theGeneratorContext);
 
-  GPU theGPU;
 
-  if (!theGPU.initializeKernels())
-    return false;
-  std::shared_ptr<GPUKernel> kernelMultiplicationContext = theGPU.theKernels[GPU::kernelInitializeMultiplicationContext];
-
-  cl_int ret = clEnqueueNDRangeKernel(
-    theGPU.commandQueue, kernelMultiplicationContext->kernel, 1, NULL,
-    &kernelMultiplicationContext->global_item_size, &kernelMultiplicationContext->local_item_size, 0, NULL, NULL
-  );
-  if (ret != CL_SUCCESS) {
-    logServer << "Failed to enqueue kernel. Return code: " << ret << ". " << Logger::endL;
-    return 0;
-  }
-  cl_mem& result = kernelMultiplicationContext->outputs[0]->theMemory;
-  for (int i = 0; i < 9000000; i ++) {
-    bufferGraphicsPUMultiplicationContext[i] = 0;
-  }
-  logServer << "DEBUG: got to here. " << Logger::endL;
-  ret = clEnqueueReadBuffer(theGPU.commandQueue, result, CL_TRUE, 0, 9000000, (void*) &bufferGraphicsPUMultiplicationContext, 0, NULL, NULL);
-  if (ret != CL_SUCCESS) {
-    logServer << "Failed to read buffer. Return code: " << ret << Logger::endL;
-    return - 1;
-  }
-  testPrintMultiplicationContext(bufferGraphicsPUMultiplicationContext, "Graphics PU");
-  /*
-  secp256k1_ecmult_gen_context generatorContext;
-  secp256k1_ecmult_gen_context_init(&generatorContext);
-  secp256k1_ecmult_gen_context_build(&generatorContext, &criticalFailure);
-  logTest << "\n**********\n"
-          << "DEBUG: generatorContext: " << toStringSecp256k1_GeneratorContext(generatorContext) << Logger::endL;
-  secp256k1_scalar signatureS, signatureR;
+/*  secp256k1_scalar signatureS, signatureR;
   secp256k1_scalar secretKey = SECP256K1_SCALAR_CONST(
     0, 0, 0, 0, 0, 13, 17, 19
   );
@@ -118,6 +130,42 @@ int mainTest() {
   logTest << "nonce: " << toStringSecp256k1_Scalar(nonce) << Logger::endL;
   logTest << "outputR: " << toStringSecp256k1_Scalar(signatureR) << Logger::endL;
   logTest << "outputS: " << toStringSecp256k1_Scalar(signatureS) << Logger::endL;
+
+
+*/
+
+
+
+
+
+  GPU theGPU;
+
+  if (!theGPU.initializeKernels())
+    return false;
+  std::shared_ptr<GPUKernel> kernelMultiplicationContext = theGPU.theKernels[GPU::kernelInitializeMultiplicationContext];
+
+  cl_int ret = clEnqueueNDRangeKernel(
+    theGPU.commandQueue, kernelMultiplicationContext->kernel, 1, NULL,
+    &kernelMultiplicationContext->global_item_size, &kernelMultiplicationContext->local_item_size, 0, NULL, NULL
+  );
+  if (ret != CL_SUCCESS) {
+    logServer << "Failed to enqueue kernel. Return code: " << ret << ". " << Logger::endL;
+    return 0;
+  }
+  cl_mem& result = kernelMultiplicationContext->outputs[0]->theMemory;
+  for (int i = 0; i < 4000000; i ++) {
+    bufferGraphicsPUMultiplicationContext[i] = 0;
+  }
+  logServer << "DEBUG: got to here. " << Logger::endL;
+  ret = clEnqueueReadBuffer(theGPU.commandQueue, result, CL_TRUE, 0, 4000000, (void*) &bufferGraphicsPUMultiplicationContext, 0, NULL, NULL);
+  if (ret != CL_SUCCESS) {
+    logServer << "Failed to read buffer. Return code: " << ret << Logger::endL;
+    return - 1;
+  }
+  testPrintMultiplicationContext(bufferGraphicsPUMultiplicationContext, "Graphics PU");
+  /*
+  secp256k1_ecmult_gen_context generatorContext;
+  secp256k1_ecmult_gen_context_init(&generatorContext);
 
 
   printComments(resultChar);

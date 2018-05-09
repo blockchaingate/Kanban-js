@@ -63,22 +63,32 @@ std::string toStringSecp256k1_MultiplicationContext(const secp256k1_ecmult_conte
   return out.str();
 }
 
-std::string toStringSecp256k1_GeneratorContext(const secp256k1_ecmult_gen_context& generatorContext) {
+std::string toStringSecp256k1_GeneratorContext(const secp256k1_ecmult_gen_context& generatorContext, bool fullDetail) {
   std::stringstream out;
   out << "Generator context. Blind: " << toStringSecp256k1_Scalar(generatorContext.blind) << "\n";
-
+  int numToDisplayAtEnd = 10;
+  int topSuppressBoundary = 64 * 16 - numToDisplayAtEnd;
+  int indexDisplayed = - 1;
   for (int i = 0; i < 64; i ++) {
     for (int j = 0; j < 16; j++) {
-      out << "p_" << i << "_" << j << ": " << toStringSecp256k1_ECPointStorage((*generatorContext.prec)[i][j]) << ", ";
+      indexDisplayed ++;
+      if (!fullDetail) {
+        if (indexDisplayed >= numToDisplayAtEnd && indexDisplayed < topSuppressBoundary) {
+          if (indexDisplayed == numToDisplayAtEnd){
+            out << "...\n";
+          }
+          continue;
+        }
+      }
+      out << "p_" << i << "_" << j << ": " << toStringSecp256k1_ECPointStorage((*generatorContext.prec)[16 * i + j]) << ",\n";
     }
-    out << "\n";
   }
   return out.str();
 }
 
 std::string toStringErrorLog(const unsigned char* memoryPool){
   std::string result;
-  for (int i = 12; i < 1000; i++) {
+  for (int i = 8 + 4 * MACRO_numberOfOutputs; i < 1000; i++) {
     if (memoryPool[i] == '\0')
       break;
     result.push_back((char) memoryPool[i]);

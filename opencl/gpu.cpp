@@ -175,16 +175,16 @@ bool GPU::initializeKernels() {
         {}
   ))
     return false;
-  //if (!this->createKernel(
-  //      this->kernelInitializeGeneratorContext,
-  //      {"outputGeneratorContext"},
-  //      {
-  //        SharedMemory::typeVoidPointer,
-  //      },
-  //      {},
-  //      {}
-  //))
-  //  return false;
+  if (!this->createKernel(
+        this->kernelInitializeGeneratorContext,
+        {"outputGeneratorContext"},
+        {
+          SharedMemory::typeVoidPointer,
+        },
+        {},
+        {}
+  ))
+    return false;
   //if (!this->createKernel(
   //      this->kernelVerifySignature,
   //      {"output"},
