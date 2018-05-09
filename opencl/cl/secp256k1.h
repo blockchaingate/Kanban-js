@@ -29,19 +29,7 @@
 /**********************************************************************
   Plan for openCL port.
   1.The present file is compiled both as a C program and 
-    as an openCL program. While we commit to keep both builds working 
-    in the future, for the time being, in the current development branch, 
-    only the openCL build is expected to work. 
-  2.To make this file into an openCL program, we use the file
-    
-    secp256k1_opencl_header.cl
-    
-    which internally includes this file.
-  3. This file is made into a C program using the file
-    
-    secp256k1_c_header.c
-
-    which internally includes this file.
+    as an openCL program.
  **********************************************************************/
 
 
@@ -138,7 +126,7 @@ void freeMemory__global(__global void* any);
 #define SECP256K1_FE_STORAGE_CONST(d7, d6, d5, d4, d3, d2, d1, d0) {{ (d0), (d1), (d2), (d3), (d4), (d5), (d6), (d7) }}
 #define SECP256K1_FE_STORAGE_CONST_GET(d) d.n[7], d.n[6], d.n[5], d.n[4],d.n[3], d.n[2], d.n[1], d.n[0]
 
-void secp256k1_fe_copy__from__global(secp256k1_fe* output, __global secp256k1_fe* input);
+void secp256k1_fe_copy__from__global(secp256k1_fe* output, __global const secp256k1_fe* input);
 
 //******end of field_10x26.h******
 
@@ -198,10 +186,6 @@ void secp256k1_fe_negate(secp256k1_fe *r, const secp256k1_fe *a, int m); //origi
  *  small integer. */
 void secp256k1_fe_mul_int(secp256k1_fe *r, int a); //original name: secp256k1_fe_mul_int
 
-/** Sets a field element to be the product of two others. Requires the inputs' magnitudes to be at most 8.
- *  The output magnitude is 1 (but not guaranteed to be normalized). */
-void secp256k1_fe_mul(secp256k1_fe *r, const secp256k1_fe *a, const secp256k1_fe *b); //original name: secp256k1_fe_mul
-
 /** Sets a field element to be the square of another. Requires the input's magnitude to be at most 8.
  *  The output magnitude is 1 (but not guaranteed to be normalized). */
 void secp256k1_fe_sqr(secp256k1_fe *r, const secp256k1_fe *a); //original name: secp256k1_fe_sqr
@@ -221,16 +205,7 @@ void secp256k1_fe_inv_var(secp256k1_fe *r, const secp256k1_fe *a); //original na
 /** Calculate the (modular) inverses of a batch of field elements. Requires the inputs' magnitudes to be
  *  at most 8. The output magnitudes are 1 (but not guaranteed to be normalized). The inputs and
  *  outputs must not overlap in memory. */
-void secp256k1_fe_inv_all_var(size_t len, secp256k1_fe *r, const secp256k1_fe *a); //original name: secp256k1_fe_inv_all_var
-
-/** Convert a field element to the storage type. */
-void secp256k1_fe_to_storage(secp256k1_fe_storage *r, const secp256k1_fe *a); //original name: secp256k1_fe_to_storage
-
-/** Convert a field element back from the storage type. */
-void secp256k1_fe_from_storage(secp256k1_fe *r, const secp256k1_fe_storage *a); //original name: secp256k1_fe_from_storage
-
-/** If flag is true, set *r equal to *a; otherwise leave it. Constant-time. */
-void secp256k1_fe_storage_cmov(secp256k1_fe_storage *r, const secp256k1_fe_storage *a, int flag); //original name: secp256k1_fe_storage_cmov
+void secp256k1_fe_inv_all_var(size_t len, __global secp256k1_fe *r, __global const secp256k1_fe *a);
 
 /** If flag is true, set *r equal to *a; otherwise leave it. Constant-time. */
 void secp256k1_fe_cmov(secp256k1_fe *r, const secp256k1_fe *a, int flag); //original name: secp256k1_fe_cmov
@@ -289,14 +264,19 @@ void secp256k1_ge_set_all_gej_var(
 /** Set a batch of group elements equal to the inputs given in jacobian
  *  coordinates (with known z-ratios). zr must contain the known z-ratios such
  *  that mul(a[i].z, zr[i+1]) == a[i+1].z. zr[0] is ignored. */
-void secp256k1_ge_set_table_gej_var(size_t len, secp256k1_ge *r, const secp256k1_gej *a, const secp256k1_fe *zr);
+void secp256k1_ge_set_table_gej_var(size_t len, __global secp256k1_ge *r, __global const secp256k1_gej *a, __global const secp256k1_fe *zr);
 
 /** Bring a batch inputs given in jacobian coordinates (with known z-ratios) to
  *  the same global z "denominator". zr must contain the known z-ratios such
  *  that mul(a[i].z, zr[i+1]) == a[i+1].z. zr[0] is ignored. The x and y
  *  coordinates of the result are stored in r, the common z coordinate is
  *  stored in globalz. */
-void secp256k1_ge_globalz_set_table_gej(size_t len, secp256k1_ge *r, secp256k1_fe *globalz, const secp256k1_gej *a, const secp256k1_fe *zr);
+void secp256k1_ge_globalz_set_table_gej(
+  size_t len, secp256k1_ge *r,
+  secp256k1_fe *globalz, 
+  __global const secp256k1_gej *a, 
+  __global const secp256k1_fe *zr
+);
 
 /** Set a group element (jacobian) equal to the point at infinity. */
 void secp256k1_gej_set_infinity(secp256k1_gej *r);
@@ -337,19 +317,11 @@ void secp256k1_gej_clear(secp256k1_gej *r);
 /** Clear a secp256k1_ge to prevent leaking sensitive information. */
 void secp256k1_ge_clear(secp256k1_ge *r);
 
-/** Convert a group element to the storage type. */
-void secp256k1_ge_to_storage(secp256k1_ge_storage *r, const secp256k1_ge *a);
-
-/** Convert a group element back from the storage type. */
-void secp256k1_ge_from_storage(secp256k1_ge *r, const secp256k1_ge_storage *a);
-
-/** If flag is true, set *r equal to *a; otherwise leave it. Constant-time. */
-void secp256k1_ge_storage_cmov(secp256k1_ge_storage *r, const secp256k1_ge_storage *a, int flag);
-
 /** Rescale a jacobian point by b which must be non-zero. Constant-time. */
 void secp256k1_gej_rescale(secp256k1_gej *r, const secp256k1_fe *b);
 
 //******end of group.h******
+
 
 
 //******From ecmult.h******
@@ -375,7 +347,7 @@ void secp256k1_gej_rescale(secp256k1_gej *r, const secp256k1_fe *b);
 typedef struct {
   /* For accelerating the computation of a*P + b*G: */
   //Size when constructed: ECMULT_TABLE_SIZE(WINDOW_G)
-  secp256k1_ge_storage (*pre_g)[];    /* odd multiples of the generator */
+  __global secp256k1_ge_storage (*pre_g)[];    /* odd multiples of the generator */
 } secp256k1_ecmult_context;
 
 //static void secp256k1_ecmult_context_clone(secp256k1_ecmult_context *dst,
@@ -383,7 +355,14 @@ typedef struct {
 int secp256k1_ecmult_context_is_built(const secp256k1_ecmult_context *ctx);
 
 /** Double multiply: R = na*A + ng*G */
-void secp256k1_ecmult(const secp256k1_ecmult_context *ctx, secp256k1_gej *r, const secp256k1_gej *a, const secp256k1_scalar *na, const secp256k1_scalar *ng);
+void secp256k1_ecmult(
+  __global const secp256k1_ecmult_context *ctx, 
+  secp256k1_gej *r, 
+  const secp256k1_gej *a, 
+  const secp256k1_scalar *na, 
+  const secp256k1_scalar *ng,
+  __global unsigned char* memoryPool
+);
 //******end of ecmult.h******
 
 
@@ -402,7 +381,7 @@ typedef struct {
      * None of the resulting prec group elements have a known scalar, and neither do any of
      * the intermediate sums while computing a*G.
      */
-    secp256k1_ge_storage (*prec)[64][16]; /* prec[j][i] = 16^j * i * G + U_i */
+    __global secp256k1_ge_storage (*prec)[64][16]; /* prec[j][i] = 16^j * i * G + U_i */
     secp256k1_scalar blind;
     secp256k1_gej initial;
 } secp256k1_ecmult_gen_context;
@@ -425,7 +404,7 @@ void secp256k1_scalar_copy__from__global(secp256k1_scalar* output, __global cons
 
 //******From ecmult_impl.h******
 void secp256k1_ecmult_context_build(__global secp256k1_ecmult_context *output, __global unsigned char *memoryPool);
-void secp256k1_gej_copy__from__global(secp256k1_gej* output, __global secp256k1_gej* input);
+void secp256k1_gej_copy__from__global(secp256k1_gej* output, __global const secp256k1_gej* input);
 //******End of ecmult_impl.h******
 
 
@@ -433,7 +412,26 @@ void secp256k1_gej_copy__from__global(secp256k1_gej* output, __global secp256k1_
 int secp256k1_ecdsa_sig_parse(secp256k1_scalar *r, secp256k1_scalar *s, const unsigned char *sig, size_t size);
 int secp256k1_ecdsa_sig_serialize(unsigned char *sig, size_t *size, const secp256k1_scalar *r, const secp256k1_scalar *s);
 int secp256k1_ecdsa_sig_sign(__global const secp256k1_ecmult_gen_context *ctx, secp256k1_scalar* r, secp256k1_scalar* s, const secp256k1_scalar *seckey, const secp256k1_scalar *message, const secp256k1_scalar *nonce, int *recid);
-int secp256k1_ecdsa_sig_recover(const secp256k1_ecmult_context *ctx, const secp256k1_scalar* r, const secp256k1_scalar* s, secp256k1_ge *pubkey, const secp256k1_scalar *message, int recid);
+int secp256k1_ecdsa_sig_recover(
+  __global const secp256k1_ecmult_context *ctx, 
+  const secp256k1_scalar* r, 
+  const secp256k1_scalar* s, 
+  secp256k1_ge *pubkey, 
+  const secp256k1_scalar *message, 
+  int recid,
+  __global unsigned char* memoryPool
+);
+
+char secp256k1_ecdsa_sig_verify(
+  __global const secp256k1_ecmult_context *ctx, 
+  __global const secp256k1_scalar* r, 
+  __global const secp256k1_scalar* s, 
+  __global const secp256k1_ge *pubkey, 
+  __global const secp256k1_scalar *message, 
+  __global unsigned char* comments, 
+  __global unsigned char* memoryPool
+);
+
 //******end of ecdsa.h******
 
 

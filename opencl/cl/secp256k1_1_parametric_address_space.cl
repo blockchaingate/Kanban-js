@@ -8,7 +8,14 @@
 #include "../opencl/cl/secp256k1.h"
 
 
-void APPEND_ADDRESS_SPACE(memoryCopy)(unsigned char* destination, const unsigned char* source, int amount) {
+void APPEND_ADDRESS_SPACE(memoryCopy)(unsigned char* destination, ADDRESS_SPACE const unsigned char* source, int amount) {
+  int i;
+  for (i = 0; i < amount; i ++){
+    destination[i] = source[i];
+  }
+}
+
+void APPEND_ADDRESS_SPACE(memoryCopy_to__global)(__global unsigned char* destination, ADDRESS_SPACE const unsigned char* source, int amount) {
   int i;
   for (i = 0; i < amount; i ++){
     destination[i] = source[i];
@@ -409,7 +416,7 @@ void APPEND_ADDRESS_SPACE(secp256k1_fe_mul)(secp256k1_fe *r, const secp256k1_fe 
 #endif
 }
 
-void APPEND_ADDRESS_SPACE(secp256k1_fe_copy__to__global)(__global secp256k1_fe* output, ADDRESS_SPACE secp256k1_fe* input){
+void APPEND_ADDRESS_SPACE(secp256k1_fe_copy__to__global)(__global secp256k1_fe* output, ADDRESS_SPACE const secp256k1_fe* input){
   output->n[0] = input->n[0];
   output->n[1] = input->n[1];
   output->n[2] = input->n[2];
@@ -422,10 +429,121 @@ void APPEND_ADDRESS_SPACE(secp256k1_fe_copy__to__global)(__global secp256k1_fe* 
   output->n[9] = input->n[9];
 }
 
+void APPEND_ADDRESS_SPACE(secp256k1_fe_storage_cmov)(
+  secp256k1_fe_storage *r, 
+  ADDRESS_SPACE const secp256k1_fe_storage *a, 
+  int flag
+) {
+  uint32_t mask0, mask1;
+  mask0 = flag + ~((uint32_t)0);
+  mask1 = ~mask0;
+  r->n[0] = (r->n[0] & mask0) | (a->n[0] & mask1);
+  r->n[1] = (r->n[1] & mask0) | (a->n[1] & mask1);
+  r->n[2] = (r->n[2] & mask0) | (a->n[2] & mask1);
+  r->n[3] = (r->n[3] & mask0) | (a->n[3] & mask1);
+  r->n[4] = (r->n[4] & mask0) | (a->n[4] & mask1);
+  r->n[5] = (r->n[5] & mask0) | (a->n[5] & mask1);
+  r->n[6] = (r->n[6] & mask0) | (a->n[6] & mask1);
+  r->n[7] = (r->n[7] & mask0) | (a->n[7] & mask1);
+}
+
+void APPEND_ADDRESS_SPACE(secp256k1_fe_storage_cmov_to__global)(
+  __global secp256k1_fe_storage *r, 
+  ADDRESS_SPACE const secp256k1_fe_storage *a, 
+  int flag
+) {
+  uint32_t mask0, mask1;
+  mask0 = flag + ~((uint32_t)0);
+  mask1 = ~mask0;
+  r->n[0] = (r->n[0] & mask0) | (a->n[0] & mask1);
+  r->n[1] = (r->n[1] & mask0) | (a->n[1] & mask1);
+  r->n[2] = (r->n[2] & mask0) | (a->n[2] & mask1);
+  r->n[3] = (r->n[3] & mask0) | (a->n[3] & mask1);
+  r->n[4] = (r->n[4] & mask0) | (a->n[4] & mask1);
+  r->n[5] = (r->n[5] & mask0) | (a->n[5] & mask1);
+  r->n[6] = (r->n[6] & mask0) | (a->n[6] & mask1);
+  r->n[7] = (r->n[7] & mask0) | (a->n[7] & mask1);
+}
+
+void APPEND_ADDRESS_SPACE(secp256k1_fe_to_storage)(secp256k1_fe_storage *r, ADDRESS_SPACE const secp256k1_fe *a) {
+    r->n[0] = a->n[0] | a->n[1] << 26;
+    r->n[1] = a->n[1] >> 6 | a->n[2] << 20;
+    r->n[2] = a->n[2] >> 12 | a->n[3] << 14;
+    r->n[3] = a->n[3] >> 18 | a->n[4] << 8;
+    r->n[4] = a->n[4] >> 24 | a->n[5] << 2 | a->n[6] << 28;
+    r->n[5] = a->n[6] >> 4 | a->n[7] << 22;
+    r->n[6] = a->n[7] >> 10 | a->n[8] << 16;
+    r->n[7] = a->n[8] >> 16 | a->n[9] << 10;
+}
+
+void APPEND_ADDRESS_SPACE(secp256k1_fe_to__global__storage)(__global secp256k1_fe_storage *r, ADDRESS_SPACE const secp256k1_fe *a) {
+    r->n[0] = a->n[0] | a->n[1] << 26;
+    r->n[1] = a->n[1] >> 6 | a->n[2] << 20;
+    r->n[2] = a->n[2] >> 12 | a->n[3] << 14;
+    r->n[3] = a->n[3] >> 18 | a->n[4] << 8;
+    r->n[4] = a->n[4] >> 24 | a->n[5] << 2 | a->n[6] << 28;
+    r->n[5] = a->n[6] >> 4 | a->n[7] << 22;
+    r->n[6] = a->n[7] >> 10 | a->n[8] << 16;
+    r->n[7] = a->n[8] >> 16 | a->n[9] << 10;
+}
+
+void APPEND_ADDRESS_SPACE(secp256k1_fe_from_storage)(secp256k1_fe* r, ADDRESS_SPACE const secp256k1_fe_storage* a) {
+  r->n[0] = a->n[0] & 0x3FFFFFFUL;
+  r->n[1] = a->n[0] >> 26 | ((a->n[1] << 6) & 0x3FFFFFFUL);
+  r->n[2] = a->n[1] >> 20 | ((a->n[2] << 12) & 0x3FFFFFFUL);
+  r->n[3] = a->n[2] >> 14 | ((a->n[3] << 18) & 0x3FFFFFFUL);
+  r->n[4] = a->n[3] >> 8 | ((a->n[4] << 24) & 0x3FFFFFFUL);
+  r->n[5] = (a->n[4] >> 2) & 0x3FFFFFFUL;
+  r->n[6] = a->n[4] >> 28 | ((a->n[5] << 4) & 0x3FFFFFFUL);
+  r->n[7] = a->n[5] >> 22 | ((a->n[6] << 10) & 0x3FFFFFFUL);
+  r->n[8] = a->n[6] >> 16 | ((a->n[7] << 16) & 0x3FFFFFFUL);
+  r->n[9] = a->n[7] >> 10;
+#ifdef VERIFY
+  r->magnitude = 1;
+  r->normalized = 1;
+#endif
+}
+
+void APPEND_ADDRESS_SPACE(secp256k1_fe_from_storage__to__global)(__global secp256k1_fe* r, ADDRESS_SPACE const secp256k1_fe_storage* a) {
+  r->n[0] = a->n[0] & 0x3FFFFFFUL;
+  r->n[1] = a->n[0] >> 26 | ((a->n[1] << 6) & 0x3FFFFFFUL);
+  r->n[2] = a->n[1] >> 20 | ((a->n[2] << 12) & 0x3FFFFFFUL);
+  r->n[3] = a->n[2] >> 14 | ((a->n[3] << 18) & 0x3FFFFFFUL);
+  r->n[4] = a->n[3] >> 8 | ((a->n[4] << 24) & 0x3FFFFFFUL);
+  r->n[5] = (a->n[4] >> 2) & 0x3FFFFFFUL;
+  r->n[6] = a->n[4] >> 28 | ((a->n[5] << 4) & 0x3FFFFFFUL);
+  r->n[7] = a->n[5] >> 22 | ((a->n[6] << 10) & 0x3FFFFFFUL);
+  r->n[8] = a->n[6] >> 16 | ((a->n[7] << 16) & 0x3FFFFFFUL);
+  r->n[9] = a->n[7] >> 10;
+#ifdef VERIFY
+  r->magnitude = 1;
+  r->normalized = 1;
+#endif
+}
+
 //******End of field_10x26_impl.h******
 
 
 //******From group_impl.h******
+void APPEND_ADDRESS_SPACE(secp256k1_ge_from_storage)(secp256k1_ge* r, ADDRESS_SPACE const secp256k1_ge_storage* a) {
+  APPEND_ADDRESS_SPACE(secp256k1_fe_from_storage)(&r->x, &a->x);
+  APPEND_ADDRESS_SPACE(secp256k1_fe_from_storage)(&r->y, &a->y);
+  r->infinity = 0;
+}
+
+void APPEND_ADDRESS_SPACE(secp256k1_ge_storage_cmov)(secp256k1_ge_storage *r, ADDRESS_SPACE const secp256k1_ge_storage *a, int flag) {
+  APPEND_ADDRESS_SPACE(secp256k1_fe_storage_cmov)(&r->x, &a->x, flag);
+  APPEND_ADDRESS_SPACE(secp256k1_fe_storage_cmov)(&r->y, &a->y, flag);
+}
+
+void APPEND_ADDRESS_SPACE(secp256k1_ge_storage_cmov__to__global)(
+  __global secp256k1_ge_storage *r,
+  ADDRESS_SPACE const secp256k1_ge_storage *a, 
+  int flag
+) {
+  APPEND_ADDRESS_SPACE(secp256k1_fe_storage_cmov_to__global)(&r->x, &a->x, flag);
+  APPEND_ADDRESS_SPACE(secp256k1_fe_storage_cmov_to__global)(&r->y, &a->y, flag);
+}
 
 void APPEND_ADDRESS_SPACE(secp256k1_gej_add_ge_var)(secp256k1_gej *r, const secp256k1_gej *a, ADDRESS_SPACE const secp256k1_ge *b, secp256k1_fe *rzr) {
   /* 8 mul, 3 sqr, 4 normalize, 12 mul_int/add/negate */
@@ -489,110 +607,41 @@ void APPEND_ADDRESS_SPACE(secp256k1_gej_add_ge_var)(secp256k1_gej *r, const secp
 //******end of group_impl.h******
 
 
+//******From group.h******
+void APPEND_ADDRESS_SPACE(secp256k1_ge_to_storage)(secp256k1_ge_storage *r, ADDRESS_SPACE const secp256k1_ge *a) {
+  secp256k1_fe x, y;
+  VERIFY_CHECK(!a->infinity);
+  x = a->x;
+  secp256k1_fe_normalize(&x);
+  y = a->y;
+  secp256k1_fe_normalize(&y);
+  secp256k1_fe_to_storage(&r->x, &x);
+  secp256k1_fe_to_storage(&r->y, &y);
+}
+
+void APPEND_ADDRESS_SPACE(secp256k1_ge_to__global__storage)(__global secp256k1_ge_storage *r, ADDRESS_SPACE const secp256k1_ge *a) {
+  secp256k1_fe x, y;
+  VERIFY_CHECK(!a->infinity);
+  x = a->x;
+  secp256k1_fe_normalize(&x);
+  y = a->y;
+  secp256k1_fe_normalize(&y);
+  secp256k1_fe_to_storage(&r->x, &x);
+  secp256k1_fe_to_storage(&r->y, &y);
+}
+//******end of group.h******
+
+
 //******From ecmult_impl.h******
 
-void APPEND_ADDRESS_SPACE(secp256k1_ecmult)(
-  ADDRESS_SPACE const secp256k1_ecmult_context *ctx,
-  secp256k1_gej *r,
-  const secp256k1_gej *a,
-  const secp256k1_scalar *na,
-  const secp256k1_scalar *ng
-) {
-    secp256k1_ge pre_a[ECMULT_TABLE_SIZE(WINDOW_A)];
-    secp256k1_ge tmpa;
-    secp256k1_fe Z;
-    int wnaf_na[256];
-    int bits_na;
-    int wnaf_ng[256];
-    int bits_ng;
-    int i;
-    int bits;
 
-    /* build wnaf representation for na. */
-    bits_na     = secp256k1_ecmult_wnaf(wnaf_na,     256, na,      WINDOW_A);
-    bits = bits_na;
-
-    /* Calculate odd multiples of a.
-     * All multiples are brought to the same Z 'denominator', which is stored
-     * in Z. Due to secp256k1' isomorphism we can do all operations pretending
-     * that the Z coordinate was 1, use affine addition formulae, and correct
-     * the Z coordinate of the result once at the end.
-     * The exception is the precomputed G table points, which are actually
-     * affine. Compared to the base used for other points, they have a Z ratio
-     * of 1/Z, so we can use secp256k1_gej_add_zinv_var, which uses the same
-     * isomorphism to efficiently add with a known Z inverse.
-     */
-    secp256k1_ecmult_odd_multiples_table_globalz_windowa(pre_a, &Z, a);
-
-#ifdef USE_ENDOMORPHISM
-    for (i = 0; i < ECMULT_TABLE_SIZE(WINDOW_A); i++) {
-        secp256k1_ge_mul_lambda(&pre_a_lam[i], &pre_a[i]);
-    }
-
-    /* split ng into ng_1 and ng_128 (where gn = gn_1 + gn_128*2^128, and gn_1 and gn_128 are ~128 bit) */
-    secp256k1_scalar_split_128(&ng_1, &ng_128, ng);
-
-    /* Build wnaf representation for ng_1 and ng_128 */
-    bits_ng_1   = secp256k1_ecmult_wnaf(wnaf_ng_1,   129, &ng_1,   WINDOW_G);
-    bits_ng_128 = secp256k1_ecmult_wnaf(wnaf_ng_128, 129, &ng_128, WINDOW_G);
-    if (bits_ng_1 > bits) {
-        bits = bits_ng_1;
-    }
-    if (bits_ng_128 > bits) {
-        bits = bits_ng_128;
-    }
-#else
-    bits_ng     = secp256k1_ecmult_wnaf(wnaf_ng,     256, ng,      WINDOW_G);
-    if (bits_ng > bits) {
-        bits = bits_ng;
-    }
-#endif
-
-    secp256k1_gej_set_infinity(r);
-
-    for (i = bits - 1; i >= 0; i--) {
-        int n;
-        secp256k1_gej_double_var(r, r, NULL);
-#ifdef USE_ENDOMORPHISM
-        if (i < bits_na_1 && (n = wnaf_na_1[i])) {
-            ECMULT_TABLE_GET_GE(&tmpa, pre_a, n, WINDOW_A);
-            secp256k1_gej_add_ge_var(r, r, &tmpa, NULL);
-        }
-        if (i < bits_na_lam && (n = wnaf_na_lam[i])) {
-            ECMULT_TABLE_GET_GE(&tmpa, pre_a_lam, n, WINDOW_A);
-            secp256k1_gej_add_ge_var(r, r, &tmpa, NULL);
-        }
-        if (i < bits_ng_1 && (n = wnaf_ng_1[i])) {
-            ECMULT_TABLE_GET_GE_STORAGE(&tmpa, *ctx->pre_g, n, WINDOW_G);
-            secp256k1_gej_add_zinv_var(r, r, &tmpa, &Z);
-        }
-        if (i < bits_ng_128 && (n = wnaf_ng_128[i])) {
-            ECMULT_TABLE_GET_GE_STORAGE(&tmpa, *ctx->pre_g_128, n, WINDOW_G);
-            secp256k1_gej_add_zinv_var(r, r, &tmpa, &Z);
-        }
-#else
-        if (i < bits_na && (n = wnaf_na[i])) {
-            ECMULT_TABLE_GET_GE(&tmpa, pre_a, n, WINDOW_A);
-            secp256k1_gej_add_ge_var(r, r, &tmpa, NULL);
-        }
-        if (i < bits_ng && (n = wnaf_ng[i])) {
-            ECMULT_TABLE_GET_GE_STORAGE(&tmpa, *ctx->pre_g, n, WINDOW_G);
-            secp256k1_gej_add_zinv_var(r, r, &tmpa, &Z);
-        }
-#endif
-    }
-
-    if (!r->infinity) {
-        secp256k1_fe_mul(&r->z, &r->z, &Z);
-    }
-}
 
 //******end of ecmult_impl.h******
 
 
 //******From ecmult_gen_impl.h******
 
-void APPEND_ADDRESS_SPACE(secp256k1_gej_copy__to__global)(__global secp256k1_gej* output, ADDRESS_SPACE secp256k1_gej* input){
+void APPEND_ADDRESS_SPACE(secp256k1_gej_copy__to__global)(__global secp256k1_gej* output, ADDRESS_SPACE const secp256k1_gej* input){
   output->infinity = input->infinity;
   APPEND_ADDRESS_SPACE(secp256k1_fe_copy__to__global)(&output->x, &input->x);
   APPEND_ADDRESS_SPACE(secp256k1_fe_copy__to__global)(&output->y, &input->y);
@@ -721,7 +770,7 @@ void APPEND_ADDRESS_SPACE(secp256k1_scalar_mul_512)(
     l[15] = c0;
 }
 
-static void APPEND_ADDRESS_SPACE(secp256k1_scalar_mul)(
+void APPEND_ADDRESS_SPACE(secp256k1_scalar_mul)(
   secp256k1_scalar *r, 
   const secp256k1_scalar *a, 
   ADDRESS_SPACE const secp256k1_scalar *b
@@ -1000,38 +1049,4 @@ void APPEND_ADDRESS_SPACE(secp256k1_scalar_inverse_var)(secp256k1_scalar *r, ADD
 
 //******From ecdsa_impl.h******
 
-int APPEND_ADDRESS_SPACE(secp256k1_ecdsa_sig_recover)(const secp256k1_ecmult_context *ctx, const secp256k1_scalar *sigr, const secp256k1_scalar* sigs, secp256k1_ge *pubkey, const secp256k1_scalar *message, int recid) {
-  unsigned char brx[32];
-  secp256k1_fe fx;
-  secp256k1_ge x;
-  secp256k1_gej xj;
-  secp256k1_scalar rn, u1, u2;
-  secp256k1_gej qj;
-
-  if (secp256k1_scalar_is_zero(sigr) || secp256k1_scalar_is_zero(sigs)) {
-    return 0;
-  }
-
-  secp256k1_scalar_get_b32(brx, sigr);
-  VERIFY_CHECK(secp256k1_fe_set_b32(&fx, brx)); /* brx comes from a scalar, so is less than the order; certainly less than p */
-  if (recid & 2) {
-    //openCL note: secp256k1_ecdsa_const_p_minus_order is always in the __constant address space.
-    if (secp256k1_fe_cmp_var__constant(&fx, &secp256k1_ecdsa_const_p_minus_order) >= 0) {
-      return 0;
-    }
-    //openCL note: secp256k1_ecdsa_const_p_minus_order is always in the __constant address space.
-    secp256k1_fe_add__constant(&fx, &secp256k1_ecdsa_const_order_as_fe);
-  }
-  if (!secp256k1_ge_set_xo_var(&x, &fx, recid & 1)) {
-    return 0;
-  }
-  secp256k1_gej_set_ge(&xj, &x);
-  secp256k1_scalar_inverse_var(&rn, sigr);
-  secp256k1_scalar_mul(&u1, &rn, message);
-  secp256k1_scalar_negate(&u1, &u1);
-  secp256k1_scalar_mul(&u2, &rn, sigs);
-  secp256k1_ecmult(ctx, &qj, &xj, &u2, &u1);
-  secp256k1_ge_set_gej_var(pubkey, &qj);
-  return !secp256k1_gej_is_infinity(&qj);
-}
 //******end of ecdsa_impl.h******

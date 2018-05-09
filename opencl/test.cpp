@@ -24,12 +24,20 @@ const unsigned int GPUMemoryAvailable = 10000000; //for the time being, this sho
 unsigned char bufferCentralPUMultiplicationContext[GPUMemoryAvailable];
 unsigned char bufferGraphicsPUMultiplicationContext[GPUMemoryAvailable];
 
+
+extern void secp256k1_opencl_compute_multiplication_context(
+  __global unsigned char* outputMemoryPoolContainingMultiplicationContext
+);
+
 int mainTest() {
-  initializeMemoryPool(9000000, bufferCentralPUMultiplicationContext);
-  secp256k1_ecmult_context* multiplicationContextCentralPU = (secp256k1_ecmult_context*) checked_malloc(sizeof(secp256k1_ecmult_context), bufferCentralPUMultiplicationContext);
-  multiplicationContextCentralPU->pre_g = NULL;
-  secp256k1_ecmult_context_build(multiplicationContextCentralPU, bufferCentralPUMultiplicationContext);
-  logTest << "DEBUG: multiplicationContext:\n CPU:\n" << toStringSecp256k1_MultiplicationContext(*multiplicationContextCentralPU) << Logger::endL;
+  secp256k1_opencl_compute_multiplication_context(bufferCentralPUMultiplicationContext);
+
+  uint32_t outputPositionCentralPU = readFromMemoryPool(bufferCentralPUMultiplicationContext + 8);
+  logTest << "DEBUG: outputPositionCentralPU: " << outputPositionCentralPU << Logger::endL;
+  secp256k1_ecmult_context multiplicationContextCentralPU;
+  multiplicationContextCentralPU.pre_g = (secp256k1_ge_storage(*)[]) (bufferCentralPUMultiplicationContext + outputPositionCentralPU);
+  logTest << "DEBUG: multiplicationContext:\n Central PU:\n"
+  << toStringSecp256k1_MultiplicationContext(multiplicationContextCentralPU) << Logger::endL;
 
 
   GPU theGPU;
@@ -42,11 +50,11 @@ int mainTest() {
     &kernelMultiplicationContext->global_item_size, &kernelMultiplicationContext->local_item_size, 0, NULL, NULL
   );
   if (ret != CL_SUCCESS) {
-    logServer << "Failed to enqueue kernel. Return code: " << ret << ". ";
+    logServer << "Failed to enqueue kernel. Return code: " << ret << ". " << Logger::endL;
     return 0;
   }
   cl_mem& result = kernelMultiplicationContext->outputs[0]->theMemory;
-  for (int i = 0 ; i< 9000000; i ++) {
+  for (int i = 0; i < 9000000; i ++) {
     bufferGraphicsPUMultiplicationContext[i] = 0;
   }
   ret = clEnqueueReadBuffer(theGPU.commandQueue, result, CL_TRUE, 0, 9000000, &bufferGraphicsPUMultiplicationContext, 0, NULL, NULL);
@@ -55,6 +63,7 @@ int mainTest() {
     return - 1;
   }
   uint32_t outputPosition = readFromMemoryPool(bufferGraphicsPUMultiplicationContext + 8);
+  logTest << "DEBUG: outputPositionCentralPU: " << outputPositionCentralPU << Logger::endL;
   secp256k1_ecmult_context multiplicationContextGraphicsPU;
   multiplicationContextGraphicsPU.pre_g = (secp256k1_ge_storage(*)[]) (bufferGraphicsPUMultiplicationContext + outputPosition);
   logTest << "DEBUG: multiplicationContext:\n CPU:\n" << toStringSecp256k1_MultiplicationContext(multiplicationContextGraphicsPU) << Logger::endL;

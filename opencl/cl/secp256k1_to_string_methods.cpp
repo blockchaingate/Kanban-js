@@ -32,6 +32,14 @@ std::string toStringSecp256k1_ECPoint(const secp256k1_ge& input) {
   return out.str();
 }
 
+std::string toStringSecp256k1_ECPointProjective(const secp256k1_gej& input) {
+  std::stringstream out;
+  out << "\nx: " << toStringSecp256k1_FieldElement(input.x);
+  out << "\ny: " << toStringSecp256k1_FieldElement(input.y);
+  out << "\nz: " << toStringSecp256k1_FieldElement(input.z);
+  return out.str();
+}
+
 std::string toStringSecp256k1_ECPointStorage(const secp256k1_ge_storage& input) {
   std::stringstream out;
   out << "(x,y): " << toStringSecp256k1_FieldElementStorage(input.x);
