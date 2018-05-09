@@ -60,7 +60,7 @@ typedef struct {
 //Memory pool format: in the notes before the definition of initializeMemoryPool.
 __global void* checked_malloc(unsigned int size, __global unsigned char* memoryPool);
 void writeToMemoryPool(unsigned int numberToWrite, __global unsigned char* memoryPoolPointer);
-void writeStringToMemoryPoolLog(__constant const char* message, __global unsigned char* memoryPool);
+void writeStringToMemoryPoolLog(__constant const char* message, unsigned int length, __global unsigned char* memoryPool);
 
 unsigned int readFromMemoryPool(__global unsigned char* memoryPoolPointer);
 

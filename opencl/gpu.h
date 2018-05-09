@@ -74,7 +74,7 @@ public:
   bool constructArguments(
       const std::vector<std::string>& argumentNames,
       const std::vector<int>& argumentTypes,
-      bool isInput);
+      bool isInput, bool isOutput);
   void writeToBuffer(unsigned argumentNumber, const std::vector<char>& input);
   bool writeToBuffer(unsigned argumentNumber, const std::string& input);
   bool writeToBuffer(unsigned argumentNumber, const void* input, size_t size);
