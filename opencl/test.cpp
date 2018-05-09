@@ -62,7 +62,7 @@ int mainTest() {
   for (int i = 0; i < 9000000; i ++) {
     bufferGraphicsPUMultiplicationContext[i] = 0;
   }
-  ret = clEnqueueReadBuffer(theGPU.commandQueue, result, CL_TRUE, 0, 9000000, &bufferGraphicsPUMultiplicationContext, 0, NULL, NULL);
+  ret = clEnqueueReadBuffer(theGPU.commandQueue, result, CL_TRUE, 2, 9000000, &bufferGraphicsPUMultiplicationContext, 0, NULL, NULL);
   if (ret != CL_SUCCESS) {
     logServer << "Failed to read buffer. Return code: " << ret << Logger::endL;
     return - 1;

@@ -147,22 +147,22 @@ bool GPU::initialize() {
 
 bool GPU::initializeKernels() {
   this->initialize();
-  if (!this->createKernel(
-        this->kernelSHA256,
-        {"result"},
-        {SharedMemory::typeVoidPointer},
-        {"offset", "length", "messageIndex", "message"},
-        {SharedMemory::typeUint, SharedMemory::typeUint, SharedMemory::typeUint, SharedMemory::typeVoidPointer}
-  ))
-    return false;
-  if (!this->createKernel(
-        this->kernelTestBuffer,
-        {"buffer"},
-        {SharedMemory::typeVoidPointer},
-        {},
-        {}
-  ))
-    return false;
+  //if (!this->createKernel(
+  //      this->kernelSHA256,
+  //      {"result"},
+  //      {SharedMemory::typeVoidPointer},
+  //      {"offset", "length", "messageIndex", "message"},
+  //      {SharedMemory::typeUint, SharedMemory::typeUint, SharedMemory::typeUint, SharedMemory::typeVoidPointer}
+  //))
+  //  return false;
+  //if (!this->createKernel(
+  //      this->kernelTestBuffer,
+  //      {"buffer"},
+  //      {SharedMemory::typeVoidPointer},
+  //      {},
+  //      {}
+  //))
+  //  return false;
   if (!this->createKernel(
         this->kernelInitializeMultiplicationContext,
         {"outputMultiplicationContext"},
@@ -299,8 +299,8 @@ bool GPUKernel::constructFromFileName(
     return false;
   }
   logGPU << "Kernel created, allocating buffers..." << Logger::endL;
-  this->constructArguments(outputNames, outputTypes, false);
-  this->constructArguments(inputNames, inputTypes, true);
+  this->constructArguments(outputNames, outputTypes, true, true);
+  this->constructArguments(inputNames, inputTypes, true, false);
   this->SetArguments();
   logGPU << "Kernel creation successful. " << Logger::endL;
   return true;
@@ -309,11 +309,24 @@ bool GPUKernel::constructFromFileName(
 bool GPUKernel::constructArguments(
   const std::vector<std::string>& argumentNames,
   const std::vector<int> &argumentTypes,
-  bool isInput
+  bool isInput, bool isOutput
 ) {
-  std::vector<std::shared_ptr<SharedMemory> >& theArgs = isInput ? this->inputs : this->outputs;
+  std::vector<std::shared_ptr<SharedMemory> >& theArgs = isOutput ? this->outputs : this->inputs;
   cl_int ret = CL_SUCCESS;
-  cl_mem_flags bufferFlag = isInput ? CL_MEM_READ_ONLY: CL_MEM_WRITE_ONLY;
+  cl_mem_flags bufferFlag = CL_MEM_READ_WRITE;
+  if (isInput && isOutput) {
+    bufferFlag = CL_MEM_READ_WRITE;
+  }
+  if (isInput && !isOutput) {
+    bufferFlag = CL_MEM_READ_ONLY;
+  }
+  if (!isInput && isOutput ) {
+    bufferFlag = CL_MEM_WRITE_ONLY;
+  }
+  if (!isInput && !isOutput) {
+    logGPU << "GPU kernel arguments are neither input nor output" << Logger::endL;
+    return false;
+  }
   if (theArgs.size() != 0) {
     logGPU << "Fatal error: arguments not empty. " << Logger::endL;
     return false;
