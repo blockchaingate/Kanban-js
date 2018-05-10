@@ -56,6 +56,7 @@
 //Memory pool format: in the notes before the definition of initializeMemoryPool.
 
 #define MACRO_numberOfOutputs 4
+#define MACRO_MessageLogSize 500
 
 __global void* checked_malloc(unsigned int size, __global unsigned char* memoryPool);
 void writeToMemoryPool(unsigned int numberToWrite, __global unsigned char* memoryPoolPointer);
@@ -64,6 +65,9 @@ void writeCurrentMemoryPoolSizeAsOutput(unsigned int argumentIndex, __global uns
 
 unsigned int readFromMemoryPool(__global const unsigned char *memoryPoolPointer);
 unsigned int readMemoryPoolSize(__global const unsigned char* memoryPool);
+
+unsigned int getNumberOfReservedBytesExcludingMessageLog();
+unsigned int getNumberOfReservedBytesIncludingMessageLog();
 
 //Memory pool format: in the notes before the definition of initializeMemoryPool.
 void initializeMemoryPool(unsigned int totalSize, __global unsigned char* memoryPool);
@@ -387,14 +391,9 @@ typedef struct {
      * None of the resulting prec group elements have a known scalar, and neither do any of
      * the intermediate sums while computing a*G.
      */
-    __global secp256k1_ge_storage (*prec)[]; /* old_prec[j][i] = prec[16 & j + i] */
+    __global secp256k1_ge_storage* prec; /* old_prec[j][i] = prec[16 * j + i] */
     //original version:
     //__global secp256k1_ge_storage (*prec)[64][16]; /* prec[j][i] = 16^j * i * G + U_i */
-    //Rationale for change: an array of arrays is an array of pointers.
-    //Its size is therefore dependent on the system's pointer size.
-    //This does not play well with the potential (expected) 32 bit pointers
-    //of the GPU, the potential (expected) 64 bit pointers of the CPU and
-    //the desire to run off a pre-allocated memory pool.
     secp256k1_scalar blind;
     secp256k1_gej initial;
 } secp256k1_ecmult_gen_context;

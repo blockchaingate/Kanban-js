@@ -23,7 +23,7 @@ void printComments(unsigned char* comments) {
 unsigned char bufferCentralPUMultiplicationContext[6000000]; //6MB for computing multiplication context
 unsigned char bufferGraphicsPUMultiplicationContext[6000000];
 
-unsigned char bufferCentralPUGeneratorContext[2000000]; //1MB for computing generators
+unsigned char bufferCentralPUGeneratorContext[2000000]; //2MB for computing generators
 unsigned char bufferGraphicsPUGeneratorContext[2000000];
 
 
@@ -40,20 +40,31 @@ void getGeneratorContext(
   logTest << "GOT to here pt 2 " << Logger::endL;
   outputGeneratorContext.prec = NULL;
   logTest << "GOT to here pt 3 " << Logger::endL;
-  outputGeneratorContext.prec = (secp256k1_ge_storage (*)[]) &theMemoryPool[outputPositionGeneratorContextContent];
+  //int sizeOfGeneratorContextLump = (16 * 64 * sizeof(secp256k1_ge_storage));
+  //logTest << "Size of generator context lump: " << sizeOfGeneratorContextLump << Logger::endL;
+  //for (int i = 0; i < sizeOfGeneratorContextLump; i++)
+  //  logTest << std::hex << (int) theMemoryPool[outputPositionGeneratorContextContent + i];
+  outputGeneratorContext.prec = (secp256k1_ge_storage*) &theMemoryPool[outputPositionGeneratorContextContent];
   logTest << "GOT to here pt 4. Prec pointer:  " << std::hex << ((long) outputGeneratorContext.prec)
   << "\nMemory pool pointer: " << std::hex << ((long) theMemoryPool) << Logger::endL;
 }
 
-void testPrintMultiplicationContext(const unsigned char* theMemoryPool, const std::string& computationID){
-  uint32_t outputPositionCentralPU = readFromMemoryPool(&theMemoryPool[8]);
+void testPrintMemoryPoolGeneral(const unsigned char* theMemoryPool, const std::string& computationID) {
   logTest << computationID << Logger::endL;
   std::string memoryPoolPrintout;
-  memoryPoolPrintout.assign((const char*) theMemoryPool, 1000);
-  logTest << "First 1000 hex-formatted characters of the memory pool: "
-  << Miscellaneous::toStringHex(memoryPoolPrintout) << Logger::endL;
+  //int useFulmemoryPoolSize = 16 * 64 * 64 + 10192 + 100;
+  logTest << "Memory pool reserved bytes: " << std::dec << getNumberOfReservedBytesIncludingMessageLog() << Logger::endL;
+  int initialBytesToPrint = getNumberOfReservedBytesIncludingMessageLog() + 1000;
+  logTest << "First " << initialBytesToPrint << " hex-formatted characters of the memory pool: " << Logger::endL;
+  memoryPoolPrintout.assign((const char*) theMemoryPool, initialBytesToPrint);
+  logTest << Miscellaneous::toStringHex(memoryPoolPrintout) << Logger::endL;
   logTest << "Computation log:\n"
   << toStringErrorLog(theMemoryPool) << Logger::endL;
+}
+
+void testPrintMultiplicationContext(const unsigned char* theMemoryPool, const std::string& computationID) {
+  testPrintMemoryPoolGeneral(theMemoryPool, computationID);
+  uint32_t outputPositionCentralPU = readFromMemoryPool(&theMemoryPool[8]);
   logTest << "outputPosition: " << outputPositionCentralPU << Logger::endL;
   secp256k1_ecmult_context multiplicationContextCentralPU;
   multiplicationContextCentralPU.pre_g = (secp256k1_ge_storage(*)[]) (theMemoryPool + outputPositionCentralPU);
@@ -62,7 +73,7 @@ void testPrintMultiplicationContext(const unsigned char* theMemoryPool, const st
 }
 
 void testPrintGeneratorContext(const unsigned char* theMemoryPool, const std::string& computationID) {
-  logTest << computationID << Logger::endL;
+  testPrintMemoryPoolGeneral(theMemoryPool, computationID);
   uint32_t outputPositionGeneratorContextStruct = readFromMemoryPool(&theMemoryPool[8]);
   uint32_t outputPositionGeneratorContextContent = readFromMemoryPool(&theMemoryPool[12]);
   uint32_t sizePrec = readFromMemoryPool(&theMemoryPool[16]);
@@ -71,7 +82,7 @@ void testPrintGeneratorContext(const unsigned char* theMemoryPool, const std::st
   logTest << "sizePrec: " << sizePrec << Logger::endL;
 
   secp256k1_ecmult_gen_context theGeneratorContext;
-  getGeneratorContext(bufferCentralPUMultiplicationContext, theGeneratorContext);
+  getGeneratorContext(theMemoryPool, theGeneratorContext);
   logTest << "generatorContext:\n" << toStringSecp256k1_GeneratorContext(theGeneratorContext, false) << Logger::endL;
 }
 
@@ -89,7 +100,7 @@ int mainTest() {
   testPrintGeneratorContext(bufferCentralPUGeneratorContext, "Central PU");
   secp256k1_ecmult_gen_context theGeneratorContext;
   secp256k1_ecmult_gen_context_init(&theGeneratorContext);
-  getGeneratorContext(bufferCentralPUMultiplicationContext, theGeneratorContext);
+  getGeneratorContext(bufferCentralPUGeneratorContext, theGeneratorContext);
 
 
 /*  secp256k1_scalar signatureS, signatureR;

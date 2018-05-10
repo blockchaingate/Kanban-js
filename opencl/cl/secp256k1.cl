@@ -51,14 +51,22 @@
 //Next 4 bytes: total memory consumed from the memory pool, including the first 12 bytes.
 //Next 4 * numberOfOutputs bytes: reserved for the unsigned int position of the first byte(s) of the output(s).
 //
-//In addition, the following 10000 bytes may be reserved for debugging purposes 
+//In addition, the following MACRO_MessageLogSize bytes may be reserved for debugging purposes 
 //(printf is not guaranteed to work out-of-the-box in older openCL versions).
 //
 
+unsigned int getNumberOfReservedBytesExcludingMessageLog(){
+  return 8 + 4 * MACRO_numberOfOutputs;
+}
+
+unsigned int getNumberOfReservedBytesIncludingMessageLog(){
+  return getNumberOfReservedBytesExcludingMessageLog() + MACRO_MessageLogSize;
+}
+
 void initializeMemoryPool(unsigned int totalSize, __global unsigned char* memoryPool) {
-  unsigned int i;
+  unsigned int i, reservedBytes;
   writeToMemoryPool(totalSize, memoryPool);
-  unsigned int reservedBytes = 8 + 4 * MACRO_numberOfOutputs;
+  reservedBytes  = getNumberOfReservedBytesExcludingMessageLog();
   writeToMemoryPool(reservedBytes, &memoryPool[4]);
   for (i = 0; i < MACRO_numberOfOutputs; i ++){
     writeToMemoryPool(0, &memoryPool[8 + 4 * i]);
@@ -73,20 +81,18 @@ void initializeMemoryPool(unsigned int totalSize, __global unsigned char* memory
   //}
 
   //Allocate buffer for error messages:
-  checked_malloc(10000, memoryPool);
+  checked_malloc(MACRO_MessageLogSize, memoryPool);
 }
 
 void writeStringToMemoryPoolLog(__constant const char* message, __global unsigned char* memoryPool) {
-  unsigned int i, length;
-  length = 1000;
+  unsigned int i, length, reservedBytes;
+  length = MACRO_MessageLogSize - 2;
+  reservedBytes = getNumberOfReservedBytesExcludingMessageLog();
   for (i = 0; i < length; i ++) {
-    memoryPool[i + 12] = (unsigned char) message[i];
-    memoryPool[i + 13] = (unsigned char) 0; // <- ensure our string is null-terminated, independent of whether message is.
+    memoryPool[i + reservedBytes] = (unsigned char) message[i];
+    memoryPool[i + reservedBytes + 1] = (unsigned char) 0; // <- ensure our string is null-terminated, independent of whether message is.
     if (message[i] == 0)
       break;
-    if (i > 1000) {
-      break;
-    }
   }
 }
 
@@ -3339,8 +3345,8 @@ void secp256k1_ecmult_gen_context_build(
 
   writeCurrentMemoryPoolSizeAsOutput(1, memoryPool);
 //  ctx->prec = (__global secp256k1_ge_storage (*)[64][16]) checked_malloc(sizeof(*ctx->prec), memoryPool);
-  ctx->prec = (__global secp256k1_ge_storage (*)[]) checked_malloc(sizeof((*ctx->prec)[0]) * 16 * 64, memoryPool);
-  writeToMemoryPool(sizeof((*ctx->prec)[0]) * 16 * 64, &memoryPool[16]);
+  ctx->prec = (__global secp256k1_ge_storage*) checked_malloc(sizeof(secp256k1_ge_storage) * 16 * 64, memoryPool);
+  writeToMemoryPool(sizeof(secp256k1_ge_storage) * 16 * 64, &memoryPool[16]);
   /* get the generator */
   //openCL note: secp256k1_ge_const_g is always in the __constant address space.
   secp256k1_gej_set_ge__constant(&gj, &secp256k1_ge_const_g);
@@ -3395,7 +3401,7 @@ void secp256k1_ecmult_gen_context_build(
     for (i = 0; i < 16; i ++) {
       //original version:
       //secp256k1_ge_to__global__storage(&(*ctx->prec)[j][i], &prec[j * 16 + i]);
-      secp256k1_ge_to__global__storage(&(*ctx->prec)[j * 16 + i], &prec[j * 16 + i]);
+      secp256k1_ge_to__global__storage(&ctx->prec[j * 16 + i], &prec[j * 16 + i]);
     }
   }
   secp256k1_ecmult_gen_blind(ctx, NULL);
@@ -3457,7 +3463,6 @@ void secp256k1_ecmult_gen_blind(__global secp256k1_ecmult_gen_context *ctx, cons
     secp256k1_scalar_clear(&b);
     secp256k1_gej_clear(&gb);
 }
-
 
 // secp256k1_ecmult_gen_context_init must be called on each newly created generator context.
 void secp256k1_ecmult_gen_context_init(secp256k1_ecmult_gen_context *ctx) {
@@ -3539,7 +3544,7 @@ void secp256k1_ecmult_gen(
              *    by Dag Arne Osvik, Adi Shamir, and Eran Tromer
              *    (http://www.tau.ac.il/~tromer/papers/cache.pdf)
              */
-          secp256k1_ge_storage_cmov__global(&adds, &(*ctx->prec)[16 * j + i], i == bits);
+          secp256k1_ge_storage_cmov__global(&adds, & ctx->prec[16 * j + i], i == bits);
           //original version:
           //secp256k1_ge_storage_cmov__global(&adds, &(*ctx->prec)[j][i], i == bits);
         }

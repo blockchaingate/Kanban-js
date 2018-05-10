@@ -2,7 +2,7 @@
 #include <sstream>
 #include <iomanip>
 #include "cl/secp256k1_cpp.h"
-
+extern Logger logTest;
 
 std::string toStringSecp256k1_FieldElement(const secp256k1_fe& input) {
   std::stringstream out;
@@ -69,8 +69,15 @@ std::string toStringSecp256k1_GeneratorContext(const secp256k1_ecmult_gen_contex
   int numToDisplayAtEnd = 10;
   int topSuppressBoundary = 64 * 16 - numToDisplayAtEnd;
   int indexDisplayed = - 1;
+  logTest << "prec: " << std::hex << (long) generatorContext.prec << Logger::endL;
+  logTest << "&prec[0]: " << std::hex << (long) &(generatorContext.prec[0]) << Logger::endL;
+  logTest << "&prec[0].x: " << std::hex << (long) &(generatorContext.prec[0].x) << Logger::endL;
+  logTest << "&prec[0].y: " << std::hex << (long) &(generatorContext.prec[0].y) << Logger::endL;
+  logTest << "&prec[0].x.n[0]: " << std::hex << (long) &(generatorContext.prec[0].x.n[0]) << Logger::endL;
+  logTest << "&prec[0].y.n[0]: " << std::hex << (long) &(generatorContext.prec[0].y.n[0]) << Logger::endL;
+  logTest << "prec[0].y.n[0]: " << std::hex << (generatorContext.prec[0].y.n[0]) << Logger::endL;
   for (int i = 0; i < 64; i ++) {
-    for (int j = 0; j < 16; j++) {
+    for (int j = 0; j < 16; j ++) {
       indexDisplayed ++;
       if (!fullDetail) {
         if (indexDisplayed >= numToDisplayAtEnd && indexDisplayed < topSuppressBoundary) {
@@ -80,7 +87,9 @@ std::string toStringSecp256k1_GeneratorContext(const secp256k1_ecmult_gen_contex
           continue;
         }
       }
-      out << "p_" << i << "_" << j << ": " << toStringSecp256k1_ECPointStorage((*generatorContext.prec)[16 * i + j]) << ",\n";
+      logTest << "Got to here: i,j: " << i << ", " << j << Logger::endL;
+      logTest << "prec[16 * i + j].x.n[0]: " << generatorContext.prec[16 * i + j].x.n[0] << Logger::endL;
+      out << "p_" << i << "_" << j << ": " << toStringSecp256k1_ECPointStorage(generatorContext.prec[16 * i + j]) << ",\n";
     }
   }
   return out.str();
