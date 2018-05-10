@@ -1,44 +1,28 @@
 # Kanban
 
-To do: write installation instructions.
+Kanban is the system used to coordinate FAB coin's decentralized public blockchain with the annex chains. The annex chains may either be decentralized/public or centralized/private. 
 
+1. For development machine setup instructions, see
 
-## Dev machine setup
+[development machine setup](doc/development_machine_setup.md)
 
-### Opencl installation
+2. For system architecture, see
 
-#### Ubuntu
+[system architecture](doc/architecture.md)
 
-1. Install opencl:
+Please bear in mind that this is work in progress.
 
-```
-sudo apt install ocl-icd-opencl-dev
-```
-2. You may want to look into installing the Intel openCL drivers:
+## Development roadmap/features
+At the moment, Kanban is under intense development; its features are likely to change significantly. In the present section, we describe our immediate goals for the near future. 
 
-https://software.intel.com/en-us/articles/sdk-for-opencl-gsg 
+By design, Kanban is expected to implement only a few limited blockchain operations at the maximum possible speed. Kanban can be ran as an application alongside fabcoin core or as a standalone executable. Kanban should carry out the following operations. Please note that the list below is expected to change rapidly as our work progresses. 
 
-For convenience, the openCL installation script is copied in our repository: [intel openCL installation](miscellaneous/INTEL_Apr_18_install_OCL_driver2.sh)
+- Verify basic transaction consistency (signatures, transaction validity, etc.).
 
+- Verify transactions against the rules of SCAR.
 
-### Node.js installation instructions
+- Verify transactions against the table of transaction address balances.
 
+- Sign verified transactions.
 
-#### Ubuntu 16.04
-1. Intall nodejs. 
-
-1.1. If for some reason you installed a wrong version of nodejs - for example, you installed the default which 
-is outdated at the time of writing this readme - then you may:
-```
-sudo apt remove nodejs
-```
-
-1.2. Do the installation as described at:
-https://github.com/nodesource/distributions
-
-```
-curl -sL https://deb.nodesource.com/setup_9.x | sudo -E bash -
-sudo apt-get install -y nodejs
-```
-
-
+- Dispatch verified transactions to the open storage network and to the main blockchain.

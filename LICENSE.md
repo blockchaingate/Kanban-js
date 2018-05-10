@@ -1,26 +1,18 @@
-Copyright (c) 2018 FA Enterprise System Inc
-All Rights Reserved
- 
-This product is protected by copyright and distributed under
-licenses restricting copying, distribution and decompilation.
+Copyright (c) 2018 FA Enterprise System
+Distributed under the MIT software license,
 
-At the time of writing this text, 
-FA Enterprises intends to free/open-source this project and all of its code -
-in the near future. Until that happens however, all code
-in this repository is considered restricted intellectual property of FA Enterprise System Inc. 
+http://www.opensource.org/licenses/mit-license.php
 
-We will add an appropriate license (that will most likely be the MIT license) as soon as we free/open-source the project.
 
+Please note that the code in this repository is completely experimental.
+We will remove the latter warning once our code reaches sufficient level of maturity.
 
 ## List of projects used
 
 This section contains a (possibly incomplete) list of software projects whose code was used in Kanban
 
 1. Node.js (MIT license).
-2. BitcoinJS (MIT license).
-3. Code from https://github.com/Fruneng/opencl_sha_al_im (MIT license).
-4. Code from https://raw.githubusercontent.com/hhanh00/secp256k1-cl (MIT license).
-
+2. The bitcoin crypto library: https://github.com/sipa/secp256k1 (MIT license).
 
 
 ## Licenses

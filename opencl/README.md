@@ -22,7 +22,7 @@ As of May 2018, the goals of the modifications are the following.
 2)  Refactor (or write new) tests and benchmarks to match our 
     system's setup.
 3)  Introduce cosmetic changes to match FA's variable/class naming 
-    style. The primary aim of Step 4 is to introduce our team
+    style. The primary aim of Step 3 is to introduce our team
     to the inner workings of the code, while trying to
     preserve the code's original aesthetics. 
 

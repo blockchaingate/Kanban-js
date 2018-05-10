@@ -40,16 +40,16 @@
 //
 //Useful output recorded in the memory pool is referenced
 //by setting the third, fourth, ... reserved byte quadruples
-//(bytes of indeces 7-11, 12-15, ...) to the the unsigned int position of
+//(bytes of indices 7-11, 12-15, ...) to the the unsigned int position of
 //the first byte where the output is located. Naturally,
-//no data in the output should not be interpretted as a pointer.
+//no data in the output should be interpretted as a pointer.
 //
 //
 //Memory pool format:
-//The first 8 + MACRO_numberOfOutputs bytes are reserved.
+//The first 8 + 4 * MACRO_numberOfOutputs bytes are reserved.
 //First 4 bytes: total memory pool size.
-//Next 4 bytes: total memory consumed from the memory pool, including the first 12 bytes.
-//Next 4 * numberOfOutputs bytes: reserved for the unsigned int position of the first byte(s) of the output(s).
+//Next 4 bytes: total memory consumed from the memory pool, including all bytes reserved in the present paragraph.
+//Next 4 * MACRO_numberOfOutputs bytes: reserved for the unsigned int position of the first byte(s) of the output(s).
 //
 //In addition, the following MACRO_MessageLogSize bytes may be reserved for debugging purposes 
 //(printf is not guaranteed to work out-of-the-box in older openCL versions).
