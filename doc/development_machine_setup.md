@@ -8,7 +8,11 @@ To install Kanban, you need to install:
 
 We expect the list to be expanded to include mongoDB. The list of required technologies is expected to grow further as our work progresses. 
 
+We would like to automate Kanban's installation procedure as much as possible. Until that happens, please follow the present guide.
 
+
+If possible, please take notes while installing Kanban. 
+What you note down is likely going to be something that needs to be added to the present instructions.
 
 
 ## Basic setup
@@ -48,12 +52,48 @@ cd Kanban
 npm install 
 ``` 
 
+6. Compile the kanban GPU driver. 
+
+```
+cd build
+make -j4
+```
+
+The number in the ``-j4`` flag of the make command tells C++ how many threads to use when compiling. Feel free to adjust 
+that number to what you feel is appropriate for your system's processor. Plain ``make`` should compile using a single thread.
+
+7. Test the GPU driver:
+
+```
+./kanban-gpu test
+```
+8. Run kanban:
+
+```
+cd ..   #to go back to Kanban's base folder
+npm run develop
+```
+
+Open up your browser and navigate to:
+
+```
+http://localhost:51846/
+```
+or to
+
+```
+https://localhost:52907/
+```
 
 ## Dependencies
 
+
+At the time of writing, our installation procedure assumes you are working on **Ubuntu**. 
+If you are using a different Linux flavor, we would appreciate help with porting 
+the commands below to your distribution.
+
 ### Node.js
 
-#### Ubuntu
 1. Intall nodejs and related.
 
   - If for some reason you installed a wrong version of nodejs - for example, you installed the default which 
@@ -85,8 +125,6 @@ sudo apt install cmake
 
 
 ### OpenCL installation
-
-#### Ubuntu
 
 1. Install opencl:
 
