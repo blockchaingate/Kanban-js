@@ -34,29 +34,29 @@ Please see the file opencl/README.md for technical notes on this code.
 #define __global
 #endif
 
-//Memory pool format: in the notes before the definition of initializeMemoryPool.
+//Memory pool format: in the notes before the definition of memoryPool_Initialize.
 
 #define MACRO_numberOfOutputs 4
 #define MACRO_MessageLogSize 500
 
 __global void* checked_malloc(unsigned int size, __global unsigned char* memoryPool);
-void writeToMemoryPool(unsigned int numberToWrite, __global unsigned char* memoryPoolPointer);
+void memoryPool_writeUINT(unsigned int numberToWrite, __global unsigned char* memoryPoolPointer);
 void memoryPool_writeString(__constant const char* message, __global unsigned char* memoryPool);
-void writeCurrentMemoryPoolSizeAsOutput(unsigned int argumentIndex, __global unsigned char* memoryPool);
+void memoryPool_writeCurrentSizeAsOutput(unsigned int argumentIndex, __global unsigned char* memoryPool);
 
-unsigned int readFromMemoryPool(__global const unsigned char *memoryPoolPointer);
-unsigned int readMemoryPoolSize(__global const unsigned char* memoryPool);
+unsigned int memoryPool_readUINT(__global const unsigned char *memoryPoolPointer);
+unsigned int memoryPool_readPoolSize(__global const unsigned char* memoryPool);
 
-unsigned int getNumberOfReservedBytesExcludingMessageLog();
-unsigned int getNumberOfReservedBytesIncludingMessageLog();
+unsigned int memoryPool_readNumberReservedBytesExcludingLog();
+unsigned int memoryPool_readNumberReservedBytesIncludingLog();
 
-//Memory pool format: in the notes before the definition of initializeMemoryPool.
-void initializeMemoryPool(unsigned int totalSize, __global unsigned char* memoryPool);
+//Memory pool format: in the notes before the definition of memoryPool_Initialize.
+void memoryPool_Initialize(unsigned int totalSize, __global unsigned char* memoryPool);
 
 void assertFalse(__constant const char* errorMessage, __global unsigned char *memoryPool);
 
-void freeMemory(void* any);
-void freeMemory__global(__global void* any);
+void memoryPool_freeMemory(void* any);
+void memoryPool_freeMemory__global(__global void* any);
 
 
 //removed:

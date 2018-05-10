@@ -12,10 +12,10 @@ __constant static const char messageGeneratorContext1[50] = "initialized mempool
 __kernel void secp256k1_opencl_compute_generator_context(
   __global unsigned char* outputMemoryPoolContainingGeneratorContext
 ) {
-  initializeMemoryPool(1000000, outputMemoryPoolContainingGeneratorContext);
+  memoryPool_Initialize(1000000, outputMemoryPoolContainingGeneratorContext);
   memoryPool_writeString(messageGeneratorContext1, outputMemoryPoolContainingGeneratorContext);
   
-  writeCurrentMemoryPoolSizeAsOutput(0, outputMemoryPoolContainingGeneratorContext);
+  memoryPool_writeCurrentSizeAsOutput(0, outputMemoryPoolContainingGeneratorContext);
 
   __global secp256k1_ecmult_gen_context* generatorContext = (__global secp256k1_ecmult_gen_context*) checked_malloc(
     sizeof(secp256k1_ecmult_gen_context), outputMemoryPoolContainingGeneratorContext

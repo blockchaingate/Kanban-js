@@ -55,21 +55,21 @@
 //(printf is not guaranteed to work out-of-the-box in older openCL versions).
 //
 
-unsigned int getNumberOfReservedBytesExcludingMessageLog(){
+unsigned int memoryPool_readNumberReservedBytesExcludingLog(){
   return 8 + 4 * MACRO_numberOfOutputs;
 }
 
-unsigned int getNumberOfReservedBytesIncludingMessageLog(){
-  return getNumberOfReservedBytesExcludingMessageLog() + MACRO_MessageLogSize;
+unsigned int memoryPool_readNumberReservedBytesIncludingLog(){
+  return memoryPool_readNumberReservedBytesExcludingLog() + MACRO_MessageLogSize;
 }
 
-void initializeMemoryPool(unsigned int totalSize, __global unsigned char* memoryPool) {
+void memoryPool_Initialize(unsigned int totalSize, __global unsigned char* memoryPool) {
   unsigned int i, reservedBytes;
-  writeToMemoryPool(totalSize, memoryPool);
-  reservedBytes  = getNumberOfReservedBytesExcludingMessageLog();
-  writeToMemoryPool(reservedBytes, &memoryPool[4]);
+  memoryPool_writeUINT(totalSize, memoryPool);
+  reservedBytes  = memoryPool_readNumberReservedBytesExcludingLog();
+  memoryPool_writeUINT(reservedBytes, &memoryPool[4]);
   for (i = 0; i < MACRO_numberOfOutputs; i ++){
-    writeToMemoryPool(0, &memoryPool[8 + 4 * i]);
+    memoryPool_writeUINT(0, &memoryPool[8 + 4 * i]);
   }
   for (i = reservedBytes; i < totalSize; i ++) {
     memoryPool[i] = (unsigned char) 0;
@@ -77,7 +77,7 @@ void initializeMemoryPool(unsigned int totalSize, __global unsigned char* memory
   //Use this snippet if you want initialize the RAM 
   //with some pattern other than zeroes (say, you doubt the memory is accessed properly).
   //for (i = 12; i + 4 < totalSize; i += 4){
-  //  writeToMemoryPool(i, &memoryPool[i]);
+  //  memoryPool_writeUINT(i, &memoryPool[i]);
   //}
 
   //Allocate buffer for error messages:
@@ -87,7 +87,7 @@ void initializeMemoryPool(unsigned int totalSize, __global unsigned char* memory
 void memoryPool_writeString(__constant const char* message, __global unsigned char* memoryPool) {
   unsigned int i, length, reservedBytes;
   length = MACRO_MessageLogSize - 2;
-  reservedBytes = getNumberOfReservedBytesExcludingMessageLog();
+  reservedBytes = memoryPool_readNumberReservedBytesExcludingLog();
   for (i = 0; i < length; i ++) {
     memoryPool[i + reservedBytes] = (unsigned char) message[i];
     memoryPool[i + reservedBytes + 1] = (unsigned char) 0; // <- ensure our string is null-terminated, independent of whether message is.
@@ -96,27 +96,27 @@ void memoryPool_writeString(__constant const char* message, __global unsigned ch
   }
 }
 
-void writeToMemoryPool(unsigned int numberToWrite, __global unsigned char* memoryPoolPointer) {
+void memoryPool_writeUINT(unsigned int numberToWrite, __global unsigned char* memoryPoolPointer) {
   memoryPoolPointer[0] = (unsigned char) (numberToWrite >> 24);
   memoryPoolPointer[1] = (unsigned char) (numberToWrite >> 16);
   memoryPoolPointer[2] = (unsigned char) (numberToWrite >> 8 );
   memoryPoolPointer[3] = (unsigned char) (numberToWrite      );
 }
 
-void writeCurrentMemoryPoolSizeAsOutput(unsigned int argumentIndex, __global unsigned char* memoryPool) {
+void memoryPool_writeCurrentSizeAsOutput(unsigned int argumentIndex, __global unsigned char* memoryPool) {
   unsigned int currentSize;
   if (argumentIndex >= MACRO_numberOfOutputs) {
     assertFalse("Argument index too large", memoryPool);
   }
-  currentSize = readMemoryPoolSize(memoryPool);
-  writeToMemoryPool(currentSize, &memoryPool[8 + 4 * argumentIndex]);
+  currentSize = memoryPool_readPoolSize(memoryPool);
+  memoryPool_writeUINT(currentSize, &memoryPool[8 + 4 * argumentIndex]);
 }
 
-unsigned int readMemoryPoolSize(__global const unsigned char* memoryPool) {
-  return readFromMemoryPool(&memoryPool[4]);
+unsigned int memoryPool_readPoolSize(__global const unsigned char* memoryPool) {
+  return memoryPool_readUINT(&memoryPool[4]);
 }
 
-unsigned int readFromMemoryPool(__global const unsigned char* memoryPoolPointer) {
+unsigned int memoryPool_readUINT(__global const unsigned char* memoryPoolPointer) {
   return 
   ((unsigned int) (memoryPoolPointer[0] << 24)) +
   ((unsigned int) (memoryPoolPointer[1] << 16)) +
@@ -124,15 +124,15 @@ unsigned int readFromMemoryPool(__global const unsigned char* memoryPoolPointer)
   ((unsigned int) memoryPoolPointer[3]       ) ;
 }
 
-//Memory pool format: in the notes before the definition of initializeMemoryPool.
+//Memory pool format: in the notes before the definition of memoryPool_Initialize.
 __global void* checked_malloc(unsigned int size, __global unsigned char* memoryPool) {
   unsigned int oldSize, newSize;
   unsigned int maxSize;
-  oldSize = readFromMemoryPool(memoryPool + 4);
+  oldSize = memoryPool_readUINT(memoryPool + 4);
   if (oldSize < 8) {
     assertFalse("Old size too small\0", memoryPool);
   }
-  maxSize = readFromMemoryPool(memoryPool);
+  maxSize = memoryPool_readUINT(memoryPool);
   if (maxSize < 200000) {
     assertFalse("Memory pool too small.\0", memoryPool);
   }
@@ -146,15 +146,15 @@ __global void* checked_malloc(unsigned int size, __global unsigned char* memoryP
   if (newSize > maxSize) {
     assertFalse("New size exceeds maximum.\0", memoryPool);
   }
-  writeToMemoryPool(newSize, memoryPool + 4);
+  memoryPool_writeUINT(newSize, memoryPool + 4);
   return memoryPool + oldSize;
 }
 
-void freeMemory(void* any) {
+void memoryPool_freeMemory(void* any) {
   (void) any;
 }
 
-void freeMemory__global(__global void* any) {
+void memoryPool_freeMemory__global(__global void* any) {
   (void) any;
 }
 
@@ -1215,7 +1215,7 @@ void secp256k1_ge_set_all_gej_var(
 
   azi = (__global secp256k1_fe *) checked_malloc(sizeof(secp256k1_fe) * count, memoryPool);
   secp256k1_fe_inv_all_var(count, azi, az);
-  freeMemory__global(az);
+  memoryPool_freeMemory__global(az);
 
   count = 0;
   for (i = 0; i < len; i ++) {
@@ -1225,7 +1225,7 @@ void secp256k1_ge_set_all_gej_var(
       secp256k1_ge_set_gej_zinv(&outputPoints[i], &outputPointsJacobian[i], &globalToLocal1);
     }
   }
-  freeMemory__global(azi);
+  memoryPool_freeMemory__global(azi);
 }
 
 void secp256k1_ge_copy__to__global(__global secp256k1_ge* output, const secp256k1_ge* input) {
@@ -2591,9 +2591,9 @@ static void secp256k1_ecmult_odd_multiples_table_storage_var(
     //logGPU << "DEBUG: " << i << ": " << toStringSecp256k1_ECPointStorage(pre[i]) << Logger::endL;
     //<< toStringSecp256k1_ECPoint(prea[i]) << Logger::endL;
   }
-  freeMemory__global(prea);
-  freeMemory__global(prej);
-  freeMemory__global(zr);
+  memoryPool_freeMemory__global(prea);
+  memoryPool_freeMemory__global(prej);
+  memoryPool_freeMemory__global(zr);
 }
 
 /** Convert a number to WNAF notation. The number becomes represented by sum(2^i * wnaf[i], i=0..bits),
@@ -3343,10 +3343,10 @@ void secp256k1_ecmult_gen_context_build(
     return;
   }
 
-  writeCurrentMemoryPoolSizeAsOutput(1, memoryPool);
+  memoryPool_writeCurrentSizeAsOutput(1, memoryPool);
 //  ctx->prec = (__global secp256k1_ge_storage (*)[64][16]) checked_malloc(sizeof(*ctx->prec), memoryPool);
   ctx->prec = (__global secp256k1_ge_storage*) checked_malloc(sizeof(secp256k1_ge_storage) * 16 * 64, memoryPool);
-  writeToMemoryPool(sizeof(secp256k1_ge_storage) * 16 * 64, &memoryPool[16]);
+  memoryPool_writeUINT(sizeof(secp256k1_ge_storage) * 16 * 64, &memoryPool[16]);
   /* get the generator */
   //openCL note: secp256k1_ge_const_g is always in the __constant address space.
   secp256k1_gej_set_ge__constant(&gj, &secp256k1_ge_const_g);
@@ -3474,7 +3474,7 @@ int secp256k1_ecmult_gen_context_is_built(const secp256k1_ecmult_gen_context* ct
 }
 
 void secp256k1_ecmult_gen_context_clear(secp256k1_ecmult_gen_context *ctx) {
-  freeMemory__global(ctx->prec);
+  memoryPool_freeMemory__global(ctx->prec);
   secp256k1_scalar_clear(&ctx->blind);
   secp256k1_gej_clear(&ctx->initial);
   ctx->prec = NULL;
@@ -3498,7 +3498,7 @@ void secp256k1_ecmult_context_build(
   /* get the generator */
   //openCL note: secp256k1_ge_const_g is always in the __constant address space.
   secp256k1_gej_set_ge__constant(&gj, &secp256k1_ge_const_g);
-  writeCurrentMemoryPoolSizeAsOutput(0, memoryPool);
+  memoryPool_writeCurrentSizeAsOutput(0, memoryPool);
   output->pre_g = (__global secp256k1_ge_storage (*)[]) checked_malloc(ECMULT_TABLE_SIZE(WINDOW_G) * sizeof((*output->pre_g)[0]), memoryPool);
   /* precompute the tables with odd multiples */
   secp256k1_ecmult_odd_multiples_table_storage_var(ECMULT_TABLE_SIZE(WINDOW_G), *output->pre_g, &gj, memoryPool);

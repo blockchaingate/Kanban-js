@@ -32,8 +32,8 @@ void getGeneratorContext(
   secp256k1_ecmult_gen_context& outputGeneratorContext
 ){
   secp256k1_ecmult_gen_context_init(&outputGeneratorContext);
-  uint32_t outputPositionGeneratorContextStruct = readFromMemoryPool(&theMemoryPool[8]);
-  uint32_t outputPositionGeneratorContextContent = readFromMemoryPool(&theMemoryPool[12]);
+  uint32_t outputPositionGeneratorContextStruct = memoryPool_readUINT(&theMemoryPool[8]);
+  uint32_t outputPositionGeneratorContextContent = memoryPool_readUINT(&theMemoryPool[12]);
 
   logTest << "GOT to here pt 1 " << Logger::endL;
   outputGeneratorContext = *((secp256k1_ecmult_gen_context*) &theMemoryPool[outputPositionGeneratorContextStruct]);
@@ -53,8 +53,9 @@ void testPrintMemoryPoolGeneral(const unsigned char* theMemoryPool, const std::s
   logTest << computationID << Logger::endL;
   std::string memoryPoolPrintout;
   //int useFulmemoryPoolSize = 16 * 64 * 64 + 10192 + 100;
-  logTest << "Memory pool reserved bytes: " << std::dec << getNumberOfReservedBytesIncludingMessageLog() << Logger::endL;
-  int initialBytesToPrint = getNumberOfReservedBytesIncludingMessageLog() + 1000;
+  logTest << "Memory pool reserved bytes: " << std::dec << memoryPool_readNumberReservedBytesExcludingLog() << Logger::endL;
+  logTest << "Memory pool reserved bytes + log size: " << std::dec << memoryPool_readNumberReservedBytesIncludingLog() << Logger::endL;
+  int initialBytesToPrint = memoryPool_readNumberReservedBytesIncludingLog() + 1000;
   logTest << "First " << initialBytesToPrint << " hex-formatted characters of the memory pool: " << Logger::endL;
   memoryPoolPrintout.assign((const char*) theMemoryPool, initialBytesToPrint);
   logTest << Miscellaneous::toStringHex(memoryPoolPrintout) << Logger::endL;
@@ -64,7 +65,7 @@ void testPrintMemoryPoolGeneral(const unsigned char* theMemoryPool, const std::s
 
 void testPrintMultiplicationContext(const unsigned char* theMemoryPool, const std::string& computationID) {
   testPrintMemoryPoolGeneral(theMemoryPool, computationID);
-  uint32_t outputPositionCentralPU = readFromMemoryPool(&theMemoryPool[8]);
+  uint32_t outputPositionCentralPU = memoryPool_readUINT(&theMemoryPool[8]);
   logTest << "outputPosition: " << outputPositionCentralPU << Logger::endL;
   secp256k1_ecmult_context multiplicationContextCentralPU;
   multiplicationContextCentralPU.pre_g = (secp256k1_ge_storage(*)[]) (theMemoryPool + outputPositionCentralPU);
@@ -74,9 +75,9 @@ void testPrintMultiplicationContext(const unsigned char* theMemoryPool, const st
 
 void testPrintGeneratorContext(const unsigned char* theMemoryPool, const std::string& computationID) {
   testPrintMemoryPoolGeneral(theMemoryPool, computationID);
-  uint32_t outputPositionGeneratorContextStruct = readFromMemoryPool(&theMemoryPool[8]);
-  uint32_t outputPositionGeneratorContextContent = readFromMemoryPool(&theMemoryPool[12]);
-  uint32_t sizePrec = readFromMemoryPool(&theMemoryPool[16]);
+  uint32_t outputPositionGeneratorContextStruct = memoryPool_readUINT(&theMemoryPool[8]);
+  uint32_t outputPositionGeneratorContextContent = memoryPool_readUINT(&theMemoryPool[12]);
+  uint32_t sizePrec = memoryPool_readUINT(&theMemoryPool[16]);
   logTest << "Context struct position: " << outputPositionGeneratorContextStruct << Logger::endL;
   logTest << "Context content position: " << outputPositionGeneratorContextContent << Logger::endL;
   logTest << "sizePrec: " << sizePrec << Logger::endL;
