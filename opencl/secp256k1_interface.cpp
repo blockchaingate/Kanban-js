@@ -28,15 +28,15 @@ bool CryptoEC256k1GPU::computeMultiplicationContext(unsigned char* outputMemoryP
     return false;
   }
   cl_mem& result = kernelMultiplicationContext->outputs[0]->theMemory;
-  logGPU << "DEBUG: got to here. " << Logger::endL;
-  ret = clEnqueueReadBuffer(theGPU.commandQueue, result, CL_TRUE, 0, 4000000, (void*) &outputMemoryPool, 0, NULL, NULL);
+  logGPU << "DEBUG: enqueued multiplication context. " << Logger::endL;
+  ret = clEnqueueReadBuffer(theGPU.commandQueue, result, CL_TRUE, 0, 4000000, (void*) outputMemoryPool, 0, NULL, NULL);
+  logGPU << "DEBUG: enqueued multiplication context done. " << Logger::endL;
   if (ret != CL_SUCCESS) {
     logGPU << "Failed to read buffer. Return code: " << ret << Logger::endL;
     return false;
   }
   return true;
 }
-
 
 bool CryptoEC256k1GPU::computeGeneratorContext(unsigned char* outputMemoryPool, GPU& theGPU) {
   if (!theGPU.initializeAll())
@@ -52,8 +52,8 @@ bool CryptoEC256k1GPU::computeGeneratorContext(unsigned char* outputMemoryPool, 
     return false;
   }
   cl_mem& result = kernelGeneratorContext->outputs[0]->theMemory;
-  logGPU << "DEBUG: got to here. " << Logger::endL;
-  ret = clEnqueueReadBuffer(theGPU.commandQueue, result, CL_TRUE, 0, 1000000, (void*) &outputMemoryPool, 0, NULL, NULL);
+  logGPU << "DEBUG: enqueued generator context. " << Logger::endL;
+  ret = clEnqueueReadBuffer(theGPU.commandQueue, result, CL_TRUE, 0, 1000000, (void*) outputMemoryPool, 0, NULL, NULL);
   if (ret != CL_SUCCESS) {
     logGPU << "Failed to read buffer. Return code: " << ret << Logger::endL;
     return false;

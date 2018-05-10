@@ -8,7 +8,8 @@
 #include <assert.h>
 #include "secp256k1_interface.h"
 
-Logger logTest("../logfiles/logTest.txt", "[test] ");
+Logger logTestCentralPU("../test/kanban-gpu/debug/logTestCentralPU.txt", "[test CPU] ");
+Logger logTestGraphicsPU("../test/kanban-gpu/debug/logTestGraphicsPU.txt", "[test GPU] ");
 extern Logger logServer;
 
 void printComments(unsigned char* comments) {
@@ -46,7 +47,7 @@ void getGeneratorContext(
   outputGeneratorContext.prec = (secp256k1_ge_storage*) &theMemoryPool[outputPositionGeneratorContextContent];
 }
 
-void testPrintMemoryPoolGeneral(const unsigned char* theMemoryPool, const std::string& computationID) {
+void testPrintMemoryPoolGeneral(const unsigned char* theMemoryPool, const std::string& computationID, Logger& logTest) {
   logTest << computationID << Logger::endL;
   std::string memoryPoolPrintout;
   //int useFulmemoryPoolSize = 16 * 64 * 64 + 10192 + 100;
@@ -61,8 +62,8 @@ void testPrintMemoryPoolGeneral(const unsigned char* theMemoryPool, const std::s
   << toStringErrorLog(theMemoryPool) << Logger::endL;
 }
 
-void testPrintMultiplicationContext(const unsigned char* theMemoryPool, const std::string& computationID) {
-  testPrintMemoryPoolGeneral(theMemoryPool, computationID);
+void testPrintMultiplicationContext(const unsigned char* theMemoryPool, const std::string& computationID, Logger& logTest) {
+  testPrintMemoryPoolGeneral(theMemoryPool, computationID, logTest);
   uint32_t outputPosition= memoryPool_readUINT(&theMemoryPool[8]);
   logTest << "Position multiplication context: " << outputPosition << Logger::endL;
   secp256k1_ecmult_context multiplicationContext;
@@ -71,8 +72,8 @@ void testPrintMultiplicationContext(const unsigned char* theMemoryPool, const st
   << toStringSecp256k1_MultiplicationContext(multiplicationContext, false) << Logger::endL;
 }
 
-void testPrintGeneratorContext(const unsigned char* theMemoryPool, const std::string& computationID) {
-  testPrintMemoryPoolGeneral(theMemoryPool, computationID);
+void testPrintGeneratorContext(const unsigned char* theMemoryPool, const std::string& computationID, Logger& logTest) {
+  testPrintMemoryPoolGeneral(theMemoryPool, computationID, logTest);
   uint32_t outputPositionGeneratorContextStruct = memoryPool_readUINT(&theMemoryPool[8]);
   uint32_t outputPositionGeneratorContextContent = memoryPool_readUINT(&theMemoryPool[12]);
   uint32_t sizePrec = memoryPool_readUINT(&theMemoryPool[16]);
@@ -96,20 +97,20 @@ int testMain() {
   GPU theGPU;
   if (!CryptoEC256k1::computeMultiplicationContext(bufferCentralPUMultiplicationContext))
     return - 1;
-  testPrintMultiplicationContext(bufferCentralPUMultiplicationContext, "Central PU");
+  testPrintMultiplicationContext(bufferCentralPUMultiplicationContext, "Central PU", logTestCentralPU);
   if (!CryptoEC256k1::computeGeneratorContext(bufferCentralPUGeneratorContext))
     return - 1;
-  testPrintGeneratorContext(bufferCentralPUGeneratorContext, "Central PU"); 
+  testPrintGeneratorContext(bufferCentralPUGeneratorContext, "Central PU", logTestCentralPU);
   secp256k1_ecmult_gen_context generatorContextCentralPU;
   secp256k1_ecmult_gen_context_init(&generatorContextCentralPU);
   getGeneratorContext(bufferCentralPUGeneratorContext, generatorContextCentralPU);
 
   if (!CryptoEC256k1GPU::computeMultiplicationContext(bufferGraphicsPUMultiplicationContext, theGPU))
     return - 1;
-  testPrintMultiplicationContext(bufferGraphicsPUMultiplicationContext, "Graphics PU");
+  testPrintMultiplicationContext(bufferGraphicsPUMultiplicationContext, "Graphics PU", logTestGraphicsPU);
   if (!CryptoEC256k1GPU::computeGeneratorContext(bufferGraphicsPUGeneratorContext, theGPU))
     return - 1;
-  testPrintGeneratorContext(bufferGraphicsPUGeneratorContext, "Graphics PU");
+  testPrintGeneratorContext(bufferGraphicsPUGeneratorContext, "Graphics PU", logTestGraphicsPU);
   secp256k1_ecmult_gen_context generatorContextGraphicsPU;
   secp256k1_ecmult_gen_context_init(&generatorContextGraphicsPU);
   getGeneratorContext(bufferGraphicsPUGeneratorContext, generatorContextGraphicsPU);
@@ -266,7 +267,7 @@ int testSHA256(GPU& theGPU) {
       &theKernel->global_item_size, &theKernel->local_item_size, 0, NULL, NULL
     );
     if (ret != CL_SUCCESS) {
-      logTest << "Failed to enqueue kernel. Return code: " << ret << ". " << Logger::endL;
+      logTestGraphicsPU << "Failed to enqueue kernel. Return code: " << ret << ". " << Logger::endL;
       return false;
     }
     //std::cout << "DEBUG: kernel enqueued, proceeding to read buffer. " << std::endl;
@@ -282,14 +283,14 @@ int testSHA256(GPU& theGPU) {
     32 * testSHA256::totalToCompute, testSHA256::outputBuffer, 0, NULL, NULL
   );
   if (ret != CL_SUCCESS) {
-    logTest << "Failed to enqueue read buffer. Return code: " << ret << ". " << Logger::endL;
+    logTestGraphicsPU << "Failed to enqueue read buffer. Return code: " << ret << ". " << Logger::endL;
     return false;
   }
   auto timeCurrent = std::chrono::system_clock::now();
   std::chrono::duration<double> elapsed_seconds = timeCurrent - timeStart;
-  logTest << "Computed " << largeTestCounter << " sha256s in " << elapsed_seconds.count() << " second(s). " << Logger::endL;
-  logTest << "Speed: " << (testSHA256::totalToCompute / elapsed_seconds.count()) << " hashes per second. " << Logger::endL;
-  logTest << "Checking computations ..." << Logger::endL;
+  logTestGraphicsPU << "Computed " << largeTestCounter << " sha256s in " << elapsed_seconds.count() << " second(s). " << Logger::endL;
+  logTestGraphicsPU << "Speed: " << (testSHA256::totalToCompute / elapsed_seconds.count()) << " hashes per second. " << Logger::endL;
+  logTestGraphicsPU << "Checking computations ..." << Logger::endL;
   for (largeTestCounter = 0; largeTestCounter < testSHA256::totalToCompute; largeTestCounter ++) {
     unsigned testCounteR = largeTestCounter % testSHA256::knownSHA256s.size();
     std::stringstream out;
@@ -297,14 +298,14 @@ int testSHA256(GPU& theGPU) {
     for (unsigned i = offset; i < offset + 32; i ++)
       out << std::hex << std::setw(2) << std::setfill('0') << ((int) ((unsigned) testSHA256::outputBuffer[i]));
     if (out.str() != testSHA256::knownSHA256s[testCounteR][1]) {
-      logTest << "\e[31mSha of message index " << largeTestCounter
+      logTestGraphicsPU << "\e[31mSha of message index " << largeTestCounter
              << ": " << testSHA256::knownSHA256s[testCounteR][0] << " is wrongly computed to be: " << out.str()
              << " instead of: " << testSHA256::knownSHA256s[testCounteR][1] << "\e[39m" << Logger::endL;
       assert(false);
       return - 1;
     }
   }
-  logTest << "Success!" << Logger::endL;
+  logTestGraphicsPU << "Success!" << Logger::endL;
   std::cout << "\e[32mSuccess!\e[39m" << std::endl;
   return 0;
 }

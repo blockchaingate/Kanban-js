@@ -107,11 +107,13 @@ public:
   bool initializePlatform();
   bool initializeKernels();
   GPU();
-  bool createKernel(const std::string& fileNameNoExtension,
-      const std::vector<std::string>& outputs,
-      const std::vector<int>& outputTypes,
-      const std::vector<std::string>& inputs,
-      const std::vector<int>& inputTypes);
+  bool createKernel(
+    const std::string& fileNameNoExtension,
+    const std::vector<std::string>& outputs,
+    const std::vector<int>& outputTypes,
+    const std::vector<std::string>& inputs,
+    const std::vector<int>& inputTypes
+  );
   ~GPU();
 };
 
