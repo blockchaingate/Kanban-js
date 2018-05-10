@@ -3860,14 +3860,4 @@ char secp256k1_ecdsa_sig_verify(
 ///////////////////////
 ///////////////////////
 
-///////////////////////
-///////////////////////
-#include "../opencl/cl/secp256k1_set_2_address_spaces__global__global.h"
-#include "../opencl/cl/secp256k1_2_parametric_address_spaces.cl"
-///////////////////////
-#include "../opencl/cl/secp256k1_set_2_address_spaces__default.h"
-#include "../opencl/cl/secp256k1_2_parametric_address_spaces.cl"
-///////////////////////
-///////////////////////
-
 #endif //FILE_secp256k1_CL_INCLUDED_MUST_GUARD_DUE_TO_OPENCL_COMPILER_BUG

@@ -2,8 +2,6 @@
 #include "logging.h"
 #include <fstream>
 #include <iostream>
-#include <assert.h>
-#include <chrono>
 #include <iomanip>
 
 #define MAX_SOURCE_SIZE (0x100000)
@@ -89,9 +87,21 @@ GPUKernel::~GPUKernel() {
 
 GPU::GPU() {
   this->flagVerbose = false;
+  this->flagInitializedPlatform = false;
+  this->flagInitializedKernels = false;
 }
 
-bool GPU::initialize() {
+bool GPU::initializeAll() {
+  if (! this->initializePlatform())
+    return false;
+  if (! this->initializeKernels())
+    return false;
+  return true;
+}
+
+bool GPU::initializePlatform() {
+  if (this->flagInitializedPlatform)
+    return true;
   this->context = 0;
   cl_int ret = 0;
   ret = clGetPlatformIDs(2, this->platformIds, &this->numberOfPlatforms);
@@ -142,13 +152,15 @@ bool GPU::initialize() {
     logGPU << "Failed to create command queue." << Logger::endL;
     return false;
   }
+  this->flagInitializedPlatform = true;
   return true;
 }
 
 bool GPU::initializeKernels() {
-  this->initialize();
-
-
+  if (this->flagInitializedKernels)
+    return true;
+  if (!this->initializePlatform())
+    return false;
   //if (!this->createKernel(
   //      this->kernelSHA256,
   //      {"result"},
@@ -195,6 +207,7 @@ bool GPU::initializeKernels() {
   //      {SharedMemory::typeVoidPointer, SharedMemory::typeVoidPointer, SharedMemory::typeVoidPointer, SharedMemory::typeVoidPointer, SharedMemory::typeVoidPointer}
   //))
   //  return false;
+  this->flagInitializedKernels = true;
   return true;
 }
 
@@ -417,103 +430,4 @@ bool GPUKernel::writeArgument(unsigned argumentNumber, uint input) {
     return false;
   }
   return true;
-}
-
-std::vector<std::vector<std::string> > testSHA256::knownSHA256s;
-std::string testSHA256::inputBuffer;
-unsigned char testSHA256::outputBuffer[10000000];
-std::vector<uint> testSHA256::messageStarts;
-std::vector<uint> testSHA256::messageLengths;
-unsigned testSHA256::totalToCompute = 100000;
-
-void testSHA256::initialize() {
-  testSHA256::knownSHA256s.push_back((std::vector<std::string>) {
-    "abc",
-    "ba7816bf8f01cfea414140de5dae2223b00361a396177a9cb410ff61f20015ad"
-  });
-  testSHA256::knownSHA256s.push_back((std::vector<std::string>) {
-    "abcdbcdecdefdefgefghfghighijhijkijkljklmklmnlmnomnopnopq",
-    "248d6a61d20638b8e5c026930c3e6039a33ce45964ff2167f6ecedd419db06c1"
-  });
-  testSHA256::knownSHA256s.push_back((std::vector<std::string>) {
-   "abcdefghbcdefghicdefghijdefghijkefghijklfghijklmghijklmnhijklmnoijklmnopjklmnopqklmnopqrlmnopqrsmnopqrstnopqrstu",
-   "cf5b16a778af8380036ce59e7b0492370b249b11e8f07a51afac45037afee9d1"
-  });
-  testSHA256::inputBuffer.reserve(100 * testSHA256::totalToCompute);
-  for (unsigned i = 0; i < testSHA256::totalToCompute; i ++) {
-    unsigned testCounter = i % testSHA256::knownSHA256s.size();
-    std::string& currentMessage = testSHA256::knownSHA256s[testCounter][0];
-    testSHA256::messageStarts.push_back(testSHA256::inputBuffer.size());
-    testSHA256::messageLengths.push_back(currentMessage.size());
-    testSHA256::inputBuffer.append(currentMessage);
-    for (unsigned j = 0; j < 32; j ++)
-      testSHA256::outputBuffer[i * 32 + j] = 0;
-  }
-}
-
-int testGPU(void) {
-  // Create the two input vectors
-  GPU theGPU;
-  theGPU.initializeKernels();
-  // Create a command queue
-  std::shared_ptr<GPUKernel> theKernel = theGPU.theKernels[GPU::kernelSHA256];
-  std::cout << "DEBUG: about to write to buffer. " << std::endl;
-  testSHA256::initialize();
-
-  auto timeStart = std::chrono::system_clock::now();
-  uint largeTestCounter;
-  theKernel->writeToBuffer(4, testSHA256::inputBuffer);
-
-  for (largeTestCounter = 0; largeTestCounter < testSHA256::totalToCompute; largeTestCounter ++) {
-    theKernel->writeArgument(1, testSHA256::messageStarts[largeTestCounter]);
-    theKernel->writeArgument(2, testSHA256::messageLengths[largeTestCounter]);
-    theKernel->writeArgument(3, largeTestCounter);
-    //theKernel->writeToBuffer(0, &theLength, sizeof(uint));
-    //std::cout << "DEBUG: Setting arguments ... " << std::endl;
-    //std::cout << "DEBUG: arguments set, enqueueing kernel... " << std::endl;
-    cl_int ret = clEnqueueNDRangeKernel(
-      theGPU.commandQueue, theKernel->kernel, 1, NULL,
-      &theKernel->global_item_size, &theKernel->local_item_size, 0, NULL, NULL
-    );
-    if (ret != CL_SUCCESS) {
-      logGPU << "Failed to enqueue kernel. Return code: " << ret << ". " << Logger::endL;
-      return false;
-    }
-    //std::cout << "DEBUG: kernel enqueued, proceeding to read buffer. " << std::endl;
-    if (largeTestCounter % 500 == 0) {
-      auto timeCurrent = std::chrono::system_clock::now();
-      std::chrono::duration<double> elapsed_seconds = timeCurrent - timeStart;
-      std::cout << "Computed " << largeTestCounter << " sha256s in " << elapsed_seconds.count() << " second(s). " << std::endl;
-    }
-  }
-  cl_mem& result = theKernel->outputs[0]->theMemory;
-  cl_int ret = clEnqueueReadBuffer (
-    theGPU.commandQueue, result, CL_TRUE, 0,
-    32 * testSHA256::totalToCompute, testSHA256::outputBuffer, 0, NULL, NULL
-  );
-  if (ret != CL_SUCCESS) {
-    logGPU << "Failed to enqueue read buffer. Return code: " << ret << ". " << Logger::endL;
-    return false;
-  }
-  auto timeCurrent = std::chrono::system_clock::now();
-  std::chrono::duration<double> elapsed_seconds = timeCurrent - timeStart;
-  std::cout << "Computed " << largeTestCounter << " sha256s in " << elapsed_seconds.count() << " second(s). " << std::endl;
-  std::cout << "Speed: " << (testSHA256::totalToCompute / elapsed_seconds.count()) << " hashes per second. " << std::endl;
-  std::cout << "Checking computations ..." << std::endl;
-  for (largeTestCounter = 0; largeTestCounter < testSHA256::totalToCompute; largeTestCounter ++) {
-    unsigned testCounteR = largeTestCounter % testSHA256::knownSHA256s.size();
-    std::stringstream out;
-    unsigned offset = largeTestCounter * 32;
-    for (unsigned i = offset; i < offset + 32; i ++)
-      out << std::hex << std::setw(2) << std::setfill('0') << ((int) ((unsigned) testSHA256::outputBuffer[i]));
-    if (out.str() != testSHA256::knownSHA256s[testCounteR][1]) {
-      logGPU << "\e[31mSha of message index " << largeTestCounter
-             << ": " << testSHA256::knownSHA256s[testCounteR][0] << " is wrongly computed to be: " << out.str()
-             << " instead of: " << testSHA256::knownSHA256s[testCounteR][1] << "\e[39m" << Logger::endL;
-      assert(false);
-      return - 1;
-    }
-  }
-  std::cout << "\e[32mSuccess!\e[39m" << std::endl;
-  return 0;
 }

@@ -85,9 +85,6 @@ void memoryPool_freeMemory__global(__global void* any);
 #include "../opencl/cl/secp256k1_set_1_address_space__default.h"
 #include "../opencl/cl/secp256k1_data_structures_parametric_address_space.h"
 ///////////////////////
-//#include "../opencl/cl/secp256k1_set_address_space__constant__global__global.h"
-//#include "../opencl/cl/secp256k1_data_structures_parametric_address_space.h"
-///////////////////////
 ///////////////////////
 
 
@@ -438,16 +435,6 @@ char secp256k1_ecdsa_sig_verify(
 ///////////////////////
 #include "../opencl/cl/secp256k1_set_1_address_space__default.h"
 #include "../opencl/cl/secp256k1_1_parametric_address_space.h"
-///////////////////////
-///////////////////////
-
-///////////////////////
-///////////////////////
-#include "../opencl/cl/secp256k1_set_2_address_spaces__global__global.h"
-#include "../opencl/cl/secp256k1_2_parametric_address_spaces.h"
-///////////////////////
-#include "../opencl/cl/secp256k1_set_2_address_spaces__default.h"
-#include "../opencl/cl/secp256k1_2_parametric_address_spaces.h"
 ///////////////////////
 ///////////////////////
 

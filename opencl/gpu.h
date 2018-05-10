@@ -101,7 +101,10 @@ public:
   cl_context context;
   cl_command_queue commandQueue;
   bool flagVerbose;
-  bool initialize();
+  bool flagInitializedPlatform;
+  bool flagInitializedKernels;
+  bool initializeAll();
+  bool initializePlatform();
   bool initializeKernels();
   GPU();
   bool createKernel(const std::string& fileNameNoExtension,
@@ -110,18 +113,6 @@ public:
       const std::vector<std::string>& inputs,
       const std::vector<int>& inputTypes);
   ~GPU();
-};
-
-class testSHA256
-{
-public:
-  static std::vector<std::vector<std::string> > knownSHA256s;
-  static std::string inputBuffer;
-  static unsigned char outputBuffer[10000000];
-  static std::vector<uint> messageStarts;
-  static std::vector<uint> messageLengths;
-  static void initialize();
-  static unsigned totalToCompute;
 };
 
 #endif

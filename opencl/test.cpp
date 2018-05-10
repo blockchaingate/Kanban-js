@@ -4,6 +4,9 @@
 #include "gpu.h"
 #include "cl/secp256k1_cpp.h"
 #include "miscellaneous.h"
+#include <chrono>
+#include <assert.h>
+#include "secp256k1_interface.h"
 
 Logger logTest("../logfiles/logTest.txt", "[test] ");
 extern Logger logServer;
@@ -34,19 +37,13 @@ void getGeneratorContext(
   secp256k1_ecmult_gen_context_init(&outputGeneratorContext);
   uint32_t outputPositionGeneratorContextStruct = memoryPool_readUINT(&theMemoryPool[8]);
   uint32_t outputPositionGeneratorContextContent = memoryPool_readUINT(&theMemoryPool[12]);
-
-  logTest << "GOT to here pt 1 " << Logger::endL;
   outputGeneratorContext = *((secp256k1_ecmult_gen_context*) &theMemoryPool[outputPositionGeneratorContextStruct]);
-  logTest << "GOT to here pt 2 " << Logger::endL;
   outputGeneratorContext.prec = NULL;
-  logTest << "GOT to here pt 3 " << Logger::endL;
   //int sizeOfGeneratorContextLump = (16 * 64 * sizeof(secp256k1_ge_storage));
   //logTest << "Size of generator context lump: " << sizeOfGeneratorContextLump << Logger::endL;
   //for (int i = 0; i < sizeOfGeneratorContextLump; i++)
   //  logTest << std::hex << (int) theMemoryPool[outputPositionGeneratorContextContent + i];
   outputGeneratorContext.prec = (secp256k1_ge_storage*) &theMemoryPool[outputPositionGeneratorContextContent];
-  logTest << "GOT to here pt 4. Prec pointer:  " << std::hex << ((long) outputGeneratorContext.prec)
-  << "\nMemory pool pointer: " << std::hex << ((long) theMemoryPool) << Logger::endL;
 }
 
 void testPrintMemoryPoolGeneral(const unsigned char* theMemoryPool, const std::string& computationID) {
@@ -55,8 +52,9 @@ void testPrintMemoryPoolGeneral(const unsigned char* theMemoryPool, const std::s
   //int useFulmemoryPoolSize = 16 * 64 * 64 + 10192 + 100;
   logTest << "Memory pool reserved bytes: " << std::dec << memoryPool_readNumberReservedBytesExcludingLog() << Logger::endL;
   logTest << "Memory pool reserved bytes + log size: " << std::dec << memoryPool_readNumberReservedBytesIncludingLog() << Logger::endL;
+  logTest << "\nMemory pool pointer: 0x" << std::hex << ((long) theMemoryPool) << Logger::endL;
   int initialBytesToPrint = memoryPool_readNumberReservedBytesIncludingLog() + 1000;
-  logTest << "First " << initialBytesToPrint << " hex-formatted characters of the memory pool: " << Logger::endL;
+  logTest << "First " << std::dec << initialBytesToPrint << " hex-formatted characters of the memory pool: " << Logger::endL;
   memoryPoolPrintout.assign((const char*) theMemoryPool, initialBytesToPrint);
   logTest << Miscellaneous::toStringHex(memoryPoolPrintout) << Logger::endL;
   logTest << "Computation log:\n"
@@ -66,10 +64,10 @@ void testPrintMemoryPoolGeneral(const unsigned char* theMemoryPool, const std::s
 void testPrintMultiplicationContext(const unsigned char* theMemoryPool, const std::string& computationID) {
   testPrintMemoryPoolGeneral(theMemoryPool, computationID);
   uint32_t outputPositionCentralPU = memoryPool_readUINT(&theMemoryPool[8]);
-  logTest << "outputPosition: " << outputPositionCentralPU << Logger::endL;
+  logTest << "Position multiplication context: " << outputPositionCentralPU << Logger::endL;
   secp256k1_ecmult_context multiplicationContextCentralPU;
   multiplicationContextCentralPU.pre_g = (secp256k1_ge_storage(*)[]) (theMemoryPool + outputPositionCentralPU);
-  logTest << "multiplicationContext:\n"
+  logTest << "Multiplication context:\n"
   << toStringSecp256k1_MultiplicationContext(multiplicationContextCentralPU, false) << Logger::endL;
 }
 
@@ -84,7 +82,7 @@ void testPrintGeneratorContext(const unsigned char* theMemoryPool, const std::st
 
   secp256k1_ecmult_gen_context theGeneratorContext;
   getGeneratorContext(theMemoryPool, theGeneratorContext);
-  logTest << "generatorContext:\n" << toStringSecp256k1_GeneratorContext(theGeneratorContext, false) << Logger::endL;
+  logTest << "Generator context:\n" << toStringSecp256k1_GeneratorContext(theGeneratorContext, false) << Logger::endL;
 }
 
 extern void secp256k1_opencl_compute_multiplication_context(
@@ -94,15 +92,18 @@ extern void secp256k1_opencl_compute_generator_context(
   __global unsigned char* outputMemoryPoolContainingGeneratorContext
 );
 
-int mainTest() {  
-  secp256k1_opencl_compute_multiplication_context(bufferCentralPUMultiplicationContext);
+int testMain() {
+  Secp256k1::computeMultiplicationContext(bufferCentralPUMultiplicationContext);
   testPrintMultiplicationContext(bufferCentralPUMultiplicationContext, "Central PU");
-  secp256k1_opencl_compute_generator_context(bufferCentralPUGeneratorContext);
+  Secp256k1::computeGeneratorContext(bufferCentralPUGeneratorContext);
   testPrintGeneratorContext(bufferCentralPUGeneratorContext, "Central PU");
   secp256k1_ecmult_gen_context theGeneratorContext;
   secp256k1_ecmult_gen_context_init(&theGeneratorContext);
   getGeneratorContext(bufferCentralPUGeneratorContext, theGeneratorContext);
 
+  GPU theGPU;
+  if (!theGPU.initializeAll())
+    return false;
 
 /*  secp256k1_scalar signatureS, signatureR;
   secp256k1_scalar secretKey = SECP256K1_SCALAR_CONST(
@@ -145,15 +146,6 @@ int mainTest() {
 
 
 */
-
-
-
-
-
-  GPU theGPU;
-
-  if (!theGPU.initializeKernels())
-    return false;
   std::shared_ptr<GPUKernel> kernelMultiplicationContext = theGPU.theKernels[GPU::kernelInitializeMultiplicationContext];
 
   cl_int ret = clEnqueueNDRangeKernel(
@@ -213,5 +205,116 @@ int mainTest() {
     return - 1;
   }
   printComments(resultChar);*/
+  return 0;
+}
+
+class testSHA256
+{
+public:
+  static std::vector<std::vector<std::string> > knownSHA256s;
+  static std::string inputBuffer;
+  static unsigned char outputBuffer[10000000];
+  static std::vector<uint> messageStarts;
+  static std::vector<uint> messageLengths;
+  static void initialize();
+  static unsigned totalToCompute;
+};
+
+std::vector<std::vector<std::string> > testSHA256::knownSHA256s;
+std::string testSHA256::inputBuffer;
+unsigned char testSHA256::outputBuffer[10000000];
+std::vector<uint> testSHA256::messageStarts;
+std::vector<uint> testSHA256::messageLengths;
+unsigned testSHA256::totalToCompute = 100000;
+
+void testSHA256::initialize() {
+  testSHA256::knownSHA256s.push_back((std::vector<std::string>) {
+    "abc",
+    "ba7816bf8f01cfea414140de5dae2223b00361a396177a9cb410ff61f20015ad"
+  });
+  testSHA256::knownSHA256s.push_back((std::vector<std::string>) {
+    "abcdbcdecdefdefgefghfghighijhijkijkljklmklmnlmnomnopnopq",
+    "248d6a61d20638b8e5c026930c3e6039a33ce45964ff2167f6ecedd419db06c1"
+  });
+  testSHA256::knownSHA256s.push_back((std::vector<std::string>) {
+   "abcdefghbcdefghicdefghijdefghijkefghijklfghijklmghijklmnhijklmnoijklmnopjklmnopqklmnopqrlmnopqrsmnopqrstnopqrstu",
+   "cf5b16a778af8380036ce59e7b0492370b249b11e8f07a51afac45037afee9d1"
+  });
+  testSHA256::inputBuffer.reserve(100 * testSHA256::totalToCompute);
+  for (unsigned i = 0; i < testSHA256::totalToCompute; i ++) {
+    unsigned testCounter = i % testSHA256::knownSHA256s.size();
+    std::string& currentMessage = testSHA256::knownSHA256s[testCounter][0];
+    testSHA256::messageStarts.push_back(testSHA256::inputBuffer.size());
+    testSHA256::messageLengths.push_back(currentMessage.size());
+    testSHA256::inputBuffer.append(currentMessage);
+    for (unsigned j = 0; j < 32; j ++)
+      testSHA256::outputBuffer[i * 32 + j] = 0;
+  }
+}
+
+int testSHA256(GPU& theGPU) {
+  // Create the two input vectors
+  theGPU.initializeAll();
+  // Create a command queue
+  std::shared_ptr<GPUKernel> theKernel = theGPU.theKernels[GPU::kernelSHA256];
+  std::cout << "DEBUG: about to write to buffer. " << std::endl;
+  testSHA256::initialize();
+
+  auto timeStart = std::chrono::system_clock::now();
+  uint largeTestCounter;
+  theKernel->writeToBuffer(4, testSHA256::inputBuffer);
+
+  for (largeTestCounter = 0; largeTestCounter < testSHA256::totalToCompute; largeTestCounter ++) {
+    theKernel->writeArgument(1, testSHA256::messageStarts[largeTestCounter]);
+    theKernel->writeArgument(2, testSHA256::messageLengths[largeTestCounter]);
+    theKernel->writeArgument(3, largeTestCounter);
+    //theKernel->writeToBuffer(0, &theLength, sizeof(uint));
+    //std::cout << "DEBUG: Setting arguments ... " << std::endl;
+    //std::cout << "DEBUG: arguments set, enqueueing kernel... " << std::endl;
+    cl_int ret = clEnqueueNDRangeKernel(
+      theGPU.commandQueue, theKernel->kernel, 1, NULL,
+      &theKernel->global_item_size, &theKernel->local_item_size, 0, NULL, NULL
+    );
+    if (ret != CL_SUCCESS) {
+      logTest << "Failed to enqueue kernel. Return code: " << ret << ". " << Logger::endL;
+      return false;
+    }
+    //std::cout << "DEBUG: kernel enqueued, proceeding to read buffer. " << std::endl;
+    if (largeTestCounter % 500 == 0) {
+      auto timeCurrent = std::chrono::system_clock::now();
+      std::chrono::duration<double> elapsed_seconds = timeCurrent - timeStart;
+      std::cout << "Computed " << largeTestCounter << " sha256s in " << elapsed_seconds.count() << " second(s). " << std::endl;
+    }
+  }
+  cl_mem& result = theKernel->outputs[0]->theMemory;
+  cl_int ret = clEnqueueReadBuffer (
+    theGPU.commandQueue, result, CL_TRUE, 0,
+    32 * testSHA256::totalToCompute, testSHA256::outputBuffer, 0, NULL, NULL
+  );
+  if (ret != CL_SUCCESS) {
+    logTest << "Failed to enqueue read buffer. Return code: " << ret << ". " << Logger::endL;
+    return false;
+  }
+  auto timeCurrent = std::chrono::system_clock::now();
+  std::chrono::duration<double> elapsed_seconds = timeCurrent - timeStart;
+  logTest << "Computed " << largeTestCounter << " sha256s in " << elapsed_seconds.count() << " second(s). " << Logger::endL;
+  logTest << "Speed: " << (testSHA256::totalToCompute / elapsed_seconds.count()) << " hashes per second. " << Logger::endL;
+  logTest << "Checking computations ..." << Logger::endL;
+  for (largeTestCounter = 0; largeTestCounter < testSHA256::totalToCompute; largeTestCounter ++) {
+    unsigned testCounteR = largeTestCounter % testSHA256::knownSHA256s.size();
+    std::stringstream out;
+    unsigned offset = largeTestCounter * 32;
+    for (unsigned i = offset; i < offset + 32; i ++)
+      out << std::hex << std::setw(2) << std::setfill('0') << ((int) ((unsigned) testSHA256::outputBuffer[i]));
+    if (out.str() != testSHA256::knownSHA256s[testCounteR][1]) {
+      logTest << "\e[31mSha of message index " << largeTestCounter
+             << ": " << testSHA256::knownSHA256s[testCounteR][0] << " is wrongly computed to be: " << out.str()
+             << " instead of: " << testSHA256::knownSHA256s[testCounteR][1] << "\e[39m" << Logger::endL;
+      assert(false);
+      return - 1;
+    }
+  }
+  logTest << "Success!" << Logger::endL;
+  std::cout << "\e[32mSuccess!\e[39m" << std::endl;
   return 0;
 }

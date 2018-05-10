@@ -9,8 +9,9 @@ SOURCES += \
     server.cpp \
     miscellaneous.cpp \
     test.cpp \
-    cl/secp256k1_c.cpp \
-    cl/secp256k1_to_string_methods.cpp
+    cl/secp256k1_to_string_methods.cpp \
+    secp256k1_interface.cpp \
+    cl/secp256k1_cpp.cpp
 
 LIBS+=-lOpenCL
 
@@ -20,7 +21,8 @@ HEADERS += \
     logging.h \
     miscellaneous.h \
     cl/secp256k1.h \
-    cl/secp256k1_cpp.h
+    cl/secp256k1_cpp.h \
+    secp256k1_interface.h
 
 DISTFILES += \
     cl/testBuffer.cl

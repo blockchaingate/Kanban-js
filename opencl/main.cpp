@@ -22,16 +22,14 @@ int totalCouts = 0;
 
 extern Logger logServer;
 
-extern int mainTest();
+extern int testMain();
 
-int main(int numberOfArguments, char *arguments[])
-{
+int main(int numberOfArguments, char *arguments[]) {
   if (numberOfArguments == 2)
     if (((std::string) arguments[1]) == "test")
-      return mainTest();
+      return testMain();
   Server theServer;
-  if (!theServer.Run())
-  {
+  if (!theServer.Run()) {
     logServer << "Graceful exit with errors. ";
     return - 1;
   }
