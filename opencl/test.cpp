@@ -23,11 +23,11 @@ void printComments(unsigned char* comments) {
   logServer << "extraMessage pr.z: " << Miscellaneous::toStringHex(extraMessage3) << Logger::endL;
 }
 
-unsigned char bufferCentralPUMultiplicationContext[6000000]; //6MB for computing multiplication context
-unsigned char bufferGraphicsPUMultiplicationContext[6000000];
+unsigned char bufferCentralPUMultiplicationContext[CryptoEC256k1GPU::memoryMultiplicationContext];
+unsigned char bufferGraphicsPUMultiplicationContext[CryptoEC256k1GPU::memoryMultiplicationContext];
 
-unsigned char bufferCentralPUGeneratorContext[2000000]; //2MB for computing generators
-unsigned char bufferGraphicsPUGeneratorContext[2000000];
+unsigned char bufferCentralPUGeneratorContext[CryptoEC256k1GPU::memoryGeneratorContext];
+unsigned char bufferGraphicsPUGeneratorContext[CryptoEC256k1GPU::memoryGeneratorContext];
 
 
 void getGeneratorContext(
@@ -63,12 +63,12 @@ void testPrintMemoryPoolGeneral(const unsigned char* theMemoryPool, const std::s
 
 void testPrintMultiplicationContext(const unsigned char* theMemoryPool, const std::string& computationID) {
   testPrintMemoryPoolGeneral(theMemoryPool, computationID);
-  uint32_t outputPositionCentralPU = memoryPool_readUINT(&theMemoryPool[8]);
-  logTest << "Position multiplication context: " << outputPositionCentralPU << Logger::endL;
-  secp256k1_ecmult_context multiplicationContextCentralPU;
-  multiplicationContextCentralPU.pre_g = (secp256k1_ge_storage(*)[]) (theMemoryPool + outputPositionCentralPU);
+  uint32_t outputPosition= memoryPool_readUINT(&theMemoryPool[8]);
+  logTest << "Position multiplication context: " << outputPosition << Logger::endL;
+  secp256k1_ecmult_context multiplicationContext;
+  multiplicationContext.pre_g = (secp256k1_ge_storage(*)[]) (theMemoryPool + outputPosition);
   logTest << "Multiplication context:\n"
-  << toStringSecp256k1_MultiplicationContext(multiplicationContextCentralPU, false) << Logger::endL;
+  << toStringSecp256k1_MultiplicationContext(multiplicationContext, false) << Logger::endL;
 }
 
 void testPrintGeneratorContext(const unsigned char* theMemoryPool, const std::string& computationID) {
@@ -93,17 +93,27 @@ extern void secp256k1_opencl_compute_generator_context(
 );
 
 int testMain() {
-  Secp256k1::computeMultiplicationContext(bufferCentralPUMultiplicationContext);
-  testPrintMultiplicationContext(bufferCentralPUMultiplicationContext, "Central PU");
-  Secp256k1::computeGeneratorContext(bufferCentralPUGeneratorContext);
-  testPrintGeneratorContext(bufferCentralPUGeneratorContext, "Central PU");
-  secp256k1_ecmult_gen_context theGeneratorContext;
-  secp256k1_ecmult_gen_context_init(&theGeneratorContext);
-  getGeneratorContext(bufferCentralPUGeneratorContext, theGeneratorContext);
-
   GPU theGPU;
-  if (!theGPU.initializeAll())
-    return false;
+  if (!CryptoEC256k1::computeMultiplicationContext(bufferCentralPUMultiplicationContext))
+    return - 1;
+  testPrintMultiplicationContext(bufferCentralPUMultiplicationContext, "Central PU");
+  if (!CryptoEC256k1::computeGeneratorContext(bufferCentralPUGeneratorContext))
+    return - 1;
+  testPrintGeneratorContext(bufferCentralPUGeneratorContext, "Central PU"); 
+  secp256k1_ecmult_gen_context generatorContextCentralPU;
+  secp256k1_ecmult_gen_context_init(&generatorContextCentralPU);
+  getGeneratorContext(bufferCentralPUGeneratorContext, generatorContextCentralPU);
+
+  if (!CryptoEC256k1GPU::computeMultiplicationContext(bufferGraphicsPUMultiplicationContext, theGPU))
+    return - 1;
+  testPrintMultiplicationContext(bufferGraphicsPUMultiplicationContext, "Graphics PU");
+  if (!CryptoEC256k1GPU::computeGeneratorContext(bufferGraphicsPUGeneratorContext, theGPU))
+    return - 1;
+  testPrintGeneratorContext(bufferGraphicsPUGeneratorContext, "Graphics PU");
+  secp256k1_ecmult_gen_context generatorContextGraphicsPU;
+  secp256k1_ecmult_gen_context_init(&generatorContextGraphicsPU);
+  getGeneratorContext(bufferGraphicsPUGeneratorContext, generatorContextGraphicsPU);
+
 
 /*  secp256k1_scalar signatureS, signatureR;
   secp256k1_scalar secretKey = SECP256K1_SCALAR_CONST(
@@ -146,27 +156,7 @@ int testMain() {
 
 
 */
-  std::shared_ptr<GPUKernel> kernelMultiplicationContext = theGPU.theKernels[GPU::kernelInitializeMultiplicationContext];
 
-  cl_int ret = clEnqueueNDRangeKernel(
-    theGPU.commandQueue, kernelMultiplicationContext->kernel, 1, NULL,
-    &kernelMultiplicationContext->global_item_size, &kernelMultiplicationContext->local_item_size, 0, NULL, NULL
-  );
-  if (ret != CL_SUCCESS) {
-    logServer << "Failed to enqueue kernel. Return code: " << ret << ". " << Logger::endL;
-    return 0;
-  }
-  cl_mem& result = kernelMultiplicationContext->outputs[0]->theMemory;
-  for (int i = 0; i < 4000000; i ++) {
-    bufferGraphicsPUMultiplicationContext[i] = 0;
-  }
-  logServer << "DEBUG: got to here. " << Logger::endL;
-  ret = clEnqueueReadBuffer(theGPU.commandQueue, result, CL_TRUE, 0, 4000000, (void*) &bufferGraphicsPUMultiplicationContext, 0, NULL, NULL);
-  if (ret != CL_SUCCESS) {
-    logServer << "Failed to read buffer. Return code: " << ret << Logger::endL;
-    return - 1;
-  }
-  testPrintMultiplicationContext(bufferGraphicsPUMultiplicationContext, "Graphics PU");
   /*
   secp256k1_ecmult_gen_context generatorContext;
   secp256k1_ecmult_gen_context_init(&generatorContext);
