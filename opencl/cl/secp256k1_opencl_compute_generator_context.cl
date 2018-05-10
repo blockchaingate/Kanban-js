@@ -13,7 +13,7 @@ __kernel void secp256k1_opencl_compute_generator_context(
   __global unsigned char* outputMemoryPoolContainingGeneratorContext
 ) {
   initializeMemoryPool(1000000, outputMemoryPoolContainingGeneratorContext);
-  writeStringToMemoryPoolLog(messageGeneratorContext1, outputMemoryPoolContainingGeneratorContext);
+  memoryPool_writeString(messageGeneratorContext1, outputMemoryPoolContainingGeneratorContext);
   
   writeCurrentMemoryPoolSizeAsOutput(0, outputMemoryPoolContainingGeneratorContext);
 

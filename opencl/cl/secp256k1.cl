@@ -84,7 +84,7 @@ void initializeMemoryPool(unsigned int totalSize, __global unsigned char* memory
   checked_malloc(MACRO_MessageLogSize, memoryPool);
 }
 
-void writeStringToMemoryPoolLog(__constant const char* message, __global unsigned char* memoryPool) {
+void memoryPool_writeString(__constant const char* message, __global unsigned char* memoryPool) {
   unsigned int i, length, reservedBytes;
   length = MACRO_MessageLogSize - 2;
   reservedBytes = getNumberOfReservedBytesExcludingMessageLog();
@@ -3487,14 +3487,14 @@ void secp256k1_ecmult_context_build(
   __global secp256k1_ecmult_context* output,
   __global unsigned char* memoryPool
 ) {
-  writeStringToMemoryPoolLog(message2, memoryPool);
+  memoryPool_writeString(message2, memoryPool);
   
   secp256k1_gej gj;
 
   if (output->pre_g != NULL) {
     return;
   }
-  writeStringToMemoryPoolLog(message3, memoryPool);
+  memoryPool_writeString(message3, memoryPool);
   /* get the generator */
   //openCL note: secp256k1_ge_const_g is always in the __constant address space.
   secp256k1_gej_set_ge__constant(&gj, &secp256k1_ge_const_g);

@@ -1,7 +1,7 @@
 /**********************************************************************
  * Copyright (c) 2018 FA Enterprise System                            *
  * Distributed under the MIT software license.                        *
- * This file is a modified copy of                                    *
+ * This file is a fork (modified copy) of                             *
  * Pieter Wuille's sipa library (https://github.com/sipa/secp256k1).  *
  **********************************************************************/
 /**********************************************************************
@@ -11,27 +11,8 @@
  **********************************************************************/
 
 /**********************************************************************
-  At the time of writing (April 2018), the modifications of the library
-  are intended to:
-  1)  port the library to openCL;
-  2)  introduce openCL-related optimizations;
-  3)  refactor (or write new) tests and benchmarks to match our 
-      system's setup;
-  4)  introduce cosmetic changes to match FA's variable/class naming 
-      style. The primary aim Step 4 is to introduce our team
-      to the inner workings of Pieter Wuille's code, while trying to  
-      preserve his code's aesthetics. 
-  Henceforth, we will try to keep FA's comments 
-  in the double-forward slash style, so as to distinguish from 
-  Pieter Wuille's comments written in the multi-line comment style. 
+Please see the file opencl/README.md for technical notes on this code.
  **********************************************************************/
-
-/**********************************************************************
-  Plan for openCL port.
-  1.The present file is compiled both as a C program and 
-    as an openCL program.
- **********************************************************************/
-
 
 #ifndef SECP256k1_H_header
 #define SECP256k1_H_header
@@ -60,7 +41,7 @@
 
 __global void* checked_malloc(unsigned int size, __global unsigned char* memoryPool);
 void writeToMemoryPool(unsigned int numberToWrite, __global unsigned char* memoryPoolPointer);
-void writeStringToMemoryPoolLog(__constant const char* message, __global unsigned char* memoryPool);
+void memoryPool_writeString(__constant const char* message, __global unsigned char* memoryPool);
 void writeCurrentMemoryPoolSizeAsOutput(unsigned int argumentIndex, __global unsigned char* memoryPool);
 
 unsigned int readFromMemoryPool(__global const unsigned char *memoryPoolPointer);

@@ -18,7 +18,7 @@ __kernel void secp256k1_opencl_compute_multiplication_context(
   initializeMemoryPool(5900000, outputMemoryPoolContainingMultiplicationContext);
   __global secp256k1_ecmult_context* multiplicationContext = (__global secp256k1_ecmult_context*) checked_malloc(sizeof(secp256k1_ecmult_context), outputMemoryPoolContainingMultiplicationContext);
   multiplicationContext->pre_g = NULL; 
-  writeStringToMemoryPoolLog(message1, outputMemoryPoolContainingMultiplicationContext);
+  memoryPool_writeString(message1, outputMemoryPoolContainingMultiplicationContext);
   secp256k1_ecmult_context_build(multiplicationContext, outputMemoryPoolContainingMultiplicationContext);
 }
 
