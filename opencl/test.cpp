@@ -8,8 +8,8 @@
 #include <assert.h>
 #include "secp256k1_interface.h"
 
-Logger logTestCentralPU("../test/kanban-gpu/debug/logTestCentralPU.txt", "[test CPU] ");
-Logger logTestGraphicsPU("../test/kanban-gpu/debug/logTestGraphicsPU.txt", "[test GPU] ");
+Logger logTestCentralPU("../test/kanban_gpu/debug/logTestCentralPU.txt", "[test CPU] ");
+Logger logTestGraphicsPU("../test/kanban_gpu/debug/logTestGraphicsPU.txt", "[test GPU] ");
 extern Logger logServer;
 
 void printComments(unsigned char* comments) {

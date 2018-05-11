@@ -1,5 +1,5 @@
-#Debug log files
-
+# Debug log files
+ 
 This folder is a container for the log files generated during our crypto library tests. 
 
 At the time of writing, a test run generates the files:
@@ -10,7 +10,7 @@ and
 
 logTestGraphicsPU.txt
 
-The two files contain outputs of tests run of the same code, once ran as a CPP program and once ran as openCL program.
+The two files contain outputs of tests run off the same code, once ran as a CPP program and once ran as an openCL program.
  
 1. The two files are expected to be nearly identical. There should be no differences in the data printouts. The only expected differences are in messages, pointer locations, etc.
 

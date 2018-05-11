@@ -1,11 +1,12 @@
-Copyright (c) 2018 FA Enterprise System
+Copyright (c) 2018 FA Enterprise System.
+
 Distributed under the MIT software license,
 
 http://www.opensource.org/licenses/mit-license.php
 
 
 Please note that the code in this repository is completely experimental.
-We will remove the latter warning once our code reaches sufficient level of maturity.
+We will remove this warning once our code reaches sufficient level of maturity.
 
 ## List of projects used
 

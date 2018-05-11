@@ -20,7 +20,7 @@ __kernel void secp256k1_opencl_compute_generator_context(
   __global secp256k1_ecmult_gen_context* generatorContext = (__global secp256k1_ecmult_gen_context*) checked_malloc(
     sizeof(secp256k1_ecmult_gen_context), outputMemoryPoolContainingGeneratorContext
   );
-  generatorContext->prec = NULL;
+  generatorContext->prec = NULL; 
 
   secp256k1_ecmult_gen_context_build(generatorContext, outputMemoryPoolContainingGeneratorContext);
 }

@@ -41,8 +41,9 @@ Further comments.
 
 2)  We have chosen to collapse the library in fewer files. 
     This was an ad-hoc decision which we used to minimize our
-    work on point 1). Where applicable, we have noted the origin of each pieces of code
-    in our collapsed source code. 
+    work on point 1). Where applicable, 
+    we have noted the origin of each piece of code
+    in our version. 
     The original library structure may be restored in the future.
 
 3)  We will refactor to openCL 2.0 when we are confident 

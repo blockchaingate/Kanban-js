@@ -28,9 +28,7 @@ bool CryptoEC256k1GPU::computeMultiplicationContext(unsigned char* outputMemoryP
     return false;
   }
   cl_mem& result = kernelMultiplicationContext->outputs[0]->theMemory;
-  logGPU << "DEBUG: enqueued multiplication context. " << Logger::endL;
-  ret = clEnqueueReadBuffer(theGPU.commandQueue, result, CL_TRUE, 0, 4000000, (void*) outputMemoryPool, 0, NULL, NULL);
-  logGPU << "DEBUG: enqueued multiplication context done. " << Logger::endL;
+  ret = clEnqueueReadBuffer(theGPU.commandQueue, result, CL_TRUE, 0, CryptoEC256k1GPU::memoryMultiplicationContext - 100, (void*) outputMemoryPool, 0, NULL, NULL);
   if (ret != CL_SUCCESS) {
     logGPU << "Failed to read buffer. Return code: " << ret << Logger::endL;
     return false;
@@ -39,10 +37,11 @@ bool CryptoEC256k1GPU::computeMultiplicationContext(unsigned char* outputMemoryP
 }
 
 bool CryptoEC256k1GPU::computeGeneratorContext(unsigned char* outputMemoryPool, GPU& theGPU) {
+  logGPU << "DEBUG: Got to generator context start." << Logger::endL;
   if (!theGPU.initializeAll())
     return false;
   std::shared_ptr<GPUKernel> kernelGeneratorContext = theGPU.theKernels[GPU::kernelInitializeGeneratorContext];
-
+  logGPU << "DEBUG: Got to before compute generator context" << Logger::endL;
   cl_int ret = clEnqueueNDRangeKernel(
     theGPU.commandQueue, kernelGeneratorContext->kernel, 1, NULL,
     &kernelGeneratorContext->global_item_size, &kernelGeneratorContext->local_item_size, 0, NULL, NULL
@@ -53,7 +52,7 @@ bool CryptoEC256k1GPU::computeGeneratorContext(unsigned char* outputMemoryPool, 
   }
   cl_mem& result = kernelGeneratorContext->outputs[0]->theMemory;
   logGPU << "DEBUG: enqueued generator context. " << Logger::endL;
-  ret = clEnqueueReadBuffer(theGPU.commandQueue, result, CL_TRUE, 0, 1000000, (void*) outputMemoryPool, 0, NULL, NULL);
+  ret = clEnqueueReadBuffer(theGPU.commandQueue, result, CL_TRUE, 0,  CryptoEC256k1GPU::memoryGeneratorContext - 100, (void*) outputMemoryPool, 0, NULL, NULL);
   if (ret != CL_SUCCESS) {
     logGPU << "Failed to read buffer. Return code: " << ret << Logger::endL;
     return false;
