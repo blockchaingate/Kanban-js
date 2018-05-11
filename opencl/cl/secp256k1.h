@@ -36,16 +36,23 @@ Please see the file opencl/README.md for technical notes on this code.
 
 //Memory pool format: in the notes before the definition of memoryPool_Initialize.
 
-#define MACRO_numberOfOutputs 4
+#define MACRO_numberOfOutputs 6
 #define MACRO_MessageLogSize 500
+#define MACRO_MEMORY_POOL_SIZE_MultiplicationContext 6000000
+#define MACRO_MEMORY_POOL_SIZE_GeneratorContext 2000000
+
 
 __global void* checked_malloc(unsigned int size, __global unsigned char* memoryPool);
 void memoryPool_writeUINT(unsigned int numberToWrite, __global unsigned char* memoryPoolPointer);
+void memoryPool_writeUINTasOutput(unsigned int numberToWrite, int argumentIndex, __global unsigned char* memoryPoolPointer);
 void memoryPool_writeString(__constant const char* message, __global unsigned char* memoryPool);
 void memoryPool_writeCurrentSizeAsOutput(unsigned int argumentIndex, __global unsigned char* memoryPool);
 
+
 unsigned int memoryPool_readUINT(__global const unsigned char *memoryPoolPointer);
+unsigned int memoryPool_readUINTfromOutput(int argumentIndex, __global const unsigned char *memoryPool);
 unsigned int memoryPool_readPoolSize(__global const unsigned char* memoryPool);
+unsigned int memoryPool_readMaxPoolSize(__global const unsigned char* memoryPool);
 
 unsigned int memoryPool_readNumberReservedBytesExcludingLog();
 unsigned int memoryPool_readNumberReservedBytesIncludingLog();
@@ -438,5 +445,19 @@ char secp256k1_ecdsa_sig_verify(
 ///////////////////////
 ///////////////////////
 
+//Use of sizeof is forbidden. For more details, search for
+//#undef sizeof
+//and read the nearby comments.
+//The following functions are defined via macros.
+//The functions are delaclared here
+//to facilitate IDE autocomplete.
+unsigned int sizeof_secp256k1_ecmult_gen_context();
+unsigned int sizeof_secp256k1_fe();
+unsigned int sizeof_secp256k1_gej();
+unsigned int sizeof_secp256k1_ge();
+unsigned int sizeof_secp256k1_ecmult_context();
+unsigned int sizeof_int();
+unsigned int sizeof_secp256k1_ge_storage();
+unsigned int sizeof_char64();
 
 #endif //SECP256k1_H_header

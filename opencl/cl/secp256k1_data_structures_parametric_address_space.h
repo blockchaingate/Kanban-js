@@ -57,11 +57,11 @@
 // representation is normal. 
 // 
 typedef struct {
-    /* X = sum(i=0..9, elem[i]*2^26) mod n */
-    uint32_t n[10];
+  /* X = sum(i=0..9, elem[i]*2^26) mod n */
+  uint32_t n[10];
 #ifdef VERIFY
-    int magnitude;
-    int normalized;
+  int magnitude;
+  int normalized;
 #endif
 } APPEND_ADDRESS_SPACE(secp256k1_fe);
 
@@ -94,8 +94,8 @@ typedef struct {
 } APPEND_ADDRESS_SPACE(secp256k1_gej);
 
 typedef struct {
-    secp256k1_fe_storage x;
-    secp256k1_fe_storage y;
+  secp256k1_fe_storage x;
+  secp256k1_fe_storage y;
 } APPEND_ADDRESS_SPACE(secp256k1_ge_storage);
 
 

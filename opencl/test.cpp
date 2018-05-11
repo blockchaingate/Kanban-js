@@ -51,15 +51,17 @@ void testPrintMemoryPoolGeneral(const unsigned char* theMemoryPool, const std::s
   logTest << computationID << Logger::endL;
   std::string memoryPoolPrintout;
   //int useFulmemoryPoolSize = 16 * 64 * 64 + 10192 + 100;
+  logTest << "Claimed max size: " << memoryPool_readMaxPoolSize(theMemoryPool) << Logger::endL;
+  logTest << "Used: " << memoryPool_readPoolSize(theMemoryPool) << Logger::endL;
   logTest << "Memory pool reserved bytes: " << std::dec << memoryPool_readNumberReservedBytesExcludingLog() << Logger::endL;
   logTest << "Memory pool reserved bytes + log size: " << std::dec << memoryPool_readNumberReservedBytesIncludingLog() << Logger::endL;
-  logTest << "\nMemory pool pointer: 0x" << std::hex << ((long) theMemoryPool) << Logger::endL;
+  logTest << "Memory pool pointer: 0x" << std::hex << ((long) theMemoryPool) << Logger::endL;
   int initialBytesToPrint = memoryPool_readNumberReservedBytesIncludingLog() + 1000;
   logTest << "First " << std::dec << initialBytesToPrint << " hex-formatted characters of the memory pool: " << Logger::endL;
   memoryPoolPrintout.assign((const char*) theMemoryPool, initialBytesToPrint);
   logTest << Miscellaneous::toStringHex(memoryPoolPrintout) << Logger::endL;
   logTest << "Computation log:\n"
-  << toStringErrorLog(theMemoryPool) << Logger::endL;
+  << toStringErrorLog(theMemoryPool) << Logger::endL << Logger::endL;
 }
 
 void testPrintMultiplicationContext(const unsigned char* theMemoryPool, const std::string& computationID, Logger& logTest) {
@@ -74,12 +76,12 @@ void testPrintMultiplicationContext(const unsigned char* theMemoryPool, const st
 
 void testPrintGeneratorContext(const unsigned char* theMemoryPool, const std::string& computationID, Logger& logTest) {
   testPrintMemoryPoolGeneral(theMemoryPool, computationID, logTest);
-  uint32_t outputPositionGeneratorContextStruct = memoryPool_readUINT(&theMemoryPool[8]);
-  uint32_t outputPositionGeneratorContextContent = memoryPool_readUINT(&theMemoryPool[12]);
-  uint32_t sizePrec = memoryPool_readUINT(&theMemoryPool[16]);
+  uint32_t outputPositionGeneratorContextStruct = memoryPool_readUINTfromOutput(0, theMemoryPool);
+  uint32_t outputPositionGeneratorContextContent = memoryPool_readUINTfromOutput(1, theMemoryPool);
+  uint32_t debugInt = memoryPool_readUINTfromOutput(2, theMemoryPool);
   logTest << "Context struct position: " << outputPositionGeneratorContextStruct << Logger::endL;
   logTest << "Context content position: " << outputPositionGeneratorContextContent << Logger::endL;
-  logTest << "sizePrec: " << sizePrec << Logger::endL;
+  logTest << "Debug integer: " << debugInt << Logger::endL;
 
   secp256k1_ecmult_gen_context theGeneratorContext;
   getGeneratorContext(theMemoryPool, theGeneratorContext);
@@ -95,25 +97,25 @@ extern void secp256k1_opencl_compute_generator_context(
 
 int testMain() {
   GPU theGPU;
-  if (!CryptoEC256k1::computeMultiplicationContext(bufferCentralPUMultiplicationContext))
-    return - 1;
-  testPrintMultiplicationContext(bufferCentralPUMultiplicationContext, "Central PU", logTestCentralPU);
+  //if (!CryptoEC256k1::computeMultiplicationContext(bufferCentralPUMultiplicationContext))
+  //  return - 1;
+  //testPrintMultiplicationContext(bufferCentralPUMultiplicationContext, "Central PU", logTestCentralPU);
   if (!CryptoEC256k1::computeGeneratorContext(bufferCentralPUGeneratorContext))
     return - 1;
   testPrintGeneratorContext(bufferCentralPUGeneratorContext, "Central PU", logTestCentralPU);
-  secp256k1_ecmult_gen_context generatorContextCentralPU;
-  secp256k1_ecmult_gen_context_init(&generatorContextCentralPU);
-  getGeneratorContext(bufferCentralPUGeneratorContext, generatorContextCentralPU);
+  //secp256k1_ecmult_gen_context generatorContextCentralPU;
+  //secp256k1_ecmult_gen_context_init(&generatorContextCentralPU);
+  //getGeneratorContext(bufferCentralPUGeneratorContext, generatorContextCentralPU);
 
-  if (!CryptoEC256k1GPU::computeMultiplicationContext(bufferGraphicsPUMultiplicationContext, theGPU))
-    return - 1;
-  testPrintMultiplicationContext(bufferGraphicsPUMultiplicationContext, "Graphics PU", logTestGraphicsPU);
+  //if (!CryptoEC256k1GPU::computeMultiplicationContext(bufferGraphicsPUMultiplicationContext, theGPU))
+  //  return - 1;
+  //testPrintMultiplicationContext(bufferGraphicsPUMultiplicationContext, "Graphics PU", logTestGraphicsPU);
   if (!CryptoEC256k1GPU::computeGeneratorContext(bufferGraphicsPUGeneratorContext, theGPU))
     return - 1;
   testPrintGeneratorContext(bufferGraphicsPUGeneratorContext, "Graphics PU", logTestGraphicsPU);
-  secp256k1_ecmult_gen_context generatorContextGraphicsPU;
-  secp256k1_ecmult_gen_context_init(&generatorContextGraphicsPU);
-  getGeneratorContext(bufferGraphicsPUGeneratorContext, generatorContextGraphicsPU);
+  //secp256k1_ecmult_gen_context generatorContextGraphicsPU;
+  //secp256k1_ecmult_gen_context_init(&generatorContextGraphicsPU);
+  //getGeneratorContext(bufferGraphicsPUGeneratorContext, generatorContextGraphicsPU);
 
 
 /*  secp256k1_scalar signatureS, signatureR;

@@ -2,8 +2,8 @@
 
 #include "../opencl/cl/secp256k1.h"
 
-#ifndef FILE_secp256k1_CL_INCLUDED_MUST_GUARD_DUE_TO_OPENCL_COMPILER_BUG
-#define FILE_secp256k1_CL_INCLUDED_MUST_GUARD_DUE_TO_OPENCL_COMPILER_BUG
+#ifndef FILE_secp256k1_CL_INCLUDED_MUST_GUARD_DUE_TO_OPENCL_NON_DOCUMENTED_BEHAVIOR
+#define FILE_secp256k1_CL_INCLUDED_MUST_GUARD_DUE_TO_OPENCL_NON_DOCUMENTED_BEHAVIOR
 ////////////////////////////////////////////////
 //<- This file is guarded due to an open cl compiler bug 
 //(as of May 9 2018 using stock ubuntu openCL libraries) which requires that
@@ -16,6 +16,46 @@
 //the former fails to run with an "out of resources " error, and the latter runs 
 //producing random bytes. 
 ////////////////////////////////////////////////
+
+
+
+
+//////////////////////////////////////////////////
+/////////////////sizeof behavior//////////////////
+//On certain hardware + driver combinations (for example: NVIDIA Quadro K2000, openCL 1.1, Ubuntu)
+//sizeof returns 0 on structs such as, for example, secp256k1_fe.
+//
+//I have not been able to establish whether this is the expected behavior or whether it's a bug.
+//
+//In what follows, to guard against accidental use of sizeof,
+//we redefine sizeof to something that will generate a compiler error.
+//At the end of this file, we redefine sizeof to restore the status quo.
+
+#define MACRO_SIZEOF_FUNCTION(X)          \
+unsigned int sizeof_ ## X() { \
+  X usedForSizeOf;                        \
+  return sizeof(usedForSizeOf);           \
+}
+
+MACRO_SIZEOF_FUNCTION(secp256k1_fe)
+MACRO_SIZEOF_FUNCTION(secp256k1_gej)
+MACRO_SIZEOF_FUNCTION(secp256k1_ge)
+MACRO_SIZEOF_FUNCTION(secp256k1_ecmult_context)
+MACRO_SIZEOF_FUNCTION(secp256k1_ecmult_gen_context)
+MACRO_SIZEOF_FUNCTION(int)
+MACRO_SIZEOF_FUNCTION(secp256k1_ge_storage)
+
+unsigned int sizeof_char64() {
+  char usedForSizeOf[64];
+  return sizeof(usedForSizeOf);
+}
+
+#ifdef sizeof
+#undef sizeof
+#endif  
+#define sizeof sizeof_returns_zero_on_some_hardware_driver_combinations_use_sizeof_yourTypeName_instead
+/////////////end of sizeof behavior block////////
+
 
 
 
@@ -96,6 +136,10 @@ void memoryPool_writeString(__constant const char* message, __global unsigned ch
   }
 }
 
+void memoryPool_writeUINTasOutput(unsigned int numberToWrite, int argumentIndex, __global unsigned char* memoryPool) {
+  memoryPool_writeUINT(numberToWrite, &memoryPool[8 + 4 * argumentIndex ] );
+}
+
 void memoryPool_writeUINT(unsigned int numberToWrite, __global unsigned char* memoryPoolPointer) {
   memoryPoolPointer[0] = (unsigned char) (numberToWrite >> 24);
   memoryPoolPointer[1] = (unsigned char) (numberToWrite >> 16);
@@ -109,11 +153,15 @@ void memoryPool_writeCurrentSizeAsOutput(unsigned int argumentIndex, __global un
     assertFalse("Argument index too large", memoryPool);
   }
   currentSize = memoryPool_readPoolSize(memoryPool);
-  memoryPool_writeUINT(currentSize, &memoryPool[8 + 4 * argumentIndex]);
+  memoryPool_writeUINTasOutput(currentSize, argumentIndex, memoryPool);
 }
 
 unsigned int memoryPool_readPoolSize(__global const unsigned char* memoryPool) {
   return memoryPool_readUINT(&memoryPool[4]);
+}
+
+unsigned int memoryPool_readMaxPoolSize(__global const unsigned char* memoryPool) {
+  return memoryPool_readUINT(memoryPool);
 }
 
 unsigned int memoryPool_readUINT(__global const unsigned char* memoryPoolPointer) {
@@ -122,6 +170,10 @@ unsigned int memoryPool_readUINT(__global const unsigned char* memoryPoolPointer
   ((unsigned int) (memoryPoolPointer[1] << 16)) +
   ((unsigned int) (memoryPoolPointer[2] <<  8)) +
   ((unsigned int) memoryPoolPointer[3]       ) ;
+}
+
+unsigned int memoryPool_readUINTfromOutput(int argumentIndex, __global const unsigned char *memoryPool) {
+  return memoryPool_readUINT(&memoryPool[8 + 4 * argumentIndex]);
 }
 
 //Memory pool format: in the notes before the definition of memoryPool_Initialize.
@@ -1205,7 +1257,8 @@ void secp256k1_ge_set_all_gej_var(
   secp256k1_fe globalToLocal1;
   size_t i;
   size_t count = 0;
-  az = (__global secp256k1_fe *) checked_malloc(sizeof(secp256k1_fe) * len, memoryPool);
+  az = (__global secp256k1_fe *) checked_malloc(sizeof_secp256k1_fe() * len, memoryPool);
+  memoryPool_writeUINTasOutput(sizeof_secp256k1_fe() * len, 2, memoryPool);
 
   for (i = 0; i < len; i++) {
     if (!outputPointsJacobian[i].infinity) {
@@ -1213,7 +1266,8 @@ void secp256k1_ge_set_all_gej_var(
     }
   }
 
-  azi = (__global secp256k1_fe *) checked_malloc(sizeof(secp256k1_fe) * count, memoryPool);
+  azi = (__global secp256k1_fe *) checked_malloc(sizeof_secp256k1_fe() * count, memoryPool);
+  memoryPool_writeUINTasOutput(sizeof_secp256k1_fe() * count, 2, memoryPool);
   secp256k1_fe_inv_all_var(count, azi, az);
   memoryPool_freeMemory__global(az);
 
@@ -1226,6 +1280,8 @@ void secp256k1_ge_set_all_gej_var(
     }
   }
   memoryPool_freeMemory__global(azi);
+  int usedForCompilerWarning;
+  return;
 }
 
 void secp256k1_ge_copy__to__global(__global secp256k1_ge* output, const secp256k1_ge* input) {
@@ -2558,8 +2614,8 @@ static void secp256k1_ecmult_odd_multiples_table_globalz_windowa(
   const secp256k1_gej *a,
   __global unsigned char* memoryPool
   ) {
-    __global secp256k1_gej* prej = (__global secp256k1_gej*) checked_malloc(sizeof(secp256k1_gej) * ECMULT_TABLE_SIZE(WINDOW_A), memoryPool);
-    __global secp256k1_fe* zr =    (__global secp256k1_fe* ) checked_malloc(sizeof(secp256k1_fe ) * ECMULT_TABLE_SIZE(WINDOW_A), memoryPool);
+    __global secp256k1_gej* prej = (__global secp256k1_gej*) checked_malloc(sizeof_secp256k1_gej() * ECMULT_TABLE_SIZE(WINDOW_A), memoryPool);
+    __global secp256k1_fe* zr =    (__global secp256k1_fe* ) checked_malloc(sizeof_secp256k1_fe()  * ECMULT_TABLE_SIZE(WINDOW_A), memoryPool);
 
     /* Compute the odd multiples in Jacobian form. */
     secp256k1_ecmult_odd_multiples_table(ECMULT_TABLE_SIZE(WINDOW_A), prej, zr, a);
@@ -2573,9 +2629,9 @@ static void secp256k1_ecmult_odd_multiples_table_storage_var(
   const secp256k1_gej *a,
   __global unsigned char* memoryPool
 ) {
-  __global secp256k1_gej* prej = (__global secp256k1_gej*) checked_malloc(sizeof(secp256k1_gej) * n, memoryPool);
-  __global secp256k1_ge* prea = (__global secp256k1_ge*) checked_malloc(sizeof(secp256k1_ge) * n, memoryPool);
-  __global secp256k1_fe* zr = (__global secp256k1_fe*) checked_malloc(sizeof(secp256k1_fe) * n, memoryPool);
+  __global secp256k1_gej* prej = (__global secp256k1_gej*) checked_malloc(sizeof_secp256k1_gej() * n, memoryPool);
+  __global secp256k1_ge* prea  = (__global secp256k1_ge*)  checked_malloc(sizeof_secp256k1_ge()  * n, memoryPool);
+  __global secp256k1_fe* zr    = (__global secp256k1_fe*)  checked_malloc(sizeof_secp256k1_fe()  * n, memoryPool);
 
   int i;
 
@@ -2619,7 +2675,7 @@ static int secp256k1_ecmult_wnaf(int *wnaf, int len, const secp256k1_scalar *a, 
   for (i = 0; i < len; i ++){
     wnaf[i] = 0;
   }  
-  memorySet((unsigned char*) wnaf, 0, len * sizeof(wnaf[0]));
+  memorySet((unsigned char*) wnaf, 0, len * sizeof_int());
   if (secp256k1_scalar_get_bits(&s, 255, 1)) {
     secp256k1_scalar_negate(&s, &s);
     sign = - 1;
@@ -3337,16 +3393,16 @@ void secp256k1_ecmult_gen_context_build(
   secp256k1_ge prec[1024];
   secp256k1_gej gj;
   secp256k1_gej nums_gej;
+  // <- sizeof(secp256k1_ge_storage) returns zero on openCL 1.1, Ubuntu, NVidia Quadro K2000.
   int i, j;
 
   if (ctx->prec != NULL) {
     return;
   }
-
   memoryPool_writeCurrentSizeAsOutput(1, memoryPool);
-//  ctx->prec = (__global secp256k1_ge_storage (*)[64][16]) checked_malloc(sizeof(*ctx->prec), memoryPool);
-  ctx->prec = (__global secp256k1_ge_storage*) checked_malloc(sizeof(secp256k1_ge_storage) * 16 * 64, memoryPool);
-  memoryPool_writeUINT(sizeof(secp256k1_ge_storage) * 16 * 64, &memoryPool[16]);
+  //ctx->prec = (__global secp256k1_ge_storage (*)[64][16]) checked_malloc(sizeof(*ctx->prec), memoryPool);
+  //memoryPool_writeUINTasOutput(sizeof_secp256k1_ge_storage() * 16 * 64, 2, memoryPool);
+  ctx->prec = (__global secp256k1_ge_storage*) checked_malloc(sizeof_secp256k1_ge_storage() * 16 * 64, memoryPool);
   /* get the generator */
   //openCL note: secp256k1_ge_const_g is always in the __constant address space.
   secp256k1_gej_set_ge__constant(&gj, &secp256k1_ge_const_g);
@@ -3397,6 +3453,8 @@ void secp256k1_ecmult_gen_context_build(
     }
     secp256k1_ge_set_all_gej_var(1024, prec, precj, memoryPool);
   }
+  int usedForCompilerWarning;
+  return;
   for (j = 0; j < 64; j ++) {
     for (i = 0; i < 16; i ++) {
       //original version:
@@ -3415,7 +3473,9 @@ void secp256k1_ecmult_gen_blind(__global secp256k1_ecmult_gen_context *ctx, cons
     unsigned char nonce32[32];
     secp256k1_rfc6979_hmac_sha256_t rng;
     int retry;
-    unsigned char keydata[64] = {0};
+    //WARNING: hard-coded sizeof(keydata) is used below. 
+    //Please apply extra attention if refactoring this variable.
+    unsigned char keydata[64] = {0}; 
     if (seed32 == NULL) {
       /* When seed is NULL, reset the initial point and blinding value. */
       //Note: secp256k1_ge_const_g is in the __constant address space
@@ -3436,7 +3496,7 @@ void secp256k1_ecmult_gen_blind(__global secp256k1_ecmult_gen_context *ctx, cons
       memoryCopy(keydata + 32, seed32, 32);
     }
     secp256k1_rfc6979_hmac_sha256_initialize(&rng, keydata, seed32 ? 64 : 32);
-    memorySet(keydata, 0, sizeof(keydata));
+    memorySet(keydata, 0, sizeof_char64());
     /* Retry for out of range results to achieve uniformity. */
     do {
         secp256k1_rfc6979_hmac_sha256_generate(&rng, nonce32, 32);
@@ -3499,7 +3559,10 @@ void secp256k1_ecmult_context_build(
   //openCL note: secp256k1_ge_const_g is always in the __constant address space.
   secp256k1_gej_set_ge__constant(&gj, &secp256k1_ge_const_g);
   memoryPool_writeCurrentSizeAsOutput(0, memoryPool);
-  output->pre_g = (__global secp256k1_ge_storage (*)[]) checked_malloc(ECMULT_TABLE_SIZE(WINDOW_G) * sizeof((*output->pre_g)[0]), memoryPool);
+  output->pre_g = (__global secp256k1_ge_storage (*)[]) checked_malloc(
+    ECMULT_TABLE_SIZE(WINDOW_G) * sizeof_secp256k1_ge_storage(), 
+    memoryPool
+  );
   /* precompute the tables with odd multiples */
   secp256k1_ecmult_odd_multiples_table_storage_var(ECMULT_TABLE_SIZE(WINDOW_G), *output->pre_g, &gj, memoryPool);
 }
@@ -3525,7 +3588,7 @@ void secp256k1_ecmult_gen(
     secp256k1_scalar gnb, blind;
     int bits;
     int i, j;
-    memorySet((unsigned char*) &adds, 0, sizeof(adds));
+    memorySet((unsigned char*) &adds, 0, sizeof_secp256k1_ge_storage());
     *r = ctx->initial;
     /* Blind scalar/point multiplication by computing (n-b)G + bG instead of nG. */
     secp256k1_scalar_copy__from__global(&blind, &ctx->blind);
@@ -3860,4 +3923,7 @@ char secp256k1_ecdsa_sig_verify(
 ///////////////////////
 ///////////////////////
 
-#endif //FILE_secp256k1_CL_INCLUDED_MUST_GUARD_DUE_TO_OPENCL_COMPILER_BUG
+#undef sizeof
+#define sizeof sizeof
+
+#endif //FILE_secp256k1_CL_INCLUDED_MUST_GUARD_DUE_TO_OPENCL_NON_DOCUMENTED_BEHAVIOR

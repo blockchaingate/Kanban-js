@@ -1,15 +1,16 @@
 #ifndef SECP256K1_INTERFACE_H_header
 #define SECP256K1_INTERFACE_H_header
 #include "gpu.h"
+#include "cl/secp256k1.h"
 
 //class name starts with "Crypto" instead of secp256k1 to
 //shorten the autocomple menu suggestions in (my) IDEs
 class CryptoEC256k1GPU {
 public:
   //6MB RAM for computing multiplication context.
-  static const int memoryMultiplicationContext = 6000000;
+  static const int memoryMultiplicationContext = MACRO_MEMORY_POOL_SIZE_MultiplicationContext;
   //2MB RAM for computing generator context.
-  static const int memoryGeneratorContext = 2000000;
+  static const int memoryGeneratorContext = MACRO_MEMORY_POOL_SIZE_GeneratorContext;
 
   static bool computeMultiplicationContext(unsigned char* outputMemoryPool, GPU& theGPU);
   static bool computeGeneratorContext(unsigned char* outputMemoryPool, GPU& theGPU);

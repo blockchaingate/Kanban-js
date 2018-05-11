@@ -33,42 +33,42 @@ void APPEND_ADDRESS_SPACE(memorySet) (unsigned char* destination, unsigned char 
 
 void APPEND_ADDRESS_SPACE(secp256k1_fe_add)(secp256k1_fe *r, ADDRESS_SPACE const secp256k1_fe *a) {
 #ifdef VERIFY
-    secp256k1_fe_verify(a);
+  secp256k1_fe_verify(a);
 #endif
-    r->n[0] += a->n[0];
-    r->n[1] += a->n[1];
-    r->n[2] += a->n[2];
-    r->n[3] += a->n[3];
-    r->n[4] += a->n[4];
-    r->n[5] += a->n[5];
-    r->n[6] += a->n[6];
-    r->n[7] += a->n[7];
-    r->n[8] += a->n[8];
-    r->n[9] += a->n[9];
+  r->n[0] += a->n[0];
+  r->n[1] += a->n[1];
+  r->n[2] += a->n[2];
+  r->n[3] += a->n[3];
+  r->n[4] += a->n[4];
+  r->n[5] += a->n[5];
+  r->n[6] += a->n[6];
+  r->n[7] += a->n[7];
+  r->n[8] += a->n[8];
+  r->n[9] += a->n[9];
 #ifdef VERIFY
-    r->magnitude += a->magnitude;
-    r->normalized = 0;
-    secp256k1_fe_verify(r);
+  r->magnitude += a->magnitude;
+  r->normalized = 0;
+  secp256k1_fe_verify(r);
 #endif
 }
 
 int APPEND_ADDRESS_SPACE(secp256k1_fe_cmp_var)(const secp256k1_fe *a, ADDRESS_SPACE const secp256k1_fe *b) {
-    int i;
+  int i;
 #ifdef VERIFY
-    VERIFY_CHECK(a->normalized);
-    VERIFY_CHECK(b->normalized);
-    secp256k1_fe_verify(a);
-    secp256k1_fe_verify(b);
+  VERIFY_CHECK(a->normalized);
+  VERIFY_CHECK(b->normalized);
+  secp256k1_fe_verify(a);
+  secp256k1_fe_verify(b);
 #endif
-    for (i = 9; i >= 0; i--) {
-        if (a->n[i] > b->n[i]) {
-            return 1;
-        }
-        if (a->n[i] < b->n[i]) {
-            return -1;
-        }
+  for (i = 9; i >= 0; i--) {
+    if (a->n[i] > b->n[i]) {
+      return 1;
     }
-    return 0;
+    if (a->n[i] < b->n[i]) {
+      return -1;
+    }
+  }
+  return 0;
 }
 
 static void APPEND_ADDRESS_SPACE(secp256k1_fe_mul_inner)(uint32_t *r, const uint32_t *a, ADDRESS_SPACE const uint32_t * b) {
