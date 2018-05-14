@@ -36,8 +36,8 @@ void getGeneratorContext(
   secp256k1_ecmult_gen_context& outputGeneratorContext
 ){
   secp256k1_ecmult_gen_context_init(&outputGeneratorContext);
-  uint32_t outputPositionGeneratorContextStruct = memoryPool_readUINT(&theMemoryPool[8]);
-  uint32_t outputPositionGeneratorContextContent = memoryPool_readUINT(&theMemoryPool[12]);
+  uint32_t outputPositionGeneratorContextStruct = memoryPool_read_uint(&theMemoryPool[8]);
+  uint32_t outputPositionGeneratorContextContent = memoryPool_read_uint(&theMemoryPool[12]);
   outputGeneratorContext = *((secp256k1_ecmult_gen_context*) &theMemoryPool[outputPositionGeneratorContextStruct]);
   outputGeneratorContext.prec = NULL;
   //int sizeOfGeneratorContextLump = (16 * 64 * sizeof(secp256k1_ge_storage));
@@ -66,7 +66,7 @@ void testPrintMemoryPoolGeneral(const unsigned char* theMemoryPool, const std::s
 
 void testPrintMultiplicationContext(const unsigned char* theMemoryPool, const std::string& computationID, Logger& logTest) {
   testPrintMemoryPoolGeneral(theMemoryPool, computationID, logTest);
-  uint32_t outputPosition= memoryPool_readUINT(&theMemoryPool[8]);
+  uint32_t outputPosition= memoryPool_read_uint(&theMemoryPool[8]);
   logTest << "Position multiplication context: " << outputPosition << Logger::endL;
   secp256k1_ecmult_context multiplicationContext;
   multiplicationContext.pre_g = (secp256k1_ge_storage(*)[]) (theMemoryPool + outputPosition);
@@ -76,13 +76,13 @@ void testPrintMultiplicationContext(const unsigned char* theMemoryPool, const st
 
 void testPrintGeneratorContext(const unsigned char* theMemoryPool, const std::string& computationID, Logger& logTest) {
   testPrintMemoryPoolGeneral(theMemoryPool, computationID, logTest);
-  uint32_t outputPositionGeneratorContextStruct = memoryPool_readUINTfromOutput(0, theMemoryPool);
-  uint32_t outputPositionGeneratorContextContent = memoryPool_readUINTfromOutput(1, theMemoryPool);
-  uint32_t debugInt = memoryPool_readUINTfromOutput(2, theMemoryPool);
+  uint32_t outputPositionGeneratorContextStruct = memoryPool_read_uint_fromOutput(0, theMemoryPool);
+  uint32_t outputPositionGeneratorContextContent = memoryPool_read_uint_fromOutput(1, theMemoryPool);
   logTest << "Context struct position: " << outputPositionGeneratorContextStruct << Logger::endL;
   logTest << "Context content position: " << outputPositionGeneratorContextContent << Logger::endL;
-  logTest << "Debug integer: " << debugInt << Logger::endL;
-
+  for (int i = 2; i < MACRO_numberOfOutputs; i++ ) {
+    logTest << "Debug " << (i + 1) << ": " << toStringOutputObject(i, theMemoryPool) << Logger::endL;
+  }
   secp256k1_ecmult_gen_context theGeneratorContext;
   getGeneratorContext(theMemoryPool, theGeneratorContext);
   logTest << "Generator context:\n" << toStringSecp256k1_GeneratorContext(theGeneratorContext, false) << Logger::endL;

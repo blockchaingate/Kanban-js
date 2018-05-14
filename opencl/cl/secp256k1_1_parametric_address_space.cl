@@ -29,6 +29,18 @@ void APPEND_ADDRESS_SPACE(memorySet) (unsigned char* destination, unsigned char 
   }
 }
 
+void APPEND_ADDRESS_SPACE(memoryPool_write_ge_asOutput)(
+  ADDRESS_SPACE const secp256k1_ge* input, unsigned int argumentIndex, __global unsigned char* memoryPool
+) {
+  __global secp256k1_ge* serializerPointer;
+  __global unsigned char* typePointer;
+  memoryPool_writeCurrentSizeAsOutput(argumentIndex, memoryPool);
+  typePointer = (__global unsigned char*) checked_malloc(sizeof_uint(), memoryPool);
+  memoryPool_write_uint(MACRO_memoryPoolType_ge, typePointer);
+  serializerPointer = (__global secp256k1_ge*) checked_malloc(sizeof_secp256k1_ge(), memoryPool);
+  APPEND_ADDRESS_SPACE(secp256k1_ge_copy__to__global)(serializerPointer, input); 
+}
+
 //******From field_10x26_impl.h******
 
 void APPEND_ADDRESS_SPACE(secp256k1_fe_add)(secp256k1_fe *r, ADDRESS_SPACE const secp256k1_fe *a) {
@@ -525,6 +537,13 @@ void APPEND_ADDRESS_SPACE(secp256k1_fe_from_storage__to__global)(__global secp25
 
 
 //******From group_impl.h******
+
+void APPEND_ADDRESS_SPACE(secp256k1_ge_copy__to__global)(__global secp256k1_ge* output, ADDRESS_SPACE const secp256k1_ge* input) {
+  output->infinity = input->infinity;
+  APPEND_ADDRESS_SPACE(secp256k1_fe_copy__to__global)(&output->x, &input->x);
+  APPEND_ADDRESS_SPACE(secp256k1_fe_copy__to__global)(&output->y, &input->y);
+}
+
 void APPEND_ADDRESS_SPACE(secp256k1_ge_from_storage)(secp256k1_ge* r, ADDRESS_SPACE const secp256k1_ge_storage* a) {
   APPEND_ADDRESS_SPACE(secp256k1_fe_from_storage)(&r->x, &a->x);
   APPEND_ADDRESS_SPACE(secp256k1_fe_from_storage)(&r->y, &a->y);

@@ -2,7 +2,8 @@
 #include <sstream>
 #include <iomanip>
 #include "cl/secp256k1_cpp.h"
-extern Logger logTest;
+#include <assert.h>
+extern Logger logGPU;
 
 std::string toStringSecp256k1_FieldElement(const secp256k1_fe& input) {
   std::stringstream out;
@@ -95,7 +96,7 @@ std::string toStringSecp256k1_GeneratorContext(const secp256k1_ecmult_gen_contex
   return out.str();
 }
 
-std::string toStringErrorLog(const unsigned char* memoryPool){
+std::string toStringErrorLog(const unsigned char* memoryPool) {
   std::string result;
   for (int i = 8 + 4 * MACRO_numberOfOutputs; i < 1000; i++) {
     if (memoryPool[i] == '\0')
@@ -104,4 +105,27 @@ std::string toStringErrorLog(const unsigned char* memoryPool){
   }
 
   return result;
+}
+
+
+std::string toStringOutputObject(int argumentIndex, const unsigned char* memoryPool) {
+  secp256k1_ge readerECPoint;
+  //secp256k1_fe readerFieldElement1, readerFieldElement2;
+  std::stringstream out;
+  if (argumentIndex > MACRO_numberOfOutputs || argumentIndex < 0) {
+    logGPU << "Memory pool output index " << argumentIndex << " out of bounds. ";
+    assert(false);
+  }
+  unsigned int position = memoryPool_read_uint_fromOutput(argumentIndex, memoryPool);
+  unsigned int theType = memoryPool_read_uint(&memoryPool[position]);
+  switch (theType) {
+  case MACRO_memoryPoolType_ge:
+    memoryPool_read_secp256k1_ge(&readerECPoint, &memoryPool[position + sizeof_uint()]);
+    out << "EC point: " << toStringSecp256k1_ECPoint(readerECPoint);
+    break;
+  default:
+    out << "Unknown object type: " << theType;
+    break;
+  }
+  return out.str();
 }

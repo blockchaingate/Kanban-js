@@ -43,14 +43,16 @@ Please see the file opencl/README.md for technical notes on this code.
 
 
 __global void* checked_malloc(unsigned int size, __global unsigned char* memoryPool);
-void memoryPool_writeUINT(unsigned int numberToWrite, __global unsigned char* memoryPoolPointer);
-void memoryPool_writeUINTasOutput(unsigned int numberToWrite, int argumentIndex, __global unsigned char* memoryPoolPointer);
+void memoryPool_write_uint(unsigned int numberToWrite, __global unsigned char* memoryPoolPointer);
+void memoryPool_write_uint_asOutput(unsigned int numberToWrite, int argumentIndex, __global unsigned char* memoryPoolPointer);
 void memoryPool_writeString(__constant const char* message, __global unsigned char* memoryPool);
 void memoryPool_writeCurrentSizeAsOutput(unsigned int argumentIndex, __global unsigned char* memoryPool);
 
 
-unsigned int memoryPool_readUINT(__global const unsigned char *memoryPoolPointer);
-unsigned int memoryPool_readUINTfromOutput(int argumentIndex, __global const unsigned char *memoryPool);
+
+unsigned int memoryPool_read_uint(__global const unsigned char *memoryPoolPointer);
+
+unsigned int memoryPool_read_uint_fromOutput(int argumentIndex, __global const unsigned char *memoryPool);
 unsigned int memoryPool_readPoolSize(__global const unsigned char* memoryPool);
 unsigned int memoryPool_readMaxPoolSize(__global const unsigned char* memoryPool);
 
@@ -85,15 +87,24 @@ void memoryPool_freeMemory__global(__global void* any);
 
 //******end of util.h******
 
-
-
 ///////////////////////
 ///////////////////////
 #include "../opencl/cl/secp256k1_set_1_address_space__default.h"
 #include "../opencl/cl/secp256k1_data_structures_parametric_address_space.h"
 ///////////////////////
 ///////////////////////
+#define MACRO_memoryPoolType_fe 0
+#define MACRO_memoryPoolType_ge 1
+#define MACRO_memoryPoolType_gej 2
 
+void memoryPool_write_fe_asOutput(secp256k1_fe* input, unsigned int argumentIndex, __global unsigned char* memoryPool);
+
+void memoryPool_write_gej_asOutput(secp256k1_gej* input, unsigned int argumentIndex, __global unsigned char* memoryPool);
+
+
+void memoryPool_read_secp256k1_ge(secp256k1_ge* output, __global const unsigned char* memoryPoolPointer);
+//void memoryPool_read_fe_fromOutput(secp256k1_fe* output, unsigned int argumentIndex, __global unsigned char* memoryPool);
+//void memoryPool_read_gej_fromOutput(secp256k1_gej* output, unsigned int argumentIndex, __global unsigned char* memoryPool);
 
 
 //******From field_10x26.h******
@@ -252,7 +263,7 @@ void secp256k1_ge_set_gej(secp256k1_ge *r, secp256k1_gej *a);
 void secp256k1_ge_set_all_gej_var(
   size_t len, 
   secp256k1_ge *outputPoints, 
-  const secp256k1_gej *outputPointsJacobian,
+  const secp256k1_gej *inputPointsJacobian,
   __global unsigned char* memoryPool
 );
 
@@ -315,6 +326,7 @@ void secp256k1_ge_clear(secp256k1_ge *r);
 /** Rescale a jacobian point by b which must be non-zero. Constant-time. */
 void secp256k1_gej_rescale(secp256k1_gej *r, const secp256k1_fe *b);
 
+void secp256k1_ge_copy__from__global(secp256k1_ge* output, __global const secp256k1_ge* input);
 //******end of group.h******
 
 
@@ -457,6 +469,7 @@ unsigned int sizeof_secp256k1_gej();
 unsigned int sizeof_secp256k1_ge();
 unsigned int sizeof_secp256k1_ecmult_context();
 unsigned int sizeof_int();
+unsigned int sizeof_uint();
 unsigned int sizeof_secp256k1_ge_storage();
 unsigned int sizeof_char64();
 

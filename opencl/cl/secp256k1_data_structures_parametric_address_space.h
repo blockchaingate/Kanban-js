@@ -63,7 +63,8 @@ typedef struct {
   int magnitude;
   int normalized;
 #endif
-} APPEND_ADDRESS_SPACE(secp256k1_fe);
+} secp256k1_fe;
+//APPEND_ADDRESS_SPACE(secp256k1_fe);
 
 typedef struct {
   uint32_t n[8];
@@ -78,7 +79,8 @@ typedef struct {
   secp256k1_fe x;
   secp256k1_fe y;
   int infinity; /* whether this represents the point at infinity */
-} APPEND_ADDRESS_SPACE(secp256k1_ge);
+} secp256k1_ge;
+//APPEND_ADDRESS_SPACE(secp256k1_ge);
 
 /** A group element of the secp256k1 curve, in jacobian coordinates.
  *  y^2 = x^3 + 7
@@ -96,7 +98,8 @@ typedef struct {
 typedef struct {
   secp256k1_fe_storage x;
   secp256k1_fe_storage y;
-} APPEND_ADDRESS_SPACE(secp256k1_ge_storage);
+} secp256k1_ge_storage;
+//APPEND_ADDRESS_SPACE(secp256k1_ge_storage);
 
 
 //******end of group.h******

@@ -6,11 +6,17 @@
 // APPEND_ADDRESS_SPACE
 
 
+
+
 void APPEND_ADDRESS_SPACE(memoryCopy)(unsigned char* destination, ADDRESS_SPACE const unsigned char* source, int amount);
 void APPEND_ADDRESS_SPACE(memoryCopy_to__global)(__global unsigned char* destination, ADDRESS_SPACE const unsigned char* source, int amount);
 
 void APPEND_ADDRESS_SPACE(memorySet) (unsigned char* destination, unsigned char value, int amountToSet);
 
+
+void APPEND_ADDRESS_SPACE(memoryPool_write_ge_asOutput)(
+  ADDRESS_SPACE const secp256k1_ge* input, unsigned int argumentIndex, __global unsigned char* memoryPool
+);
 
 //******From field.h******
 
@@ -66,6 +72,8 @@ void APPEND_ADDRESS_SPACE(secp256k1_ge_from_storage_to__global)(__global secp256
 /** If flag is true, set *r equal to *a; otherwise leave it. Constant-time. */
 void APPEND_ADDRESS_SPACE(secp256k1_ge_storage_cmov)(secp256k1_ge_storage *r, ADDRESS_SPACE const secp256k1_ge_storage *a, int flag);
 void APPEND_ADDRESS_SPACE(secp256k1_ge_storage_cmov__to__global)(__global secp256k1_ge_storage *r, ADDRESS_SPACE const secp256k1_ge_storage *a, int flag);
+void APPEND_ADDRESS_SPACE(secp256k1_ge_copy__to__global)(__global secp256k1_ge* output, ADDRESS_SPACE const secp256k1_ge* input);
+
 //******end of group_impl.h******
 
 //******From scalar.h******

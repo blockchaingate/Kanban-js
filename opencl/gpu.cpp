@@ -102,6 +102,8 @@ bool GPU::initializeAll() {
 bool GPU::initializePlatform() {
   if (this->flagInitializedPlatform)
     return true;
+  int debugWarningDisableCacheDuringDevelopmentOnly;
+  setenv("CUDA_CACHE_DISABLE", "1", 1);
   this->context = 0;
   cl_int ret = 0;
   ret = clGetPlatformIDs(2, this->platformIds, &this->numberOfPlatforms);
@@ -177,16 +179,16 @@ bool GPU::initializeKernels() {
   //      {}
   //))
   //  return false;
-  if (!this->createKernel(
-        this->kernelInitializeMultiplicationContext,
-        {"outputMultiplicationContext"},
-        {
-          SharedMemory::typeVoidPointer,
-        },
-        {},
-        {}
-  ))
-    return false;
+  //if (!this->createKernel(
+  //      this->kernelInitializeMultiplicationContext,
+  //      {"outputMultiplicationContext"},
+  //      {
+  //        SharedMemory::typeVoidPointer,
+  //      },
+  //      {},
+  //      {}
+  //))
+  //  return false;
   if (!this->createKernel(
         this->kernelInitializeGeneratorContext,
         {"outputGeneratorContext"},
