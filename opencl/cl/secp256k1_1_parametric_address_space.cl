@@ -36,7 +36,7 @@ void APPEND_ADDRESS_SPACE(memoryPool_write_ge_asOutput)(
   __global unsigned char* typePointer;
   memoryPool_writeCurrentSizeAsOutput(argumentIndex, memoryPool);
   typePointer = (__global unsigned char*) checked_malloc(sizeof_uint(), memoryPool);
-  memoryPool_write_uint(MACRO_memoryPoolType_ge, typePointer);
+  memoryPool_write_uint(memoryPoolType_ge, typePointer);
   serializerPointer = (__global secp256k1_ge*) checked_malloc(sizeof_secp256k1_ge(), memoryPool);
   APPEND_ADDRESS_SPACE(secp256k1_ge_copy__to__global)(serializerPointer, input); 
 }
@@ -81,6 +81,28 @@ int APPEND_ADDRESS_SPACE(secp256k1_fe_cmp_var)(const secp256k1_fe *a, ADDRESS_SP
     }
   }
   return 0;
+}
+
+int APPEND_ADDRESS_SPACE(secp256k1_fe_set_b32)(secp256k1_fe *r, ADDRESS_SPACE const unsigned char *a) {
+  int i, j;
+  r->n[0] = r->n[1] = r->n[2] = r->n[3] = r->n[4] = 0;
+  r->n[5] = r->n[6] = r->n[7] = r->n[8] = r->n[9] = 0;
+  for (i = 0; i < 32; i ++) {
+    for (j = 0; j < 4; j ++) {
+      int limb = (8 * i + 2 * j) / 26;
+      int shift = (8 * i + 2 * j) % 26;
+      r->n[limb] |= (uint32_t)((a[31 - i] >> (2 * j)) & 0x3) << shift;
+    }
+  }
+  if (r->n[9] == 0x3FFFFFUL && (r->n[8] & r->n[7] & r->n[6] & r->n[5] & r->n[4] & r->n[3] & r->n[2]) == 0x3FFFFFFUL && (r->n[1] + 0x40UL + ((r->n[0] + 0x3D1UL) >> 26)) > 0x3FFFFFFUL) {
+    return 0;
+  }
+#ifdef VERIFY
+  r->magnitude = 1;
+  r->normalized = 1;
+  secp256k1_fe_verify(r);
+#endif
+  return 1;
 }
 
 static void APPEND_ADDRESS_SPACE(secp256k1_fe_mul_inner)(uint32_t *r, const uint32_t *a, ADDRESS_SPACE const uint32_t * b) {
@@ -316,7 +338,9 @@ static void APPEND_ADDRESS_SPACE(secp256k1_fe_mul_inner)(uint32_t *r, const uint
        + (uint64_t)a[6] * b[1]
        + (uint64_t)a[7] * b[0];
     /* VERIFY_BITS(c, 64); */
+#ifdef VERIFY
     VERIFY_CHECK(c <= 0x8000007C00000007ULL);
+#endif
     /* [d 0 0 0 0 0 0 0 t9 0 c t6 t5 t4 t3 t2 t1 t0] = [p16 p15 p14 p13 p12 p11 p10 p9 0 p7 p6 p5 p4 p3 p2 p1 p0] */
     d += (uint64_t)a[8] * b[9]
        + (uint64_t)a[9] * b[8];
@@ -326,7 +350,9 @@ static void APPEND_ADDRESS_SPACE(secp256k1_fe_mul_inner)(uint32_t *r, const uint
     VERIFY_BITS(u7, 26);
     VERIFY_BITS(d, 32);
     /* VERIFY_BITS(c, 64); */
+#ifdef VERIFY
     VERIFY_CHECK(c <= 0x800001703FFFC2F7ULL);
+#endif
     /* [d u7 0 0 0 0 0 0 0 t9 0 c-u7*R0 t6 t5 t4 t3 t2 t1 t0] = [p17 p16 p15 p14 p13 p12 p11 p10 p9 0 p7 p6 p5 p4 p3 p2 p1 p0] */
     t7 = c & M; c >>= 26; c += u7 * R1;
     VERIFY_BITS(t7, 26);
@@ -344,7 +370,9 @@ static void APPEND_ADDRESS_SPACE(secp256k1_fe_mul_inner)(uint32_t *r, const uint
        + (uint64_t)a[7] * b[1]
        + (uint64_t)a[8] * b[0];
     /* VERIFY_BITS(c, 64); */
+#ifdef VERIFY
     VERIFY_CHECK(c <= 0x9000007B80000008ULL);
+#endif
     /* [d 0 0 0 0 0 0 0 0 t9 c t7 t6 t5 t4 t3 t2 t1 t0] = [p17 p16 p15 p14 p13 p12 p11 p10 p9 p8 p7 p6 p5 p4 p3 p2 p1 p0] */
     d += (uint64_t)a[9] * b[9];
     VERIFY_BITS(d, 57);
@@ -353,7 +381,9 @@ static void APPEND_ADDRESS_SPACE(secp256k1_fe_mul_inner)(uint32_t *r, const uint
     VERIFY_BITS(u8, 26);
     VERIFY_BITS(d, 31);
     /* VERIFY_BITS(c, 64); */
+#ifdef VERIFY
     VERIFY_CHECK(c <= 0x9000016FBFFFC2F8ULL);
+#endif
     /* [d u8 0 0 0 0 0 0 0 0 t9 c-u8*R0 t7 t6 t5 t4 t3 t2 t1 t0] = [p18 p17 p16 p15 p14 p13 p12 p11 p10 p9 p8 p7 p6 p5 p4 p3 p2 p1 p0] */
 
     r[3] = t3;
@@ -396,13 +426,17 @@ static void APPEND_ADDRESS_SPACE(secp256k1_fe_mul_inner)(uint32_t *r, const uint
     /* [r9+(c<<22) r8 r7 r6 r5 r4 r3 t2 t1+d r0-c*R0>>4] = [p18 p17 p16 p15 p14 p13 p12 p11 p10 p9 p8 p7 p6 p5 p4 p3 p2 p1 p0] */
     d   += c * (R1 >> 4) + t1;
     VERIFY_BITS(d, 53);
+#ifdef VERIFY
     VERIFY_CHECK(d <= 0x10000003FFFFBFULL);
+#endif
     /* [r9+(c<<22) r8 r7 r6 r5 r4 r3 t2 d-c*R1>>4 r0-c*R0>>4] = [p18 p17 p16 p15 p14 p13 p12 p11 p10 p9 p8 p7 p6 p5 p4 p3 p2 p1 p0] */
     /* [r9 r8 r7 r6 r5 r4 r3 t2 d r0] = [p18 p17 p16 p15 p14 p13 p12 p11 p10 p9 p8 p7 p6 p5 p4 p3 p2 p1 p0] */
     r[1] = d & M; d >>= 26;
     VERIFY_BITS(r[1], 26);
     VERIFY_BITS(d, 27);
+#ifdef VERIFY
     VERIFY_CHECK(d <= 0x4000000ULL);
+#endif
     /* [r9 r8 r7 r6 r5 r4 r3 t2+d r1 r0] = [p18 p17 p16 p15 p14 p13 p12 p11 p10 p9 p8 p7 p6 p5 p4 p3 p2 p1 p0] */
     d   += t2;
     VERIFY_BITS(d, 27);
@@ -568,7 +602,9 @@ void APPEND_ADDRESS_SPACE(secp256k1_gej_add_ge_var)(secp256k1_gej *r, const secp
   /* 8 mul, 3 sqr, 4 normalize, 12 mul_int/add/negate */
   secp256k1_fe z12, u1, u2, s1, s2, h, i, i2, h2, h3, t;
   if (a->infinity) {
+#ifdef VERIFY
     VERIFY_CHECK(rzr == NULL);
+#endif
     APPEND_ADDRESS_SPACE(secp256k1_gej_set_ge)(r, b);
     return;
   }
@@ -629,7 +665,9 @@ void APPEND_ADDRESS_SPACE(secp256k1_gej_add_ge_var)(secp256k1_gej *r, const secp
 //******From group.h******
 void APPEND_ADDRESS_SPACE(secp256k1_ge_to_storage)(secp256k1_ge_storage *r, ADDRESS_SPACE const secp256k1_ge *a) {
   secp256k1_fe x, y;
+#ifdef VERIFY
   VERIFY_CHECK(!a->infinity);
+#endif
   x = a->x;
   secp256k1_fe_normalize(&x);
   y = a->y;
@@ -640,7 +678,10 @@ void APPEND_ADDRESS_SPACE(secp256k1_ge_to_storage)(secp256k1_ge_storage *r, ADDR
 
 void APPEND_ADDRESS_SPACE(secp256k1_ge_to__global__storage)(__global secp256k1_ge_storage *r, ADDRESS_SPACE const secp256k1_ge *a) {
   secp256k1_fe x, y;
+#ifdef VERIFY
   VERIFY_CHECK(!a->infinity);
+#endif
+
   x = a->x;
   secp256k1_fe_normalize(&x);
   y = a->y;
@@ -785,7 +826,9 @@ void APPEND_ADDRESS_SPACE(secp256k1_scalar_mul_512)(
     extract(l[13]);
     muladd_fast(a->d[7], b->d[7]);
     extract_fast(l[14]);
+#ifdef VERIFY
     VERIFY_CHECK(c1 == 0);
+#endif
     l[15] = c0;
 }
 
@@ -855,7 +898,9 @@ static void APPEND_ADDRESS_SPACE(secp256k1_scalar_sqr_512)(uint32_t *l, ADDRESS_
     extract(l[13]);
     muladd_fast(a->d[7], a->d[7]);
     extract_fast(l[14]);
+#ifdef VERIFY
     VERIFY_CHECK(c1 == 0);
+#endif
     l[15] = c0;
 }
 

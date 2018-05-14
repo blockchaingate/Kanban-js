@@ -18,6 +18,13 @@ void APPEND_ADDRESS_SPACE(memoryPool_write_ge_asOutput)(
   ADDRESS_SPACE const secp256k1_ge* input, unsigned int argumentIndex, __global unsigned char* memoryPool
 );
 
+
+//******From field_10x26_impl.h******
+/** Set a field element equal to 32-byte big endian value. If successful, the resulting field element is normalized. */
+int APPEND_ADDRESS_SPACE(secp256k1_fe_set_b32)(secp256k1_fe *r, ADDRESS_SPACE const unsigned char *a);
+//******end of field_10x26_impl.h******
+
+
 //******From field.h******
 
 /** Compare two field elements. Requires both inputs to be normalized */

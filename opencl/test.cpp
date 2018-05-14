@@ -91,6 +91,7 @@ void testPrintGeneratorContext(const unsigned char* theMemoryPool, const std::st
 extern void secp256k1_opencl_compute_multiplication_context(
   __global unsigned char* outputMemoryPoolContainingMultiplicationContext
 );
+
 extern void secp256k1_opencl_compute_generator_context(
   __global unsigned char* outputMemoryPoolContainingGeneratorContext
 );

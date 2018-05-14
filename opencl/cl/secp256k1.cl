@@ -5,16 +5,16 @@
 #ifndef FILE_secp256k1_CL_INCLUDED_MUST_GUARD_DUE_TO_OPENCL_NON_DOCUMENTED_BEHAVIOR
 #define FILE_secp256k1_CL_INCLUDED_MUST_GUARD_DUE_TO_OPENCL_NON_DOCUMENTED_BEHAVIOR
 ////////////////////////////////////////////////
-//<- This file is guarded due to an open cl compiler bug 
+//<- This file is guarded due to an open cl compiler bug
 //(as of May 9 2018 using stock ubuntu openCL libraries) which requires that
-//the __kernel entry point of an openCL program be located immediately inside the 
-//first included file. 
+//the __kernel entry point of an openCL program be located immediately inside the
+//first included file.
 //In particular kernel entry points are not allowed
 //to reside other files included with #include directives.
-//At the time of writing, this weird behavior manifests itself only on GPU builds and not on 
+//At the time of writing, this weird behavior manifests itself only on GPU builds and not on
 //for openCL CPU builds. Furthermore the manifestation is different on (my) NVIDIA and intel graphics cards:
-//the former fails to run with an "out of resources " error, and the latter runs 
-//producing random bytes. 
+//the former fails to run with an "out of resources " error, and the latter runs
+//producing random bytes.
 ////////////////////////////////////////////////
 
 
@@ -57,7 +57,7 @@ unsigned int sizeof_uint() {
 
 #ifdef sizeof
 #undef sizeof
-#endif  
+#endif
 #define sizeof sizeof_returns_zero_on_some_hardware_driver_combinations_use_sizeof_yourTypeName_instead
 /////////////end of sizeof behavior block////////
 
@@ -96,7 +96,7 @@ unsigned int sizeof_uint() {
 //Next 4 bytes: total memory consumed from the memory pool, including all bytes reserved in the present paragraph.
 //Next 4 * MACRO_numberOfOutputs bytes: reserved for the unsigned int position of the first byte(s) of the output(s).
 //
-//In addition, the following MACRO_MessageLogSize bytes may be reserved for debugging purposes 
+//In addition, the following MACRO_MessageLogSize bytes may be reserved for debugging purposes
 //(printf is not guaranteed to work out-of-the-box in older openCL versions).
 //
 
@@ -119,7 +119,7 @@ void memoryPool_Initialize(unsigned int totalSize, __global unsigned char* memor
   for (i = reservedBytes; i < totalSize; i ++) {
     memoryPool[i] = (unsigned char) 0;
   }
-  //Use this snippet if you want initialize the RAM 
+  //Use this snippet if you want initialize the RAM
   //with some pattern other than zeroes (say, you doubt the memory is accessed properly).
   //for (i = 12; i + 4 < totalSize; i += 4){
   //  memoryPool_write_uint(i, &memoryPool[i]);
@@ -170,7 +170,7 @@ unsigned int memoryPool_readMaxPoolSize(__global const unsigned char* memoryPool
 }
 
 unsigned int memoryPool_read_uint(__global const unsigned char* memoryPoolPointer) {
-  return 
+  return
   ((unsigned int) (memoryPoolPointer[0] << 24)) +
   ((unsigned int) (memoryPoolPointer[1] << 16)) +
   ((unsigned int) (memoryPoolPointer[2] <<  8)) +
@@ -218,6 +218,23 @@ void memoryPool_freeMemory__global(__global void* any) {
 void memoryPool_read_secp256k1_ge(secp256k1_ge* output, __global const unsigned char* memoryPoolPointer) {
   secp256k1_ge_copy__from__global(output, (__global secp256k1_ge*) memoryPoolPointer);
 }
+
+void memoryPool_read_secp256k1_fe(secp256k1_fe* output, __global const unsigned char* memoryPoolPointer) {
+  secp256k1_fe_copy__from__global(output, (__global secp256k1_fe*) memoryPoolPointer);
+}
+
+void memoryPool_write_fe_asOutput(
+  const secp256k1_fe* input, unsigned int argumentIndex, __global unsigned char* memoryPool
+) {
+  __global secp256k1_fe* serializerPointer;
+  __global unsigned char* typePointer;
+  memoryPool_writeCurrentSizeAsOutput(argumentIndex, memoryPool);
+  typePointer = (__global unsigned char*) checked_malloc(sizeof_uint(), memoryPool);
+  memoryPool_write_uint(memoryPoolType_fe, typePointer);
+  serializerPointer = (__global secp256k1_fe*) checked_malloc(sizeof_secp256k1_fe(), memoryPool);
+  secp256k1_fe_copy__to__global(serializerPointer, input);
+}
+
 
 //******From field_10x26_impl.h******
 
@@ -275,8 +292,9 @@ void secp256k1_fe_normalize(secp256k1_fe *r) {
   t9 += (t8 >> 26); t8 &= 0x3FFFFFFUL; m &= t8;
 
   /* ... except for a possible carry at bit 22 of t9 (i.e. bit 256 of the field element) */
+#ifdef VERIFY
   VERIFY_CHECK(t9 >> 23 == 0);
-
+#endif
   /* At most a single final reduction is needed; check if the value is >= the field characteristic */
   x = (t9 >> 22) | ((t9 == 0x03FFFFFUL) & (m == 0x3FFFFFFUL)
       & ((t1 + 0x40UL + ((t0 + 0x3D1UL) >> 26)) > 0x3FFFFFFUL));
@@ -294,8 +312,9 @@ void secp256k1_fe_normalize(secp256k1_fe *r) {
   t9 += (t8 >> 26); t8 &= 0x3FFFFFFUL;
 
   /* If t9 didn't carry to bit 22 already, then it should have after any final reduction */
+#ifdef VERIFY
   VERIFY_CHECK(t9 >> 22 == x);
-
+#endif
   /* Mask off the possible multiple of 2^256 from the final reduction */
   t9 &= 0x03FFFFFUL;
 
@@ -329,8 +348,9 @@ void secp256k1_fe_normalize_weak(secp256k1_fe *r) {
   t9 += (t8 >> 26); t8 &= 0x3FFFFFFUL;
 
   /* ... except for a possible carry at bit 22 of t9 (i.e. bit 256 of the field element) */
+#ifdef VERIFY
   VERIFY_CHECK(t9 >> 23 == 0);
-
+#endif
   r->n[0] = t0; r->n[1] = t1; r->n[2] = t2; r->n[3] = t3; r->n[4] = t4;
   r->n[5] = t5; r->n[6] = t6; r->n[7] = t7; r->n[8] = t8; r->n[9] = t9;
 
@@ -361,8 +381,9 @@ void secp256k1_fe_normalize_var(secp256k1_fe *r) {
     t9 += (t8 >> 26); t8 &= 0x3FFFFFFUL; m &= t8;
 
     /* ... except for a possible carry at bit 22 of t9 (i.e. bit 256 of the field element) */
+#ifdef VERIFY
     VERIFY_CHECK(t9 >> 23 == 0);
-
+#endif
     /* At most a single final reduction is needed; check if the value is >= the field characteristic */
     x = (t9 >> 22) | ((t9 == 0x03FFFFFUL) & (m == 0x3FFFFFFUL)
         & ((t1 + 0x40UL + ((t0 + 0x3D1UL) >> 26)) > 0x3FFFFFFUL));
@@ -380,8 +401,9 @@ void secp256k1_fe_normalize_var(secp256k1_fe *r) {
         t9 += (t8 >> 26); t8 &= 0x3FFFFFFUL;
 
         /* If t9 didn't carry to bit 22 already, then it should have after any final reduction */
+#ifdef VERIFY
         VERIFY_CHECK(t9 >> 22 == x);
-
+#endif
         /* Mask off the possible multiple of 2^256 from the final reduction */
         t9 &= 0x03FFFFFUL;
     }
@@ -420,8 +442,9 @@ int secp256k1_fe_normalizes_to_zero(secp256k1_fe *r) {
                                          z0 |= t9; z1 &= t9 ^ 0x3C00000UL;
 
     /* ... except for a possible carry at bit 22 of t9 (i.e. bit 256 of the field element) */
+#ifdef VERIFY
     VERIFY_CHECK(t9 >> 23 == 0);
-
+#endif
     return (z0 == 0) | (z1 == 0x3FFFFFFUL);
 }
 
@@ -472,8 +495,9 @@ int secp256k1_fe_normalizes_to_zero_var(secp256k1_fe *r) {
                                          z0 |= t9; z1 &= t9 ^ 0x3C00000UL;
 
     /* ... except for a possible carry at bit 22 of t9 (i.e. bit 256 of the field element) */
+#ifdef VERIFY
     VERIFY_CHECK(t9 >> 23 == 0);
-
+#endif
     return (z0 == 0) | (z1 == 0x3FFFFFFUL);
 }
 
@@ -523,29 +547,6 @@ static void secp256k1_fe_clear(secp256k1_fe *a) {
     for (i=0; i<10; i++) {
         a->n[i] = 0;
     }
-}
-
-int secp256k1_fe_set_b32(secp256k1_fe *r, const unsigned char *a) {
-    int i;
-    r->n[0] = r->n[1] = r->n[2] = r->n[3] = r->n[4] = 0;
-    r->n[5] = r->n[6] = r->n[7] = r->n[8] = r->n[9] = 0;
-    for (i=0; i<32; i++) {
-        int j;
-        for (j=0; j<4; j++) {
-            int limb = (8*i+2*j)/26;
-            int shift = (8*i+2*j)%26;
-            r->n[limb] |= (uint32_t)((a[31-i] >> (2*j)) & 0x3) << shift;
-        }
-    }
-    if (r->n[9] == 0x3FFFFFUL && (r->n[8] & r->n[7] & r->n[6] & r->n[5] & r->n[4] & r->n[3] & r->n[2]) == 0x3FFFFFFUL && (r->n[1] + 0x40UL + ((r->n[0] + 0x3D1UL) >> 26)) > 0x3FFFFFFUL) {
-        return 0;
-    }
-#ifdef VERIFY
-    r->magnitude = 1;
-    r->normalized = 1;
-    secp256k1_fe_verify(r);
-#endif
-    return 1;
 }
 
 /** Convert a field element to a 32-byte big endian value. Requires the input to be normalized */
@@ -796,7 +797,9 @@ static void secp256k1_fe_sqr_inner(uint32_t *r, const uint32_t *a) {
        + (uint64_t)(a[2]*2) * a[5]
        + (uint64_t)(a[3]*2) * a[4];
     /* VERIFY_BITS(c, 64); */
+#ifdef VERIFY
     VERIFY_CHECK(c <= 0x8000007C00000007ULL);
+#endif
     /* [d 0 0 0 0 0 0 0 t9 0 c t6 t5 t4 t3 t2 t1 t0] = [p16 p15 p14 p13 p12 p11 p10 p9 0 p7 p6 p5 p4 p3 p2 p1 p0] */
     d += (uint64_t)(a[8]*2) * a[9];
     VERIFY_BITS(d, 58);
@@ -805,7 +808,9 @@ static void secp256k1_fe_sqr_inner(uint32_t *r, const uint32_t *a) {
     VERIFY_BITS(u7, 26);
     VERIFY_BITS(d, 32);
     /* VERIFY_BITS(c, 64); */
+#ifdef VERIFY
     VERIFY_CHECK(c <= 0x800001703FFFC2F7ULL);
+#endif
     /* [d u7 0 0 0 0 0 0 0 t9 0 c-u7*R0 t6 t5 t4 t3 t2 t1 t0] = [p17 p16 p15 p14 p13 p12 p11 p10 p9 0 p7 p6 p5 p4 p3 p2 p1 p0] */
     t7 = c & M; c >>= 26; c += u7 * R1;
     VERIFY_BITS(t7, 26);
@@ -819,7 +824,9 @@ static void secp256k1_fe_sqr_inner(uint32_t *r, const uint32_t *a) {
        + (uint64_t)(a[3]*2) * a[5]
        + (uint64_t)a[4] * a[4];
     /* VERIFY_BITS(c, 64); */
+#ifdef VERIFY
     VERIFY_CHECK(c <= 0x9000007B80000008ULL);
+#endif
     /* [d 0 0 0 0 0 0 0 0 t9 c t7 t6 t5 t4 t3 t2 t1 t0] = [p17 p16 p15 p14 p13 p12 p11 p10 p9 p8 p7 p6 p5 p4 p3 p2 p1 p0] */
     d += (uint64_t)a[9] * a[9];
     VERIFY_BITS(d, 57);
@@ -828,7 +835,9 @@ static void secp256k1_fe_sqr_inner(uint32_t *r, const uint32_t *a) {
     VERIFY_BITS(u8, 26);
     VERIFY_BITS(d, 31);
     /* VERIFY_BITS(c, 64); */
+#ifdef VERIFY
     VERIFY_CHECK(c <= 0x9000016FBFFFC2F8ULL);
+#endif
     /* [d u8 0 0 0 0 0 0 0 0 t9 c-u8*R0 t7 t6 t5 t4 t3 t2 t1 t0] = [p18 p17 p16 p15 p14 p13 p12 p11 p10 p9 p8 p7 p6 p5 p4 p3 p2 p1 p0] */
 
     r[3] = t3;
@@ -871,13 +880,17 @@ static void secp256k1_fe_sqr_inner(uint32_t *r, const uint32_t *a) {
     /* [r9+(c<<22) r8 r7 r6 r5 r4 r3 t2 t1+d r0-c*R0>>4] = [p18 p17 p16 p15 p14 p13 p12 p11 p10 p9 p8 p7 p6 p5 p4 p3 p2 p1 p0] */
     d   += c * (R1 >> 4) + t1;
     VERIFY_BITS(d, 53);
+#ifdef VERIFY
     VERIFY_CHECK(d <= 0x10000003FFFFBFULL);
+#endif
     /* [r9+(c<<22) r8 r7 r6 r5 r4 r3 t2 d-c*R1>>4 r0-c*R0>>4] = [p18 p17 p16 p15 p14 p13 p12 p11 p10 p9 p8 p7 p6 p5 p4 p3 p2 p1 p0] */
     /* [r9 r8 r7 r6 r5 r4 r3 t2 d r0] = [p18 p17 p16 p15 p14 p13 p12 p11 p10 p9 p8 p7 p6 p5 p4 p3 p2 p1 p0] */
     r[1] = d & M; d >>= 26;
     VERIFY_BITS(r[1], 26);
     VERIFY_BITS(d, 27);
+#ifdef VERIFY
     VERIFY_CHECK(d <= 0x4000000ULL);
+#endif
     /* [r9 r8 r7 r6 r5 r4 r3 t2+d r1 r0] = [p18 p17 p16 p15 p14 p13 p12 p11 p10 p9 p8 p7 p6 p5 p4 p3 p2 p1 p0] */
     d   += t2;
     VERIFY_BITS(d, 27);
@@ -1138,8 +1151,9 @@ void secp256k1_fe_inv_all_var(size_t len, __global secp256k1_fe *r,__global cons
     return;
   }
 
+#ifdef VERIFY
   VERIFY_CHECK((r + len <= a) || (a + len <= r));
-
+#endif
   r[0] = a[0];
 
   i = 0;
@@ -1201,7 +1215,7 @@ void secp256k1_gej_set_ge__constant__global(__global secp256k1_gej *r, __constan
 //*******************************************************
 
 static void secp256k1_ge_set_gej_zinv(secp256k1_ge *r, const secp256k1_gej *a, const secp256k1_fe *zi) {
-    secp256k1_fe zi2; 
+    secp256k1_fe zi2;
     secp256k1_fe zi3;
     secp256k1_fe_sqr(&zi2, zi);
     secp256k1_fe_mul(&zi3, &zi2, zi);
@@ -1256,8 +1270,8 @@ static void secp256k1_ge_set_gej_var(secp256k1_ge *r, secp256k1_gej *a) {
 }
 
 void secp256k1_ge_set_all_gej_var(
-  size_t len, 
-  secp256k1_ge *outputPoints, 
+  size_t len,
+  secp256k1_ge *outputPoints,
   const secp256k1_gej *inputPointsJacobian,
   __global unsigned char* memoryPool
 ) {
@@ -1299,9 +1313,9 @@ void secp256k1_ge_copy__from__global(secp256k1_ge* output, __global const secp25
 }
 
 void secp256k1_ge_set_table_gej_var(
-  size_t len, 
-  __global secp256k1_ge *r, 
-  __global const secp256k1_gej *a, 
+  size_t len,
+  __global secp256k1_ge *r,
+  __global const secp256k1_gej *a,
   __global const secp256k1_fe *zr
 ) {
   size_t i = len - 1;
@@ -1315,12 +1329,12 @@ void secp256k1_ge_set_table_gej_var(
   /* Compute the inverse of the last z coordinate, and use it to compute the last affine output. */
   secp256k1_gej_copy__from__global(&globalToLocalGEJ1, &a[i]);
   //logGPU << "DEBUG: at onset: a: "
-  //<< toStringSecp256k1_ECPointProjective(a[i]) 
-  //<< "\n copy: " << toStringSecp256k1_ECPointProjective(globalToLocalGEJ1) 
+  //<< toStringSecp256k1_ECPointProjective(a[i])
+  //<< "\n copy: " << toStringSecp256k1_ECPointProjective(globalToLocalGEJ1)
   //<< Logger::endL;
   secp256k1_fe_inv(&zi, &globalToLocalGEJ1.z);
   //logGPU << "DEBUG: z inverse: "
-  //<< toStringSecp256k1_FieldElement(zi) 
+  //<< toStringSecp256k1_FieldElement(zi)
   //<< Logger::endL;
   secp256k1_ge_set_gej_zinv(&globalToLocalGE1, &globalToLocalGEJ1, &zi);
   //logGPU << "DEBUG: globalToLocalGE1 inside secp256k1_ge_set_table_gej_var: "
@@ -1334,10 +1348,10 @@ void secp256k1_ge_set_table_gej_var(
   while (i > 0) {
     secp256k1_fe_mul__global(&zi, &zi, &zr[i]);
     //logGPU << "DEBUG: zri @ loop start: "
-    //<< toStringSecp256k1_FieldElement(zr[i]) 
+    //<< toStringSecp256k1_FieldElement(zr[i])
     //<< Logger::endL;
     //logGPU << "DEBUG: z inverse @ loop start: "
-    //<< toStringSecp256k1_FieldElement(zi) 
+    //<< toStringSecp256k1_FieldElement(zi)
     //<< Logger::endL;
     i--;
     secp256k1_gej_copy__from__global(&globalToLocalGEJ1, &a[i]);
@@ -1356,9 +1370,9 @@ void secp256k1_ge_set_table_gej_var(
 }
 
 void secp256k1_ge_globalz_set_table_gej(
-  size_t len, secp256k1_ge *r, 
-  secp256k1_fe *globalz, 
-  __global const secp256k1_gej *a, 
+  size_t len, secp256k1_ge *r,
+  secp256k1_fe *globalz,
+  __global const secp256k1_gej *a,
   __global const secp256k1_fe *zr
 ) {
   size_t i = len - 1;
@@ -1426,7 +1440,9 @@ int secp256k1_ge_set_xo_var(secp256k1_ge *r, const secp256k1_fe *x, int odd) {
 
 int secp256k1_gej_eq_x_var(const secp256k1_fe *x, const secp256k1_gej *a) {
   secp256k1_fe r, r2;
+#ifdef VERIFY
   VERIFY_CHECK(!a->infinity);
+#endif
   secp256k1_fe_sqr(&r, &a->z); //r = z^2
   secp256k1_fe_mul(&r, &r, x); //r = x z^2
   r2 = a->x;
@@ -1458,10 +1474,10 @@ int secp256k1_gej_is_valid_var(const secp256k1_gej *a) {
      *  Y^2 = X^3 + 7*Z^6
      */
     secp256k1_fe_sqr(&y2, &a->y);
-    secp256k1_fe_sqr(&x3, &a->x); 
+    secp256k1_fe_sqr(&x3, &a->x);
     secp256k1_fe_mul(&x3, &x3, &a->x);
     secp256k1_fe_sqr(&z2, &a->z);
-    secp256k1_fe_sqr(&z6, &z2); 
+    secp256k1_fe_sqr(&z6, &z2);
     secp256k1_fe_mul(&z6, &z6, &z2);
     secp256k1_fe_mul_int(&z6, 7);
     secp256k1_fe_add(&x3, &z6);
@@ -1476,7 +1492,7 @@ int secp256k1_ge_is_valid_var(const secp256k1_ge *a) {
     }
     /* y^2 = x^3 + 7 */
     secp256k1_fe_sqr(&y2, &a->y);
-    secp256k1_fe_sqr(&x3, &a->x); 
+    secp256k1_fe_sqr(&x3, &a->x);
     secp256k1_fe_mul(&x3, &x3, &a->x);
     secp256k1_fe_set_int(&c, 7);
     secp256k1_fe_add(&x3, &c);
@@ -1528,7 +1544,9 @@ void secp256k1_gej_double_var(secp256k1_gej *r, const secp256k1_gej *a, secp256k
 }
 
 void secp256k1_gej_double_nonzero(secp256k1_gej *r, const secp256k1_gej *a, secp256k1_fe *rzr) {
+#ifdef VERIFY
     VERIFY_CHECK(!secp256k1_gej_is_infinity(a));
+#endif
     secp256k1_gej_double_var(r, a, rzr);
 }
 
@@ -1537,7 +1555,9 @@ void secp256k1_gej_add_var(secp256k1_gej *r, const secp256k1_gej *a, const secp2
     secp256k1_fe z22, z12, u1, u2, s1, s2, h, i, i2, h2, h3, t;
 
     if (a->infinity) {
+#ifdef VERIFY
         VERIFY_CHECK(rzr == NULL);
+#endif
         *r = *b;
         return;
     }
@@ -1555,13 +1575,13 @@ void secp256k1_gej_add_var(secp256k1_gej *r, const secp256k1_gej *a, const secp2
     secp256k1_fe_sqr(&z12, &a->z);
     secp256k1_fe_mul(&u1, &a->x, &z22);
     secp256k1_fe_mul(&u2, &b->x, &z12);
-    secp256k1_fe_mul(&s1, &a->y, &z22); 
+    secp256k1_fe_mul(&s1, &a->y, &z22);
     secp256k1_fe_mul(&s1, &s1, &b->z);
-    secp256k1_fe_mul(&s2, &b->y, &z12); 
+    secp256k1_fe_mul(&s2, &b->y, &z12);
     secp256k1_fe_mul(&s2, &s2, &a->z);
-    secp256k1_fe_negate(&h, &u1, 1); 
+    secp256k1_fe_negate(&h, &u1, 1);
     secp256k1_fe_add(&h, &u2);
-    secp256k1_fe_negate(&i, &s1, 1); 
+    secp256k1_fe_negate(&i, &s1, 1);
     secp256k1_fe_add(&i, &s2);
     if (secp256k1_fe_normalizes_to_zero_var(&h)) {
         if (secp256k1_fe_normalizes_to_zero_var(&i)) {
@@ -1583,14 +1603,14 @@ void secp256k1_gej_add_var(secp256k1_gej *r, const secp256k1_gej *a, const secp2
     }
     secp256k1_fe_mul(&r->z, &a->z, &h);
     secp256k1_fe_mul(&t, &u1, &h2);
-    r->x = t; secp256k1_fe_mul_int(&r->x, 2); 
-    secp256k1_fe_add(&r->x, &h3); 
-    secp256k1_fe_negate(&r->x, &r->x, 3); 
+    r->x = t; secp256k1_fe_mul_int(&r->x, 2);
+    secp256k1_fe_add(&r->x, &h3);
+    secp256k1_fe_negate(&r->x, &r->x, 3);
     secp256k1_fe_add(&r->x, &i2);
-    secp256k1_fe_negate(&r->y, &r->x, 5); 
-    secp256k1_fe_add(&r->y, &t); 
+    secp256k1_fe_negate(&r->y, &r->x, 5);
+    secp256k1_fe_add(&r->y, &t);
     secp256k1_fe_mul(&r->y, &r->y, &i);
-    secp256k1_fe_mul(&h3, &h3, &s1); 
+    secp256k1_fe_mul(&h3, &h3, &s1);
     secp256k1_fe_negate(&h3, &h3, 1);
     secp256k1_fe_add(&r->y, &h3);
 }
@@ -1626,16 +1646,16 @@ void secp256k1_gej_add_zinv_var(secp256k1_gej *r, const secp256k1_gej *a, const 
     secp256k1_fe_mul(&az, &a->z, bzinv);
 
     secp256k1_fe_sqr(&z12, &az);
-    u1 = a->x; 
+    u1 = a->x;
     secp256k1_fe_normalize_weak(&u1);
     secp256k1_fe_mul(&u2, &b->x, &z12);
-    s1 = a->y; 
+    s1 = a->y;
     secp256k1_fe_normalize_weak(&s1);
-    secp256k1_fe_mul(&s2, &b->y, &z12); 
+    secp256k1_fe_mul(&s2, &b->y, &z12);
     secp256k1_fe_mul(&s2, &s2, &az);
-    secp256k1_fe_negate(&h, &u1, 1); 
+    secp256k1_fe_negate(&h, &u1, 1);
     secp256k1_fe_add(&h, &u2);
-    secp256k1_fe_negate(&i, &s1, 1); 
+    secp256k1_fe_negate(&i, &s1, 1);
     secp256k1_fe_add(&i, &s2);
     if (secp256k1_fe_normalizes_to_zero_var(&h)) {
         if (secp256k1_fe_normalizes_to_zero_var(&i)) {
@@ -1648,18 +1668,18 @@ void secp256k1_gej_add_zinv_var(secp256k1_gej *r, const secp256k1_gej *a, const 
     secp256k1_fe_sqr(&i2, &i);
     secp256k1_fe_sqr(&h2, &h);
     secp256k1_fe_mul(&h3, &h, &h2);
-    r->z = a->z; 
+    r->z = a->z;
     secp256k1_fe_mul(&r->z, &r->z, &h);
     secp256k1_fe_mul(&t, &u1, &h2);
-    r->x = t; 
-    secp256k1_fe_mul_int(&r->x, 2); 
-    secp256k1_fe_add(&r->x, &h3); 
-    secp256k1_fe_negate(&r->x, &r->x, 3); 
+    r->x = t;
+    secp256k1_fe_mul_int(&r->x, 2);
+    secp256k1_fe_add(&r->x, &h3);
+    secp256k1_fe_negate(&r->x, &r->x, 3);
     secp256k1_fe_add(&r->x, &i2);
-    secp256k1_fe_negate(&r->y, &r->x, 5); 
-    secp256k1_fe_add(&r->y, &t); 
+    secp256k1_fe_negate(&r->y, &r->x, 5);
+    secp256k1_fe_add(&r->y, &t);
     secp256k1_fe_mul(&r->y, &r->y, &i);
-    secp256k1_fe_mul(&h3, &h3, &s1); 
+    secp256k1_fe_mul(&h3, &h3, &s1);
     secp256k1_fe_negate(&h3, &h3, 1);
     secp256k1_fe_add(&r->y, &h3);
 }
@@ -1668,15 +1688,16 @@ void secp256k1_gej_add_zinv_var(secp256k1_gej *r, const secp256k1_gej *a, const 
 void secp256k1_gej_add_ge(secp256k1_gej *r, const secp256k1_gej *a, const secp256k1_ge *b) {
     /* Operations: 7 mul, 5 sqr, 4 normalize, 21 mul_int/add/negate/cmov */
     //Please note: the static keyword breaks the openCL 1.0 build.
-    //static 
+    //static
     const secp256k1_fe fe_1 = SECP256K1_FE_CONST(0, 0, 0, 0, 0, 0, 0, 1);
-    
+
     secp256k1_fe zz, u1, u2, s1, s2, t, tt, m, n, q, rr;
     secp256k1_fe m_alt, rr_alt;
     int infinity, degenerate;
+#ifdef VERIFY
     VERIFY_CHECK(!b->infinity);
     VERIFY_CHECK(a->infinity == 0 || a->infinity == 1);
-
+#endif
     /** In:
      *    Eric Brier and Marc Joye, Weierstrass Elliptic Curves and Side-Channel Attacks.
      *    In D. Naccache and P. Paillier, Eds., Public Key Cryptography, vol. 2274 of Lecture Notes in Computer Science, pages 335-345. Springer-Verlag, 2002.
@@ -1793,7 +1814,9 @@ void secp256k1_gej_add_ge(secp256k1_gej *r, const secp256k1_gej *a, const secp25
 void secp256k1_gej_rescale(secp256k1_gej *r, const secp256k1_fe *s) {
     /* Operations: 4 mul, 1 sqr */
     secp256k1_fe zz;
+#ifdef VERIFY
     VERIFY_CHECK(!secp256k1_fe_is_zero(s));
+#endif
     secp256k1_fe_sqr(&zz, s);
     secp256k1_fe_mul(&r->x, &r->x, &zz);                /* r->x *= s^2 */
     secp256k1_fe_mul(&r->y, &r->y, &zz);
@@ -1866,17 +1889,23 @@ static void secp256k1_scalar_set_int(secp256k1_scalar *r, unsigned int v) {
 }
 
 static unsigned int secp256k1_scalar_get_bits(const secp256k1_scalar *a, unsigned int offset, unsigned int count) {
+#ifdef VERIFY
     VERIFY_CHECK((offset + count - 1) >> 5 == offset >> 5);
+#endif
     return (a->d[offset >> 5] >> (offset & 0x1F)) & ((1 << count) - 1);
 }
 
 static unsigned int secp256k1_scalar_get_bits_var(const secp256k1_scalar *a, unsigned int offset, unsigned int count) {
+#ifdef VERIFY
     VERIFY_CHECK(count < 32);
     VERIFY_CHECK(offset + count <= 256);
+#endif
     if ((offset + count - 1) >> 5 == offset >> 5) {
         return secp256k1_scalar_get_bits(a, offset, count);
     } else {
+#ifdef VERIFY
         VERIFY_CHECK((offset >> 5) + 1 < 8);
+#endif
         return ((a->d[offset >> 5] >> (offset & 0x1F)) | (a->d[(offset >> 5) + 1] << (32 - (offset & 0x1F)))) & ((((uint32_t)1) << count) - 1);
     }
 }
@@ -1901,7 +1930,9 @@ static int secp256k1_scalar_check_overflow(const secp256k1_scalar *a) {
 
 static int secp256k1_scalar_reduce(secp256k1_scalar *r, uint32_t overflow) {
     uint64_t t;
+#ifdef VERIFY
     VERIFY_CHECK(overflow <= 1);
+#endif
     t = (uint64_t)r->d[0] + overflow * SECP256K1_N_C_0;
     r->d[0] = t & 0xFFFFFFFFUL; t >>= 32;
     t += (uint64_t)r->d[1] + overflow * SECP256K1_N_C_1;
@@ -1940,14 +1971,18 @@ static int secp256k1_scalar_add(secp256k1_scalar *r, const secp256k1_scalar *a, 
     t += (uint64_t)a->d[7] + b->d[7];
     r->d[7] = t & 0xFFFFFFFFUL; t >>= 32;
     overflow = t + secp256k1_scalar_check_overflow(r);
+#ifdef VERIFY
     VERIFY_CHECK(overflow == 0 || overflow == 1);
+#endif
     secp256k1_scalar_reduce(r, overflow);
     return overflow;
 }
 
 static void secp256k1_scalar_cadd_bit(secp256k1_scalar *r, unsigned int bit, int flag) {
     uint64_t t;
+#ifdef VERIFY
     VERIFY_CHECK(bit < 256);
+#endif
     bit += ((uint32_t) flag - 1) & 0x100;  /* forcing (bit >> 5) > 7 makes this a noop */
     t = (uint64_t)r->d[0] + (((uint32_t)((bit >> 5) == 0)) << (bit & 0x1F));
     r->d[0] = t & 0xFFFFFFFFUL; t >>= 32;
@@ -2068,7 +2103,7 @@ static int secp256k1_scalar_cond_negate(secp256k1_scalar *r, int flag) {
     th += (c0 < tl) ? 1 : 0;  /* at most 0xFFFFFFFF */ \
     c1 += th;                 /* overflow is handled on the next line */ \
     c2 += (c1 < th) ? 1 : 0;  /* never overflows by contract (verified in the next line) */ \
-    VERIFY_CHECK((c1 >= th) || (c2 != 0)); \
+/*    VERIFY_CHECK((c1 >= th) || (c2 != 0)); */ \
 }
 
 /** Add a*b to the number defined by (c0,c1). c1 must never overflow. */
@@ -2082,7 +2117,7 @@ static int secp256k1_scalar_cond_negate(secp256k1_scalar *r, int flag) {
     c0 += tl;                 /* overflow is handled on the next line */ \
     th += (c0 < tl) ? 1 : 0;  /* at most 0xFFFFFFFF */ \
     c1 += th;                 /* never overflows by contract (verified in the next line) */ \
-    VERIFY_CHECK(c1 >= th); \
+/*    VERIFY_CHECK(c1 >= th);*/ \
 }
 
 /** Add 2*a*b to the number defined by (c0,c1,c2). c2 must never overflow. */
@@ -2095,16 +2130,16 @@ static int secp256k1_scalar_cond_negate(secp256k1_scalar *r, int flag) {
     } \
     th2 = th + th;                  /* at most 0xFFFFFFFE (in case th was 0x7FFFFFFF) */ \
     c2 += (th2 < th) ? 1 : 0;       /* never overflows by contract (verified the next line) */ \
-    VERIFY_CHECK((th2 >= th) || (c2 != 0)); \
+    /*VERIFY_CHECK((th2 >= th) || (c2 != 0)); */\
     tl2 = tl + tl;                  /* at most 0xFFFFFFFE (in case the lowest 63 bits of tl were 0x7FFFFFFF) */ \
     th2 += (tl2 < tl) ? 1 : 0;      /* at most 0xFFFFFFFF */ \
     c0 += tl2;                      /* overflow is handled on the next line */ \
     th2 += (c0 < tl2) ? 1 : 0;      /* second overflow is handled on the next line */ \
     c2 += (c0 < tl2) & (th2 == 0);  /* never overflows by contract (verified the next line) */ \
-    VERIFY_CHECK((c0 >= tl2) || (th2 != 0) || (c2 != 0)); \
+    /*VERIFY_CHECK((c0 >= tl2) || (th2 != 0) || (c2 != 0)); */\
     c1 += th2;                      /* overflow is handled on the next line */ \
     c2 += (c1 < th2) ? 1 : 0;       /* never overflows by contract (verified the next line) */ \
-    VERIFY_CHECK((c1 >= th2) || (c2 != 0)); \
+    /*VERIFY_CHECK((c1 >= th2) || (c2 != 0));*/ \
 }
 
 /** Add a to the number defined by (c0,c1,c2). c2 must never overflow. */
@@ -2120,8 +2155,8 @@ static int secp256k1_scalar_cond_negate(secp256k1_scalar *r, int flag) {
 #define sumadd_fast(a) { \
     c0 += (a);                 /* overflow is handled on the next line */ \
     c1 += (c0 < (a)) ? 1 : 0;  /* never overflows by contract (verified the next line) */ \
-    VERIFY_CHECK((c1 != 0) | (c0 >= (a))); \
-    VERIFY_CHECK(c2 == 0); \
+    /*VERIFY_CHECK((c1 != 0) | (c0 >= (a)));*/ \
+    /*VERIFY_CHECK(c2 == 0);*/ \
 }
 
 /** Extract the lowest 32 bits of (c0,c1,c2) into n, and left shift the number 32 bits. */
@@ -2137,7 +2172,7 @@ static int secp256k1_scalar_cond_negate(secp256k1_scalar *r, int flag) {
     (n) = c0; \
     c0 = c1; \
     c1 = 0; \
-    VERIFY_CHECK(c2 == 0); \
+/*    VERIFY_CHECK(c2 == 0); */ \
 }
 
 static void secp256k1_scalar_reduce_512(secp256k1_scalar *r, const uint32_t *l) {
@@ -2211,7 +2246,9 @@ static void secp256k1_scalar_reduce_512(secp256k1_scalar *r, const uint32_t *l) 
     extract(m10);
     sumadd_fast(n7);
     extract_fast(m11);
+#ifdef VERIFY
     VERIFY_CHECK(c0 <= 1);
+#endif
     m12 = c0;
 
     /* Reduce 385 bits into 258. */
@@ -2257,8 +2294,9 @@ static void secp256k1_scalar_reduce_512(secp256k1_scalar *r, const uint32_t *l) 
     sumadd_fast(m11);
     extract_fast(p7);
     p8 = c0 + m12;
+#ifdef VERIFY
     VERIFY_CHECK(p8 <= 2);
-
+#endif
     /* Reduce 258 bits into 256. */
     /* r[0..7] = p[0..7] + p[8] * SECP256K1_N_C. */
     c = p0 + (uint64_t)SECP256K1_N_C_0 * p8;
@@ -2293,8 +2331,10 @@ static void secp256k1_scalar_reduce_512(secp256k1_scalar *r, const uint32_t *l) 
 
 static int secp256k1_scalar_shr_int(secp256k1_scalar *r, int n) {
     int ret;
+#ifdef VERIFY
     VERIFY_CHECK(n > 0);
     VERIFY_CHECK(n < 16);
+#endif
     ret = r->d[0] & ((1 << n) - 1);
     r->d[0] = (r->d[0] >> n) + (r->d[1] << (32 - n));
     r->d[1] = (r->d[1] >> n) + (r->d[2] << (32 - n));
@@ -2337,7 +2377,9 @@ void secp256k1_scalar_mul_shift_var(secp256k1_scalar *r, const secp256k1_scalar 
     unsigned int shiftlimbs;
     unsigned int shiftlow;
     unsigned int shifthigh;
+#ifdef VERIFY
     VERIFY_CHECK(shift >= 256);
+#endif
     secp256k1_scalar_mul_512(l, a, b);
     shiftlimbs = shift >> 5;
     shiftlow = shift & 0x1F;
@@ -2515,9 +2557,9 @@ static void secp256k1_scalar_split_lambda(secp256k1_scalar *r1, secp256k1_scalar
 /** The following two macro retrieves a particular odd multiple from a table
  *  of precomputed multiples. */
 #define ECMULT_TABLE_GET_GE(r,pre,n,w) do { \
-  VERIFY_CHECK(((n) & 1) == 1); \
-  VERIFY_CHECK((n) >= -((1 << ((w)-1)) - 1)); \
-  VERIFY_CHECK((n) <=  ((1 << ((w)-1)) - 1)); \
+  /*VERIFY_CHECK(((n) & 1) == 1);*/ \
+  /*VERIFY_CHECK((n) >= -((1 << ((w)-1)) - 1));*/ \
+  /*VERIFY_CHECK((n) <=  ((1 << ((w)-1)) - 1));*/ \
   if ((n) > 0) { \
     *(r) = (pre)[((n)-1)/2]; \
   } else { \
@@ -2526,9 +2568,9 @@ static void secp256k1_scalar_split_lambda(secp256k1_scalar *r1, secp256k1_scalar
 } while(0)
 
 #define ECMULT_TABLE_GET_GE_STORAGE(r, pre, n, w) do { \
-  VERIFY_CHECK(((n) & 1) == 1); \
-  VERIFY_CHECK((n) >= -((1 << ((w)-1)) - 1)); \
-  VERIFY_CHECK((n) <=  ((1 << ((w)-1)) - 1)); \
+  /*VERIFY_CHECK(((n) & 1) == 1);*/ \
+  /*VERIFY_CHECK((n) >= -((1 << ((w)-1)) - 1));*/ \
+  /*VERIFY_CHECK((n) <=  ((1 << ((w)-1)) - 1));*/ \
   if ((n) > 0) { \
     secp256k1_ge_from_storage__global((r), &(pre)[((n)-1)/2]); \
   } else { \
@@ -2543,9 +2585,9 @@ static void secp256k1_scalar_split_lambda(secp256k1_scalar *r1, secp256k1_scalar
  *  Prej's Z values are undefined, except for the last value.
  */
 static void secp256k1_ecmult_odd_multiples_table(
-  int n, 
-  __global secp256k1_gej *prej, 
-  __global secp256k1_fe *zr, 
+  int n,
+  __global secp256k1_gej *prej,
+  __global secp256k1_fe *zr,
   const secp256k1_gej *a
 ) {
   secp256k1_gej d, globalToLocal1, globalToLocal2;
@@ -2553,7 +2595,9 @@ static void secp256k1_ecmult_odd_multiples_table(
   secp256k1_fe globalToLocalFE1, globalToLocalFE2;
   int i;
 
+#ifdef VERIFY
   VERIFY_CHECK(!a->infinity);
+#endif
 
   secp256k1_gej_double_var(&d, a, NULL);
 
@@ -2578,7 +2622,7 @@ static void secp256k1_ecmult_odd_multiples_table(
     secp256k1_fe_copy__from__global(&globalToLocalFE1, &zr[i]);
     secp256k1_gej_add_ge_var(&globalToLocal1, &globalToLocal2, &d_ge, &globalToLocalFE1);
     //<- warning: secp256k1_gej_add_ge_var modifies its last argument.
-    //Failure to carry out the next command resulted in a bug. 
+    //Failure to carry out the next command resulted in a bug.
     secp256k1_fe_copy__to__global(&zr[i], &globalToLocalFE1);
     secp256k1_gej_copy__to__global(&prej[i], &globalToLocal1);
     //logGPU << "DEBUG: prej[i]: " << toStringSecp256k1_ECPointProjective( prej[i]) << Logger::endL;
@@ -2611,8 +2655,8 @@ static void secp256k1_ecmult_odd_multiples_table(
  *  happen once).
  */
 static void secp256k1_ecmult_odd_multiples_table_globalz_windowa(
-  secp256k1_ge *pre, 
-  secp256k1_fe *globalz, 
+  secp256k1_ge *pre,
+  secp256k1_fe *globalz,
   const secp256k1_gej *a,
   __global unsigned char* memoryPool
   ) {
@@ -2626,8 +2670,8 @@ static void secp256k1_ecmult_odd_multiples_table_globalz_windowa(
 }
 
 static void secp256k1_ecmult_odd_multiples_table_storage_var(
-  int n, 
-  __global secp256k1_ge_storage *pre, 
+  int n,
+  __global secp256k1_ge_storage *pre,
   const secp256k1_gej *a,
   __global unsigned char* memoryPool
 ) {
@@ -2668,15 +2712,17 @@ static int secp256k1_ecmult_wnaf(int *wnaf, int len, const secp256k1_scalar *a, 
   int sign = 1;
   int carry = 0;
 
+#ifdef VERIFY
   VERIFY_CHECK(wnaf != NULL);
   VERIFY_CHECK(0 <= len && len <= 256);
   VERIFY_CHECK(a != NULL);
   VERIFY_CHECK(2 <= w && w <= 31);
+#endif
 
   int i;
   for (i = 0; i < len; i ++){
     wnaf[i] = 0;
-  }  
+  }
   memorySet((unsigned char*) wnaf, 0, len * sizeof_int());
   if (secp256k1_scalar_get_bits(&s, 255, 1)) {
     secp256k1_scalar_negate(&s, &s);
@@ -2710,7 +2756,7 @@ static int secp256k1_ecmult_wnaf(int *wnaf, int len, const secp256k1_scalar *a, 
   CHECK(carry == 0);
   while (bit < 256) {
     CHECK(secp256k1_scalar_get_bits(&s, bit ++, 1) == 0);
-  } 
+  }
 #endif
   return last_set_bit + 1;
 }
@@ -2777,7 +2823,7 @@ void secp256k1_ecmult(
 
 //static void secp256k1_ecmult_context_clone(
 //  secp256k1_ecmult_context *dst,
-//  const secp256k1_ecmult_context *src, 
+//  const secp256k1_ecmult_context *src,
 //  const secp256k1_callback *cb
 //) {
 //  if (src->pre_g == NULL) {
@@ -2798,8 +2844,8 @@ int secp256k1_ecmult_context_is_built(const secp256k1_ecmult_context *ctx) {
 
 //******From ecmult_const.h******
 void secp256k1_ecmult_const(
-  secp256k1_gej *r, 
-  const secp256k1_ge *a, 
+  secp256k1_gej *r,
+  const secp256k1_ge *a,
   const secp256k1_scalar *q,
   __global unsigned char* memoryPool
 );
@@ -2820,11 +2866,11 @@ void secp256k1_ecmult_const(
     int abs_n = (n) * (((n) > 0) * 2 - 1); \
     int idx_n = abs_n / 2; \
     secp256k1_fe neg_y; \
-    VERIFY_CHECK(((n) & 1) == 1); \
-    VERIFY_CHECK((n) >= -((1 << ((w)-1)) - 1)); \
-    VERIFY_CHECK((n) <=  ((1 << ((w)-1)) - 1)); \
-    VERIFY_SETUP(secp256k1_fe_clear(&(r)->x)); \
-    VERIFY_SETUP(secp256k1_fe_clear(&(r)->y)); \
+    /*VERIFY_CHECK(((n) & 1) == 1);*/ \
+    /*VERIFY_CHECK((n) >= -((1 << ((w)-1)) - 1));*/ \
+    /*VERIFY_CHECK((n) <=  ((1 << ((w)-1)) - 1));*/ \
+    /*VERIFY_SETUP(secp256k1_fe_clear(&(r)->x));*/ \
+    /*VERIFY_SETUP(secp256k1_fe_clear(&(r)->y));*/ \
     for (m = 0; m < ECMULT_TABLE_SIZE(w); m++) { \
         /* This loop is used to avoid secret data in array indices. See
          * the comment in ecmult_gen_impl.h for rationale. */ \
@@ -2911,16 +2957,18 @@ static int secp256k1_wnaf_const(int *wnaf, secp256k1_scalar s, int w) {
     }
     wnaf[word] = u * global_sign;
 
+#ifdef VERIFY
     VERIFY_CHECK(secp256k1_scalar_is_zero(&s));
     VERIFY_CHECK(word == WNAF_SIZE(w));
+#endif
     return skew;
 }
 
 
 void secp256k1_ecmult_const(
-  secp256k1_gej *r, 
-  const secp256k1_ge *a, 
-  const secp256k1_scalar *scalar, 
+  secp256k1_gej *r,
+  const secp256k1_ge *a,
+  const secp256k1_scalar *scalar,
   __global unsigned char* memoryPool
 ) {
     secp256k1_ge pre_a[ECMULT_TABLE_SIZE(WINDOW_A)];
@@ -2954,8 +3002,9 @@ void secp256k1_ecmult_const(
     /* the wNAF ladder cannot handle zero, so bump this to one .. we will
      * correct the result after the fact */
     sc.d[0] += is_zero;
+#ifdef VERIFY
     VERIFY_CHECK(!secp256k1_scalar_is_zero(&sc));
-
+#endif
     secp256k1_wnaf_const(wnaf, sc, WINDOW_A - 1);
 #endif
 
@@ -2993,7 +3042,9 @@ void secp256k1_ecmult_const(
     secp256k1_gej_add_ge(r, r, &tmpa);
 #else
     i = wnaf[WNAF_SIZE(WINDOW_A - 1)];
+#ifdef VERIFY
     VERIFY_CHECK(i != 0);
+#endif
     ECMULT_CONST_TABLE_GET_GE(&tmpa, pre_a, i, WINDOW_A);
     secp256k1_gej_set_ge(r, &tmpa);
 #endif
@@ -3016,7 +3067,9 @@ void secp256k1_ecmult_const(
         secp256k1_gej_add_ge(r, r, &tmpa);
 #else
         n = wnaf[i];
+#ifdef VERIFY
         VERIFY_CHECK(n != 0);
+#endif
         ECMULT_CONST_TABLE_GET_GE(&tmpa, pre_a, n, WINDOW_A);
         secp256k1_gej_add_ge(r, r, &tmpa);
 #endif
@@ -3229,7 +3282,7 @@ static void secp256k1_sha256_write(secp256k1_sha256_t *hash, const unsigned char
 
 static void secp256k1_sha256_finalize(secp256k1_sha256_t *hash, unsigned char *out32) {
   //Please note: the static keyword breaks the openCL 1.0 build.
-  //static 
+  //static
   const unsigned char pad[64] = {0x80, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
   uint32_t sizedesc[2];
   uint32_t out[8];
@@ -3289,7 +3342,7 @@ static void secp256k1_hmac_sha256_finalize(secp256k1_hmac_sha256_t *hash, unsign
 static void secp256k1_rfc6979_hmac_sha256_initialize(secp256k1_rfc6979_hmac_sha256_t *rng, const unsigned char *key, size_t keylen) {
   secp256k1_hmac_sha256_t hmac;
   //Please note: the static keyword breaks the openCL 1.0 build.
-  //static 
+  //static
   const unsigned char zero[1] = {0x00};
   const unsigned char one[1] = {0x01};
 
@@ -3321,7 +3374,7 @@ static void secp256k1_rfc6979_hmac_sha256_initialize(secp256k1_rfc6979_hmac_sha2
 static void secp256k1_rfc6979_hmac_sha256_generate(secp256k1_rfc6979_hmac_sha256_t *rng, unsigned char *out, size_t outlen) {
     /* RFC6979 3.2.h. */
   //Please note: the static keyword breaks the openCL 1.0 build.
-  //static 
+  //static
   const unsigned char zero[1] = {0x00};
   if (rng->retry) {
     secp256k1_hmac_sha256_t hmac;
@@ -3388,6 +3441,8 @@ void secp256k1_gej_copy__from__global(secp256k1_gej* output, __global const secp
   secp256k1_fe_copy__from__global(&output->z, &input->z);
 }
 
+__constant static const char x_coordinate_seed_for_EC_point_with_unknown_scalar_signed[34] = "The scalar for this x is unknown\0";
+
 void secp256k1_ecmult_gen_context_build(
   __global secp256k1_ecmult_gen_context *ctx,
   __global unsigned char* memoryPool
@@ -3396,7 +3451,7 @@ void secp256k1_ecmult_gen_context_build(
   secp256k1_gej gj;
   secp256k1_gej nums_gej;
   // <- sizeof(secp256k1_ge_storage) returns zero on openCL 1.1, Ubuntu, NVidia Quadro K2000.
-  int i, j;
+  int i, j, k;
 
   if (ctx->prec != NULL) {
     return;
@@ -3409,7 +3464,6 @@ void secp256k1_ecmult_gen_context_build(
   //openCL note: secp256k1_ge_const_g is always in the __constant address space.
   secp256k1_gej_set_ge__constant(&gj, &secp256k1_ge_const_g);
   int debugWarning;
-  memoryPool_write_ge_asOutput__constant(&secp256k1_ge_const_g, 2, memoryPool);
 
   /* Construct a group element with no known corresponding scalar (nothing up my sleeve). */
   {
@@ -3418,13 +3472,16 @@ void secp256k1_ecmult_gen_context_build(
     // serving as an essentail constant for the library.
     //Static does not compile in openCL 1.2
     //static
-    const unsigned char nums_b32[33] = "The scalar for this x is unknown";
     secp256k1_fe nums_x;
     secp256k1_ge nums_ge;
-    
+    unsigned char x_coordinate_seed_for_EC_point_with_unknown_scalar[32];
     //The line below does not compile in openCL 1.2
-    VERIFY_CHECK(secp256k1_fe_set_b32(&nums_x, nums_b32));
-    VERIFY_CHECK(secp256k1_ge_set_xo_var(&nums_ge, &nums_x, 0));
+    for (k = 0; k < 32; k ++) {
+      x_coordinate_seed_for_EC_point_with_unknown_scalar[k] = (unsigned char) x_coordinate_seed_for_EC_point_with_unknown_scalar_signed[k];
+    }
+    secp256k1_fe_set_b32(&nums_x, x_coordinate_seed_for_EC_point_with_unknown_scalar);
+    memoryPool_write_fe_asOutput(&nums_x, 2, memoryPool);
+    secp256k1_ge_set_xo_var(&nums_ge, &nums_x, 0);
     secp256k1_gej_set_ge(&nums_gej, &nums_ge);
     int debugWarning;
     memoryPool_write_ge_asOutput(&nums_ge, 3, memoryPool);
@@ -3435,7 +3492,7 @@ void secp256k1_ecmult_gen_context_build(
   /* compute prec. */
   {
     secp256k1_gej precj[1024]; /* Jacobian versions of prec. */
-    
+
     secp256k1_gej gbase;
     secp256k1_gej numsbase;
     gbase = gj; /* 16^j * G */
@@ -3457,7 +3514,7 @@ void secp256k1_ecmult_gen_context_build(
         secp256k1_gej_neg(&numsbase, &numsbase);
         secp256k1_gej_add_var(&numsbase, &numsbase, &nums_gej, NULL);
       }
-    } 
+    }
     secp256k1_ge_set_all_gej_var(1024, prec, precj, memoryPool);
   }
   for (j = 0; j < 64; j ++) {
@@ -3480,9 +3537,9 @@ void secp256k1_ecmult_gen_blind(__global secp256k1_ecmult_gen_context *ctx, cons
     unsigned char nonce32[32];
     secp256k1_rfc6979_hmac_sha256_t rng;
     int retry;
-    //WARNING: hard-coded sizeof(keydata) is used below. 
+    //WARNING: hard-coded sizeof(keydata) is used below.
     //Please apply extra attention if refactoring this variable.
-    unsigned char keydata[64] = {0}; 
+    unsigned char keydata[64] = {0};
     if (seed32 == NULL) {
       /* When seed is NULL, reset the initial point and blinding value. */
       //Note: secp256k1_ge_const_g is in the __constant address space
@@ -3555,7 +3612,7 @@ void secp256k1_ecmult_context_build(
   __global unsigned char* memoryPool
 ) {
   memoryPool_writeString(message2, memoryPool);
-  
+
   secp256k1_gej gj;
 
   if (output->pre_g != NULL) {
@@ -3567,7 +3624,7 @@ void secp256k1_ecmult_context_build(
   secp256k1_gej_set_ge__constant(&gj, &secp256k1_ge_const_g);
   memoryPool_writeCurrentSizeAsOutput(0, memoryPool);
   output->pre_g = (__global secp256k1_ge_storage (*)[]) checked_malloc(
-    ECMULT_TABLE_SIZE(WINDOW_G) * sizeof_secp256k1_ge_storage(), 
+    ECMULT_TABLE_SIZE(WINDOW_G) * sizeof_secp256k1_ge_storage(),
     memoryPool
   );
   /* precompute the tables with odd multiples */
@@ -3586,8 +3643,8 @@ void secp256k1_scalar_copy__from__global(secp256k1_scalar* output, __global cons
 }
 
 void secp256k1_ecmult_gen(
-  __global const secp256k1_ecmult_gen_context *ctx, 
-  secp256k1_gej *r, 
+  __global const secp256k1_ecmult_gen_context *ctx,
+  secp256k1_gej *r,
   const secp256k1_scalar *gn
 ) {
     secp256k1_ge add;
@@ -3789,11 +3846,11 @@ int secp256k1_ecdsa_sig_sign(__global const secp256k1_ecmult_gen_context *ctx, s
 }
 
 int secp256k1_ecdsa_sig_recover(
-  __global const secp256k1_ecmult_context *ctx, 
-  const secp256k1_scalar *sigr, 
-  const secp256k1_scalar* sigs, 
-  secp256k1_ge *pubkey, 
-  const secp256k1_scalar *message, 
+  __global const secp256k1_ecmult_context *ctx,
+  const secp256k1_scalar *sigr,
+  const secp256k1_scalar* sigs,
+  secp256k1_ge *pubkey,
+  const secp256k1_scalar *message,
   int recid,
   __global unsigned char* memoryPool
 ) {
@@ -3809,7 +3866,7 @@ int secp256k1_ecdsa_sig_recover(
   }
 
   secp256k1_scalar_get_b32(brx, sigr);
-  VERIFY_CHECK(secp256k1_fe_set_b32(&fx, brx)); /* brx comes from a scalar, so is less than the order; certainly less than p */
+  secp256k1_fe_set_b32(&fx, brx); /* brx comes from a scalar, so is less than the order; certainly less than p */
   if (recid & 2) {
     //openCL note: secp256k1_ecdsa_const_p_minus_order is always in the __constant address space.
     if (secp256k1_fe_cmp_var__constant(&fx, &secp256k1_ecdsa_const_p_minus_order) >= 0) {
@@ -3832,12 +3889,12 @@ int secp256k1_ecdsa_sig_recover(
 }
 
 char secp256k1_ecdsa_sig_verify(
-  __global const secp256k1_ecmult_context *ctx, 
-  __global const secp256k1_scalar *sigr, 
-  __global const secp256k1_scalar *sigs, 
-  __global const secp256k1_ge *pubkey, 
-  __global const secp256k1_scalar *message, 
-  __global unsigned char* comments, 
+  __global const secp256k1_ecmult_context *ctx,
+  __global const secp256k1_scalar *sigr,
+  __global const secp256k1_scalar *sigs,
+  __global const secp256k1_ge *pubkey,
+  __global const secp256k1_scalar *message,
+  __global unsigned char* comments,
   __global unsigned char* memoryPool
 ) {
   unsigned char c[32];
@@ -3881,13 +3938,13 @@ char secp256k1_ecdsa_sig_verify(
    *  Thus, we can avoid the inversion, but we have to check both cases separately.
    *  secp256k1_gej_eq_x implements the (xr * pr.z^2 mod p == pr.x) test.
    */
-   
+
     secp256k1_fe_get_b32(c, &xr);
     memoryCopy_to__global(comments + 1, c, 32);
     secp256k1_fe_get_b32(c, &pr.x);
-    memoryCopy_to__global(comments + 33, c, 32);    
+    memoryCopy_to__global(comments + 33, c, 32);
     secp256k1_fe_get_b32(c, &pr.z);
-    memoryCopy_to__global(comments + 65, c, 32);    
+    memoryCopy_to__global(comments + 65, c, 32);
 
   if (secp256k1_gej_eq_x_var(&xr, &pr)) {
     /* pr.x == xr * pr.z^2 mod p, so the signature is valid. */

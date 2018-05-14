@@ -9,7 +9,7 @@
 #define uint32_t uint
 #define uint64_t ulong
 
-#define VERIFY_CHECK(arg)
+#define VERIFY_CHECK(arg) arg
 
 
 #define NULL 0

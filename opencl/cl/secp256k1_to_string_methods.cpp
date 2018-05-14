@@ -110,18 +110,26 @@ std::string toStringErrorLog(const unsigned char* memoryPool) {
 
 std::string toStringOutputObject(int argumentIndex, const unsigned char* memoryPool) {
   secp256k1_ge readerECPoint;
-  //secp256k1_fe readerFieldElement1, readerFieldElement2;
+  secp256k1_fe readerFieldElement1;
   std::stringstream out;
   if (argumentIndex > MACRO_numberOfOutputs || argumentIndex < 0) {
     logGPU << "Memory pool output index " << argumentIndex << " out of bounds. ";
     assert(false);
   }
   unsigned int position = memoryPool_read_uint_fromOutput(argumentIndex, memoryPool);
+  if (position == 0) {
+    out << "empty";
+    return out.str();
+  }
   unsigned int theType = memoryPool_read_uint(&memoryPool[position]);
   switch (theType) {
-  case MACRO_memoryPoolType_ge:
+  case memoryPoolType_ge:
     memoryPool_read_secp256k1_ge(&readerECPoint, &memoryPool[position + sizeof_uint()]);
     out << "EC point: " << toStringSecp256k1_ECPoint(readerECPoint);
+    break;
+  case memoryPoolType_fe:
+    memoryPool_read_secp256k1_fe(&readerFieldElement1, &memoryPool[position + sizeof_uint()]);
+    out << "Field element: " << toStringSecp256k1_FieldElement(readerFieldElement1);
     break;
   default:
     out << "Unknown object type: " << theType;

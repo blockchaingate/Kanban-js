@@ -18,15 +18,6 @@ Please see the file opencl/README.md for technical notes on this code.
 #define SECP256k1_H_header
 
 //******From util.h******
-#ifdef VERIFY
-#define VERIFY_CHECK CHECK
-#define VERIFY_SETUP(stmt) do { stmt; } while(0)
-#else
-#ifndef VERIFY_CHECK
-  #define VERIFY_CHECK(cond) do { (void)(cond); } while(0)
-#endif
-#define VERIFY_SETUP(stmt)
-#endif
 
 #ifndef MACRO_USE_openCL
 #define ___static__constant static const
@@ -93,18 +84,18 @@ void memoryPool_freeMemory__global(__global void* any);
 #include "../opencl/cl/secp256k1_data_structures_parametric_address_space.h"
 ///////////////////////
 ///////////////////////
-#define MACRO_memoryPoolType_fe 0
-#define MACRO_memoryPoolType_ge 1
-#define MACRO_memoryPoolType_gej 2
+enum memoryPoolType{
+  memoryPoolType_fe,
+  memoryPoolType_ge,
+  memoryPoolType_gej
+};
 
-void memoryPool_write_fe_asOutput(secp256k1_fe* input, unsigned int argumentIndex, __global unsigned char* memoryPool);
-
-void memoryPool_write_gej_asOutput(secp256k1_gej* input, unsigned int argumentIndex, __global unsigned char* memoryPool);
+void memoryPool_write_gej_asOutput(const secp256k1_gej* input, unsigned int argumentIndex, __global unsigned char* memoryPool);
+void memoryPool_write_fe_asOutput (const secp256k1_fe*  input, unsigned int argumentIndex, __global unsigned char* memoryPool);
 
 
 void memoryPool_read_secp256k1_ge(secp256k1_ge* output, __global const unsigned char* memoryPoolPointer);
-//void memoryPool_read_fe_fromOutput(secp256k1_fe* output, unsigned int argumentIndex, __global unsigned char* memoryPool);
-//void memoryPool_read_gej_fromOutput(secp256k1_gej* output, unsigned int argumentIndex, __global unsigned char* memoryPool);
+void memoryPool_read_secp256k1_fe(secp256k1_fe* output, __global const unsigned char* memoryPoolPointer);
 
 
 //******From field_10x26.h******
@@ -177,9 +168,6 @@ int secp256k1_fe_is_odd(const secp256k1_fe *a); //original name: secp256k1_fe_is
 
 /** Compare two field elements. Requires magnitude-1 inputs. */
 int secp256k1_fe_equal_var(const secp256k1_fe *a, const secp256k1_fe *b); //original name: secp256k1_fe_equal_var
-
-/** Set a field element equal to 32-byte big endian value. If successful, the resulting field element is normalized. */
-int secp256k1_fe_set_b32(secp256k1_fe *r, const unsigned char *a); //original name: secp256k1_fe_set_b32
 
 /** Convert a field element to a 32-byte big endian value. Requires the input to be normalized */
 void secp256k1_fe_get_b32(unsigned char *r, const secp256k1_fe *a); //original name: secp256k1_fe_get_b32
