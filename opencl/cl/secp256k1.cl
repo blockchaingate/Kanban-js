@@ -2891,7 +2891,7 @@ void secp256k1_ecmult_const(
  *
  *  Adapted from `The Width-w NAF Method Provides Small Memory and Fast Elliptic Scalar
  *  Multiplications Secure against Side Channel Attacks`, Okeya and Tagaki. M. Joye (Ed.)
- *  CT-RSA 2003, LNCS 2612, pp. 328-443, 2003. Springer-Verlagy Berlin Heidelberg 2003
+ *  CT-RSA 2003, LNCS 2612, pp. 328-443, 2003. Springer-Verlag Berlin Heidelberg 2003
  *
  *  Numbers reference steps of `Algorithm SPA-resistant Width-w NAF with Odd Scalar` on pp. 335
  */
@@ -3331,11 +3331,11 @@ static void secp256k1_hmac_sha256_write(secp256k1_hmac_sha256_t *hash, const uns
 }
 
 static void secp256k1_hmac_sha256_finalize(secp256k1_hmac_sha256_t *hash, unsigned char *out32) {
-    unsigned char temp[32];
-    secp256k1_sha256_finalize(&hash->inner, temp);
-    secp256k1_sha256_write(&hash->outer, temp, 32);
-    memorySet(temp, 0, 32);
-    secp256k1_sha256_finalize(&hash->outer, out32);
+  unsigned char temp[32];
+  secp256k1_sha256_finalize(&hash->inner, temp);
+  secp256k1_sha256_write(&hash->outer, temp, 32);
+  memorySet(temp, 0, 32);
+  secp256k1_sha256_finalize(&hash->outer, out32);
 }
 
 
@@ -3531,61 +3531,61 @@ void secp256k1_ecmult_gen_context_build(
 
 /* Setup blinding values for secp256k1_ecmult_gen. */
 void secp256k1_ecmult_gen_blind(__global secp256k1_ecmult_gen_context *ctx, const unsigned char *seed32) {
-    secp256k1_scalar b, blindPoint;
-    secp256k1_gej gb, initialPoint;
-    secp256k1_fe s;
-    unsigned char nonce32[32];
-    secp256k1_rfc6979_hmac_sha256_t rng;
-    int retry;
-    //WARNING: hard-coded sizeof(keydata) is used below.
-    //Please apply extra attention if refactoring this variable.
-    unsigned char keydata[64] = {0};
-    if (seed32 == NULL) {
-      /* When seed is NULL, reset the initial point and blinding value. */
-      //Note: secp256k1_ge_const_g is in the __constant address space
-      secp256k1_gej_set_ge__constant(&initialPoint, &secp256k1_ge_const_g);
-      secp256k1_gej_neg(&initialPoint, &initialPoint);
-      secp256k1_gej_copy__to__global(&ctx->initial, &initialPoint);
-      secp256k1_scalar_set_int(&blindPoint, 1);
-      secp256k1_scalar_copy__to__global(&ctx->blind, &blindPoint);
-    }
-    /* The prior blinding value (if not reset) is chained forward by including it in the hash. */
-    secp256k1_scalar_get_b32__global(nonce32, &ctx->blind);
-    /** Using a CSPRNG allows a failure free interface, avoids needing large amounts of random data,
-     *   and guards against weak or adversarial seeds.  This is a simpler and safer interface than
-     *   asking the caller for blinding values directly and expecting them to retry on failure.
-     */
-    memoryCopy(keydata, nonce32, 32);
-    if (seed32 != NULL) {
-      memoryCopy(keydata + 32, seed32, 32);
-    }
-    secp256k1_rfc6979_hmac_sha256_initialize(&rng, keydata, seed32 ? 64 : 32);
-    memorySet(keydata, 0, sizeof_char64());
-    /* Retry for out of range results to achieve uniformity. */
-    do {
-        secp256k1_rfc6979_hmac_sha256_generate(&rng, nonce32, 32);
-        retry = !secp256k1_fe_set_b32(&s, nonce32);
-        retry |= secp256k1_fe_is_zero(&s);
-    } while (retry);
-    /* Randomize the projection to defend against multiplier sidechannels. */
-    secp256k1_gej_copy__from__global(&initialPoint, &ctx->initial);
-    secp256k1_gej_rescale(&initialPoint, &s);
+  secp256k1_scalar b, blindPoint;
+  secp256k1_gej gb, initialPoint;
+  secp256k1_fe s;
+  unsigned char nonce32[32];
+  secp256k1_rfc6979_hmac_sha256_t rng;
+  int retry;
+  //WARNING: hard-coded sizeof(keydata) is used below.
+  //Please apply extra attention if refactoring this variable.
+  unsigned char keydata[64] = {0};
+  if (seed32 == NULL) {
+    /* When seed is NULL, reset the initial point and blinding value. */
+    //Note: secp256k1_ge_const_g is in the __constant address space
+    secp256k1_gej_set_ge__constant(&initialPoint, &secp256k1_ge_const_g);
+    secp256k1_gej_neg(&initialPoint, &initialPoint);
     secp256k1_gej_copy__to__global(&ctx->initial, &initialPoint);
-    secp256k1_fe_clear(&s);
-    do {
-        secp256k1_rfc6979_hmac_sha256_generate(&rng, nonce32, 32);
-        secp256k1_scalar_set_b32(&b, nonce32, &retry);
-        /* A blinding value of 0 works, but would undermine the projection hardening. */
-        retry |= secp256k1_scalar_is_zero(&b);
-    } while (retry);
-    secp256k1_rfc6979_hmac_sha256_finalize(&rng);
-    memorySet(nonce32, 0, 32);
-    secp256k1_ecmult_gen(ctx, &gb, &b);
-    secp256k1_scalar_negate(&b, &b);
-    ctx->blind = b;
-    ctx->initial = gb;
-    secp256k1_scalar_clear(&b);
-    secp256k1_gej_clear(&gb);
+    secp256k1_scalar_set_int(&blindPoint, 1);
+    secp256k1_scalar_copy__to__global(&ctx->blind, &blindPoint);
+  }
+  /* The prior blinding value (if not reset) is chained forward by including it in the hash. */
+  secp256k1_scalar_get_b32__global(nonce32, &ctx->blind);
+  /** Using a CSPRNG allows a failure free interface, avoids needing large amounts of random data,
+   *   and guards against weak or adversarial seeds.  This is a simpler and safer interface than
+   *   asking the caller for blinding values directly and expecting them to retry on failure.
+   */
+  memoryCopy(keydata, nonce32, 32);
+  if (seed32 != NULL) {
+    memoryCopy(keydata + 32, seed32, 32);
+  }
+  secp256k1_rfc6979_hmac_sha256_initialize(&rng, keydata, seed32 ? 64 : 32);
+  memorySet(keydata, 0, sizeof_char64());
+  /* Retry for out of range results to achieve uniformity. */
+  do {
+    secp256k1_rfc6979_hmac_sha256_generate(&rng, nonce32, 32);
+    retry = !secp256k1_fe_set_b32(&s, nonce32);
+    retry |= secp256k1_fe_is_zero(&s);
+  } while (retry);
+  /* Randomize the projection to defend against multiplier sidechannels. */
+  secp256k1_gej_copy__from__global(&initialPoint, &ctx->initial);
+  secp256k1_gej_rescale(&initialPoint, &s);
+  secp256k1_gej_copy__to__global(&ctx->initial, &initialPoint);
+  secp256k1_fe_clear(&s);
+  do {
+    secp256k1_rfc6979_hmac_sha256_generate(&rng, nonce32, 32);
+    secp256k1_scalar_set_b32(&b, nonce32, &retry);
+    /* A blinding value of 0 works, but would undermine the projection hardening. */
+    retry |= secp256k1_scalar_is_zero(&b);
+  } while (retry);
+  secp256k1_rfc6979_hmac_sha256_finalize(&rng);
+  memorySet(nonce32, 0, 32);
+  secp256k1_ecmult_gen(ctx, &gb, &b);
+  secp256k1_scalar_negate(&b, &b);
+  ctx->blind = b;
+  ctx->initial = gb;
+  secp256k1_scalar_clear(&b);
+  secp256k1_gej_clear(&gb);
 }
 
 // secp256k1_ecmult_gen_context_init must be called on each newly created generator context.
@@ -3606,6 +3606,10 @@ void secp256k1_ecmult_gen_context_clear(secp256k1_ecmult_gen_context *ctx) {
 
 __constant static const char message2[50] = "At the start of context_build.\0";
 __constant static const char message3[50] = "Got to building context.\0";
+
+void secp256k1_ecmult_context_init(__global secp256k1_ecmult_context* output) {
+  output->pre_g = NULL;
+}
 
 void secp256k1_ecmult_context_build(
   __global secp256k1_ecmult_context* output,
@@ -3805,44 +3809,52 @@ int secp256k1_ecdsa_sig_serialize(unsigned char *sig, size_t *size, const secp25
     return 1;
 }
 
-int secp256k1_ecdsa_sig_sign(__global const secp256k1_ecmult_gen_context *ctx, secp256k1_scalar *sigr, secp256k1_scalar *sigs, const secp256k1_scalar *seckey, const secp256k1_scalar *message, const secp256k1_scalar *nonce, int *recid) {
-    unsigned char b[32];
-    secp256k1_gej rp;
-    secp256k1_ge r;
-    secp256k1_scalar n;
-    int overflow = 0;
-    secp256k1_ecmult_gen(ctx, &rp, nonce);
-    secp256k1_ge_set_gej(&r, &rp);
-    secp256k1_fe_normalize(&r.x);
-    secp256k1_fe_normalize(&r.y);
-    secp256k1_fe_get_b32(b, &r.x);
-    secp256k1_scalar_set_b32(sigr, b, &overflow);
-    if (secp256k1_scalar_is_zero(sigr)) {
-        /* P.x = order is on the curve, so technically sig->r could end up zero, which would be an invalid signature. */
-        secp256k1_gej_clear(&rp);
-        secp256k1_ge_clear(&r);
-        return 0;
-    }
-    if (recid) {
-        *recid = (overflow ? 2 : 0) | (secp256k1_fe_is_odd(&r.y) ? 1 : 0);
-    }
-    secp256k1_scalar_mul(&n, sigr, seckey);
-    secp256k1_scalar_add(&n, &n, message);
-    secp256k1_scalar_inverse(sigs, nonce);
-    secp256k1_scalar_mul(sigs, sigs, &n);
-    secp256k1_scalar_clear(&n);
+int secp256k1_ecdsa_sig_sign(
+  __global const secp256k1_ecmult_gen_context *generatorContext, 
+  secp256k1_scalar *sigr, 
+  secp256k1_scalar *sigs, 
+  const secp256k1_scalar *seckey, 
+  const secp256k1_scalar *message, 
+  const secp256k1_scalar *nonce, 
+  int *recid
+) {
+  unsigned char b[32];
+  secp256k1_gej rp;
+  secp256k1_ge r;
+  secp256k1_scalar n;
+  int overflow = 0;
+  secp256k1_ecmult_gen(generatorContext, &rp, nonce);
+  secp256k1_ge_set_gej(&r, &rp);
+  secp256k1_fe_normalize(&r.x);
+  secp256k1_fe_normalize(&r.y);
+  secp256k1_fe_get_b32(b, &r.x);
+  secp256k1_scalar_set_b32(sigr, b, &overflow);
+  if (secp256k1_scalar_is_zero(sigr)) {
+    /* P.x = order is on the curve, so technically sig->r could end up zero, which would be an invalid signature. */
     secp256k1_gej_clear(&rp);
     secp256k1_ge_clear(&r);
-    if (secp256k1_scalar_is_zero(sigs)) {
-        return 0;
+    return 0;
+  }
+  if (recid) {
+    *recid = (overflow ? 2 : 0) | (secp256k1_fe_is_odd(&r.y) ? 1 : 0);
+  }
+  secp256k1_scalar_mul(&n, sigr, seckey);
+  secp256k1_scalar_add(&n, &n, message);
+  secp256k1_scalar_inverse(sigs, nonce);
+  secp256k1_scalar_mul(sigs, sigs, &n);
+  secp256k1_scalar_clear(&n);
+  secp256k1_gej_clear(&rp);
+  secp256k1_ge_clear(&r);
+  if (secp256k1_scalar_is_zero(sigs)) {
+    return 0;
+  }
+  if (secp256k1_scalar_is_high(sigs)) {
+    secp256k1_scalar_negate(sigs, sigs);
+    if (recid) {
+      *recid ^= 1;
     }
-    if (secp256k1_scalar_is_high(sigs)) {
-        secp256k1_scalar_negate(sigs, sigs);
-        if (recid) {
-            *recid ^= 1;
-        }
-    }
-    return 1;
+  }
+  return 1;
 }
 
 int secp256k1_ecdsa_sig_recover(
@@ -3895,7 +3907,7 @@ char secp256k1_ecdsa_sig_verify(
   __global const secp256k1_ge *pubkey,
   __global const secp256k1_scalar *message,
   __global unsigned char* comments,
-  __global unsigned char* memoryPool
+  __global unsigned char* memoryPoolMultiplicationContext
 ) {
   unsigned char c[32];
   secp256k1_scalar sn, u1, u2;
@@ -3913,7 +3925,7 @@ char secp256k1_ecdsa_sig_verify(
   secp256k1_scalar_mul__global(&u2, &sn, sigr);
   secp256k1_gej_set_ge__global(&pubkeyj, pubkey);
 
-  secp256k1_ecmult(ctx, &pr, &pubkeyj, &u2, &u1, memoryPool);
+  secp256k1_ecmult(ctx, &pr, &pubkeyj, &u2, &u1, memoryPoolMultiplicationContext);
   if (secp256k1_gej_is_infinity(&pr)) {
     comments[0] = (unsigned char) 8;
     return 8;

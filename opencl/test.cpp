@@ -36,8 +36,8 @@ void getGeneratorContext(
   secp256k1_ecmult_gen_context& outputGeneratorContext
 ){
   secp256k1_ecmult_gen_context_init(&outputGeneratorContext);
-  uint32_t outputPositionGeneratorContextStruct = memoryPool_read_uint(&theMemoryPool[8]);
-  uint32_t outputPositionGeneratorContextContent = memoryPool_read_uint(&theMemoryPool[12]);
+  uint32_t outputPositionGeneratorContextStruct = memoryPool_read_uint_fromOutput(0, theMemoryPool);
+  uint32_t outputPositionGeneratorContextContent = memoryPool_read_uint_fromOutput(1, theMemoryPool);
   outputGeneratorContext = *((secp256k1_ecmult_gen_context*) &theMemoryPool[outputPositionGeneratorContextStruct]);
   outputGeneratorContext.prec = NULL;
   //int sizeOfGeneratorContextLump = (16 * 64 * sizeof(secp256k1_ge_storage));
@@ -45,6 +45,19 @@ void getGeneratorContext(
   //for (int i = 0; i < sizeOfGeneratorContextLump; i++)
   //  logTest << std::hex << (int) theMemoryPool[outputPositionGeneratorContextContent + i];
   outputGeneratorContext.prec = (secp256k1_ge_storage*) &theMemoryPool[outputPositionGeneratorContextContent];
+}
+
+void getMultiplicationContext(
+  const unsigned char* theMemoryPool,
+  secp256k1_ecmult_context& outputMultiplicationContext
+){
+  outputMultiplicationContext.pre_g = NULL;
+  uint32_t outputPositionMultiplicationContent = memoryPool_read_uint_fromOutput(0, theMemoryPool);
+  //int sizeOfGeneratorContextLump = (16 * 64 * sizeof(secp256k1_ge_storage));
+  //logTest << "Size of generator context lump: " << sizeOfGeneratorContextLump << Logger::endL;
+  //for (int i = 0; i < sizeOfGeneratorContextLump; i++)
+  //  logTest << std::hex << (int) theMemoryPool[outputPositionGeneratorContextContent + i];
+  outputMultiplicationContext.pre_g = (secp256k1_ge_storage(*)[]) &theMemoryPool[outputPositionMultiplicationContent];
 }
 
 void testPrintMemoryPoolGeneral(const unsigned char* theMemoryPool, const std::string& computationID, Logger& logTest) {
@@ -66,10 +79,11 @@ void testPrintMemoryPoolGeneral(const unsigned char* theMemoryPool, const std::s
 
 void testPrintMultiplicationContext(const unsigned char* theMemoryPool, const std::string& computationID, Logger& logTest) {
   testPrintMemoryPoolGeneral(theMemoryPool, computationID, logTest);
-  uint32_t outputPosition= memoryPool_read_uint(&theMemoryPool[8]);
+  uint32_t outputPosition = memoryPool_read_uint(&theMemoryPool[8]);
   logTest << "Position multiplication context: " << outputPosition << Logger::endL;
   secp256k1_ecmult_context multiplicationContext;
-  multiplicationContext.pre_g = (secp256k1_ge_storage(*)[]) (theMemoryPool + outputPosition);
+  secp256k1_ecmult_context_init(&multiplicationContext);
+  getMultiplicationContext(theMemoryPool, multiplicationContext);
   logTest << "Multiplication context:\n"
   << toStringSecp256k1_MultiplicationContext(multiplicationContext, false) << Logger::endL;
 }
@@ -96,30 +110,28 @@ extern void secp256k1_opencl_compute_generator_context(
   __global unsigned char* outputMemoryPoolContainingGeneratorContext
 );
 
+bool testMainPart1ComputeContexts(GPU& theGPU) {
+  if (!CryptoEC256k1::computeMultiplicationContext(bufferCentralPUMultiplicationContext))
+    return false;
+  testPrintMultiplicationContext(bufferCentralPUMultiplicationContext, "Central PU", logTestCentralPU);
+  if (!CryptoEC256k1::computeGeneratorContext(bufferCentralPUGeneratorContext))
+    return false;
+  testPrintGeneratorContext(bufferCentralPUGeneratorContext, "Central PU", logTestCentralPU);
+
+  if (!CryptoEC256k1GPU::computeMultiplicationContext(bufferGraphicsPUMultiplicationContext, theGPU))
+    return false;
+  testPrintMultiplicationContext(bufferGraphicsPUMultiplicationContext, "Graphics PU", logTestGraphicsPU);
+  if (!CryptoEC256k1GPU::computeGeneratorContext(bufferGraphicsPUGeneratorContext, theGPU))
+    return false;
+  testPrintGeneratorContext(bufferGraphicsPUGeneratorContext, "Graphics PU", logTestGraphicsPU);
+  return true;
+}
+
 int testMain() {
   GPU theGPU;
-  //if (!CryptoEC256k1::computeMultiplicationContext(bufferCentralPUMultiplicationContext))
-  //  return - 1;
-  //testPrintMultiplicationContext(bufferCentralPUMultiplicationContext, "Central PU", logTestCentralPU);
-  if (!CryptoEC256k1::computeGeneratorContext(bufferCentralPUGeneratorContext))
+  if (!testMainPart1ComputeContexts(theGPU))
     return - 1;
-  testPrintGeneratorContext(bufferCentralPUGeneratorContext, "Central PU", logTestCentralPU);
-  //secp256k1_ecmult_gen_context generatorContextCentralPU;
-  //secp256k1_ecmult_gen_context_init(&generatorContextCentralPU);
-  //getGeneratorContext(bufferCentralPUGeneratorContext, generatorContextCentralPU);
-
-  //if (!CryptoEC256k1GPU::computeMultiplicationContext(bufferGraphicsPUMultiplicationContext, theGPU))
-  //  return - 1;
-  //testPrintMultiplicationContext(bufferGraphicsPUMultiplicationContext, "Graphics PU", logTestGraphicsPU);
-  if (!CryptoEC256k1GPU::computeGeneratorContext(bufferGraphicsPUGeneratorContext, theGPU))
-    return - 1;
-  testPrintGeneratorContext(bufferGraphicsPUGeneratorContext, "Graphics PU", logTestGraphicsPU);
-  //secp256k1_ecmult_gen_context generatorContextGraphicsPU;
-  //secp256k1_ecmult_gen_context_init(&generatorContextGraphicsPU);
-  //getGeneratorContext(bufferGraphicsPUGeneratorContext, generatorContextGraphicsPU);
-
-
-/*  secp256k1_scalar signatureS, signatureR;
+  secp256k1_scalar signatureS, signatureR;
   secp256k1_scalar secretKey = SECP256K1_SCALAR_CONST(
     0, 0, 0, 0, 0, 13, 17, 19
   );
@@ -132,34 +144,46 @@ int testMain() {
   secp256k1_ge publicKey;
   secp256k1_gej publicKeyJacobianCoordinates;
 
-  secp256k1_ecmult_gen(&generatorContext, &publicKeyJacobianCoordinates, &secretKey);
+  secp256k1_ecmult_gen_context generatorContextCentralPU;
+  secp256k1_ecmult_gen_context_init(&generatorContextCentralPU);
+  getGeneratorContext(bufferCentralPUGeneratorContext, generatorContextCentralPU);
+
+  secp256k1_ecmult_gen(&generatorContextCentralPU, &publicKeyJacobianCoordinates, &secretKey);
 
   secp256k1_ge_set_gej(&publicKey, &publicKeyJacobianCoordinates);
-  logTest << "DEBUG: public key: " << toStringSecp256k1_ECPoint(publicKey) << Logger::endL;
+  logTestCentralPU << "DEBUG: public key: " << toStringSecp256k1_ECPoint(publicKey) << Logger::endL;
 
   int recId = 5;
 
-  logTest << "Got to here pt 5. " << Logger::endL;
-  secp256k1_ecdsa_sig_sign(&generatorContext, &signatureR, &signatureS, &secretKey, &message, &nonce, &recId);
-  logTest << "SigR: " << toStringSecp256k1_Scalar(signatureR) << Logger::endL;
-  logTest << "SigS: " << toStringSecp256k1_Scalar(signatureS) << Logger::endL;
+  logTestCentralPU << "Got to here pt 5. " << Logger::endL;
+  secp256k1_ecdsa_sig_sign(&generatorContextCentralPU, &signatureR, &signatureS, &secretKey, &message, &nonce, &recId);
+  logTestCentralPU << "SigR: " << toStringSecp256k1_Scalar(signatureR) << Logger::endL;
+  logTestCentralPU << "SigS: " << toStringSecp256k1_Scalar(signatureS) << Logger::endL;
   unsigned char resultChar[1200];
   for (int i = 0 ; i < 900; i ++) {
     resultChar[i] = 0;
   }
+  secp256k1_ecmult_context multiplicationContext;
+  secp256k1_ecmult_context_init(&multiplicationContext);
+  getMultiplicationContext(bufferCentralPUMultiplicationContext, multiplicationContext);
+  int signatureResult = secp256k1_ecdsa_sig_verify(
+    &multiplicationContext,
+    &signatureR,
+    &signatureS,
+    &publicKey,
+    &message,
+    resultChar,
+    bufferCentralPUMultiplicationContext
+  );
+  logTestCentralPU << "DEBUG: signature verification: " << signatureResult << Logger::endL;
 
-  int signatureResult = secp256k1_ecdsa_sig_verify(&multiplicationContext, &signatureR, &signatureS, &publicKey, &message, resultChar);
-  logTest << "DEBUG: signature verification: " << signatureResult << Logger::endL;
+  logTestCentralPU << "Got to here pt 6. " << Logger::endL;
+  logTestCentralPU << "secret: " << toStringSecp256k1_Scalar(secretKey) << Logger::endL;
+  logTestCentralPU << "message: " << toStringSecp256k1_Scalar(message) << Logger::endL;
+  logTestCentralPU << "nonce: " << toStringSecp256k1_Scalar(nonce) << Logger::endL;
+  logTestCentralPU << "outputR: " << toStringSecp256k1_Scalar(signatureR) << Logger::endL;
+  logTestCentralPU << "outputS: " << toStringSecp256k1_Scalar(signatureS) << Logger::endL;
 
-  logTest << "Got to here pt 6. " << Logger::endL;
-  logTest << "secret: " << toStringSecp256k1_Scalar(secretKey) << Logger::endL;
-  logTest << "message: " << toStringSecp256k1_Scalar(message) << Logger::endL;
-  logTest << "nonce: " << toStringSecp256k1_Scalar(nonce) << Logger::endL;
-  logTest << "outputR: " << toStringSecp256k1_Scalar(signatureR) << Logger::endL;
-  logTest << "outputS: " << toStringSecp256k1_Scalar(signatureS) << Logger::endL;
-
-
-*/
 
   /*
   secp256k1_ecmult_gen_context generatorContext;

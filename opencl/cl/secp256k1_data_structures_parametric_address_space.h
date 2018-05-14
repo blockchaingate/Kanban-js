@@ -93,7 +93,7 @@ typedef struct {
   secp256k1_fe y; /* actual (affine) y: secp256k1_gej.y / secp256k1_gej.z^3 */
   secp256k1_fe z;
   int infinity; /* whether this represents the point at infinity */
-} APPEND_ADDRESS_SPACE(secp256k1_gej);
+} secp256k1_gej;
 
 typedef struct {
   secp256k1_fe_storage x;

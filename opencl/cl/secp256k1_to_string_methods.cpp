@@ -67,6 +67,7 @@ std::string toStringSecp256k1_MultiplicationContext(const secp256k1_ecmult_conte
 std::string toStringSecp256k1_GeneratorContext(const secp256k1_ecmult_gen_context& generatorContext, bool fullDetail) {
   std::stringstream out;
   out << "Blind: " << toStringSecp256k1_Scalar(generatorContext.blind) << "\n";
+  out << "Initial: " << toStringSecp256k1_ECPointProjective(generatorContext.initial) << "\n";
   int numToDisplayAtEnd = 10;
   int topSuppressBoundary = 64 * 16 - numToDisplayAtEnd;
   int indexDisplayed = - 1;

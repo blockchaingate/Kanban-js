@@ -364,23 +364,33 @@ void secp256k1_ecmult(
 //******Content from ecmult_gen.h******
 
 typedef struct {
-    /* For accelerating the computation of a*G:
-     * To harden against timing attacks, use the following mechanism:
-     * * Break up the multiplicand into groups of 4 bits, called n_0, n_1, n_2, ..., n_63.
-     * * Compute sum(n_i * 16^i * G + U_i, i=0..63), where:
-     *   * U_i = U * 2^i (for i=0..62)
-     *   * U_i = U * (1-2^63) (for i=63)
-     *   where U is a point with no known corresponding scalar. Note that sum(U_i, i=0..63) = 0.
-     * For each i, and each of the 16 possible values of n_i, (n_i * 16^i * G + U_i) is
-     * precomputed (call it prec(i, n_i)). The formula now becomes sum(prec(i, n_i), i=0..63).
-     * None of the resulting prec group elements have a known scalar, and neither do any of
-     * the intermediate sums while computing a*G.
-     */
-    __global secp256k1_ge_storage* prec; /* old_prec[j][i] = prec[16 * j + i] */
-    //original version:
-    //__global secp256k1_ge_storage (*prec)[64][16]; /* prec[j][i] = 16^j * i * G + U_i */
-    secp256k1_scalar blind;
-    secp256k1_gej initial;
+  //Please do not swap the order of the fields of this struct.
+  //The blind and initial data structures' bit size
+  //is (supposed to be) system independent, namely 32 bytes for blind and
+  // 4 + 3 * 10 * 4 = 124 bytes for initial.
+  //On the other hand, the prec data structure below has
+  //system-dependent byte size:
+  //for example, on my NVidia Quadro K2000 prec is 32 bits, whereas
+  //on my CPU and on my Intel graphics card prec is 64 bits.
+  //If you swap the prec data to the front of this struct,
+  //you may break some of the code which reads the GPU's results into the CPU.
+  secp256k1_scalar blind;
+  secp256k1_gej initial;
+  /* For accelerating the computation of a*G:
+   * To harden against timing attacks, use the following mechanism:
+   * * Break up the multiplicand into groups of 4 bits, called n_0, n_1, n_2, ..., n_63.
+   * * Compute sum(n_i * 16^i * G + U_i, i=0..63), where:
+   *   * U_i = U * 2^i (for i=0..62)
+   *   * U_i = U * (1-2^63) (for i=63)
+   *   where U is a point with no known corresponding scalar. Note that sum(U_i, i=0..63) = 0.
+   * For each i, and each of the 16 possible values of n_i, (n_i * 16^i * G + U_i) is
+   * precomputed (call it prec(i, n_i)). The formula now becomes sum(prec(i, n_i), i=0..63).
+   * None of the resulting prec group elements have a known scalar, and neither do any of
+   * the intermediate sums while computing a*G.
+   */
+  __global secp256k1_ge_storage* prec; /* old_prec[j][i] = prec[16 * j + i] */
+  //original version:
+  //__global secp256k1_ge_storage (*prec)[64][16]; /* prec[j][i] = 16^j * i * G + U_i */
 } secp256k1_ecmult_gen_context;
 
 void secp256k1_ecmult_gen_context_init(secp256k1_ecmult_gen_context* ctx);
@@ -400,6 +410,7 @@ void secp256k1_ecmult_gen(__global const secp256k1_ecmult_gen_context* ctx, secp
 void secp256k1_scalar_copy__from__global(secp256k1_scalar* output, __global const secp256k1_scalar* input);
 
 //******From ecmult_impl.h******
+void secp256k1_ecmult_context_init(__global secp256k1_ecmult_context *output);
 void secp256k1_ecmult_context_build(__global secp256k1_ecmult_context *output, __global unsigned char* memoryPool);
 void secp256k1_gej_copy__from__global(secp256k1_gej* output, __global const secp256k1_gej* input);
 //******End of ecmult_impl.h******
