@@ -38,5 +38,12 @@ __kernel void secp256k1_opencl_sign(
   __global unsigned char* inputMessage,
   __global unsigned char* inputMemoryPoolGeneratorContext
 );
+
+__kernel void secp256k1_opencl_generate_public_key(
+  __global unsigned char* outputPublicKey,
+  __global unsigned char* outputPublicKeySize,
+  __global unsigned char* inputSecretKey,
+  __global unsigned char* inputMemoryPoolGeneratorContext
+);
 #endif //SECP256K1_CPP_H_header
 

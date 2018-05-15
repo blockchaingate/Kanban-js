@@ -287,7 +287,7 @@ static void secp256k1_fe_verify(const secp256k1_fe *a) {
 }
 #else
 void secp256k1_fe_verify(const secp256k1_fe *a) {
-    (void)a;
+  (void)a;
 }
 #endif
 
@@ -4026,6 +4026,51 @@ char secp256k1_ecdsa_sig_verify(
 }
 //******end of ecdsa_impl.h******
 
+
+//******From eckey.h******
+int secp256k1_eckey_pubkey_parse(secp256k1_ge *outputPublicKey, const unsigned char *inputPublicKey, size_t size) {
+  if (size == 33 && (inputPublicKey[0] == SECP256K1_TAG_PUBKEY_EVEN || inputPublicKey[0] == SECP256K1_TAG_PUBKEY_ODD)) {
+    secp256k1_fe x;
+    return secp256k1_fe_set_b32(&x, inputPublicKey + 1) && 
+    secp256k1_ge_set_xo_var(outputPublicKey, &x, inputPublicKey[0] == SECP256K1_TAG_PUBKEY_ODD);
+  } else if (size == 65 && (
+      inputPublicKey[0] == SECP256K1_TAG_PUBKEY_UNCOMPRESSED || 
+      inputPublicKey[0] == SECP256K1_TAG_PUBKEY_HYBRID_EVEN || 
+      inputPublicKey[0] == SECP256K1_TAG_PUBKEY_HYBRID_ODD
+  )) {
+    secp256k1_fe x, y;
+    if (!secp256k1_fe_set_b32(&x, inputPublicKey + 1) || !secp256k1_fe_set_b32(&y, inputPublicKey + 33)) {
+      return 0;
+    }
+    secp256k1_ge_set_xy(outputPublicKey, &x, &y);
+    if ((inputPublicKey[0] == SECP256K1_TAG_PUBKEY_HYBRID_EVEN || inputPublicKey[0] == SECP256K1_TAG_PUBKEY_HYBRID_ODD) &&
+        secp256k1_fe_is_odd(&y) != (inputPublicKey[0] == SECP256K1_TAG_PUBKEY_HYBRID_ODD)) {
+        return 0;
+    }
+    return secp256k1_ge_is_valid_var(outputPublicKey);
+  } else {
+      return 0;
+  }
+}
+
+int secp256k1_eckey_pubkey_serialize(secp256k1_ge *inputOutputPublicKey, unsigned char *outputPublicKey, size_t *size, int compressed) {
+  if (secp256k1_ge_is_infinity(inputOutputPublicKey)) {
+    return 0;
+  }
+  secp256k1_fe_normalize_var(&inputOutputPublicKey->x);
+  secp256k1_fe_normalize_var(&inputOutputPublicKey->y);
+  secp256k1_fe_get_b32(&outputPublicKey[1], &inputOutputPublicKey->x);
+  if (compressed) {
+    *size = 33;
+    outputPublicKey[0] = secp256k1_fe_is_odd(&inputOutputPublicKey->y) ? SECP256K1_TAG_PUBKEY_ODD : SECP256K1_TAG_PUBKEY_EVEN;
+  } else {
+    *size = 65;
+    outputPublicKey[0] = SECP256K1_TAG_PUBKEY_UNCOMPRESSED;
+    secp256k1_fe_get_b32(&outputPublicKey[33], &inputOutputPublicKey->y);
+  }
+  return 1;
+}
+//******end of eckey.h******
 
 
 ///////////////////////

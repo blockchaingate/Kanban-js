@@ -430,7 +430,15 @@ int secp256k1_ecdsa_sig_serialize__global(
   const secp256k1_scalar *r, 
   const secp256k1_scalar *s
 );
-int secp256k1_ecdsa_sig_sign(__global const secp256k1_ecmult_gen_context *ctx, secp256k1_scalar* r, secp256k1_scalar* s, const secp256k1_scalar *seckey, const secp256k1_scalar *message, const secp256k1_scalar *nonce, int *recid);
+int secp256k1_ecdsa_sig_sign(
+  __global const secp256k1_ecmult_gen_context *ctx,
+  secp256k1_scalar* r,
+  secp256k1_scalar* s,
+  const secp256k1_scalar *seckey,
+  const secp256k1_scalar *message,
+  const secp256k1_scalar *nonce,
+  int *recid
+);
 int secp256k1_ecdsa_sig_recover(
   __global const secp256k1_ecmult_context *ctx, 
   const secp256k1_scalar* r, 
@@ -451,6 +459,29 @@ char secp256k1_ecdsa_sig_verify(
 );
 
 //******end of ecdsa.h******
+
+
+//******From eckey.h******
+#define SECP256K1_TAG_PUBKEY_EVEN 0x02
+#define SECP256K1_TAG_PUBKEY_ODD 0x03
+#define SECP256K1_TAG_PUBKEY_UNCOMPRESSED 0x04
+#define SECP256K1_TAG_PUBKEY_HYBRID_EVEN 0x06
+#define SECP256K1_TAG_PUBKEY_HYBRID_ODD 0x07
+
+int secp256k1_eckey_pubkey_parse(
+  secp256k1_ge *outputPublicKey, 
+  __global const unsigned char *inputPublicKey, 
+  size_t size
+);
+
+int secp256k1_eckey_pubkey_serialize(
+  secp256k1_ge *inputOutputPublicKey, 
+  __global unsigned char *outputPublicKey, 
+  size_t *size, 
+  int compressed
+);
+
+//******end of eckey.h******
 
 
 ///////////////////////

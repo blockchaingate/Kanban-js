@@ -31,8 +31,7 @@ PipeBasic::~PipeBasic() {
   this->fileDescriptor = -1;
 }
 
-MessagePipeline::MessagePipeline()
-{
+MessagePipeline::MessagePipeline() {
   this->bufferCapacityData = 50000000;
   this->bufferCapacityMetaData = 1000000;
   //Pipe buffers start.
@@ -42,8 +41,7 @@ MessagePipeline::MessagePipeline()
   //Pipe buffers end.
 }
 
-Server::Server()
-{
+Server::Server() {
   this->flagInitialized = false;
   this->listeningSocketData = - 1;
   this->listeningSocketMetaData = - 1;
@@ -52,8 +50,7 @@ Server::Server()
   this->portOutputData = - 1;
 }
 
-MessagePipeline::~MessagePipeline()
-{
+MessagePipeline::~MessagePipeline() {
   //Pipe buffers start.
   delete this->inputData;
   this->inputData = 0;
@@ -67,8 +64,7 @@ MessagePipeline::~MessagePipeline()
   this->fileDescriptorOutputData = - 1;
 }
 
-Server::~Server()
-{
+Server::~Server() {
   if (this->listeningSocketData >= 0)
     close(this->listeningSocketData);
   if (this->listeningSocketMetaData >= 0)
@@ -80,8 +76,7 @@ Server::~Server()
   this->listeningSocketOutputData = - 1;
 }
 
-bool Server::initialize()
-{
+bool Server::initialize() {
   if (this->flagInitialized)
     return true;
   logServer << "Creating GPU ..." << Logger::endL;
@@ -101,8 +96,7 @@ bool Server::initialize()
   return true;
 }
 
-bool Server::Run()
-{
+bool Server::Run() {
   if (!this->initialize())
     return false;
   while (this->RunOnce()) {
@@ -114,8 +108,7 @@ std::vector<std::string> portsToTryMetaData = {"49201"};
 std::vector<std::string> portsToTryData = {"48201"};
 std::vector<std::string> portsToTryOutputData = {"47201"};
 
-bool Server::initializeOneSocketAndPort(int& outputSocket, std::string& outputPort, std::vector<std::string>& portsToTry)
-{
+bool Server::initializeOneSocketAndPort(int& outputSocket, std::string& outputPort, std::vector<std::string>& portsToTry) {
   addrinfo hints;
   addrinfo *serverInfo = 0;
   addrinfo *p = 0;
@@ -315,13 +308,13 @@ bool Server::RunOnce() {
 
 bool Server::ExecuteNodeCommand(MessageFromNode &theMessage) {
   logServer << "Processing message: " << theMessage.id << ", " << "command: " << theMessage.command
-            << ", " << theMessage.length << " bytes. " << Logger::endL;
+  << ", " << theMessage.length << " bytes. " << Logger::endL;
   if (theMessage.command == "SHA256")
     return this->ExecuteSha256(theMessage);
   if (theMessage.command == "testBuffer")
     return this->ExecuteTestBuffer(theMessage);
   logServer << "Fatal error: unknown command. Message: " << theMessage.id << ", " << "command: " << theMessage.command
-            << ", " << theMessage.length << " bytes. " << Logger::endL;
+  << ", " << theMessage.length << " bytes. " << Logger::endL;
   return false;
 }
 
@@ -372,7 +365,7 @@ bool Server::ExecuteTestBuffer(MessageFromNode &theMessage) {
   }
   std::stringstream output;
   output << "{\"id\":\"" << theMessage.id << "\", \"result\": \""
-         << theMessage.length << " bytes successfully sent to GPU. No useful work performed.\"}\n";
+  << theMessage.length << " bytes successfully sent to GPU. No useful work performed.\"}\n";
 
   logServer << "Computation " << theMessage.id << " completed, writing ..." << Logger::endL;
   int numWrittenBytes = write(this->thePipe.fileDescriptorOutputData, output.str().c_str(), output.str().size());

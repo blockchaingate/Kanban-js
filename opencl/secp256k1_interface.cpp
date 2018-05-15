@@ -150,3 +150,20 @@ bool CryptoEC256k1::signMessage(
   *outputSize = memoryPool_read_uint(outputSizeBuffer);
   return true;
 }
+
+bool CryptoEC256k1::generatePublicKey(
+  unsigned char* outputPublicKey,
+  unsigned int *outputPublicKeySize,
+  unsigned char *inputSecretKey,
+  unsigned char *inputMemoryPoolGeneratorContext
+) {
+  unsigned char outputSizeBuffer[4];
+  secp256k1_opencl_generate_public_key(
+    outputPublicKey,
+    outputSizeBuffer,
+    inputSecretKey,
+    inputMemoryPoolGeneratorContext
+  );
+  *outputPublicKeySize = memoryPool_read_uint(outputSizeBuffer);
+  return true;
+}

@@ -16,7 +16,7 @@
 #include <CL/cl.h>
 #endif
 
-class OpenCLFunctions{
+class OpenCLFunctions {
 public:
   static std::string getDeviceInfo(cl_device_id deviceId, cl_device_info informationRequested);
   static std::string getDriverVersion(cl_device_id deviceId);
@@ -25,18 +25,16 @@ public:
   static std::string getDeviceName(cl_device_id deviceId);
 };
 
-class SharedMemory
-{
+class SharedMemory {
 public:
-  enum
-  {
+  enum {
     typeVoidPointer,
     typeVoidPointerExternalOwnership,
     typeUint
   };
   std::string name;
   cl_mem theMemory;
-  cl_mem* memoryExernalOwnership;
+  cl_mem* memoryExternallyOwned;
   int typE;
   uint uintValue;
   SharedMemory();
@@ -55,14 +53,16 @@ class GPU;
 /// 2. The output arguments correspond to the elements of this->outputs.
 /// 3. Likewise the input arguments correspond to the elements of this->inputs, respecting the order of the this->inputs vector.
 
-class GPUKernel{
+class GPUKernel {
 public:
   GPU* owner;
   std::vector<std::shared_ptr<SharedMemory> > outputs;
   std::vector<std::shared_ptr<SharedMemory> > inputs;
+  std::vector<cl_mem*> buffersExternallyOwned;
   cl_program program;
   cl_kernel kernel;
   std::string name;
+  unsigned numInitializedExternallyOwnedBuffers;
   size_t local_item_size; // Divide work items into groups of 64
   size_t global_item_size; // Divide work items into groups of 64
   bool constructFromFileName(
@@ -71,6 +71,7 @@ public:
     const std::vector<int>& outputTypes,
     const std::vector<std::string>& inputNames,
     const std::vector<int>& inputTypes,
+    const std::vector<cl_mem*>& inputExternalBuffers,
     GPU& ownerGPU
   );
   bool constructArguments(
@@ -86,8 +87,6 @@ public:
   ~GPUKernel();
   bool SetArguments();
   bool SetArguments(std::vector<std::shared_ptr<SharedMemory> >& theArgs, unsigned offset);
-  bool SetSharedArguments();
-  bool SetSharedArguments(std::vector<std::shared_ptr<SharedMemory> >& theArgs, unsigned offset);
 };
 
 class GPU {
@@ -118,7 +117,8 @@ public:
     const std::vector<std::string>& outputs,
     const std::vector<int>& outputTypes,
     const std::vector<std::string>& inputs,
-    const std::vector<int>& inputTypes
+    const std::vector<int>& inputTypes,
+    const std::vector<cl_mem*>& inputExternalBuffers
   );
   ~GPU();
 };

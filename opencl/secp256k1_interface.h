@@ -14,6 +14,14 @@ public:
 
   static bool computeMultiplicationContext(unsigned char* outputMemoryPool, GPU& theGPU);
   static bool computeGeneratorContext(unsigned char* outputMemoryPool, GPU& theGPU);
+  static bool generatePublicKey(
+    unsigned char* outputSignatures,
+    unsigned int* outputSize,
+    unsigned char* outputInputNonce,
+    unsigned char* inputMessage,
+    unsigned char* inputNonce,
+    GPU& theGPU
+  );
   static bool signMessage(
     unsigned char* outputSignatures,
     unsigned int* outputSize,
@@ -21,6 +29,12 @@ public:
     unsigned char* inputMessage,
     unsigned char* inputNonce,
     GPU& theGPU
+  );
+  static bool verifySignature(
+    unsigned char* output,
+    const unsigned char* inputSignature,
+    const unsigned char* publicKey,
+    const unsigned char* message
   );
 };
 
@@ -41,6 +55,21 @@ public:
     unsigned char* inputMessage,
     unsigned char* inputMemoryPoolGeneratorContext
   );
+  static bool verifySignature(
+    unsigned char* output,
+    const unsigned char* inputSignature,
+    const unsigned char* publicKey,
+    const unsigned char* message,
+    const unsigned char* memoryPoolMultiplicationContext
+  );
+  static bool generatePublicKey(
+    unsigned char* outputPublicKey,
+    unsigned int* outputPublicKeySize,
+    unsigned char* inputSecretKey,
+    unsigned char* inputMemoryPoolGeneratorContext
+  );
+
+
 };
 
 #endif //SECP256K1_INTERFACE_H_header

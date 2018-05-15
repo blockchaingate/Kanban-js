@@ -142,6 +142,22 @@ public:
   GeneratorScalar nonceMustChangeAfterEverySignature;
 };
 
+class PublicKey {
+public:
+  static const int maxSerializationSize = 66;
+  //1 (type) + 32 (x-coord) + 32 (coord) = 65 bytes.
+  //We leave an extra byte for null-termination, in case we want to write c_string() here.
+  unsigned int size;
+  unsigned char serialization[maxSerializationSize];
+  std::string toString();
+};
+
+std::string PublicKey::toString() {
+  std::string buffer;
+  buffer.assign((const char*) this->serialization, this->size);
+  return Miscellaneous::toStringHex(buffer);
+}
+
 void GeneratorScalar::ComputeScalarFromSerialization() {
   secp256k1_scalar_set_b32(&this->scalar, this->serialization, NULL);
 }
@@ -214,11 +230,32 @@ bool testMainPart2Signatures(GPU& theGPU) {
   theSignature.ComputeScalarsFromSerialization();
   logTestGraphicsPU << "Signature:\n" << theSignature.toString() << Logger::endL;
 
-  return true;
-  /*
-  secp256k1_ecmult_context multiplicationContext;
+  PublicKey thePublicKey;
+
+  CryptoEC256k1::generatePublicKey(
+    thePublicKey.serialization,
+    &thePublicKey.size,
+    theKey.key.serialization,
+    bufferCentralPUGeneratorContext
+  );
+  logTestCentralPU << "Public key:\n" << thePublicKey.toString() << Logger::endL;
+//  CryptoEC256k1GPU::generatePublicKey(
+//    thePublicKey.serialization,
+//    &thePublicKey.size,
+//    theKey.key.serialization
+//  );
+//  logTestGraphicsPU << "Public key:\n" << thePublicKey.toString() << Logger::endL;
+
+/*  secp256k1_ecmult_context multiplicationContext;
   secp256k1_ecmult_context_init(&multiplicationContext);
-  getMultiplicationContext(bufferCentralPUMultiplicationContext, multiplicationContext);
+  //getMultiplicationContext(bufferCentralPUMultiplicationContext, multiplicationContext);
+  char signatureResult[4];
+  bool signatureExecution = CryptoEC256k1::verifySignature(
+    signatureResult,
+    theSignature.serialization,
+
+
+  );
   int signatureResult = secp256k1_ecdsa_sig_verify(
     &multiplicationContext,
     &signatureR,
@@ -234,8 +271,7 @@ bool testMainPart2Signatures(GPU& theGPU) {
   logTestCentralPU << "message: " << toStringSecp256k1_Scalar(message) << Logger::endL;
   logTestCentralPU << "nonce: " << toStringSecp256k1_Scalar(nonce) << Logger::endL;
   logTestCentralPU << "outputR: " << toStringSecp256k1_Scalar(signatureR) << Logger::endL;
-  logTestCentralPU << "outputS: " << toStringSecp256k1_Scalar(signatureS) << Logger::endL;
-*/
+  logTestCentralPU << "outputS: " << toStringSecp256k1_Scalar(signatureS) << Logger::endL;*/
   return true;
 }
 
