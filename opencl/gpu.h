@@ -31,11 +31,12 @@ public:
   enum
   {
     typeVoidPointer,
+    typeVoidPointerExternalOwnership,
     typeUint
   };
   std::string name;
   cl_mem theMemory;
-  bool flagIsHOSTWritable;
+  cl_mem* memoryExernalOwnership;
   int typE;
   uint uintValue;
   SharedMemory();
@@ -65,16 +66,18 @@ public:
   size_t local_item_size; // Divide work items into groups of 64
   size_t global_item_size; // Divide work items into groups of 64
   bool constructFromFileName(
-      const std::string& fileNameNoExtension,
-      const std::vector<std::string>& outputNames,
-      const std::vector<int>& outputTypes,
-      const std::vector<std::string>& inputNames,
-      const std::vector<int>& inputTypes,
-      GPU& ownerGPU);
+    const std::string& fileNameNoExtension,
+    const std::vector<std::string>& outputNames,
+    const std::vector<int>& outputTypes,
+    const std::vector<std::string>& inputNames,
+    const std::vector<int>& inputTypes,
+    GPU& ownerGPU
+  );
   bool constructArguments(
-      const std::vector<std::string>& argumentNames,
-      const std::vector<int>& argumentTypes,
-      bool isInput, bool isOutput);
+    const std::vector<std::string>& argumentNames,
+    const std::vector<int>& argumentTypes,
+    bool isInput, bool isOutput
+  );
   void writeToBuffer(unsigned argumentNumber, const std::vector<char>& input);
   bool writeToBuffer(unsigned argumentNumber, const std::string& input);
   bool writeToBuffer(unsigned argumentNumber, const void* input, size_t size);
@@ -83,6 +86,8 @@ public:
   ~GPUKernel();
   bool SetArguments();
   bool SetArguments(std::vector<std::shared_ptr<SharedMemory> >& theArgs, unsigned offset);
+  bool SetSharedArguments();
+  bool SetSharedArguments(std::vector<std::shared_ptr<SharedMemory> >& theArgs, unsigned offset);
 };
 
 class GPU {
@@ -91,6 +96,7 @@ public:
   static std::string kernelTestBuffer;
   static std::string kernelInitializeMultiplicationContext;
   static std::string kernelInitializeGeneratorContext;
+  static std::string kernelSign;
   static std::string kernelVerifySignature;
   std::unordered_map<std::string, std::shared_ptr<GPUKernel> > theKernels;
   cl_platform_id platformIds[2];

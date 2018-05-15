@@ -51,15 +51,16 @@ std::string OpenCLFunctions::getDeviceName(cl_device_id deviceId) {
 
 SharedMemory::SharedMemory() {
   this->name = "";
-  this->flagIsHOSTWritable = true;
   this->theMemory = 0;
   this->typE = this->typeVoidPointer;
   this->uintValue = 0;
+  this->memoryExernalOwnership = 0;
 }
 
 void SharedMemory::ReleaseMe() {
   clReleaseMemObject(this->theMemory);
   this->theMemory = 0;
+  this->memoryExernalOwnership = 0;
   this->name = "";
 }
 
@@ -145,7 +146,8 @@ bool GPU::initializePlatform() {
   }
   logGPU << "About to create GPU queue ..." << Logger::endL;
   this->commandQueue = clCreateCommandQueue(
-    this->context, this->currentDeviceId,
+    this->context,
+    this->currentDeviceId,
     CL_QUEUE_OUT_OF_ORDER_EXEC_MODE_ENABLE,
     &ret
   );
@@ -161,6 +163,30 @@ bool GPU::initializePlatform() {
 bool GPU::initializeKernels() {
   if (this->flagInitializedKernels)
     return true;
+  if (!this->createKernel(
+    this->kernelSign,
+    {
+      "outputSignature",
+      "outputSize",
+      "outputInputNonce"
+    },
+    {
+      SharedMemory::typeVoidPointer,
+      SharedMemory::typeVoidPointer,
+      SharedMemory::typeVoidPointer
+    },
+    {
+      "inputSecretKey",
+      "inputMessage",
+      "inputMemoryPoolGeneratorContext"
+    },
+    {
+      SharedMemory::typeVoidPointer,
+      SharedMemory::typeVoidPointer,
+      SharedMemory::typeVoidPointerExternalOwnership
+    }
+  ))
+    return false;
   if (!this->initializePlatform())
     return false;
   //if (!this->createKernel(
@@ -180,35 +206,32 @@ bool GPU::initializeKernels() {
   //))
   //  return false;
   if (!this->createKernel(
-        this->kernelInitializeMultiplicationContext,
-        {"outputMultiplicationContext"},
-        {
-          SharedMemory::typeVoidPointer,
-        },
-        {},
-        {}
+    this->kernelInitializeMultiplicationContext,
+    {"outputMultiplicationContext"},
+    {
+      SharedMemory::typeVoidPointer,
+    },
+    {},
+    {}
   ))
     return false;
   if (!this->createKernel(
-        this->kernelInitializeGeneratorContext,
-        {"outputGeneratorContext"},
-        {
-          SharedMemory::typeVoidPointer,
-        },
-        {},
-        {}
+    this->kernelInitializeGeneratorContext,
+    {"outputGeneratorContext"},
+    {
+      SharedMemory::typeVoidPointer,
+    },
+    {},
+    {}
   ))
     return false;
-  //if (!this->createKernel(
-  //      this->kernelVerifySignature,
-  //      {"output"},
-  //      {
-  //        SharedMemory::typeVoidPointer,
-  //      },
-  //      {"inputMultiplicationTable", "inputSignatureR", "inputSignatureS", "inputPublicKey", "inputMessage"},
-  //      {SharedMemory::typeVoidPointer, SharedMemory::typeVoidPointer, SharedMemory::typeVoidPointer, SharedMemory::typeVoidPointer, SharedMemory::typeVoidPointer}
-  //))
-  //  return false;
+
+  std::shared_ptr<GPUKernel> kernelSign = this->theKernels[GPU::kernelSign];
+  std::shared_ptr<GPUKernel> kernelGeneratorContext = this->theKernels[GPU::kernelInitializeGeneratorContext];
+  kernelSign->inputs[2]->memoryExernalOwnership = &(kernelGeneratorContext->outputs[0]->theMemory);
+  if (!kernelSign->SetSharedArguments()) {
+    return false;
+  }
   this->flagInitializedKernels = true;
   return true;
 }
@@ -243,6 +266,7 @@ std::string GPU::kernelTestBuffer = "testBuffer";
 std::string GPU::kernelInitializeMultiplicationContext = "secp256k1_opencl_compute_multiplication_context";
 std::string GPU::kernelInitializeGeneratorContext = "secp256k1_opencl_compute_generator_context";
 std::string GPU::kernelVerifySignature = "secp256k1_opencl_verify_signature";
+std::string GPU::kernelSign = "secp256k1_opencl_sign";
 
 const int maxProgramBuildBufferSize = 10000000;
 char programBuildBuffer[maxProgramBuildBufferSize];
@@ -352,7 +376,6 @@ bool GPUKernel::constructArguments(
     theArgs.push_back(std::make_shared<SharedMemory>());
     std::shared_ptr<SharedMemory> current = theArgs[theArgs.size() - 1];
     current->name = argumentNames[i];
-    current->flagIsHOSTWritable = true;
     current->typE = argumentTypes[i];
     size_t defaultBufferSize = 10000000;
     current->theMemory = clCreateBuffer(this->owner->context, bufferFlag, defaultBufferSize, NULL, &ret);
@@ -377,11 +400,36 @@ bool GPUKernel::SetArguments(std::vector<std::shared_ptr<SharedMemory> >& theArg
   //std::cout << "DEBUG: kernel: setting " << theArgs.size() << " arguments. "<< std::endl;
   for (unsigned i = 0; i < theArgs.size(); i ++) {
     std::shared_ptr<SharedMemory> current = theArgs[i];
+    if (current->typE == SharedMemory::typeVoidPointerExternalOwnership)
+      continue;
     if (current->typE == SharedMemory::typeVoidPointer)
       ret = clSetKernelArg(this->kernel, i + offset, sizeof(cl_mem), (void *)& current->theMemory);
     if (current->typE == SharedMemory::typeUint)
       ret = clSetKernelArg(this->kernel, i + offset, sizeof(uint), &current->uintValue);
 
+    if (ret != CL_SUCCESS) {
+      logGPU << "Failed to set argument " << current->name << ". Return code: " << ret << "." << Logger::endL;
+      return false;
+    }
+  }
+  return true;
+}
+
+bool GPUKernel::SetSharedArguments() {
+  if (!this->SetSharedArguments(this->outputs, 0))
+    return false;
+  if (!this->SetSharedArguments(this->inputs, this->outputs.size()))
+    return false;
+  return true;
+}
+
+bool GPUKernel::SetSharedArguments(std::vector<std::shared_ptr<SharedMemory> >& theArgs, unsigned offset) {
+  cl_int ret = CL_SUCCESS;
+  for (unsigned i = 0; i < theArgs.size(); i ++) {
+    std::shared_ptr<SharedMemory> current = theArgs[i];
+    if (current->typE != SharedMemory::typeVoidPointerExternalOwnership)
+      continue;
+    ret = clSetKernelArg(this->kernel, i + offset, sizeof(cl_mem), (void *) current->memoryExernalOwnership);
     if (ret != CL_SUCCESS) {
       logGPU << "Failed to set argument " << current->name << ". Return code: " << ret << "." << Logger::endL;
       return false;

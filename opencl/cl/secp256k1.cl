@@ -2026,22 +2026,6 @@ static void secp256k1_scalar_cadd_bit(secp256k1_scalar *r, unsigned int bit, int
 #endif
 }
 
-void secp256k1_scalar_set_b32(secp256k1_scalar *r, const unsigned char *b32, int *overflow) {
-  int over;
-  r->d[0] = (uint32_t)b32[31] | (uint32_t)b32[30] << 8 | (uint32_t)b32[29] << 16 | (uint32_t)b32[28] << 24;
-  r->d[1] = (uint32_t)b32[27] | (uint32_t)b32[26] << 8 | (uint32_t)b32[25] << 16 | (uint32_t)b32[24] << 24;
-  r->d[2] = (uint32_t)b32[23] | (uint32_t)b32[22] << 8 | (uint32_t)b32[21] << 16 | (uint32_t)b32[20] << 24;
-  r->d[3] = (uint32_t)b32[19] | (uint32_t)b32[18] << 8 | (uint32_t)b32[17] << 16 | (uint32_t)b32[16] << 24;
-  r->d[4] = (uint32_t)b32[15] | (uint32_t)b32[14] << 8 | (uint32_t)b32[13] << 16 | (uint32_t)b32[12] << 24;
-  r->d[5] = (uint32_t)b32[11] | (uint32_t)b32[10] << 8 | (uint32_t)b32[9] << 16 | (uint32_t)b32[8] << 24;
-  r->d[6] = (uint32_t)b32[7] | (uint32_t)b32[6] << 8 | (uint32_t)b32[5] << 16 | (uint32_t)b32[4] << 24;
-  r->d[7] = (uint32_t)b32[3] | (uint32_t)b32[2] << 8 | (uint32_t)b32[1] << 16 | (uint32_t)b32[0] << 24;
-  over = secp256k1_scalar_reduce(r, secp256k1_scalar_check_overflow(r));
-  if (overflow) {
-    *overflow = over;
-  }
-}
-
 static void secp256k1_scalar_negate(secp256k1_scalar *r, const secp256k1_scalar *a) {
     uint32_t nonzero = 0xFFFFFFFFUL * (secp256k1_scalar_is_zero(a) == 0);
     uint64_t t = (uint64_t)(~a->d[0]) + SECP256K1_N_0 + 1;
@@ -3756,8 +3740,8 @@ int secp256k1_ecdsa_sig_parse(secp256k1_scalar *rr, secp256k1_scalar *rs, const 
     if (5+lenr >= size) {
         return 0;
     }
-    lens = sig[lenr+5];
-    if (sig[1] != lenr+lens+4) {
+    lens = sig[lenr + 5];
+    if (sig[1] != lenr + lens + 4) {
         return 0;
     }
     if (lenr+lens+6 > size) {
@@ -3805,34 +3789,76 @@ int secp256k1_ecdsa_sig_parse(secp256k1_scalar *rr, secp256k1_scalar *rs, const 
     return 1;
 }
 
-int secp256k1_ecdsa_sig_serialize(unsigned char *sig, size_t* inputAvailableSizeOutputFinalSize, const secp256k1_scalar* ar, const secp256k1_scalar* as) {
-    unsigned char r[33] = {0}, s[33] = {0};
-    unsigned char *rp = r, *sp = s;
-    size_t lenR = 33, lenS = 33;
-    secp256k1_scalar_get_b32(&r[1], ar);
-    secp256k1_scalar_get_b32(&s[1], as);
-    while (lenR > 1 && rp[0] == 0 && rp[1] < 0x80) { 
-      lenR--; 
-      rp++; 
-    }
-    while (lenS > 1 && sp[0] == 0 && sp[1] < 0x80) { 
-      lenS--; 
-      sp++; 
-    }
-    if (*inputAvailableSizeOutputFinalSize < 6 + lenS + lenR) {
-      *inputAvailableSizeOutputFinalSize = 6 + lenS + lenR;
-      return 0;
-    }
+/*Same as the next function, except that it's working with the local address space.*/ 
+int secp256k1_ecdsa_sig_serialize(
+  unsigned char *sig, 
+  size_t* inputAvailableSizeOutputFinalSize, 
+  const secp256k1_scalar* ar, 
+  const secp256k1_scalar* as
+) {
+  unsigned char r[33] = {0}, s[33] = {0};
+  unsigned char *rp = r, *sp = s;
+  size_t lenR = 33, lenS = 33;
+  secp256k1_scalar_get_b32(&r[1], ar);
+  secp256k1_scalar_get_b32(&s[1], as);
+  while (lenR > 1 && rp[0] == 0 && rp[1] < 0x80) { 
+    lenR--; 
+    rp++; 
+  }
+  while (lenS > 1 && sp[0] == 0 && sp[1] < 0x80) { 
+    lenS--; 
+    sp++; 
+  }
+  if (*inputAvailableSizeOutputFinalSize < 6 + lenS + lenR) {
     *inputAvailableSizeOutputFinalSize = 6 + lenS + lenR;
-    sig[0] = 0x30;
-    sig[1] = 4 + lenS + lenR;
-    sig[2] = 0x02;
-    sig[3] = lenR;
-    memoryCopy(sig + 4, rp, lenR);
-    sig[4 + lenR] = 0x02;
-    sig[5 + lenR] = lenS;
-    memoryCopy(sig + lenR + 6, sp, lenS);
-    return 1;
+    return 0;
+  }
+  *inputAvailableSizeOutputFinalSize = 6 + lenS + lenR;
+  sig[0] = 0x30;
+  sig[1] = 4 + lenS + lenR;
+  sig[2] = 0x02;
+  sig[3] = lenR;
+  memoryCopy(sig + 4, rp, lenR);
+  sig[4 + lenR] = 0x02;
+  sig[5 + lenR] = lenS;
+  memoryCopy(sig + lenR + 6, sp, lenS);
+  return 1;
+}
+
+/*Same as the preceding function, except that it's working with the __global address space*/ 
+int secp256k1_ecdsa_sig_serialize__global(
+  __global unsigned char *sig, 
+  size_t* inputAvailableSizeOutputFinalSize, 
+  const secp256k1_scalar* ar, 
+  const secp256k1_scalar* as
+) {
+  unsigned char r[33] = {0}, s[33] = {0};
+  unsigned char *rp = r, *sp = s;
+  size_t lenR = 33, lenS = 33;
+  secp256k1_scalar_get_b32(&r[1], ar);
+  secp256k1_scalar_get_b32(&s[1], as);
+  while (lenR > 1 && rp[0] == 0 && rp[1] < 0x80) { 
+    lenR --; 
+    rp ++; 
+  }
+  while (lenS > 1 && sp[0] == 0 && sp[1] < 0x80) { 
+    lenS --; 
+    sp ++; 
+  }
+  if (*inputAvailableSizeOutputFinalSize < 6 + lenS + lenR) {
+    *inputAvailableSizeOutputFinalSize = 6 + lenS + lenR;
+    return 0;
+  }
+  *inputAvailableSizeOutputFinalSize = 6 + lenS + lenR;
+  sig[0] = 0x30;
+  sig[1] = 4 + lenS + lenR;
+  sig[2] = 0x02;
+  sig[3] = lenR;
+  memoryCopy_to__global(sig + 4, rp, lenR);
+  sig[4 + lenR] = 0x02;
+  sig[5 + lenR] = lenS;
+  memoryCopy_to__global(sig + lenR + 6, sp, lenS);
+  return 1;
 }
 
 int secp256k1_ecdsa_sig_sign(

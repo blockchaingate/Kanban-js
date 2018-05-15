@@ -16,11 +16,10 @@ public:
   static bool computeGeneratorContext(unsigned char* outputMemoryPool, GPU& theGPU);
   static bool signMessage(
     unsigned char* outputSignatures,
+    unsigned int* outputSize,
     unsigned char* outputInputNonce,
     unsigned char* inputMessage,
     unsigned char* inputNonce,
-    unsigned int recordId,
-    unsigned char* inputMemoryPoolGeneratorContext,
     GPU& theGPU
   );
 };

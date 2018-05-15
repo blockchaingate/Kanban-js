@@ -113,13 +113,15 @@ bool testMainPart1ComputeContexts(GPU& theGPU) {
 
 class Signature {
 public:
+  static const int maxSerializationSize = 33 * 2 + 6;
   secp256k1_scalar r;
   secp256k1_scalar s;
-  unsigned char serialization[33 * 2 + 6]; // Max signature size = 33 * 2 + 6, may be smaller.
+  unsigned char serialization[maxSerializationSize]; // Max signature size = 33 * 2 + 6, may be smaller.
   unsigned int size;
   void ComputeSerializationFromScalars();
   bool ComputeScalarsFromSerialization();
   std::string toString();
+  void reset();
 };
 
 class GeneratorScalar {
@@ -169,6 +171,18 @@ bool Signature::ComputeScalarsFromSerialization() {
   return true;
 }
 
+void Signature::reset() {
+  for (int i = 0; i < 8; i ++) {
+    this->r.d[i] = 0;
+  }
+  for (int i = 0; i < 8; i ++) {
+    this->s.d[i] = 0;
+  }
+  for (int i = 0; i < this->maxSerializationSize; i++) {
+    this->serialization[i] = 0;
+  }
+}
+
 bool testMainPart2Signatures(GPU& theGPU) {
   Signature theSignature;
   PrivateKey theKey;
@@ -176,6 +190,7 @@ bool testMainPart2Signatures(GPU& theGPU) {
   theKey.key.TestAssignString("This is a secret. ");
   message.TestAssignString("This is a message. ");
   theKey.nonceMustChangeAfterEverySignature.TestAssignString("This is a nonce. ");
+  theSignature.reset();
   CryptoEC256k1::signMessage(
     theSignature.serialization,
     &theSignature.size,
@@ -186,6 +201,18 @@ bool testMainPart2Signatures(GPU& theGPU) {
   );
   theSignature.ComputeScalarsFromSerialization();
   logTestCentralPU << "Signature:\n" << theSignature.toString() << Logger::endL;
+  theKey.nonceMustChangeAfterEverySignature.TestAssignString("This is a nonce. ");
+  theSignature.reset();
+  CryptoEC256k1GPU::signMessage(
+    theSignature.serialization,
+    &theSignature.size,
+    theKey.nonceMustChangeAfterEverySignature.serialization,
+    theKey.key.serialization,
+    message.serialization,
+    theGPU
+  );
+  theSignature.ComputeScalarsFromSerialization();
+  logTestGraphicsPU << "Signature:\n" << theSignature.toString() << Logger::endL;
 
   return true;
   /*
@@ -321,8 +348,8 @@ int testSHA256(GPU& theGPU) {
       out << std::hex << std::setw(2) << std::setfill('0') << ((int) ((unsigned) testSHA256::outputBuffer[i]));
     if (out.str() != testSHA256::knownSHA256s[testCounteR][1]) {
       logTestGraphicsPU << "\e[31mSha of message index " << largeTestCounter
-             << ": " << testSHA256::knownSHA256s[testCounteR][0] << " is wrongly computed to be: " << out.str()
-             << " instead of: " << testSHA256::knownSHA256s[testCounteR][1] << "\e[39m" << Logger::endL;
+      << ": " << testSHA256::knownSHA256s[testCounteR][0] << " is wrongly computed to be: " << out.str()
+      << " instead of: " << testSHA256::knownSHA256s[testCounteR][1] << "\e[39m" << Logger::endL;
       assert(false);
       return - 1;
     }

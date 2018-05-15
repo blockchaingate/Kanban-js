@@ -102,7 +102,7 @@ __kernel void sha256GPU(__global char* result, uint32_t offset, uint32_t length,
         //printf("W[%u]: %u\n",t,W[t]);
       }
       mmod = i % 4;
-      if ( mmod == 3) {
+      if (mmod == 3) {
         W[t] = ((uchar)  plain_key[currentIndex]) << 24;
 	      currentIndex++;
         W[t] |= ((uchar) plain_key[currentIndex]) << 16;

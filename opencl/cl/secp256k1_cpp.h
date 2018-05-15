@@ -32,7 +32,7 @@ __kernel void secp256k1_opencl_compute_generator_context(
 
 __kernel void secp256k1_opencl_sign(
   __global unsigned char* outputSignature,
-  __global unsigned int* outputSize,
+  __global unsigned char* outputSize,
   __global unsigned char* outputInputNonce,
   __global unsigned char* inputSecretKey,
   __global unsigned char* inputMessage,

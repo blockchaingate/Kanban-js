@@ -213,7 +213,6 @@ typedef struct {
     uint32_t d[8];
 } secp256k1_scalar;
 
-void secp256k1_scalar_set_b32(secp256k1_scalar *r, const unsigned char *b32, int *overflow);
 #define SECP256K1_SCALAR_CONST(d7, d6, d5, d4, d3, d2, d1, d0) {{(d0), (d1), (d2), (d3), (d4), (d5), (d6), (d7)}}
 //******end of scalar_8x32.h******
 
@@ -419,7 +418,18 @@ void secp256k1_gej_copy__from__global(secp256k1_gej* output, __global const secp
 
 //******From ecdsa.h******
 int secp256k1_ecdsa_sig_parse(secp256k1_scalar *r, secp256k1_scalar *s, const unsigned char *sig, size_t size);
-int secp256k1_ecdsa_sig_serialize(unsigned char *sig, size_t* inputAvailableSizeOutputFinalSize, const secp256k1_scalar *r, const secp256k1_scalar *s);
+int secp256k1_ecdsa_sig_serialize(
+  unsigned char *sig, 
+  size_t* inputAvailableSizeOutputFinalSize, 
+  const secp256k1_scalar *r, 
+  const secp256k1_scalar *s
+);
+int secp256k1_ecdsa_sig_serialize__global(
+  __global unsigned char *sig, 
+  size_t* inputAvailableSizeOutputFinalSize, 
+  const secp256k1_scalar *r, 
+  const secp256k1_scalar *s
+);
 int secp256k1_ecdsa_sig_sign(__global const secp256k1_ecmult_gen_context *ctx, secp256k1_scalar* r, secp256k1_scalar* s, const secp256k1_scalar *seckey, const secp256k1_scalar *message, const secp256k1_scalar *nonce, int *recid);
 int secp256k1_ecdsa_sig_recover(
   __global const secp256k1_ecmult_context *ctx, 

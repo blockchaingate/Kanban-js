@@ -62,14 +62,72 @@ bool CryptoEC256k1GPU::computeGeneratorContext(unsigned char* outputMemoryPool, 
 
 bool CryptoEC256k1GPU::signMessage(
   unsigned char* outputSignatures,
+  unsigned int* outputSize,
   unsigned char* outputInputNonce,
   unsigned char* inputSecretKey,
   unsigned char* inputMessage,
-  unsigned int recordId,
-  unsigned char *inputMemoryPoolGeneratorContext,
   GPU& theGPU
 ) {
+  if (!theGPU.initializeAll())
+    return false;
+  std::shared_ptr<GPUKernel> kernelSign = theGPU.theKernels[GPU::kernelSign];
+  kernelSign->writeToBuffer(2, outputInputNonce, 32);
+  kernelSign->writeToBuffer(3, inputSecretKey, 32);
+  kernelSign->writeToBuffer(4, inputMessage, 32);
+  logGPU << "DEBUG: Got to signature start." << Logger::endL;
+  cl_int ret = clEnqueueNDRangeKernel(
+    theGPU.commandQueue,
+    kernelSign->kernel,
+    1,
+    NULL,
+    &kernelSign->global_item_size,
+    &kernelSign->local_item_size,
+    0,
+    NULL,
+    NULL
+  );
+  if (ret != CL_SUCCESS) {
+    logGPU << "Failed to enqueue kernel. Return code: " << ret << ". " << Logger::endL;
+    return false;
+  }
+  cl_mem& resultSignatureSize = kernelSign->outputs[1]->theMemory;
+  unsigned char outputSizeBuffer[4];
 
+  logGPU << "DEBUG: enqueued output size. " << Logger::endL;
+  ret = clEnqueueReadBuffer(
+    theGPU.commandQueue,
+    resultSignatureSize,
+    CL_TRUE,
+    0,
+    4,
+    (void*) outputSizeBuffer,
+    0,
+    NULL,
+    NULL
+  );
+  if (ret != CL_SUCCESS) {
+    logGPU << "Failed to read size buffer. Return code: " << ret << Logger::endL;
+    return false;
+  }
+  *outputSize = memoryPool_read_uint(outputSizeBuffer);
+  cl_mem& resultSignature = kernelSign->outputs[0]->theMemory;
+  ret = clEnqueueReadBuffer(
+    theGPU.commandQueue,
+    resultSignature,
+    CL_TRUE,
+    0,
+    *outputSize,
+    (void*) outputSignatures,
+    0,
+    NULL,
+    NULL
+  );
+  if (ret != CL_SUCCESS) {
+    logGPU << "Failed to read signature buffer. Wanted to read: "
+    << *outputSize << " bytes. Return code: " << ret << Logger::endL;
+    return false;
+  }
+  return true;
 }
 
 bool CryptoEC256k1::signMessage(
@@ -80,12 +138,15 @@ bool CryptoEC256k1::signMessage(
   unsigned char* inputMessage,
   unsigned char *inputMemoryPoolGeneratorContext
 ) {
+  unsigned char outputSizeBuffer[4];
   secp256k1_opencl_sign(
     outputSignature,
-    outputSize,
+    outputSizeBuffer,
     outputInputNonce,
     inputSecretKey,
     inputMessage,
     inputMemoryPoolGeneratorContext
   );
+  *outputSize = memoryPool_read_uint(outputSizeBuffer);
+  return true;
 }
