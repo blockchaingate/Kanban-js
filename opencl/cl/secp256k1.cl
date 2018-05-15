@@ -571,21 +571,39 @@ static void secp256k1_fe_clear(secp256k1_fe *a) {
 
 /** Convert a field element to a 32-byte big endian value. Requires the input to be normalized */
 void secp256k1_fe_get_b32(unsigned char *r, const secp256k1_fe *a) {
-    int i;
+  int i;
 #ifdef VERIFY
-    VERIFY_CHECK(a->normalized);
-    secp256k1_fe_verify(a);
+  VERIFY_CHECK(a->normalized);
+  secp256k1_fe_verify(a);
 #endif
-    for (i=0; i<32; i++) {
-        int j;
-        int c = 0;
-        for (j=0; j<4; j++) {
-            int limb = (8*i+2*j)/26;
-            int shift = (8*i+2*j)%26;
-            c |= ((a->n[limb] >> shift) & 0x3) << (2 * j);
-        }
-        r[31-i] = c;
+  for (i = 0; i < 32; i ++) {
+    int j;
+    int c = 0;
+    for (j = 0; j < 4; j ++) {
+        int limb = (8 * i + 2 * j) / 26;
+        int shift = (8 * i + 2 * j) % 26;
+        c |= ((a->n[limb] >> shift) & 0x3) << (2 * j);
     }
+    r[31 - i] = c;
+  }
+}
+
+void secp256k1_fe_get_b32__to__global(__global unsigned char *r, const secp256k1_fe *a) {
+  int i;
+#ifdef VERIFY
+  VERIFY_CHECK(a->normalized);
+  secp256k1_fe_verify(a);
+#endif
+  for (i = 0; i < 32; i ++) {
+    int j;
+    int c = 0;
+    for (j = 0; j < 4; j ++) {
+      int limb = (8 * i + 2 * j) / 26;
+      int shift = (8 * i + 2 * j) % 26;
+      c |= ((a->n[limb] >> shift) & 0x3) << (2 * j);
+    }
+    r[31 - i] = c;
+  }
 }
 
 void secp256k1_fe_negate(secp256k1_fe *r, const secp256k1_fe *a, int m) {
@@ -4028,10 +4046,14 @@ char secp256k1_ecdsa_sig_verify(
 
 
 //******From eckey.h******
-int secp256k1_eckey_pubkey_parse(secp256k1_ge *outputPublicKey, const unsigned char *inputPublicKey, size_t size) {
+int secp256k1_eckey_pubkey_parse(
+  secp256k1_ge *outputPublicKey, 
+  __global const unsigned char *inputPublicKey, 
+  size_t size
+) {
   if (size == 33 && (inputPublicKey[0] == SECP256K1_TAG_PUBKEY_EVEN || inputPublicKey[0] == SECP256K1_TAG_PUBKEY_ODD)) {
     secp256k1_fe x;
-    return secp256k1_fe_set_b32(&x, inputPublicKey + 1) && 
+    return secp256k1_fe_set_b32__global(&x, inputPublicKey + 1) && 
     secp256k1_ge_set_xo_var(outputPublicKey, &x, inputPublicKey[0] == SECP256K1_TAG_PUBKEY_ODD);
   } else if (size == 65 && (
       inputPublicKey[0] == SECP256K1_TAG_PUBKEY_UNCOMPRESSED || 
@@ -4039,7 +4061,7 @@ int secp256k1_eckey_pubkey_parse(secp256k1_ge *outputPublicKey, const unsigned c
       inputPublicKey[0] == SECP256K1_TAG_PUBKEY_HYBRID_ODD
   )) {
     secp256k1_fe x, y;
-    if (!secp256k1_fe_set_b32(&x, inputPublicKey + 1) || !secp256k1_fe_set_b32(&y, inputPublicKey + 33)) {
+    if (!secp256k1_fe_set_b32__global(&x, inputPublicKey + 1) || !secp256k1_fe_set_b32__global(&y, inputPublicKey + 33)) {
       return 0;
     }
     secp256k1_ge_set_xy(outputPublicKey, &x, &y);
@@ -4053,20 +4075,25 @@ int secp256k1_eckey_pubkey_parse(secp256k1_ge *outputPublicKey, const unsigned c
   }
 }
 
-int secp256k1_eckey_pubkey_serialize(secp256k1_ge *inputOutputPublicKey, unsigned char *outputPublicKey, size_t *size, int compressed) {
+int secp256k1_eckey_pubkey_serialize(
+  secp256k1_ge *inputOutputPublicKey, 
+  __global unsigned char *outputPublicKey, 
+  size_t *size, 
+  int compressed
+) {
   if (secp256k1_ge_is_infinity(inputOutputPublicKey)) {
     return 0;
   }
   secp256k1_fe_normalize_var(&inputOutputPublicKey->x);
   secp256k1_fe_normalize_var(&inputOutputPublicKey->y);
-  secp256k1_fe_get_b32(&outputPublicKey[1], &inputOutputPublicKey->x);
+  secp256k1_fe_get_b32__to__global(&outputPublicKey[1], &inputOutputPublicKey->x);
   if (compressed) {
     *size = 33;
     outputPublicKey[0] = secp256k1_fe_is_odd(&inputOutputPublicKey->y) ? SECP256K1_TAG_PUBKEY_ODD : SECP256K1_TAG_PUBKEY_EVEN;
   } else {
     *size = 65;
     outputPublicKey[0] = SECP256K1_TAG_PUBKEY_UNCOMPRESSED;
-    secp256k1_fe_get_b32(&outputPublicKey[33], &inputOutputPublicKey->y);
+    secp256k1_fe_get_b32__to__global(&outputPublicKey[33], &inputOutputPublicKey->y);
   }
   return 1;
 }

@@ -170,7 +170,8 @@ int secp256k1_fe_is_odd(const secp256k1_fe *a); //original name: secp256k1_fe_is
 int secp256k1_fe_equal_var(const secp256k1_fe *a, const secp256k1_fe *b); //original name: secp256k1_fe_equal_var
 
 /** Convert a field element to a 32-byte big endian value. Requires the input to be normalized */
-void secp256k1_fe_get_b32(unsigned char *r, const secp256k1_fe *a); //original name: secp256k1_fe_get_b32
+void secp256k1_fe_get_b32(unsigned char *r, const secp256k1_fe *a);
+void secp256k1_fe_get_b32__to__global(__global unsigned char *r, const secp256k1_fe *a);
 
 /** Set a field element equal to the additive inverse of another. Takes a maximum magnitude of the input
  *  as an argument. The magnitude of the output is one higher. */
