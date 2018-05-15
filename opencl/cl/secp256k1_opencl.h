@@ -11,10 +11,13 @@
 
 #define VERIFY_CHECK(arg) arg
 
-
+#ifndef NULL
 #define NULL 0
+#endif
 
+#ifndef ___static__constant
 #define ___static__constant __constant
+#endif
 
 #include "../opencl/cl/secp256k1.h"
 

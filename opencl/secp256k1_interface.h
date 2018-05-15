@@ -16,10 +16,11 @@ public:
   static bool computeGeneratorContext(unsigned char* outputMemoryPool, GPU& theGPU);
   static bool signMessage(
     unsigned char* outputSignatures,
-    unsigned char* inputSecretKey,
+    unsigned char* outputInputNonce,
     unsigned char* inputMessage,
     unsigned char* inputNonce,
     unsigned int recordId,
+    unsigned char* inputMemoryPoolGeneratorContext,
     GPU& theGPU
   );
 };
@@ -34,11 +35,12 @@ public:
   static bool computeMultiplicationContext(unsigned char* outputMemoryPool);
   static bool computeGeneratorContext(unsigned char* outputMemoryPool);
   static bool signMessage(
-    unsigned char* outputSignatures,
+    unsigned char* outputSignature,
+    unsigned char* outputInputNonce,
     unsigned char* inputSecretKey,
     unsigned char* inputMessage,
-    unsigned char* inputNonce,
-    unsigned int recordId
+    unsigned int recordId,
+    unsigned char* inputMemoryPoolGeneratorContext
   );
 };
 

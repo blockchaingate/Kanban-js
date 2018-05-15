@@ -29,5 +29,14 @@ __kernel void secp256k1_opencl_compute_multiplication_context(
 __kernel void secp256k1_opencl_compute_generator_context(
   __global unsigned char* outputMemoryPoolContainingGeneratorContext
 );
+
+__kernel void secp256k1_opencl_sign(
+  __global unsigned char* outputSignature,
+  __global unsigned char* outputInputNonce,
+  __global unsigned char* inputSecretKey,
+  __global unsigned char* inputMessage,
+  __global unsigned int recordId,
+  __global unsigned char* inputMemoryPoolGeneratorContext
+);
 #endif //SECP256K1_CPP_H_header
 

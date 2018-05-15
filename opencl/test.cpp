@@ -31,22 +31,6 @@ unsigned char bufferCentralPUGeneratorContext[CryptoEC256k1GPU::memoryGeneratorC
 unsigned char bufferGraphicsPUGeneratorContext[CryptoEC256k1GPU::memoryGeneratorContext];
 
 
-void getGeneratorContext(
-  const unsigned char* theMemoryPool,
-  secp256k1_ecmult_gen_context& outputGeneratorContext
-){
-  secp256k1_ecmult_gen_context_init(&outputGeneratorContext);
-  uint32_t outputPositionGeneratorContextStruct = memoryPool_read_uint_fromOutput(0, theMemoryPool);
-  uint32_t outputPositionGeneratorContextContent = memoryPool_read_uint_fromOutput(1, theMemoryPool);
-  outputGeneratorContext = *((secp256k1_ecmult_gen_context*) &theMemoryPool[outputPositionGeneratorContextStruct]);
-  outputGeneratorContext.prec = NULL;
-  //int sizeOfGeneratorContextLump = (16 * 64 * sizeof(secp256k1_ge_storage));
-  //logTest << "Size of generator context lump: " << sizeOfGeneratorContextLump << Logger::endL;
-  //for (int i = 0; i < sizeOfGeneratorContextLump; i++)
-  //  logTest << std::hex << (int) theMemoryPool[outputPositionGeneratorContextContent + i];
-  outputGeneratorContext.prec = (secp256k1_ge_storage*) &theMemoryPool[outputPositionGeneratorContextContent];
-}
-
 void getMultiplicationContext(
   const unsigned char* theMemoryPool,
   secp256k1_ecmult_context& outputMultiplicationContext
@@ -98,7 +82,7 @@ void testPrintGeneratorContext(const unsigned char* theMemoryPool, const std::st
     logTest << "Debug " << (i + 1) << ": " << toStringOutputObject(i, theMemoryPool) << Logger::endL;
   }
   secp256k1_ecmult_gen_context theGeneratorContext;
-  getGeneratorContext(theMemoryPool, theGeneratorContext);
+  memoryPool_read_generatorContext(&theGeneratorContext,theMemoryPool);
   logTest << "Generator context:\n" << toStringSecp256k1_GeneratorContext(theGeneratorContext, false) << Logger::endL;
 }
 
@@ -127,41 +111,67 @@ bool testMainPart1ComputeContexts(GPU& theGPU) {
   return true;
 }
 
-unsigned char bufferOutputSignatures[1000];
-unsigned char bufferInputSecretKey[1000];
-unsigned char bufferInputMessage[1000];
-unsigned char bufferInputNonce[1000];
+class Signature {
+public:
+  secp256k1_scalar r;
+  secp256k1_scalar s;
+  unsigned char serialized[33 * 2 + 6]; // Max signature size = 33 * 2 + 6, may be smaller.
+  int size;
+  void ComputeSerializationFromScalars();
+  void ComputeScalarsFromSerialization();
+};
 
+class GeneratorScalar {
+public:
+  secp256k1_scalar scalar;
+  unsigned char serialization[32];
+  void ComputeSerializationFromScalar();
+  void ComputeScalarFromSerialization();
+  //This is a testing-only function. Do not use otherwise:
+  //copying secrets around is not a good idea.
+  void TestAssignString(const std::string& input);
+};
+
+class PrivateKey {
+public:
+  GeneratorScalar key;
+  GeneratorScalar nonceMustChangeAfterEverySignature;
+};
+
+void GeneratorScalar::ComputeScalarFromSerialization() {
+  secp256k1_scalar_set_b32(&this->scalar, this->serialization, NULL);
+}
+
+void GeneratorScalar::TestAssignString(const std::string& input) {
+  int lastCopiedIndex;
+  int numCharacters = std::min((int) input.size(), 32);
+  for (lastCopiedIndex = 0; lastCopiedIndex < numCharacters; lastCopiedIndex ++) {
+    this->serialization[lastCopiedIndex] = input[lastCopiedIndex];
+  }
+  for (; lastCopiedIndex < 32; lastCopiedIndex ++) {
+    this->serialization[lastCopiedIndex] = 0;
+  }
+  this->ComputeScalarFromSerialization();
+}
 
 bool testMainPart2Signatures(GPU& theGPU) {
-  secp256k1_scalar signatureS, signatureR;
-  secp256k1_scalar secretKey = SECP256K1_SCALAR_CONST(
-    0, 0, 0, 0, 0, 13, 17, 19
+  return false;
+  Signature theSignature;
+  PrivateKey theKey;
+  GeneratorScalar message;
+  theKey.key.TestAssignString("This is a secret. ");
+  message.TestAssignString("This is a message. ");
+  theKey.nonceMustChangeAfterEverySignature.TestAssignString("This is a nonce. ");
+  unsigned int recordId = 5;
+  CryptoEC256k1::signMessage(
+    theSignature.serialized,
+    theKey.nonceMustChangeAfterEverySignature.serialization,
+    theKey.key.serialization,
+    message.serialization,
+    recordId,
+    bufferCentralPUGeneratorContext
   );
-  secp256k1_scalar message = SECP256K1_SCALAR_CONST(
-    2, 3, 5, 7, 11, 13, 17, 19
-  );
-  secp256k1_scalar nonce = SECP256K1_SCALAR_CONST(
-    3, 5, 7, 11, 13, 17, 19, 23
-  );
-  secp256k1_ge publicKey;
-  secp256k1_gej publicKeyJacobianCoordinates;
 
-  int recId = 5;
-
-
-  secp256k1_ecmult_gen_context generatorContextCentralPU;
-  secp256k1_ecmult_gen_context_init(&generatorContextCentralPU);
-  getGeneratorContext(bufferCentralPUGeneratorContext, generatorContextCentralPU);
-
-  secp256k1_ecmult_gen(&generatorContextCentralPU, &publicKeyJacobianCoordinates, &secretKey);
-
-  secp256k1_ge_set_gej(&publicKey, &publicKeyJacobianCoordinates);
-  logTestCentralPU << "DEBUG: public key: " << toStringSecp256k1_ECPoint(publicKey) << Logger::endL;
-
-
-  logTestCentralPU << "Got to here pt 5. " << Logger::endL;
-  secp256k1_ecdsa_sig_sign(&generatorContextCentralPU, &signatureR, &signatureS, &secretKey, &message, &nonce, &recId);
   /*
   logTestCentralPU << "SigR: " << toStringSecp256k1_Scalar(signatureR) << Logger::endL;
   logTestCentralPU << "SigS: " << toStringSecp256k1_Scalar(signatureS) << Logger::endL;
@@ -194,46 +204,6 @@ int testMain() {
     return - 1;
   if (!testMainPart2Signatures(theGPU))
     return - 1;
-
-
-  /*
-  secp256k1_ecmult_gen_context generatorContext;
-  secp256k1_ecmult_gen_context_init(&generatorContext);
-
-
-  printComments(resultChar);
-  GPU theGPU;
-  if (!theGPU.initializeKernels())
-    return false;
-
-
-  std::shared_ptr<GPUKernel> theKernel = theGPU.theKernels[GPU::kernelVerifySignature];
-
-  theKernel->writeToBuffer(1, &signatureR, sizeof(multiplicationContext));
-  theKernel->writeToBuffer(2, &signatureR, sizeof(signatureR));
-  theKernel->writeToBuffer(3, &signatureS, sizeof(signatureS));
-  theKernel->writeToBuffer(4, &publicKey, sizeof(publicKey));
-  theKernel->writeToBuffer(5, &message, sizeof(message));
-
-  cl_int ret = clEnqueueNDRangeKernel(
-    theGPU.commandQueue, theKernel->kernel, 1, NULL,
-    &theKernel->global_item_size, &theKernel->local_item_size, 0, NULL, NULL
-  );
-  if (ret != CL_SUCCESS) {
-    logServer << "Failed to enqueue kernel. Return code: " << ret << ". ";
-    return 0;
-  }
-  cl_mem& result = theKernel->outputs[0]->theMemory;
-  secp256k1_ecmult_gen_context_clear(&generatorContext);
-  for (int i = 0 ; i< 900; i ++) {
-    resultChar[i] = 0;
-  }
-  ret = clEnqueueReadBuffer(theGPU.commandQueue, result, CL_TRUE, 0, 1000, &resultChar, 0, NULL, NULL);
-  if (ret != CL_SUCCESS) {
-    logServer << "Failed to read buffer. Return code: " << ret << Logger::endL;
-    return - 1;
-  }
-  printComments(resultChar);*/
   return 0;
 }
 
