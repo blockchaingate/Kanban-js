@@ -472,9 +472,14 @@ unsigned int sizeof_uint();
 unsigned int sizeof_secp256k1_ge_storage();
 unsigned int sizeof_char64();
 
-
+// Reads generator context. PORTABLE: can be called accross GPU<->CPU.
 void memoryPool_read_generatorContext(
   __global secp256k1_ecmult_gen_context* outputGeneratorContext,
+  __global const unsigned char* memoryPool
+);
+
+//Reads the generator context pointer. NOT PORTABLE: must not be called accross GPU<->CPU.
+__global secp256k1_ecmult_gen_context* memoryPool_read_generatorContextPointer(
   __global const unsigned char* memoryPool
 );
 #endif //SECP256k1_H_header

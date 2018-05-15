@@ -36,10 +36,10 @@ public:
   static bool computeGeneratorContext(unsigned char* outputMemoryPool);
   static bool signMessage(
     unsigned char* outputSignature,
+    unsigned int* outputSize,
     unsigned char* outputInputNonce,
     unsigned char* inputSecretKey,
     unsigned char* inputMessage,
-    unsigned int recordId,
     unsigned char* inputMemoryPoolGeneratorContext
   );
 };

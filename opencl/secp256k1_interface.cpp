@@ -74,18 +74,18 @@ bool CryptoEC256k1GPU::signMessage(
 
 bool CryptoEC256k1::signMessage(
   unsigned char* outputSignature,
+  unsigned int* outputSize,
   unsigned char* outputInputNonce,
   unsigned char* inputSecretKey,
   unsigned char* inputMessage,
-  unsigned int recordId,
   unsigned char *inputMemoryPoolGeneratorContext
 ) {
   secp256k1_opencl_sign(
     outputSignature,
+    outputSize,
     outputInputNonce,
     inputSecretKey,
     inputMessage,
-    recordId,
     inputMemoryPoolGeneratorContext
   );
 }

@@ -235,6 +235,13 @@ void memoryPool_write_fe_asOutput(
   secp256k1_fe_copy__to__global(serializerPointer, input);
 }
 
+__global secp256k1_ecmult_gen_context* memoryPool_read_generatorContextPointer(
+  __global const unsigned char* memoryPool
+) {
+  uint32_t position = memoryPool_read_uint_fromOutput(0, memoryPool);
+  return ((__global secp256k1_ecmult_gen_context*) &memoryPool[position]);
+}
+
 void memoryPool_read_generatorContext(
   __global secp256k1_ecmult_gen_context* outputGeneratorContext,
   __global const unsigned char* memoryPool

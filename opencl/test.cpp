@@ -115,10 +115,11 @@ class Signature {
 public:
   secp256k1_scalar r;
   secp256k1_scalar s;
-  unsigned char serialized[33 * 2 + 6]; // Max signature size = 33 * 2 + 6, may be smaller.
-  int size;
+  unsigned char serialization[33 * 2 + 6]; // Max signature size = 33 * 2 + 6, may be smaller.
+  unsigned int size;
   void ComputeSerializationFromScalars();
-  void ComputeScalarsFromSerialization();
+  bool ComputeScalarsFromSerialization();
+  std::string toString();
 };
 
 class GeneratorScalar {
@@ -130,6 +131,7 @@ public:
   //This is a testing-only function. Do not use otherwise:
   //copying secrets around is not a good idea.
   void TestAssignString(const std::string& input);
+  std::string toString();
 };
 
 class PrivateKey {
@@ -154,27 +156,39 @@ void GeneratorScalar::TestAssignString(const std::string& input) {
   this->ComputeScalarFromSerialization();
 }
 
+std::string Signature::toString() {
+  std::stringstream out;
+  out << "(r,s): " << toStringSecp256k1_Scalar(this->r) << ", " << toStringSecp256k1_Scalar(this->s);
+  return out.str();
+}
+
+bool Signature::ComputeScalarsFromSerialization() {
+  if (secp256k1_ecdsa_sig_parse(&this->r, & this->s, this->serialization, this->size) == 0) {
+    return false;
+  }
+  return true;
+}
+
 bool testMainPart2Signatures(GPU& theGPU) {
-  return false;
   Signature theSignature;
   PrivateKey theKey;
   GeneratorScalar message;
   theKey.key.TestAssignString("This is a secret. ");
   message.TestAssignString("This is a message. ");
   theKey.nonceMustChangeAfterEverySignature.TestAssignString("This is a nonce. ");
-  unsigned int recordId = 5;
   CryptoEC256k1::signMessage(
-    theSignature.serialized,
+    theSignature.serialization,
+    &theSignature.size,
     theKey.nonceMustChangeAfterEverySignature.serialization,
     theKey.key.serialization,
     message.serialization,
-    recordId,
     bufferCentralPUGeneratorContext
   );
+  theSignature.ComputeScalarsFromSerialization();
+  logTestCentralPU << "Signature:\n" << theSignature.toString() << Logger::endL;
 
+  return true;
   /*
-  logTestCentralPU << "SigR: " << toStringSecp256k1_Scalar(signatureR) << Logger::endL;
-  logTestCentralPU << "SigS: " << toStringSecp256k1_Scalar(signatureS) << Logger::endL;
   secp256k1_ecmult_context multiplicationContext;
   secp256k1_ecmult_context_init(&multiplicationContext);
   getMultiplicationContext(bufferCentralPUMultiplicationContext, multiplicationContext);

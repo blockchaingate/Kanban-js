@@ -1,7 +1,7 @@
 #ifndef SECP256K1_CPP_H_header
 #include "../opencl/cl/secp256k1_opencl.h"
 //<- header file incompatible with secp256k1_cpp.h
-//This weird header structure arose through
+//This header structure arose through
 //hunting for the bug described in the include guard 
 //inside of secp256k1.cl.
 //To do: make the header file structure more intuitive.
