@@ -14,17 +14,32 @@ public:
 
   static bool computeMultiplicationContext(unsigned char* outputMemoryPool, GPU& theGPU);
   static bool computeGeneratorContext(unsigned char* outputMemoryPool, GPU& theGPU);
+  static bool signMessage(
+    unsigned char* outputSignatures,
+    unsigned char* inputSecretKey,
+    unsigned char* inputMessage,
+    unsigned char* inputNonce,
+    unsigned int recordId,
+    GPU& theGPU
+  );
 };
 
 //class name starts with "Crypto" instead of secp256k1 to
 //shorten the autocomple menu suggestions in (my) IDEs
-class CryptoEC256k1{
+class CryptoEC256k1 {
 public:
   //The functions below are expected to never return false,
   //however we declare them boolean
   //in order to keep the interface similar to that of CryptoEC256k1GPU.
   static bool computeMultiplicationContext(unsigned char* outputMemoryPool);
   static bool computeGeneratorContext(unsigned char* outputMemoryPool);
+  static bool signMessage(
+    unsigned char* outputSignatures,
+    unsigned char* inputSecretKey,
+    unsigned char* inputMessage,
+    unsigned char* inputNonce,
+    unsigned int recordId
+  );
 };
 
 #endif //SECP256K1_INTERFACE_H_header

@@ -3635,7 +3635,7 @@ void secp256k1_ecmult_context_build(
   secp256k1_ecmult_odd_multiples_table_storage_var(ECMULT_TABLE_SIZE(WINDOW_G), *output->pre_g, &gj, memoryPool);
 }
 
-void secp256k1_scalar_copy__from__global(secp256k1_scalar* output, __global const secp256k1_scalar* input){
+void secp256k1_scalar_copy__from__global(secp256k1_scalar* output, __global const secp256k1_scalar* input) {
   output->d[0] = input->d[0];
   output->d[1] = input->d[1];
   output->d[2] = input->d[2];
@@ -3647,44 +3647,44 @@ void secp256k1_scalar_copy__from__global(secp256k1_scalar* output, __global cons
 }
 
 void secp256k1_ecmult_gen(
-  __global const secp256k1_ecmult_gen_context *ctx,
+  __global const secp256k1_ecmult_gen_context *inputGeneratorContext,
   secp256k1_gej *r,
   const secp256k1_scalar *gn
 ) {
-    secp256k1_ge add;
-    secp256k1_ge_storage adds;
-    secp256k1_scalar gnb, blind;
-    int bits;
-    int i, j;
-    memorySet((unsigned char*) &adds, 0, sizeof_secp256k1_ge_storage());
-    *r = ctx->initial;
-    /* Blind scalar/point multiplication by computing (n-b)G + bG instead of nG. */
-    secp256k1_scalar_copy__from__global(&blind, &ctx->blind);
-    secp256k1_scalar_add(&gnb, gn, &blind);
-    add.infinity = 0;
-    for (j = 0; j < 64; j ++) {
-        bits = secp256k1_scalar_get_bits(&gnb, j * 4, 4);
-        for (i = 0; i < 16; i ++) {
-            /** This uses a conditional move to avoid any secret data in array indexes.
-             *   _Any_ use of secret indexes has been demonstrated to result in timing
-             *   sidechannels, even when the cache-line access patterns are uniform.
-             *  See also:
-             *   "A word of warning", CHES 2013 Rump Session, by Daniel J. Bernstein and Peter Schwabe
-             *    (https://cryptojedi.org/peter/data/chesrump-20130822.pdf) and
-             *   "Cache Attacks and Countermeasures: the Case of AES", RSA 2006,
-             *    by Dag Arne Osvik, Adi Shamir, and Eran Tromer
-             *    (http://www.tau.ac.il/~tromer/papers/cache.pdf)
-             */
-          secp256k1_ge_storage_cmov__global(&adds, & ctx->prec[16 * j + i], i == bits);
-          //original version:
-          //secp256k1_ge_storage_cmov__global(&adds, &(*ctx->prec)[j][i], i == bits);
-        }
-        secp256k1_ge_from_storage(&add, &adds);
-        secp256k1_gej_add_ge(r, r, &add);
+  secp256k1_ge add;
+  secp256k1_ge_storage adds;
+  secp256k1_scalar gnb, blind;
+  int bits;
+  int i, j;
+  memorySet((unsigned char*) &adds, 0, sizeof_secp256k1_ge_storage());
+  *r = inputGeneratorContext->initial;
+  /* Blind scalar/point multiplication by computing (n-b)G + bG instead of nG. */
+  secp256k1_scalar_copy__from__global(&blind, &inputGeneratorContext->blind);
+  secp256k1_scalar_add(&gnb, gn, &blind);
+  add.infinity = 0;
+  for (j = 0; j < 64; j ++) {
+    bits = secp256k1_scalar_get_bits(&gnb, j * 4, 4);
+    for (i = 0; i < 16; i ++) {
+      /** This uses a conditional move to avoid any secret data in array indexes.
+       *   _Any_ use of secret indexes has been demonstrated to result in timing
+       *   sidechannels, even when the cache-line access patterns are uniform.
+       *  See also:
+       *   "A word of warning", CHES 2013 Rump Session, by Daniel J. Bernstein and Peter Schwabe
+       *    (https://cryptojedi.org/peter/data/chesrump-20130822.pdf) and
+       *   "Cache Attacks and Countermeasures: the Case of AES", RSA 2006,
+       *    by Dag Arne Osvik, Adi Shamir, and Eran Tromer
+       *    (http://www.tau.ac.il/~tromer/papers/cache.pdf)
+       */
+      secp256k1_ge_storage_cmov__global(&adds, & inputGeneratorContext->prec[16 * j + i], i == bits);
+      //original version:
+      //secp256k1_ge_storage_cmov__global(&adds, &(*inputGeneratorContext->prec)[j][i], i == bits);
     }
-    bits = 0;
-    secp256k1_ge_clear(&add);
-    secp256k1_scalar_clear(&gnb);
+    secp256k1_ge_from_storage(&add, &adds);
+    secp256k1_gej_add_ge(r, r, &add);
+  }
+  bits = 0;
+  secp256k1_ge_clear(&add);
+  secp256k1_scalar_clear(&gnb);
 }
 //******end of ecmult_gen_impl.h******
 
@@ -3906,7 +3906,6 @@ char secp256k1_ecdsa_sig_verify(
   __global const secp256k1_scalar *sigs,
   __global const secp256k1_ge *pubkey,
   __global const secp256k1_scalar *message,
-  __global unsigned char* comments,
   __global unsigned char* memoryPoolMultiplicationContext
 ) {
   unsigned char c[32];
@@ -3915,8 +3914,6 @@ char secp256k1_ecdsa_sig_verify(
   secp256k1_gej pubkeyj;
   secp256k1_gej pr;
   if (secp256k1_scalar_is_zero__global(sigr) || secp256k1_scalar_is_zero__global(sigs)) {
-    comments[0] = (unsigned char) 7;
-    return 7;
     return 0;
   }
 
@@ -3927,8 +3924,6 @@ char secp256k1_ecdsa_sig_verify(
 
   secp256k1_ecmult(ctx, &pr, &pubkeyj, &u2, &u1, memoryPoolMultiplicationContext);
   if (secp256k1_gej_is_infinity(&pr)) {
-    comments[0] = (unsigned char) 8;
-    return 8;
     return 0;
   }
   secp256k1_scalar_get_b32__global(c, sigr);
@@ -3951,23 +3946,21 @@ char secp256k1_ecdsa_sig_verify(
    *  secp256k1_gej_eq_x implements the (xr * pr.z^2 mod p == pr.x) test.
    */
 
-    secp256k1_fe_get_b32(c, &xr);
-    memoryCopy_to__global(comments + 1, c, 32);
-    secp256k1_fe_get_b32(c, &pr.x);
-    memoryCopy_to__global(comments + 33, c, 32);
-    secp256k1_fe_get_b32(c, &pr.z);
-    memoryCopy_to__global(comments + 65, c, 32);
+    //secp256k1_fe_get_b32(c, &xr);
+    //memoryCopy_to__global(comments + 1, c, 32);
+    //secp256k1_fe_get_b32(c, &pr.x);
+    //memoryCopy_to__global(comments + 33, c, 32);
+    //secp256k1_fe_get_b32(c, &pr.z);
+    //memoryCopy_to__global(comments + 65, c, 32);
 
   if (secp256k1_gej_eq_x_var(&xr, &pr)) {
     /* pr.x == xr * pr.z^2 mod p, so the signature is valid. */
-    comments[0] = (unsigned char) 1;
+    //comments[0] = (unsigned char) 1;
     return 1;
   }
   //openCL note: secp256k1_ecdsa_const_p_minus_order is always in the __constant address space.
   if (secp256k1_fe_cmp_var__constant(&xr, &secp256k1_ecdsa_const_p_minus_order) >= 0) {
     /* xr + p >= n, so we can skip testing the second case. */
-    comments[0] = (unsigned char) 9;
-    return 9;
     return 0;
   }
   //openCL note: secp256k1_ecdsa_const_p_minus_order is always in the __constant address space.
@@ -3975,11 +3968,8 @@ char secp256k1_ecdsa_sig_verify(
   if (secp256k1_gej_eq_x_var(&xr, &pr)) {
     /* (xr + n) * pr.z^2 mod p == pr.
     x, so the signature is valid. */
-    comments[0] = (unsigned char) 1;
     return 1;
   }
-  comments[0] = (unsigned char) 10;
-  return 10;
   return 0;
 }
 //******end of ecdsa_impl.h******

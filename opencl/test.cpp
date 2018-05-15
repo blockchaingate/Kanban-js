@@ -50,7 +50,7 @@ void getGeneratorContext(
 void getMultiplicationContext(
   const unsigned char* theMemoryPool,
   secp256k1_ecmult_context& outputMultiplicationContext
-){
+) {
   outputMultiplicationContext.pre_g = NULL;
   uint32_t outputPositionMultiplicationContent = memoryPool_read_uint_fromOutput(0, theMemoryPool);
   //int sizeOfGeneratorContextLump = (16 * 64 * sizeof(secp256k1_ge_storage));
@@ -127,10 +127,13 @@ bool testMainPart1ComputeContexts(GPU& theGPU) {
   return true;
 }
 
-int testMain() {
-  GPU theGPU;
-  if (!testMainPart1ComputeContexts(theGPU))
-    return - 1;
+unsigned char bufferOutputSignatures[1000];
+unsigned char bufferInputSecretKey[1000];
+unsigned char bufferInputMessage[1000];
+unsigned char bufferInputNonce[1000];
+
+
+bool testMainPart2Signatures(GPU& theGPU) {
   secp256k1_scalar signatureS, signatureR;
   secp256k1_scalar secretKey = SECP256K1_SCALAR_CONST(
     0, 0, 0, 0, 0, 13, 17, 19
@@ -144,6 +147,9 @@ int testMain() {
   secp256k1_ge publicKey;
   secp256k1_gej publicKeyJacobianCoordinates;
 
+  int recId = 5;
+
+
   secp256k1_ecmult_gen_context generatorContextCentralPU;
   secp256k1_ecmult_gen_context_init(&generatorContextCentralPU);
   getGeneratorContext(bufferCentralPUGeneratorContext, generatorContextCentralPU);
@@ -153,16 +159,12 @@ int testMain() {
   secp256k1_ge_set_gej(&publicKey, &publicKeyJacobianCoordinates);
   logTestCentralPU << "DEBUG: public key: " << toStringSecp256k1_ECPoint(publicKey) << Logger::endL;
 
-  int recId = 5;
 
   logTestCentralPU << "Got to here pt 5. " << Logger::endL;
   secp256k1_ecdsa_sig_sign(&generatorContextCentralPU, &signatureR, &signatureS, &secretKey, &message, &nonce, &recId);
+  /*
   logTestCentralPU << "SigR: " << toStringSecp256k1_Scalar(signatureR) << Logger::endL;
   logTestCentralPU << "SigS: " << toStringSecp256k1_Scalar(signatureS) << Logger::endL;
-  unsigned char resultChar[1200];
-  for (int i = 0 ; i < 900; i ++) {
-    resultChar[i] = 0;
-  }
   secp256k1_ecmult_context multiplicationContext;
   secp256k1_ecmult_context_init(&multiplicationContext);
   getMultiplicationContext(bufferCentralPUMultiplicationContext, multiplicationContext);
@@ -172,7 +174,6 @@ int testMain() {
     &signatureS,
     &publicKey,
     &message,
-    resultChar,
     bufferCentralPUMultiplicationContext
   );
   logTestCentralPU << "DEBUG: signature verification: " << signatureResult << Logger::endL;
@@ -183,6 +184,16 @@ int testMain() {
   logTestCentralPU << "nonce: " << toStringSecp256k1_Scalar(nonce) << Logger::endL;
   logTestCentralPU << "outputR: " << toStringSecp256k1_Scalar(signatureR) << Logger::endL;
   logTestCentralPU << "outputS: " << toStringSecp256k1_Scalar(signatureS) << Logger::endL;
+*/
+  return true;
+}
+
+int testMain() {
+  GPU theGPU;
+  if (!testMainPart1ComputeContexts(theGPU))
+    return - 1;
+  if (!testMainPart2Signatures(theGPU))
+    return - 1;
 
 
   /*

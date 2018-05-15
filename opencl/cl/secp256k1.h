@@ -436,7 +436,6 @@ char secp256k1_ecdsa_sig_verify(
   __global const secp256k1_scalar* s, 
   __global const secp256k1_ge *pubkey, 
   __global const secp256k1_scalar *message, 
-  __global unsigned char* comments, 
   __global unsigned char* memoryPool
 );
 

@@ -14,8 +14,7 @@
 
 Logger logServer("../logfiles/logServer.txt", "[ServerGPU] ");
 
-PipeBasic::PipeBasic(int inputCapacity, const std::string& inputName)
-{
+PipeBasic::PipeBasic(int inputCapacity, const std::string& inputName) {
   this->capacity = inputCapacity;
   this->length = 0;
   this->position = 0;
@@ -24,8 +23,7 @@ PipeBasic::PipeBasic(int inputCapacity, const std::string& inputName)
   this->name = inputName;
 }
 
-PipeBasic::~PipeBasic()
-{
+PipeBasic::~PipeBasic() {
   delete [] this->buffer;
   this->buffer = 0;
   if (this->fileDescriptor >= 0)

@@ -59,3 +59,24 @@ bool CryptoEC256k1GPU::computeGeneratorContext(unsigned char* outputMemoryPool, 
   }
   return true;
 }
+
+bool CryptoEC256k1GPU::signMessage(
+  unsigned char* outputSignatures,
+  unsigned char* bufferInputSecretKey,
+  unsigned char* bufferInputMessage,
+  unsigned char* bufferInputNonce,
+  unsigned int recordId,
+  GPU& theGPU
+) {
+
+}
+
+bool CryptoEC256k1::signMessage(
+  unsigned char* outputSignatures,
+  unsigned char* bufferInputSecretKey,
+  unsigned char* bufferInputMessage,
+  unsigned char* bufferInputNonce,
+  unsigned int recordId
+) {
+
+}
