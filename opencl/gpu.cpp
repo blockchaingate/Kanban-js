@@ -72,12 +72,12 @@ GPUKernel::GPUKernel() {
   this->local_item_size = 32;
   this->global_item_size = 32;
   this->numInitializedExternallyOwnedBuffers = 0;
+  this->program = NULL;
+  this->kernel = NULL;
 }
 
 GPUKernel::~GPUKernel() {
   //logGPU << "Kernel " << this->name << " destruction started. " << Logger::endL;
-  this->kernel = 0;
-  this->program = 0;
   for (unsigned i = 0; i < this->inputs.size(); i ++)
     this->inputs[i]->ReleaseMe();
   for (unsigned i = 0; i < this->outputs.size(); i ++)
@@ -89,11 +89,13 @@ GPUKernel::~GPUKernel() {
     logGPU << "Error with code: " << ret << " while releasing kernel " << this->name << ". " << Logger::endL;
     isGood = false;
   }
+  this->program = NULL;
   ret = clReleaseKernel(this->kernel);
   if (ret != CL_SUCCESS) {
     logGPU << "Error with code: " << ret << " while releasing kernel " << this->name << ". " << Logger::endL;
     isGood = false;
   }
+  this->kernel = NULL;
   if (isGood)
     logGPU << "Kernel " << this->name << " destroyed successfully. " << Logger::endL;
   else
@@ -183,8 +185,6 @@ bool GPU::initializeKernels() {
     return true;
   if (!this->initializePlatform())
     return false;
-  int kernelsDisabled;
-  return true;
   //if (!this->createKernel(
   //      this->kernelSHA256,
   //      {"result"},

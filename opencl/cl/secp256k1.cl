@@ -241,7 +241,7 @@ void memoryPool_write_fe_asOutput(
   secp256k1_fe_copy__to__global(serializerPointer, input);
 }
 
-__global secp256k1_ecmult_gen_context* memoryPool_read_generatorContextPointer(
+__global secp256k1_ecmult_gen_context* memoryPool_read_generatorContextPointer_NON_PORTABLE(
   __global const unsigned char* memoryPool
 ) {
   uint32_t position = memoryPool_read_uint_fromOutput(0, memoryPool);
@@ -1393,44 +1393,19 @@ void secp256k1_ge_set_table_gej_var(
   }
   /* Compute the inverse of the last z coordinate, and use it to compute the last affine output. */
   secp256k1_gej_copy__from__global(&globalToLocalGEJ1, &a[i]);
-  //logGPU << "DEBUG: at onset: a: "
-  //<< toStringSecp256k1_ECPointProjective(a[i])
-  //<< "\n copy: " << toStringSecp256k1_ECPointProjective(globalToLocalGEJ1)
-  //<< Logger::endL;
   secp256k1_fe_inv(&zi, &globalToLocalGEJ1.z);
-  //logGPU << "DEBUG: z inverse: "
-  //<< toStringSecp256k1_FieldElement(zi)
-  //<< Logger::endL;
   secp256k1_ge_set_gej_zinv(&globalToLocalGE1, &globalToLocalGEJ1, &zi);
-  //logGPU << "DEBUG: globalToLocalGE1 inside secp256k1_ge_set_table_gej_var: "
-  //<< toStringSecp256k1_ECPoint(globalToLocalGE1) << Logger::endL;
 
   secp256k1_ge_copy__to__global(&r[i], &globalToLocalGE1);
-  //logGPU << "DEBUG: r[i] after first copy : "
-  //<< toStringSecp256k1_ECPoint(globalToLocalGE1) << Logger::endL;
 
   /* Work out way backwards, using the z-ratios to scale the x/y values. */
   while (i > 0) {
     secp256k1_fe_mul__global(&zi, &zi, &zr[i]);
-    //logGPU << "DEBUG: zri @ loop start: "
-    //<< toStringSecp256k1_FieldElement(zr[i])
-    //<< Logger::endL;
-    //logGPU << "DEBUG: z inverse @ loop start: "
-    //<< toStringSecp256k1_FieldElement(zi)
-    //<< Logger::endL;
     i--;
     secp256k1_gej_copy__from__global(&globalToLocalGEJ1, &a[i]);
-    //logGPU << "DEBUG: globalToLocalGEJ1 inside secp256k1_ge_set_table_gej_var: "
-    //<< toStringSecp256k1_ECPointProjective(globalToLocalGEJ1) << Logger::endL;
-    //logGPU << "DEBUG: zi inside secp256k1_ge_set_table_gej_var: "
-    //<< toStringSecp256k1_FieldElement(zi) << Logger::endL;
 
     secp256k1_ge_set_gej_zinv(&globalToLocalGE1, &globalToLocalGEJ1, &zi);
-    //logGPU << "DEBUG: globalToLocalGE1 inside secp256k1_ge_set_table_gej_var: "
-    //<< toStringSecp256k1_ECPoint(globalToLocalGE1) << Logger::endL;
     secp256k1_ge_copy__to__global(&r[i], &globalToLocalGE1);
-    //logGPU << "DEBUG: r[i] inside secp256k1_ge_set_table_gej_var: "
-    //<< toStringSecp256k1_ECPoint(r[i]) << Logger::endL;
   }
 }
 
@@ -2661,7 +2636,6 @@ static void secp256k1_ecmult_odd_multiples_table(
   prej[0].infinity = 0;
 
   zr[0] = d.z;
-  //logGPU << "DEBUG: N: " << n << Logger::endL;
   for (i = 1; i < n; i ++) {
     secp256k1_gej_copy__from__global(&globalToLocal2, &prej[i - 1]);
     secp256k1_fe_copy__from__global(&globalToLocalFE1, &zr[i]);
@@ -2670,7 +2644,6 @@ static void secp256k1_ecmult_odd_multiples_table(
     //Failure to carry out the next command resulted in a bug.
     secp256k1_fe_copy__to__global(&zr[i], &globalToLocalFE1);
     secp256k1_gej_copy__to__global(&prej[i], &globalToLocal1);
-    //logGPU << "DEBUG: prej[i]: " << toStringSecp256k1_ECPointProjective( prej[i]) << Logger::endL;
   }
 
   /*
@@ -2680,8 +2653,6 @@ static void secp256k1_ecmult_odd_multiples_table(
   secp256k1_fe_copy__from__global(&globalToLocalFE2, &prej[n-1].z);
   secp256k1_fe_mul(&globalToLocalFE1, &globalToLocalFE2, &d.z);
   secp256k1_fe_copy__to__global(&prej[n-1].z, &globalToLocalFE1);
-  //logGPU << "DEBUG: prej[n-1].z: " << toStringSecp256k1_FieldElement( prej[n-1].z) << Logger::endL;
-
 }
 
 /** Fill a table 'pre' with precomputed odd multiples of a.
@@ -2705,7 +2676,6 @@ static void secp256k1_ecmult_odd_multiples_table_globalz_windowa(
   const secp256k1_gej *a,
   __global unsigned char* memoryPool
   ) {
-  logGPU << "Got to start of secp256k1_ecmult_odd_multiples_table_globalz_windowa." << Logger::endL;
   __global secp256k1_gej* prej = (__global secp256k1_gej*) checked_malloc(sizeof_secp256k1_gej() * ECMULT_TABLE_SIZE(WINDOW_A), memoryPool);
   __global secp256k1_fe* zr =    (__global secp256k1_fe* ) checked_malloc(sizeof_secp256k1_fe()  * ECMULT_TABLE_SIZE(WINDOW_A), memoryPool);
 
@@ -2713,7 +2683,6 @@ static void secp256k1_ecmult_odd_multiples_table_globalz_windowa(
   secp256k1_ecmult_odd_multiples_table(ECMULT_TABLE_SIZE(WINDOW_A), prej, zr, a);
   /* Bring them to the same Z denominator. */
   secp256k1_ge_globalz_set_table_gej(ECMULT_TABLE_SIZE(WINDOW_A), pre, globalz, prej, zr);
-  logGPU << "Got to END of secp256k1_ecmult_odd_multiples_table_globalz_windowa." << Logger::endL;
 }
 
 static void secp256k1_ecmult_odd_multiples_table_storage_var(
@@ -2737,8 +2706,6 @@ static void secp256k1_ecmult_odd_multiples_table_storage_var(
   for (i = 0; i < n; i ++) {
     secp256k1_ge_copy__from__global(&globalToLocalGE, &prea[i]);
     secp256k1_ge_to__global__storage(&pre[i], &globalToLocalGE);
-    //logGPU << "DEBUG: " << i << ": " << toStringSecp256k1_ECPointStorage(pre[i]) << Logger::endL;
-    //<< toStringSecp256k1_ECPoint(prea[i]) << Logger::endL;
   }
   memoryPool_freeMemory__global(prea);
   memoryPool_freeMemory__global(prej);
@@ -2850,9 +2817,6 @@ void secp256k1_ecmult(
 
   secp256k1_gej_set_infinity(r);
 
-  logGPU << "Got to before for loop." << Logger::endL;
-  logGPU << "Multiplication context: " 
-  << toStringSecp256k1_MultiplicationContext(*multiplicationContext, false) << Logger::endL;
   for (i = bits - 1; i >= 0; i --) {
     int n;
     secp256k1_gej_double_var(r, r, NULL);
@@ -4020,9 +3984,7 @@ char secp256k1_ecdsa_sig_verify(
   secp256k1_scalar_mul__global(&u2, &sn, sigr);
   secp256k1_gej_set_ge__global(&pubkeyj, pubkey);
 
-  logGPU << "Got to here pt 3." << Logger::endL;
   secp256k1_ecmult(multiplicationContext, &pr, &pubkeyj, &u2, &u1, memoryPoolSignatures);
-  logGPU << "Got to here pt 4." << Logger::endL;
   if (secp256k1_gej_is_infinity(&pr)) {
     return 0;
   }

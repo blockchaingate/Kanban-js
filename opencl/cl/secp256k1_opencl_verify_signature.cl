@@ -17,12 +17,9 @@ __kernel void secp256k1_opencl_verify_signature(
   __global const unsigned char *message,
   __global const unsigned char *memoryPoolMultiplicationContext
 ) {
-  logGPU << "Got to here pt 1." << Logger::endL;
   unsigned char result;
   __global secp256k1_ecmult_context* multiplicationContextPointer =
   memoryPool_read_multiplicationContextPointer(memoryPoolMultiplicationContext);
-  logGPU << "Multiplication context: " 
-  << toStringSecp256k1_MultiplicationContext(*multiplicationContextPointer, false) << Logger::endL;
 
   secp256k1_scalar scalarR, scalarS, scalarMessage;
   secp256k1_ge pointPublicKey;
@@ -37,7 +34,6 @@ __kernel void secp256k1_opencl_verify_signature(
   secp256k1_scalar_set_b32(&scalarMessage, message, NULL);
 
   memoryPool_initializeNoInitializationNoLog(MACRO_MEMORY_POOL_SIZE_Signature - 10, outputMemoryPoolSignature);
-  logGPU << "Got to here pt 2." << Logger::endL;
   result = (unsigned char) secp256k1_ecdsa_sig_verify(
     multiplicationContextPointer,
     &scalarR,

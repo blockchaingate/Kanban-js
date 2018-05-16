@@ -21,7 +21,7 @@ __kernel void secp256k1_opencl_sign(
   secp256k1_scalar_set_b32__global(&nonce, outputInputNonce, NULL);
 
   __global secp256k1_ecmult_gen_context* generatorContext =
-  memoryPool_read_generatorContextPointer(inputMemoryPoolGeneratorContext);
+  memoryPool_read_generatorContextPointer_NON_PORTABLE(inputMemoryPoolGeneratorContext);
 
   secp256k1_ecdsa_sig_sign(generatorContext, &outputSignatureR, &outputSignatureS, &secretKey, &message, &nonce, NULL);
   size_t outputSizeBuffer;

@@ -257,7 +257,7 @@ bool testMainPart2Signatures(GPU& theGPU) {
   }
   //getMultiplicationContext(bufferCentralPUMultiplicationContext, multiplicationContext);
   unsigned char signatureResult[1];
-  logTestCentralPU << "Got to here!" << Logger::endL;
+  signatureResult[1] = 0;
   CryptoEC256k1::verifySignature(
     &signatureResult[0],
     bufferCentralPUSignature,
@@ -292,7 +292,7 @@ bool testMainPart2Signatures(GPU& theGPU) {
 
 int testMain() {
   GPU theGPU;
-  theGPU.flagTurnOffToDebugCPU = true;
+  //theGPU.flagTurnOffToDebugCPU = true;
   if (!testMainPart1ComputeContexts(theGPU))
     return - 1;
   if (!testMainPart2Signatures(theGPU))

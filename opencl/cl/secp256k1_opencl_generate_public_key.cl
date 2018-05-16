@@ -18,7 +18,7 @@ __kernel void secp256k1_opencl_generate_public_key(
   secp256k1_scalar_set_b32__global(&secretKey, inputSecretKey, NULL);
 
   __global secp256k1_ecmult_gen_context* generatorContext =
-  memoryPool_read_generatorContextPointer(inputMemoryPoolGeneratorContext);
+  memoryPool_read_generatorContextPointer_NON_PORTABLE(inputMemoryPoolGeneratorContext);
 
   secp256k1_ge publicKey;
   secp256k1_gej publicKeyJacobianCoordinates;
