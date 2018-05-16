@@ -130,6 +130,72 @@ bool CryptoEC256k1GPU::signMessage(
   return true;
 }
 
+bool CryptoEC256k1GPU::generatePublicKey(
+  unsigned char *outputPublicKey,
+  unsigned int *outputPublicKeySize,
+  unsigned char *inputSecretKey,
+  GPU &theGPU
+) {
+  if (!theGPU.initializeAll())
+    return false;
+  std::shared_ptr<GPUKernel> kernelGeneratePublicKey = theGPU.theKernels[GPU::kernelGeneratePublicKey];
+  kernelGeneratePublicKey->writeToBuffer(2, inputSecretKey, 32);
+  logGPU << "DEBUG: Got to generate public key start." << Logger::endL;
+  cl_int ret = clEnqueueNDRangeKernel(
+    theGPU.commandQueue,
+    kernelGeneratePublicKey->kernel,
+    1,
+    NULL,
+    &kernelGeneratePublicKey->global_item_size,
+    &kernelGeneratePublicKey->local_item_size,
+    0,
+    NULL,
+    NULL
+  );
+  if (ret != CL_SUCCESS) {
+    logGPU << "Failed to enqueue kernel. Return code: " << ret << ". " << Logger::endL;
+    return false;
+  }
+  cl_mem& resultPublicKeySize = kernelGeneratePublicKey->outputs[1]->theMemory;
+  unsigned char outputSizeBuffer[4];
+
+  logGPU << "DEBUG: enqueued output size. " << Logger::endL;
+  ret = clEnqueueReadBuffer(
+    theGPU.commandQueue,
+    resultPublicKeySize,
+    CL_TRUE,
+    0,
+    4,
+    (void*) outputSizeBuffer,
+    0,
+    NULL,
+    NULL
+  );
+  if (ret != CL_SUCCESS) {
+    logGPU << "Failed to read size buffer. Return code: " << ret << Logger::endL;
+    return false;
+  }
+  *outputPublicKeySize = memoryPool_read_uint(outputSizeBuffer);
+  cl_mem& resultSignature = kernelGeneratePublicKey->outputs[0]->theMemory;
+  ret = clEnqueueReadBuffer(
+    theGPU.commandQueue,
+    resultSignature,
+    CL_TRUE,
+    0,
+    *outputPublicKeySize,
+    (void*) outputPublicKey,
+    0,
+    NULL,
+    NULL
+  );
+  if (ret != CL_SUCCESS) {
+    logGPU << "Failed to read signature buffer. Wanted to read: "
+    << *outputPublicKeySize << " bytes. Return code: " << ret << Logger::endL;
+    return false;
+  }
+  return true;
+}
+
 bool CryptoEC256k1::signMessage(
   unsigned char* outputSignature,
   unsigned int* outputSize,

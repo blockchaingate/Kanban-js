@@ -15,11 +15,9 @@ public:
   static bool computeMultiplicationContext(unsigned char* outputMemoryPool, GPU& theGPU);
   static bool computeGeneratorContext(unsigned char* outputMemoryPool, GPU& theGPU);
   static bool generatePublicKey(
-    unsigned char* outputSignatures,
-    unsigned int* outputSize,
-    unsigned char* outputInputNonce,
-    unsigned char* inputMessage,
-    unsigned char* inputNonce,
+    unsigned char* outputPublicKey,
+    unsigned int* outputPublicKeySize,
+    unsigned char* inputSecretKey,
     GPU& theGPU
   );
   static bool signMessage(

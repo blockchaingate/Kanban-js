@@ -206,6 +206,29 @@ bool GPU::initializeKernels() {
     return false;
   std::shared_ptr<GPUKernel> kernelGeneratorContext = this->theKernels[this->kernelInitializeGeneratorContext];
   if (!this->createKernel(
+    this->kernelGeneratePublicKey,
+    {
+      "outputPublicKey",
+      "outputPublicKeySize"
+    },
+    {
+      SharedMemory::typeVoidPointer,
+      SharedMemory::typeVoidPointer,
+    },
+    {
+      "inputSecretKey",
+      "inputMemoryPoolGeneratorContext"
+    },
+    {
+      SharedMemory::typeVoidPointer,
+      SharedMemory::typeVoidPointerExternalOwnership
+    },
+    {
+      &kernelGeneratorContext->outputs[0]->theMemory
+    }
+  ))
+    return false;
+  if (!this->createKernel(
     this->kernelSign,
     {
       "outputSignature",
@@ -227,7 +250,9 @@ bool GPU::initializeKernels() {
       SharedMemory::typeVoidPointer,
       SharedMemory::typeVoidPointerExternalOwnership
     },
-    {}
+    {
+      &kernelGeneratorContext->outputs[0]->theMemory
+    }
   ))
     return false;
   this->flagInitializedKernels = true;
@@ -267,6 +292,7 @@ std::string GPU::kernelInitializeMultiplicationContext = "secp256k1_opencl_compu
 std::string GPU::kernelInitializeGeneratorContext = "secp256k1_opencl_compute_generator_context";
 std::string GPU::kernelVerifySignature = "secp256k1_opencl_verify_signature";
 std::string GPU::kernelSign = "secp256k1_opencl_sign";
+std::string GPU::kernelGeneratePublicKey = "secp256k1_opencl_generate_public_key";
 
 const int maxProgramBuildBufferSize = 10000000;
 char programBuildBuffer[maxProgramBuildBufferSize];

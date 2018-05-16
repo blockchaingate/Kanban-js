@@ -150,7 +150,15 @@ public:
   unsigned int size;
   unsigned char serialization[maxSerializationSize];
   std::string toString();
+  void reset();
 };
+
+void PublicKey::reset() {
+  for (int i = 0; i < this->maxSerializationSize; i++) {
+    this->serialization[i] = 0;
+  }
+  this->size = 0;
+}
 
 std::string PublicKey::toString() {
   std::string buffer;
@@ -239,12 +247,15 @@ bool testMainPart2Signatures(GPU& theGPU) {
     bufferCentralPUGeneratorContext
   );
   logTestCentralPU << "Public key:\n" << thePublicKey.toString() << Logger::endL;
-//  CryptoEC256k1GPU::generatePublicKey(
-//    thePublicKey.serialization,
-//    &thePublicKey.size,
-//    theKey.key.serialization
-//  );
-//  logTestGraphicsPU << "Public key:\n" << thePublicKey.toString() << Logger::endL;
+  thePublicKey.reset();
+  if (!CryptoEC256k1GPU::generatePublicKey(
+    thePublicKey.serialization,
+    &thePublicKey.size,
+    theKey.key.serialization,
+    theGPU
+  ))
+    logTestGraphicsPU << "ERROR: generatePublicKey returned false. " << Logger::endL;
+  logTestGraphicsPU << "Public key:\n" << thePublicKey.toString() << Logger::endL;
 
 /*  secp256k1_ecmult_context multiplicationContext;
   secp256k1_ecmult_context_init(&multiplicationContext);

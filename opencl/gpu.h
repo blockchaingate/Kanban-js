@@ -95,6 +95,7 @@ public:
   static std::string kernelTestBuffer;
   static std::string kernelInitializeMultiplicationContext;
   static std::string kernelInitializeGeneratorContext;
+  static std::string kernelGeneratePublicKey;
   static std::string kernelSign;
   static std::string kernelVerifySignature;
   std::unordered_map<std::string, std::shared_ptr<GPUKernel> > theKernels;
