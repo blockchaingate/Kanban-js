@@ -750,7 +750,6 @@ void APPEND_ADDRESS_SPACE(secp256k1_scalar_set_b32)(secp256k1_scalar *r, ADDRESS
   }
 }
 
-
 int APPEND_ADDRESS_SPACE(secp256k1_scalar_is_zero)(ADDRESS_SPACE const secp256k1_scalar *a) {
     return (a->d[0] | a->d[1] | a->d[2] | a->d[3] | a->d[4] | a->d[5] | a->d[6] | a->d[7]) == 0;
 }
@@ -1129,5 +1128,72 @@ void APPEND_ADDRESS_SPACE(secp256k1_scalar_inverse_var)(secp256k1_scalar *r, ADD
 
 
 //******From ecdsa_impl.h******
+int APPEND_ADDRESS_SPACE(secp256k1_ecdsa_sig_parse)(
+  secp256k1_scalar *rr, 
+  secp256k1_scalar *rs, 
+  ADDRESS_SPACE const unsigned char *sig, 
+  size_t size
+) {
+  unsigned char ra[32] = {0}, sa[32] = {0};
+  ADDRESS_SPACE const unsigned char *rp;
+  ADDRESS_SPACE const unsigned char *sp;
+  size_t lenr;
+  size_t lens;
+  int overflow;
+  if (sig[0] != 0x30) {
+    return 0;
+  }
+  lenr = sig[3];
+  if (5 + lenr >= size) {
+    return 0;
+  }
+  lens = sig[lenr + 5];
+  if (sig[1] != lenr + lens + 4) {
+    return 0;
+  }
+  if (lenr + lens + 6 > size) {
+    return 0;
+  }
+  if (sig[2] != 0x02) {
+    return 0;
+  }
+  if (lenr == 0) {
+    return 0;
+  }
+  if (sig[lenr + 4] != 0x02) {
+    return 0;
+  }
+  if (lens == 0) {
+    return 0;
+  }
+  sp = sig + 6 + lenr;
+  while (lens > 0 && sp[0] == 0) {
+    lens --;
+    sp ++;
+  }
+  if (lens > 32) {
+    return 0;
+  }
+  rp = sig + 4;
+  while (lenr > 0 && rp[0] == 0) {
+    lenr --;
+    rp ++;
+  }
+  if (lenr > 32) {
+    return 0;
+  }
+  APPEND_ADDRESS_SPACE(memoryCopy)(ra + 32 - lenr, rp, lenr);
+  APPEND_ADDRESS_SPACE(memoryCopy)(sa + 32 - lens, sp, lens);
+  overflow = 0;
+  secp256k1_scalar_set_b32(rr, ra, &overflow);
+  if (overflow) {
+    return 0;
+  }
+  secp256k1_scalar_set_b32(rs, sa, &overflow);
+  if (overflow) {
+    return 0;
+  }
+  return 1;
+}
 
 //******end of ecdsa_impl.h******

@@ -122,3 +122,13 @@ void APPEND_ADDRESS_SPACE(secp256k1_scalar_mul_512)(
   ADDRESS_SPACE const secp256k1_scalar *b
 );
 //******end of scalar_8x32_impl.h******
+
+
+//******From ecdsa_impl.h******
+int APPEND_ADDRESS_SPACE(secp256k1_ecdsa_sig_parse)(
+  secp256k1_scalar *r, 
+  secp256k1_scalar *s, 
+  ADDRESS_SPACE const unsigned char *sig, 
+  size_t size
+);
+//******end of ecdsa_impl.h******

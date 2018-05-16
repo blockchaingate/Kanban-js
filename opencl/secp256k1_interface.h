@@ -32,8 +32,11 @@ public:
   static bool verifySignature(
     unsigned char* output,
     const unsigned char* inputSignature,
+    unsigned int signatureSize,
     const unsigned char* publicKey,
-    const unsigned char* message
+    unsigned int publicKeySize,
+    const unsigned char* message,
+    GPU& theGPU
   );
 };
 

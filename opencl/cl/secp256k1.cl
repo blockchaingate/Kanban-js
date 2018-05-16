@@ -108,7 +108,7 @@ unsigned int memoryPool_readNumberReservedBytesIncludingLog(){
   return memoryPool_readNumberReservedBytesExcludingLog() + MACRO_MessageLogSize;
 }
 
-void memoryPool_initializeNoInitializationNoLog(unsigned int totalSize, __global unsigned char* memoryPool) {
+void memoryPool_initializeNoZeroingNoLog(unsigned int totalSize, __global unsigned char* memoryPool) {
   unsigned int reservedBytes;
   memoryPool_write_uint(totalSize, memoryPool);
   reservedBytes  = memoryPool_readNumberReservedBytesExcludingLog();
@@ -117,7 +117,7 @@ void memoryPool_initializeNoInitializationNoLog(unsigned int totalSize, __global
 
 void memoryPool_initialize(unsigned int totalSize, __global unsigned char* memoryPool) {
   unsigned int i, reservedBytes;
-  memoryPool_initializeNoInitializationNoLog(totalSize, memoryPool);
+  memoryPool_initializeNoZeroingNoLog(totalSize, memoryPool);
   reservedBytes  = memoryPool_readNumberReservedBytesExcludingLog();
   for (i = 0; i < MACRO_numberOfOutputs; i ++){
     memoryPool_write_uint(0, &memoryPool[8 + 4 * i]);
@@ -263,7 +263,7 @@ void memoryPool_read_generatorContext_PORTABLE(
   outputGeneratorContext->prec = (__global secp256k1_ge_storage*) &memoryPool[outputPositionGeneratorContextContent];
 }
 
-__global secp256k1_ecmult_context* memoryPool_read_multiplicationContextPointer(
+__global secp256k1_ecmult_context* memoryPool_read_multiplicationContextPointer_NON_PORTABLE(
   __global const unsigned char* memoryPool
 ) {
   uint32_t position = memoryPool_read_uint_fromOutput(0, memoryPool);
@@ -3736,69 +3736,6 @@ ___static__constant secp256k1_fe secp256k1_ecdsa_const_p_minus_order = SECP256K1
     0, 0, 0, 1, 0x45512319UL, 0x50B75FC4UL, 0x402DA172UL, 0x2FC9BAEEUL
 );
 
-int secp256k1_ecdsa_sig_parse(secp256k1_scalar *rr, secp256k1_scalar *rs, const unsigned char *sig, size_t size) {
-    unsigned char ra[32] = {0}, sa[32] = {0};
-    const unsigned char *rp;
-    const unsigned char *sp;
-    size_t lenr;
-    size_t lens;
-    int overflow;
-    if (sig[0] != 0x30) {
-        return 0;
-    }
-    lenr = sig[3];
-    if (5+lenr >= size) {
-        return 0;
-    }
-    lens = sig[lenr + 5];
-    if (sig[1] != lenr + lens + 4) {
-        return 0;
-    }
-    if (lenr+lens+6 > size) {
-        return 0;
-    }
-    if (sig[2] != 0x02) {
-        return 0;
-    }
-    if (lenr == 0) {
-        return 0;
-    }
-    if (sig[lenr+4] != 0x02) {
-        return 0;
-    }
-    if (lens == 0) {
-        return 0;
-    }
-    sp = sig + 6 + lenr;
-    while (lens > 0 && sp[0] == 0) {
-        lens--;
-        sp++;
-    }
-    if (lens > 32) {
-        return 0;
-    }
-    rp = sig + 4;
-    while (lenr > 0 && rp[0] == 0) {
-        lenr--;
-        rp++;
-    }
-    if (lenr > 32) {
-        return 0;
-    }
-    memoryCopy(ra + 32 - lenr, rp, lenr);
-    memoryCopy(sa + 32 - lens, sp, lens);
-    overflow = 0;
-    secp256k1_scalar_set_b32(rr, ra, &overflow);
-    if (overflow) {
-        return 0;
-    }
-    secp256k1_scalar_set_b32(rs, sa, &overflow);
-    if (overflow) {
-        return 0;
-    }
-    return 1;
-}
-
 /*Same as the next function, except that it's working with the local address space.*/
 int secp256k1_ecdsa_sig_serialize(
   unsigned char *sig,
@@ -3964,10 +3901,10 @@ int secp256k1_ecdsa_sig_recover(
 
 char secp256k1_ecdsa_sig_verify(
   __global const secp256k1_ecmult_context *multiplicationContext,
-  __global const secp256k1_scalar *sigr,
-  __global const secp256k1_scalar *sigs,
-  __global const secp256k1_ge *pubkey,
-  __global const secp256k1_scalar *message,
+  const secp256k1_scalar *sigr,
+  const secp256k1_scalar *sigs,
+  const secp256k1_ge *pubkey,
+  const secp256k1_scalar *message,
   __global unsigned char* memoryPoolSignatures
 ) {
   unsigned char c[32];
@@ -3975,20 +3912,20 @@ char secp256k1_ecdsa_sig_verify(
   secp256k1_fe xr;
   secp256k1_gej pubkeyj;
   secp256k1_gej pr;
-  if (secp256k1_scalar_is_zero__global(sigr) || secp256k1_scalar_is_zero__global(sigs)) {
+  if (secp256k1_scalar_is_zero(sigr) || secp256k1_scalar_is_zero(sigs)) {
     return 0;
   }
 
-  secp256k1_scalar_inverse_var__global(&sn, sigs);
-  secp256k1_scalar_mul__global(&u1, &sn, message);
-  secp256k1_scalar_mul__global(&u2, &sn, sigr);
-  secp256k1_gej_set_ge__global(&pubkeyj, pubkey);
+  secp256k1_scalar_inverse_var(&sn, sigs);
+  secp256k1_scalar_mul(&u1, &sn, message);
+  secp256k1_scalar_mul(&u2, &sn, sigr);
+  secp256k1_gej_set_ge(&pubkeyj, pubkey);
 
   secp256k1_ecmult(multiplicationContext, &pr, &pubkeyj, &u2, &u1, memoryPoolSignatures);
   if (secp256k1_gej_is_infinity(&pr)) {
     return 0;
   }
-  secp256k1_scalar_get_b32__global(c, sigr);
+  secp256k1_scalar_get_b32(c, sigr);
   secp256k1_fe_set_b32(&xr, c);
 
   /** We now have the recomputed R point in pr, and its claimed x coordinate (modulo n)

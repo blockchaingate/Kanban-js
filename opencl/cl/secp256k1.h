@@ -31,7 +31,7 @@ Please see the file opencl/README.md for technical notes on this code.
 #define MACRO_MessageLogSize 500
 #define MACRO_MEMORY_POOL_SIZE_MultiplicationContext 6000000
 #define MACRO_MEMORY_POOL_SIZE_GeneratorContext 2000000
-#define MACRO_MEMORY_POOL_SIZE_Signature 1000000
+#define MACRO_MEMORY_POOL_SIZE_Signature 250000
 
 
 __global void* checked_malloc(unsigned int size, __global unsigned char* memoryPool);
@@ -39,7 +39,6 @@ void memoryPool_write_uint(unsigned int numberToWrite, __global unsigned char* m
 void memoryPool_write_uint_asOutput(unsigned int numberToWrite, int argumentIndex, __global unsigned char* memoryPoolPointer);
 void memoryPool_writeString(__constant const char* message, __global unsigned char* memoryPool);
 void memoryPool_writeCurrentSizeAsOutput(unsigned int argumentIndex, __global unsigned char* memoryPool);
-
 
 
 unsigned int memoryPool_read_uint(__global const unsigned char *memoryPoolPointer);
@@ -53,7 +52,7 @@ unsigned int memoryPool_readNumberReservedBytesIncludingLog();
 
 //Memory pool format: in the notes before the definition of memoryPool_initialize.
 void memoryPool_initialize(unsigned int totalSize, __global unsigned char* memoryPool);
-void memoryPool_initializeNoInitializationNoLog(unsigned int totalSize, __global unsigned char* memoryPool);
+void memoryPool_initializeNoZeroingNoLog(unsigned int totalSize, __global unsigned char* memoryPool);
 
 void assertFalse(__constant const char* errorMessage, __global unsigned char *memoryPool);
 
@@ -420,7 +419,6 @@ void secp256k1_gej_copy__from__global(secp256k1_gej* output, __global const secp
 
 
 //******From ecdsa.h******
-int secp256k1_ecdsa_sig_parse(secp256k1_scalar *r, secp256k1_scalar *s, const unsigned char *sig, size_t size);
 int secp256k1_ecdsa_sig_serialize(
   unsigned char *sig, 
   size_t* inputAvailableSizeOutputFinalSize, 
@@ -457,10 +455,10 @@ int secp256k1_ecdsa_sig_recover(
 
 char secp256k1_ecdsa_sig_verify(
   __global const secp256k1_ecmult_context *ctx,
-  __global const secp256k1_scalar* r,
-  __global const secp256k1_scalar* s,
-  __global const secp256k1_ge *pubkey,
-  __global const secp256k1_scalar *message,
+  const secp256k1_scalar* r,
+  const secp256k1_scalar* s,
+  const secp256k1_ge *pubkey,
+  const secp256k1_scalar *message,
   __global unsigned char* memoryPoolSignatures
 );
 

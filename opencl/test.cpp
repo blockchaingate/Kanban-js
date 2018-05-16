@@ -257,7 +257,7 @@ bool testMainPart2Signatures(GPU& theGPU) {
   }
   //getMultiplicationContext(bufferCentralPUMultiplicationContext, multiplicationContext);
   unsigned char signatureResult[1];
-  signatureResult[1] = 0;
+  signatureResult[0] = 3;
   CryptoEC256k1::verifySignature(
     &signatureResult[0],
     bufferCentralPUSignature,
@@ -268,7 +268,47 @@ bool testMainPart2Signatures(GPU& theGPU) {
     message.serialization,
     bufferCentralPUMultiplicationContext
   );
-  logTestCentralPU << "Signature verification: " << (int) signatureResult[0] << Logger::endL;
+  logTestCentralPU << "Signature verification (expected 1): " << (int) signatureResult[0] << Logger::endL;
+
+  signatureResult[0] = 3;
+  if (!CryptoEC256k1GPU::verifySignature(
+    &signatureResult[0],
+    theSignature.serialization,
+    theSignature.size,
+    thePublicKey.serialization,
+    thePublicKey.size,
+    message.serialization,
+    theGPU
+  ))
+    logTestGraphicsPU << "ERROR: verifySignature returned false. " << Logger::endL;
+  logTestGraphicsPU << "Signature verification (expected 1): " << (int) signatureResult[0] << Logger::endL;
+
+  theSignature.serialization[4] = 5;
+  signatureResult[0] = 3;
+  CryptoEC256k1::verifySignature(
+    &signatureResult[0],
+    bufferCentralPUSignature,
+    theSignature.serialization,
+    theSignature.size,
+    thePublicKey.serialization,
+    thePublicKey.size,
+    message.serialization,
+    bufferCentralPUMultiplicationContext
+  );
+  logTestCentralPU << "Bad signature verification (expected 0): " << (int) signatureResult[0] << Logger::endL;
+
+  signatureResult[0] = 3;
+  if (!CryptoEC256k1GPU::verifySignature(
+    &signatureResult[0],
+    theSignature.serialization,
+    theSignature.size,
+    thePublicKey.serialization,
+    thePublicKey.size,
+    message.serialization,
+    theGPU
+  ))
+    logTestGraphicsPU << "ERROR: verifySignature returned false. " << Logger::endL;
+  logTestGraphicsPU << "Bad signature verification (expected 0): " << (int) signatureResult[0] << Logger::endL;
 
   /*
   int signatureResult = secp256k1_ecdsa_sig_verify(

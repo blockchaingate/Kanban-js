@@ -3,7 +3,7 @@
 #include <fstream>
 #include <iostream>
 #include <iomanip>
-
+#include <assert.h>
 #define MAX_SOURCE_SIZE (0x100000)
 
 Logger logGPU("../logfiles/logGPU.txt", "[GPU] ");
@@ -212,6 +212,48 @@ bool GPU::initializeKernels() {
     {}
   ))
     return false;
+  std::shared_ptr<GPUKernel> kernelMultiplicationContext = this->theKernels[this->kernelInitializeMultiplicationContext];
+  //openCL function arguments:
+  //__global unsigned char *output,
+  //__global unsigned char *outputMemoryPoolSignature,
+  //__global const unsigned char *inputSignature,
+  //unsigned int signatureSize,
+  //__global const unsigned char *publicKey,
+  //unsigned int publicKeySize,
+  //__global const unsigned char *message,
+  //__global const unsigned char *memoryPoolMultiplicationContext
+
+  if (!this->createKernel(
+    this->kernelVerifySignature,
+    {
+      "output",
+      "outputMemoryPoolSignature",
+    },
+    {
+      SharedMemory::typeVoidPointer,
+      SharedMemory::typeVoidPointer
+    },
+    {
+      "inputSignature",
+      "signatureSize",
+      "publicKey",
+      "publicKeySize",
+      "message",
+      "memoryPoolMultiplicationContext"
+    },
+    {
+      SharedMemory::typeVoidPointer,
+      SharedMemory::typeUint,
+      SharedMemory::typeVoidPointer,
+      SharedMemory::typeUint,
+      SharedMemory::typeVoidPointer,
+      SharedMemory::typeVoidPointerExternalOwnership
+    },
+    {
+      &kernelMultiplicationContext->outputs[0]->theMemory
+    }
+  ))
+    return false;
   if (!this->createKernel(
     this->kernelInitializeGeneratorContext,
     {"outputGeneratorContext"},
@@ -287,6 +329,13 @@ bool GPU::createKernel(
   const std::vector<cl_mem*>& inputExternalBuffers
 ) {
   std::shared_ptr<GPUKernel> incomingKernel = std::make_shared<GPUKernel>();
+  if (inputs.size() != inputTypes.size() || outputs.size() != outputTypes.size()){
+    logGPU << "Error: while initializing: " << fileNameNoExtension << ", got "
+    << " non-matching number of kernel arguments and kernel argument types, namely "
+    << inputs.size() << " inputs, " << inputTypes.size() << " input types, "
+    << outputs.size() << " outputs, " << outputTypes.size() << " output types. " << Logger::endL;
+    assert(false);
+  }
   if (!incomingKernel->constructFromFileName(
     fileNameNoExtension, outputs, outputTypes, inputs, inputTypes, inputExternalBuffers, *this
   ))
@@ -504,17 +553,18 @@ bool GPUKernel::writeToBuffer(unsigned argumentNumber, const void *input, size_t
       argumentNumber < this->outputs.size() ?
         this->outputs[argumentNumber]->theMemory :
         this->inputs[argumentNumber - this->outputs.size()]->theMemory;
-  if (clEnqueueWriteBuffer(
-        this->owner->commandQueue,
-        bufferToWriteInto,
-        CL_TRUE,
-        0,
-        size,
-        input,
-        0,
-        NULL,
-        NULL) != CL_SUCCESS
-  ) {
+  cl_int ret = clEnqueueWriteBuffer(
+    this->owner->commandQueue,
+    bufferToWriteInto,
+    CL_TRUE,
+    0,
+    size,
+    input,
+    0,
+    NULL,
+    NULL
+  );
+  if (ret != CL_SUCCESS) {
     logGPU << "Enqueueing write buffer failed with input: " << input << Logger::endL;
     return false;
   }

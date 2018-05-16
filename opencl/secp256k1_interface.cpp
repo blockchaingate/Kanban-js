@@ -196,6 +196,69 @@ bool CryptoEC256k1GPU::generatePublicKey(
   return true;
 }
 
+bool CryptoEC256k1GPU::verifySignature(
+  unsigned char *output,
+  const unsigned char *inputSignature,
+  unsigned int signatureSize,
+  const unsigned char *publicKey,
+  unsigned int publicKeySize,
+  const unsigned char *message,
+  GPU &theGPU
+) {
+  //openCL function arguments:
+  //__global unsigned char *output,
+  //__global unsigned char *outputMemoryPoolSignature,
+  //__global const unsigned char *inputSignature,
+  //unsigned int signatureSize,
+  //__global const unsigned char *publicKey,
+  //unsigned int publicKeySize,
+  //__global const unsigned char *message,
+  //__global const unsigned char *memoryPoolMultiplicationContext
+  if (!theGPU.initializeAll())
+    return false;
+  std::shared_ptr<GPUKernel> kernelVerifySignature = theGPU.theKernels[GPU::kernelVerifySignature];
+  kernelVerifySignature->writeToBuffer(2, inputSignature, signatureSize);
+  kernelVerifySignature->writeArgument(3, signatureSize);
+  kernelVerifySignature->writeToBuffer(4, publicKey, publicKeySize);
+  kernelVerifySignature->writeArgument(5, publicKeySize);
+  kernelVerifySignature->writeToBuffer(6, message, 32);
+
+  logGPU << "DEBUG: Got to generate public key start." << Logger::endL;
+  cl_int ret = clEnqueueNDRangeKernel(
+    theGPU.commandQueue,
+    kernelVerifySignature->kernel,
+    1,
+    NULL,
+    &kernelVerifySignature->global_item_size,
+    &kernelVerifySignature->local_item_size,
+    0,
+    NULL,
+    NULL
+  );
+  if (ret != CL_SUCCESS) {
+    logGPU << "Failed to enqueue verify signature kernel. Return code: " << ret << ". " << Logger::endL;
+    return false;
+  }
+  cl_mem& resultSignature = kernelVerifySignature->outputs[0]->theMemory;
+  logGPU << "DEBUG: enqueued output size. " << Logger::endL;
+  ret = clEnqueueReadBuffer(
+    theGPU.commandQueue,
+    resultSignature,
+    CL_TRUE,
+    0,
+    1,
+    (void*) output,
+    0,
+    NULL,
+    NULL
+  );
+  if (ret != CL_SUCCESS) {
+    logGPU << "Failed to read size buffer. Return code: " << ret << Logger::endL;
+    return false;
+  }
+  return true;
+}
+
 bool CryptoEC256k1::signMessage(
   unsigned char* outputSignature,
   unsigned int* outputSize,
