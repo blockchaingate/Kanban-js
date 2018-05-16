@@ -248,7 +248,7 @@ __global secp256k1_ecmult_gen_context* memoryPool_read_generatorContextPointer(
   return ((__global secp256k1_ecmult_gen_context*) &memoryPool[position]);
 }
 
-void memoryPool_read_generatorContext(
+void memoryPool_read_generatorContext_PORTABLE(
   __global secp256k1_ecmult_gen_context* outputGeneratorContext,
   __global const unsigned char* memoryPool
 ) {
@@ -270,12 +270,12 @@ __global secp256k1_ecmult_context* memoryPool_read_multiplicationContextPointer(
   return (__global secp256k1_ecmult_context*) &memoryPool[position];
 }
 
-void memoryPool_read_multiplicationContext(
+void memoryPool_read_multiplicationContext_PORTABLE(
   __global secp256k1_ecmult_context* outputMultiplicationContext,
   __global const unsigned char* memoryPool
 ) {
   outputMultiplicationContext->pre_g = NULL;
-  uint32_t position = memoryPool_read_uint_fromOutput(0, memoryPool);
+  uint32_t position = memoryPool_read_uint_fromOutput(1, memoryPool);
   //int sizeOfGeneratorContextLump = (16 * 64 * sizeof(secp256k1_ge_storage));
   //logTest << "Size of generator context lump: " << sizeOfGeneratorContextLump << Logger::endL;
   //for (int i = 0; i < sizeOfGeneratorContextLump; i++)
@@ -2456,9 +2456,6 @@ static unsigned int secp256k1_scalar_get_bits(const secp256k1_scalar *a, unsigne
 /** Access bits from a scalar. Not constant time. */
 static unsigned int secp256k1_scalar_get_bits_var(const secp256k1_scalar *a, unsigned int offset, unsigned int count);
 
-/** Set a scalar from a big endian byte array. */
-void secp256k1_scalar_set_b32(secp256k1_scalar *r, const unsigned char *bin, int *overflow);
-
 /** Set a scalar to an unsigned integer. */
 static void secp256k1_scalar_set_int(secp256k1_scalar *r, unsigned int v);
 
@@ -2708,13 +2705,15 @@ static void secp256k1_ecmult_odd_multiples_table_globalz_windowa(
   const secp256k1_gej *a,
   __global unsigned char* memoryPool
   ) {
-    __global secp256k1_gej* prej = (__global secp256k1_gej*) checked_malloc(sizeof_secp256k1_gej() * ECMULT_TABLE_SIZE(WINDOW_A), memoryPool);
-    __global secp256k1_fe* zr =    (__global secp256k1_fe* ) checked_malloc(sizeof_secp256k1_fe()  * ECMULT_TABLE_SIZE(WINDOW_A), memoryPool);
+  logGPU << "Got to start of secp256k1_ecmult_odd_multiples_table_globalz_windowa." << Logger::endL;
+  __global secp256k1_gej* prej = (__global secp256k1_gej*) checked_malloc(sizeof_secp256k1_gej() * ECMULT_TABLE_SIZE(WINDOW_A), memoryPool);
+  __global secp256k1_fe* zr =    (__global secp256k1_fe* ) checked_malloc(sizeof_secp256k1_fe()  * ECMULT_TABLE_SIZE(WINDOW_A), memoryPool);
 
-    /* Compute the odd multiples in Jacobian form. */
-    secp256k1_ecmult_odd_multiples_table(ECMULT_TABLE_SIZE(WINDOW_A), prej, zr, a);
-    /* Bring them to the same Z denominator. */
-    secp256k1_ge_globalz_set_table_gej(ECMULT_TABLE_SIZE(WINDOW_A), pre, globalz, prej, zr);
+  /* Compute the odd multiples in Jacobian form. */
+  secp256k1_ecmult_odd_multiples_table(ECMULT_TABLE_SIZE(WINDOW_A), prej, zr, a);
+  /* Bring them to the same Z denominator. */
+  secp256k1_ge_globalz_set_table_gej(ECMULT_TABLE_SIZE(WINDOW_A), pre, globalz, prej, zr);
+  logGPU << "Got to END of secp256k1_ecmult_odd_multiples_table_globalz_windowa." << Logger::endL;
 }
 
 static void secp256k1_ecmult_odd_multiples_table_storage_var(
@@ -2810,7 +2809,7 @@ static int secp256k1_ecmult_wnaf(int *wnaf, int len, const secp256k1_scalar *a, 
 }
 
 void secp256k1_ecmult(
-  __global const secp256k1_ecmult_context *ctx,
+  __global const secp256k1_ecmult_context *multiplicationContext,
   secp256k1_gej *r,
   const secp256k1_gej *a,
   const secp256k1_scalar *na,
@@ -2851,7 +2850,10 @@ void secp256k1_ecmult(
 
   secp256k1_gej_set_infinity(r);
 
-  for (i = bits - 1; i >= 0; i--) {
+  logGPU << "Got to before for loop." << Logger::endL;
+  logGPU << "Multiplication context: " 
+  << toStringSecp256k1_MultiplicationContext(*multiplicationContext, false) << Logger::endL;
+  for (i = bits - 1; i >= 0; i --) {
     int n;
     secp256k1_gej_double_var(r, r, NULL);
     if (i < bits_na && (n = wnaf_na[i])) {
@@ -2859,7 +2861,7 @@ void secp256k1_ecmult(
       secp256k1_gej_add_ge_var(r, r, &tmpa, NULL);
     }
     if (i < bits_ng && (n = wnaf_ng[i])) {
-      ECMULT_TABLE_GET_GE_STORAGE(&tmpa, *ctx->pre_g, n, WINDOW_G);
+      ECMULT_TABLE_GET_GE_STORAGE(&tmpa, *multiplicationContext->pre_g, n, WINDOW_G);
       secp256k1_gej_add_zinv_var(r, r, &tmpa, &Z);
     }
   }
@@ -3674,7 +3676,7 @@ void secp256k1_ecmult_context_build(
   /* get the generator */
   //openCL note: secp256k1_ge_const_g is always in the __constant address space.
   secp256k1_gej_set_ge__constant(&gj, &secp256k1_ge_const_g);
-  memoryPool_writeCurrentSizeAsOutput(0, memoryPool);
+  memoryPool_writeCurrentSizeAsOutput(1, memoryPool);
   output->pre_g = (__global secp256k1_ge_storage (*)[]) checked_malloc(
     ECMULT_TABLE_SIZE(WINDOW_G) * sizeof_secp256k1_ge_storage(),
     memoryPool
@@ -3997,7 +3999,7 @@ int secp256k1_ecdsa_sig_recover(
 }
 
 char secp256k1_ecdsa_sig_verify(
-  __global const secp256k1_ecmult_context *ctx,
+  __global const secp256k1_ecmult_context *multiplicationContext,
   __global const secp256k1_scalar *sigr,
   __global const secp256k1_scalar *sigs,
   __global const secp256k1_ge *pubkey,
@@ -4018,7 +4020,9 @@ char secp256k1_ecdsa_sig_verify(
   secp256k1_scalar_mul__global(&u2, &sn, sigr);
   secp256k1_gej_set_ge__global(&pubkeyj, pubkey);
 
-  secp256k1_ecmult(ctx, &pr, &pubkeyj, &u2, &u1, memoryPoolSignatures);
+  logGPU << "Got to here pt 3." << Logger::endL;
+  secp256k1_ecmult(multiplicationContext, &pr, &pubkeyj, &u2, &u1, memoryPoolSignatures);
+  logGPU << "Got to here pt 4." << Logger::endL;
   if (secp256k1_gej_is_infinity(&pr)) {
     return 0;
   }

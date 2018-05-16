@@ -27,7 +27,9 @@ extern int testMain();
 int main(int numberOfArguments, char *arguments[]) {
   if (numberOfArguments == 2)
     if (((std::string) arguments[1]) == "test")
-      return testMain();
+    { int result = testMain();
+      return result;
+    }
   Server theServer;
   if (!theServer.Run()) {
     logServer << "Graceful exit with errors. ";

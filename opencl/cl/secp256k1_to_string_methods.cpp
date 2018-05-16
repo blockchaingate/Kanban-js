@@ -51,7 +51,7 @@ std::string toStringSecp256k1_ECPointStorage(const secp256k1_ge_storage& input) 
 std::string toStringSecp256k1_MultiplicationContext(const secp256k1_ecmult_context& multiplicationContext, bool fullDetail) {
   std::stringstream out;
   int topSuppressBoundary = ECMULT_TABLE_SIZE(WINDOW_G) - 10;
-  for (int i = 0; i < ECMULT_TABLE_SIZE(WINDOW_G); i++){
+  for (int i = 0; i < ECMULT_TABLE_SIZE(WINDOW_G); i ++){
     if (!fullDetail) {
       if (i >= 10 && i < topSuppressBoundary){
         if (i == 10)
@@ -99,7 +99,7 @@ std::string toStringSecp256k1_GeneratorContext(const secp256k1_ecmult_gen_contex
 
 std::string toStringErrorLog(const unsigned char* memoryPool) {
   std::string result;
-  for (int i = 8 + 4 * MACRO_numberOfOutputs; i < 1000; i++) {
+  for (int i = 8 + 4 * MACRO_numberOfOutputs; i < 1000; i ++) {
     if (memoryPool[i] == '\0')
       break;
     result.push_back((char) memoryPool[i]);
@@ -107,7 +107,6 @@ std::string toStringErrorLog(const unsigned char* memoryPool) {
 
   return result;
 }
-
 
 std::string toStringOutputObject(int argumentIndex, const unsigned char* memoryPool) {
   secp256k1_ge readerECPoint;

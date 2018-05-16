@@ -75,6 +75,7 @@ GPUKernel::GPUKernel() {
 }
 
 GPUKernel::~GPUKernel() {
+  //logGPU << "Kernel " << this->name << " destruction started. " << Logger::endL;
   this->kernel = 0;
   this->program = 0;
   for (unsigned i = 0; i < this->inputs.size(); i ++)
@@ -82,15 +83,31 @@ GPUKernel::~GPUKernel() {
   for (unsigned i = 0; i < this->outputs.size(); i ++)
     this->outputs[i]->ReleaseMe();
   cl_int ret;
-  (void) ret;
+  bool isGood = true;
   ret = clReleaseProgram(this->program);
+  if (ret != CL_SUCCESS) {
+    logGPU << "Error with code: " << ret << " while releasing kernel " << this->name << ". " << Logger::endL;
+    isGood = false;
+  }
   ret = clReleaseKernel(this->kernel);
+  if (ret != CL_SUCCESS) {
+    logGPU << "Error with code: " << ret << " while releasing kernel " << this->name << ". " << Logger::endL;
+    isGood = false;
+  }
+  if (isGood)
+    logGPU << "Kernel " << this->name << " destroyed successfully. " << Logger::endL;
+  else
+    logGPU << "Encountered errors while destroying kernel " << this->name << ". " << Logger::endL;
+
 }
 
 GPU::GPU() {
   this->flagVerbose = false;
   this->flagInitializedPlatform = false;
   this->flagInitializedKernels = false;
+  this->flagTurnOffToDebugCPU = false;
+  this->commandQueue = NULL;
+  this->context = NULL;
 }
 
 bool GPU::initializeAll() {
@@ -166,6 +183,8 @@ bool GPU::initializeKernels() {
     return true;
   if (!this->initializePlatform())
     return false;
+  int kernelsDisabled;
+  return true;
   //if (!this->createKernel(
   //      this->kernelSHA256,
   //      {"result"},
@@ -264,8 +283,9 @@ bool GPU::createKernel(
   const std::vector<std::string>& outputs,
   const std::vector<int>& outputTypes,
   const std::vector<std::string>& inputs,
-  const std::vector<int>& inputTypes
-, const std::vector<cl_mem*>& inputExternalBuffers) {
+  const std::vector<int>& inputTypes,
+  const std::vector<cl_mem*>& inputExternalBuffers
+) {
   std::shared_ptr<GPUKernel> incomingKernel = std::make_shared<GPUKernel>();
   if (!incomingKernel->constructFromFileName(
     fileNameNoExtension, outputs, outputTypes, inputs, inputTypes, inputExternalBuffers, *this
@@ -276,14 +296,35 @@ bool GPU::createKernel(
 }
 
 GPU::~GPU() {
-  cl_int ret = 0;
-  (void) ret;
-  ret = clFlush(this->commandQueue);
-  ret = clFinish(this->commandQueue);
-  ret = clReleaseCommandQueue(this->commandQueue);
+  cl_int ret = CL_SUCCESS;
+  if (this->commandQueue != NULL){
+    ret = clFlush(this->commandQueue);
+    if (ret != CL_SUCCESS) {
+      logGPU << "GPU destruction failure with error code: " << ret << ". " << Logger::endL;
+    }
+  }
+  if (this->commandQueue != NULL) {
+    ret = clFinish(this->commandQueue);
+    if (ret != CL_SUCCESS) {
+      logGPU << "GPU destruction failure with error code: " << ret << ". " << Logger::endL;
+    }
+  }
+  if (this->commandQueue != NULL) {
+    ret = clReleaseCommandQueue(this->commandQueue);
+    if (ret != CL_SUCCESS) {
+      logGPU << "GPU destruction failure with error code: " << ret << ". " << Logger::endL;
+    }
+  }
   this->commandQueue = NULL;
-  ret = clReleaseContext(this->context);
-  this->context = 0;
+  if (this->context != NULL) {
+    ret = clReleaseContext(this->context);
+    if (ret!= CL_SUCCESS) {
+      logGPU << "GPU destruction failure with error code: " << ret << ". " << Logger::endL;
+    }
+  }
+  //logGPU << "GPU destruction: released context. " << Logger::endL;
+  this->context = NULL;
+  logGPU << "GPU destruction complete. " << Logger::endL;
 }
 
 std::string GPU::kernelSHA256 = "sha256GPU";

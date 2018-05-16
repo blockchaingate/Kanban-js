@@ -113,6 +113,7 @@ int APPEND_ADDRESS_SPACE(secp256k1_scalar_is_zero)(ADDRESS_SPACE const secp256k1
 
 void APPEND_ADDRESS_SPACE(secp256k1_scalar_get_b32)(unsigned char *bin, ADDRESS_SPACE const secp256k1_scalar* a);
 
+/** Set a scalar from a big endian byte array. */
 void APPEND_ADDRESS_SPACE(secp256k1_scalar_set_b32)(secp256k1_scalar *r, ADDRESS_SPACE const unsigned char *b32, int *overflow);
 
 void APPEND_ADDRESS_SPACE(secp256k1_scalar_mul_512)(

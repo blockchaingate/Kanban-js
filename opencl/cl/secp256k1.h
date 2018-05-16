@@ -31,7 +31,7 @@ Please see the file opencl/README.md for technical notes on this code.
 #define MACRO_MessageLogSize 500
 #define MACRO_MEMORY_POOL_SIZE_MultiplicationContext 6000000
 #define MACRO_MEMORY_POOL_SIZE_GeneratorContext 2000000
-#define MACRO_MEMORY_POOL_SIZE_Signature 500000
+#define MACRO_MEMORY_POOL_SIZE_Signature 1000000
 
 
 __global void* checked_malloc(unsigned int size, __global unsigned char* memoryPool);
@@ -520,23 +520,23 @@ unsigned int sizeof_secp256k1_ge_storage();
 unsigned int sizeof_char64();
 
 // Reads generator context. PORTABLE: can be called accross GPU<->CPU.
-void memoryPool_read_generatorContext(
+void memoryPool_read_generatorContext_PORTABLE(
   __global secp256k1_ecmult_gen_context* outputGeneratorContext,
   __global const unsigned char* memoryPool
 );
 
 // Reads multiplication context. PORTABLE: can be called accross GPU<->CPU.
-void memoryPool_read_multiplicationContext(
+void memoryPool_read_multiplicationContext_PORTABLE(
   __global secp256k1_ecmult_context* outputMultiplicationContext,
   __global const unsigned char* memoryPool
 );
 
 //Reads the generator context pointer. NOT PORTABLE: must not be called accross GPU<->CPU.
-__global secp256k1_ecmult_gen_context* memoryPool_read_generatorContextPointer(
+__global secp256k1_ecmult_gen_context* memoryPool_read_generatorContextPointer_NON_PORTABLE(
   __global const unsigned char* memoryPool
 );
 
-__global secp256k1_ecmult_context* memoryPool_read_multiplicationContextPointer(
+__global secp256k1_ecmult_context* memoryPool_read_multiplicationContextPointer_NON_PORTABLE(
   __global const unsigned char* memoryPool
 );
 #endif //SECP256k1_H_header

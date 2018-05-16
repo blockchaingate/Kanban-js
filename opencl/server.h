@@ -4,22 +4,19 @@
 #include <queue>
 #include "gpu.h"
 
-class MessageFromNode
-{
+class MessageFromNode {
 public:
   std::string theMessage;
   int length;
   std::string id;
   std::string command;
   void reset();
-  MessageFromNode()
-  {
+  MessageFromNode() {
     this->reset();
   }
 };
 
-class PipeBasic
-{
+class PipeBasic {
 public:
   int position;
   int length;
@@ -33,8 +30,7 @@ public:
   ~PipeBasic();
 };
 
-class MessagePipeline
-{
+class MessagePipeline {
   bool ReadOne();
 public:
   int fileDescriptorOutputData;

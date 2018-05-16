@@ -52,11 +52,11 @@ void testPrintMemoryPoolGeneral(const unsigned char* theMemoryPool, const std::s
 
 void testPrintMultiplicationContext(const unsigned char* theMemoryPool, const std::string& computationID, Logger& logTest) {
   testPrintMemoryPoolGeneral(theMemoryPool, computationID, logTest);
-  uint32_t outputPosition = memoryPool_read_uint(&theMemoryPool[8]);
+  uint32_t outputPosition = memoryPool_read_uint_fromOutput(0, theMemoryPool);
   logTest << "Position multiplication context: " << outputPosition << Logger::endL;
   secp256k1_ecmult_context multiplicationContext;
   secp256k1_ecmult_context_init(&multiplicationContext);
-  memoryPool_read_multiplicationContext(&multiplicationContext, theMemoryPool);
+  memoryPool_read_multiplicationContext_PORTABLE(&multiplicationContext, theMemoryPool);
   logTest << "Multiplication context:\n"
   << toStringSecp256k1_MultiplicationContext(multiplicationContext, false) << Logger::endL;
 }
@@ -67,11 +67,11 @@ void testPrintGeneratorContext(const unsigned char* theMemoryPool, const std::st
   uint32_t outputPositionGeneratorContextContent = memoryPool_read_uint_fromOutput(1, theMemoryPool);
   logTest << "Context struct position: " << outputPositionGeneratorContextStruct << Logger::endL;
   logTest << "Context content position: " << outputPositionGeneratorContextContent << Logger::endL;
-  for (int i = 2; i < MACRO_numberOfOutputs; i++ ) {
+  for (int i = 2; i < MACRO_numberOfOutputs; i ++) {
     logTest << "Debug " << (i + 1) << ": " << toStringOutputObject(i, theMemoryPool) << Logger::endL;
   }
   secp256k1_ecmult_gen_context theGeneratorContext;
-  memoryPool_read_generatorContext(&theGeneratorContext, theMemoryPool);
+  memoryPool_read_generatorContext_PORTABLE(&theGeneratorContext, theMemoryPool);
   logTest << "Generator context:\n" << toStringSecp256k1_GeneratorContext(theGeneratorContext, false) << Logger::endL;
 }
 
@@ -90,7 +90,8 @@ bool testMainPart1ComputeContexts(GPU& theGPU) {
   if (!CryptoEC256k1::computeGeneratorContext(bufferCentralPUGeneratorContext))
     return false;
   testPrintGeneratorContext(bufferCentralPUGeneratorContext, "Central PU", logTestCentralPU);
-
+  if (theGPU.flagTurnOffToDebugCPU)
+    return true;
   if (!CryptoEC256k1GPU::computeMultiplicationContext(bufferGraphicsPUMultiplicationContext, theGPU))
     return false;
   testPrintMultiplicationContext(bufferGraphicsPUMultiplicationContext, "Graphics PU", logTestGraphicsPU);
@@ -102,10 +103,12 @@ bool testMainPart1ComputeContexts(GPU& theGPU) {
 
 class Signature {
 public:
-  static const int maxSerializationSize = 33 * 2 + 6;
+  static const int maxSerializationSize = 33 * 2 + 6 + 1;
   secp256k1_scalar r;
   secp256k1_scalar s;
-  unsigned char serialization[maxSerializationSize]; // Max signature size = 33 * 2 + 6, may be smaller.
+  unsigned char serialization[maxSerializationSize];
+  //Max signature size = 33 * 2 + 6, may be smaller.
+  //We reserve an extra byte in case we want to have null-terminated content.
   unsigned int size;
   void ComputeSerializationFromScalars();
   bool ComputeScalarsFromSerialization();
@@ -115,8 +118,12 @@ public:
 
 class GeneratorScalar {
 public:
+  static const int maxSerializationSize = 33;
   secp256k1_scalar scalar;
-  unsigned char serialization[32];
+  unsigned char serialization[GeneratorScalar::maxSerializationSize];
+  //Generator serialization = 32 bytes.
+  //We reserve an extra byte in case we want to have null-terminated
+  //content.
   void ComputeSerializationFromScalar();
   void ComputeScalarFromSerialization();
   //This is a testing-only function. Do not use otherwise:
@@ -135,15 +142,15 @@ class PublicKey {
 public:
   static const int maxSerializationSize = 66;
   //1 (type) + 32 (x-coord) + 32 (coord) = 65 bytes.
-  //We leave an extra byte for null-termination, in case we want to write c_string() here.
+  //We reserve an extra byte in case we want to have null-terminated content.
   unsigned int size;
-  unsigned char serialization[maxSerializationSize];
+  unsigned char serialization[PublicKey::maxSerializationSize];
   std::string toString();
   void reset();
 };
 
 void PublicKey::reset() {
-  for (int i = 0; i < this->maxSerializationSize; i++) {
+  for (int i = 0; i < this->maxSerializationSize; i ++) {
     this->serialization[i] = 0;
   }
   this->size = 0;
@@ -214,19 +221,20 @@ bool testMainPart2Signatures(GPU& theGPU) {
   );
   theSignature.ComputeScalarsFromSerialization();
   logTestCentralPU << "Signature:\n" << theSignature.toString() << Logger::endL;
-  theKey.nonceMustChangeAfterEverySignature.TestAssignString("This is a nonce. ");
-  theSignature.reset();
-  CryptoEC256k1GPU::signMessage(
-    theSignature.serialization,
-    &theSignature.size,
-    theKey.nonceMustChangeAfterEverySignature.serialization,
-    theKey.key.serialization,
-    message.serialization,
-    theGPU
-  );
-  theSignature.ComputeScalarsFromSerialization();
-  logTestGraphicsPU << "Signature:\n" << theSignature.toString() << Logger::endL;
-
+  if (!theGPU.flagTurnOffToDebugCPU) {
+    theKey.nonceMustChangeAfterEverySignature.TestAssignString("This is a nonce. ");
+    theSignature.reset();
+    CryptoEC256k1GPU::signMessage(
+      theSignature.serialization,
+      &theSignature.size,
+      theKey.nonceMustChangeAfterEverySignature.serialization,
+      theKey.key.serialization,
+      message.serialization,
+      theGPU
+    );
+    theSignature.ComputeScalarsFromSerialization();
+    logTestGraphicsPU << "Signature:\n" << theSignature.toString() << Logger::endL;
+  }
   PublicKey thePublicKey;
 
   CryptoEC256k1::generatePublicKey(
@@ -236,20 +244,22 @@ bool testMainPart2Signatures(GPU& theGPU) {
     bufferCentralPUGeneratorContext
   );
   logTestCentralPU << "Public key:\n" << thePublicKey.toString() << Logger::endL;
-  thePublicKey.reset();
-  if (!CryptoEC256k1GPU::generatePublicKey(
-    thePublicKey.serialization,
-    &thePublicKey.size,
-    theKey.key.serialization,
-    theGPU
-  ))
-    logTestGraphicsPU << "ERROR: generatePublicKey returned false. " << Logger::endL;
-  logTestGraphicsPU << "Public key:\n" << thePublicKey.toString() << Logger::endL;
-
+  if (!theGPU.flagTurnOffToDebugCPU) {
+    thePublicKey.reset();
+    if (!CryptoEC256k1GPU::generatePublicKey(
+      thePublicKey.serialization,
+      &thePublicKey.size,
+      theKey.key.serialization,
+      theGPU
+    ))
+      logTestGraphicsPU << "ERROR: generatePublicKey returned false. " << Logger::endL;
+    logTestGraphicsPU << "Public key:\n" << thePublicKey.toString() << Logger::endL;
+  }
   //getMultiplicationContext(bufferCentralPUMultiplicationContext, multiplicationContext);
-  unsigned char signatureResult;
+  unsigned char signatureResult[1];
+  logTestCentralPU << "Got to here!" << Logger::endL;
   CryptoEC256k1::verifySignature(
-    &signatureResult,
+    &signatureResult[0],
     bufferCentralPUSignature,
     theSignature.serialization,
     theSignature.size,
@@ -258,7 +268,7 @@ bool testMainPart2Signatures(GPU& theGPU) {
     message.serialization,
     bufferCentralPUMultiplicationContext
   );
-  logTestCentralPU << "Signature verification: " << (int) signatureResult << Logger::endL;
+  logTestCentralPU << "Signature verification: " << (int) signatureResult[0] << Logger::endL;
 
   /*
   int signatureResult = secp256k1_ecdsa_sig_verify(
@@ -282,6 +292,7 @@ bool testMainPart2Signatures(GPU& theGPU) {
 
 int testMain() {
   GPU theGPU;
+  theGPU.flagTurnOffToDebugCPU = true;
   if (!testMainPart1ComputeContexts(theGPU))
     return - 1;
   if (!testMainPart2Signatures(theGPU))
@@ -289,8 +300,7 @@ int testMain() {
   return 0;
 }
 
-class testSHA256
-{
+class testSHA256 {
 public:
   static std::vector<std::vector<std::string> > knownSHA256s;
   static std::string inputBuffer;

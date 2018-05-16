@@ -109,9 +109,15 @@ public:
   bool flagVerbose;
   bool flagInitializedPlatform;
   bool flagInitializedKernels;
+  bool flagTurnOffToDebugCPU;
   bool initializeAll();
   bool initializePlatform();
   bool initializeKernels();
+  //Static allocation forbidden!
+  //Rationale: we need to use file loggers in the
+  //destructors. File loggers are statically
+  //initialized, so we may run into the
+  //static initialization order fiasco.
   GPU();
   bool createKernel(
     const std::string& fileNameNoExtension,
