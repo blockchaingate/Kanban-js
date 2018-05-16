@@ -4,6 +4,7 @@ var defaults = {
   pageBlockInfo: "pageRPCBlockInfo",
   pageTXInfo: "pageTXInfo",
   pageNetwork: "pageNetwork",
+  pageTestGPU: "pageTestGPU",
   progressReport: "spanProgressReport",
   inputBlockHash: "inputBlockHash",
   inputBestBlockIndex: "inputBestBlockIndex",

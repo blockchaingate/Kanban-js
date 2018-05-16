@@ -8,7 +8,7 @@ const crypto = require('crypto');
 const miscellaneous = require('./miscellaneous');
 const net = require('net');
 
-function OpenCLDriver(){
+function OpenCLDriver() {
   this.started = false;
   this.connected = false;
   this.handleExecutable = null;
@@ -49,7 +49,7 @@ OpenCLDriver.prototype.generateMessages = function(numMessages, highBoundary) {
     sha256.update(`${sizeDivBy32}`);
     var currentSHA = sha256.digest();
     var nextString = "";
-    for (var counterRepetitions = 0; counterRepetitions < sizeDivBy32; counterRepetitions ++){
+    for (var counterRepetitions = 0; counterRepetitions < sizeDivBy32; counterRepetitions ++) {
       nextString += currentSHA;
     }
     nextString += currentSHA.slice(0, (sizeDivBy32 + 5) % 32);
@@ -58,8 +58,8 @@ OpenCLDriver.prototype.generateMessages = function(numMessages, highBoundary) {
   }
 }
 
-OpenCLDriver.prototype.initTestMessages = function (callId){
-  if (this.testMessages.length > 0){
+OpenCLDriver.prototype.initTestMessages = function (callId) {
+  if (this.testMessages.length > 0) {
     return;
   }
   var jobs = global.kanban.jobs;
@@ -69,9 +69,9 @@ OpenCLDriver.prototype.initTestMessages = function (callId){
   jobs.setStatus(callId, "Generated test messages, starting test. ");
 }
 
-OpenCLDriver.prototype.processOutput = function(data){
+OpenCLDriver.prototype.processOutput = function(data) {
   var splitData = data.toString().split("\n");
-  for (var counterData = 0; counterData < splitData.length; counterData ++){
+  for (var counterData = 0; counterData < splitData.length; counterData ++) {
     if (splitData[counterData].length === 0)
       continue;
     this.processOutputOneChunk(splitData[counterData]);
@@ -79,13 +79,13 @@ OpenCLDriver.prototype.processOutput = function(data){
   return true;
 }
 
-OpenCLDriver.prototype.processOneTestJob = function(parsedOutput, gpuJob){
+OpenCLDriver.prototype.processOneTestJob = function(parsedOutput, gpuJob) {
   if (gpuJob.flagIsTest !== true) {
     return;
   }
   console.log(`Completed computation: ${parsedOutput.id}`.green);
   this.testGotBackFromCPPSoFar ++;
-  if (parsedOutput.result === undefined){
+  if (parsedOutput.result === undefined) {
     console.log(`GPU message has no result entry: ${JSON.stringify(parsedOutput)}`.red);
     assert(false);
   }
@@ -95,22 +95,22 @@ OpenCLDriver.prototype.processOneTestJob = function(parsedOutput, gpuJob){
     assert(false);  
   }
   this.testBytesProcessedSoFar += this.testMessages[theMessageIndex].length;
-  if (this.testMessageResults[theMessageIndex] === undefined){
+  if (this.testMessageResults[theMessageIndex] === undefined) {
     this.testMessageResults[theMessageIndex] = parsedOutput.result;
   } else { 
-    if (this.testMessageResults[theMessageIndex] != parsedOutput.result){
+    if (this.testMessageResults[theMessageIndex] != parsedOutput.result) {
       console.log(`Inconsistent SHA256: message of index: ${theMessageIndex} first sha-ed to: ${this.testMessageResults[theMessageIndex]}, but now is sha-ed to ${parsedOutput.result}` );
       assert(false);
     }
   }  
   var jobs = global.kanban.jobs;
   jobs.setStatus(gpuJob.callId, this.getTestProgress());
-  if (this.testGotBackFromCPPSoFar >= this.totalToTest){
+  if (this.testGotBackFromCPPSoFar >= this.totalToTest) {
     jobs.finishJob(gpuJob.callId, this.getTestProgress());
   }
 }
 
-OpenCLDriver.prototype.processOutputOneChunk = function(chunk){
+OpenCLDriver.prototype.processOutputOneChunk = function(chunk) {
   var parsed = null;
   try {
     parsed = JSON.parse(chunk);
@@ -136,7 +136,7 @@ OpenCLDriver.prototype.processOutputOneChunk = function(chunk){
   return true;
 }
 
-OpenCLDriver.prototype.start = function (){
+OpenCLDriver.prototype.start = function () {
   if (this.started) {
     return;
   }
@@ -155,7 +155,7 @@ OpenCLDriver.prototype.start = function (){
       cwd: pathnames.path.openCLDriverBuildPath,
       encoding: 'binary'
     },
-    function(code, stdout, stderr){
+    function(code, stdout, stderr) {
       console.log(`OpenCL driver exited with code: ${code}.`.red);
       var theOpenCLDriver = global.kanban.openCLDriver;
       theOpenCLDriver.started = false;
@@ -163,77 +163,78 @@ OpenCLDriver.prototype.start = function (){
     }
   );
   console.log(`Process: ${pathnames.pathname.openCLDriverExecutable} spawned`.green);
-  this.handleExecutable.stdout.on('data', function(data){
+  this.handleExecutable.stdout.on('data', function(data) {
     console.log(data.toString());
   });
-  this.handleExecutable.stderr.on('data', function(data){
+  this.handleExecutable.stderr.on('data', function(data) {
     console.log(data);
   });
 }
 
-OpenCLDriver.prototype.connectOutput = function (){
+OpenCLDriver.prototype.connectOutput = function () {
   console.log(`trying to connect to: output`.blue);
-  this.gpuConnections.output = net.connect({port: this.gpuConnectionPorts.output}, function(){
+  this.gpuConnections.output = net.connect({port: this.gpuConnectionPorts.output}, function() {
     console.log(`Connected to port ${kanban.openCLDriver.gpuConnectionPorts.output}`.green);
     kanban.openCLDriver.connected = true;
   });
-  this.gpuConnections.output.on('data', function(data){
+  this.gpuConnections.output.on('data', function(data) {
     kanban.openCLDriver.processOutput(data);
   });
-  this.gpuConnections.output.on('error', function(error){
+  this.gpuConnections.output.on('error', function(error) {
     console.log(`Output pipe error: ${error}`.red);
-    if (global.kanban.openCLDriver.connected){
+    if (global.kanban.openCLDriver.connected) {
       return;
     }
-    if (global.kanban.openCLDriver.connectPipeTimer !== null && global.kanban.openCLDriver.connectPipeTimer !== undefined){
+    if (global.kanban.openCLDriver.connectPipeTimer !== null && global.kanban.openCLDriver.connectPipeTimer !== undefined) {
       clearTimeout(global.kanban.openCLDriver.connectPipeTimer);
     } 
     global.kanban.openCLDriver.connectPipeTimer = setTimeout(global.kanban.openCLDriver.connectOutput.bind(global.kanban.openCLDriver), 1000);
   });
 }
 
-OpenCLDriver.prototype.connectData = function (){
+OpenCLDriver.prototype.connectData = function () {
   console.log(`trying to connect to: data`.blue);
-  this.gpuConnections.data = net.connect({port: this.gpuConnectionPorts.data}, function(){
+  this.gpuConnections.data = net.connect({port: this.gpuConnectionPorts.data}, function() {
     console.log(`Connected to port ${kanban.openCLDriver.gpuConnectionPorts.data}`.green);
     kanban.openCLDriver.connectOutput();
   });
-  this.gpuConnections.data.on('error', function(error){
+  this.gpuConnections.data.on('error', function(error) {
     console.log(`Data pipe error: ${error}`.red);
     if (global.kanban.openCLDriver.connected){
       return;
     }
-    if (global.kanban.openCLDriver.connectPipeTimer !== null && global.kanban.openCLDriver.connectPipeTimer !== undefined){
+    if (global.kanban.openCLDriver.connectPipeTimer !== null && global.kanban.openCLDriver.connectPipeTimer !== undefined) {
       clearTimeout(global.kanban.openCLDriver.connectPipeTimer);
     } 
     global.kanban.openCLDriver.connectPipeTimer = setTimeout(global.kanban.openCLDriver.connectData.bind(global.kanban.openCLDriver), 1000);
   });
 }
 
-OpenCLDriver.prototype.connect = function (){
-  if (this.connected){
+OpenCLDriver.prototype.connect = function () {
+  if (this.connected) {
     return;
   }
   console.log(`trying to connect to: metadata`.blue);
-  this.gpuConnections.metaData = net.connect({port: this.gpuConnectionPorts.metaData}, function(){
+  this.gpuConnections.metaData = net.connect({port: this.gpuConnectionPorts.metaData}, function() {
     console.log(`Connected to port ${kanban.openCLDriver.gpuConnectionPorts.metaData}`.green);
     kanban.openCLDriver.connectData();
   });
-  this.gpuConnections.metaData.on('error', function(error){
+  this.gpuConnections.metaData.on('error', function(error) {
     console.log(`Meta data pipe error: ${error}`.red);
-    if (global.kanban.openCLDriver.connected){
+    console.log(`Perhaps the GPU is still warming up?`.yellow);
+    if (global.kanban.openCLDriver.connected) {
       return;
     }
-    if (global.kanban.openCLDriver.connectPipeTimer !== null && global.kanban.openCLDriver.connectPipeTimer !== undefined){
+    if (global.kanban.openCLDriver.connectPipeTimer !== null && global.kanban.openCLDriver.connectPipeTimer !== undefined) {
       clearTimeout(global.kanban.openCLDriver.connectPipeTimer);
     } 
-    global.kanban.openCLDriver.connectPipeTimer = setTimeout(global.kanban.openCLDriver.connect.bind(global.kanban.openCLDriver), 1000);
+    global.kanban.openCLDriver.connectPipeTimer = setTimeout(global.kanban.openCLDriver.connect.bind(global.kanban.openCLDriver), 3000);
   });
 }
 
-OpenCLDriver.prototype.startAndConnect = function (){
+OpenCLDriver.prototype.startAndConnect = function () {
   this.start();
-  this.connect();
+  setTimeout(global.kanban.openCLDriver.connect.bind(global.kanban.openCLDriver), 2000);
 }
 
 OpenCLDriver.prototype.testBackEndSha256OneMessage = function (request, response, desiredCommand) {
@@ -342,7 +343,7 @@ OpenCLDriver.prototype.testBackEndPipeMultiple = function (callId, recursionDept
   
   this.initTestMessages(callId);
   var jobs = global.kanban.jobs;
-  if (recursionDepth >= this.totalToTest){
+  if (recursionDepth >= this.totalToTest) {
     return;
   }
   var theIndex = recursionDepth % this.testMessages.length;
@@ -378,19 +379,19 @@ OpenCLDriver.prototype.testBackEndSha256MultipleStart = function (callId) {
   this.testBackEndSha256Multiple(callId, 0);
 }
 
-function testBackEndSha256Multiple(callId){
+function testBackEndSha256Multiple(callId) {
   global.kanban.openCLDriver.testBackEndSha256MultipleStart(callId);
 }
 
-function testBackEndSha256OneMessage(request, response, desiredCommand){
+function testBackEndSha256OneMessage(request, response, desiredCommand) {
   global.kanban.openCLDriver.testBackEndSha256OneMessage(request, response, desiredCommand);
 }
 
-function testBackEndPipeMultiple(callId){
+function testBackEndPipeMultiple(callId) {
   global.kanban.openCLDriver.testBackEndPipeMultipleStart(callId);
 }
 
-function testBackEndPipeOneMessage(request, response, desiredCommand){
+function testBackEndPipeOneMessage(request, response, desiredCommand) {
   global.kanban.openCLDriver.testBackEndPipeOneMessage(request, response, desiredCommand);
 }
 

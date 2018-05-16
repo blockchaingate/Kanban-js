@@ -329,6 +329,7 @@ bool testMainPart2Signatures(GPU& theGPU) {
   logTestCentralPU << "outputS: " << toStringSecp256k1_Scalar(signatureS) << Logger::endL;*/
   return true;
 }
+bool testSHA256(GPU& theGPU);
 
 int testMain() {
   GPU theGPU;
@@ -337,6 +338,9 @@ int testMain() {
     return - 1;
   if (!testMainPart2Signatures(theGPU))
     return - 1;
+  if (!testSHA256(theGPU))
+    return - 1;
+
   return 0;
 }
 
@@ -383,7 +387,7 @@ void testSHA256::initialize() {
   }
 }
 
-int testSHA256(GPU& theGPU) {
+bool testSHA256(GPU& theGPU) {
   // Create the two input vectors
   theGPU.initializeAll();
   // Create a command queue
@@ -442,10 +446,10 @@ int testSHA256(GPU& theGPU) {
       << ": " << testSHA256::knownSHA256s[testCounteR][0] << " is wrongly computed to be: " << out.str()
       << " instead of: " << testSHA256::knownSHA256s[testCounteR][1] << "\e[39m" << Logger::endL;
       assert(false);
-      return - 1;
+      return false;
     }
   }
   logTestGraphicsPU << "Success!" << Logger::endL;
   std::cout << "\e[32mSuccess!\e[39m" << std::endl;
-  return 0;
+  return true;
 }

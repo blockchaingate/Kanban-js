@@ -10528,6 +10528,7 @@ var defaults = {
   pageBlockInfo: "pageRPCBlockInfo",
   pageTXInfo: "pageTXInfo",
   pageNetwork: "pageNetwork",
+  pageTestGPU: "pageTestGPU",
   progressReport: "spanProgressReport",
   inputBlockHash: "inputBlockHash",
   inputBestBlockIndex: "inputBestBlockIndex",
@@ -10681,6 +10682,12 @@ function Page(){
         page: ids.defaults.pageNetwork
       },
       updateFunction: rpcCalls.getPeerInfo
+    },
+    testGPU: {
+      ids: {
+        page: ids.defaults.pageTestGPU
+      },
+      updateFunction: null
     }
   }
   this.currentPageLabel = null;

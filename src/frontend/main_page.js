@@ -23,6 +23,12 @@ function Page(){
         page: ids.defaults.pageNetwork
       },
       updateFunction: rpcCalls.getPeerInfo
+    },
+    testGPU: {
+      ids: {
+        page: ids.defaults.pageTestGPU
+      },
+      updateFunction: null
     }
   }
   this.currentPageLabel = null;
