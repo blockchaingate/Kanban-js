@@ -101,54 +101,6 @@ bool testMainPart1ComputeContexts(GPU& theGPU) {
   return true;
 }
 
-class Signature {
-public:
-  static const int maxSerializationSize = 33 * 2 + 6 + 1;
-  secp256k1_scalar r;
-  secp256k1_scalar s;
-  unsigned char serialization[maxSerializationSize];
-  //Max signature size = 33 * 2 + 6, may be smaller.
-  //We reserve an extra byte in case we want to have null-terminated content.
-  unsigned int size;
-  void ComputeSerializationFromScalars();
-  bool ComputeScalarsFromSerialization();
-  std::string toString();
-  void reset();
-};
-
-class GeneratorScalar {
-public:
-  static const int maxSerializationSize = 33;
-  secp256k1_scalar scalar;
-  unsigned char serialization[GeneratorScalar::maxSerializationSize];
-  //Generator serialization = 32 bytes.
-  //We reserve an extra byte in case we want to have null-terminated
-  //content.
-  void ComputeSerializationFromScalar();
-  void ComputeScalarFromSerialization();
-  //This is a testing-only function. Do not use otherwise:
-  //copying secrets around is not a good idea.
-  void TestAssignString(const std::string& input);
-  std::string toString();
-};
-
-class PrivateKey {
-public:
-  GeneratorScalar key;
-  GeneratorScalar nonceMustChangeAfterEverySignature;
-};
-
-class PublicKey {
-public:
-  static const int maxSerializationSize = 66;
-  //1 (type) + 32 (x-coord) + 32 (coord) = 65 bytes.
-  //We reserve an extra byte in case we want to have null-terminated content.
-  unsigned int size;
-  unsigned char serialization[PublicKey::maxSerializationSize];
-  std::string toString();
-  void reset();
-};
-
 void PublicKey::reset() {
   for (int i = 0; i < this->maxSerializationSize; i ++) {
     this->serialization[i] = 0;

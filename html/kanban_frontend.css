@@ -268,3 +268,8 @@ img.imgFabLogo{
   -ms-transform: rotate(45deg);
   transform: rotate(45deg);
 }
+
+table.tableTestKanban td, th{
+  padding: 5px;
+  margin: 5px
+}

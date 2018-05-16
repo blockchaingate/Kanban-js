@@ -75,12 +75,17 @@ var nodeCalls = {
   },
   testBackEndPipeOneMessage: {
     nodeCallLabel: "testBackEndPipeOneMessage"
-  }
+  },
+  testBackEndSignOneMessage: {
+    nodeCallLabel: "testBackEndSignOneMessage"
+  },
 };
 
 var gpuCommands = {
   SHA256: "SHA256",
-  testBuffer: "testBuffer"
+  testBuffer: "testBuffer",
+  signOneMessage: "signOneMessage",
+  verifyOneSignature: "verifyOneSignature"
 };
 
 var rpcCallLabel = "rpcCallLabel";

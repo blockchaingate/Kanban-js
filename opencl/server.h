@@ -73,6 +73,7 @@ public:
   bool ExecuteNodeCommand(MessageFromNode& theMessage);
   bool ExecuteSha256(MessageFromNode& theMessage);
   bool ExecuteTestBuffer(MessageFromNode& theMessage);
+  bool ExecuteSignOneMessage(MessageFromNode& theMessage);
   bool initialize();
   bool initializePorts();
   bool initializeOneSocketAndPort(int& outputSocket, std::string& outputPort, std::vector<std::string>& portsToTry);

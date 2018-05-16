@@ -10532,7 +10532,9 @@ var defaults = {
   progressReport: "spanProgressReport",
   inputBlockHash: "inputBlockHash",
   inputBestBlockIndex: "inputBestBlockIndex",
-  inputNodeCallTestOnePipeMessage: "inputNodeCallTestOnePipeMessage",
+  inputNodeCallTestMessage: "inputNodeCallTestMessage",
+  inputNodeCallTestNonce: "inputNodeCallTestNonce",
+  inputNodeCallTestSecretKey: "inputNodeCallTestSecretKey",
   outputRPCBlockInfo: "divKanbanRPCOutputBlockInfo",
   outputRPCTXInfo: "divKanbanRPCOutputTXInfo",
   outputRPCNetwork: "divKanbanRPCOutputNetwork",
@@ -10661,7 +10663,7 @@ module.exports = {
 const rpcCalls = require('./fabcoin_rpc');
 const ids = require('./ids_dom_elements');
 
-function Page(){
+function Page() {
   this.pages = {
     blockInfo: {
       ids: {
@@ -10693,31 +10695,31 @@ function Page(){
   this.currentPageLabel = null;
 }
 
-Page.prototype.initialize = function(){
+Page.prototype.initialize = function() {
   this.loadPageSettings();
   this.initializeCurrentPage();
 }
 
-Page.prototype.initializeCurrentPage = function(){
+Page.prototype.initializeCurrentPage = function() {
   for (var label in this.pages){
     document.getElementById(this.pages[label].ids.page).style.display = "none";
   }
-  if (this.currentPageLabel in this.pages){
+  if (this.currentPageLabel in this.pages) {
     document.getElementById(this.pages[this.currentPageLabel].ids.page).style.display = "";
-    var currentPage = this.pages[this.currentPageLabel]
-    if (currentPage.updateFunction !== null && currentPage.updateFunction !== undefined){
+    var currentPage = this.pages[this.currentPageLabel];
+    if (currentPage.updateFunction !== null && currentPage.updateFunction !== undefined) {
       currentPage.updateFunction();
     }
   }
 }
 
-Page.prototype.selectPage = function(pageLabel){
+Page.prototype.selectPage = function(pageLabel) {
   this.currentPageLabel = pageLabel;
   this.initializeCurrentPage();
   this.storePageSettings();
 }
 
-Page.prototype.storePageSettings = function(){
+Page.prototype.storePageSettings = function() {
   try {
     localStorage.setItem("currentPageLabel", this.currentPageLabel);
   } catch (e) {
@@ -10725,7 +10727,7 @@ Page.prototype.storePageSettings = function(){
   }  
 }
 
-Page.prototype.loadPageSettings = function(){
+Page.prototype.loadPageSettings = function() {
   try {
     this.currentPageLabel = localStorage.getItem("currentPageLabel");
   } catch (e) {
@@ -10733,7 +10735,7 @@ Page.prototype.loadPageSettings = function(){
   }
 }
 
-function getPage(){
+function getPage() {
   if (window.kanban.page === null || window.kanban.page === undefined){
     window.kanban.page = new Page();
   }
@@ -10830,20 +10832,21 @@ function doPollServerCallback(inputText, output) {
   outputElement.innerHTML = resultHtml;
 }
 
-function clearPollId(){
-  if (pollId === null)
+function clearPollId() {
+  if (pollId === null) {
     return;
+  }
   clearInterval(pollId);
   pollId = null;
   //console.log("cleared poll");
 }
 
-function pollServerDoStart(output){
+function pollServerDoStart(output) {
   clearPollId();
   pollId = setInterval(doPollServer.bind(null, output), 1000);
 }
 
-function pollServerStart(id, output){
+function pollServerStart(id, output) {
   clearPollId();
   var callIdInfo = null;
   try {
@@ -10856,7 +10859,7 @@ function pollServerStart(id, output){
   pollServerDoStart(output);
 }
 
-function testGPUSha256(){
+function testGPUSha256() {
   submitRequests.submitGET({
     url: pathnames.getURLfromNodeCallLabel(pathnames.nodeCalls.testGPUSha256.nodeCallLabel),
     progress: getSpanProgress(),
@@ -10865,7 +10868,7 @@ function testGPUSha256(){
   });
 }
 
-function testBackEndSha256Multiple(){
+function testBackEndSha256Multiple() {
   submitRequests.submitGET({
     url: pathnames.getURLfromNodeCallLabel(pathnames.nodeCalls.testBackEndSha256Multiple.nodeCallLabel),
     progress: getSpanProgress(),
@@ -10874,8 +10877,8 @@ function testBackEndSha256Multiple(){
   });
 }
 
-function testBackEndSha256OneMessage(){
-  var theMessage = document.getElementById(ids.defaults.inputNodeCallTestOnePipeMessage).value; 
+function testBackEndSha256OneMessage() {
+  var theMessage = document.getElementById(ids.defaults.inputNodeCallTestMessage).value; 
   submitRequests.submitGET({
     url: pathnames.getURLfromNodeCallLabel(pathnames.nodeCalls.testBackEndSha256OneMessage.nodeCallLabel, { message: theMessage}),
     progress: getSpanProgress(),
@@ -10883,7 +10886,7 @@ function testBackEndSha256OneMessage(){
   });
 }
 
-function testBackEndPipeMultiple(){
+function testBackEndPipeMultiple() {
   submitRequests.submitGET({
     url: pathnames.getURLfromNodeCallLabel(pathnames.nodeCalls.testBackEndPipeMultiple.nodeCallLabel),
     progress: getSpanProgress(),
@@ -10892,13 +10895,24 @@ function testBackEndPipeMultiple(){
   });
 }
 
-function testBackEndPipeOneMessage(){
-  var theMessage = document.getElementById(ids.defaults.inputNodeCallTestOnePipeMessage).value; 
+function testBackEndPipeOneMessage() {
+  var theMessage = document.getElementById(ids.defaults.inputNodeCallTestMessage).value; 
   submitRequests.submitGET({
     url: pathnames.getURLfromNodeCallLabel(pathnames.nodeCalls.testBackEndPipeOneMessage.nodeCallLabel, { message: theMessage}),
     progress: getSpanProgress(),
     result: getOutputTestGPU()
   });
+}
+
+function testBackEndSignOneMessage() {
+  var theMessage = document.getElementById(ids.defaults.inputNodeCallTestMessage).value; 
+  var theNonce = document.getElementById(ids.defaults.inputNodeCallTestNonce).value; 
+  var theSecret = document.getElementById(ids.defaults.inputNodeCallTestSecretKey).value; 
+  submitRequests.submitGET({
+    url: pathnames.getURLfromNodeCallLabel(pathnames.nodeCalls.testBackEndSignOneMessage.nodeCallLabel, { message: theMessage, nonce: theNonce, secretKey: theSecret}),
+    progress: getSpanProgress(),
+    result: getOutputTestGPU()
+  });  
 }
 
 function synchronizeUnspentTransactions(){
@@ -10917,6 +10931,7 @@ module.exports = {
   testBackEndSha256OneMessage,
   testBackEndPipeMultiple,
   testBackEndPipeOneMessage,
+  testBackEndSignOneMessage,
   pollServerDoStart,
   clearPollId
 }
@@ -11166,12 +11181,17 @@ var nodeCalls = {
   },
   testBackEndPipeOneMessage: {
     nodeCallLabel: "testBackEndPipeOneMessage"
-  }
+  },
+  testBackEndSignOneMessage: {
+    nodeCallLabel: "testBackEndSignOneMessage"
+  },
 };
 
 var gpuCommands = {
   SHA256: "SHA256",
-  testBuffer: "testBuffer"
+  testBuffer: "testBuffer",
+  signOneMessage: "signOneMessage",
+  verifyOneSignature: "verifyOneSignature"
 };
 
 var rpcCallLabel = "rpcCallLabel";

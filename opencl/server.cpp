@@ -1,7 +1,7 @@
 #include "server.h"
 #include "logging.h"
 #include "miscellaneous.h"
-
+#include "secp256k1_interface.h"
 //#include <stdio.h>
 //#include <stdlib.h>
 #include <string.h>
@@ -313,8 +313,13 @@ bool Server::ExecuteNodeCommand(MessageFromNode &theMessage) {
     return this->ExecuteSha256(theMessage);
   if (theMessage.command == "testBuffer")
     return this->ExecuteTestBuffer(theMessage);
+  if (theMessage.command == "signOneMessage")
+    return this->ExecuteSignOneMessage(theMessage);
   logServer << "Fatal error: unknown command. Message: " << theMessage.id << ", " << "command: " << theMessage.command
-  << ", " << theMessage.length << " bytes. " << Logger::endL;
+  << ", " << theMessage.length << " bytes. ";
+  if (theMessage.length < 50)
+    logServer << "Message: " << theMessage.theMessage;
+  logServer << Logger::endL;
   return false;
 }
 
@@ -374,5 +379,44 @@ bool Server::ExecuteTestBuffer(MessageFromNode &theMessage) {
     logServer << "Error writing bytes. " << Logger::endL;
     return false;
   }
+  return true;
+}
+
+bool Server::ExecuteSignOneMessage(MessageFromNode& theMessage) {
+  if (theMessage.length != 32 * 3){
+    logServer << "Sign one message: got message of length: " << theMessage.length
+    << ", expected " << 32 * 3 << " bytes." << Logger::endL;
+    return false;
+  }
+  logServer << "Got 96 bytes, as expected: " << Miscellaneous::toStringHex(theMessage.theMessage) << Logger::endL;
+
+  unsigned char bufferInputs[32 * 3];
+  Signature outputSignature;
+  for (int i = 0; i < theMessage.length; i ++)
+    bufferInputs[i] = theMessage.theMessage[i];
+  if (!CryptoEC256k1GPU::signMessage(
+    outputSignature.serialization,
+    &outputSignature.size,
+    &bufferInputs[0],
+    &bufferInputs[32],
+    &bufferInputs[64],
+    *this->theGPU.get()
+  ))
+    return false;
+  std::string outputSignatureString;
+  outputSignatureString.resize(outputSignature.size);
+  for (unsigned i = 0; i < outputSignature.size; i ++) {
+    outputSignatureString[i] = outputSignature.serialization[i];
+  }
+  std::stringstream output;
+  output << "{\"id\":\"" << theMessage.id << "\", \"result\": \"" << Miscellaneous::toStringHex(outputSignatureString) << "\"}\n";
+
+  logServer << "Computation " << theMessage.id << " completed, writing ..." << Logger::endL;
+  int numWrittenBytes = write(this->thePipe.fileDescriptorOutputData, output.str().c_str(), output.str().size());
+  if (numWrittenBytes < 0) {
+    logServer << "Error writing bytes. " << Logger::endL;
+    return false;
+  }
+  logServer << "Computation " << theMessage.id << " completed and sent." << Logger::endL;
   return true;
 }

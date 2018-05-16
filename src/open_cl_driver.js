@@ -30,7 +30,7 @@ function OpenCLDriver() {
   this.numSmallTestMessages = 900;
   this.largeTestMessageApproximateTopSizeInMultiplesOf32 = 100000;
   this.smallTestMessageApproximateTopSizeInMultiplesOf32 = 1000;
-  this.totalToTestSha256 = 50000;
+  this.totalToTestSha256 = 10000;
   this.totalToTestBuffer = 100000;
   this.totalToTest = - 1;
   this.testGotBackFromCPPSoFar = 0;
@@ -118,7 +118,7 @@ OpenCLDriver.prototype.processOutputOneChunk = function(chunk) {
     console.log(`Failed to parse:` + `${chunk}`.red + `\nError: ` + `${e}`.red);
     return false;
   }
-  if (parsed.id === undefined){
+  if (typeof parsed.id === "undefined"){
     console.log(`Chunk ${chunk} doesn't have an id.`.red);
     return false;    
   }
@@ -235,6 +235,56 @@ OpenCLDriver.prototype.connect = function () {
 OpenCLDriver.prototype.startAndConnect = function () {
   this.start();
   setTimeout(global.kanban.openCLDriver.connect.bind(global.kanban.openCLDriver), 2000);
+}
+
+function getB32FromUserInputTestHexString(input){
+  var converted = Buffer.from(input, 'hex');
+  console.log(`converted ${input} to ${converted}` );
+
+  if (converted.length <= 32){
+    return converted + "\0".repeat(32 - converted.length);
+  } 
+  return converted.slice(0, 32);
+}
+
+OpenCLDriver.prototype.testBackEndSignOneMessage = function (request, response, desiredCommand) {
+  if ((typeof desiredCommand.message) !== "string"){
+    response.writeHead(200);
+    return response.end(`Wrong message type: ${typeof desiredCommand.message}.`);
+  }
+  if ((typeof desiredCommand.nonce) !== "string"){
+    response.writeHead(200);
+    return response.end(`Wrong nonce type: ${typeof desiredCommand.nonce}.`);
+  }
+  if ((typeof desiredCommand.secretKey) !== "string"){
+    response.writeHead(200);
+    return response.end(`Wrong secret key type: ${typeof desiredCommand.secretKey}.`);
+  }
+  if (desiredCommand.message === ""){
+    response.writeHead(200);
+    return response.end(`Empty message not allowed. `);
+  }
+  if (desiredCommand.nonce === ""){
+    response.writeHead(200);
+    return response.end(`Empty nonce not allowed. `);
+  }
+  if (desiredCommand.secretKey === ""){
+    response.writeHead(200);
+    return response.end(`Empty secret key not allowed. `);
+  }
+  console.log(`About to write to openCL. ${JSON.stringify(desiredCommand)}`);
+  this.remaining[this.numProcessed] = {
+    request: request,
+    response: response,
+    command: desiredCommand
+  }
+  var messageSerialized = getB32FromUserInputTestHexString(desiredCommand.nonce) +
+  getB32FromUserInputTestHexString(desiredCommand.secretKey) +
+  getB32FromUserInputTestHexString(desiredCommand.message);
+  console.log("Message serialized: " + messageSerialized);
+  var backToHex = Buffer.from(messageSerialized, 'binary')
+  console.log("Message serialized hex: " + backToHex.toString('hex'));
+  this.pipeOneMessage(messageSerialized, pathnames.gpuCommands.signOneMessage);
 }
 
 OpenCLDriver.prototype.testBackEndSha256OneMessage = function (request, response, desiredCommand) {
@@ -395,10 +445,15 @@ function testBackEndPipeOneMessage(request, response, desiredCommand) {
   global.kanban.openCLDriver.testBackEndPipeOneMessage(request, response, desiredCommand);
 }
 
+function testBackEndSignOneMessage(request, response, desiredCommand) {
+  global.kanban.openCLDriver.testBackEndSignOneMessage(request, response, desiredCommand);
+}
+
 module.exports = {
   OpenCLDriver,
   testBackEndSha256Multiple,
   testBackEndSha256OneMessage,
   testBackEndPipeMultiple,
-  testBackEndPipeOneMessage
+  testBackEndPipeOneMessage,
+  testBackEndSignOneMessage
 }

@@ -84,20 +84,21 @@ function doPollServerCallback(inputText, output) {
   outputElement.innerHTML = resultHtml;
 }
 
-function clearPollId(){
-  if (pollId === null)
+function clearPollId() {
+  if (pollId === null) {
     return;
+  }
   clearInterval(pollId);
   pollId = null;
   //console.log("cleared poll");
 }
 
-function pollServerDoStart(output){
+function pollServerDoStart(output) {
   clearPollId();
   pollId = setInterval(doPollServer.bind(null, output), 1000);
 }
 
-function pollServerStart(id, output){
+function pollServerStart(id, output) {
   clearPollId();
   var callIdInfo = null;
   try {
@@ -110,7 +111,7 @@ function pollServerStart(id, output){
   pollServerDoStart(output);
 }
 
-function testGPUSha256(){
+function testGPUSha256() {
   submitRequests.submitGET({
     url: pathnames.getURLfromNodeCallLabel(pathnames.nodeCalls.testGPUSha256.nodeCallLabel),
     progress: getSpanProgress(),
@@ -119,7 +120,7 @@ function testGPUSha256(){
   });
 }
 
-function testBackEndSha256Multiple(){
+function testBackEndSha256Multiple() {
   submitRequests.submitGET({
     url: pathnames.getURLfromNodeCallLabel(pathnames.nodeCalls.testBackEndSha256Multiple.nodeCallLabel),
     progress: getSpanProgress(),
@@ -128,8 +129,8 @@ function testBackEndSha256Multiple(){
   });
 }
 
-function testBackEndSha256OneMessage(){
-  var theMessage = document.getElementById(ids.defaults.inputNodeCallTestOnePipeMessage).value; 
+function testBackEndSha256OneMessage() {
+  var theMessage = document.getElementById(ids.defaults.inputNodeCallTestMessage).value; 
   submitRequests.submitGET({
     url: pathnames.getURLfromNodeCallLabel(pathnames.nodeCalls.testBackEndSha256OneMessage.nodeCallLabel, { message: theMessage}),
     progress: getSpanProgress(),
@@ -137,7 +138,7 @@ function testBackEndSha256OneMessage(){
   });
 }
 
-function testBackEndPipeMultiple(){
+function testBackEndPipeMultiple() {
   submitRequests.submitGET({
     url: pathnames.getURLfromNodeCallLabel(pathnames.nodeCalls.testBackEndPipeMultiple.nodeCallLabel),
     progress: getSpanProgress(),
@@ -146,13 +147,24 @@ function testBackEndPipeMultiple(){
   });
 }
 
-function testBackEndPipeOneMessage(){
-  var theMessage = document.getElementById(ids.defaults.inputNodeCallTestOnePipeMessage).value; 
+function testBackEndPipeOneMessage() {
+  var theMessage = document.getElementById(ids.defaults.inputNodeCallTestMessage).value; 
   submitRequests.submitGET({
     url: pathnames.getURLfromNodeCallLabel(pathnames.nodeCalls.testBackEndPipeOneMessage.nodeCallLabel, { message: theMessage}),
     progress: getSpanProgress(),
     result: getOutputTestGPU()
   });
+}
+
+function testBackEndSignOneMessage() {
+  var theMessage = document.getElementById(ids.defaults.inputNodeCallTestMessage).value; 
+  var theNonce = document.getElementById(ids.defaults.inputNodeCallTestNonce).value; 
+  var theSecret = document.getElementById(ids.defaults.inputNodeCallTestSecretKey).value; 
+  submitRequests.submitGET({
+    url: pathnames.getURLfromNodeCallLabel(pathnames.nodeCalls.testBackEndSignOneMessage.nodeCallLabel, { message: theMessage, nonce: theNonce, secretKey: theSecret}),
+    progress: getSpanProgress(),
+    result: getOutputTestGPU()
+  });  
 }
 
 function synchronizeUnspentTransactions(){
@@ -171,6 +183,7 @@ module.exports = {
   testBackEndSha256OneMessage,
   testBackEndPipeMultiple,
   testBackEndPipeOneMessage,
+  testBackEndSignOneMessage,
   pollServerDoStart,
   clearPollId
 }

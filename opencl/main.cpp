@@ -32,7 +32,7 @@ int main(int numberOfArguments, char *arguments[]) {
     }
   Server theServer;
   if (!theServer.Run()) {
-    logServer << "Graceful exit with errors. ";
+    logServer << "Graceful exit with errors. " << Logger::endL;
     return - 1;
   }
   return 0;

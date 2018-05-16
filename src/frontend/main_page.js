@@ -2,7 +2,7 @@
 const rpcCalls = require('./fabcoin_rpc');
 const ids = require('./ids_dom_elements');
 
-function Page(){
+function Page() {
   this.pages = {
     blockInfo: {
       ids: {
@@ -34,31 +34,31 @@ function Page(){
   this.currentPageLabel = null;
 }
 
-Page.prototype.initialize = function(){
+Page.prototype.initialize = function() {
   this.loadPageSettings();
   this.initializeCurrentPage();
 }
 
-Page.prototype.initializeCurrentPage = function(){
+Page.prototype.initializeCurrentPage = function() {
   for (var label in this.pages){
     document.getElementById(this.pages[label].ids.page).style.display = "none";
   }
-  if (this.currentPageLabel in this.pages){
+  if (this.currentPageLabel in this.pages) {
     document.getElementById(this.pages[this.currentPageLabel].ids.page).style.display = "";
-    var currentPage = this.pages[this.currentPageLabel]
-    if (currentPage.updateFunction !== null && currentPage.updateFunction !== undefined){
+    var currentPage = this.pages[this.currentPageLabel];
+    if (currentPage.updateFunction !== null && currentPage.updateFunction !== undefined) {
       currentPage.updateFunction();
     }
   }
 }
 
-Page.prototype.selectPage = function(pageLabel){
+Page.prototype.selectPage = function(pageLabel) {
   this.currentPageLabel = pageLabel;
   this.initializeCurrentPage();
   this.storePageSettings();
 }
 
-Page.prototype.storePageSettings = function(){
+Page.prototype.storePageSettings = function() {
   try {
     localStorage.setItem("currentPageLabel", this.currentPageLabel);
   } catch (e) {
@@ -66,7 +66,7 @@ Page.prototype.storePageSettings = function(){
   }  
 }
 
-Page.prototype.loadPageSettings = function(){
+Page.prototype.loadPageSettings = function() {
   try {
     this.currentPageLabel = localStorage.getItem("currentPageLabel");
   } catch (e) {
@@ -74,7 +74,7 @@ Page.prototype.loadPageSettings = function(){
   }
 }
 
-function getPage(){
+function getPage() {
   if (window.kanban.page === null || window.kanban.page === undefined){
     window.kanban.page = new Page();
   }
