@@ -7,11 +7,12 @@
 //shorten the autocomple menu suggestions in (my) IDEs
 class CryptoEC256k1GPU {
 public:
-  //6MB RAM for computing multiplication context.
+  //6MB for computing multiplication context.
   static const int memoryMultiplicationContext = MACRO_MEMORY_POOL_SIZE_MultiplicationContext;
-  //2MB RAM for computing generator context.
+  //2MB for computing generator context.
   static const int memoryGeneratorContext = MACRO_MEMORY_POOL_SIZE_GeneratorContext;
-
+  //500KB for signature verification
+  static const int memorySignature = MACRO_MEMORY_POOL_SIZE_Signature;
   static bool computeMultiplicationContext(unsigned char* outputMemoryPool, GPU& theGPU);
   static bool computeGeneratorContext(unsigned char* outputMemoryPool, GPU& theGPU);
   static bool generatePublicKey(
@@ -55,8 +56,11 @@ public:
   );
   static bool verifySignature(
     unsigned char* output,
+    unsigned char *outputMemoryPoolSignature,
     const unsigned char* inputSignature,
+    unsigned int signatureSize,
     const unsigned char* publicKey,
+    unsigned int publicKeySize,
     const unsigned char* message,
     const unsigned char* memoryPoolMultiplicationContext
   );

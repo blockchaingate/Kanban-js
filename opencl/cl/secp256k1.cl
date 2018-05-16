@@ -108,11 +108,17 @@ unsigned int memoryPool_readNumberReservedBytesIncludingLog(){
   return memoryPool_readNumberReservedBytesExcludingLog() + MACRO_MessageLogSize;
 }
 
-void memoryPool_Initialize(unsigned int totalSize, __global unsigned char* memoryPool) {
-  unsigned int i, reservedBytes;
+void memoryPool_initializeNoInitializationNoLog(unsigned int totalSize, __global unsigned char* memoryPool) {
+  unsigned int reservedBytes;
   memoryPool_write_uint(totalSize, memoryPool);
   reservedBytes  = memoryPool_readNumberReservedBytesExcludingLog();
   memoryPool_write_uint(reservedBytes, &memoryPool[4]);
+}
+
+void memoryPool_initialize(unsigned int totalSize, __global unsigned char* memoryPool) {
+  unsigned int i, reservedBytes;
+  memoryPool_initializeNoInitializationNoLog(totalSize, memoryPool);
+  reservedBytes  = memoryPool_readNumberReservedBytesExcludingLog();
   for (i = 0; i < MACRO_numberOfOutputs; i ++){
     memoryPool_write_uint(0, &memoryPool[8 + 4 * i]);
   }
@@ -181,7 +187,7 @@ unsigned int memoryPool_read_uint_fromOutput(int argumentIndex, __global const u
   return memoryPool_read_uint(&memoryPool[8 + 4 * argumentIndex]);
 }
 
-//Memory pool format: in the notes before the definition of memoryPool_Initialize.
+//Memory pool format: in the notes before the definition of memoryPool_initialize.
 __global void* checked_malloc(unsigned int size, __global unsigned char* memoryPool) {
   unsigned int oldSize, newSize;
   unsigned int maxSize;
@@ -256,6 +262,27 @@ void memoryPool_read_generatorContext(
   outputGeneratorContext->initial = pointerToContextAsStoredInPoolMayHaveDifferentPointerSize->initial;
   outputGeneratorContext->prec = (__global secp256k1_ge_storage*) &memoryPool[outputPositionGeneratorContextContent];
 }
+
+__global secp256k1_ecmult_context* memoryPool_read_multiplicationContextPointer(
+  __global const unsigned char* memoryPool
+) {
+  uint32_t position = memoryPool_read_uint_fromOutput(0, memoryPool);
+  return (__global secp256k1_ecmult_context*) &memoryPool[position];
+}
+
+void memoryPool_read_multiplicationContext(
+  __global secp256k1_ecmult_context* outputMultiplicationContext,
+  __global const unsigned char* memoryPool
+) {
+  outputMultiplicationContext->pre_g = NULL;
+  uint32_t position = memoryPool_read_uint_fromOutput(0, memoryPool);
+  //int sizeOfGeneratorContextLump = (16 * 64 * sizeof(secp256k1_ge_storage));
+  //logTest << "Size of generator context lump: " << sizeOfGeneratorContextLump << Logger::endL;
+  //for (int i = 0; i < sizeOfGeneratorContextLump; i++)
+  //  logTest << std::hex << (int) theMemoryPool[outputPositionGeneratorContextContent + i];
+  outputMultiplicationContext->pre_g = (__global secp256k1_ge_storage(*)[]) &memoryPool[position];
+}
+
 //******From field_10x26_impl.h******
 
 #ifdef VERIFY
@@ -1721,7 +1748,6 @@ void secp256k1_gej_add_zinv_var(secp256k1_gej *r, const secp256k1_gej *a, const 
     secp256k1_fe_negate(&h3, &h3, 1);
     secp256k1_fe_add(&r->y, &h3);
 }
-
 
 void secp256k1_gej_add_ge(secp256k1_gej *r, const secp256k1_gej *a, const secp256k1_ge *b) {
     /* Operations: 7 mul, 5 sqr, 4 normalize, 21 mul_int/add/negate/cmov */
@@ -3807,11 +3833,11 @@ int secp256k1_ecdsa_sig_parse(secp256k1_scalar *rr, secp256k1_scalar *rs, const 
     return 1;
 }
 
-/*Same as the next function, except that it's working with the local address space.*/ 
+/*Same as the next function, except that it's working with the local address space.*/
 int secp256k1_ecdsa_sig_serialize(
-  unsigned char *sig, 
-  size_t* inputAvailableSizeOutputFinalSize, 
-  const secp256k1_scalar* ar, 
+  unsigned char *sig,
+  size_t* inputAvailableSizeOutputFinalSize,
+  const secp256k1_scalar* ar,
   const secp256k1_scalar* as
 ) {
   unsigned char r[33] = {0}, s[33] = {0};
@@ -3819,13 +3845,13 @@ int secp256k1_ecdsa_sig_serialize(
   size_t lenR = 33, lenS = 33;
   secp256k1_scalar_get_b32(&r[1], ar);
   secp256k1_scalar_get_b32(&s[1], as);
-  while (lenR > 1 && rp[0] == 0 && rp[1] < 0x80) { 
-    lenR--; 
-    rp++; 
+  while (lenR > 1 && rp[0] == 0 && rp[1] < 0x80) {
+    lenR--;
+    rp++;
   }
-  while (lenS > 1 && sp[0] == 0 && sp[1] < 0x80) { 
-    lenS--; 
-    sp++; 
+  while (lenS > 1 && sp[0] == 0 && sp[1] < 0x80) {
+    lenS--;
+    sp++;
   }
   if (*inputAvailableSizeOutputFinalSize < 6 + lenS + lenR) {
     *inputAvailableSizeOutputFinalSize = 6 + lenS + lenR;
@@ -3843,11 +3869,11 @@ int secp256k1_ecdsa_sig_serialize(
   return 1;
 }
 
-/*Same as the preceding function, except that it's working with the __global address space*/ 
+/*Same as the preceding function, except that it's working with the __global address space*/
 int secp256k1_ecdsa_sig_serialize__global(
-  __global unsigned char *sig, 
-  size_t* inputAvailableSizeOutputFinalSize, 
-  const secp256k1_scalar* ar, 
+  __global unsigned char *sig,
+  size_t* inputAvailableSizeOutputFinalSize,
+  const secp256k1_scalar* ar,
   const secp256k1_scalar* as
 ) {
   unsigned char r[33] = {0}, s[33] = {0};
@@ -3855,13 +3881,13 @@ int secp256k1_ecdsa_sig_serialize__global(
   size_t lenR = 33, lenS = 33;
   secp256k1_scalar_get_b32(&r[1], ar);
   secp256k1_scalar_get_b32(&s[1], as);
-  while (lenR > 1 && rp[0] == 0 && rp[1] < 0x80) { 
-    lenR --; 
-    rp ++; 
+  while (lenR > 1 && rp[0] == 0 && rp[1] < 0x80) {
+    lenR --;
+    rp ++;
   }
-  while (lenS > 1 && sp[0] == 0 && sp[1] < 0x80) { 
-    lenS --; 
-    sp ++; 
+  while (lenS > 1 && sp[0] == 0 && sp[1] < 0x80) {
+    lenS --;
+    sp ++;
   }
   if (*inputAvailableSizeOutputFinalSize < 6 + lenS + lenR) {
     *inputAvailableSizeOutputFinalSize = 6 + lenS + lenR;
@@ -3880,12 +3906,12 @@ int secp256k1_ecdsa_sig_serialize__global(
 }
 
 int secp256k1_ecdsa_sig_sign(
-  __global const secp256k1_ecmult_gen_context *generatorContext, 
-  secp256k1_scalar *sigr, 
-  secp256k1_scalar *sigs, 
-  const secp256k1_scalar *seckey, 
-  const secp256k1_scalar *message, 
-  const secp256k1_scalar *nonce, 
+  __global const secp256k1_ecmult_gen_context *generatorContext,
+  secp256k1_scalar *sigr,
+  secp256k1_scalar *sigs,
+  const secp256k1_scalar *seckey,
+  const secp256k1_scalar *message,
+  const secp256k1_scalar *nonce,
   int *recid
 ) {
   unsigned char b[32];
@@ -3976,7 +4002,7 @@ char secp256k1_ecdsa_sig_verify(
   __global const secp256k1_scalar *sigs,
   __global const secp256k1_ge *pubkey,
   __global const secp256k1_scalar *message,
-  __global unsigned char* memoryPoolMultiplicationContext
+  __global unsigned char* memoryPoolSignatures
 ) {
   unsigned char c[32];
   secp256k1_scalar sn, u1, u2;
@@ -3992,7 +4018,7 @@ char secp256k1_ecdsa_sig_verify(
   secp256k1_scalar_mul__global(&u2, &sn, sigr);
   secp256k1_gej_set_ge__global(&pubkeyj, pubkey);
 
-  secp256k1_ecmult(ctx, &pr, &pubkeyj, &u2, &u1, memoryPoolMultiplicationContext);
+  secp256k1_ecmult(ctx, &pr, &pubkeyj, &u2, &u1, memoryPoolSignatures);
   if (secp256k1_gej_is_infinity(&pr)) {
     return 0;
   }
@@ -4047,17 +4073,17 @@ char secp256k1_ecdsa_sig_verify(
 
 //******From eckey.h******
 int secp256k1_eckey_pubkey_parse(
-  secp256k1_ge *outputPublicKey, 
-  __global const unsigned char *inputPublicKey, 
+  secp256k1_ge *outputPublicKey,
+  __global const unsigned char *inputPublicKey,
   size_t size
 ) {
   if (size == 33 && (inputPublicKey[0] == SECP256K1_TAG_PUBKEY_EVEN || inputPublicKey[0] == SECP256K1_TAG_PUBKEY_ODD)) {
     secp256k1_fe x;
-    return secp256k1_fe_set_b32__global(&x, inputPublicKey + 1) && 
+    return secp256k1_fe_set_b32__global(&x, inputPublicKey + 1) &&
     secp256k1_ge_set_xo_var(outputPublicKey, &x, inputPublicKey[0] == SECP256K1_TAG_PUBKEY_ODD);
   } else if (size == 65 && (
-      inputPublicKey[0] == SECP256K1_TAG_PUBKEY_UNCOMPRESSED || 
-      inputPublicKey[0] == SECP256K1_TAG_PUBKEY_HYBRID_EVEN || 
+      inputPublicKey[0] == SECP256K1_TAG_PUBKEY_UNCOMPRESSED ||
+      inputPublicKey[0] == SECP256K1_TAG_PUBKEY_HYBRID_EVEN ||
       inputPublicKey[0] == SECP256K1_TAG_PUBKEY_HYBRID_ODD
   )) {
     secp256k1_fe x, y;
@@ -4076,9 +4102,9 @@ int secp256k1_eckey_pubkey_parse(
 }
 
 int secp256k1_eckey_pubkey_serialize(
-  secp256k1_ge *inputOutputPublicKey, 
-  __global unsigned char *outputPublicKey, 
-  size_t *size, 
+  secp256k1_ge *inputOutputPublicKey,
+  __global unsigned char *outputPublicKey,
+  size_t *size,
   int compressed
 ) {
   if (secp256k1_ge_is_infinity(inputOutputPublicKey)) {

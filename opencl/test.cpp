@@ -30,19 +30,8 @@ unsigned char bufferGraphicsPUMultiplicationContext[CryptoEC256k1GPU::memoryMult
 unsigned char bufferCentralPUGeneratorContext[CryptoEC256k1GPU::memoryGeneratorContext];
 unsigned char bufferGraphicsPUGeneratorContext[CryptoEC256k1GPU::memoryGeneratorContext];
 
-
-void getMultiplicationContext(
-  const unsigned char* theMemoryPool,
-  secp256k1_ecmult_context& outputMultiplicationContext
-) {
-  outputMultiplicationContext.pre_g = NULL;
-  uint32_t outputPositionMultiplicationContent = memoryPool_read_uint_fromOutput(0, theMemoryPool);
-  //int sizeOfGeneratorContextLump = (16 * 64 * sizeof(secp256k1_ge_storage));
-  //logTest << "Size of generator context lump: " << sizeOfGeneratorContextLump << Logger::endL;
-  //for (int i = 0; i < sizeOfGeneratorContextLump; i++)
-  //  logTest << std::hex << (int) theMemoryPool[outputPositionGeneratorContextContent + i];
-  outputMultiplicationContext.pre_g = (secp256k1_ge_storage(*)[]) &theMemoryPool[outputPositionMultiplicationContent];
-}
+unsigned char bufferCentralPUSignature[CryptoEC256k1GPU::memorySignature];
+unsigned char bufferGraphicsPUGSignature[CryptoEC256k1GPU::memorySignature];
 
 void testPrintMemoryPoolGeneral(const unsigned char* theMemoryPool, const std::string& computationID, Logger& logTest) {
   logTest << computationID << Logger::endL;
@@ -67,7 +56,7 @@ void testPrintMultiplicationContext(const unsigned char* theMemoryPool, const st
   logTest << "Position multiplication context: " << outputPosition << Logger::endL;
   secp256k1_ecmult_context multiplicationContext;
   secp256k1_ecmult_context_init(&multiplicationContext);
-  getMultiplicationContext(theMemoryPool, multiplicationContext);
+  memoryPool_read_multiplicationContext(&multiplicationContext, theMemoryPool);
   logTest << "Multiplication context:\n"
   << toStringSecp256k1_MultiplicationContext(multiplicationContext, false) << Logger::endL;
 }
@@ -82,7 +71,7 @@ void testPrintGeneratorContext(const unsigned char* theMemoryPool, const std::st
     logTest << "Debug " << (i + 1) << ": " << toStringOutputObject(i, theMemoryPool) << Logger::endL;
   }
   secp256k1_ecmult_gen_context theGeneratorContext;
-  memoryPool_read_generatorContext(&theGeneratorContext,theMemoryPool);
+  memoryPool_read_generatorContext(&theGeneratorContext, theMemoryPool);
   logTest << "Generator context:\n" << toStringSecp256k1_GeneratorContext(theGeneratorContext, false) << Logger::endL;
 }
 
@@ -257,16 +246,21 @@ bool testMainPart2Signatures(GPU& theGPU) {
     logTestGraphicsPU << "ERROR: generatePublicKey returned false. " << Logger::endL;
   logTestGraphicsPU << "Public key:\n" << thePublicKey.toString() << Logger::endL;
 
-/*  secp256k1_ecmult_context multiplicationContext;
-  secp256k1_ecmult_context_init(&multiplicationContext);
   //getMultiplicationContext(bufferCentralPUMultiplicationContext, multiplicationContext);
-  char signatureResult[4];
-  bool signatureExecution = CryptoEC256k1::verifySignature(
-    signatureResult,
+  unsigned char signatureResult;
+  CryptoEC256k1::verifySignature(
+    &signatureResult,
+    bufferCentralPUSignature,
     theSignature.serialization,
-
-
+    theSignature.size,
+    thePublicKey.serialization,
+    thePublicKey.size,
+    message.serialization,
+    bufferCentralPUMultiplicationContext
   );
+  logTestCentralPU << "Signature verification: " << (int) signatureResult << Logger::endL;
+
+  /*
   int signatureResult = secp256k1_ecdsa_sig_verify(
     &multiplicationContext,
     &signatureR,

@@ -20,6 +20,7 @@ extern Logger logGPU;
 #include "cl/secp256k1_opencl_compute_generator_context.cl"
 #include "cl/secp256k1_opencl_sign.cl"
 #include "cl/secp256k1_opencl_generate_public_key.cl"
+#include "cl/secp256k1_opencl_verify_signature.cl"
 void assertFalse(__constant const char* errorMessage, __global unsigned char* memoryPool) {
   (void) memoryPool;
   std::string errorMessageString(errorMessage);

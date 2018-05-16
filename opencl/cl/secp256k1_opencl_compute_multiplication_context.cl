@@ -15,7 +15,7 @@ __constant static const char message1[50] = "initialized multiplication context 
 __kernel void secp256k1_opencl_compute_multiplication_context(
   __global unsigned char* outputMemoryPoolContainingMultiplicationContext
 ) {
-  memoryPool_Initialize(MACRO_MEMORY_POOL_SIZE_MultiplicationContext - 100, outputMemoryPoolContainingMultiplicationContext);
+  memoryPool_initialize(MACRO_MEMORY_POOL_SIZE_MultiplicationContext - 100, outputMemoryPoolContainingMultiplicationContext);
   __global secp256k1_ecmult_context* multiplicationContext = (__global secp256k1_ecmult_context*) checked_malloc(
     sizeof_secp256k1_ecmult_context(),
     outputMemoryPoolContainingMultiplicationContext

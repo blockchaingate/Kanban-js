@@ -25,12 +25,13 @@ Please see the file opencl/README.md for technical notes on this code.
 #define __global
 #endif
 
-//Memory pool format: in the notes before the definition of memoryPool_Initialize.
+//Memory pool format: in the notes before the definition of memoryPool_initialize.
 
 #define MACRO_numberOfOutputs 6
 #define MACRO_MessageLogSize 500
 #define MACRO_MEMORY_POOL_SIZE_MultiplicationContext 6000000
 #define MACRO_MEMORY_POOL_SIZE_GeneratorContext 2000000
+#define MACRO_MEMORY_POOL_SIZE_Signature 500000
 
 
 __global void* checked_malloc(unsigned int size, __global unsigned char* memoryPool);
@@ -50,8 +51,9 @@ unsigned int memoryPool_readMaxPoolSize(__global const unsigned char* memoryPool
 unsigned int memoryPool_readNumberReservedBytesExcludingLog();
 unsigned int memoryPool_readNumberReservedBytesIncludingLog();
 
-//Memory pool format: in the notes before the definition of memoryPool_Initialize.
-void memoryPool_Initialize(unsigned int totalSize, __global unsigned char* memoryPool);
+//Memory pool format: in the notes before the definition of memoryPool_initialize.
+void memoryPool_initialize(unsigned int totalSize, __global unsigned char* memoryPool);
+void memoryPool_initializeNoInitializationNoLog(unsigned int totalSize, __global unsigned char* memoryPool);
 
 void assertFalse(__constant const char* errorMessage, __global unsigned char *memoryPool);
 
@@ -425,12 +427,14 @@ int secp256k1_ecdsa_sig_serialize(
   const secp256k1_scalar *r, 
   const secp256k1_scalar *s
 );
+
 int secp256k1_ecdsa_sig_serialize__global(
   __global unsigned char *sig, 
   size_t* inputAvailableSizeOutputFinalSize, 
   const secp256k1_scalar *r, 
   const secp256k1_scalar *s
 );
+
 int secp256k1_ecdsa_sig_sign(
   __global const secp256k1_ecmult_gen_context *ctx,
   secp256k1_scalar* r,
@@ -440,6 +444,7 @@ int secp256k1_ecdsa_sig_sign(
   const secp256k1_scalar *nonce,
   int *recid
 );
+
 int secp256k1_ecdsa_sig_recover(
   __global const secp256k1_ecmult_context *ctx, 
   const secp256k1_scalar* r, 
@@ -451,12 +456,12 @@ int secp256k1_ecdsa_sig_recover(
 );
 
 char secp256k1_ecdsa_sig_verify(
-  __global const secp256k1_ecmult_context *ctx, 
-  __global const secp256k1_scalar* r, 
-  __global const secp256k1_scalar* s, 
-  __global const secp256k1_ge *pubkey, 
-  __global const secp256k1_scalar *message, 
-  __global unsigned char* memoryPool
+  __global const secp256k1_ecmult_context *ctx,
+  __global const secp256k1_scalar* r,
+  __global const secp256k1_scalar* s,
+  __global const secp256k1_ge *pubkey,
+  __global const secp256k1_scalar *message,
+  __global unsigned char* memoryPoolSignatures
 );
 
 //******end of ecdsa.h******
@@ -520,8 +525,18 @@ void memoryPool_read_generatorContext(
   __global const unsigned char* memoryPool
 );
 
+// Reads multiplication context. PORTABLE: can be called accross GPU<->CPU.
+void memoryPool_read_multiplicationContext(
+  __global secp256k1_ecmult_context* outputMultiplicationContext,
+  __global const unsigned char* memoryPool
+);
+
 //Reads the generator context pointer. NOT PORTABLE: must not be called accross GPU<->CPU.
 __global secp256k1_ecmult_gen_context* memoryPool_read_generatorContextPointer(
+  __global const unsigned char* memoryPool
+);
+
+__global secp256k1_ecmult_context* memoryPool_read_multiplicationContextPointer(
   __global const unsigned char* memoryPool
 );
 #endif //SECP256k1_H_header
