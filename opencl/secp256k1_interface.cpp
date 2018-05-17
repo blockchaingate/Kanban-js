@@ -4,14 +4,31 @@
 
 extern Logger logGPU;
 
+unsigned char CryptoEC256k1::bufferMultiplicationContext[CryptoEC256k1GPU::memoryMultiplicationContext];
+unsigned char CryptoEC256k1::bufferGeneratorContext[CryptoEC256k1GPU::memoryGeneratorContext];
+unsigned char CryptoEC256k1::bufferSignature[CryptoEC256k1GPU::memorySignature];
+
+unsigned char CryptoEC256k1GPU::bufferMultiplicationContext[CryptoEC256k1GPU::memoryMultiplicationContext];
+unsigned char CryptoEC256k1GPU::bufferGeneratorContext[CryptoEC256k1GPU::memoryGeneratorContext];
+unsigned char CryptoEC256k1GPU::bufferSignature[CryptoEC256k1GPU::memorySignature];
+
+
 bool CryptoEC256k1::computeMultiplicationContext(unsigned char* outputMemoryPool) {
   secp256k1_opencl_compute_multiplication_context(outputMemoryPool);
   return true;
 }
 
+bool CryptoEC256k1::computeMultiplicationContextDefaultBuffers() {
+  return CryptoEC256k1::computeMultiplicationContext(CryptoEC256k1::bufferMultiplicationContext);
+}
+
 bool CryptoEC256k1::computeGeneratorContext(unsigned char* outputMemoryPool) {
   secp256k1_opencl_compute_generator_context(outputMemoryPool);
   return true;
+}
+
+bool CryptoEC256k1::computeGeneratorContextDefaultBuffers() {
+  return CryptoEC256k1::computeGeneratorContext(CryptoEC256k1::bufferGeneratorContext);
 }
 
 bool CryptoEC256k1GPU::computeMultiplicationContext(unsigned char* outputMemoryPool, GPU& theGPU) {
@@ -34,6 +51,10 @@ bool CryptoEC256k1GPU::computeMultiplicationContext(unsigned char* outputMemoryP
     return false;
   }
   return true;
+}
+
+bool CryptoEC256k1GPU::computeMultiplicationContextDefaultBuffers(GPU& theGPU) {
+  return CryptoEC256k1GPU::computeMultiplicationContext(CryptoEC256k1GPU::bufferMultiplicationContext, theGPU);
 }
 
 bool CryptoEC256k1GPU::computeGeneratorContext(unsigned char* outputMemoryPool, GPU& theGPU) {
@@ -60,7 +81,11 @@ bool CryptoEC256k1GPU::computeGeneratorContext(unsigned char* outputMemoryPool, 
   return true;
 }
 
-bool CryptoEC256k1GPU::signMessage(
+bool CryptoEC256k1GPU::computeGeneratorContextDefaultBuffers(GPU& theGPU) {
+  return CryptoEC256k1GPU::computeGeneratorContext(CryptoEC256k1GPU::bufferGeneratorContext, theGPU);
+}
+
+bool CryptoEC256k1GPU::signMessageDefaultBuffers(
   unsigned char* outputSignatures,
   unsigned int* outputSize,
   unsigned char* outputInputNonce,
@@ -68,6 +93,7 @@ bool CryptoEC256k1GPU::signMessage(
   unsigned char* inputMessage,
   GPU& theGPU
 ) {
+  int fixInitialization;
   if (!theGPU.initializeAll())
     return false;
   std::shared_ptr<GPUKernel> kernelSign = theGPU.theKernels[GPU::kernelSign];
@@ -130,12 +156,13 @@ bool CryptoEC256k1GPU::signMessage(
   return true;
 }
 
-bool CryptoEC256k1GPU::generatePublicKey(
+bool CryptoEC256k1GPU::generatePublicKeyDefaultBuffers(
   unsigned char *outputPublicKey,
   unsigned int *outputPublicKeySize,
   unsigned char *inputSecretKey,
   GPU &theGPU
 ) {
+  int fixmeInitialization;
   if (!theGPU.initializeAll())
     return false;
   std::shared_ptr<GPUKernel> kernelGeneratePublicKey = theGPU.theKernels[GPU::kernelGeneratePublicKey];
@@ -196,7 +223,7 @@ bool CryptoEC256k1GPU::generatePublicKey(
   return true;
 }
 
-bool CryptoEC256k1GPU::verifySignature(
+bool CryptoEC256k1GPU::verifySignatureDefaultBuffers(
   unsigned char *output,
   const unsigned char *inputSignature,
   unsigned int signatureSize,
@@ -205,6 +232,7 @@ bool CryptoEC256k1GPU::verifySignature(
   const unsigned char *message,
   GPU &theGPU
 ) {
+  int fixInitialization;
   //openCL function arguments:
   //__global unsigned char *output,
   //__global unsigned char *outputMemoryPoolSignature,
@@ -265,7 +293,7 @@ bool CryptoEC256k1::signMessage(
   unsigned char* outputInputNonce,
   unsigned char* inputSecretKey,
   unsigned char* inputMessage,
-  unsigned char *inputMemoryPoolGeneratorContext
+  unsigned char* inputMemoryPoolGeneratorContext_MUST_BE_INITIALIZED
 ) {
   unsigned char outputSizeBuffer[4];
   secp256k1_opencl_sign(
@@ -274,27 +302,59 @@ bool CryptoEC256k1::signMessage(
     outputInputNonce,
     inputSecretKey,
     inputMessage,
-    inputMemoryPoolGeneratorContext
+    inputMemoryPoolGeneratorContext_MUST_BE_INITIALIZED
   );
   *outputSize = memoryPool_read_uint(outputSizeBuffer);
   return true;
+}
+
+bool CryptoEC256k1::signMessageDefaultBuffers(
+  unsigned char* outputSignature,
+  unsigned int* outputSize,
+  unsigned char* outputInputNonce,
+  unsigned char* inputSecretKey,
+  unsigned char* inputMessage
+) {
+  int fixInitialization;
+  return CryptoEC256k1::signMessage(
+    outputSignature,
+    outputSize,
+    outputInputNonce,
+    inputSecretKey,
+    inputMessage,
+    CryptoEC256k1::bufferGeneratorContext
+  );
 }
 
 bool CryptoEC256k1::generatePublicKey(
   unsigned char* outputPublicKey,
   unsigned int *outputPublicKeySize,
   unsigned char *inputSecretKey,
-  unsigned char *inputMemoryPoolGeneratorContext
+  unsigned char *inputMemoryPoolGeneratorContext_MUST_BE_INITIALIZED
 ) {
   unsigned char outputSizeBuffer[4];
   secp256k1_opencl_generate_public_key(
     outputPublicKey,
     outputSizeBuffer,
     inputSecretKey,
-    inputMemoryPoolGeneratorContext
+    inputMemoryPoolGeneratorContext_MUST_BE_INITIALIZED
   );
   *outputPublicKeySize = memoryPool_read_uint(outputSizeBuffer);
   return true;
+}
+
+bool CryptoEC256k1::generatePublicKeyDefaultBuffers(
+  unsigned char* outputPublicKey,
+  unsigned int *outputPublicKeySize,
+  unsigned char *inputSecretKey
+) {
+  int fixInitialization;
+  return CryptoEC256k1::generatePublicKey(
+    outputPublicKey,
+    outputPublicKeySize,
+    inputSecretKey,
+    CryptoEC256k1::bufferGeneratorContext
+  );
 }
 
 bool CryptoEC256k1::verifySignature(
@@ -305,7 +365,7 @@ bool CryptoEC256k1::verifySignature(
   const unsigned char *publicKey,
   unsigned int publicKeySize,
   const unsigned char *message,
-  const unsigned char *memoryPoolMultiplicationContext
+  const unsigned char *memoryPoolMultiplicationContext_MUST_BE_INITIALIZED
 ) {
   secp256k1_opencl_verify_signature(
     output,
@@ -315,7 +375,28 @@ bool CryptoEC256k1::verifySignature(
     publicKey,
     publicKeySize,
     message,
-    memoryPoolMultiplicationContext
+    memoryPoolMultiplicationContext_MUST_BE_INITIALIZED
   );
   return true;
+}
+
+bool CryptoEC256k1::verifySignatureDefaultBuffers(
+  unsigned char *output,
+  const unsigned char *inputSignature,
+  unsigned int signatureSize,
+  const unsigned char *publicKey,
+  unsigned int publicKeySize,
+  const unsigned char *message
+) {
+  int fixInitialization;
+  return CryptoEC256k1::verifySignature(
+    output,
+    CryptoEC256k1::bufferSignature,
+    inputSignature,
+    signatureSize,
+    publicKey,
+    publicKeySize,
+    message,
+    CryptoEC256k1::bufferMultiplicationContext
+  );
 }

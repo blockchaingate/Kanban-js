@@ -65,6 +65,7 @@ public:
   unsigned numInitializedExternallyOwnedBuffers;
   size_t local_item_size; // Divide work items into groups of 64
   size_t global_item_size; // Divide work items into groups of 64
+
   bool constructFromFileName(
     const std::string& fileNameNoExtension,
     const std::vector<std::string>& outputNames,

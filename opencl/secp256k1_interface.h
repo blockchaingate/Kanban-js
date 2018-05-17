@@ -13,15 +13,24 @@ public:
   static const int memoryGeneratorContext = MACRO_MEMORY_POOL_SIZE_GeneratorContext;
   //500KB for signature verification
   static const int memorySignature = MACRO_MEMORY_POOL_SIZE_Signature;
+
+  static unsigned char bufferMultiplicationContext[CryptoEC256k1GPU::memoryMultiplicationContext];
+  static unsigned char bufferGeneratorContext[CryptoEC256k1GPU::memoryGeneratorContext];
+  static unsigned char bufferSignature[CryptoEC256k1GPU::memorySignature];
+  static bool flagMultiplicationContextComputed;
+  static bool flaGeneratorContextComputed;
+
   static bool computeMultiplicationContext(unsigned char* outputMemoryPool, GPU& theGPU);
+  static bool computeMultiplicationContextDefaultBuffers(GPU& theGPU);
   static bool computeGeneratorContext(unsigned char* outputMemoryPool, GPU& theGPU);
-  static bool generatePublicKey(
+  static bool computeGeneratorContextDefaultBuffers(GPU& theGPU);
+  static bool generatePublicKeyDefaultBuffers(
     unsigned char* outputPublicKey,
     unsigned int* outputPublicKeySize,
     unsigned char* inputSecretKey,
     GPU& theGPU
   );
-  static bool signMessage(
+  static bool signMessageDefaultBuffers(
     unsigned char* outputSignatures,
     unsigned int* outputSize,
     unsigned char* outputInputNonce,
@@ -29,7 +38,7 @@ public:
     unsigned char* inputNonce,
     GPU& theGPU
   );
-  static bool verifySignature(
+  static bool verifySignatureDefaultBuffers(
     unsigned char* output,
     const unsigned char* inputSignature,
     unsigned int signatureSize,
@@ -44,19 +53,35 @@ public:
 //shorten the autocomple menu suggestions in (my) IDEs
 class CryptoEC256k1 {
 public:
+  static unsigned char bufferMultiplicationContext[CryptoEC256k1GPU::memoryMultiplicationContext];
+  static unsigned char bufferGeneratorContext[CryptoEC256k1GPU::memoryGeneratorContext];
+  static unsigned char bufferSignature[CryptoEC256k1GPU::memorySignature];
   //The functions below are expected to never return false,
   //however we declare them boolean
   //in order to keep the interface similar to that of CryptoEC256k1GPU.
+  static bool flagMultiplicationContextComputed;
+  static bool flaGeneratorContextComputed;
+
   static bool computeMultiplicationContext(unsigned char* outputMemoryPool);
+  static bool computeMultiplicationContextDefaultBuffers();
   static bool computeGeneratorContext(unsigned char* outputMemoryPool);
+  static bool computeGeneratorContextDefaultBuffers();
   static bool signMessage(
     unsigned char* outputSignature,
     unsigned int* outputSize,
     unsigned char* outputInputNonce,
     unsigned char* inputSecretKey,
     unsigned char* inputMessage,
-    unsigned char* inputMemoryPoolGeneratorContext
+    unsigned char* inputMemoryPoolGeneratorContext_MUST_BE_INITIALIZED
   );
+  static bool signMessageDefaultBuffers(
+    unsigned char* outputSignature,
+    unsigned int* outputSize,
+    unsigned char* outputInputNonce,
+    unsigned char* inputSecretKey,
+    unsigned char* inputMessage
+  );
+
   static bool verifySignature(
     unsigned char* output,
     unsigned char *outputMemoryPoolSignature,
@@ -65,13 +90,26 @@ public:
     const unsigned char* publicKey,
     unsigned int publicKeySize,
     const unsigned char* message,
-    const unsigned char* memoryPoolMultiplicationContext
+    const unsigned char* memoryPoolMultiplicationContext_MUST_BE_INITIALIZED
+  );
+  static bool verifySignatureDefaultBuffers(
+    unsigned char* output,
+    const unsigned char* inputSignature,
+    unsigned int signatureSize,
+    const unsigned char* publicKey,
+    unsigned int publicKeySize,
+    const unsigned char* message
   );
   static bool generatePublicKey(
     unsigned char* outputPublicKey,
     unsigned int* outputPublicKeySize,
     unsigned char* inputSecretKey,
-    unsigned char* inputMemoryPoolGeneratorContext
+    unsigned char* inputMemoryPoolGeneratorContext_MUST_BE_INITIALIZED
+  );
+  static bool generatePublicKeyDefaultBuffers(
+    unsigned char* outputPublicKey,
+    unsigned int* outputPublicKeySize,
+    unsigned char* inputSecretKey
   );
 };
 

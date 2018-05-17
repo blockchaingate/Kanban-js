@@ -1,7 +1,6 @@
 "use strict";
 const pathnames = require('./pathnames');
 const assert = require('assert')
-const randomString = require('randomstring');
 const childProcess = require('child_process');
 const openCLDriver = require('./open_cl_driver');
 var jobs = global.kanban.jobs;
@@ -21,7 +20,7 @@ function pollOngoing(request, response, desiredCommand) {
   var numIdsToReport = Math.min(maxSimultaneousCalls, callIds.length);
   var result = {};
   console.log(`Extracting ids from: ${JSON.stringify(callIds)}`);
-  for (var counterIds = 0; counterIds < callIds.length; counterIds ++){
+  for (var counterIds = 0; counterIds < callIds.length; counterIds ++) {
     var currentId = callIds[counterIds];
     if (currentId in jobs.ongoing){
       result[currentId] = {
@@ -75,7 +74,7 @@ for (var label in pathnames.nodeCalls) {
 
 var numSimultaneousCalls = 0;
 var maxSimultaneousCalls = 4;
-function dispatch(request, response, desiredCommand){
+function dispatch(request, response, desiredCommand) {
   //console.log(`command: ${JSON.stringify(desiredCommand)}, nodeCallLabel = ${pathnames.nodeCallLabel}`);
   var isGood = false;
   var currentCommandLabel = desiredCommand[pathnames.nodeCallLabel];

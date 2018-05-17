@@ -389,7 +389,7 @@ bool Server::ExecuteSignOneMessage(MessageFromNode& theMessage) {
     return false;
   }
   logServer << "Got 96 bytes, as expected: " << Miscellaneous::toStringHex(theMessage.theMessage) << Logger::endL;
-
+  return false;
   unsigned char bufferInputs[32 * 3];
   Signature outputSignature;
   for (int i = 0; i < theMessage.length; i ++)
