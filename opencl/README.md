@@ -14,7 +14,7 @@ As of May 2018, the goals of the modifications are the following.
 1)  Port the code to openCL, while keeping it valid vanilla C/C++.
     More precisely, we commit that our code shall compile/build
     both as a C++ and an openCL program (within our setup).
-    - Our C build target is the default gcc C++ compiler on as many distributions as possible.
+    - Our C++ build target is the default gcc C++ compiler on as many distributions as possible.
     - Our openCL build target is openCL 1.1 or 1.2 on all devices 
       we can test. 
 2)  Refactor (or write new) tests and benchmarks to match our 
@@ -33,7 +33,8 @@ Further comments.
     Except for the __constant memory address space, 
     this problem is addressed in openCL 2.0 using the generic address space.
     However, as of May 2018, openCL 2.0 is not properly supported on many platforms 
-    (including my work machine). That is why this is not an acceptable solution.
+    (including my work machine as well as the latest RADEON GPU series). 
+    That is why this is not an acceptable solution.
 
     We have therefore decided to replicate each function argument address space combination
     with a system of macros. The macros emulate what in C++ is usually achieved with templates.
@@ -52,6 +53,11 @@ Further comments.
     in the foreseeable future.
     For example, at the time of writing (May 2018), my work machine
     NVidia Quadro K2000 + stock Ubuntu supports only openCL 1.1. 
+
+    Please note that whenever the openCL 2.0 drivers work, 
+    our code gets automatically all benefits associated with it.
+    In other words, our use of openCL 1.1 should not incur any computational performance penalty.
+
 4)  Henceforth, we will try to keep FA's comments 
     in the double-forward slash style, so as to distinguish from 
     secp256k1's comments written in the multi-line comment style.

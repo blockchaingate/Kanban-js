@@ -10350,6 +10350,9 @@ function updatePages(){
   if (currentPage === getPage().pages.blockInfo){
     return updateBlockInfoPage();
   }
+  if (currentPage === getPage().pages.network){
+    return getPage().pages.network.updateFunction();
+  }
 }
 
 function setTestNet(){
@@ -10371,7 +10374,7 @@ function getBlockCallback(inputHex, outputComponent){
     jsonToHtml.writeJSONtoDOMComponent(inputHex, outputComponent);
   }
 }
-function getBlock(){
+function getBlock() {
   getPage().pages.blockInfo.verbosity = "0";
   if (document.getElementById(ids.defaults.checkboxBlockVerbose).checked){
     getPage().pages.blockInfo.verbosity = "1";  
@@ -10392,10 +10395,11 @@ function getBlock(){
   });
 }
 
-function getPeerInfoCallBack(input, outputComponent){
+function getPeerInfoCallBack(input, outputComponent) {
   jsonToHtml.writeJSONtoDOMComponent(input, outputComponent);
 }
-function getPeerInfo(){
+
+function getPeerInfo() {
   submitRequests.submitGET({
     url: pathnames.getURLfromRPCLabel(pathnames.rpcCalls.getPeerInfo.rpcCallLabel, {
       net: getPage().pages.blockInfo.currentNet,
@@ -10406,16 +10410,17 @@ function getPeerInfo(){
   });
 }
 
-function getBestBlockHashCallback(inputHex, outputComponent){
+function getBestBlockHashCallback(inputHex, outputComponent) {
   getBlockHash().value = inputHex;
   jsonToHtml.writeJSONtoDOMComponent(inputHex, outputComponent);
   getPage().pages.blockInfo.updateFunction = getBestBlockHash;  
 }
-function getBestBlockHash(){
+
+function getBestBlockHash() {
   var index = getBestBlockIndex().value;  
   var theURL = "";
-  if (index === null || index === undefined || index === ""){
-    theURL = pathnames.getURLfromRPCLabel(pathnames.rpcCalls.getBestBlockHash.rpcCallLabel,{
+  if (index === null || index === undefined || index === "") {
+    theURL = pathnames.getURLfromRPCLabel(pathnames.rpcCalls.getBestBlockHash.rpcCallLabel, {
       net: getPage().pages.blockInfo.currentNet
     });
   } else {
@@ -10432,9 +10437,10 @@ function getBestBlockHash(){
   });
 }
 
-function getTXoutSetInfoCallback(input, outputComponent){
+function getTXoutSetInfoCallback(input, outputComponent) {
   jsonToHtml.writeJSONtoDOMComponent(input, outputComponent);
 }
+
 function getTXoutSetInfo(){
   submitRequests.submitGET({
     url: pathnames.getURLfromRPCLabel(pathnames.rpcCalls.getTXOutSetInfo.rpcCallLabel, {
@@ -10449,6 +10455,7 @@ function getTXoutSetInfo(){
 function getTXoutCallback(input, outputComponent){
   jsonToHtml.writeJSONtoDOMComponent(input, outputComponent);
 }
+
 function getTXout(){
   submitRequests.submitGET({
     url: pathnames.getURLfromRPCLabel(pathnames.rpcCalls.getTXOut.rpcCallLabel, {
@@ -10460,10 +10467,11 @@ function getTXout(){
   });  
 }
 
-function getReceivedByAccountCallback(input, outputComponent){
+function getReceivedByAccountCallback(input, outputComponent) {
   jsonToHtml.writeJSONtoDOMComponent(input, outputComponent);
 }
-function getReceivedByAccount(){
+
+function getReceivedByAccount() {
   submitRequests.submitGET({
     url: pathnames.getURLfromRPCLabel(pathnames.rpcCalls.getReceivedByAccount.rpcCallLabel, {
       net: getPage().pages.blockInfo.currentNet,
@@ -10474,10 +10482,11 @@ function getReceivedByAccount(){
   });  
 }
 
-function listAccountsCallback(input, outputComponent){
+function listAccountsCallback(input, outputComponent) {
   jsonToHtml.writeJSONtoDOMComponent(input, outputComponent);
 }
-function listAccounts(){
+
+function listAccounts() {
   submitRequests.submitGET({
     url: pathnames.getURLfromRPCLabel(pathnames.rpcCalls.listAccounts.rpcCallLabel, {
       net: getPage().pages.blockInfo.currentNet,
@@ -10488,10 +10497,11 @@ function listAccounts(){
   });  
 }
 
-function listUnspentCallback(input, outputComponent){
+function listUnspentCallback(input, outputComponent) {
   jsonToHtml.writeJSONtoDOMComponent(input, outputComponent);
 }
-function listUnspent(){
+
+function listUnspent() {
   submitRequests.submitGET({
     url: pathnames.getURLfromRPCLabel(pathnames.rpcCalls.listUnspent.rpcCallLabel, {
       net: getPage().pages.blockInfo.currentNet,

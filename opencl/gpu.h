@@ -65,8 +65,8 @@ public:
   cl_kernel kernel;
   std::string name;
   unsigned numInitializedExternallyOwnedBuffers;
-  size_t local_item_size; // Divide work items into groups of 64
-  size_t global_item_size; // Divide work items into groups of 64
+  size_t local_item_size; // Divide work items into groups of this size, initialized to 32
+  size_t global_item_size; // Divide work items into groups of this size, initialized to 32
 
   bool constructFromFileName(
     const std::string& fileNameNoExtension,

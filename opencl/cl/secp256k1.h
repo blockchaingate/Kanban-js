@@ -529,7 +529,7 @@ void memoryPool_read_multiplicationContext_PORTABLE(
   __global const unsigned char* memoryPool
 );
 
-//Reads the generator context pointer. NOT PORTABLE: must not be called accross GPU<->CPU.
+//Reads the generator context pointer. NOT PORTABLE: must NOT be called accross GPU<->CPU.
 __global secp256k1_ecmult_gen_context* memoryPool_read_generatorContextPointer_NON_PORTABLE(
   __global const unsigned char* memoryPool
 );

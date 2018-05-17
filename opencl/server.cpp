@@ -59,26 +59,31 @@ MessagePipeline::~MessagePipeline() {
   delete [] this->bufferOutputGPU;
   this->bufferOutputGPU = 0;
   //Pipe buffers end.
-  if (this->fileDescriptorOutputData >= 0)
+  if (this->fileDescriptorOutputData >= 0) {
     close (this->fileDescriptorOutputData);
+  }
   this->fileDescriptorOutputData = - 1;
 }
 
 Server::~Server() {
-  if (this->listeningSocketData >= 0)
+  if (this->listeningSocketData >= 0) {
     close(this->listeningSocketData);
-  if (this->listeningSocketMetaData >= 0)
+  }
+  if (this->listeningSocketMetaData >= 0) {
     close(this->listeningSocketMetaData);
-  if (this->listeningSocketOutputData >= 0)
+  }
+  if (this->listeningSocketOutputData >= 0) {
     close(this->listeningSocketOutputData);
+  }
   this->listeningSocketData = - 1;
   this->listeningSocketMetaData = - 1;
   this->listeningSocketOutputData = - 1;
 }
 
 bool Server::initialize() {
-  if (this->flagInitialized)
+  if (this->flagInitialized) {
     return true;
+  }
   logServer << "Creating GPU ..." << Logger::endL;
   this->theGPU = std::make_shared<GPU>();
   logServer << "GPU created, initializing kernels..." << Logger::endL;
@@ -186,7 +191,6 @@ bool Server::listenOneSocket(int theSocket, int& outputFileDescriptor, const std
   (void) outputFileDescriptor;
   logServer << "Listening to port: " << port << Logger::endL;
   int success = listen(theSocket, 100);
-  logServer << "After listen function to port: " << port << Logger::endL;
   if (success != 0) {
     logServer << "Failed listening. " << strerror(errno);
     return false;
@@ -383,17 +387,17 @@ bool Server::ExecuteTestBuffer(MessageFromNode &theMessage) {
 }
 
 bool Server::ExecuteSignOneMessage(MessageFromNode& theMessage) {
-  if (theMessage.length != 32 * 3){
+  if (theMessage.length != 32 * 3) {
     logServer << "Sign one message: got message of length: " << theMessage.length
     << ", expected " << 32 * 3 << " bytes." << Logger::endL;
     return false;
   }
   logServer << "Got 96 bytes, as expected: " << Miscellaneous::toStringHex(theMessage.theMessage) << Logger::endL;
-  return false;
   unsigned char bufferInputs[32 * 3];
   Signature outputSignature;
-  for (int i = 0; i < theMessage.length; i ++)
+  for (int i = 0; i < theMessage.length; i ++) {
     bufferInputs[i] = theMessage.theMessage[i];
+  }
   if (!CryptoEC256k1GPU::signMessageDefaultBuffers(
     outputSignature.serialization,
     &outputSignature.size,
@@ -401,8 +405,9 @@ bool Server::ExecuteSignOneMessage(MessageFromNode& theMessage) {
     &bufferInputs[32],
     &bufferInputs[64],
     *this->theGPU.get()
-  ))
+  )) {
     return false;
+  }
   std::string outputSignatureString;
   outputSignatureString.resize(outputSignature.size);
   for (unsigned i = 0; i < outputSignature.size; i ++) {

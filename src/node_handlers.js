@@ -19,7 +19,7 @@ function pollOngoing(request, response, desiredCommand) {
   }
   var numIdsToReport = Math.min(maxSimultaneousCalls, callIds.length);
   var result = {};
-  console.log(`Extracting ids from: ${JSON.stringify(callIds)}`);
+  //console.log(`Extracting ids from: ${JSON.stringify(callIds)}`);
   for (var counterIds = 0; counterIds < callIds.length; counterIds ++) {
     var currentId = callIds[counterIds];
     if (currentId in jobs.ongoing){
