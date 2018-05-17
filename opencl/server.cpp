@@ -394,7 +394,7 @@ bool Server::ExecuteSignOneMessage(MessageFromNode& theMessage) {
   Signature outputSignature;
   for (int i = 0; i < theMessage.length; i ++)
     bufferInputs[i] = theMessage.theMessage[i];
-  if (!CryptoEC256k1GPU::signMessage(
+  if (!CryptoEC256k1GPU::signMessageDefaultBuffers(
     outputSignature.serialization,
     &outputSignature.size,
     &bufferInputs[0],

@@ -4,14 +4,9 @@
 
 extern Logger logGPU;
 
-unsigned char CryptoEC256k1::bufferMultiplicationContext[CryptoEC256k1GPU::memoryMultiplicationContext];
-unsigned char CryptoEC256k1::bufferGeneratorContext[CryptoEC256k1GPU::memoryGeneratorContext];
-unsigned char CryptoEC256k1::bufferSignature[CryptoEC256k1GPU::memorySignature];
-
-unsigned char CryptoEC256k1GPU::bufferMultiplicationContext[CryptoEC256k1GPU::memoryMultiplicationContext];
-unsigned char CryptoEC256k1GPU::bufferGeneratorContext[CryptoEC256k1GPU::memoryGeneratorContext];
-unsigned char CryptoEC256k1GPU::bufferSignature[CryptoEC256k1GPU::memorySignature];
-
+unsigned char CryptoEC256k1::bufferMultiplicationContext[GPU::memoryMultiplicationContext];
+unsigned char CryptoEC256k1::bufferGeneratorContext[GPU::memoryGeneratorContext];
+unsigned char CryptoEC256k1::bufferSignature[GPU::memorySignature];
 
 bool CryptoEC256k1::computeMultiplicationContext(unsigned char* outputMemoryPool) {
   secp256k1_opencl_compute_multiplication_context(outputMemoryPool);
@@ -23,12 +18,66 @@ bool CryptoEC256k1::computeMultiplicationContextDefaultBuffers() {
 }
 
 bool CryptoEC256k1::computeGeneratorContext(unsigned char* outputMemoryPool) {
+  logGPU << "Got to here" << Logger::endL;
   secp256k1_opencl_compute_generator_context(outputMemoryPool);
   return true;
 }
 
 bool CryptoEC256k1::computeGeneratorContextDefaultBuffers() {
   return CryptoEC256k1::computeGeneratorContext(CryptoEC256k1::bufferGeneratorContext);
+}
+
+bool CryptoEC256k1GPU::initializeMultiplicationContext(GPU& theGPU) {
+  static int numInWait = 0;
+  if (theGPU.flagMultiplicationContextComputed) {
+    return true;
+  }
+  //This function should run only once.
+  //The only time we expect to run this code more than once is if
+  //two GPU multiplication initializations are started simultaneously
+  //in separate threads. Currently the C++ driver is single-threaded
+  //(and expected to remain so - openCL is expected to take care of
+  //parallelization). In other words, this
+  //code is here as a reminder of what needs to be done if we
+  //decide to go multi-threaded (not expected to happen).
+  if (theGPU.flagMultiplicationContextComputationSTARTED) {
+    numInWait ++;
+    int currentIndex = numInWait;
+    logGPU << "Kernel " << currentIndex << " is waiting for multiplication initialization";
+    while (theGPU.flagMultiplicationContextComputationSTARTED) {
+      //infinite loop until multiplication context computation is done
+    }
+    logGPU << "Kernel " << currentIndex << " done waiting. ";
+    return theGPU.flagMultiplicationContextComputed;
+  }
+  theGPU.flagMultiplicationContextComputationSTARTED = true;
+  bool result = CryptoEC256k1GPU::computeMultiplicationContext(theGPU.bufferMultiplicationContext, theGPU);
+  theGPU.flagMultiplicationContextComputed = true;
+  return result;
+}
+
+bool CryptoEC256k1GPU::initializeGeneratorContext(GPU& theGPU) {
+  static int numInWait = 0;
+  if (theGPU.flagGeneratorContextComputed) {
+    return true;
+  }
+  //This function should run only once.
+  //Comments similar to those in initializeMultiplicationContext
+  //apply.
+  if (theGPU.flagGeneratorContextComputationSTARTED) {
+    numInWait ++;
+    int currentIndex = numInWait;
+    logGPU << "Kernel " << currentIndex << " is waiting for generator context initialization";
+    while (theGPU.flagGeneratorContextComputationSTARTED) {
+      //infinite loop until generator context computation is done
+    }
+    logGPU << "Kernel " << currentIndex << " done waiting. ";
+    return theGPU.flagGeneratorContextComputed;
+  }
+  theGPU.flagGeneratorContextComputationSTARTED = true;
+  bool result = CryptoEC256k1GPU::computeGeneratorContext(theGPU.bufferGeneratorContext, theGPU);
+  theGPU.flagGeneratorContextComputed = true;
+  return result;
 }
 
 bool CryptoEC256k1GPU::computeMultiplicationContext(unsigned char* outputMemoryPool, GPU& theGPU) {
@@ -45,7 +94,17 @@ bool CryptoEC256k1GPU::computeMultiplicationContext(unsigned char* outputMemoryP
     return false;
   }
   cl_mem& result = kernelMultiplicationContext->outputs[0]->theMemory;
-  ret = clEnqueueReadBuffer(theGPU.commandQueue, result, CL_TRUE, 0, CryptoEC256k1GPU::memoryMultiplicationContext - 100, (void*) outputMemoryPool, 0, NULL, NULL);
+  ret = clEnqueueReadBuffer(
+    theGPU.commandQueue,
+    result,
+    CL_TRUE,
+    0,
+    theGPU.memoryMultiplicationContext - 100,
+    (void*) outputMemoryPool,
+    0,
+    NULL,
+    NULL
+  );
   if (ret != CL_SUCCESS) {
     logGPU << "Failed to read buffer. Return code: " << ret << Logger::endL;
     return false;
@@ -54,7 +113,7 @@ bool CryptoEC256k1GPU::computeMultiplicationContext(unsigned char* outputMemoryP
 }
 
 bool CryptoEC256k1GPU::computeMultiplicationContextDefaultBuffers(GPU& theGPU) {
-  return CryptoEC256k1GPU::computeMultiplicationContext(CryptoEC256k1GPU::bufferMultiplicationContext, theGPU);
+  return CryptoEC256k1GPU::computeMultiplicationContext(theGPU.bufferMultiplicationContext, theGPU);
 }
 
 bool CryptoEC256k1GPU::computeGeneratorContext(unsigned char* outputMemoryPool, GPU& theGPU) {
@@ -73,7 +132,17 @@ bool CryptoEC256k1GPU::computeGeneratorContext(unsigned char* outputMemoryPool, 
   }
   cl_mem& result = kernelGeneratorContext->outputs[0]->theMemory;
   logGPU << "DEBUG: enqueued generator context. " << Logger::endL;
-  ret = clEnqueueReadBuffer(theGPU.commandQueue, result, CL_TRUE, 0,  CryptoEC256k1GPU::memoryGeneratorContext - 100, (void*) outputMemoryPool, 0, NULL, NULL);
+  ret = clEnqueueReadBuffer(
+    theGPU.commandQueue,
+    result,
+    CL_TRUE,
+    0,
+    theGPU.memoryGeneratorContext - 100,
+    (void*) outputMemoryPool,
+    0,
+    NULL,
+    NULL
+  );
   if (ret != CL_SUCCESS) {
     logGPU << "Failed to read buffer. Return code: " << ret << Logger::endL;
     return false;
@@ -82,7 +151,7 @@ bool CryptoEC256k1GPU::computeGeneratorContext(unsigned char* outputMemoryPool, 
 }
 
 bool CryptoEC256k1GPU::computeGeneratorContextDefaultBuffers(GPU& theGPU) {
-  return CryptoEC256k1GPU::computeGeneratorContext(CryptoEC256k1GPU::bufferGeneratorContext, theGPU);
+  return CryptoEC256k1GPU::computeGeneratorContext(theGPU.bufferGeneratorContext, theGPU);
 }
 
 bool CryptoEC256k1GPU::signMessageDefaultBuffers(
@@ -93,9 +162,12 @@ bool CryptoEC256k1GPU::signMessageDefaultBuffers(
   unsigned char* inputMessage,
   GPU& theGPU
 ) {
-  int fixInitialization;
-  if (!theGPU.initializeAll())
+  if (!theGPU.initializeAll()) {
     return false;
+  }
+  if (!CryptoEC256k1GPU::initializeGeneratorContext(theGPU)) {
+    return false;
+  }
   std::shared_ptr<GPUKernel> kernelSign = theGPU.theKernels[GPU::kernelSign];
   kernelSign->writeToBuffer(2, outputInputNonce, 32);
   kernelSign->writeToBuffer(3, inputSecretKey, 32);
@@ -162,9 +234,12 @@ bool CryptoEC256k1GPU::generatePublicKeyDefaultBuffers(
   unsigned char *inputSecretKey,
   GPU &theGPU
 ) {
-  int fixmeInitialization;
-  if (!theGPU.initializeAll())
+  if (!theGPU.initializeAll()) {
     return false;
+  }
+  if (!CryptoEC256k1GPU::initializeGeneratorContext(theGPU)) {
+    return false;
+  }
   std::shared_ptr<GPUKernel> kernelGeneratePublicKey = theGPU.theKernels[GPU::kernelGeneratePublicKey];
   kernelGeneratePublicKey->writeToBuffer(2, inputSecretKey, 32);
   logGPU << "DEBUG: Got to generate public key start." << Logger::endL;
@@ -232,7 +307,6 @@ bool CryptoEC256k1GPU::verifySignatureDefaultBuffers(
   const unsigned char *message,
   GPU &theGPU
 ) {
-  int fixInitialization;
   //openCL function arguments:
   //__global unsigned char *output,
   //__global unsigned char *outputMemoryPoolSignature,
@@ -242,8 +316,12 @@ bool CryptoEC256k1GPU::verifySignatureDefaultBuffers(
   //unsigned int publicKeySize,
   //__global const unsigned char *message,
   //__global const unsigned char *memoryPoolMultiplicationContext
-  if (!theGPU.initializeAll())
+  if (!theGPU.initializeAll()) {
     return false;
+  }
+  if (!CryptoEC256k1GPU::initializeMultiplicationContext(theGPU)) {
+    return false;
+  }
   std::shared_ptr<GPUKernel> kernelVerifySignature = theGPU.theKernels[GPU::kernelVerifySignature];
   kernelVerifySignature->writeToBuffer(2, inputSignature, signatureSize);
   kernelVerifySignature->writeArgument(3, signatureSize);

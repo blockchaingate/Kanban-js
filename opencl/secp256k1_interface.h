@@ -7,29 +7,25 @@
 //shorten the autocomple menu suggestions in (my) IDEs
 class CryptoEC256k1GPU {
 public:
-  //6MB for computing multiplication context.
-  static const int memoryMultiplicationContext = MACRO_MEMORY_POOL_SIZE_MultiplicationContext;
-  //2MB for computing generator context.
-  static const int memoryGeneratorContext = MACRO_MEMORY_POOL_SIZE_GeneratorContext;
-  //500KB for signature verification
-  static const int memorySignature = MACRO_MEMORY_POOL_SIZE_Signature;
-
-  static unsigned char bufferMultiplicationContext[CryptoEC256k1GPU::memoryMultiplicationContext];
-  static unsigned char bufferGeneratorContext[CryptoEC256k1GPU::memoryGeneratorContext];
-  static unsigned char bufferSignature[CryptoEC256k1GPU::memorySignature];
-  static bool flagMultiplicationContextComputed;
-  static bool flaGeneratorContextComputed;
+  //Initialize multiplication context globally
+  //Multiplication context does not change accross runs.
+  static bool initializeMultiplicationContext(GPU& theGPU);
+  static bool initializeGeneratorContext(GPU& theGPU);
 
   static bool computeMultiplicationContext(unsigned char* outputMemoryPool, GPU& theGPU);
   static bool computeMultiplicationContextDefaultBuffers(GPU& theGPU);
   static bool computeGeneratorContext(unsigned char* outputMemoryPool, GPU& theGPU);
   static bool computeGeneratorContextDefaultBuffers(GPU& theGPU);
+  //Uses theGPU.bufferGeneratorContext.
+  //Will initialize if not done already.
   static bool generatePublicKeyDefaultBuffers(
     unsigned char* outputPublicKey,
     unsigned int* outputPublicKeySize,
     unsigned char* inputSecretKey,
     GPU& theGPU
   );
+  //Uses theGPU.bufferGeneratorContext.
+  //Will initialize if not done already.
   static bool signMessageDefaultBuffers(
     unsigned char* outputSignatures,
     unsigned int* outputSize,
@@ -53,9 +49,9 @@ public:
 //shorten the autocomple menu suggestions in (my) IDEs
 class CryptoEC256k1 {
 public:
-  static unsigned char bufferMultiplicationContext[CryptoEC256k1GPU::memoryMultiplicationContext];
-  static unsigned char bufferGeneratorContext[CryptoEC256k1GPU::memoryGeneratorContext];
-  static unsigned char bufferSignature[CryptoEC256k1GPU::memorySignature];
+  static unsigned char bufferMultiplicationContext[GPU::memoryMultiplicationContext];
+  static unsigned char bufferGeneratorContext[GPU::memoryGeneratorContext];
+  static unsigned char bufferSignature[GPU::memorySignature];
   //The functions below are expected to never return false,
   //however we declare them boolean
   //in order to keep the interface similar to that of CryptoEC256k1GPU.
@@ -153,7 +149,7 @@ public:
 class PublicKey {
 public:
   static const int maxSerializationSize = 66;
-  //1 (type) + 32 (x-coord) + 32 (coord) = 65 bytes.
+  //1 (type) + 32 (x-coord) + 32 (y-coord) = 65 bytes.
   //We reserve an extra byte in case we want to have null-terminated content.
   unsigned int size;
   unsigned char serialization[PublicKey::maxSerializationSize];

@@ -110,6 +110,14 @@ GPU::GPU() {
   this->flagTurnOffToDebugCPU = false;
   this->commandQueue = NULL;
   this->context = NULL;
+  this->flagMultiplicationContextComputed = false;
+  this->flagGeneratorContextComputed = false;
+  this->flagMultiplicationContextComputationSTARTED = false;
+  this->flagGeneratorContextComputationSTARTED = false;
+
+  this->bufferMultiplicationContext = new unsigned char [GPU::memoryMultiplicationContext];
+  this->bufferGeneratorContext = new unsigned char [GPU::memoryGeneratorContext];
+  this->bufferSignature = new unsigned char [GPU::memorySignature];
 }
 
 bool GPU::initializeAll() {
@@ -375,6 +383,12 @@ GPU::~GPU() {
   }
   //logGPU << "GPU destruction: released context. " << Logger::endL;
   this->context = NULL;
+  delete [] this->bufferMultiplicationContext;
+  this->bufferMultiplicationContext = 0;
+  delete [] this->bufferGeneratorContext;
+  this->bufferGeneratorContext = 0;
+  delete [] this->bufferSignature;
+  this->bufferSignature = 0;
   logGPU << "GPU destruction complete. " << Logger::endL;
 }
 

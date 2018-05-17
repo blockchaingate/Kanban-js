@@ -16,6 +16,8 @@
 #include <CL/cl.h>
 #endif
 
+#include "cl/secp256k1.h"
+
 class OpenCLFunctions {
 public:
   static std::string getDeviceInfo(cl_device_id deviceId, cl_device_info informationRequested);
@@ -91,6 +93,9 @@ public:
 };
 
 class GPU {
+private:
+  //Copying GPU object is banned (private copy-constructor): the GPU contains live pointers.
+  GPU(const GPU& other);
 public:
   static std::string kernelSHA256;
   static std::string kernelTestBuffer;
@@ -99,6 +104,36 @@ public:
   static std::string kernelGeneratePublicKey;
   static std::string kernelSign;
   static std::string kernelVerifySignature;
+
+  //6MB for computing multiplication context.
+  static const int memoryMultiplicationContext = MACRO_MEMORY_POOL_SIZE_MultiplicationContext;
+  //2MB for computing generator context.
+  static const int memoryGeneratorContext = MACRO_MEMORY_POOL_SIZE_GeneratorContext;
+  //250KB for signature verification
+  static const int memorySignature = MACRO_MEMORY_POOL_SIZE_Signature;
+
+  //Warning: too-large compile-time non-static memory allocations such as
+  //
+  //unsigned char bufferMultiplicationContext[MACRO_MEMORY_POOL_SIZE_MultiplicationContext];
+  //
+  //may fail in an obscure way.
+  //For example, compilation may pass but one can still get
+  //a run-time segfault on (some) writes.
+  //
+  //Therefore we allocate the computation buffers below
+  //at run-time, even though they are of the fixed sizes
+  //indicated above.
+  //
+  unsigned char* bufferMultiplicationContext;
+  unsigned char* bufferGeneratorContext;
+  unsigned char* bufferSignature;
+
+  bool flagMultiplicationContextComputed;
+  bool flagGeneratorContextComputed;
+  bool flagMultiplicationContextComputationSTARTED;
+  bool flagGeneratorContextComputationSTARTED;
+
+
   std::unordered_map<std::string, std::shared_ptr<GPUKernel> > theKernels;
   cl_platform_id platformIds[2];
   cl_uint numberOfPlatforms;

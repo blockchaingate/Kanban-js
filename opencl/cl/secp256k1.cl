@@ -5,14 +5,14 @@
 #ifndef FILE_secp256k1_CL_INCLUDED_MUST_GUARD_DUE_TO_OPENCL_NON_DOCUMENTED_BEHAVIOR
 #define FILE_secp256k1_CL_INCLUDED_MUST_GUARD_DUE_TO_OPENCL_NON_DOCUMENTED_BEHAVIOR
 ////////////////////////////////////////////////
-//<- This file is guarded due to an open cl compiler bug
+//<- This file is guarded due to an open cl compiler issue
 //(as of May 9 2018 using stock ubuntu openCL libraries) which requires that
 //the __kernel entry point of an openCL program be located immediately inside the
 //first included file.
 //In particular kernel entry points are not allowed
 //to reside other files included with #include directives.
-//At the time of writing, this weird behavior manifests itself only on GPU builds and not on
-//for openCL CPU builds. Furthermore the manifestation is different on (my) NVIDIA and intel graphics cards:
+//At the time of writing, this unexpected behavior manifests itself only on openCL GPU builds and not on
+//openCL CPU builds. Furthermore the manifestation is different on (my) NVIDIA and intel graphics cards:
 //the former fails to run with an "out of resources " error, and the latter runs
 //producing random bytes.
 ////////////////////////////////////////////////
@@ -62,10 +62,11 @@ unsigned int sizeof_uint() {
 /////////////end of sizeof behavior block////////
 
 
-
-
-//Except for initializations, the crypto code does not
-//(or at least, should not) allocate any memory.
+//As far as I have investigated so far, 
+//except for initializations and except for the 
+//signature verification, the crypto code does not
+//allocate memory.
+//
 //The memory pool is a structure that holds all
 //"dynamically" allocated memory during initializations.
 //All memory in the memory pool is allocated once by our C++ driver
@@ -75,13 +76,14 @@ unsigned int sizeof_uint() {
 //during initializations/precomputations.
 //
 //The memory pool is immutable: it cannot grow / be resized.
-//Pointers to elements in the pool can safeley be referenced as the pool does not move.
+//Pointers to elements in the pool can safely be referenced as the pool does not move.
 //
 //Please pay attention when storing pointers into the memory pool:
 //GPU pointers may be 32 bit (as is the case on my system),
 //while CPU pointers are typically 64 bit (as is the case on my system).
 //This means that pointers allocated inside the memory pool by openCL should
-//only be referenced by openCL and not by the C++ driver.
+//only be referenced by openCL on the appropriate platform, 
+//and not another openCL platform or by the C++ driver.
 //
 //Useful output recorded in the memory pool is referenced
 //by setting the third, fourth, ... reserved byte quadruples
@@ -100,11 +102,11 @@ unsigned int sizeof_uint() {
 //(printf is not guaranteed to work out-of-the-box in older openCL versions).
 //
 
-unsigned int memoryPool_readNumberReservedBytesExcludingLog(){
+unsigned int memoryPool_readNumberReservedBytesExcludingLog() {
   return 8 + 4 * MACRO_numberOfOutputs;
 }
 
-unsigned int memoryPool_readNumberReservedBytesIncludingLog(){
+unsigned int memoryPool_readNumberReservedBytesIncludingLog() {
   return memoryPool_readNumberReservedBytesExcludingLog() + MACRO_MessageLogSize;
 }
 
@@ -119,7 +121,7 @@ void memoryPool_initialize(unsigned int totalSize, __global unsigned char* memor
   unsigned int i, reservedBytes;
   memoryPool_initializeNoZeroingNoLog(totalSize, memoryPool);
   reservedBytes  = memoryPool_readNumberReservedBytesExcludingLog();
-  for (i = 0; i < MACRO_numberOfOutputs; i ++){
+  for (i = 0; i < MACRO_numberOfOutputs; i ++) {
     memoryPool_write_uint(0, &memoryPool[8 + 4 * i]);
   }
   for (i = reservedBytes; i < totalSize; i ++) {
@@ -148,7 +150,7 @@ void memoryPool_writeString(__constant const char* message, __global unsigned ch
 }
 
 void memoryPool_write_uint_asOutput(unsigned int numberToWrite, int argumentIndex, __global unsigned char* memoryPool) {
-  memoryPool_write_uint(numberToWrite, &memoryPool[8 + 4 * argumentIndex ] );
+  memoryPool_write_uint(numberToWrite, &memoryPool[8 + 4 * argumentIndex]);
 }
 
 void memoryPool_write_uint(unsigned int numberToWrite, __global unsigned char* memoryPoolPointer) {

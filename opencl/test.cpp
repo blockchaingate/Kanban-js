@@ -8,6 +8,10 @@
 #include <assert.h>
 #include "secp256k1_interface.h"
 
+
+//Use CentralPU and GraphicsPU, CPU and GPU look too similar,
+//causing unwanted typos.
+
 Logger logTestCentralPU("../test/kanban_gpu/debug/logTestCentralPU.txt", "[test CPU] ");
 Logger logTestGraphicsPU("../test/kanban_gpu/debug/logTestGraphicsPU.txt", "[test GPU] ");
 extern Logger logServer;
@@ -76,20 +80,29 @@ extern void secp256k1_opencl_compute_generator_context(
 );
 
 bool testMainPart1ComputeContexts(GPU& theGPU) {
+  //*****CPU tests*******
   if (!CryptoEC256k1::computeMultiplicationContextDefaultBuffers())
     return false;
+  logTestCentralPU << "Multiplication context computed. " << Logger::endL;
   testPrintMultiplicationContext(CryptoEC256k1::bufferMultiplicationContext, "Central PU", logTestCentralPU);
+  logTestCentralPU << "About to start generator context computation. " << Logger::endL;
   if (!CryptoEC256k1::computeGeneratorContextDefaultBuffers())
     return false;
+  logTestCentralPU << "Generator context computed. " << Logger::endL;
   testPrintGeneratorContext(CryptoEC256k1::bufferGeneratorContext, "Central PU", logTestCentralPU);
   if (theGPU.flagTurnOffToDebugCPU)
     return true;
+
+  //*****GPU tests*******
   if (!CryptoEC256k1GPU::computeMultiplicationContextDefaultBuffers(theGPU))
     return false;
-  testPrintMultiplicationContext(CryptoEC256k1GPU::bufferMultiplicationContext, "Graphics PU", logTestGraphicsPU);
+  logTestGraphicsPU << "Multiplication context computed. " << Logger::endL;
+  testPrintMultiplicationContext(theGPU.bufferMultiplicationContext, "Graphics PU", logTestGraphicsPU);
+  logTestGraphicsPU << "About to start generator context computation. " << Logger::endL;
   if (!CryptoEC256k1GPU::computeGeneratorContextDefaultBuffers(theGPU))
     return false;
-  testPrintGeneratorContext(CryptoEC256k1GPU::bufferGeneratorContext, "Graphics PU", logTestGraphicsPU);
+  logTestGraphicsPU << "Generator context computed. " << Logger::endL;
+  testPrintGeneratorContext(theGPU.bufferGeneratorContext, "Graphics PU", logTestGraphicsPU);
   return true;
 }
 
