@@ -9,12 +9,6 @@ const net = require('net');
 
 /////////////Test suites declaration
 
-function TestSuiteSignatures(inputOwner) {
-  this.owner = inputOwner;
-  this.messages = [];
-  this.name = "testSignatures";
-}
-
 function TestSuiteSHA256(inputOwner) {
   this.owner = inputOwner;
   this.name = "testSHA256";
@@ -45,7 +39,98 @@ function TestSuitePipeBuffer(inputOwner) {
   this.startTime = null;
   this.numberScheduled = 0;
 }
+
+function TestSuiteSignatures(inputOwner) {
+  this.owner = inputOwner;
+  this.name = "testSignatures";
+  this.messagesToSign = [];
+  this.secretKeys = [];
+  this.nonces = [];
+  this.messages = [];
+  this.results = {};
+  this.numberDifferentMessages = 100;
+  this.totalToTest = 10000;
+  this.numberBackFromCPP = 0;
+  this.startTime = null;
+  this.numberBytesProcessed = 0;
+  this.numberScheduled = 0;
+}
 /////////////End of test suites
+
+TestSuiteSignatures.prototype.processFinishedJob = function(parsedOutput, gpuJob) {
+  console.log(`Completed computation: ${parsedOutput.id}`.green);
+  this.numberBackFromCPP ++;
+  if (parsedOutput.result === undefined) {
+    console.log(`GPU message has no result entry: ${JSON.stringify(parsedOutput)}`.red);
+    assert(false);
+  }
+  var theMessageIndex = gpuJob.messageIndex;
+  if (theMessageIndex === undefined) {
+    console.log(`Test job has no message index: ${JSON.stringify(gpuJob)}`.red);
+    assert(false);  
+  }
+  this.numberBytesProcessed += this.messages[theMessageIndex].length;
+  if (this.results[theMessageIndex] === undefined) {
+    this.results[theMessageIndex] = parsedOutput.result;
+  } else { 
+    if (this.results[theMessageIndex] != parsedOutput.result) {
+      console.log(`Inconsistent signature: signature request index ${theMessageIndex} first signed to: ${this.results[theMessageIndex]}, but now is signed to ${parsedOutput.result}`);
+      assert(false);
+    }
+  }  
+  var jobs = global.kanban.jobs;
+  jobs.setStatus(gpuJob.callId, this.getProgress());
+  if (this.numberBackFromCPP >= this.totalToTest) {
+    jobs.finishJob(gpuJob.callId, this.getProgress());
+  }
+}
+
+TestSuiteSignatures.prototype.getProgress = function () {
+  var currentTime = (new Date()).getTime();
+  var elapsedSoFar = (currentTime - this.startTime) / 1000;
+  var signaturesPerSecond = (this.numberBackFromCPP / elapsedSoFar).toFixed(3);
+
+  return `Progress: scheduled ${this.numberScheduled} out of ${this.totalToTest}, completed ${this.numberBackFromCPP}.<br>
+  ${elapsedSoFar} second(s) elapsed. Speed: ${signaturesPerSecond} signatures per second.`;
+}
+
+TestSuiteSignatures.prototype.initMessages = function(callId) {
+  console.log(`DEBUG: initializing messages for test suite ${this.name}`);
+  if (this.messages.length > 0) {
+    return;
+  }
+  var jobs = global.kanban.jobs;
+  jobs.setStatus(callId, `Generating test messages for test suite ${this.name}`);
+  var currentString = "1";
+  for (var counterMessage = 0; counterMessage < this.numberDifferentMessages; counterMessage ++) {
+    var sha256nonce = crypto.createHash('sha256');
+    var sha256secret = crypto.createHash('sha256');
+    var sha256message = crypto.createHash('sha256');
+    
+
+    sha256nonce.update(currentString);
+    var nonce = sha256nonce.digest();
+    this.nonces.push(nonce);
+    
+    sha256secret.update(nonce);
+    var secretKey = sha256secret.digest();
+    this.secretKeys.push(secretKey);
+
+    sha256message.update(secretKey);
+    var messageToSign = sha256message.digest();
+    this.messagesToSign.push(messageToSign);
+
+    var messageSerialized = Buffer.concat([
+      nonce,
+      secretKey,
+      messageToSign
+    ]);
+    this.messages.push(messageSerialized);
+    currentString = messageToSign;
+    console.log(`Generated message ${counterMessage}, length: ${messageSerialized.length}: ${messageSerialized.toString('hex')}`);
+  }
+  jobs.setStatus(callId, "Generated test messages, starting test. ");
+}
 
 function testSuiteInitMessageStats() {
   this.numberBackFromCPP = 0;
@@ -106,9 +191,9 @@ TestSuiteSHA256.prototype.processFinishedJob = function(parsedOutput, gpuJob) {
     }
   }  
   var jobs = global.kanban.jobs;
-  jobs.setStatus(gpuJob.callId, this.getTestProgress());
+  jobs.setStatus(gpuJob.callId, this.getProgress());
   if (this.numberBackFromCPP >= this.totalToTest) {
-    jobs.finishJob(gpuJob.callId, this.getTestProgress());
+    jobs.finishJob(gpuJob.callId, this.getProgress());
   }
 }
 
@@ -131,15 +216,15 @@ TestSuitePipeBuffer.prototype.processFinishedJob = function(parsedOutput, gpuJob
   }
   this.numberBytesProcessed += this.messages[theMessageIndex].length;
   var jobs = global.kanban.jobs;
-  jobs.setStatus(gpuJob.callId, this.getTestProgress());
+  jobs.setStatus(gpuJob.callId, this.getProgress());
   if (this.numberBackFromCPP >= this.totalToTest) {
-    jobs.finishJob(gpuJob.callId, this.getTestProgress());
+    jobs.finishJob(gpuJob.callId, this.getProgress());
   }
 }
 
 
-TestSuiteSHA256.prototype.getTestProgress     = testSuiteGetProgress;
-TestSuitePipeBuffer.prototype.getTestProgress = testSuiteGetProgress;
+TestSuiteSHA256.prototype.getProgress     = testSuiteGetProgress;
+TestSuitePipeBuffer.prototype.getProgress = testSuiteGetProgress;
 
 TestSuiteSHA256.prototype.initMessages     = testSuiteInitMessages;
 TestSuitePipeBuffer.prototype.initMessages = testSuiteInitMessages;
@@ -149,6 +234,7 @@ TestSuitePipeBuffer.prototype.generateMessages = testSuiteGenerateMessages;
 
 TestSuiteSHA256.prototype.initMessageStats     = testSuiteInitMessageStats;
 TestSuitePipeBuffer.prototype.initMessageStats = testSuiteInitMessageStats;
+TestSuiteSignatures.prototype.initMessageStats = testSuiteInitMessageStats;
 
 function OpenCLDriver() {
   this.started = false;
@@ -462,7 +548,7 @@ OpenCLDriver.prototype.testBackEndPipeMultiple = function (callId, recursionDept
     callId: callId,
     testSuite: "testPipeBuffer"
   }
-  jobs.setStatus(callId, this.testPipeBuffer.getTestProgress());
+  jobs.setStatus(callId, this.testPipeBuffer.getProgress());
   this.pipeOneMessage(this.testPipeBuffer.messages[theIndex], pathnames.gpuCommands.testBuffer);
   this.testScheduledSoFar ++;
   recursionDepth ++;
@@ -485,11 +571,36 @@ OpenCLDriver.prototype.testBackEndSha256Multiple = function (callId, recursionDe
     callId: callId,
     testSuite: "testSHA256"
   }
-  jobs.setStatus(callId, this.testSHA256.getTestProgress());
+  jobs.setStatus(callId, this.testSHA256.getProgress());
   this.pipeOneMessage(this.testSHA256.messages[theIndex], pathnames.gpuCommands.SHA256);
   this.testSHA256.numberScheduled ++;
   recursionDepth ++;
   setImmediate(this.testBackEndSha256Multiple.bind(this, callId, recursionDepth));
+} 
+
+OpenCLDriver.prototype.testBackEndSignMultipleMessages = function (callId, recursionDepth) {
+  //setImmediate(this.pipeOneMessage.bind(this,"abc".repeat(1000070)));
+  //setImmediate(this.pipeOneMessage.bind(this,"cabc".repeat(100001)));
+  
+  this.testSignatures.initMessages(callId);
+  var jobs = global.kanban.jobs;
+  if (recursionDepth >= this.testSignatures.totalToTest) {
+    return;
+  }
+  var theIndex = recursionDepth % this.testSignatures.messages.length;
+  this.remaining[this.numProcessed] = {
+    flagIsTest: true,
+    messageIndex: theIndex,
+    callId: callId,
+    testSuite: "testSignatures"
+  }
+  jobs.setStatus(callId, this.testSignatures.getProgress());
+  var currentMessage = this.testSignatures.messages[theIndex];
+  console.log(`About to pipe one: index: ${theIndex}, message: ${currentMessage}.`);
+  this.pipeOneMessage(currentMessage, pathnames.gpuCommands.signOneMessage);
+  this.testSignatures.numberScheduled ++;
+  recursionDepth ++;
+  setImmediate(this.testBackEndSignMultipleMessages.bind(this, callId, recursionDepth));
 } 
 
 OpenCLDriver.prototype.testBackEndPipeMultipleStart = function (callId) {
@@ -500,6 +611,11 @@ OpenCLDriver.prototype.testBackEndPipeMultipleStart = function (callId) {
 OpenCLDriver.prototype.testBackEndSha256MultipleStart = function (callId) {
   this.testSHA256.initMessageStats();
   this.testBackEndSha256Multiple(callId, 0);
+}
+
+OpenCLDriver.prototype.testBackEndSignMultipleMessagesStart = function (callId) {
+  this.testSignatures.initMessageStats();
+  this.testBackEndSignMultipleMessages(callId, 0);
 }
 
 function testBackEndSha256Multiple(callId) {
@@ -522,11 +638,16 @@ function testBackEndSignOneMessage(request, response, desiredCommand) {
   global.kanban.openCLDriver.testBackEndSignOneMessage(request, response, desiredCommand);
 }
 
+function testBackEndSignMultipleMessages(callId) {
+  global.kanban.openCLDriver.testBackEndSignMultipleMessagesStart(callId);
+}
+
 module.exports = {
   OpenCLDriver,
   testBackEndSha256Multiple,
   testBackEndSha256OneMessage,
   testBackEndPipeMultiple,
   testBackEndPipeOneMessage,
-  testBackEndSignOneMessage
+  testBackEndSignOneMessage,
+  testBackEndSignMultipleMessages
 }

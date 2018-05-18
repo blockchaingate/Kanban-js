@@ -49,6 +49,7 @@ handlersReturnImmediately[pathnames.nodeCalls.computeUnspentTransactions.nodeCal
 handlersReturnImmediately[pathnames.nodeCalls.testGPUSha256.nodeCallLabel] = null;
 handlersReturnImmediately[pathnames.nodeCalls.testBackEndSha256Multiple.nodeCallLabel] = openCLDriver.testBackEndSha256Multiple;
 handlersReturnImmediately[pathnames.nodeCalls.testBackEndPipeMultiple.nodeCallLabel] = openCLDriver.testBackEndPipeMultiple;
+handlersReturnImmediately[pathnames.nodeCalls.testBackEndSignMultipleMessages.nodeCallLabel] = openCLDriver.testBackEndSignMultipleMessages;
 
 var handlersReturnWhenDone = {};
 handlersReturnWhenDone[pathnames.nodeCalls.pollOngoing.nodeCallLabel] = pollOngoing;

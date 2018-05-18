@@ -167,6 +167,15 @@ function testBackEndSignOneMessage() {
   });  
 }
 
+function testBackEndSignMultipleMessages() {
+  submitRequests.submitGET({
+    url: pathnames.getURLfromNodeCallLabel(pathnames.nodeCalls.testBackEndSignMultipleMessages.nodeCallLabel),
+    progress: getSpanProgress(),
+    result: getOutputTestGPU(),
+    callback: pollServerStart
+  });
+}
+
 function synchronizeUnspentTransactions(){
   submitRequests.submitGET({
     url: pathnames.getURLfromNodeCallLabel(pathnames.nodeCalls.computeUnspentTransactions.nodeCallLabel),
@@ -184,6 +193,7 @@ module.exports = {
   testBackEndPipeMultiple,
   testBackEndPipeOneMessage,
   testBackEndSignOneMessage,
+  testBackEndSignMultipleMessages,
   pollServerDoStart,
   clearPollId
 }

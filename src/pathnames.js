@@ -79,6 +79,9 @@ var nodeCalls = {
   testBackEndSignOneMessage: {
     nodeCallLabel: "testBackEndSignOneMessage"
   },
+  testBackEndSignMultipleMessages: {
+    nodeCallLabel: "testBackEndSignMultipleMessages"
+  },
 };
 
 var gpuCommands = {

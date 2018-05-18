@@ -438,6 +438,9 @@ bool GPUKernel::constructFromFileName(
     return false;
   }
   logGPU << "Building program: " << this->name << "..." << Logger::endL;
+
+  //std::string programOptions = "-cl-opt-disable";
+
   //std::string programOptions = "-cl-std=CL2.0";
   ret = clBuildProgram(
     this->program, 1, &this->owner->currentDeviceId,
