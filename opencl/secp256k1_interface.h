@@ -32,6 +32,7 @@ public:
     unsigned char* outputInputNonce,
     unsigned char* inputMessage,
     unsigned char* inputNonce,
+    unsigned int inputMessageIndex,
     GPU& theGPU
   );
   static bool verifySignatureDefaultBuffers(
@@ -68,7 +69,8 @@ public:
     unsigned char* outputInputNonce,
     unsigned char* inputSecretKey,
     unsigned char* inputMessage,
-    unsigned char* inputMemoryPoolGeneratorContext_MUST_BE_INITIALIZED
+    unsigned char* inputMemoryPoolGeneratorContext_MUST_BE_INITIALIZED,
+    unsigned int inputMessageIndex
   );
   static bool signMessageDefaultBuffers(
     unsigned char* outputSignature,

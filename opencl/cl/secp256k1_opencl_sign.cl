@@ -13,20 +13,22 @@ __kernel void secp256k1_opencl_sign(
   __global unsigned char* outputInputNonce,
   __global unsigned char* inputSecretKey,
   __global unsigned char* inputMessage,
-  __global unsigned char* inputMemoryPoolGeneratorContext
+  __global unsigned char* inputMemoryPoolGeneratorContext,
+  unsigned int inputMessageIndex
 ) {
   secp256k1_scalar secretKey, outputSignatureR, outputSignatureS, message, nonce;
-  secp256k1_scalar_set_b32__global(&secretKey, inputSecretKey, NULL);
-  secp256k1_scalar_set_b32__global(&message, inputMessage, NULL);
-  secp256k1_scalar_set_b32__global(&nonce, outputInputNonce, NULL);
+  unsigned int offset = inputMessageIndex * 32;
+  secp256k1_scalar_set_b32__global(&secretKey, &inputSecretKey[offset], NULL);
+  secp256k1_scalar_set_b32__global(&message, &inputMessage[offset], NULL);
+  secp256k1_scalar_set_b32__global(&nonce, &outputInputNonce[offset], NULL);
 
   __global secp256k1_ecmult_gen_context* generatorContext =
   memoryPool_read_generatorContextPointer_NON_PORTABLE(inputMemoryPoolGeneratorContext);
 
   secp256k1_ecdsa_sig_sign(generatorContext, &outputSignatureR, &outputSignatureS, &secretKey, &message, &nonce, NULL);
   size_t outputSizeBuffer;
-  secp256k1_ecdsa_sig_serialize__global(outputSignature, &outputSizeBuffer, &outputSignatureR, &outputSignatureS);
-  memoryPool_write_uint(outputSizeBuffer, outputSize);
+  secp256k1_ecdsa_sig_serialize__global(&outputSignature[offset], &outputSizeBuffer, &outputSignatureR, &outputSignatureS);
+  memoryPool_write_uint(outputSizeBuffer, &outputSize[inputMessageIndex]);
 }
 
 #include "../opencl/cl/secp256k1.cl"

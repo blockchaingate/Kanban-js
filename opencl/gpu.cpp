@@ -314,12 +314,14 @@ bool GPU::initializeKernels() {
     {
       "inputSecretKey",
       "inputMessage",
-      "inputMemoryPoolGeneratorContext"
+      "inputMemoryPoolGeneratorContext",
+      "inputMessageIndex"
     },
     {
       SharedMemory::typeVoidPointer,
       SharedMemory::typeVoidPointer,
-      SharedMemory::typeVoidPointerExternalOwnership
+      SharedMemory::typeVoidPointerExternalOwnership,
+      SharedMemory::typeUint,
     },
     {
       &kernelGeneratorContext->outputs[0]->theMemory

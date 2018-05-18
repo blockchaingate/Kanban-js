@@ -404,6 +404,7 @@ bool Server::ExecuteSignOneMessage(MessageFromNode& theMessage) {
     &bufferInputs[0],
     &bufferInputs[32],
     &bufferInputs[64],
+    0,
     *this->theGPU.get()
   )) {
     return false;

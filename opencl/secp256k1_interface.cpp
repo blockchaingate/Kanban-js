@@ -160,6 +160,7 @@ bool CryptoEC256k1GPU::signMessageDefaultBuffers(
   unsigned char* outputInputNonce,
   unsigned char* inputSecretKey,
   unsigned char* inputMessage,
+  unsigned int inputMessageIndex,
   GPU& theGPU
 ) {
   if (!theGPU.initializeAll()) {
@@ -172,6 +173,7 @@ bool CryptoEC256k1GPU::signMessageDefaultBuffers(
   kernelSign->writeToBuffer(2, outputInputNonce, 32);
   kernelSign->writeToBuffer(3, inputSecretKey, 32);
   kernelSign->writeToBuffer(4, inputMessage, 32);
+  kernelSign->writeArgument(6, inputMessageIndex);
   logGPU << "DEBUG: Got to signature start." << Logger::endL;
   cl_int ret = clEnqueueNDRangeKernel(
     theGPU.commandQueue,
@@ -371,7 +373,8 @@ bool CryptoEC256k1::signMessage(
   unsigned char* outputInputNonce,
   unsigned char* inputSecretKey,
   unsigned char* inputMessage,
-  unsigned char* inputMemoryPoolGeneratorContext_MUST_BE_INITIALIZED
+  unsigned char* inputMemoryPoolGeneratorContext_MUST_BE_INITIALIZED,
+  unsigned int inputMessageIndex
 ) {
   unsigned char outputSizeBuffer[4];
   secp256k1_opencl_sign(
@@ -380,7 +383,8 @@ bool CryptoEC256k1::signMessage(
     outputInputNonce,
     inputSecretKey,
     inputMessage,
-    inputMemoryPoolGeneratorContext_MUST_BE_INITIALIZED
+    inputMemoryPoolGeneratorContext_MUST_BE_INITIALIZED,
+    inputMessageIndex
   );
   *outputSize = memoryPool_read_uint(outputSizeBuffer);
   return true;
@@ -400,7 +404,8 @@ bool CryptoEC256k1::signMessageDefaultBuffers(
     outputInputNonce,
     inputSecretKey,
     inputMessage,
-    CryptoEC256k1::bufferGeneratorContext
+    CryptoEC256k1::bufferGeneratorContext,
+    0
   );
 }
 

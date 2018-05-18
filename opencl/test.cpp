@@ -186,6 +186,7 @@ bool testMainPart2Signatures(GPU& theGPU) {
       theKey.nonceMustChangeAfterEverySignature.serialization,
       theKey.key.serialization,
       message.serialization,
+      0,
       theGPU
     );
     theSignature.ComputeScalarsFromSerialization();
@@ -280,7 +281,10 @@ bool testMainPart2Signatures(GPU& theGPU) {
   logTestCentralPU << "outputS: " << toStringSecp256k1_Scalar(signatureS) << Logger::endL;*/
   return true;
 }
+
 bool testSHA256(GPU& theGPU);
+
+bool testSign(GPU& theGPU);
 
 int testMain() {
   GPU theGPU;
@@ -290,6 +294,8 @@ int testMain() {
   if (!testMainPart2Signatures(theGPU))
     return - 1;
   if (!testSHA256(theGPU))
+    return - 1;
+  if (!testSign(theGPU))
     return - 1;
 
   return 0;
@@ -400,6 +406,134 @@ bool testSHA256(GPU& theGPU) {
       return false;
     }
   }
+  logTestGraphicsPU << "Success!" << Logger::endL;
+  std::cout << "\e[32mSuccess!\e[39m" << std::endl;
+  return true;
+}
+
+class testSignatures {
+public:
+  std::vector<unsigned char> messages;
+  std::vector<unsigned char> nonces;
+  std::vector<unsigned char> secretKeys;
+  std::vector<unsigned char> outputSignatures;
+  unsigned numMessagesPerPipeline;
+  void initialize();
+};
+
+unsigned char getByte(unsigned char byte1, unsigned char byte2, unsigned char byte3) {
+  return byte1 * byte1 * (byte1 + 3) + byte2 * 7 + byte3 * 3 + 5 + byte1 * byte3;
+}
+
+void testSignatures::initialize() {
+  this->numMessagesPerPipeline = 10000;
+  int totalPipelineSize = this->numMessagesPerPipeline * 32;
+  int totalOutputSize = this->numMessagesPerPipeline * 80;
+  this->messages.resize(totalPipelineSize);
+  this->nonces.resize(totalPipelineSize);
+  this->secretKeys.resize(totalPipelineSize);
+  this->outputSignatures.reserve(totalOutputSize);
+  this->messages[0] = 'a';
+  this->messages[1] = 'b';
+  this->messages[2] = 'c';
+  this->nonces[0] = 'e';
+  this->nonces[1] = 'f';
+  this->nonces[2] = 'g';
+  this->secretKeys[0] = 'h';
+  this->secretKeys[1] = 'i';
+  this->secretKeys[2] = 'j';
+  for (unsigned i = 3; i < this->numMessagesPerPipeline; i ++) {
+    this->messages[i] = getByte(this->messages[i - 1], this->messages[i - 2], this->nonces[i - 3]);
+    this->nonces[i] = getByte(this->nonces[i - 1], this->nonces[i - 2], this->secretKeys[i - 3]);
+    this->secretKeys[i] = getByte(this->secretKeys[i - 1], this->secretKeys[i - 2], this->messages[i - 3]);
+  }
+}
+
+
+bool testSign(GPU& theGPU) {
+  // Create the two input vectors
+  theGPU.initializeAll();
+  CryptoEC256k1GPU::computeGeneratorContextDefaultBuffers(theGPU);
+  // Create a command queue
+  std::shared_ptr<GPUKernel> kernelSign = theGPU.theKernels[GPU::kernelSign];
+  std::cout << "DEBUG: about to write to buffer. " << std::endl;
+  testSignatures theTest;
+  theTest.initialize();
+
+  auto timeStart = std::chrono::system_clock::now();
+  unsigned counterTest;
+
+  kernelSign->writeToBuffer(2, &theTest.nonces[0], theTest.nonces.size() );
+  kernelSign->writeToBuffer(3, &theTest.secretKeys[0], theTest.secretKeys.size());
+  kernelSign->writeToBuffer(4, &theTest.messages[0], theTest.messages.size());
+  for (counterTest = 0; counterTest < theTest.numMessagesPerPipeline; counterTest ++) {
+    kernelSign->writeArgument(6, counterTest);
+
+    kernelSign->writeArgument(6, counterTest);
+    //theKernel->writeToBuffer(0, &theLength, sizeof(uint));
+    //std::cout << "DEBUG: Setting arguments ... " << std::endl;
+    //std::cout << "DEBUG: arguments set, enqueueing kernel... " << std::endl;
+    cl_int ret = clEnqueueNDRangeKernel(
+      theGPU.commandQueue,
+      kernelSign->kernel,
+      1,
+      NULL,
+      &kernelSign->global_item_size,
+      &kernelSign->local_item_size,
+      0,
+      NULL,
+      NULL
+    );
+    if (ret != CL_SUCCESS) {
+      logTestGraphicsPU << "Failed to enqueue kernel. Return code: " << ret << ". " << Logger::endL;
+      return false;
+    }
+    //std::cout << "DEBUG: kernel enqueued, proceeding to read buffer. " << std::endl;
+    if (counterTest % 100 == 0) {
+      auto timeCurrent = std::chrono::system_clock::now();
+      std::chrono::duration<double> elapsed_seconds = timeCurrent - timeStart;
+      std::cout << "Signed " << counterTest << " 32-byte messages in " << elapsed_seconds.count() << " second(s),"
+      << " current speed: "
+      << ((counterTest+1) / elapsed_seconds.count()) << " signature(s) per second." << std::endl;
+    }
+  }
+  cl_mem& result = kernelSign->outputs[0]->theMemory;
+  cl_int ret = clEnqueueReadBuffer (
+    theGPU.commandQueue,
+    result,
+    CL_TRUE,
+    0,
+    theTest.outputSignatures.size(),
+    &theTest.outputSignatures[0],
+    0,
+    NULL,
+    NULL
+  );
+  if (ret != CL_SUCCESS) {
+    logTestGraphicsPU << "Failed to enqueue read buffer. Return code: " << ret << ". " << Logger::endL;
+    return false;
+  }
+  auto timeCurrent = std::chrono::system_clock::now();
+  std::chrono::duration<double> elapsed_seconds = timeCurrent - timeStart;
+  logTestGraphicsPU << "Signed " << counterTest << " 32-byte messages in " << elapsed_seconds.count() << " second(s). " << Logger::endL;
+  logTestGraphicsPU << "Speed: "
+  << (theTest.numMessagesPerPipeline / elapsed_seconds.count()) << " signature(s) per second." << Logger::endL;
+
+  logTestGraphicsPU << "Checking computations ... NOT IMPLEMENTED YET!" << Logger::endL;
+  /*for (largeTestCounter = 0; largeTestCounter < testSHA256::totalToCompute; largeTestCounter ++) {
+    unsigned testCounteR = largeTestCounter % testSHA256::knownSHA256s.size();
+    std::stringstream out;
+    unsigned offset = largeTestCounter * 32;
+    for (unsigned i = offset; i < offset + 32; i ++)
+      out << std::hex << std::setw(2) << std::setfill('0') << ((int) ((unsigned) testSHA256::outputBuffer[i]));
+    if (out.str() != testSHA256::knownSHA256s[testCounteR][1]) {
+      logTestGraphicsPU << "\e[31mSha of message index " << largeTestCounter
+      << ": " << testSHA256::knownSHA256s[testCounteR][0] << " is wrongly computed to be: " << out.str()
+      << " instead of: " << testSHA256::knownSHA256s[testCounteR][1] << "\e[39m" << Logger::endL;
+      assert(false);
+      return false;
+    }
+  }*/
   logTestGraphicsPU << "Success!" << Logger::endL;
   std::cout << "\e[32mSuccess!\e[39m" << std::endl;
   return true;
