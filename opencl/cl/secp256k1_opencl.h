@@ -6,8 +6,8 @@
 #define SECP256K1_OPENCL_H_HEADER
 #define MACRO_USE_openCL
 
-#define uint32_t uint
-#define uint64_t ulong
+#define uint32_t unsigned int
+#define uint64_t unsigned long
 
 #define VERIFY_CHECK(arg) arg
 

@@ -19,3 +19,6 @@ test/kanban_gpu/debug/
 *.log
 *.bbl
 *.blg
+*.toc
+*.nav
+*.snm

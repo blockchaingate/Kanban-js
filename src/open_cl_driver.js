@@ -49,11 +49,12 @@ function TestSuiteSignatures(inputOwner) {
   this.messages = [];
   this.results = {};
   this.numberDifferentMessages = 100;
-  this.totalToTest = 10000;
+  this.totalToTest = 1000;
   this.numberBackFromCPP = 0;
   this.startTime = null;
   this.numberBytesProcessed = 0;
   this.numberScheduled = 0;
+  this.numberInconsistent = 0;
 }
 /////////////End of test suites
 
@@ -74,8 +75,9 @@ TestSuiteSignatures.prototype.processFinishedJob = function(parsedOutput, gpuJob
     this.results[theMessageIndex] = parsedOutput.result;
   } else { 
     if (this.results[theMessageIndex] != parsedOutput.result) {
-      console.log(`Inconsistent signature: signature request index ${theMessageIndex} first signed to: ${this.results[theMessageIndex]}, but now is signed to ${parsedOutput.result}`);
-      assert(false);
+      console.log(`Inconsistent signature: signature request index ${theMessageIndex} first signed to: ${this.results[theMessageIndex]}, but now is signed to ${parsedOutput.result}`.red);
+      this.numberInconsistent ++;
+      //assert(false);
     }
   }  
   var jobs = global.kanban.jobs;
@@ -89,8 +91,9 @@ TestSuiteSignatures.prototype.getProgress = function () {
   var currentTime = (new Date()).getTime();
   var elapsedSoFar = (currentTime - this.startTime) / 1000;
   var signaturesPerSecond = (this.numberBackFromCPP / elapsedSoFar).toFixed(3);
-
+  var numberGood = this.numberBackFromCPP - this.numberInconsistent;
   return `Progress: scheduled ${this.numberScheduled} out of ${this.totalToTest}, completed ${this.numberBackFromCPP}.<br>
+  Of them ${this.numberInconsistent} inconsistent and ${numberGood} good ones.<br>
   ${elapsedSoFar} second(s) elapsed. Speed: ${signaturesPerSecond} signatures per second.`;
 }
 
