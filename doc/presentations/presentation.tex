@@ -6,6 +6,7 @@
 %IMPORTANT
 % % % % % % % %
 % % % % % % % %
+% !TeX spellcheck = en_US
 %On windows: comment out the line \input{../system-specific-config-Ubuntu-texlive}
 \documentclass%
 %[handout]%
@@ -85,32 +86,7 @@
 \end{frame}
 }%
 \lect{May 18}{Progress report}{1}{
-\section{Current architecture plan}
-\begin{frame}
-\frametitle{Current architecture plan}
-\begin{itemize}
-\item OS: Ubuntu at the moment. Aspirations to support everything.
-\item Computational engine in C/C++.
-\begin{itemize}
-\item Crypto functions in openCL/C++.
-\item Data management? Expected solution: stl library (no database).
-\end{itemize}
-\item Networking, management, testing, other non-computational tasks: nodejs.
-\end{itemize}
-\end{frame}
-\subsection{Computational engine}
-\begin{frame}
-\frametitle{Computational engine}
-\begin{itemize}
-\item Core cryptographic functions: same code compiled as both openCL/C++.
-\begin{itemize}
-\item Forked Pieter Wuille's secp256k1 library (used in fabcoin \& bitcoin).
-\item Heavy but formal modifications: more than 10\% new/modified LOC.
-\begin{itemize}
-\item openCL does not 
-\end{itemize}
-\end{itemize}
-\end{itemize}
-\end{frame}
+\include{presentation-content}
 }
+
 \end{document}

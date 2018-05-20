@@ -1,0 +1,157 @@
+\section{Current architecture plan}
+\begin{frame}
+\frametitle{Current architecture}
+\begin{itemize}
+\item OS: Ubuntu at the moment. Aspirations to support everything.
+\item<2-> Computational engine in openCL/C/C++.
+\begin{itemize}
+\item<3-> Crypto functions in openCL/C++.
+\item<4-> Data management? Expected solution: stl library (no database).
+\end{itemize}
+\item<5-> Networking, management, testing, other non-computational tasks: nodejs.
+\end{itemize}
+\end{frame}
+\section{Computational engine}
+\subsection{Cryptography}
+\begin{frame}[fragile]
+\frametitle{Computational engine: cryptography}
+Core crypto functions: code compiled as both openCL/C++.
+\begin{itemize}
+\item<2-> Forked Pieter Wuille's secp256k1 library (used in fabcoin \& bitcoin).
+\item<3-> Heavy but formal modifications.
+\begin{itemize}
+\item<4-> openCL major memory types: \verb|__local|, \verb|__global|, \verb|__constant|
+\item<5-> Mixed arguments: 1 version per combination:
+\medskip
+
+
+{
+\tiny
+\verb|secp256k1_fe_mul_inner(uint32_t *r, const uint32_t *a, __global const uint32_t * b) |
+
+\verb|secp256k1_fe_mul_inner(uint32_t *r, const uint32_t *a, __local const uint32_t * b) |
+
+\verb|secp256k1_fe_mul_inner(uint32_t *r, const uint32_t *a, __constant const uint32_t * b) |
+}
+
+\medskip
+\item<6-> No C++ templates in openCL: emulate with macros.
+\item<7-> No \verb|free|, \verb|malloc|: custom memory pools: 0 runtime memory allocation, minimal openCL-statically allocated RAM memory use
+\end{itemize}
+\item<8-> 4 basic modes of running. TO DO: combine (arbitrarily?).
+\begin{enumerate}
+\item openCL on GPU.
+\item openCL on CPU.
+\item C/C++ on CPU using openCL entry points.
+\item C/C++ direct function call.
+\end{enumerate}
+\item<9-> TO DO: computation load balancing.
+
+\end{itemize}
+\end{frame}
+
+\begin{frame}[fragile]
+Core crypto: errors.
+\begin{itemize}
+\item No debugger.
+\item Error hunting: hardcore: not even \verb|printf| available!
+\item At least 4 types of errors seen so far:
+\begin{itemize}
+\item Easy: compiles as C/C++, doesn't as openCL or other way round.
+\item Easy: runtime errors show in C/C++. 
+\begin{itemize}
+\item Fix: use \verb|printf|, temporarily breaking openCL, debug as usual.
+\end{itemize}
+\item Harder: C/C++ runs correctly, openCL crashes.
+\begin{itemize}
+\item Manually return from offending function.
+\item Print memory pool \& compare with C/C++ output. 
+\end{itemize}
+\item Hard core: 1 machine/setup works correctly, another doesn't.
+\begin{itemize}
+\item Fix?
+\end{itemize}
+\end{itemize}
+\end{itemize}
+Core crypto: testing.
+\begin{itemize}
+\item Compare 4 modes of running against one another.
+\item Generate signatures \& verify. 
+\item Tamper signature and invalidate.
+\item Compare outputs with same input between runs.
+\end{itemize}
+
+
+\end{frame}
+
+\subsection{C++ driver}
+\begin{frame}[fragile]
+\frametitle{Computational engine: C++ driver}
+\begin{itemize}
+\item 3 Binary pipes: 
+\begin{itemize}
+\item Command pipe 
+\begin{itemize}
+\item nodejs $\longrightarrow$ C++. 
+\item nodejs end: non-blocking; C++ end: blocking.
+\end{itemize} 
+\item Input data pipe
+\begin{itemize}
+\item nodejs $\longrightarrow$ C++.
+\item nodejs end: non-blocking; C++ end: blocking.
+\end{itemize} 
+\item Data pipe nodejs $\leftarrow$ C++. 
+\begin{itemize}
+\item nodejs $\longleftarrow$ C++.
+\item nodejs end: non-blocking; C++ end: blocking.
+\end{itemize}
+\end{itemize}
+\item TCP protocol: chosen over named/unnamed pipe, std::cin/std::cout (portability).
+\item Nodejs $\leftrightarrow$ C++ communication local: no networking, no authentication, no encoding.
+\end{itemize}
+
+\end{frame}
+
+\section{nodejs}
+\begin{frame}[fragile]
+\frametitle{Nodejs: networking and management}
+\begin{itemize}
+\item TO DO: Networking.
+\begin{itemize}
+\item p2p discovery (FAB RPC call, Nader's smart engine, ...)
+\item Kanban id: which peers are running Kanban? Quick options:
+\begin{enumerate}
+\item Use FAB rpc: \verb|getPeerInfo|, get IP addresses; connect on separate port to ask whether they run Kanban.
+\item Alternatively, add Kanban discovery information to \verb|getPeerInfo|.
+\item Alternatively, make new RPC function, e.g., \verb|getKanbanPeerInfo|.
+\item Alternatively, proposals? Do Kanban p2p in a brand new way or as part of FAB RPC calls?
+\end{enumerate}
+\end{itemize} 
+\item Data.
+\end{itemize}
+\end{frame}
+\begin{frame}
+\frametitle{To do list for next week(s)}
+Immediate to do list.
+\begin{enumerate}
+\item Figure out crypto bug(s) causing inconsistent runs across machines (work machines works correctly, laptop doesn't). 
+\item At the moment, tests are parallelized, node runtime is not. Fix. 
+\item Add timing tests for 
+\begin{itemize}
+\item Signature on the CPU.
+\item Signature verification on the CPU and GPU.
+\item Public key generation on the CPU and GPU.
+\end{itemize}
+\item Bootstrap a powerful machine for all tests.
+\end{enumerate}
+
+To do list for the near future.
+
+\begin{enumerate}
+\item Start signing and verifying actual transactions.
+\item Implement in-RAM data search.
+\item p2p network discovery.
+\item Write heavy test suites.
+\item Prepare detailed benchmarks.
+\end{enumerate}
+\end{frame}

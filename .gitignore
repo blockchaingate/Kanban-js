@@ -22,3 +22,4 @@ test/kanban_gpu/debug/
 *.toc
 *.nav
 *.snm
+*.vrb

@@ -193,24 +193,26 @@ bool GPU::initializeKernels() {
     return true;
   if (!this->initializePlatform())
     return false;
-  if (!this->createKernel(
-    this->kernelSHA256,
-    {"result"},
-    {SharedMemory::typeVoidPointer},
-    {"offset", "length", "messageIndex", "message"},
-    {SharedMemory::typeUint, SharedMemory::typeUint, SharedMemory::typeUint, SharedMemory::typeVoidPointer},
-    {}
-  ))
-    return false;
-  if (!this->createKernel(
-    this->kernelTestBuffer,
-    {"buffer"},
-    {SharedMemory::typeVoidPointer},
-    {},
-    {},
-    {}
-  ))
-    return false;
+  //if (!this->createKernel(
+  //  this->kernelSHA256,
+  //  {"result"},
+  //  {SharedMemory::typeVoidPointer},
+  //  {"offset", "length", "messageIndex", "message"},
+  //  {SharedMemory::typeUint, SharedMemory::typeUint, SharedMemory::typeUint, SharedMemory::typeVoidPointer},
+  //  {}
+  //)) {
+  //  return false;
+  //}
+  //if (!this->createKernel(
+  //  this->kernelTestBuffer,
+  //  {"buffer"},
+  //  {SharedMemory::typeVoidPointer},
+  //  {},
+  //  {},
+  //  {}
+  //)) {
+  //  return false;
+  //}
   if (!this->createKernel(
     this->kernelInitializeMultiplicationContext,
     {"outputMultiplicationContext"},
@@ -220,8 +222,9 @@ bool GPU::initializeKernels() {
     {},
     {},
     {}
-  ))
+  )) {
     return false;
+  }
   std::shared_ptr<GPUKernel> kernelMultiplicationContext = this->theKernels[this->kernelInitializeMultiplicationContext];
   //openCL function arguments:
   //__global unsigned char *output,
@@ -233,101 +236,105 @@ bool GPU::initializeKernels() {
   //__global const unsigned char *message,
   //__global const unsigned char *memoryPoolMultiplicationContext
 
-  if (!this->createKernel(
-    this->kernelVerifySignature,
-    {
-      "output",
-      "outputMemoryPoolSignature",
-    },
-    {
-      SharedMemory::typeVoidPointer,
-      SharedMemory::typeVoidPointer
-    },
-    {
-      "inputSignature",
-      "signatureSize",
-      "publicKey",
-      "publicKeySize",
-      "message",
-      "memoryPoolMultiplicationContext"
-    },
-    {
-      SharedMemory::typeVoidPointer,
-      SharedMemory::typeUint,
-      SharedMemory::typeVoidPointer,
-      SharedMemory::typeUint,
-      SharedMemory::typeVoidPointer,
-      SharedMemory::typeVoidPointerExternalOwnership
-    },
-    {
-      &kernelMultiplicationContext->outputs[0]->theMemory
-    }
-  ))
-    return false;
-  if (!this->createKernel(
-    this->kernelInitializeGeneratorContext,
-    {"outputGeneratorContext"},
-    {
-      SharedMemory::typeVoidPointer,
-    },
-    {},
-    {},
-    {}
-  ))
-    return false;
+  //if (!this->createKernel(
+  //  this->kernelVerifySignature,
+  //  {
+  //    "output",
+  //    "outputMemoryPoolSignature",
+  //  },
+  //  {
+  //    SharedMemory::typeVoidPointer,
+  //    SharedMemory::typeVoidPointer
+  //  },
+  //  {
+  //    "inputSignature",
+  //    "signatureSize",
+  //    "publicKey",
+  //    "publicKeySize",
+  //    "message",
+  //    "memoryPoolMultiplicationContext"
+  //  },
+  //  {
+  //    SharedMemory::typeVoidPointer,
+  //    SharedMemory::typeUint,
+  //    SharedMemory::typeVoidPointer,
+  //    SharedMemory::typeUint,
+  //    SharedMemory::typeVoidPointer,
+  //    SharedMemory::typeVoidPointerExternalOwnership
+  //  },
+  //  {
+  //    &kernelMultiplicationContext->outputs[0]->theMemory
+  //  }
+  //)) {
+  //  return false;
+  //}
+  //if (!this->createKernel(
+  //  this->kernelInitializeGeneratorContext,
+  //  {"outputGeneratorContext"},
+  //  {
+  //    SharedMemory::typeVoidPointer,
+  //  },
+  //  {},
+  //  {},
+  //  {}
+  //)) {
+  //  return false;
+  //}
   std::shared_ptr<GPUKernel> kernelGeneratorContext = this->theKernels[this->kernelInitializeGeneratorContext];
-  if (!this->createKernel(
-    this->kernelGeneratePublicKey,
-    {
-      "outputPublicKey",
-      "outputPublicKeySize"
-    },
-    {
-      SharedMemory::typeVoidPointer,
-      SharedMemory::typeVoidPointer,
-    },
-    {
-      "inputSecretKey",
-      "inputMemoryPoolGeneratorContext"
-    },
-    {
-      SharedMemory::typeVoidPointer,
-      SharedMemory::typeVoidPointerExternalOwnership
-    },
-    {
-      &kernelGeneratorContext->outputs[0]->theMemory
-    }
-  ))
-    return false;
-  if (!this->createKernel(
-    this->kernelSign,
-    {
-      "outputSignature",
-      "outputSize",
-      "outputInputNonce"
-    },
-    {
-      SharedMemory::typeVoidPointer,
-      SharedMemory::typeVoidPointer,
-      SharedMemory::typeVoidPointer
-    },
-    {
-      "inputSecretKey",
-      "inputMessage",
-      "inputMemoryPoolGeneratorContext",
-      "inputMessageIndex"
-    },
-    {
-      SharedMemory::typeVoidPointer,
-      SharedMemory::typeVoidPointer,
-      SharedMemory::typeVoidPointerExternalOwnership,
-      SharedMemory::typeUint,
-    },
-    {
-      &kernelGeneratorContext->outputs[0]->theMemory
-    }
-  ))
-    return false;
+  //if (!this->createKernel(
+  //  this->kernelGeneratePublicKey,
+  //  {
+  //    "outputPublicKey",
+  //    "outputPublicKeySize"
+  //  },
+  //  {
+  //    SharedMemory::typeVoidPointer,
+  //    SharedMemory::typeVoidPointer,
+  //  },
+  //  {
+  //    "inputSecretKey",
+  //    "inputMemoryPoolGeneratorContext"
+  //  },
+  //  {
+  //    SharedMemory::typeVoidPointer,
+  //    SharedMemory::typeVoidPointerExternalOwnership
+  //  },
+  //  {
+  //    &kernelGeneratorContext->outputs[0]->theMemory
+  //  }
+  //)) {
+  //  return false;
+  //}
+//  if (!this->createKernel(
+//    this->kernelSign,
+//    {
+//      "outputSignature",
+//      "outputSize",
+//      "outputInputNonce"
+//    },
+//    {
+//      SharedMemory::typeVoidPointer,
+//      SharedMemory::typeVoidPointer,
+//      SharedMemory::typeVoidPointer
+//    },
+//    {
+//      "inputSecretKey",
+//      "inputMessage",
+//      "inputMemoryPoolGeneratorContext",
+//      "inputMessageIndex"
+//    },
+//    {
+//      SharedMemory::typeVoidPointer,
+//      SharedMemory::typeVoidPointer,
+//      SharedMemory::typeVoidPointerExternalOwnership,
+//      SharedMemory::typeUint,
+//    },
+//    {
+//      &kernelGeneratorContext->outputs[0]->theMemory
+//    }
+//  )) {
+//    return false;
+//  }
   this->flagInitializedKernels = true;
   return true;
 }
@@ -571,9 +578,9 @@ bool GPUKernel::writeToBuffer(unsigned argumentNumber, const void *input, size_t
   //std::cout << "DEBUG: writing " << input;
   //std::cout << " in buffeR: " << &bufferToWriteInto << std::endl;
   cl_mem& bufferToWriteInto =
-      argumentNumber < this->outputs.size() ?
-        this->outputs[argumentNumber]->theMemory :
-        this->inputs[argumentNumber - this->outputs.size()]->theMemory;
+    argumentNumber < this->outputs.size() ?
+    this->outputs[argumentNumber]->theMemory :
+    this->inputs[argumentNumber - this->outputs.size()]->theMemory;
   cl_int ret = clEnqueueWriteBuffer(
     this->owner->commandQueue,
     bufferToWriteInto,

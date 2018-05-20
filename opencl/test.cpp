@@ -177,21 +177,6 @@ bool testMainPart2Signatures(GPU& theGPU) {
   );
   theSignature.ComputeScalarsFromSerialization();
   logTestCentralPU << "Signature:\n" << theSignature.toString() << Logger::endL;
-  if (!theGPU.flagTurnOffToDebugCPU) {
-    theKey.nonceMustChangeAfterEverySignature.TestAssignString("This is a nonce. ");
-    theSignature.reset();
-    CryptoEC256k1GPU::signMessageDefaultBuffers(
-      theSignature.serialization,
-      &theSignature.size,
-      theKey.nonceMustChangeAfterEverySignature.serialization,
-      theKey.key.serialization,
-      message.serialization,
-      0,
-      theGPU
-    );
-    theSignature.ComputeScalarsFromSerialization();
-    logTestGraphicsPU << "Signature:\n" << theSignature.toString() << Logger::endL;
-  }
   PublicKey thePublicKey;
 
   CryptoEC256k1::generatePublicKeyDefaultBuffers(
@@ -200,17 +185,6 @@ bool testMainPart2Signatures(GPU& theGPU) {
     theKey.key.serialization
   );
   logTestCentralPU << "Public key:\n" << thePublicKey.toString() << Logger::endL;
-  if (!theGPU.flagTurnOffToDebugCPU) {
-    thePublicKey.reset();
-    if (!CryptoEC256k1GPU::generatePublicKeyDefaultBuffers(
-      thePublicKey.serialization,
-      &thePublicKey.size,
-      theKey.key.serialization,
-      theGPU
-    ))
-      logTestGraphicsPU << "ERROR: generatePublicKey returned false. " << Logger::endL;
-    logTestGraphicsPU << "Public key:\n" << thePublicKey.toString() << Logger::endL;
-  }
   //getMultiplicationContext(bufferCentralPUMultiplicationContext, multiplicationContext);
   unsigned char signatureResult[1];
   signatureResult[0] = 3;
@@ -223,20 +197,6 @@ bool testMainPart2Signatures(GPU& theGPU) {
     message.serialization
   );
   logTestCentralPU << "Signature verification (expected 1): " << (int) signatureResult[0] << Logger::endL;
-
-  signatureResult[0] = 3;
-  if (!CryptoEC256k1GPU::verifySignatureDefaultBuffers(
-    &signatureResult[0],
-    theSignature.serialization,
-    theSignature.size,
-    thePublicKey.serialization,
-    thePublicKey.size,
-    message.serialization,
-    theGPU
-  ))
-    logTestGraphicsPU << "ERROR: verifySignature returned false. " << Logger::endL;
-  logTestGraphicsPU << "Signature verification (expected 1): " << (int) signatureResult[0] << Logger::endL;
-
   theSignature.serialization[4] = 5;
   signatureResult[0] = 3;
   CryptoEC256k1::verifySignatureDefaultBuffers(
@@ -248,7 +208,32 @@ bool testMainPart2Signatures(GPU& theGPU) {
     message.serialization
   );
   logTestCentralPU << "Bad signature verification (expected 0): " << (int) signatureResult[0] << Logger::endL;
+  if (theGPU.flagTurnOffToDebugCPU) {
+    return true;
+  }
 
+  theSignature.reset();
+  CryptoEC256k1GPU::signMessageDefaultBuffers(
+    theSignature.serialization,
+    &theSignature.size,
+    theKey.nonceMustChangeAfterEverySignature.serialization,
+    theKey.key.serialization,
+    message.serialization,
+    0,
+    theGPU
+  );
+  theSignature.ComputeScalarsFromSerialization();
+  logTestGraphicsPU << "Signature:\n" << theSignature.toString() << Logger::endL;
+  thePublicKey.reset();
+  if (!CryptoEC256k1GPU::generatePublicKeyDefaultBuffers(
+    thePublicKey.serialization,
+    &thePublicKey.size,
+    theKey.key.serialization,
+    theGPU
+  )) {
+    logTestGraphicsPU << "ERROR: generatePublicKey returned false. " << Logger::endL;
+  }
+  logTestGraphicsPU << "Public key:\n" << thePublicKey.toString() << Logger::endL;
   signatureResult[0] = 3;
   if (!CryptoEC256k1GPU::verifySignatureDefaultBuffers(
     &signatureResult[0],
@@ -258,27 +243,23 @@ bool testMainPart2Signatures(GPU& theGPU) {
     thePublicKey.size,
     message.serialization,
     theGPU
-  ))
+  )) {
     logTestGraphicsPU << "ERROR: verifySignature returned false. " << Logger::endL;
+  }
+  logTestGraphicsPU << "Signature verification (expected 1): " << (int) signatureResult[0] << Logger::endL;
+  signatureResult[0] = 3;
+  if (!CryptoEC256k1GPU::verifySignatureDefaultBuffers(
+    &signatureResult[0],
+    theSignature.serialization,
+    theSignature.size,
+    thePublicKey.serialization,
+    thePublicKey.size,
+    message.serialization,
+    theGPU
+  )) {
+    logTestGraphicsPU << "ERROR: verifySignature returned false. " << Logger::endL;
+  }
   logTestGraphicsPU << "Bad signature verification (expected 0): " << (int) signatureResult[0] << Logger::endL;
-
-  /*
-  int signatureResult = secp256k1_ecdsa_sig_verify(
-    &multiplicationContext,
-    &signatureR,
-    &signatureS,
-    &publicKey,
-    &message,
-    bufferCentralPUMultiplicationContext
-  );
-  logTestCentralPU << "DEBUG: signature verification: " << signatureResult << Logger::endL;
-
-  logTestCentralPU << "Got to here pt 6. " << Logger::endL;
-  logTestCentralPU << "secret: " << toStringSecp256k1_Scalar(secretKey) << Logger::endL;
-  logTestCentralPU << "message: " << toStringSecp256k1_Scalar(message) << Logger::endL;
-  logTestCentralPU << "nonce: " << toStringSecp256k1_Scalar(nonce) << Logger::endL;
-  logTestCentralPU << "outputR: " << toStringSecp256k1_Scalar(signatureR) << Logger::endL;
-  logTestCentralPU << "outputS: " << toStringSecp256k1_Scalar(signatureS) << Logger::endL;*/
   return true;
 }
 
@@ -293,6 +274,8 @@ int testMain() {
     return - 1;
   if (!testMainPart2Signatures(theGPU))
     return - 1;
+  if (theGPU.flagTurnOffToDebugCPU)
+    return 0;
   if (!testSHA256(theGPU))
     return - 1;
   if (!testSign(theGPU))
