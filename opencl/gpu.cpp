@@ -116,6 +116,7 @@ GPU::GPU() {
   this->flagGeneratorContextComputationSTARTED = false;
 
   this->bufferMultiplicationContext = new unsigned char [GPU::memoryMultiplicationContext];
+  this->bufferTestSuite1BasicOperations = new unsigned char [GPU::memoryMultiplicationContext];
   this->bufferGeneratorContext = new unsigned char [GPU::memoryGeneratorContext];
   this->bufferSignature = new unsigned char [GPU::memorySignature];
 }
@@ -213,6 +214,19 @@ bool GPU::initializeKernels() {
   //)) {
   //  return false;
   //}
+  if (!this->createKernel(
+    this->kernelTestSuite1BasicOperations,
+    {"outputMemoryPool"},
+    {
+      SharedMemory::typeVoidPointer,
+    },
+    {},
+    {},
+    {}
+  )) {
+    return false;
+  }
+
   if (!this->createKernel(
     this->kernelInitializeMultiplicationContext,
     {"outputMultiplicationContext"},
@@ -394,6 +408,8 @@ GPU::~GPU() {
   this->context = NULL;
   delete [] this->bufferMultiplicationContext;
   this->bufferMultiplicationContext = 0;
+  delete [] this->bufferTestSuite1BasicOperations;
+  this->bufferTestSuite1BasicOperations = 0;
   delete [] this->bufferGeneratorContext;
   this->bufferGeneratorContext = 0;
   delete [] this->bufferSignature;
@@ -406,6 +422,7 @@ std::string GPU::kernelTestBuffer = "testBuffer";
 std::string GPU::kernelInitializeMultiplicationContext = "secp256k1_opencl_compute_multiplication_context";
 std::string GPU::kernelInitializeGeneratorContext = "secp256k1_opencl_compute_generator_context";
 std::string GPU::kernelVerifySignature = "secp256k1_opencl_verify_signature";
+std::string GPU::kernelTestSuite1BasicOperations = "test_suite_1_basic_operations";
 std::string GPU::kernelSign = "secp256k1_opencl_sign";
 std::string GPU::kernelGeneratePublicKey = "secp256k1_opencl_generate_public_key";
 

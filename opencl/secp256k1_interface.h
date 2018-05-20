@@ -44,6 +44,12 @@ public:
     const unsigned char* message,
     GPU& theGPU
   );
+  static bool testSuite1BasicOperations(
+    unsigned char* outputMemoryPool, GPU& theGPU
+  );
+  static bool testSuite1BasicOperationsDefaultBuffers(
+    GPU& theGPU
+  );
 };
 
 //class name starts with "Crypto" instead of secp256k1 to
@@ -51,6 +57,7 @@ public:
 class CryptoEC256k1 {
 public:
   static unsigned char bufferMultiplicationContext[GPU::memoryMultiplicationContext];
+  static unsigned char bufferTestSuite1BasicOperations[GPU::memoryMultiplicationContext];
   static unsigned char bufferGeneratorContext[GPU::memoryGeneratorContext];
   static unsigned char bufferSignature[GPU::memorySignature];
   //The functions below are expected to never return false,
@@ -58,6 +65,9 @@ public:
   //in order to keep the interface similar to that of CryptoEC256k1GPU.
   static bool flagMultiplicationContextComputed;
   static bool flaGeneratorContextComputed;
+
+  static bool testSuite1BasicOperations(unsigned char* outputMemoryPool);
+  static bool testSuite1BasicOperationsDefaultBuffers();
 
   static bool computeMultiplicationContext(unsigned char* outputMemoryPool);
   static bool computeMultiplicationContextDefaultBuffers();

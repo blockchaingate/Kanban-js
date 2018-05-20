@@ -57,5 +57,10 @@ __kernel void secp256k1_opencl_verify_signature(
   __global const unsigned char *message,
   __global const unsigned char *memoryPoolMultiplicationContext
 );
+
+__kernel void test_suite_1_basic_operations(
+  __global unsigned char* memoryPool
+);
+
 #endif //SECP256K1_CPP_H_header
 

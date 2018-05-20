@@ -227,13 +227,30 @@ void memoryPool_read_secp256k1_ge(secp256k1_ge* output, __global const unsigned 
   secp256k1_ge_copy__from__global(output, (__global secp256k1_ge*) memoryPoolPointer);
 }
 
+void memoryPool_read_secp256k1_gej(secp256k1_gej* output, __global const unsigned char* memoryPoolPointer) {
+  secp256k1_gej_copy__from__global(output, (__global secp256k1_gej*) memoryPoolPointer);
+}
+
 void memoryPool_read_secp256k1_fe(secp256k1_fe* output, __global const unsigned char* memoryPoolPointer) {
   secp256k1_fe_copy__from__global(output, (__global secp256k1_fe*) memoryPoolPointer);
 }
 
+int memoryPool_adjustArgumentIndex(int argumentIndex, __global unsigned char* memoryPool) {
+  if (argumentIndex >= 0) {
+    return argumentIndex;
+  }
+  for (int i = 0; i < MACRO_numberOfOutputs; i ++) {
+    if (memoryPool_read_uint_fromOutput(i, memoryPool) == 0) {
+      return i;
+    }
+  }
+  return 0;
+}
+
 void memoryPool_write_fe_asOutput(
-  const secp256k1_fe* input, unsigned int argumentIndex, __global unsigned char* memoryPool
+  const secp256k1_fe* input, int argumentIndex, __global unsigned char* memoryPool
 ) {
+  argumentIndex = memoryPool_adjustArgumentIndex(argumentIndex, memoryPool);
   __global secp256k1_fe* serializerPointer;
   __global unsigned char* typePointer;
   memoryPool_writeCurrentSizeAsOutput(argumentIndex, memoryPool);
@@ -241,6 +258,19 @@ void memoryPool_write_fe_asOutput(
   memoryPool_write_uint(memoryPoolType_fe, typePointer);
   serializerPointer = (__global secp256k1_fe*) checked_malloc(sizeof_secp256k1_fe(), memoryPool);
   secp256k1_fe_copy__to__global(serializerPointer, input);
+}
+
+void memoryPool_write_gej_asOutput(
+  const secp256k1_gej* input, int argumentIndex, __global unsigned char* memoryPool
+) {
+  argumentIndex = memoryPool_adjustArgumentIndex(argumentIndex, memoryPool);
+  __global secp256k1_gej* serializerPointer;
+  __global unsigned char* typePointer;
+  memoryPool_writeCurrentSizeAsOutput(argumentIndex, memoryPool);
+  typePointer = (__global unsigned char*) checked_malloc(sizeof_uint(), memoryPool);
+  memoryPool_write_uint(memoryPoolType_gej, typePointer);
+  serializerPointer = (__global secp256k1_gej*) checked_malloc(sizeof_secp256k1_gej(), memoryPool);
+  secp256k1_gej_copy__to__global(serializerPointer, input);
 }
 
 __global secp256k1_ecmult_gen_context* memoryPool_read_generatorContextPointer_NON_PORTABLE(
@@ -675,11 +705,12 @@ void secp256k1_fe_mul_int(secp256k1_fe *r, int a) {
 #endif
 }
 
-#ifdef VERIFY
-#define VERIFY_BITS(x, n) VERIFY_CHECK(((x) >> (n)) == 0)
-#else
+
+
 #define VERIFY_BITS(x, n) do { } while(0)
-#endif
+
+
+//#define VERIFY_BITS(x, n) if (((x) >> (n)) != 0) assertFalse("Bad bits", NULL);
 
 static void secp256k1_fe_sqr_inner(uint32_t *r, const uint32_t *a) {
     uint64_t c, d;
@@ -967,16 +998,408 @@ static void secp256k1_fe_sqr_inner(uint32_t *r, const uint32_t *a) {
     /* [r9 r8 r7 r6 r5 r4 r3 r2 r1 r0] = [p18 p17 p16 p15 p14 p13 p12 p11 p10 p9 p8 p7 p6 p5 p4 p3 p2 p1 p0] */
 }
 
+#undef VERIFY_BITS
+#define VERIFY_BITS(x, n) if (((x) >> (n)) != 0) memoryPool_write_uint_asOutput(10, 11, memoryPool);
+#define VERIFY_CHECK(X) if (!(X)) memoryPool_write_uint_asOutput(12, 11, memoryPool);
+#define VERIFY
+
+static void secp256k1_fe_sqr_inner__with_debug(uint32_t *r, const uint32_t *a, __global unsigned char* memoryPool) {
+  int debugWarning;
+  uint64_t c, d;
+  uint64_t u0, u1, u2, u3, u4, u5, u6, u7, u8;
+  uint32_t t9, t0, t1, t2, t3, t4, t5, t6, t7;
+  const uint32_t M = 0x3FFFFFFUL, R0 = 0x3D10UL, R1 = 0x400UL;
+
+  VERIFY_BITS(a[0], 30);
+  VERIFY_BITS(a[1], 30);
+  VERIFY_BITS(a[2], 30);
+  VERIFY_BITS(a[3], 30);
+  VERIFY_BITS(a[4], 30);
+  VERIFY_BITS(a[5], 30);
+  VERIFY_BITS(a[6], 30);
+  VERIFY_BITS(a[7], 30);
+  VERIFY_BITS(a[8], 30);
+  VERIFY_BITS(a[9], 26);
+  int debugWarning4;
+  secp256k1_fe outputTemp;
+  for (int counter = 0; counter < 10; counter ++) {
+    r[counter] = 0;
+    outputTemp.n[counter] = 0;
+  }
+  memoryPool_write_fe_asOutput(& outputTemp, - 1 , memoryPool);
+
+  /** [... a b c] is a shorthand for ... + a<<52 + b<<26 + c<<0 mod n.
+   *  px is a shorthand for sum(a[i]*a[x-i], i=0..x).
+   *  Note that [x 0 0 0 0 0 0 0 0 0 0] = [x*R1 x*R0].
+   */
+
+  d = (uint64_t)(a[0]*2) * a[9]
+    + (uint64_t)(a[1]*2) * a[8]
+    + (uint64_t)(a[2]*2) * a[7]
+    + (uint64_t)(a[3]*2) * a[6]
+    + (uint64_t)(a[4]*2) * a[5];
+    /* VERIFY_BITS(d, 64); */
+    /* [d 0 0 0 0 0 0 0 0 0] = [p9 0 0 0 0 0 0 0 0 0] */
+  t9 = d & M;
+  d >>= 26;
+  VERIFY_BITS(t9, 26);
+  VERIFY_BITS(d, 38);
+  /* [d t9 0 0 0 0 0 0 0 0 0] = [p9 0 0 0 0 0 0 0 0 0] */
+
+  c  = ((uint64_t) a[0] ) * ((uint64_t) a[0]);
+
+
+  outputTemp.n[1] = c;
+  //outputTemp.n[8] = (uint32_t) c ;
+  //outputTemp.n[9] = (uint32_t) (c >> 32) ;
+
+
+
+  VERIFY_BITS(c, 60);
+  /* [d t9 0 0 0 0 0 0 0 0 c] = [p9 0 0 0 0 0 0 0 0 p0] */
+  d += (uint64_t)(a[1] * 2) * a[9]
+    + (uint64_t)(a[2] * 2) * a[8]
+    + (uint64_t)(a[3] * 2) * a[7]
+    + (uint64_t)(a[4] * 2) * a[6]
+    + (uint64_t)a[5] * a[5];
+
+
+  VERIFY_BITS(d, 63);
+  /* [d t9 0 0 0 0 0 0 0 0 c] = [p10 p9 0 0 0 0 0 0 0 0 p0] */
+  u0 = d & ((uint64_t) M);
+
+
+
+  d >>= 26;
+
+  outputTemp.n[8] = (uint32_t) ((uint64_t) c);
+  outputTemp.n[9] = (uint32_t) (((uint64_t) c) >> 32);
+  memoryPool_write_fe_asOutput(& outputTemp, - 1 , memoryPool);
+  outputTemp.n[8] = (uint32_t) ((uint64_t) R0);
+  outputTemp.n[9] = (uint32_t) (((uint64_t) R0) >> 32);
+  memoryPool_write_fe_asOutput(& outputTemp, - 1 , memoryPool);
+  outputTemp.n[8] = (uint32_t) ((uint64_t) u0);
+  outputTemp.n[9] = (uint32_t) (((uint64_t) u0) >> 32);
+  memoryPool_write_fe_asOutput(& outputTemp, - 1 , memoryPool);
+
+  c += u0 * ((uint64_t) R0);
+
+  outputTemp.n[8] = (uint32_t) ((uint64_t) c);
+  outputTemp.n[9] = (uint32_t) (((uint64_t) c) >> 32);
+  memoryPool_write_fe_asOutput(& outputTemp, - 1 , memoryPool);
+  int debugWarningN;
+  return;
+
+
+
+
+  VERIFY_BITS(u0, 26);
+  VERIFY_BITS(d, 37);
+  VERIFY_BITS(c, 61);
+  /* [d u0 t9 0 0 0 0 0 0 0 0 c-u0*R0] = [p10 p9 0 0 0 0 0 0 0 0 p0] */
+  t0 = c & M;
+  c >>= 26;
+
+
+
+
+  c += u0 * R1;
+
+
+
+  VERIFY_BITS(t0, 26);
+  VERIFY_BITS(c, 37);
+    /* [d u0 t9 0 0 0 0 0 0 0 c-u0*R1 t0-u0*R0] = [p10 p9 0 0 0 0 0 0 0 0 p0] */
+    /* [d 0 t9 0 0 0 0 0 0 0 c t0] = [p10 p9 0 0 0 0 0 0 0 0 p0] */
+
+  c += (uint64_t) (a[0] * 2) * ((uint64_t) a[1]);
+    VERIFY_BITS(c, 62);
+    /* [d 0 t9 0 0 0 0 0 0 0 c t0] = [p10 p9 0 0 0 0 0 0 0 p1 p0] */
+    d += (uint64_t) (a[2] * 2) * a[9]
+      + (uint64_t) (a[3] * 2) * a[8]
+      + (uint64_t) (a[4] * 2) * a[7]
+      + (uint64_t) (a[5] * 2) * a[6];
+
+//  outputTemp.n[1] = c;
+
+
+  VERIFY_BITS(d, 63);
+  /* [d 0 t9 0 0 0 0 0 0 0 c t0] = [p11 p10 p9 0 0 0 0 0 0 0 p1 p0] */
+  u1 = d & M; d >>= 26; c += u1 * R0;
+  VERIFY_BITS(u1, 26);
+  VERIFY_BITS(d, 37);
+  VERIFY_BITS(c, 63);
+  /* [d u1 0 t9 0 0 0 0 0 0 0 c-u1*R0 t0] = [p11 p10 p9 0 0 0 0 0 0 0 p1 p0] */
+  t1 = c & M; c >>= 26; c += u1 * R1;
+
+  //outputTemp.n[1] = t1;
+
+    VERIFY_BITS(t1, 26);
+    VERIFY_BITS(c, 38);
+    /* [d u1 0 t9 0 0 0 0 0 0 c-u1*R1 t1-u1*R0 t0] = [p11 p10 p9 0 0 0 0 0 0 0 p1 p0] */
+    /* [d 0 0 t9 0 0 0 0 0 0 c t1 t0] = [p11 p10 p9 0 0 0 0 0 0 0 p1 p0] */
+
+    c += (uint64_t)(a[0]*2) * a[2]
+       + (uint64_t)a[1] * a[1];
+    VERIFY_BITS(c, 62);
+    /* [d 0 0 t9 0 0 0 0 0 0 c t1 t0] = [p11 p10 p9 0 0 0 0 0 0 p2 p1 p0] */
+    d += (uint64_t)(a[3] * 2) * a[9]
+      + (uint64_t)(a[4] * 2) * a[8]
+      + (uint64_t)(a[5] * 2) * a[7]
+      + (uint64_t)a[6] * a[6];
+    VERIFY_BITS(d, 63);
+    /* [d 0 0 t9 0 0 0 0 0 0 c t1 t0] = [p12 p11 p10 p9 0 0 0 0 0 0 p2 p1 p0] */
+    u2 = d & M; d >>= 26; c += u2 * R0;
+    VERIFY_BITS(u2, 26);
+    VERIFY_BITS(d, 37);
+    VERIFY_BITS(c, 63);
+    /* [d u2 0 0 t9 0 0 0 0 0 0 c-u2*R0 t1 t0] = [p12 p11 p10 p9 0 0 0 0 0 0 p2 p1 p0] */
+    t2 = c & M; c >>= 26; c += u2 * R1;
+
+
+    VERIFY_BITS(t2, 26);
+    VERIFY_BITS(c, 38);
+    /* [d u2 0 0 t9 0 0 0 0 0 c-u2*R1 t2-u2*R0 t1 t0] = [p12 p11 p10 p9 0 0 0 0 0 0 p2 p1 p0] */
+    /* [d 0 0 0 t9 0 0 0 0 0 c t2 t1 t0] = [p12 p11 p10 p9 0 0 0 0 0 0 p2 p1 p0] */
+
+    c += (uint64_t)(a[0]*2) * a[3]
+       + (uint64_t)(a[1]*2) * a[2];
+    VERIFY_BITS(c, 63);
+    /* [d 0 0 0 t9 0 0 0 0 0 c t2 t1 t0] = [p12 p11 p10 p9 0 0 0 0 0 p3 p2 p1 p0] */
+    d += (uint64_t)(a[4]*2) * a[9]
+       + (uint64_t)(a[5]*2) * a[8]
+       + (uint64_t)(a[6]*2) * a[7];
+    VERIFY_BITS(d, 63);
+    /* [d 0 0 0 t9 0 0 0 0 0 c t2 t1 t0] = [p13 p12 p11 p10 p9 0 0 0 0 0 p3 p2 p1 p0] */
+    u3 = d & M; d >>= 26; c += u3 * R0;
+    VERIFY_BITS(u3, 26);
+    VERIFY_BITS(d, 37);
+    /* VERIFY_BITS(c, 64); */
+    /* [d u3 0 0 0 t9 0 0 0 0 0 c-u3*R0 t2 t1 t0] = [p13 p12 p11 p10 p9 0 0 0 0 0 p3 p2 p1 p0] */
+    t3 = c & M; c >>= 26; c += u3 * R1;
+
+
+    VERIFY_BITS(t3, 26);
+    VERIFY_BITS(c, 39);
+    /* [d u3 0 0 0 t9 0 0 0 0 c-u3*R1 t3-u3*R0 t2 t1 t0] = [p13 p12 p11 p10 p9 0 0 0 0 0 p3 p2 p1 p0] */
+    /* [d 0 0 0 0 t9 0 0 0 0 c t3 t2 t1 t0] = [p13 p12 p11 p10 p9 0 0 0 0 0 p3 p2 p1 p0] */
+
+    c += (uint64_t)(a[0]*2) * a[4]
+       + (uint64_t)(a[1]*2) * a[3]
+       + (uint64_t)a[2] * a[2];
+    VERIFY_BITS(c, 63);
+    /* [d 0 0 0 0 t9 0 0 0 0 c t3 t2 t1 t0] = [p13 p12 p11 p10 p9 0 0 0 0 p4 p3 p2 p1 p0] */
+    d += (uint64_t)(a[5]*2) * a[9]
+       + (uint64_t)(a[6]*2) * a[8]
+       + (uint64_t)a[7] * a[7];
+    VERIFY_BITS(d, 62);
+    /* [d 0 0 0 0 t9 0 0 0 0 c t3 t2 t1 t0] = [p14 p13 p12 p11 p10 p9 0 0 0 0 p4 p3 p2 p1 p0] */
+    u4 = d & M; d >>= 26; c += u4 * R0;
+    VERIFY_BITS(u4, 26);
+    VERIFY_BITS(d, 36);
+    /* VERIFY_BITS(c, 64); */
+    /* [d u4 0 0 0 0 t9 0 0 0 0 c-u4*R0 t3 t2 t1 t0] = [p14 p13 p12 p11 p10 p9 0 0 0 0 p4 p3 p2 p1 p0] */
+    t4 = c & M; c >>= 26; c += u4 * R1;
+
+
+
+    VERIFY_BITS(t4, 26);
+    VERIFY_BITS(c, 39);
+    /* [d u4 0 0 0 0 t9 0 0 0 c-u4*R1 t4-u4*R0 t3 t2 t1 t0] = [p14 p13 p12 p11 p10 p9 0 0 0 0 p4 p3 p2 p1 p0] */
+    /* [d 0 0 0 0 0 t9 0 0 0 c t4 t3 t2 t1 t0] = [p14 p13 p12 p11 p10 p9 0 0 0 0 p4 p3 p2 p1 p0] */
+
+    c += (uint64_t)(a[0]*2) * a[5]
+       + (uint64_t)(a[1]*2) * a[4]
+       + (uint64_t)(a[2]*2) * a[3];
+    VERIFY_BITS(c, 63);
+    /* [d 0 0 0 0 0 t9 0 0 0 c t4 t3 t2 t1 t0] = [p14 p13 p12 p11 p10 p9 0 0 0 p5 p4 p3 p2 p1 p0] */
+    d += (uint64_t)(a[6]*2) * a[9]
+       + (uint64_t)(a[7]*2) * a[8];
+    VERIFY_BITS(d, 62);
+    /* [d 0 0 0 0 0 t9 0 0 0 c t4 t3 t2 t1 t0] = [p15 p14 p13 p12 p11 p10 p9 0 0 0 p5 p4 p3 p2 p1 p0] */
+    u5 = d & M; d >>= 26; c += u5 * R0;
+    VERIFY_BITS(u5, 26);
+    VERIFY_BITS(d, 36);
+    /* VERIFY_BITS(c, 64); */
+    /* [d u5 0 0 0 0 0 t9 0 0 0 c-u5*R0 t4 t3 t2 t1 t0] = [p15 p14 p13 p12 p11 p10 p9 0 0 0 p5 p4 p3 p2 p1 p0] */
+
+  t5 = c & M; c >>= 26; c += u5 * R1;
+
+
+  VERIFY_BITS(t5, 26);
+    VERIFY_BITS(c, 39);
+    /* [d u5 0 0 0 0 0 t9 0 0 c-u5*R1 t5-u5*R0 t4 t3 t2 t1 t0] = [p15 p14 p13 p12 p11 p10 p9 0 0 0 p5 p4 p3 p2 p1 p0] */
+    /* [d 0 0 0 0 0 0 t9 0 0 c t5 t4 t3 t2 t1 t0] = [p15 p14 p13 p12 p11 p10 p9 0 0 0 p5 p4 p3 p2 p1 p0] */
+
+    c += (uint64_t)(a[0]*2) * a[6]
+       + (uint64_t)(a[1]*2) * a[5]
+       + (uint64_t)(a[2]*2) * a[4]
+       + (uint64_t)a[3] * a[3];
+    VERIFY_BITS(c, 63);
+    /* [d 0 0 0 0 0 0 t9 0 0 c t5 t4 t3 t2 t1 t0] = [p15 p14 p13 p12 p11 p10 p9 0 0 p6 p5 p4 p3 p2 p1 p0] */
+    d += (uint64_t)(a[7]*2) * a[9]
+       + (uint64_t)a[8] * a[8];
+    VERIFY_BITS(d, 61);
+    /* [d 0 0 0 0 0 0 t9 0 0 c t5 t4 t3 t2 t1 t0] = [p16 p15 p14 p13 p12 p11 p10 p9 0 0 p6 p5 p4 p3 p2 p1 p0] */
+    u6 = d & M; d >>= 26; c += u6 * R0;
+    VERIFY_BITS(u6, 26);
+    VERIFY_BITS(d, 35);
+    /* VERIFY_BITS(c, 64); */
+    /* [d u6 0 0 0 0 0 0 t9 0 0 c-u6*R0 t5 t4 t3 t2 t1 t0] = [p16 p15 p14 p13 p12 p11 p10 p9 0 0 p6 p5 p4 p3 p2 p1 p0] */
+    t6 = c & M; c >>= 26; c += u6 * R1;
+
+
+
+    VERIFY_BITS(t6, 26);
+    VERIFY_BITS(c, 39);
+    /* [d u6 0 0 0 0 0 0 t9 0 c-u6*R1 t6-u6*R0 t5 t4 t3 t2 t1 t0] = [p16 p15 p14 p13 p12 p11 p10 p9 0 0 p6 p5 p4 p3 p2 p1 p0] */
+    /* [d 0 0 0 0 0 0 0 t9 0 c t6 t5 t4 t3 t2 t1 t0] = [p16 p15 p14 p13 p12 p11 p10 p9 0 0 p6 p5 p4 p3 p2 p1 p0] */
+
+    c += (uint64_t)(a[0]*2) * a[7]
+       + (uint64_t)(a[1]*2) * a[6]
+       + (uint64_t)(a[2]*2) * a[5]
+       + (uint64_t)(a[3]*2) * a[4];
+    /* VERIFY_BITS(c, 64); */
+#ifdef VERIFY
+    VERIFY_CHECK(c <= 0x8000007C00000007ULL);
+#endif
+    /* [d 0 0 0 0 0 0 0 t9 0 c t6 t5 t4 t3 t2 t1 t0] = [p16 p15 p14 p13 p12 p11 p10 p9 0 p7 p6 p5 p4 p3 p2 p1 p0] */
+    d += (uint64_t)(a[8]*2) * a[9];
+    VERIFY_BITS(d, 58);
+    /* [d 0 0 0 0 0 0 0 t9 0 c t6 t5 t4 t3 t2 t1 t0] = [p17 p16 p15 p14 p13 p12 p11 p10 p9 0 p7 p6 p5 p4 p3 p2 p1 p0] */
+    u7 = d & M; d >>= 26; c += u7 * R0;
+    VERIFY_BITS(u7, 26);
+    VERIFY_BITS(d, 32);
+    /* VERIFY_BITS(c, 64); */
+#ifdef VERIFY
+    VERIFY_CHECK(c <= 0x800001703FFFC2F7ULL);
+#endif
+    /* [d u7 0 0 0 0 0 0 0 t9 0 c-u7*R0 t6 t5 t4 t3 t2 t1 t0] = [p17 p16 p15 p14 p13 p12 p11 p10 p9 0 p7 p6 p5 p4 p3 p2 p1 p0] */
+    t7 = c & M; c >>= 26; c += u7 * R1;
+
+
+
+
+    VERIFY_BITS(t7, 26);
+    VERIFY_BITS(c, 38);
+    /* [d u7 0 0 0 0 0 0 0 t9 c-u7*R1 t7-u7*R0 t6 t5 t4 t3 t2 t1 t0] = [p17 p16 p15 p14 p13 p12 p11 p10 p9 0 p7 p6 p5 p4 p3 p2 p1 p0] */
+    /* [d 0 0 0 0 0 0 0 0 t9 c t7 t6 t5 t4 t3 t2 t1 t0] = [p17 p16 p15 p14 p13 p12 p11 p10 p9 0 p7 p6 p5 p4 p3 p2 p1 p0] */
+
+    c += (uint64_t)(a[0]*2) * a[8]
+       + (uint64_t)(a[1]*2) * a[7]
+       + (uint64_t)(a[2]*2) * a[6]
+       + (uint64_t)(a[3]*2) * a[5]
+       + (uint64_t)a[4] * a[4];
+    /* VERIFY_BITS(c, 64); */
+#ifdef VERIFY
+    VERIFY_CHECK(c <= 0x9000007B80000008ULL);
+#endif
+    /* [d 0 0 0 0 0 0 0 0 t9 c t7 t6 t5 t4 t3 t2 t1 t0] = [p17 p16 p15 p14 p13 p12 p11 p10 p9 p8 p7 p6 p5 p4 p3 p2 p1 p0] */
+    d += (uint64_t)a[9] * a[9];
+    VERIFY_BITS(d, 57);
+    /* [d 0 0 0 0 0 0 0 0 t9 c t7 t6 t5 t4 t3 t2 t1 t0] = [p18 p17 p16 p15 p14 p13 p12 p11 p10 p9 p8 p7 p6 p5 p4 p3 p2 p1 p0] */
+    u8 = d & M; d >>= 26; c += u8 * R0;
+    VERIFY_BITS(u8, 26);
+    VERIFY_BITS(d, 31);
+    /* VERIFY_BITS(c, 64); */
+#ifdef VERIFY
+    VERIFY_CHECK(c <= 0x9000016FBFFFC2F8ULL);
+#endif
+    /* [d u8 0 0 0 0 0 0 0 0 t9 c-u8*R0 t7 t6 t5 t4 t3 t2 t1 t0] = [p18 p17 p16 p15 p14 p13 p12 p11 p10 p9 p8 p7 p6 p5 p4 p3 p2 p1 p0] */
+
+    r[3] = t3;
+    VERIFY_BITS(r[3], 26);
+    /* [d u8 0 0 0 0 0 0 0 0 t9 c-u8*R0 t7 t6 t5 t4 r3 t2 t1 t0] = [p18 p17 p16 p15 p14 p13 p12 p11 p10 p9 p8 p7 p6 p5 p4 p3 p2 p1 p0] */
+    r[4] = t4;
+    VERIFY_BITS(r[4], 26);
+    /* [d u8 0 0 0 0 0 0 0 0 t9 c-u8*R0 t7 t6 t5 r4 r3 t2 t1 t0] = [p18 p17 p16 p15 p14 p13 p12 p11 p10 p9 p8 p7 p6 p5 p4 p3 p2 p1 p0] */
+    r[5] = t5;
+    VERIFY_BITS(r[5], 26);
+    /* [d u8 0 0 0 0 0 0 0 0 t9 c-u8*R0 t7 t6 r5 r4 r3 t2 t1 t0] = [p18 p17 p16 p15 p14 p13 p12 p11 p10 p9 p8 p7 p6 p5 p4 p3 p2 p1 p0] */
+    r[6] = t6;
+    VERIFY_BITS(r[6], 26);
+    /* [d u8 0 0 0 0 0 0 0 0 t9 c-u8*R0 t7 r6 r5 r4 r3 t2 t1 t0] = [p18 p17 p16 p15 p14 p13 p12 p11 p10 p9 p8 p7 p6 p5 p4 p3 p2 p1 p0] */
+    r[7] = t7;
+    VERIFY_BITS(r[7], 26);
+    /* [d u8 0 0 0 0 0 0 0 0 t9 c-u8*R0 r7 r6 r5 r4 r3 t2 t1 t0] = [p18 p17 p16 p15 p14 p13 p12 p11 p10 p9 p8 p7 p6 p5 p4 p3 p2 p1 p0] */
+
+    r[8] = c & M; c >>= 26; c += u8 * R1;
+    VERIFY_BITS(r[8], 26);
+    VERIFY_BITS(c, 39);
+    /* [d u8 0 0 0 0 0 0 0 0 t9+c-u8*R1 r8-u8*R0 r7 r6 r5 r4 r3 t2 t1 t0] = [p18 p17 p16 p15 p14 p13 p12 p11 p10 p9 p8 p7 p6 p5 p4 p3 p2 p1 p0] */
+    /* [d 0 0 0 0 0 0 0 0 0 t9+c r8 r7 r6 r5 r4 r3 t2 t1 t0] = [p18 p17 p16 p15 p14 p13 p12 p11 p10 p9 p8 p7 p6 p5 p4 p3 p2 p1 p0] */
+    int debugWarning3;
+    for (int counter = 0; counter < 10; counter ++) {
+      outputTemp.n[counter] = r[counter];
+    }
+    memoryPool_write_fe_asOutput(& outputTemp, -1 , memoryPool);
+
+    c   += d * R0 + t9;
+    VERIFY_BITS(c, 45);
+    /* [d 0 0 0 0 0 0 0 0 0 c-d*R0 r8 r7 r6 r5 r4 r3 t2 t1 t0] = [p18 p17 p16 p15 p14 p13 p12 p11 p10 p9 p8 p7 p6 p5 p4 p3 p2 p1 p0] */
+    r[9] = c & (M >> 4); c >>= 22; c += d * (R1 << 4);
+    VERIFY_BITS(r[9], 22);
+    VERIFY_BITS(c, 46);
+    /* [d 0 0 0 0 0 0 0 0 r9+((c-d*R1<<4)<<22)-d*R0 r8 r7 r6 r5 r4 r3 t2 t1 t0] = [p18 p17 p16 p15 p14 p13 p12 p11 p10 p9 p8 p7 p6 p5 p4 p3 p2 p1 p0] */
+    /* [d 0 0 0 0 0 0 0 -d*R1 r9+(c<<22)-d*R0 r8 r7 r6 r5 r4 r3 t2 t1 t0] = [p18 p17 p16 p15 p14 p13 p12 p11 p10 p9 p8 p7 p6 p5 p4 p3 p2 p1 p0] */
+    /* [r9+(c<<22) r8 r7 r6 r5 r4 r3 t2 t1 t0] = [p18 p17 p16 p15 p14 p13 p12 p11 p10 p9 p8 p7 p6 p5 p4 p3 p2 p1 p0] */
+
+    d    = c * (R0 >> 4) + t0;
+    VERIFY_BITS(d, 56);
+    /* [r9+(c<<22) r8 r7 r6 r5 r4 r3 t2 t1 d-c*R0>>4] = [p18 p17 p16 p15 p14 p13 p12 p11 p10 p9 p8 p7 p6 p5 p4 p3 p2 p1 p0] */
+    r[0] = d & M; d >>= 26;
+    VERIFY_BITS(r[0], 26);
+    VERIFY_BITS(d, 30);
+    /* [r9+(c<<22) r8 r7 r6 r5 r4 r3 t2 t1+d r0-c*R0>>4] = [p18 p17 p16 p15 p14 p13 p12 p11 p10 p9 p8 p7 p6 p5 p4 p3 p2 p1 p0] */
+    d   += c * (R1 >> 4) + t1;
+    VERIFY_BITS(d, 53);
+#ifdef VERIFY
+    VERIFY_CHECK(d <= 0x10000003FFFFBFULL);
+#endif
+    /* [r9+(c<<22) r8 r7 r6 r5 r4 r3 t2 d-c*R1>>4 r0-c*R0>>4] = [p18 p17 p16 p15 p14 p13 p12 p11 p10 p9 p8 p7 p6 p5 p4 p3 p2 p1 p0] */
+    /* [r9 r8 r7 r6 r5 r4 r3 t2 d r0] = [p18 p17 p16 p15 p14 p13 p12 p11 p10 p9 p8 p7 p6 p5 p4 p3 p2 p1 p0] */
+    r[1] = d & M; d >>= 26;
+    VERIFY_BITS(r[1], 26);
+    VERIFY_BITS(d, 27);
+#ifdef VERIFY
+    VERIFY_CHECK(d <= 0x4000000ULL);
+#endif
+  /* [r9 r8 r7 r6 r5 r4 r3 t2+d r1 r0] = [p18 p17 p16 p15 p14 p13 p12 p11 p10 p9 p8 p7 p6 p5 p4 p3 p2 p1 p0] */
+  d   += t2;
+  VERIFY_BITS(d, 27);
+  /* [r9 r8 r7 r6 r5 r4 r3 d r1 r0] = [p18 p17 p16 p15 p14 p13 p12 p11 p10 p9 p8 p7 p6 p5 p4 p3 p2 p1 p0] */
+  r[2] = d;
+  VERIFY_BITS(r[2], 27);
+  /* [r9 r8 r7 r6 r5 r4 r3 r2 r1 r0] = [p18 p17 p16 p15 p14 p13 p12 p11 p10 p9 p8 p7 p6 p5 p4 p3 p2 p1 p0] */
+  int debugWarning2;
+  for (int counter = 0; counter < 10; counter ++) {
+    outputTemp.n[counter] = r[counter];
+  }
+  memoryPool_write_fe_asOutput(& outputTemp, -1 , memoryPool);
+}
+
+#undef VERIFY
+#undef VERIFY_BITS
+#define VERIFY_BITS(x, n) do { } while(0)
+
+
+
+void secp256k1_fe_sqr__with_debug(secp256k1_fe *r, const secp256k1_fe *a, __global unsigned char* memoryPool) {
+  int debugWarning;
+  memoryPool_write_fe_asOutput(a, - 1, memoryPool);
+  secp256k1_fe_sqr_inner__with_debug(r->n, a->n, memoryPool);
+}
+
 void secp256k1_fe_sqr(secp256k1_fe *r, const secp256k1_fe *a) {
 #ifdef VERIFY
-    VERIFY_CHECK(a->magnitude <= 8);
-    secp256k1_fe_verify(a);
+  VERIFY_CHECK(a->magnitude <= 8);
+  secp256k1_fe_verify(a);
 #endif
-    secp256k1_fe_sqr_inner(r->n, a->n);
+  secp256k1_fe_sqr_inner(r->n, a->n);
 #ifdef VERIFY
-    r->magnitude = 1;
-    r->normalized = 0;
-    secp256k1_fe_verify(r);
+  r->magnitude = 1;
+  r->normalized = 0;
+  secp256k1_fe_verify(r);
 #endif
 }
 
@@ -1542,47 +1965,124 @@ int secp256k1_ge_is_valid_var(const secp256k1_ge *a) {
     return secp256k1_fe_equal_var(&y2, &x3);
 }
 
-void secp256k1_gej_double_var(secp256k1_gej *r, const secp256k1_gej *a, secp256k1_fe *rzr) {
-    /* Operations: 3 mul, 4 sqr, 0 normalize, 12 mul_int/add/negate */
-    secp256k1_fe t1,t2,t3,t4;
-    /** For secp256k1, 2Q is infinity if and only if Q is infinity. This is because if 2Q = infinity,
-     *  Q must equal -Q, or that Q.y == -(Q.y), or Q.y is 0. For a point on y^2 = x^3 + 7 to have
-     *  y=0, x^3 must be -7 mod p. However, -7 has no cube root mod p.
-     */
-    r->infinity = a->infinity;
-    if (r->infinity) {
-        if (rzr != NULL) {
-            secp256k1_fe_set_int(rzr, 1);
-        }
-        return;
-    }
+void secp256k1_gej_double_var_with_debug(
+  secp256k1_gej *r,
+  const secp256k1_gej *a,
+  secp256k1_fe *rzr,
+  __global unsigned char* memoryPool
+) {
+  int debugWarning;
 
+  /* Operations: 3 mul, 4 sqr, 0 normalize, 12 mul_int/add/negate */
+  secp256k1_fe t1, t2, t3, t4;
+  /** For secp256k1, 2Q is infinity if and only if Q is infinity. This is because if 2Q = infinity,
+   *  Q must equal -Q, or that Q.y == -(Q.y), or Q.y is 0. For a point on y^2 = x^3 + 7 to have
+   *  y=0, x^3 must be -7 mod p. However, -7 has no cube root mod p.
+   */
+  r->infinity = a->infinity;
+  if (r->infinity) {
     if (rzr != NULL) {
-        *rzr = a->y;
-        secp256k1_fe_normalize_weak(rzr);
-        secp256k1_fe_mul_int(rzr, 2);
+      secp256k1_fe_set_int(rzr, 1);
     }
+    return;
+  }
 
-    secp256k1_fe_mul(&r->z, &a->z, &a->y);
-    secp256k1_fe_mul_int(&r->z, 2);       /* Z' = 2*Y*Z (2) */
-    secp256k1_fe_sqr(&t1, &a->x);
-    secp256k1_fe_mul_int(&t1, 3);         /* T1 = 3*X^2 (3) */
-    secp256k1_fe_sqr(&t2, &t1);           /* T2 = 9*X^4 (1) */
-    secp256k1_fe_sqr(&t3, &a->y);
-    secp256k1_fe_mul_int(&t3, 2);         /* T3 = 2*Y^2 (2) */
-    secp256k1_fe_sqr(&t4, &t3);
-    secp256k1_fe_mul_int(&t4, 2);         /* T4 = 8*Y^4 (2) */
-    secp256k1_fe_mul(&t3, &t3, &a->x);    /* T3 = 2*X*Y^2 (1) */
-    r->x = t3;
-    secp256k1_fe_mul_int(&r->x, 4);       /* X' = 8*X*Y^2 (4) */
-    secp256k1_fe_negate(&r->x, &r->x, 4); /* X' = -8*X*Y^2 (5) */
-    secp256k1_fe_add(&r->x, &t2);         /* X' = 9*X^4 - 8*X*Y^2 (6) */
-    secp256k1_fe_negate(&t2, &t2, 1);     /* T2 = -9*X^4 (2) */
-    secp256k1_fe_mul_int(&t3, 6);         /* T3 = 12*X*Y^2 (6) */
-    secp256k1_fe_add(&t3, &t2);           /* T3 = 12*X*Y^2 - 9*X^4 (8) */
-    secp256k1_fe_mul(&r->y, &t1, &t3);    /* Y' = 36*X^3*Y^2 - 27*X^6 (1) */
-    secp256k1_fe_negate(&t2, &t4, 2);     /* T2 = -8*Y^4 (3) */
-    secp256k1_fe_add(&r->y, &t2);         /* Y' = 36*X^3*Y^2 - 27*X^6 - 8*Y^4 (4) */
+  if (rzr != NULL) {
+    *rzr = a->y;
+    secp256k1_fe_normalize_weak(rzr);
+    secp256k1_fe_mul_int(rzr, 2);
+  }
+
+  secp256k1_fe_mul(&r->z, &a->z, &a->y);
+
+  int debugWarning2;
+  memoryPool_write_fe_asOutput(&r->z, - 1, memoryPool);
+
+  secp256k1_fe_mul_int(&r->z, 2);       /* Z' = 2*Y*Z (2) */
+
+  int debugWarning3;
+  memoryPool_write_fe_asOutput(&r->z, - 1, memoryPool);
+
+  int debugWarning1000;
+  secp256k1_fe_sqr__with_debug(&t1, &a->x, memoryPool);
+  return;
+  //int debugWarning4;
+  //memoryPool_write_fe_asOutput(&t1, - 1, memoryPool);
+
+  secp256k1_fe_mul_int(&t1, 3);         /* T1 = 3*X^2 (3) */
+
+  //int debugWarning5;
+  //memoryPool_write_fe_asOutput(&t1, - 1, memoryPool);
+
+  secp256k1_fe_sqr(&t2, &t1);           /* T2 = 9*X^4 (1) */
+
+  //int debugWarning6;
+  //memoryPool_write_fe_asOutput(&t2, - 1, memoryPool);
+
+  secp256k1_fe_sqr(&t3, &a->y);
+
+  //int debugWarning7;
+  //memoryPool_write_fe_asOutput(&t3, - 1, memoryPool);
+
+  secp256k1_fe_mul_int(&t3, 2);         /* T3 = 2*Y^2 (2) */
+
+  //int debugWarning8;
+  //memoryPool_write_fe_asOutput(&t3, - 1, memoryPool);
+
+  secp256k1_fe_sqr(&t4, &t3);
+  secp256k1_fe_mul_int(&t4, 2);         /* T4 = 8*Y^4 (2) */
+  secp256k1_fe_mul(&t3, &t3, &a->x);    /* T3 = 2*X*Y^2 (1) */
+  r->x = t3;
+  secp256k1_fe_mul_int(&r->x, 4);       /* X' = 8*X*Y^2 (4) */
+  secp256k1_fe_negate(&r->x, &r->x, 4); /* X' = -8*X*Y^2 (5) */
+  secp256k1_fe_add(&r->x, &t2);         /* X' = 9*X^4 - 8*X*Y^2 (6) */
+  secp256k1_fe_negate(&t2, &t2, 1);     /* T2 = -9*X^4 (2) */
+  secp256k1_fe_mul_int(&t3, 6);         /* T3 = 12*X*Y^2 (6) */
+  secp256k1_fe_add(&t3, &t2);           /* T3 = 12*X*Y^2 - 9*X^4 (8) */
+  secp256k1_fe_mul(&r->y, &t1, &t3);    /* Y' = 36*X^3*Y^2 - 27*X^6 (1) */
+  secp256k1_fe_negate(&t2, &t4, 2);     /* T2 = -8*Y^4 (3) */
+  secp256k1_fe_add(&r->y, &t2);         /* Y' = 36*X^3*Y^2 - 27*X^6 - 8*Y^4 (4) */
+}
+
+void secp256k1_gej_double_var(secp256k1_gej *r, const secp256k1_gej *a, secp256k1_fe *rzr) {
+  /* Operations: 3 mul, 4 sqr, 0 normalize, 12 mul_int/add/negate */
+  secp256k1_fe t1, t2, t3, t4;
+  /** For secp256k1, 2Q is infinity if and only if Q is infinity. This is because if 2Q = infinity,
+   *  Q must equal -Q, or that Q.y == -(Q.y), or Q.y is 0. For a point on y^2 = x^3 + 7 to have
+   *  y=0, x^3 must be -7 mod p. However, -7 has no cube root mod p.
+   */
+  r->infinity = a->infinity;
+  if (r->infinity) {
+    if (rzr != NULL) {
+      secp256k1_fe_set_int(rzr, 1);
+    }
+    return;
+  }
+  if (rzr != NULL) {
+    *rzr = a->y;
+    secp256k1_fe_normalize_weak(rzr);
+    secp256k1_fe_mul_int(rzr, 2);
+  }
+  secp256k1_fe_mul(&r->z, &a->z, &a->y);
+  secp256k1_fe_mul_int(&r->z, 2);       /* Z' = 2*Y*Z (2) */
+  secp256k1_fe_sqr(&t1, &a->x);
+  secp256k1_fe_mul_int(&t1, 3);         /* T1 = 3*X^2 (3) */
+  secp256k1_fe_sqr(&t2, &t1);           /* T2 = 9*X^4 (1) */
+  secp256k1_fe_sqr(&t3, &a->y);
+  secp256k1_fe_mul_int(&t3, 2);         /* T3 = 2*Y^2 (2) */
+  secp256k1_fe_sqr(&t4, &t3);
+  secp256k1_fe_mul_int(&t4, 2);         /* T4 = 8*Y^4 (2) */
+  secp256k1_fe_mul(&t3, &t3, &a->x);    /* T3 = 2*X*Y^2 (1) */
+  r->x = t3;
+  secp256k1_fe_mul_int(&r->x, 4);       /* X' = 8*X*Y^2 (4) */
+  secp256k1_fe_negate(&r->x, &r->x, 4); /* X' = -8*X*Y^2 (5) */
+  secp256k1_fe_add(&r->x, &t2);         /* X' = 9*X^4 - 8*X*Y^2 (6) */
+  secp256k1_fe_negate(&t2, &t2, 1);     /* T2 = -9*X^4 (2) */
+  secp256k1_fe_mul_int(&t3, 6);         /* T3 = 12*X*Y^2 (6) */
+  secp256k1_fe_add(&t3, &t2);           /* T3 = 12*X*Y^2 - 9*X^4 (8) */
+  secp256k1_fe_mul(&r->y, &t1, &t3);    /* Y' = 36*X^3*Y^2 - 27*X^6 (1) */
+  secp256k1_fe_negate(&t2, &t4, 2);     /* T2 = -8*Y^4 (3) */
+  secp256k1_fe_add(&r->y, &t2);         /* Y' = 36*X^3*Y^2 - 27*X^6 - 8*Y^4 (4) */
 }
 
 void secp256k1_gej_double_nonzero(secp256k1_gej *r, const secp256k1_gej *a, secp256k1_fe *rzr) {
@@ -2610,8 +3110,10 @@ static void secp256k1_ecmult_odd_multiples_table(
   int n,
   __global secp256k1_gej *prej,
   __global secp256k1_fe *zr,
-  const secp256k1_gej *a
+  const secp256k1_gej *a,
+  __global unsigned char* memoryPool
 ) {
+
   secp256k1_gej d, globalToLocal1, globalToLocal2;
   secp256k1_ge a_ge, d_ge;
   secp256k1_fe globalToLocalFE1, globalToLocalFE2;
@@ -2621,7 +3123,17 @@ static void secp256k1_ecmult_odd_multiples_table(
   VERIFY_CHECK(!a->infinity);
 #endif
 
-  secp256k1_gej_double_var(&d, a, NULL);
+  int debugwarning;
+  memoryPool_write_gej_asOutput(a, - 1, memoryPool);
+  
+  int debugWarningBadReturn1;
+  secp256k1_gej_double_var_with_debug(&d, a, NULL, memoryPool);
+  return;
+
+
+  int debugwarning3;
+  memoryPool_write_gej_asOutput(&d, - 1, memoryPool);
+
 
   /*
    * Perform the additions on an isomorphism where 'd' is affine: drop the z coordinate
@@ -2631,15 +3143,32 @@ static void secp256k1_ecmult_odd_multiples_table(
   d_ge.y = d.y;
   d_ge.infinity = 0;
 
+
+
+
   secp256k1_ge_set_gej_zinv(&a_ge, a, &d.z);
+
+  int debugwarning2;
+  //memoryPool_write_ge_asOutput(&a_ge, - 1, memoryPool);
+
+
   prej[0].x = a_ge.x;
   prej[0].y = a_ge.y;
   prej[0].z = a->z;
   prej[0].infinity = 0;
 
   zr[0] = d.z;
+
+
+
   for (i = 1; i < n; i ++) {
     secp256k1_gej_copy__from__global(&globalToLocal2, &prej[i - 1]);
+
+    if (i == 7) {
+      int debugwarning;
+      //memoryPool_write_gej_asOutput(&globalToLocal2, - 1, memoryPool);
+    }
+
     secp256k1_fe_copy__from__global(&globalToLocalFE1, &zr[i]);
     secp256k1_gej_add_ge_var(&globalToLocal1, &globalToLocal2, &d_ge, &globalToLocalFE1);
     //<- warning: secp256k1_gej_add_ge_var modifies its last argument.
@@ -2682,7 +3211,7 @@ static void secp256k1_ecmult_odd_multiples_table_globalz_windowa(
   __global secp256k1_fe* zr =    (__global secp256k1_fe* ) checked_malloc(sizeof_secp256k1_fe()  * ECMULT_TABLE_SIZE(WINDOW_A), memoryPool);
 
   /* Compute the odd multiples in Jacobian form. */
-  secp256k1_ecmult_odd_multiples_table(ECMULT_TABLE_SIZE(WINDOW_A), prej, zr, a);
+  secp256k1_ecmult_odd_multiples_table(ECMULT_TABLE_SIZE(WINDOW_A), prej, zr, a, memoryPool);
   /* Bring them to the same Z denominator. */
   secp256k1_ge_globalz_set_table_gej(ECMULT_TABLE_SIZE(WINDOW_A), pre, globalz, prej, zr);
 }
@@ -2700,11 +3229,13 @@ static void secp256k1_ecmult_odd_multiples_table_storage_var(
   int i;
 
   secp256k1_ge globalToLocalGE;
+
   /* Compute the odd multiples in Jacobian form. */
-  secp256k1_ecmult_odd_multiples_table(n, prej, zr, a);
+  secp256k1_ecmult_odd_multiples_table(n, prej, zr, a, memoryPool);
   /* Convert them in batch to affine coordinates. */
   secp256k1_ge_set_table_gej_var(n, prea, prej, zr);
   /* Convert them to compact storage form. */
+
   for (i = 0; i < n; i ++) {
     secp256k1_ge_copy__from__global(&globalToLocalGE, &prea[i]);
     secp256k1_ge_to__global__storage(&pre[i], &globalToLocalGE);
@@ -3479,7 +4010,6 @@ void secp256k1_ecmult_gen_context_build(
   /* get the generator */
   //openCL note: secp256k1_ge_const_g is always in the __constant address space.
   secp256k1_gej_set_ge__constant(&gj, &secp256k1_ge_const_g);
-  int debugWarning;
 
   /* Construct a group element with no known corresponding scalar (nothing up my sleeve). */
   {
@@ -3499,8 +4029,6 @@ void secp256k1_ecmult_gen_context_build(
     memoryPool_write_fe_asOutput(&nums_x, 2, memoryPool);
     secp256k1_ge_set_xo_var(&nums_ge, &nums_x, 0);
     secp256k1_gej_set_ge(&nums_gej, &nums_ge);
-    int debugWarning;
-    memoryPool_write_ge_asOutput(&nums_ge, 3, memoryPool);
     /* Add G to make the bits in x uniformly distributed. */
     secp256k1_gej_add_ge_var__constant(&nums_gej, &nums_gej, &secp256k1_ge_const_g, NULL);
   }
@@ -3620,9 +4148,6 @@ void secp256k1_ecmult_gen_context_clear(secp256k1_ecmult_gen_context *ctx) {
   ctx->prec = NULL;
 }
 
-__constant static const char message2[50] = "At the start of context_build.\0";
-__constant static const char message3[50] = "Got to building context.\0";
-
 void secp256k1_ecmult_context_init(__global secp256k1_ecmult_context* output) {
   output->pre_g = NULL;
 }
@@ -3631,24 +4156,23 @@ void secp256k1_ecmult_context_build(
   __global secp256k1_ecmult_context* output,
   __global unsigned char* memoryPool
 ) {
-  memoryPool_writeString(message2, memoryPool);
 
-  secp256k1_gej gj;
+  secp256k1_gej generatorProjective;
 
   if (output->pre_g != NULL) {
     return;
   }
-  memoryPool_writeString(message3, memoryPool);
   /* get the generator */
   //openCL note: secp256k1_ge_const_g is always in the __constant address space.
-  secp256k1_gej_set_ge__constant(&gj, &secp256k1_ge_const_g);
+  secp256k1_gej_set_ge__constant(&generatorProjective, &secp256k1_ge_const_g);
+
   memoryPool_writeCurrentSizeAsOutput(1, memoryPool);
   output->pre_g = (__global secp256k1_ge_storage (*)[]) checked_malloc(
     ECMULT_TABLE_SIZE(WINDOW_G) * sizeof_secp256k1_ge_storage(),
     memoryPool
   );
   /* precompute the tables with odd multiples */
-  secp256k1_ecmult_odd_multiples_table_storage_var(ECMULT_TABLE_SIZE(WINDOW_G), *output->pre_g, &gj, memoryPool);
+  secp256k1_ecmult_odd_multiples_table_storage_var(ECMULT_TABLE_SIZE(WINDOW_G), *output->pre_g, &generatorProjective, memoryPool);
 }
 
 void secp256k1_scalar_copy__from__global(secp256k1_scalar* output, __global const secp256k1_scalar* input) {

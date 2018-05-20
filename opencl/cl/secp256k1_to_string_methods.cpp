@@ -110,6 +110,7 @@ std::string toStringErrorLog(const unsigned char* memoryPool) {
 
 std::string toStringOutputObject(int argumentIndex, const unsigned char* memoryPool) {
   secp256k1_ge readerECPoint;
+  secp256k1_gej readerECPointProjective;
   secp256k1_fe readerFieldElement1;
   std::stringstream out;
   if (argumentIndex > MACRO_numberOfOutputs || argumentIndex < 0) {
@@ -117,8 +118,12 @@ std::string toStringOutputObject(int argumentIndex, const unsigned char* memoryP
     assert(false);
   }
   unsigned int position = memoryPool_read_uint_fromOutput(argumentIndex, memoryPool);
+  out << "Position " << position << ": ";
   if (position == 0) {
     out << "empty";
+    return out.str();
+  }
+  if (position < memoryPool_readNumberReservedBytesIncludingLog()) {
     return out.str();
   }
   unsigned int theType = memoryPool_read_uint(&memoryPool[position]);
@@ -130,6 +135,10 @@ std::string toStringOutputObject(int argumentIndex, const unsigned char* memoryP
   case memoryPoolType_fe:
     memoryPool_read_secp256k1_fe(&readerFieldElement1, &memoryPool[position + sizeof_uint()]);
     out << "Field element: " << toStringSecp256k1_FieldElement(readerFieldElement1);
+    break;
+  case memoryPoolType_gej:
+    memoryPool_read_secp256k1_gej(&readerECPointProjective, &memoryPool[position + sizeof_uint()]);
+    out << "EC point projective: " << toStringSecp256k1_ECPointProjective(readerECPointProjective);
     break;
   default:
     out << "Unknown object type: " << theType;

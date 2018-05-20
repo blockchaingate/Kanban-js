@@ -104,6 +104,7 @@ public:
   static std::string kernelGeneratePublicKey;
   static std::string kernelSign;
   static std::string kernelVerifySignature;
+  static std::string kernelTestSuite1BasicOperations;
 
   //6MB for computing multiplication context.
   static const int memoryMultiplicationContext = MACRO_MEMORY_POOL_SIZE_MultiplicationContext;
@@ -125,6 +126,7 @@ public:
   //indicated above.
   //
   unsigned char* bufferMultiplicationContext;
+  unsigned char* bufferTestSuite1BasicOperations;
   unsigned char* bufferGeneratorContext;
   unsigned char* bufferSignature;
 

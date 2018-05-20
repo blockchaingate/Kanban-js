@@ -5,8 +5,19 @@
 extern Logger logGPU;
 
 unsigned char CryptoEC256k1::bufferMultiplicationContext[GPU::memoryMultiplicationContext];
+unsigned char CryptoEC256k1::bufferTestSuite1BasicOperations[GPU::memoryMultiplicationContext];
 unsigned char CryptoEC256k1::bufferGeneratorContext[GPU::memoryGeneratorContext];
 unsigned char CryptoEC256k1::bufferSignature[GPU::memorySignature];
+
+
+bool CryptoEC256k1::testSuite1BasicOperations(unsigned char* outputMemoryPool) {
+  test_suite_1_basic_operations(outputMemoryPool);
+  return true;
+}
+
+bool CryptoEC256k1::testSuite1BasicOperationsDefaultBuffers() {
+  return CryptoEC256k1::testSuite1BasicOperations(CryptoEC256k1::bufferTestSuite1BasicOperations);
+}
 
 bool CryptoEC256k1::computeMultiplicationContext(unsigned char* outputMemoryPool) {
   secp256k1_opencl_compute_multiplication_context(outputMemoryPool);
@@ -79,6 +90,43 @@ bool CryptoEC256k1GPU::initializeGeneratorContext(GPU& theGPU) {
   theGPU.flagGeneratorContextComputed = true;
   return result;
 }
+
+bool CryptoEC256k1GPU::testSuite1BasicOperationsDefaultBuffers(GPU& theGPU) {
+  return CryptoEC256k1GPU::testSuite1BasicOperations(theGPU.bufferTestSuite1BasicOperations, theGPU);
+}
+
+bool CryptoEC256k1GPU::testSuite1BasicOperations(unsigned char* outputMemoryPool, GPU& theGPU) {
+  if (!theGPU.initializeAll())
+    return false;
+  std::shared_ptr<GPUKernel> kernelTest = theGPU.theKernels[GPU::kernelTestSuite1BasicOperations];
+
+  cl_int ret = clEnqueueNDRangeKernel(
+    theGPU.commandQueue, kernelTest->kernel, 1, NULL,
+    &kernelTest->global_item_size, &kernelTest->local_item_size, 0, NULL, NULL
+  );
+  if (ret != CL_SUCCESS) {
+    logGPU << "Failed to enqueue kernel. Return code: " << ret << ". " << Logger::endL;
+    return false;
+  }
+  cl_mem& result = kernelTest->outputs[0]->theMemory;
+  ret = clEnqueueReadBuffer(
+    theGPU.commandQueue,
+    result,
+    CL_TRUE,
+    0,
+    theGPU.memoryMultiplicationContext - 100,
+    (void*) outputMemoryPool,
+    0,
+    NULL,
+    NULL
+  );
+  if (ret != CL_SUCCESS) {
+    logGPU << "Failed to read buffer. Return code: " << ret << Logger::endL;
+    return false;
+  }
+  return true;
+}
+
 
 bool CryptoEC256k1GPU::computeMultiplicationContext(unsigned char* outputMemoryPool, GPU& theGPU) {
   if (!theGPU.initializeAll())

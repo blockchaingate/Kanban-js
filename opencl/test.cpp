@@ -42,6 +42,9 @@ void testPrintMemoryPoolGeneral(const unsigned char* theMemoryPool, const std::s
   logTest << "First " << std::dec << initialBytesToPrint << " hex-formatted characters of the memory pool: " << Logger::endL;
   memoryPoolPrintout.assign((const char*) theMemoryPool, initialBytesToPrint);
   logTest << Miscellaneous::toStringHex(memoryPoolPrintout) << Logger::endL;
+  for (int i = 0; i < MACRO_numberOfOutputs; i ++) {
+    logTest << "Debug " << i << ": " << toStringOutputObject(i, theMemoryPool) << Logger::endL;
+  }
   logTest << "Computation log:\n"
   << toStringErrorLog(theMemoryPool) << Logger::endL << Logger::endL;
 }
@@ -63,9 +66,6 @@ void testPrintGeneratorContext(const unsigned char* theMemoryPool, const std::st
   uint32_t outputPositionGeneratorContextContent = memoryPool_read_uint_fromOutput(1, theMemoryPool);
   logTest << "Context struct position: " << outputPositionGeneratorContextStruct << Logger::endL;
   logTest << "Context content position: " << outputPositionGeneratorContextContent << Logger::endL;
-  for (int i = 2; i < MACRO_numberOfOutputs; i ++) {
-    logTest << "Debug " << (i + 1) << ": " << toStringOutputObject(i, theMemoryPool) << Logger::endL;
-  }
   secp256k1_ecmult_gen_context theGeneratorContext;
   memoryPool_read_generatorContext_PORTABLE(&theGeneratorContext, theMemoryPool);
   logTest << "Generator context:\n" << toStringSecp256k1_GeneratorContext(theGeneratorContext, false) << Logger::endL;
@@ -266,10 +266,20 @@ bool testMainPart2Signatures(GPU& theGPU) {
 bool testSHA256(GPU& theGPU);
 
 bool testSign(GPU& theGPU);
+bool testBasicOperations(GPU& theGPU){
+  CryptoEC256k1::testSuite1BasicOperationsDefaultBuffers();
+  testPrintMemoryPoolGeneral(CryptoEC256k1::bufferTestSuite1BasicOperations, "Central PU", logTestCentralPU);
+
+  CryptoEC256k1GPU::testSuite1BasicOperationsDefaultBuffers(theGPU);
+  testPrintMemoryPoolGeneral(theGPU.bufferTestSuite1BasicOperations, "Graphics PU", logTestGraphicsPU);
+  return true;
+}
 
 int testMain() {
   GPU theGPU;
   //theGPU.flagTurnOffToDebugCPU = true;
+  if (!testBasicOperations(theGPU))
+    return - 1;
   if (!testMainPart1ComputeContexts(theGPU))
     return - 1;
   if (!testMainPart2Signatures(theGPU))

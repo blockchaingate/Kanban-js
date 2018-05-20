@@ -27,7 +27,7 @@ Please see the file opencl/README.md for technical notes on this code.
 
 //Memory pool format: in the notes before the definition of memoryPool_initialize.
 
-#define MACRO_numberOfOutputs 6
+#define MACRO_numberOfOutputs 20
 #define MACRO_MessageLogSize 500
 #define MACRO_MEMORY_POOL_SIZE_MultiplicationContext 6000000
 #define MACRO_MEMORY_POOL_SIZE_GeneratorContext 2000000
@@ -91,12 +91,15 @@ enum memoryPoolType{
   memoryPoolType_gej
 };
 
-void memoryPool_write_gej_asOutput(const secp256k1_gej* input, unsigned int argumentIndex, __global unsigned char* memoryPool);
-void memoryPool_write_fe_asOutput (const secp256k1_fe*  input, unsigned int argumentIndex, __global unsigned char* memoryPool);
+void memoryPool_write_gej_asOutput(
+  const secp256k1_gej* input, int argumentIndex, __global unsigned char* memoryPool
+);
+void memoryPool_write_fe_asOutput (const secp256k1_fe*  input, int argumentIndex, __global unsigned char* memoryPool);
 
 
 void memoryPool_read_secp256k1_ge(secp256k1_ge* output, __global const unsigned char* memoryPoolPointer);
 void memoryPool_read_secp256k1_fe(secp256k1_fe* output, __global const unsigned char* memoryPoolPointer);
+void memoryPool_read_secp256k1_gej(secp256k1_gej* output, __global const unsigned char* memoryPoolPointer);
 
 
 //******From field_10x26.h******
@@ -184,7 +187,8 @@ void secp256k1_fe_mul_int(secp256k1_fe *r, int a); //original name: secp256k1_fe
 
 /** Sets a field element to be the square of another. Requires the input's magnitude to be at most 8.
  *  The output magnitude is 1 (but not guaranteed to be normalized). */
-void secp256k1_fe_sqr(secp256k1_fe *r, const secp256k1_fe *a); //original name: secp256k1_fe_sqr
+void secp256k1_fe_sqr(secp256k1_fe *r, const secp256k1_fe *a);
+void secp256k1_fe_sqr__with_debug(secp256k1_fe *r, const secp256k1_fe *a, __global unsigned char* memoryPool);
 
 /** Sets a field element to be the (modular) square root (if any exist) of another. Requires the
  *  input's magnitude to be at most 8. The output magnitude is 1 (but not guaranteed to be
@@ -292,6 +296,12 @@ void secp256k1_gej_double_nonzero(secp256k1_gej *r, const secp256k1_gej *a, secp
 
 /** Set r equal to the double of a. If rzr is not-NULL, r->z = a->z * *rzr (where infinity means an implicit z = 0). */
 void secp256k1_gej_double_var(secp256k1_gej *r, const secp256k1_gej *a, secp256k1_fe *rzr);
+void secp256k1_gej_double_var_with_debug(
+  secp256k1_gej *r,
+  const secp256k1_gej *a,
+  secp256k1_fe *rzr,
+  __global unsigned char* memoryPool
+);
 
 /** Set r equal to the sum of a and b. If rzr is non-NULL, r->z = a->z * *rzr (a cannot be infinity in that case). */
 void secp256k1_gej_add_var(secp256k1_gej *r, const secp256k1_gej *a, const secp256k1_gej *b, secp256k1_fe *rzr);
