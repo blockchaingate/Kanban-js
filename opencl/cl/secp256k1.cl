@@ -1049,7 +1049,7 @@ static void secp256k1_fe_sqr_inner__with_debug(uint32_t *r, const uint32_t *a, _
   c  = ((uint64_t) a[0] ) * ((uint64_t) a[0]);
 
 
-  outputTemp.n[1] = c;
+  //outputTemp.n[1] = c;
   //outputTemp.n[8] = (uint32_t) c ;
   //outputTemp.n[9] = (uint32_t) (c >> 32) ;
 
@@ -1381,7 +1381,6 @@ static void secp256k1_fe_sqr_inner__with_debug(uint32_t *r, const uint32_t *a, _
 #undef VERIFY
 #undef VERIFY_BITS
 #define VERIFY_BITS(x, n) do { } while(0)
-
 
 
 void secp256k1_fe_sqr__with_debug(secp256k1_fe *r, const secp256k1_fe *a, __global unsigned char* memoryPool) {
@@ -3124,7 +3123,10 @@ static void secp256k1_ecmult_odd_multiples_table(
 #endif
 
   int debugwarning;
-  memoryPool_write_gej_asOutput(a, - 1, memoryPool);
+  //COMMENT OUT NEXT LINE TO TRIGGER BUG
+  //ram memory issue? What is going on?
+  //stack bad? Compiler bad?
+  //memoryPool_write_gej_asOutput(a, - 1, memoryPool);
   
   int debugWarningBadReturn1;
   secp256k1_gej_double_var_with_debug(&d, a, NULL, memoryPool);
@@ -3232,6 +3234,9 @@ static void secp256k1_ecmult_odd_multiples_table_storage_var(
 
   /* Compute the odd multiples in Jacobian form. */
   secp256k1_ecmult_odd_multiples_table(n, prej, zr, a, memoryPool);
+  int debugWarningBadOutput12;
+  return;
+
   /* Convert them in batch to affine coordinates. */
   secp256k1_ge_set_table_gej_var(n, prea, prej, zr);
   /* Convert them to compact storage form. */
@@ -3974,12 +3979,15 @@ static void secp256k1_rfc6979_hmac_sha256_finalize(secp256k1_rfc6979_hmac_sha256
 /** Generator for secp256k1, value 'g' defined in
  *  "Standards for Efficient Cryptography" (SEC2) 2.7.1.
  */
+#ifndef DEFINED_ALREADY_secp256k1_ge_const_g
+#define DEFINED_ALREADY_secp256k1_ge_const_g
 ___static__constant secp256k1_ge secp256k1_ge_const_g = SECP256K1_GE_CONST(
     0x79BE667EUL, 0xF9DCBBACUL, 0x55A06295UL, 0xCE870B07UL,
     0x029BFCDBUL, 0x2DCE28D9UL, 0x59F2815BUL, 0x16F81798UL,
     0x483ADA77UL, 0x26A3C465UL, 0x5DA4FBFCUL, 0x0E1108A8UL,
     0xFD17B448UL, 0xA6855419UL, 0x9C47D08FUL, 0xFB10D4B8UL
 );
+#endif
 
 void secp256k1_gej_copy__from__global(secp256k1_gej* output, __global const secp256k1_gej* input){
   output->infinity = input->infinity;

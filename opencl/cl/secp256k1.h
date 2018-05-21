@@ -86,9 +86,9 @@ void memoryPool_freeMemory__global(__global void* any);
 ///////////////////////
 ///////////////////////
 enum memoryPoolType{
-  memoryPoolType_fe,
-  memoryPoolType_ge,
-  memoryPoolType_gej
+  memoryPoolType_fe = 7,
+  memoryPoolType_ge = 8,
+  memoryPoolType_gej = 9
 };
 
 void memoryPool_write_gej_asOutput(
@@ -252,6 +252,9 @@ void secp256k1_ge_neg(secp256k1_ge *r, const secp256k1_ge *a);
 
 /** Set a group element equal to another which is given in jacobian coordinates */
 void secp256k1_ge_set_gej(secp256k1_ge *r, secp256k1_gej *a);
+
+/** Construct jacobian coordinates pont from affine ones.*/
+void secp256k1_gej_set_ge__constant(secp256k1_gej *r, __constant const secp256k1_ge *a);
 
 /** Set a batch of group elements equal to the inputs given in jacobian coordinates */
 void secp256k1_ge_set_all_gej_var(
