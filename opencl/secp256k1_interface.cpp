@@ -103,6 +103,7 @@ bool CryptoEC256k1GPU::testSuite1BasicOperations(unsigned char* outputMemoryPool
     return false;
   }
   std::shared_ptr<GPUKernel> kernelTest = theGPU.theKernels[GPU::kernelTestSuite1BasicOperations];
+  logGPU << "Got to here! " << Logger::endL;
   if (!kernelTest->build()) {
     return false;
   }

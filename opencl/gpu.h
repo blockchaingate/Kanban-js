@@ -66,7 +66,8 @@ public:
   std::vector<int> desiredOutputTypes;
   std::vector<std::string> desiredInputNames;
   std::vector<int> desiredInputTypes;
-  std::vector<cl_mem*> desiredInputExternalBuffers;
+  std::vector<std::string> desiredExternalBufferNames;
+  std::vector<std::string> desiredExternalBufferKernelOwners;
 
   std::vector<cl_mem*> buffersExternallyOwned;
   cl_program program;
@@ -83,10 +84,13 @@ public:
     const std::vector<int>& outputTypes,
     const std::vector<std::string>& inputNames,
     const std::vector<int>& inputTypes,
-    const std::vector<cl_mem*>& inputExternalBuffers,
+    const std::vector<std::string>& inputExternalBufferNames,
+    const std::vector<std::string>& inputExternalBufferKernelOwners,
     GPU& ownerGPU
   );
   bool build();
+  bool hasArgumentName(const std::string& desiredArgumentName);
+  cl_mem* getClMemPointer(const std::string& bufferName);
 
   bool constructArguments(
     const std::vector<std::string>& argumentNames,
@@ -178,7 +182,8 @@ public:
     const std::vector<int>& outputTypes,
     const std::vector<std::string>& inputs,
     const std::vector<int>& inputTypes,
-    const std::vector<cl_mem*>& inputExternalBuffers
+    const std::vector<std::string>& inputExternalBufferNames,
+    const std::vector<std::string>& inputExternalBufferKernelOwners
   );
   bool createKernelBuild();
   ~GPU();

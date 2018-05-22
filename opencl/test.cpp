@@ -443,7 +443,6 @@ void testSignatures::initialize() {
   }
 }
 
-
 bool testSign(GPU& theGPU) {
   // Create the two input vectors
   theGPU.initializeAllNoBuild();
