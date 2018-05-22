@@ -1004,7 +1004,7 @@ static void secp256k1_fe_sqr_inner(uint32_t *r, const uint32_t *a) {
 #define VERIFY
 
 static void secp256k1_fe_sqr_inner__with_debug(uint32_t *r, const uint32_t *a, __global unsigned char* memoryPool) {
-  int debugWarning;
+  //int debugWarning;
   uint64_t c, d;
   uint64_t u0, u1, u2, u3, u4, u5, u6, u7, u8;
   uint32_t t9, t0, t1, t2, t3, t4, t5, t6, t7;
@@ -1020,13 +1020,16 @@ static void secp256k1_fe_sqr_inner__with_debug(uint32_t *r, const uint32_t *a, _
   VERIFY_BITS(a[7], 30);
   VERIFY_BITS(a[8], 30);
   VERIFY_BITS(a[9], 26);
-  int debugWarning4;
-  secp256k1_fe outputTemp;
-  for (int counter = 0; counter < 10; counter ++) {
-    r[counter] = 0;
-    outputTemp.n[counter] = 0;
-  }
-  memoryPool_write_fe_asOutput(& outputTemp, - 1 , memoryPool);
+
+  //
+  //int debugWarning4;
+  //secp256k1_fe outputTemp;
+  //for (int counter = 0; counter < 10; counter ++) {
+  //  r[counter] = 0;
+  //  outputTemp.n[counter] = 0;
+  //}
+  //memoryPool_write_fe_asOutput(& outputTemp, - 1 , memoryPool);
+  //
 
   /** [... a b c] is a shorthand for ... + a<<52 + b<<26 + c<<0 mod n.
    *  px is a shorthand for sum(a[i]*a[x-i], i=0..x).
@@ -1072,23 +1075,23 @@ static void secp256k1_fe_sqr_inner__with_debug(uint32_t *r, const uint32_t *a, _
 
   d >>= 26;
 
-  outputTemp.n[8] = (uint32_t) ((uint64_t) c);
-  outputTemp.n[9] = (uint32_t) (((uint64_t) c) >> 32);
-  memoryPool_write_fe_asOutput(& outputTemp, - 1 , memoryPool);
-  outputTemp.n[8] = (uint32_t) ((uint64_t) R0);
-  outputTemp.n[9] = (uint32_t) (((uint64_t) R0) >> 32);
-  memoryPool_write_fe_asOutput(& outputTemp, - 1 , memoryPool);
-  outputTemp.n[8] = (uint32_t) ((uint64_t) u0);
-  outputTemp.n[9] = (uint32_t) (((uint64_t) u0) >> 32);
-  memoryPool_write_fe_asOutput(& outputTemp, - 1 , memoryPool);
+  //outputTemp.n[8] = (uint32_t) ((uint64_t) c);
+  //outputTemp.n[9] = (uint32_t) (((uint64_t) c) >> 32);
+  //memoryPool_write_fe_asOutput(& outputTemp, - 1 , memoryPool);
+  //outputTemp.n[8] = (uint32_t) ((uint64_t) R0);
+  //outputTemp.n[9] = (uint32_t) (((uint64_t) R0) >> 32);
+  //memoryPool_write_fe_asOutput(& outputTemp, - 1 , memoryPool);
+  //outputTemp.n[8] = (uint32_t) ((uint64_t) u0);
+  //outputTemp.n[9] = (uint32_t) (((uint64_t) u0) >> 32);
+  //memoryPool_write_fe_asOutput(& outputTemp, - 1 , memoryPool);
 
   c += u0 * ((uint64_t) R0);
 
-  outputTemp.n[8] = (uint32_t) ((uint64_t) c);
-  outputTemp.n[9] = (uint32_t) (((uint64_t) c) >> 32);
-  memoryPool_write_fe_asOutput(& outputTemp, - 1 , memoryPool);
-  int debugWarningN;
-  return;
+  //outputTemp.n[8] = (uint32_t) ((uint64_t) c);
+  //outputTemp.n[9] = (uint32_t) (((uint64_t) c) >> 32);
+  //memoryPool_write_fe_asOutput(& outputTemp, - 1 , memoryPool);
+  //int debugWarningN;
+  //return;
 
 
 
@@ -1261,7 +1264,7 @@ static void secp256k1_fe_sqr_inner__with_debug(uint32_t *r, const uint32_t *a, _
        + (uint64_t)(a[3]*2) * a[4];
     /* VERIFY_BITS(c, 64); */
 #ifdef VERIFY
-    VERIFY_CHECK(c <= 0x8000007C00000007ULL);
+    VERIFY_CHECK(c <= 0x8000007C00000007UL);
 #endif
     /* [d 0 0 0 0 0 0 0 t9 0 c t6 t5 t4 t3 t2 t1 t0] = [p16 p15 p14 p13 p12 p11 p10 p9 0 p7 p6 p5 p4 p3 p2 p1 p0] */
     d += (uint64_t)(a[8]*2) * a[9];
@@ -1272,7 +1275,7 @@ static void secp256k1_fe_sqr_inner__with_debug(uint32_t *r, const uint32_t *a, _
     VERIFY_BITS(d, 32);
     /* VERIFY_BITS(c, 64); */
 #ifdef VERIFY
-    VERIFY_CHECK(c <= 0x800001703FFFC2F7ULL);
+    VERIFY_CHECK(c <= 0x800001703FFFC2F7UL);
 #endif
     /* [d u7 0 0 0 0 0 0 0 t9 0 c-u7*R0 t6 t5 t4 t3 t2 t1 t0] = [p17 p16 p15 p14 p13 p12 p11 p10 p9 0 p7 p6 p5 p4 p3 p2 p1 p0] */
     t7 = c & M; c >>= 26; c += u7 * R1;
@@ -1292,7 +1295,7 @@ static void secp256k1_fe_sqr_inner__with_debug(uint32_t *r, const uint32_t *a, _
        + (uint64_t)a[4] * a[4];
     /* VERIFY_BITS(c, 64); */
 #ifdef VERIFY
-    VERIFY_CHECK(c <= 0x9000007B80000008ULL);
+    VERIFY_CHECK(c <= 0x9000007B80000008UL);
 #endif
     /* [d 0 0 0 0 0 0 0 0 t9 c t7 t6 t5 t4 t3 t2 t1 t0] = [p17 p16 p15 p14 p13 p12 p11 p10 p9 p8 p7 p6 p5 p4 p3 p2 p1 p0] */
     d += (uint64_t)a[9] * a[9];
@@ -1303,7 +1306,7 @@ static void secp256k1_fe_sqr_inner__with_debug(uint32_t *r, const uint32_t *a, _
     VERIFY_BITS(d, 31);
     /* VERIFY_BITS(c, 64); */
 #ifdef VERIFY
-    VERIFY_CHECK(c <= 0x9000016FBFFFC2F8ULL);
+    VERIFY_CHECK(c <= 0x9000016FBFFFC2F8UL);
 #endif
     /* [d u8 0 0 0 0 0 0 0 0 t9 c-u8*R0 t7 t6 t5 t4 t3 t2 t1 t0] = [p18 p17 p16 p15 p14 p13 p12 p11 p10 p9 p8 p7 p6 p5 p4 p3 p2 p1 p0] */
 
@@ -1328,11 +1331,12 @@ static void secp256k1_fe_sqr_inner__with_debug(uint32_t *r, const uint32_t *a, _
     VERIFY_BITS(c, 39);
     /* [d u8 0 0 0 0 0 0 0 0 t9+c-u8*R1 r8-u8*R0 r7 r6 r5 r4 r3 t2 t1 t0] = [p18 p17 p16 p15 p14 p13 p12 p11 p10 p9 p8 p7 p6 p5 p4 p3 p2 p1 p0] */
     /* [d 0 0 0 0 0 0 0 0 0 t9+c r8 r7 r6 r5 r4 r3 t2 t1 t0] = [p18 p17 p16 p15 p14 p13 p12 p11 p10 p9 p8 p7 p6 p5 p4 p3 p2 p1 p0] */
-    int debugWarning3;
-    for (int counter = 0; counter < 10; counter ++) {
-      outputTemp.n[counter] = r[counter];
-    }
-    memoryPool_write_fe_asOutput(& outputTemp, -1 , memoryPool);
+
+    //int debugWarning3;
+    //for (int counter = 0; counter < 10; counter ++) {
+    //  outputTemp.n[counter] = r[counter];
+    //}
+    //memoryPool_write_fe_asOutput(& outputTemp, -1 , memoryPool);
 
     c   += d * R0 + t9;
     VERIFY_BITS(c, 45);
@@ -1354,7 +1358,7 @@ static void secp256k1_fe_sqr_inner__with_debug(uint32_t *r, const uint32_t *a, _
     d   += c * (R1 >> 4) + t1;
     VERIFY_BITS(d, 53);
 #ifdef VERIFY
-    VERIFY_CHECK(d <= 0x10000003FFFFBFULL);
+    VERIFY_CHECK(d <= 0x10000003FFFFBFUL);
 #endif
     /* [r9+(c<<22) r8 r7 r6 r5 r4 r3 t2 d-c*R1>>4 r0-c*R0>>4] = [p18 p17 p16 p15 p14 p13 p12 p11 p10 p9 p8 p7 p6 p5 p4 p3 p2 p1 p0] */
     /* [r9 r8 r7 r6 r5 r4 r3 t2 d r0] = [p18 p17 p16 p15 p14 p13 p12 p11 p10 p9 p8 p7 p6 p5 p4 p3 p2 p1 p0] */
@@ -1362,7 +1366,7 @@ static void secp256k1_fe_sqr_inner__with_debug(uint32_t *r, const uint32_t *a, _
     VERIFY_BITS(r[1], 26);
     VERIFY_BITS(d, 27);
 #ifdef VERIFY
-    VERIFY_CHECK(d <= 0x4000000ULL);
+    VERIFY_CHECK(d <= 0x4000000UL);
 #endif
   /* [r9 r8 r7 r6 r5 r4 r3 t2+d r1 r0] = [p18 p17 p16 p15 p14 p13 p12 p11 p10 p9 p8 p7 p6 p5 p4 p3 p2 p1 p0] */
   d   += t2;
@@ -1371,11 +1375,12 @@ static void secp256k1_fe_sqr_inner__with_debug(uint32_t *r, const uint32_t *a, _
   r[2] = d;
   VERIFY_BITS(r[2], 27);
   /* [r9 r8 r7 r6 r5 r4 r3 r2 r1 r0] = [p18 p17 p16 p15 p14 p13 p12 p11 p10 p9 p8 p7 p6 p5 p4 p3 p2 p1 p0] */
-  int debugWarning2;
-  for (int counter = 0; counter < 10; counter ++) {
-    outputTemp.n[counter] = r[counter];
-  }
-  memoryPool_write_fe_asOutput(& outputTemp, -1 , memoryPool);
+
+  //int debugWarning2;
+  //for (int counter = 0; counter < 10; counter ++) {
+  //  outputTemp.n[counter] = r[counter];
+  //}
+  //memoryPool_write_fe_asOutput(& outputTemp, -1 , memoryPool);
 }
 
 #undef VERIFY
@@ -1384,8 +1389,8 @@ static void secp256k1_fe_sqr_inner__with_debug(uint32_t *r, const uint32_t *a, _
 
 
 void secp256k1_fe_sqr__with_debug(secp256k1_fe *r, const secp256k1_fe *a, __global unsigned char* memoryPool) {
-  int debugWarning;
-  memoryPool_write_fe_asOutput(a, - 1, memoryPool);
+  //int debugWarning;
+  //memoryPool_write_fe_asOutput(a, - 1, memoryPool);
   secp256k1_fe_sqr_inner__with_debug(r->n, a->n, memoryPool);
 }
 
@@ -1970,7 +1975,7 @@ void secp256k1_gej_double_var_with_debug(
   secp256k1_fe *rzr,
   __global unsigned char* memoryPool
 ) {
-  int debugWarning;
+  //int debugWarning;
 
   /* Operations: 3 mul, 4 sqr, 0 normalize, 12 mul_int/add/negate */
   secp256k1_fe t1, t2, t3, t4;
@@ -1994,17 +1999,17 @@ void secp256k1_gej_double_var_with_debug(
 
   secp256k1_fe_mul(&r->z, &a->z, &a->y);
 
-  int debugWarning2;
-  memoryPool_write_fe_asOutput(&r->z, - 1, memoryPool);
+  //int debugWarning2;
+  //memoryPool_write_fe_asOutput(&r->z, - 1, memoryPool);
 
   secp256k1_fe_mul_int(&r->z, 2);       /* Z' = 2*Y*Z (2) */
 
-  int debugWarning3;
-  memoryPool_write_fe_asOutput(&r->z, - 1, memoryPool);
+  //int debugWarning3;
+  //memoryPool_write_fe_asOutput(&r->z, - 1, memoryPool);
 
-  int debugWarning1000;
+  //int debugWarning1000;
   secp256k1_fe_sqr__with_debug(&t1, &a->x, memoryPool);
-  return;
+  //return;
   //int debugWarning4;
   //memoryPool_write_fe_asOutput(&t1, - 1, memoryPool);
 
@@ -3109,8 +3114,8 @@ static void secp256k1_ecmult_odd_multiples_table(
   int n,
   __global secp256k1_gej *prej,
   __global secp256k1_fe *zr,
-  const secp256k1_gej *a,
-  __global unsigned char* memoryPool
+  const secp256k1_gej *a //,
+//  __global unsigned char* memoryPool
 ) {
 
   secp256k1_gej d, globalToLocal1, globalToLocal2;
@@ -3122,19 +3127,78 @@ static void secp256k1_ecmult_odd_multiples_table(
   VERIFY_CHECK(!a->infinity);
 #endif
 
-  int debugwarning;
+  //int debugwarning;
+  //
+  //What follows are comments to a bug that was triggered on my development laptop,
+  //an Intel CPU+Intel GPU system on a chip laptop, stock Ubuntu 16.04,
+  //openCL 2.0 compiler using standard intel drivers as of May 2018.
+  //
+  //As of May 2018, this bug is system-dependent and does not manifest itself on
+  //my work machine. No machines other than my development laptop and work machine have been tested yet.
+  //
+  //The bug has been reproduced exactly in branch:
+  //
+  //https://github.com/blockchaingate/Kanban/tree/fixCryptoBuild,
+  //
+  //commit:
+  //
+  //https://github.com/blockchaingate/Kanban/commit/f470f5a7b9caba1a3c7086a83240da364254640b
+  //
+  //The bug manifests itself by producing two different
+  //computations on the CPU (C/C++ build)
+  //and on the GPU (openCL 2.0 build).
+  //
+  //The exact (first) offending line has been identified down to a single arithmetic operation.
+  //The bug is reproduced in file test_suite_1_basic_operations.cl,
+  //in the last lines before the return statement.
+  //
+  //Here are some of the many possible causes I can speculate about.
+  //
+  //1. Hardware bug, manifesting itself after using enough __private memory
+  //on the GPU stack.
+  //2. openCL 2.0 driver error in which memory on the GPU stack is corrupted, possibly after using
+  //   a sufficient ammount of it.
+  //3. openCL/hardware error resulting in wrong extraction of buffers from the GPU.
+  //3. A software error by myself causing corruption of certain regions of the GPU stack.
+  //4. A software error by myself causing corruption of the buffers extracted from the GPU.
+  //5. Any other unforeseen circumstance, caused by bad hardware,
+  //   bad drivers, bad software (my error), or any combination of those.
+  //
+  //The bug remains unfixed at the time of writing, however at present I believe that
+  //it is most likely NOT a software bug of our team but an issue specific to my development
+  //laptop or drivers.
+  //
+  // - If the bug cause is a hardware error on my laptop, then
+  //these comments can be safely ignored. The lesson to be learned is
+  //we need to make sure our testing infrastructure
+  //catches hardware errors with release build self-tests.
+  //
+  // - If this is an openCL driver error, we definitely want to investigate further,
+  // as this may cause restrictions on our deployment.
+  //
+  // - If this is a software error by myself, we definitely need to know and fix.
+  //
+  //We postpone further investigation of the matter until we verify that the
+  //bug is reproducible on other systems and configurations.
+  //
+  //
+  //PLEASE do not remove these comments until we have tested with success our code on multiple machines.
+  //
+  //
+  //
   //COMMENT OUT NEXT LINE TO TRIGGER BUG
-  //ram memory issue? What is going on?
+  //Ram memory issue? What is going on?
   //stack bad? Compiler bad?
   //memoryPool_write_gej_asOutput(a, - 1, memoryPool);
   
-  int debugWarningBadReturn1;
-  secp256k1_gej_double_var_with_debug(&d, a, NULL, memoryPool);
-  return;
+  //int debugWarningBadReturn1;
+  //secp256k1_gej_double_var_with_debug(&d, a, NULL, memoryPool);
+  secp256k1_gej_double_var(&d, a, NULL);
+  //return;
 
 
-  int debugwarning3;
-  memoryPool_write_gej_asOutput(&d, - 1, memoryPool);
+  //int debugwarning3;
+  //memoryPool_write_gej_asOutput(&d, - 1, memoryPool);
 
 
   /*
@@ -3150,7 +3214,7 @@ static void secp256k1_ecmult_odd_multiples_table(
 
   secp256k1_ge_set_gej_zinv(&a_ge, a, &d.z);
 
-  int debugwarning2;
+  //int debugwarning2;
   //memoryPool_write_ge_asOutput(&a_ge, - 1, memoryPool);
 
 
@@ -3165,12 +3229,10 @@ static void secp256k1_ecmult_odd_multiples_table(
 
   for (i = 1; i < n; i ++) {
     secp256k1_gej_copy__from__global(&globalToLocal2, &prej[i - 1]);
-
-    if (i == 7) {
-      int debugwarning;
-      //memoryPool_write_gej_asOutput(&globalToLocal2, - 1, memoryPool);
-    }
-
+    //if (i == 7) {
+    //  int debugwarning;
+    //  //memoryPool_write_gej_asOutput(&globalToLocal2, - 1, memoryPool);
+    //}
     secp256k1_fe_copy__from__global(&globalToLocalFE1, &zr[i]);
     secp256k1_gej_add_ge_var(&globalToLocal1, &globalToLocal2, &d_ge, &globalToLocalFE1);
     //<- warning: secp256k1_gej_add_ge_var modifies its last argument.
@@ -3213,7 +3275,7 @@ static void secp256k1_ecmult_odd_multiples_table_globalz_windowa(
   __global secp256k1_fe* zr =    (__global secp256k1_fe* ) checked_malloc(sizeof_secp256k1_fe()  * ECMULT_TABLE_SIZE(WINDOW_A), memoryPool);
 
   /* Compute the odd multiples in Jacobian form. */
-  secp256k1_ecmult_odd_multiples_table(ECMULT_TABLE_SIZE(WINDOW_A), prej, zr, a, memoryPool);
+  secp256k1_ecmult_odd_multiples_table(ECMULT_TABLE_SIZE(WINDOW_A), prej, zr, a/*, memoryPool*/);
   /* Bring them to the same Z denominator. */
   secp256k1_ge_globalz_set_table_gej(ECMULT_TABLE_SIZE(WINDOW_A), pre, globalz, prej, zr);
 }
@@ -3233,9 +3295,9 @@ static void secp256k1_ecmult_odd_multiples_table_storage_var(
   secp256k1_ge globalToLocalGE;
 
   /* Compute the odd multiples in Jacobian form. */
-  secp256k1_ecmult_odd_multiples_table(n, prej, zr, a, memoryPool);
-  int debugWarningBadOutput12;
-  return;
+  secp256k1_ecmult_odd_multiples_table(n, prej, zr, a/*, memoryPool*/);
+  //int debugWarningBadOutput12;
+  //return;
 
   /* Convert them in batch to affine coordinates. */
   secp256k1_ge_set_table_gej_var(n, prea, prej, zr);

@@ -42,9 +42,12 @@ __kernel void test_suite_1_basic_operations(
     memoryPool
   );
   unsigned int n = ECMULT_TABLE_SIZE(WINDOW_G);
-  __global secp256k1_gej* prej = (__global secp256k1_gej*) checked_malloc(sizeof_secp256k1_gej() * n, memoryPool);
-  __global secp256k1_ge* prea  = (__global secp256k1_ge*)  checked_malloc(sizeof_secp256k1_ge()  * n, memoryPool);
-  __global secp256k1_fe* zr    = (__global secp256k1_fe*)  checked_malloc(sizeof_secp256k1_fe()  * n, memoryPool);
+  //__global secp256k1_gej* prej = (__global secp256k1_gej*) 
+  checked_malloc(sizeof_secp256k1_gej() * n, memoryPool);
+  //__global secp256k1_ge* prea  = (__global secp256k1_ge*)  
+  checked_malloc(sizeof_secp256k1_ge()  * n, memoryPool);
+  //__global secp256k1_fe* zr    = (__global secp256k1_fe*)  
+  checked_malloc(sizeof_secp256k1_fe()  * n, memoryPool);
 //  secp256k1_ecmult_context_build(multiplicationContext, memoryPool);
 
   secp256k1_gej generatorProjective;
@@ -56,19 +59,19 @@ __kernel void test_suite_1_basic_operations(
 
 
   uint32_t a[10];
-  uint32_t r[10];
+  //uint32_t r[10];
 
 
-  int debugWarning;
+  //int debugWarning;
   uint64_t c, d;
-  uint64_t u0, u1, u2, u3, u4, u5, u6, u7, u8;
-  uint32_t t9, t0, t1, t2, t3, t4, t5, t6, t7;
-  const uint32_t M = 0x3FFFFFFUL, R0 = 0x3D10UL, R1 = 0x400UL;
+  uint64_t u0; //, u1, u2, u3, u4, u5, u6, u7, u8;
+  //uint32_t t9, t0, t1, t2, t3, t4, t5, t6, t7;
+  const uint32_t M = 0x3FFFFFFUL, R0 = 0x3D10UL;//, R1 = 0x400UL;
 
-  int debugWarning4;
+  //int debugWarning4;
   secp256k1_fe outputTemp;
   for (int counter = 0; counter < 10; counter ++) {
-    r[counter] = 0;
+    //r[counter] = 0;
     a[counter] = generatorProjective.x.n[counter];
     outputTemp.n[counter] = 0;
   }
@@ -85,7 +88,7 @@ __kernel void test_suite_1_basic_operations(
     + (uint64_t)(a[3]*2) * a[6]
     + (uint64_t)(a[4]*2) * a[5];
     /* [d 0 0 0 0 0 0 0 0 0] = [p9 0 0 0 0 0 0 0 0 0] */
-  t9 = d & M;
+  //t9 = d & M;
   d >>= 26;
   /* [d t9 0 0 0 0 0 0 0 0 0] = [p9 0 0 0 0 0 0 0 0 0] */
 
@@ -128,20 +131,8 @@ __kernel void test_suite_1_basic_operations(
   outputTemp.n[8] = (uint32_t) ((uint64_t) c);
   outputTemp.n[9] = (uint32_t) (((uint64_t) c) >> 32);
   memoryPool_write_fe_asOutput(& outputTemp, - 1 , memoryPool);
-  int debugWarningN;
+  //int debugWarningN;
   return;
-
-
-
-
-
-
-
-
-
-
-  
-
 }
 
 
