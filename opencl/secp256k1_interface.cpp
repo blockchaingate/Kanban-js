@@ -10,6 +10,9 @@ unsigned char CryptoEC256k1::bufferGeneratorContext[GPU::memoryGeneratorContext]
 unsigned char CryptoEC256k1::bufferSignature[GPU::memorySignature];
 
 
+bool CryptoEC256k1::flagGeneratorContextComputed = true;
+bool CryptoEC256k1::flagMultiplicationContextComputed = true;
+
 bool CryptoEC256k1::testSuite1BasicOperations(unsigned char* outputMemoryPool) {
   test_suite_1_basic_operations(outputMemoryPool);
   return true;
@@ -445,7 +448,11 @@ bool CryptoEC256k1::signMessageDefaultBuffers(
   unsigned char* inputSecretKey,
   unsigned char* inputMessage
 ) {
-  int fixInitialization;
+  if (!CryptoEC256k1::flagGeneratorContextComputed) {
+    CryptoEC256k1::computeGeneratorContext(CryptoEC256k1::bufferGeneratorContext);
+    CryptoEC256k1::flagGeneratorContextComputed = true;
+  }
+
   return CryptoEC256k1::signMessage(
     outputSignature,
     outputSize,
@@ -479,7 +486,11 @@ bool CryptoEC256k1::generatePublicKeyDefaultBuffers(
   unsigned int *outputPublicKeySize,
   unsigned char *inputSecretKey
 ) {
-  int fixInitialization;
+  if (!CryptoEC256k1::flagGeneratorContextComputed) {
+    CryptoEC256k1::computeGeneratorContext(CryptoEC256k1::bufferGeneratorContext);
+    CryptoEC256k1::flagGeneratorContextComputed = true;
+  }
+
   return CryptoEC256k1::generatePublicKey(
     outputPublicKey,
     outputPublicKeySize,
@@ -519,7 +530,10 @@ bool CryptoEC256k1::verifySignatureDefaultBuffers(
   unsigned int publicKeySize,
   const unsigned char *message
 ) {
-  int fixInitialization;
+  if (!CryptoEC256k1::flagMultiplicationContextComputed) {
+    CryptoEC256k1::computeMultiplicationContextDefaultBuffers();
+    CryptoEC256k1::flagMultiplicationContextComputed = true;
+  }
   return CryptoEC256k1::verifySignature(
     output,
     CryptoEC256k1::bufferSignature,

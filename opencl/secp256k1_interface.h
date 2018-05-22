@@ -64,7 +64,7 @@ public:
   //however we declare them boolean
   //in order to keep the interface similar to that of CryptoEC256k1GPU.
   static bool flagMultiplicationContextComputed;
-  static bool flaGeneratorContextComputed;
+  static bool flagGeneratorContextComputed;
 
   static bool testSuite1BasicOperations(unsigned char* outputMemoryPool);
   static bool testSuite1BasicOperationsDefaultBuffers();
