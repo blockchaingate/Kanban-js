@@ -87,7 +87,7 @@ bool Server::initialize() {
   logServer << "Creating GPU ..." << Logger::endL;
   this->theGPU = std::make_shared<GPU>();
   logServer << "GPU created, initializing kernels..." << Logger::endL;
-  this->theGPU->initializeKernels();
+  this->theGPU->initializeKernelsNoBuild();
   logServer << "Kernels initialized, initializing ports..." << Logger::endL;
   if (!this->initializePorts())
     return false;

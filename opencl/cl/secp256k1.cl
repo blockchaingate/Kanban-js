@@ -3159,9 +3159,9 @@ static void secp256k1_ecmult_odd_multiples_table(
   //2. openCL 2.0 driver error in which memory on the GPU stack is corrupted, possibly after using
   //   a sufficient ammount of it.
   //3. openCL/hardware error resulting in wrong extraction of buffers from the GPU.
-  //3. A software error by myself causing corruption of certain regions of the GPU stack.
-  //4. A software error by myself causing corruption of the buffers extracted from the GPU.
-  //5. Any other unforeseen circumstance, caused by bad hardware,
+  //4. A software error by myself causing corruption of certain regions of the GPU stack.
+  //5. A software error by myself causing corruption of the buffers extracted from the GPU.
+  //6. Any other unforeseen circumstance, caused by bad hardware,
   //   bad drivers, bad software (my error), or any combination of those.
   //
   //The bug remains unfixed at the time of writing, however at present I believe that

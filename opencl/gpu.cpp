@@ -74,6 +74,7 @@ GPUKernel::GPUKernel() {
   this->numInitializedExternallyOwnedBuffers = 0;
   this->program = NULL;
   this->kernel = NULL;
+  this->flagIsBuilt = false;
 }
 
 GPUKernel::~GPUKernel() {
@@ -106,7 +107,8 @@ GPUKernel::~GPUKernel() {
 GPU::GPU() {
   this->flagVerbose = false;
   this->flagInitializedPlatform = false;
-  this->flagInitializedKernels = false;
+  this->flagInitializedKernelsFull = false;
+  this->flagInitializedKernelsNoBuild = false;
   this->flagTurnOffToDebugCPU = false;
   this->commandQueue = NULL;
   this->context = NULL;
@@ -121,11 +123,22 @@ GPU::GPU() {
   this->bufferSignature = new unsigned char [GPU::memorySignature];
 }
 
-bool GPU::initializeAll() {
-  if (! this->initializePlatform())
+bool GPU::initializeAllFull() {
+  if (! this->initializePlatform()) {
     return false;
-  if (! this->initializeKernels())
+  }
+  if (! this->initializeKernelsFull())
     return false;
+  return true;
+}
+
+bool GPU::initializeAllNoBuild() {
+  if (!this->initializePlatform()) {
+    return false;
+  }
+  if (!this->initializeKernelsNoBuild()) {
+    return false;
+  }
   return true;
 }
 
@@ -189,32 +202,33 @@ bool GPU::initializePlatform() {
   return true;
 }
 
-bool GPU::initializeKernels() {
-  if (this->flagInitializedKernels)
+bool GPU::initializeKernelsNoBuild() {
+  if (this->flagInitializedKernelsNoBuild)
     return true;
   if (!this->initializePlatform())
     return false;
-  //if (!this->createKernel(
-  //  this->kernelSHA256,
-  //  {"result"},
-  //  {SharedMemory::typeVoidPointer},
-  //  {"offset", "length", "messageIndex", "message"},
-  //  {SharedMemory::typeUint, SharedMemory::typeUint, SharedMemory::typeUint, SharedMemory::typeVoidPointer},
-  //  {}
-  //)) {
-  //  return false;
-  //}
-  //if (!this->createKernel(
-  //  this->kernelTestBuffer,
-  //  {"buffer"},
-  //  {SharedMemory::typeVoidPointer},
-  //  {},
-  //  {},
-  //  {}
-  //)) {
-  //  return false;
-  //}
-  if (!this->createKernel(
+
+  if (!this->createKernelNoBuild(
+    this->kernelSHA256,
+    {"result"},
+    {SharedMemory::typeVoidPointer},
+    {"offset", "length", "messageIndex", "message"},
+    {SharedMemory::typeUint, SharedMemory::typeUint, SharedMemory::typeUint, SharedMemory::typeVoidPointer},
+    {}
+  )) {
+    return false;
+  }
+  if (!this->createKernelNoBuild(
+    this->kernelTestBuffer,
+    {"buffer"},
+    {SharedMemory::typeVoidPointer},
+    {},
+    {},
+    {}
+  )) {
+    return false;
+  }
+  if (!this->createKernelNoBuild(
     this->kernelTestSuite1BasicOperations,
     {"outputMemoryPool"},
     {
@@ -227,7 +241,7 @@ bool GPU::initializeKernels() {
     return false;
   }
 
-  if (!this->createKernel(
+  if (!this->createKernelNoBuild(
     this->kernelInitializeMultiplicationContext,
     {"outputMultiplicationContext"},
     {
@@ -250,110 +264,132 @@ bool GPU::initializeKernels() {
   //__global const unsigned char *message,
   //__global const unsigned char *memoryPoolMultiplicationContext
 
-  //if (!this->createKernel(
-  //  this->kernelVerifySignature,
-  //  {
-  //    "output",
-  //    "outputMemoryPoolSignature",
-  //  },
-  //  {
-  //    SharedMemory::typeVoidPointer,
-  //    SharedMemory::typeVoidPointer
-  //  },
-  //  {
-  //    "inputSignature",
-  //    "signatureSize",
-  //    "publicKey",
-  //    "publicKeySize",
-  //    "message",
-  //    "memoryPoolMultiplicationContext"
-  //  },
-  //  {
-  //    SharedMemory::typeVoidPointer,
-  //    SharedMemory::typeUint,
-  //    SharedMemory::typeVoidPointer,
-  //    SharedMemory::typeUint,
-  //    SharedMemory::typeVoidPointer,
-  //    SharedMemory::typeVoidPointerExternalOwnership
-  //  },
-  //  {
-  //    &kernelMultiplicationContext->outputs[0]->theMemory
-  //  }
-  //)) {
-  //  return false;
-  //}
-  //if (!this->createKernel(
-  //  this->kernelInitializeGeneratorContext,
-  //  {"outputGeneratorContext"},
-  //  {
-  //    SharedMemory::typeVoidPointer,
-  //  },
-  //  {},
-  //  {},
-  //  {}
-  //)) {
-  //  return false;
-  //}
+  if (!this->createKernelNoBuild(
+    this->kernelVerifySignature,
+    {
+      "output",
+      "outputMemoryPoolSignature",
+    },
+    {
+      SharedMemory::typeVoidPointer,
+      SharedMemory::typeVoidPointer
+    },
+    {
+      "inputSignature",
+      "signatureSize",
+      "publicKey",
+      "publicKeySize",
+      "message",
+      "memoryPoolMultiplicationContext"
+    },
+    {
+      SharedMemory::typeVoidPointer,
+      SharedMemory::typeUint,
+      SharedMemory::typeVoidPointer,
+      SharedMemory::typeUint,
+      SharedMemory::typeVoidPointer,
+      SharedMemory::typeVoidPointerExternalOwnership
+    },
+    {
+      &kernelMultiplicationContext->outputs[0]->theMemory
+    }
+  )) {
+    return false;
+  }
+  if (!this->createKernelNoBuild(
+    this->kernelInitializeGeneratorContext,
+    {"outputGeneratorContext"},
+    {
+      SharedMemory::typeVoidPointer,
+    },
+    {},
+    {},
+    {}
+  )) {
+    return false;
+  }
   std::shared_ptr<GPUKernel> kernelGeneratorContext = this->theKernels[this->kernelInitializeGeneratorContext];
-  //if (!this->createKernel(
-  //  this->kernelGeneratePublicKey,
-  //  {
-  //    "outputPublicKey",
-  //    "outputPublicKeySize"
-  //  },
-  //  {
-  //    SharedMemory::typeVoidPointer,
-  //    SharedMemory::typeVoidPointer,
-  //  },
-  //  {
-  //    "inputSecretKey",
-  //    "inputMemoryPoolGeneratorContext"
-  //  },
-  //  {
-  //    SharedMemory::typeVoidPointer,
-  //    SharedMemory::typeVoidPointerExternalOwnership
-  //  },
-  //  {
-  //    &kernelGeneratorContext->outputs[0]->theMemory
-  //  }
-  //)) {
-  //  return false;
-  //}
-//  if (!this->createKernel(
-//    this->kernelSign,
-//    {
-//      "outputSignature",
-//      "outputSize",
-//      "outputInputNonce"
-//    },
-//    {
-//      SharedMemory::typeVoidPointer,
-//      SharedMemory::typeVoidPointer,
-//      SharedMemory::typeVoidPointer
-//    },
-//    {
-//      "inputSecretKey",
-//      "inputMessage",
-//      "inputMemoryPoolGeneratorContext",
-//      "inputMessageIndex"
-//    },
-//    {
-//      SharedMemory::typeVoidPointer,
-//      SharedMemory::typeVoidPointer,
-//      SharedMemory::typeVoidPointerExternalOwnership,
-//      SharedMemory::typeUint,
-//    },
-//    {
-//      &kernelGeneratorContext->outputs[0]->theMemory
-//    }
-//  )) {
-//    return false;
-//  }
-  this->flagInitializedKernels = true;
+  if (!this->createKernelNoBuild(
+    this->kernelGeneratePublicKey,
+    {
+      "outputPublicKey",
+      "outputPublicKeySize"
+    },
+    {
+      SharedMemory::typeVoidPointer,
+      SharedMemory::typeVoidPointer,
+    },
+    {
+      "inputSecretKey",
+      "inputMemoryPoolGeneratorContext"
+    },
+    {
+      SharedMemory::typeVoidPointer,
+      SharedMemory::typeVoidPointerExternalOwnership
+    },
+    {
+      &kernelGeneratorContext->outputs[0]->theMemory
+    }
+  )) {
+    return false;
+  }
+  if (!this->createKernelNoBuild(
+    this->kernelSign,
+    {
+      "outputSignature",
+      "outputSize",
+      "outputInputNonce"
+    },
+    {
+      SharedMemory::typeVoidPointer,
+      SharedMemory::typeVoidPointer,
+      SharedMemory::typeVoidPointer
+    },
+    {
+      "inputSecretKey",
+      "inputMessage",
+      "inputMemoryPoolGeneratorContext",
+      "inputMessageIndex"
+    },
+    {
+      SharedMemory::typeVoidPointer,
+      SharedMemory::typeVoidPointer,
+      SharedMemory::typeVoidPointerExternalOwnership,
+      SharedMemory::typeUint,
+    },
+    {
+      &kernelGeneratorContext->outputs[0]->theMemory
+    }
+  )) {
+    return false;
+  }
+  this->flagInitializedKernelsNoBuild = true;
   return true;
 }
 
-bool GPU::createKernel(
+bool GPU::initializeKernelsFull() {
+  if (this->flagInitializedKernelsFull) {
+    return true;
+  }
+  if (!this->initializePlatform()) {
+    return false;
+  }
+  if (!this->initializeKernelsNoBuild()) {
+    return false;
+  }
+  for (
+    std::unordered_map<std::string, std::shared_ptr<GPUKernel> >::iterator kernelIterator = this->theKernels.begin();
+    kernelIterator != this->theKernels.end();
+    ++kernelIterator
+  ) {
+    if (!kernelIterator->second.get()->build()) {
+      return false;
+    }
+  }
+  return true;
+}
+
+bool GPU::createKernelNoBuild(
   const std::string& fileNameNoExtension,
   const std::vector<std::string>& outputs,
   const std::vector<int>& outputTypes,
@@ -362,17 +398,18 @@ bool GPU::createKernel(
   const std::vector<cl_mem*>& inputExternalBuffers
 ) {
   std::shared_ptr<GPUKernel> incomingKernel = std::make_shared<GPUKernel>();
-  if (inputs.size() != inputTypes.size() || outputs.size() != outputTypes.size()){
+  if (inputs.size() != inputTypes.size() || outputs.size() != outputTypes.size()) {
     logGPU << "Error: while initializing: " << fileNameNoExtension << ", got "
     << " non-matching number of kernel arguments and kernel argument types, namely "
     << inputs.size() << " inputs, " << inputTypes.size() << " input types, "
     << outputs.size() << " outputs, " << outputTypes.size() << " output types. " << Logger::endL;
     assert(false);
   }
-  if (!incomingKernel->constructFromFileName(
+  if (!incomingKernel->constructFromFileNameNoBuild(
     fileNameNoExtension, outputs, outputTypes, inputs, inputTypes, inputExternalBuffers, *this
-  ))
+  )) {
     return false;
+  }
   this->theKernels[fileNameNoExtension] = incomingKernel;
   return true;
 }
@@ -429,7 +466,7 @@ std::string GPU::kernelGeneratePublicKey = "secp256k1_opencl_generate_public_key
 const int maxProgramBuildBufferSize = 10000000;
 char programBuildBuffer[maxProgramBuildBufferSize];
 
-bool GPUKernel::constructFromFileName(
+bool GPUKernel::constructFromFileNameNoBuild(
   const std::string& fileNameNoExtension,
   const std::vector<std::string>& outputNames,
   const std::vector<int>& outputTypes,
@@ -441,6 +478,13 @@ bool GPUKernel::constructFromFileName(
   this->owner = &ownerGPU;
   this->name = fileNameNoExtension;
   std::string fileName = "../opencl/cl/" + fileNameNoExtension + ".cl";
+
+  this->desiredOutputNames = outputNames;
+  this->desiredOutputTypes = outputTypes;
+  this->desiredInputNames = inputNames;
+  this->desiredInputTypes = inputTypes;
+  this->desiredInputExternalBuffers = inputExternalBuffers;
+
   std::ifstream theFile(fileName);
   if (!theFile.is_open()) {
     logGPU << "Failed to open " << fileName << "\n";
@@ -468,6 +512,15 @@ bool GPUKernel::constructFromFileName(
   //std::string programOptions = "-cl-opt-disable";
 
   //std::string programOptions = "-cl-std=CL2.0";
+  return true;
+}
+
+bool GPUKernel::build() {
+  if (this->flagIsBuilt){
+    return true;
+  }
+
+  cl_int ret;
   ret = clBuildProgram(
     this->program, 1, &this->owner->currentDeviceId,
     NULL,
@@ -475,7 +528,7 @@ bool GPUKernel::constructFromFileName(
     NULL, NULL
   );
   if (ret != CL_SUCCESS) {
-    logGPU << "Failed to build the program. Return code: " << ret << Logger::endL;
+    logGPU << "Failed to build program: " << this->name << ". Return code: " << ret << Logger::endL;
     size_t logSize;
     ret = clGetProgramBuildInfo(
       this->program, this->owner->currentDeviceId,
@@ -483,7 +536,7 @@ bool GPUKernel::constructFromFileName(
       &programBuildBuffer, &logSize
     );
     if (ret != CL_SUCCESS) {
-      logGPU << "Failed to fetch program build info, return code: " << ret << Logger::endL;
+      logGPU << "Failed to fetch the build info for program: " << this->name << ". Return code: " << ret << Logger::endL;
       return false;
     }
     if (logSize > 0)
@@ -496,19 +549,21 @@ bool GPUKernel::constructFromFileName(
   logGPU << "Creating openCL kernel..." << Logger::endL;
   this->kernel = clCreateKernel(this->program, this->name.c_str(), &ret);
   if (ret != CL_SUCCESS) {
-    logGPU << "Failed to allocate kernel. Return code: " << ret << Logger::endL;
+    logGPU << "Failed to allocate kernel: " << this->name << ". Return code: " << ret << Logger::endL;
     logGPU << "Please note we \e[31mrequire the __kernel function name be the same\e[39m as the no-extension filename: \e[31m"
            << this->name << "\e[39m." << Logger::endL;
     return false;
   }
-  logGPU << "Kernel created, allocating buffers..." << Logger::endL;
-  this->buffersExternallyOwned = inputExternalBuffers;
-  this->constructArguments(outputNames, outputTypes, true, true);
-  this->constructArguments(inputNames, inputTypes, true, false);
+  logGPU << "Kernel: " << this->name << " created, allocating buffers..." << Logger::endL;
+  this->buffersExternallyOwned = this->desiredInputExternalBuffers;
+  this->constructArguments(this->desiredOutputNames, this->desiredOutputTypes, true, true);
+  this->constructArguments(this->desiredInputNames, this->desiredInputTypes, true, false);
   this->SetArguments();
-  logGPU << "Kernel creation successful. " << Logger::endL;
+  logGPU << "Kernel: " << this->name << " created successfully. " << Logger::endL;
+  this->flagIsBuilt = true;
   return true;
 }
+
 
 bool GPUKernel::constructArguments(
   const std::vector<std::string>& argumentNames,

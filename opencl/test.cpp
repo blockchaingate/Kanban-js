@@ -339,9 +339,10 @@ void testSHA256::initialize() {
 
 bool testSHA256(GPU& theGPU) {
   // Create the two input vectors
-  theGPU.initializeAll();
+  theGPU.initializeAllNoBuild();
   // Create a command queue
   std::shared_ptr<GPUKernel> theKernel = theGPU.theKernels[GPU::kernelSHA256];
+  theKernel->build();
   std::cout << "DEBUG: about to write to buffer. " << std::endl;
   testSHA256::initialize();
 
@@ -445,10 +446,13 @@ void testSignatures::initialize() {
 
 bool testSign(GPU& theGPU) {
   // Create the two input vectors
-  theGPU.initializeAll();
+  theGPU.initializeAllNoBuild();
   CryptoEC256k1GPU::computeGeneratorContextDefaultBuffers(theGPU);
   // Create a command queue
   std::shared_ptr<GPUKernel> kernelSign = theGPU.theKernels[GPU::kernelSign];
+  if (!kernelSign->build()) {
+    return false;
+  }
   std::cout << "DEBUG: about to write to buffer. " << std::endl;
   testSignatures theTest;
   theTest.initialize();
@@ -487,7 +491,7 @@ bool testSign(GPU& theGPU) {
       std::chrono::duration<double> elapsed_seconds = timeCurrent - timeStart;
       std::cout << "Signed " << counterTest << " 32-byte messages in " << elapsed_seconds.count() << " second(s),"
       << " current speed: "
-      << ((counterTest+1) / elapsed_seconds.count()) << " signature(s) per second." << std::endl;
+      << ((counterTest + 1) / elapsed_seconds.count()) << " signature(s) per second." << std::endl;
     }
   }
   cl_mem& result = kernelSign->outputs[0]->theMemory;

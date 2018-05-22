@@ -60,15 +60,24 @@ public:
   GPU* owner;
   std::vector<std::shared_ptr<SharedMemory> > outputs;
   std::vector<std::shared_ptr<SharedMemory> > inputs;
+
+
+  std::vector<std::string> desiredOutputNames;
+  std::vector<int> desiredOutputTypes;
+  std::vector<std::string> desiredInputNames;
+  std::vector<int> desiredInputTypes;
+  std::vector<cl_mem*> desiredInputExternalBuffers;
+
   std::vector<cl_mem*> buffersExternallyOwned;
   cl_program program;
   cl_kernel kernel;
   std::string name;
   unsigned numInitializedExternallyOwnedBuffers;
+  bool flagIsBuilt;
   size_t local_item_size; // Divide work items into groups of this size, initialized to 32
   size_t global_item_size; // Divide work items into groups of this size, initialized to 32
 
-  bool constructFromFileName(
+  bool constructFromFileNameNoBuild(
     const std::string& fileNameNoExtension,
     const std::vector<std::string>& outputNames,
     const std::vector<int>& outputTypes,
@@ -77,6 +86,8 @@ public:
     const std::vector<cl_mem*>& inputExternalBuffers,
     GPU& ownerGPU
   );
+  bool build();
+
   bool constructArguments(
     const std::vector<std::string>& argumentNames,
     const std::vector<int>& argumentTypes,
@@ -146,18 +157,22 @@ public:
   cl_command_queue commandQueue;
   bool flagVerbose;
   bool flagInitializedPlatform;
-  bool flagInitializedKernels;
+  bool flagInitializedKernelsNoBuild;
+  bool flagInitializedKernelsFull;
   bool flagTurnOffToDebugCPU;
-  bool initializeAll();
+  bool initializeAllNoBuild();
+  bool initializeAllFull();
   bool initializePlatform();
-  bool initializeKernels();
+  bool initializePlatformFull();
+  bool initializeKernelsNoBuild();
+  bool initializeKernelsFull();
   //Static allocation forbidden!
   //Rationale: we need to use file loggers in the
   //destructors. File loggers are statically
   //initialized, so we may run into the
   //static initialization order fiasco.
   GPU();
-  bool createKernel(
+  bool createKernelNoBuild(
     const std::string& fileNameNoExtension,
     const std::vector<std::string>& outputs,
     const std::vector<int>& outputTypes,
@@ -165,6 +180,7 @@ public:
     const std::vector<int>& inputTypes,
     const std::vector<cl_mem*>& inputExternalBuffers
   );
+  bool createKernelBuild();
   ~GPU();
 };
 

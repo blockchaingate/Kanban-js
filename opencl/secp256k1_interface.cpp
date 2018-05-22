@@ -99,10 +99,13 @@ bool CryptoEC256k1GPU::testSuite1BasicOperationsDefaultBuffers(GPU& theGPU) {
 }
 
 bool CryptoEC256k1GPU::testSuite1BasicOperations(unsigned char* outputMemoryPool, GPU& theGPU) {
-  if (!theGPU.initializeAll())
+  if (!theGPU.initializeAllNoBuild()) {
     return false;
+  }
   std::shared_ptr<GPUKernel> kernelTest = theGPU.theKernels[GPU::kernelTestSuite1BasicOperations];
-
+  if (!kernelTest->build()) {
+    return false;
+  }
   cl_int ret = clEnqueueNDRangeKernel(
     theGPU.commandQueue, kernelTest->kernel, 1, NULL,
     &kernelTest->global_item_size, &kernelTest->local_item_size, 0, NULL, NULL
@@ -132,10 +135,13 @@ bool CryptoEC256k1GPU::testSuite1BasicOperations(unsigned char* outputMemoryPool
 
 
 bool CryptoEC256k1GPU::computeMultiplicationContext(unsigned char* outputMemoryPool, GPU& theGPU) {
-  if (!theGPU.initializeAll())
+  if (!theGPU.initializeAllNoBuild()) {
     return false;
+  }
   std::shared_ptr<GPUKernel> kernelMultiplicationContext = theGPU.theKernels[GPU::kernelInitializeMultiplicationContext];
-
+  if (!kernelMultiplicationContext->build()) {
+    return false;
+  }
   cl_int ret = clEnqueueNDRangeKernel(
     theGPU.commandQueue, kernelMultiplicationContext->kernel, 1, NULL,
     &kernelMultiplicationContext->global_item_size, &kernelMultiplicationContext->local_item_size, 0, NULL, NULL
@@ -169,9 +175,13 @@ bool CryptoEC256k1GPU::computeMultiplicationContextDefaultBuffers(GPU& theGPU) {
 
 bool CryptoEC256k1GPU::computeGeneratorContext(unsigned char* outputMemoryPool, GPU& theGPU) {
   logGPU << "DEBUG: Got to generator context start." << Logger::endL;
-  if (!theGPU.initializeAll())
+  if (!theGPU.initializeAllNoBuild())
     return false;
   std::shared_ptr<GPUKernel> kernelGeneratorContext = theGPU.theKernels[GPU::kernelInitializeGeneratorContext];
+  if (!kernelGeneratorContext->build()){
+    return false;
+  }
+
   logGPU << "DEBUG: Got to before compute generator context" << Logger::endL;
   cl_int ret = clEnqueueNDRangeKernel(
     theGPU.commandQueue, kernelGeneratorContext->kernel, 1, NULL,
@@ -214,13 +224,16 @@ bool CryptoEC256k1GPU::signMessageDefaultBuffers(
   unsigned int inputMessageIndex,
   GPU& theGPU
 ) {
-  if (!theGPU.initializeAll()) {
+  if (!theGPU.initializeAllNoBuild()) {
     return false;
   }
   if (!CryptoEC256k1GPU::initializeGeneratorContext(theGPU)) {
     return false;
   }
   std::shared_ptr<GPUKernel> kernelSign = theGPU.theKernels[GPU::kernelSign];
+  if (!kernelSign->build()){
+    return false;
+  }
   kernelSign->writeToBuffer(2, outputInputNonce, 32);
   kernelSign->writeToBuffer(3, inputSecretKey, 32);
   kernelSign->writeToBuffer(4, inputMessage, 32);
@@ -287,13 +300,16 @@ bool CryptoEC256k1GPU::generatePublicKeyDefaultBuffers(
   unsigned char *inputSecretKey,
   GPU &theGPU
 ) {
-  if (!theGPU.initializeAll()) {
+  if (!theGPU.initializeAllNoBuild()) {
     return false;
   }
   if (!CryptoEC256k1GPU::initializeGeneratorContext(theGPU)) {
     return false;
   }
   std::shared_ptr<GPUKernel> kernelGeneratePublicKey = theGPU.theKernels[GPU::kernelGeneratePublicKey];
+  if (!kernelGeneratePublicKey->build()) {
+    return false;
+  }
   kernelGeneratePublicKey->writeToBuffer(2, inputSecretKey, 32);
   logGPU << "DEBUG: Got to generate public key start." << Logger::endL;
   cl_int ret = clEnqueueNDRangeKernel(
@@ -369,13 +385,16 @@ bool CryptoEC256k1GPU::verifySignatureDefaultBuffers(
   //unsigned int publicKeySize,
   //__global const unsigned char *message,
   //__global const unsigned char *memoryPoolMultiplicationContext
-  if (!theGPU.initializeAll()) {
+  if (!theGPU.initializeAllNoBuild()) {
     return false;
   }
   if (!CryptoEC256k1GPU::initializeMultiplicationContext(theGPU)) {
     return false;
   }
   std::shared_ptr<GPUKernel> kernelVerifySignature = theGPU.theKernels[GPU::kernelVerifySignature];
+  if (!kernelVerifySignature->build()) {
+    return false;
+  }
   kernelVerifySignature->writeToBuffer(2, inputSignature, signatureSize);
   kernelVerifySignature->writeArgument(3, signatureSize);
   kernelVerifySignature->writeToBuffer(4, publicKey, publicKeySize);
