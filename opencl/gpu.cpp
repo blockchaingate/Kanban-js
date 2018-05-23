@@ -360,8 +360,8 @@ bool GPU::initializeKernelsNoBuild() {
     this->kernelTestBuffer,
     {"buffer"},
     {SharedMemory::typeVoidPointer},
-    {},
-    {},
+    {"offsets", "messageIndex"},
+    {SharedMemory::typeVoidPointer, SharedMemory::typeUint},
     {},
     {}
   )) {

@@ -541,17 +541,22 @@ bool Server::RunOnce() {
   this->packetNumberOfComputations = 0;
   while (!this->thePipe.messagesRead.empty()) {
     if (!this->QueueCommand(this->thePipe.messagesRead.front())) {
-      return false;
+      if (numQueued == 0) {
+        return false;
+      }
     }
     numQueued ++;
     this->packetNumberOfComputations ++;
     this->thePipe.messagesRead.pop_front();
   }
-  return true;
+  return this->ExecuteQueued();
 }
 
 bool Server::QueueCommand(MessageFromNode& theMessage) {
   logServer << "Processing message: " << theMessage.toString() << Logger::endL;
+  if (!this->theGPU->initializeAllNoBuild()) {
+    return false;
+  }
   if (theMessage.command == "SHA256") {
     return this->QueueSha256(theMessage);
   }
@@ -594,14 +599,26 @@ bool Server::ExecuteQueued() {
 }
 
 bool Server::QueueTestBuffer(MessageFromNode& theMessage) {
-
+  std::shared_ptr<GPUKernel> kernelBuffer = this->theGPU->theKernels[GPU::kernelTestBuffer];
+  std::vector<unsigned char>& buffer = kernelBuffer->outputs[0]->buffer;
+  std::vector<unsigned char>& bufferOffsets = kernelBuffer->inputs[0]->buffer;
+  if (buffer.size() + theMessage.theMessage.size() > buffer.capacity()) {
+    return false;
+  }
+  bufferOffsets.resize(bufferOffsets.size() + 4);
+  memoryPool_write_uint(buffer.size(), &bufferOffsets[bufferOffsets.size() - 4]);
+  buffer.insert(buffer.end(), theMessage.theMessage.begin(), theMessage.theMessage.end());
+  kernelBuffer->computationIds.push_back(theMessage.id);
+  return true;
 }
 
 bool Server::QueueSha256(MessageFromNode& theMessage) {
+  logServer << "DEBUG: here be i " << Logger::endL;
   std::shared_ptr<GPUKernel> theKernel = this->theGPU->theKernels[GPU::kernelSHA256];
   std::vector<unsigned char>& offsets = theKernel->inputs[0]->buffer;
   std::vector<unsigned char>& lengths = theKernel->inputs[1]->buffer;
   std::vector<unsigned char>& messages = theKernel->inputs[3]->buffer;
+  logServer << "DEBUG: Queueing " << theMessage.toString() << Logger::endL;
   if (messages.size() + theMessage.theMessage.size() > messages.capacity()) {
     return false;
   }
@@ -613,11 +630,16 @@ bool Server::QueueSha256(MessageFromNode& theMessage) {
   memoryPool_write_uint(messages.size(), &offsets[oldLengthsSize]);
   messages.insert(messages.end(), theMessage.theMessage.begin(), theMessage.theMessage.end());
   theKernel->computationIds.push_back(theMessage.id);
+
+  logServer << "DEBUG: Queued successfully. " << Logger::endL;
   return true;
 }
 
 bool Server::ExecuteSha256s() {
   std::shared_ptr<GPUKernel> kernelSHA256 = this->theGPU->theKernels[GPU::kernelSHA256];
+  if (!kernelSHA256->build()) {
+    return false;
+  }
   kernelSHA256->writeToBuffer(1, kernelSHA256->inputs[0]->buffer);
   kernelSHA256->writeToBuffer(2, kernelSHA256->inputs[1]->buffer);
   kernelSHA256->writeToBuffer(4, kernelSHA256->inputs[3]->buffer);
@@ -661,8 +683,8 @@ bool Server::ProcessResultsSha256(std::stringstream& output) {
     output << "{\"id\":\"" << kernelSHA256->computationIds[i] << "\", \"result\": \"" << Miscellaneous::toStringHex(outputBinary)
     << "\", \"packetSize:\"" << this->packetNumberOfComputations << "}\n";
     logServer << "Computation " << kernelSHA256->computationIds[i] << " completed." << Logger::endL;
-
   }
+  kernelSHA256->computationIds.clear();
   return true;
 }
 
@@ -698,35 +720,14 @@ bool Server::QueueSignOneMessage(MessageFromNode& theMessage) {
   return true;
 }
 
-bool Server::ExecuteTestBuffers() {/*
-  std::shared_ptr<GPUKernel> theKernel = this->theGPU->theKernels[GPU::kernelTestBuffer];
-  theKernel->writeToBuffer(0, theMessage.theMessage);
-  cl_int ret = clEnqueueNDRangeKernel(
-    this->theGPU->commandQueue, theKernel->kernel, 1, NULL,
-    &theKernel->global_item_size, &theKernel->local_item_size, 0, NULL, NULL
-  );
-  if (ret != CL_SUCCESS) {
-    logServer << "Failed to enqueue kernel. Return code: " << ret << ". ";
-    return false;
-  }
-  std::stringstream output;
-  output << "{\"id\":\"" << theMessage.id << "\", \"result\": \""
-  << theMessage.length << " bytes successfully sent to GPU. No useful work performed.\"}\n";
-
-  logServer << "Computation " << theMessage.id << " completed, writing ..." << Logger::endL;
-  int numWrittenBytes = write(this->thePipe.fileDescriptorOutputData, output.str().c_str(), output.str().size());
-  logServer << "Computation " << theMessage.id << " completed and sent." << Logger::endL;
-  if (numWrittenBytes < 0) {
-    logServer << "Error writing bytes. " << Logger::endL;
-    return false;
-  }*/
-  return false;
-}
-
 bool Server::ExecuteSignMessages() {
   std::shared_ptr<GPUKernel> kernelSign = this->theGPU->theKernels[this->theGPU->kernelSign];
-  CryptoEC256k1GPU::initializeGeneratorContext(*this->theGPU.get());
-
+  if (!kernelSign->build()) {
+    return false;
+  }
+  if (! CryptoEC256k1GPU::initializeGeneratorContext(*this->theGPU.get())) {
+    return false;
+  }
   kernelSign->writeToBuffer(2, kernelSign->outputs[2]->buffer);
   kernelSign->writeToBuffer(3, kernelSign->inputs[0]->buffer);
   kernelSign->writeToBuffer(4, kernelSign->inputs[1]->buffer);
@@ -741,9 +742,88 @@ bool Server::ExecuteSignMessages() {
       return false;
     }
   }
-  kernelSign->outputs[2]->buffer.resize(0);
-  kernelSign->inputs[0]->buffer.resize(0);
-  kernelSign->inputs[1]->buffer.resize(0);
+  kernelSign->outputs[2]->buffer.clear();
+  kernelSign->inputs[0]->buffer.clear();
+  kernelSign->inputs[1]->buffer.clear();
+  return true;
+}
+
+bool Server::ExecuteTestBuffers() {
+  std::shared_ptr<GPUKernel> kernelBuffers = this->theGPU->theKernels[GPU::kernelTestBuffer];
+  kernelBuffers->writeToBuffer(0, kernelBuffers->outputs[0]->buffer);
+  kernelBuffers->writeToBuffer(1, kernelBuffers->inputs[0]->buffer);
+  for (unsigned i = 0; i < kernelBuffers->computationIds.size(); i ++) {
+    kernelBuffers->writeArgument(2, i);
+    cl_int ret = clEnqueueNDRangeKernel(
+      this->theGPU->commandQueue,
+      kernelBuffers->kernel,
+      1,
+      NULL,
+      &kernelBuffers->global_item_size,
+      &kernelBuffers->local_item_size,
+      0,
+      NULL,
+      NULL
+    );
+    if (ret != CL_SUCCESS) {
+      logServer << "Failed to enqueue kernel. Return code: " << ret << ". ";
+      return false;
+    }
+  }
+  return true;
+}
+
+bool Server::ProcessResultsTestBuffer(std::stringstream& output) {
+  std::shared_ptr<GPUKernel> kernelBuffers = this->theGPU->theKernels[this->theGPU->kernelTestBuffer];
+  cl_mem& resultBuffers = kernelBuffers->outputs[0]->theMemory;
+  unsigned int totalSize = kernelBuffers->outputs[0]->buffer.size();
+  kernelBuffers->outputs[0]->buffer.clear();
+  cl_int ret = clEnqueueReadBuffer(
+    this->theGPU->commandQueue,
+    resultBuffers,
+    CL_TRUE,
+    0,
+    totalSize,
+    this->thePipe.bufferOutputGPU,
+    0,
+    NULL,
+    NULL
+  );
+  if (ret != CL_SUCCESS) {
+    logServer << "Failed to read buffer. " << Logger::endL;
+    return false;
+  }
+  cl_mem& resultOffsets = kernelBuffers->inputs[0]->theMemory;
+  ret = clEnqueueReadBuffer(
+    this->theGPU->commandQueue,
+    resultOffsets,
+    CL_TRUE,
+    0,
+    kernelBuffers->computationIds.size() * 4,
+    this->thePipe.bufferOutputGPU_second,
+    0,
+    NULL,
+    NULL
+  );
+  if (ret != CL_SUCCESS) {
+    logServer << "Failed to read buffer. " << Logger::endL;
+    return false;
+  }
+
+  for (unsigned i = 0; i < kernelBuffers->computationIds.size(); i ++) {
+    unsigned currentOffset = memoryPool_read_uint(&this->thePipe.bufferOutputGPU_second[i * 4]);
+    unsigned nextOffset = -1;
+    if (i + 1 < kernelBuffers->computationIds.size()) {
+      nextOffset = memoryPool_read_uint(&this->thePipe.bufferOutputGPU_second[(i + 1) * 4]);
+    } else {
+      nextOffset = totalSize;
+    }
+    signed currentSize = nextOffset - currentOffset;
+    output << "{\"id\":\"" << kernelBuffers->computationIds[i] << "\", \"result\": \"" << currentSize
+    << " bytes read, no work performed.\", \"packetSize:\"" << this->packetNumberOfComputations << "}\n";
+    logServer << "Computation " << kernelBuffers->computationIds[i] << " completed." << Logger::endL;
+  }
+  kernelBuffers->computationIds.clear();
   return true;
 }
 
@@ -789,6 +869,7 @@ bool Server::ProcessResultSignMessages(std::stringstream &output) {
     << "\", \"packetSize:\"" << this->packetNumberOfComputations << "}\n";
     logServer << "Computation " << kernelSign->computationIds[i] << " completed." << Logger::endL;
   }
+  kernelSign->computationIds.clear();
   return true;
 }
 
@@ -806,8 +887,6 @@ bool Server::WriteResults(std::stringstream& output) {
   }
   return true;
 }
-
-
 
 bool Server::ProcessResults() {
   std::stringstream output;
