@@ -11,6 +11,7 @@ public:
   std::string id;
   std::string command;
   void reset();
+  std::string toString();
   MessageFromNode() {
     this->reset();
   }
@@ -20,12 +21,12 @@ class PipeBasic {
 public:
   int position;
   int length;
-  int capacity;
-  char* buffer;
+  std::vector<char> buffer;
   int fileDescriptor;
   std::string name;
   char GetChar();
   bool ReadMore();
+  std::string toString();
   PipeBasic(int inputCapacity, const std::string& inputName);
   ~PipeBasic();
 };
@@ -42,14 +43,15 @@ public:
 
   std::string currentMetaDatA;
 
-  std::queue<MessageFromNode> messagesRead;
+  std::deque<MessageFromNode> messagesRead;
 
-  std::queue<MessageFromNode> messagesWithMetadataButNoData;
+  std::deque<MessageFromNode> messagesWithMetadataButNoData;
 
   PipeBasic* inputData;
   PipeBasic* inputMeta;
   unsigned char* bufferOutputGPU;
   unsigned char* bufferOutputGPU_second;
+  std::string toStringPendingMessages();
   bool ReadNext();
   MessagePipeline();
   ~MessagePipeline();

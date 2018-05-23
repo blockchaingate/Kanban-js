@@ -14,21 +14,22 @@
 
 Logger logServer("../logfiles/logServer.txt", "[ServerGPU] ");
 
+std::string Logger::colorNormal = "\e[39m";
+std::string Logger::colorBlue = "\e[94m";
+
 PipeBasic::PipeBasic(int inputCapacity, const std::string& inputName) {
-  this->capacity = inputCapacity;
   this->length = 0;
   this->position = 0;
   this->fileDescriptor = - 1;
-  this->buffer = new char[inputCapacity];
+  this->buffer.resize(inputCapacity);
   this->name = inputName;
 }
 
 PipeBasic::~PipeBasic() {
-  delete [] this->buffer;
-  this->buffer = 0;
-  if (this->fileDescriptor >= 0)
+  if (this->fileDescriptor >= 0) {
     close (this->fileDescriptor);
-  this->fileDescriptor = -1;
+  }
+  this->fileDescriptor = - 1;
 }
 
 MessagePipeline::MessagePipeline() {
@@ -92,21 +93,24 @@ bool Server::initialize() {
   logServer << "GPU created, initializing kernels..." << Logger::endL;
   this->theGPU->initializeKernelsNoBuild();
   logServer << "Kernels initialized, initializing ports..." << Logger::endL;
-  if (!this->initializePorts())
+  if (!this->initializePorts()) {
     return false;
+  }
   logServer << "Server ports opened ..." << Logger::endL;
-  if (!this->listenAll())
+  if (!this->listenAll()) {
     return false;
-  if (!this->acceptAll())
+  }
+  if (!this->acceptAll()) {
     return false;
-
+  }
   logServer << "All connections accepted." << Logger::endL;
   return true;
 }
 
 bool Server::Run() {
-  if (!this->initialize())
+  if (!this->initialize()) {
     return false;
+  }
   while (this->RunOnce()) {
   }
   return false;
@@ -144,7 +148,7 @@ bool Server::initializeOneSocketAndPort(int& outputSocket, std::string& outputPo
       }
       if (bind(outputSocket, p->ai_addr, p->ai_addrlen) == - 1) {
         close(outputSocket);
-        outputSocket= - 1;
+        outputSocket = - 1;
         logServer << "Error: bind failed at port: " << portsToTry[i] << ". " << strerror(errno) << Logger::endL;
         continue;
       }
@@ -155,22 +159,28 @@ bool Server::initializeOneSocketAndPort(int& outputSocket, std::string& outputPo
 }
 
 bool Server::initializePorts() {
-  if (!this->initializeOneSocketAndPort(this->listeningSocketMetaData, this->portMetaData, portsToTryMetaData))
+  if (!this->initializeOneSocketAndPort(this->listeningSocketMetaData, this->portMetaData, portsToTryMetaData)) {
     return false;
-  if (!this->initializeOneSocketAndPort(this->listeningSocketData, this->portData, portsToTryData))
+  }
+  if (!this->initializeOneSocketAndPort(this->listeningSocketData, this->portData, portsToTryData)) {
     return false;
-  if (!this->initializeOneSocketAndPort(this->listeningSocketOutputData, this->portOutputData, portsToTryOutputData))
+  }
+  if (!this->initializeOneSocketAndPort(this->listeningSocketOutputData, this->portOutputData, portsToTryOutputData)) {
     return false;
+  }
   return true;
 }
 
 bool Server::acceptAll() {
-  if (!this->acceptOneSocket(this->listeningSocketMetaData, this->thePipe.inputMeta->fileDescriptor, this->portMetaData))
+  if (!this->acceptOneSocket(this->listeningSocketMetaData, this->thePipe.inputMeta->fileDescriptor, this->portMetaData)) {
     return false;
-  if (!this->acceptOneSocket(this->listeningSocketData, this->thePipe.inputData->fileDescriptor, this->portData))
+  }
+  if (!this->acceptOneSocket(this->listeningSocketData, this->thePipe.inputData->fileDescriptor, this->portData)) {
     return false;
-  if (!this->acceptOneSocket(this->listeningSocketOutputData, this->thePipe.fileDescriptorOutputData, this->portOutputData))
+  }
+  if (!this->acceptOneSocket(this->listeningSocketOutputData, this->thePipe.fileDescriptorOutputData, this->portOutputData)) {
     return false;
+  }
   return true;
 }
 
@@ -202,13 +212,30 @@ bool Server::listenOneSocket(int theSocket, int& outputFileDescriptor, const std
 }
 
 bool Server::listenAll() {
-  if (!this->listenOneSocket(this->listeningSocketMetaData, this->thePipe.inputMeta->fileDescriptor, this->portMetaData))
+  if (!this->listenOneSocket(this->listeningSocketMetaData, this->thePipe.inputMeta->fileDescriptor, this->portMetaData)) {
     return false;
-  if (!this->listenOneSocket(this->listeningSocketData, this->thePipe.inputMeta->fileDescriptor, this->portData))
+  }
+  if (!this->listenOneSocket(this->listeningSocketData, this->thePipe.inputMeta->fileDescriptor, this->portData)) {
     return false;
-  if (!this->listenOneSocket(this->listeningSocketOutputData, this->thePipe.fileDescriptorOutputData, this->portOutputData))
+  }
+  if (!this->listenOneSocket(this->listeningSocketOutputData, this->thePipe.fileDescriptorOutputData, this->portOutputData)) {
     return false;
+  }
   return true;
+}
+
+std::string MessageFromNode::toString() {
+  std::stringstream out;
+  out << "Message " << this->id << ": "
+  << "command: " << this->command
+  << ", length: " << this->length
+  << ", content: ";
+  if (this->theMessage == "") {
+    out << "[empty]";
+  } else {
+    out << Miscellaneous::toStringShorten(this->theMessage, 50);
+  }
+  return out.str();
 }
 
 void MessageFromNode::reset() {
@@ -228,7 +255,7 @@ bool PipeBasic::ReadMore() {
   }
   this->position = 0;
   this->length = 0;
-  this->length = read(this->fileDescriptor, this->buffer, this->capacity);
+  this->length = read(this->fileDescriptor, &this->buffer[0], this->buffer.size());
   if (this->length < 0) {
     logServer << "Failed to read " << this->name << ". " << strerror(errno) << Logger::endL;
     return false;
@@ -248,6 +275,28 @@ char PipeBasic::GetChar() {
   char result = this->buffer[this->position];
   this->position ++;
   return result;
+}
+
+std::string PipeBasic::toString() {
+  std::stringstream out;
+  out << "Pipe: " << this->name << ", position: " << this->position << ", length: " << this->length << "\n";
+  std::string bufferShortened(&this->buffer[0], this->length);
+  out << "Content:[" << Logger::colorBlue << Miscellaneous::toStringShorten(bufferShortened, 60) << Logger::colorNormal << "]";
+
+  return out.str();
+}
+
+std::string MessagePipeline::toStringPendingMessages() {
+  std::stringstream out;
+  out << "Completed messages: " << this->messagesRead.size() << "\n";
+  out << "Incomplete messages: " << this->messagesWithMetadataButNoData.size() << "\n";
+  for (unsigned i = 0; i < this->messagesWithMetadataButNoData.size(); i ++) {
+    out << "Message " << i << ": " << this->messagesWithMetadataButNoData[i].toString();
+  }
+  out << "Currently read metadata: " << this->currentMetaDatA << "\n";
+  out << "Meta buffer: " << this->inputMeta->toString() << "\n";
+  out << "Data buffer: " << this->inputData->toString() << "\n";
+  return out.str();
 }
 
 /* Reads available meta data, blocking if
@@ -309,7 +358,7 @@ bool MessagePipeline::ReadAvailableMetaData() {
   }
 
   if (this->messagesWithMetadataButNoData.size() == 0) {
-    this->messagesWithMetadataButNoData.push(MessageFromNode());
+    this->messagesWithMetadataButNoData.push_back(MessageFromNode());
   }
   if (this->messagesWithMetadataButNoData.size() > 1) {
     //We have complete metadata for at least one message,
@@ -331,7 +380,7 @@ bool MessagePipeline::ReadAvailableMetaData() {
   //This while loop should exit with two or more wannabe messages in the
   //this->messagesWithMetadataButNoData queue. All except the last of them
   //must have complete metadata; the last must have incomplete metadata.
-  while(this->inputMeta->position < this->inputMeta->length) {
+  while (this->inputMeta->position < this->inputMeta->length) {
     char currentChar = this->inputMeta->GetChar(); // <- increments this->inputMeta->position
     if (currentChar != '\n') {
       this->currentMetaDatA.push_back(currentChar);
@@ -354,15 +403,17 @@ bool MessagePipeline::ReadAvailableMetaData() {
       this->currentMetaDatA = "";
       continue;
     }
-    if (currentMessage.command == "") {
+    if (currentMessage.id == "") {
       currentMessage.id = this->currentMetaDatA;
-      this->messagesWithMetadataButNoData.push(MessageFromNode());
+      this->messagesWithMetadataButNoData.push_back(MessageFromNode());
       this->currentMetaDatA = "";
       continue;
     }
   }
   if (this->messagesWithMetadataButNoData.size() < 2) {
-    logServer << "Fatal error: failed to read complete metadata. " << Logger::endL;
+    logServer << "Fatal error: failed to read complete metadata. "
+    << this->toStringPendingMessages()
+    << Logger::endL;
     return false;
   }
   return true;
@@ -437,8 +488,8 @@ bool MessagePipeline::ReadAvailableData() {
         currentMessage.theMessage.append(&this->inputData->buffer[this->inputData->position], lengthNeeded);
         this->inputData->position += lengthNeeded;
         //currentMessage now contains a completed message. We are moving it from the wannabe queue to the completed queue.
-        this->messagesRead.push(std::move(this->messagesWithMetadataButNoData.front()));
-        this->messagesWithMetadataButNoData.pop();
+        this->messagesRead.push_back(std::move(this->messagesWithMetadataButNoData.front()));
+        this->messagesWithMetadataButNoData.pop_front();
       } else {
         int numBytesThatCanBeRead = this->inputData->length - this->inputData->position;
         currentMessage.theMessage.append(& this->inputData->buffer[this->inputData->position], numBytesThatCanBeRead);
@@ -448,7 +499,6 @@ bool MessagePipeline::ReadAvailableData() {
   }
   return true;
 }
-
 
 /* Reads one lump of data available in the command and data pipes.
  * If no data is available, falls asleep.
@@ -495,14 +545,13 @@ bool Server::RunOnce() {
     }
     numQueued ++;
     this->packetNumberOfComputations ++;
-    this->thePipe.messagesRead.pop();
+    this->thePipe.messagesRead.pop_front();
   }
   return true;
 }
 
 bool Server::QueueCommand(MessageFromNode& theMessage) {
-  logServer << "Processing message: " << theMessage.id << ", " << "command: " << theMessage.command
-  << ", " << theMessage.length << " bytes. " << Logger::endL;
+  logServer << "Processing message: " << theMessage.toString() << Logger::endL;
   if (theMessage.command == "SHA256") {
     return this->QueueSha256(theMessage);
   }
@@ -522,21 +571,21 @@ bool Server::QueueCommand(MessageFromNode& theMessage) {
 
 }
 
-bool Server::ExecuteQueued(){
+bool Server::ExecuteQueued() {
   std::shared_ptr<GPUKernel> theKernelSha256     = this->theGPU->theKernels[GPU::kernelSHA256];
   std::shared_ptr<GPUKernel> theKernelSignOne    = this->theGPU->theKernels[GPU::kernelSign];
   std::shared_ptr<GPUKernel> theKernelTestBuffer = this->theGPU->theKernels[GPU::kernelTestBuffer];
-  if (theKernelSha256->computationIds.size() > 0){
+  if (theKernelSha256->computationIds.size() > 0) {
     if (!this->ExecuteSha256s()) {
       return false;
     }
   }
-  if (theKernelSignOne->computationIds.size() > 0){
+  if (theKernelSignOne->computationIds.size() > 0) {
     if (!this->ExecuteSignMessages()) {
       return false;
     }
   }
-  if (theKernelTestBuffer->computationIds.size() > 0){
+  if (theKernelTestBuffer->computationIds.size() > 0) {
     if (!this->ExecuteTestBuffers()) {
       return false;
     }
@@ -572,7 +621,7 @@ bool Server::ExecuteSha256s() {
   kernelSHA256->writeToBuffer(1, kernelSHA256->inputs[0]->buffer);
   kernelSHA256->writeToBuffer(2, kernelSHA256->inputs[1]->buffer);
   kernelSHA256->writeToBuffer(4, kernelSHA256->inputs[3]->buffer);
-  for (unsigned i = 0; i < kernelSHA256->computationIds.size(); i ++){
+  for (unsigned i = 0; i < kernelSHA256->computationIds.size(); i ++) {
     kernelSHA256->writeArgument(3, i);
     cl_int ret = clEnqueueNDRangeKernel(
       this->theGPU->commandQueue, kernelSHA256->kernel, 1, NULL,
@@ -681,7 +730,7 @@ bool Server::ExecuteSignMessages() {
   kernelSign->writeToBuffer(2, kernelSign->outputs[2]->buffer);
   kernelSign->writeToBuffer(3, kernelSign->inputs[0]->buffer);
   kernelSign->writeToBuffer(4, kernelSign->inputs[1]->buffer);
-  for (unsigned i = 0; i < kernelSign->computationIds.size(); i ++){
+  for (unsigned i = 0; i < kernelSign->computationIds.size(); i ++) {
     kernelSign->writeArgument(6, i);
     cl_int ret = clEnqueueNDRangeKernel(
       this->theGPU->commandQueue, kernelSign->kernel, 1, NULL,

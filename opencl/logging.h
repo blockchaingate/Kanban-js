@@ -6,6 +6,10 @@
 class Logger
 {
 public:
+  static std::string colorRed;
+  static std::string colorBlue;
+  static std::string colorNormal;
+
   std::fstream theFile;
   std::string descriptionPrependToLogs;
   bool flagExtraDescription;
@@ -39,7 +43,6 @@ public:
   ~Logger()
   { this->theFile.close();
   }
-
 };
 
 #endif // LOGGING_H
