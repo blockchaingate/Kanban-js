@@ -601,10 +601,13 @@ bool GPUKernel::build() {
   logGPU << "Building program: " << this->name << "..." << Logger::endL;
   cl_int ret;
   ret = clBuildProgram(
-    this->program, 1, &this->owner->currentDeviceId,
+    this->program,
+    1,
+    &this->owner->currentDeviceId,
     NULL,
     //programOptions.c_str(),
-    NULL, NULL
+    NULL,
+    NULL
   );
   if (ret != CL_SUCCESS) {
     logGPU << "Failed to build program: " << this->name << ". Return code: " << ret << Logger::endL;

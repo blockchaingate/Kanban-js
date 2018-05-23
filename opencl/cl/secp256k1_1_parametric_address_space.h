@@ -56,6 +56,7 @@ void APPEND_ADDRESS_SPACE(secp256k1_fe_from_storage__to__global)(__global secp25
 
 //******From field_10x26_impl.h******
 void APPEND_ADDRESS_SPACE(secp256k1_fe_copy__to__global)(__global secp256k1_fe* output, ADDRESS_SPACE const secp256k1_fe* input);
+void APPEND_ADDRESS_SPACE(secp256k1_fe_copy)(secp256k1_fe* output, ADDRESS_SPACE const secp256k1_fe* input);
 //******End of field_10x26_impl.h******
 
 
@@ -73,6 +74,14 @@ void APPEND_ADDRESS_SPACE(secp256k1_ge_to__global__storage)(__global secp256k1_g
 void APPEND_ADDRESS_SPACE(secp256k1_ge_from_storage)(secp256k1_ge *r, ADDRESS_SPACE const secp256k1_ge_storage *a);
 void APPEND_ADDRESS_SPACE(secp256k1_ge_from_storage_to__global)(__global secp256k1_ge *r, ADDRESS_SPACE const secp256k1_ge_storage *a);
 
+/** Set a batch of group elements equal to the inputs given in jacobian coordinates */
+void APPEND_ADDRESS_SPACE(secp256k1_ge_set_all_gej_var)(
+  size_t len, 
+  ADDRESS_SPACE secp256k1_ge *outputPoints, 
+  ADDRESS_SPACE const secp256k1_gej *inputPointsJacobian,
+  __global unsigned char* memoryPool
+);
+
 //******End of group.h******
 
 //******From group_impl.h******
@@ -80,7 +89,6 @@ void APPEND_ADDRESS_SPACE(secp256k1_ge_from_storage_to__global)(__global secp256
 void APPEND_ADDRESS_SPACE(secp256k1_ge_storage_cmov)(secp256k1_ge_storage *r, ADDRESS_SPACE const secp256k1_ge_storage *a, int flag);
 void APPEND_ADDRESS_SPACE(secp256k1_ge_storage_cmov__to__global)(__global secp256k1_ge_storage *r, ADDRESS_SPACE const secp256k1_ge_storage *a, int flag);
 void APPEND_ADDRESS_SPACE(secp256k1_ge_copy__to__global)(__global secp256k1_ge* output, ADDRESS_SPACE const secp256k1_ge* input);
-
 //******end of group_impl.h******
 
 //******From scalar.h******
@@ -106,6 +114,7 @@ void APPEND_ADDRESS_SPACE(secp256k1_scalar_mul)(secp256k1_scalar *r, const secp2
 //******End of scalar.h******
 
 void APPEND_ADDRESS_SPACE(secp256k1_gej_copy__to__global)(__global secp256k1_gej* output, ADDRESS_SPACE const secp256k1_gej* input);
+void APPEND_ADDRESS_SPACE(secp256k1_gej_copy)(secp256k1_gej* output, ADDRESS_SPACE const secp256k1_gej* input);
 
 
 //******From scalar_8x32_impl.h******

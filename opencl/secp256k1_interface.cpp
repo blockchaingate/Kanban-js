@@ -176,20 +176,29 @@ bool CryptoEC256k1GPU::computeMultiplicationContextDefaultBuffers(GPU& theGPU) {
 
 bool CryptoEC256k1GPU::computeGeneratorContext(unsigned char* outputMemoryPool, GPU& theGPU) {
   logGPU << "DEBUG: Got to generator context start." << Logger::endL;
-  if (!theGPU.initializeAllNoBuild())
+  if (!theGPU.initializeAllNoBuild()) {
     return false;
+  }
   std::shared_ptr<GPUKernel> kernelGeneratorContext = theGPU.theKernels[GPU::kernelInitializeGeneratorContext];
-  if (!kernelGeneratorContext->build()){
+  if (!kernelGeneratorContext->build()) {
     return false;
   }
 
-  logGPU << "DEBUG: Got to before compute generator context" << Logger::endL;
+  logGPU << "DEBUG: Got to before compute generator context. " << Logger::endL;
   cl_int ret = clEnqueueNDRangeKernel(
-    theGPU.commandQueue, kernelGeneratorContext->kernel, 1, NULL,
-    &kernelGeneratorContext->global_item_size, &kernelGeneratorContext->local_item_size, 0, NULL, NULL
+    theGPU.commandQueue,
+    kernelGeneratorContext->kernel,
+    1,
+    NULL,
+    &kernelGeneratorContext->global_item_size,
+    &kernelGeneratorContext->local_item_size,
+    0,
+    NULL,
+    NULL
   );
   if (ret != CL_SUCCESS) {
-    logGPU << "Failed to enqueue kernel. Return code: " << ret << ". " << Logger::endL;
+    logGPU << "Failed to enqueue kernel " << kernelGeneratorContext->name
+    << ". Return code: " << ret << ". " << Logger::endL;
     return false;
   }
   cl_mem& result = kernelGeneratorContext->outputs[0]->theMemory;

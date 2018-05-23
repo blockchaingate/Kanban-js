@@ -7,13 +7,13 @@
 //To do: make the header file structure more intuitive.
 #endif 
 
-__constant static const char messageGeneratorContext1[50] = "initialized mempool.\0";
+//__constant static const char messageGeneratorContext1[50] = "initialized mempool.\0";
 
 __kernel void secp256k1_opencl_compute_generator_context(
   __global unsigned char* outputMemoryPoolContainingGeneratorContext
 ) {
   memoryPool_initialize(MACRO_MEMORY_POOL_SIZE_GeneratorContext - 100, outputMemoryPoolContainingGeneratorContext);
-  memoryPool_writeString(messageGeneratorContext1, outputMemoryPoolContainingGeneratorContext);
+  //memoryPool_writeString(messageGeneratorContext1, outputMemoryPoolContainingGeneratorContext);
  
   memoryPool_writeCurrentSizeAsOutput(0, outputMemoryPoolContainingGeneratorContext);
 

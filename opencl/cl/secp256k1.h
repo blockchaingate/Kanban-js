@@ -30,7 +30,7 @@ Please see the file opencl/README.md for technical notes on this code.
 #define MACRO_numberOfOutputs 20
 #define MACRO_MessageLogSize 500
 #define MACRO_MEMORY_POOL_SIZE_MultiplicationContext 6000000
-#define MACRO_MEMORY_POOL_SIZE_GeneratorContext 2000000
+#define MACRO_MEMORY_POOL_SIZE_GeneratorContext 370000
 #define MACRO_MEMORY_POOL_SIZE_Signature 250000
 #define MACRO_size_of_signature (33 * 2 + 6)
 
@@ -127,8 +127,6 @@ void memoryPool_read_secp256k1_gej(secp256k1_gej* output, __global const unsigne
 #define SECP256K1_FE_STORAGE_CONST(d7, d6, d5, d4, d3, d2, d1, d0) {{ (d0), (d1), (d2), (d3), (d4), (d5), (d6), (d7) }}
 #define SECP256K1_FE_STORAGE_CONST_GET(d) d.n[7], d.n[6], d.n[5], d.n[4],d.n[3], d.n[2], d.n[1], d.n[0]
 
-void secp256k1_fe_copy__from__global(secp256k1_fe* output, __global const secp256k1_fe* input);
-
 //******end of field_10x26.h******
 
 
@@ -188,7 +186,6 @@ void secp256k1_fe_mul_int(secp256k1_fe *r, int a); //original name: secp256k1_fe
 /** Sets a field element to be the square of another. Requires the input's magnitude to be at most 8.
  *  The output magnitude is 1 (but not guaranteed to be normalized). */
 void secp256k1_fe_sqr(secp256k1_fe *r, const secp256k1_fe *a);
-void secp256k1_fe_sqr__with_debug(secp256k1_fe *r, const secp256k1_fe *a, __global unsigned char* memoryPool);
 
 /** Sets a field element to be the (modular) square root (if any exist) of another. Requires the
  *  input's magnitude to be at most 8. The output magnitude is 1 (but not guaranteed to be
@@ -256,14 +253,6 @@ void secp256k1_ge_set_gej(secp256k1_ge *r, secp256k1_gej *a);
 /** Construct jacobian coordinates pont from affine ones.*/
 void secp256k1_gej_set_ge__constant(secp256k1_gej *r, __constant const secp256k1_ge *a);
 
-/** Set a batch of group elements equal to the inputs given in jacobian coordinates */
-void secp256k1_ge_set_all_gej_var(
-  size_t len, 
-  secp256k1_ge *outputPoints, 
-  const secp256k1_gej *inputPointsJacobian,
-  __global unsigned char* memoryPool
-);
-
 /** Set a batch of group elements equal to the inputs given in jacobian
  *  coordinates (with known z-ratios). zr must contain the known z-ratios such
  *  that mul(a[i].z, zr[i+1]) == a[i+1].z. zr[0] is ignored. */
@@ -299,12 +288,6 @@ void secp256k1_gej_double_nonzero(secp256k1_gej *r, const secp256k1_gej *a, secp
 
 /** Set r equal to the double of a. If rzr is not-NULL, r->z = a->z * *rzr (where infinity means an implicit z = 0). */
 void secp256k1_gej_double_var(secp256k1_gej *r, const secp256k1_gej *a, secp256k1_fe *rzr);
-void secp256k1_gej_double_var_with_debug(
-  secp256k1_gej *r,
-  const secp256k1_gej *a,
-  secp256k1_fe *rzr,
-  __global unsigned char* memoryPool
-);
 
 /** Set r equal to the sum of a and b. If rzr is non-NULL, r->z = a->z * *rzr (a cannot be infinity in that case). */
 void secp256k1_gej_add_var(secp256k1_gej *r, const secp256k1_gej *a, const secp256k1_gej *b, secp256k1_fe *rzr);
@@ -505,12 +488,14 @@ int secp256k1_eckey_pubkey_serialize(
 ///////////////////////
 #include "../opencl/cl/secp256k1_set_1_address_space__global.h"
 #include "../opencl/cl/secp256k1_1_parametric_address_space.h"
+#include "../opencl/cl/secp256k1_1_parametric_address_space_non_constant.h"
 ///////////////////////
 #include "../opencl/cl/secp256k1_set_1_address_space__constant.h"
 #include "../opencl/cl/secp256k1_1_parametric_address_space.h"
 ///////////////////////
 #include "../opencl/cl/secp256k1_set_1_address_space__default.h"
 #include "../opencl/cl/secp256k1_1_parametric_address_space.h"
+#include "../opencl/cl/secp256k1_1_parametric_address_space_non_constant.h"
 ///////////////////////
 ///////////////////////
 

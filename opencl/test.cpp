@@ -83,26 +83,38 @@ bool testMainPart1ComputeContexts(GPU& theGPU) {
   //*****CPU tests*******
   if (!CryptoEC256k1::computeMultiplicationContextDefaultBuffers())
     return false;
-  logTestCentralPU << "Multiplication context computed. " << Logger::endL;
-  testPrintMultiplicationContext(CryptoEC256k1::bufferMultiplicationContext, "Central PU", logTestCentralPU);
-  logTestCentralPU << "About to start generator context computation. " << Logger::endL;
+  /////////////////////////////
   if (!CryptoEC256k1::computeGeneratorContextDefaultBuffers())
     return false;
   logTestCentralPU << "Generator context computed. " << Logger::endL;
   testPrintGeneratorContext(CryptoEC256k1::bufferGeneratorContext, "Central PU", logTestCentralPU);
+  /////////////////////////////
+
+
+  /////////////////////////////
+  logTestCentralPU << "Multiplication context computed. " << Logger::endL;
+  testPrintMultiplicationContext(CryptoEC256k1::bufferMultiplicationContext, "Central PU", logTestCentralPU);
   if (theGPU.flagTurnOffToDebugCPU)
     return true;
+  /////////////////////////////
 
   //*****GPU tests*******
-  if (!CryptoEC256k1GPU::computeMultiplicationContextDefaultBuffers(theGPU))
-    return false;
-  logTestGraphicsPU << "Multiplication context computed. " << Logger::endL;
-  testPrintMultiplicationContext(theGPU.bufferMultiplicationContext, "Graphics PU", logTestGraphicsPU);
-  logTestGraphicsPU << "About to start generator context computation. " << Logger::endL;
+  /////////////////////////////
   if (!CryptoEC256k1GPU::computeGeneratorContextDefaultBuffers(theGPU))
     return false;
   logTestGraphicsPU << "Generator context computed. " << Logger::endL;
   testPrintGeneratorContext(theGPU.bufferGeneratorContext, "Graphics PU", logTestGraphicsPU);
+  /////////////////////////////
+
+
+  /////////////////////////////
+  if (!CryptoEC256k1GPU::computeMultiplicationContextDefaultBuffers(theGPU))
+    return false;
+  logTestGraphicsPU << "Multiplication context computed. " << Logger::endL;
+  testPrintMultiplicationContext(theGPU.bufferMultiplicationContext, "Graphics PU", logTestGraphicsPU);
+  /////////////////////////////
+
+
   return true;
 }
 
@@ -196,7 +208,7 @@ bool testMainPart2Signatures(GPU& theGPU) {
     thePublicKey.size,
     message.serialization
   );
-  logTestCentralPU << "Signature verification (expected 1): " << (int) signatureResult[0] << Logger::endL;
+  logTestCentralPU << "Verification of signature (expected 1): " << (int) signatureResult[0] << Logger::endL;
   theSignature.serialization[4] = 5;
   signatureResult[0] = 3;
   CryptoEC256k1::verifySignatureDefaultBuffers(
@@ -207,7 +219,7 @@ bool testMainPart2Signatures(GPU& theGPU) {
     thePublicKey.size,
     message.serialization
   );
-  logTestCentralPU << "Bad signature verification (expected 0): " << (int) signatureResult[0] << Logger::endL;
+  logTestCentralPU << "Verification of a signature that's been tampered with (expected 0): " << (int) signatureResult[0] << Logger::endL;
   if (theGPU.flagTurnOffToDebugCPU) {
     return true;
   }
@@ -246,7 +258,8 @@ bool testMainPart2Signatures(GPU& theGPU) {
   )) {
     logTestGraphicsPU << "ERROR: verifySignature returned false. " << Logger::endL;
   }
-  logTestGraphicsPU << "Signature verification (expected 1): " << (int) signatureResult[0] << Logger::endL;
+  logTestGraphicsPU << "Verification of signature (expected 1): " << (int) signatureResult[0] << Logger::endL;
+  theSignature.serialization[4] = 5;
   signatureResult[0] = 3;
   if (!CryptoEC256k1GPU::verifySignatureDefaultBuffers(
     &signatureResult[0],
@@ -259,7 +272,7 @@ bool testMainPart2Signatures(GPU& theGPU) {
   )) {
     logTestGraphicsPU << "ERROR: verifySignature returned false. " << Logger::endL;
   }
-  logTestGraphicsPU << "Bad signature verification (expected 0): " << (int) signatureResult[0] << Logger::endL;
+  logTestGraphicsPU << "Verification of a signature that's been tampered with (expected 0): " << (int) signatureResult[0] << Logger::endL;
   return true;
 }
 
@@ -278,8 +291,8 @@ bool testBasicOperations(GPU& theGPU){
 int testMain() {
   GPU theGPU;
   //theGPU.flagTurnOffToDebugCPU = true;
-  if (!testBasicOperations(theGPU))
-    return - 1;
+  //if (!testBasicOperations(theGPU))
+  //  return - 1;
   if (!testMainPart1ComputeContexts(theGPU))
     return - 1;
   if (!testMainPart2Signatures(theGPU))

@@ -121,7 +121,6 @@ DIST          = ../opencl/cl/testBuffer.cl \
 		/usr/lib/x86_64-linux-gnu/qt5/mkspecs/features/qt_config.prf \
 		/usr/lib/x86_64-linux-gnu/qt5/mkspecs/linux-g++/qmake.conf \
 		/usr/lib/x86_64-linux-gnu/qt5/mkspecs/features/spec_post.prf \
-		../opencl/.qmake.stash \
 		/usr/lib/x86_64-linux-gnu/qt5/mkspecs/features/exclusive_builds.prf \
 		/usr/lib/x86_64-linux-gnu/qt5/mkspecs/features/toolchain.prf \
 		/usr/lib/x86_64-linux-gnu/qt5/mkspecs/features/default_pre.prf \
@@ -214,7 +213,6 @@ Makefile: ../opencl/kanban-gpu.pro /usr/lib/x86_64-linux-gnu/qt5/mkspecs/linux-g
 		/usr/lib/x86_64-linux-gnu/qt5/mkspecs/features/qt_config.prf \
 		/usr/lib/x86_64-linux-gnu/qt5/mkspecs/linux-g++/qmake.conf \
 		/usr/lib/x86_64-linux-gnu/qt5/mkspecs/features/spec_post.prf \
-		.qmake.stash \
 		/usr/lib/x86_64-linux-gnu/qt5/mkspecs/features/exclusive_builds.prf \
 		/usr/lib/x86_64-linux-gnu/qt5/mkspecs/features/toolchain.prf \
 		/usr/lib/x86_64-linux-gnu/qt5/mkspecs/features/default_pre.prf \
@@ -284,7 +282,6 @@ Makefile: ../opencl/kanban-gpu.pro /usr/lib/x86_64-linux-gnu/qt5/mkspecs/linux-g
 /usr/lib/x86_64-linux-gnu/qt5/mkspecs/features/qt_config.prf:
 /usr/lib/x86_64-linux-gnu/qt5/mkspecs/linux-g++/qmake.conf:
 /usr/lib/x86_64-linux-gnu/qt5/mkspecs/features/spec_post.prf:
-.qmake.stash:
 /usr/lib/x86_64-linux-gnu/qt5/mkspecs/features/exclusive_builds.prf:
 /usr/lib/x86_64-linux-gnu/qt5/mkspecs/features/toolchain.prf:
 /usr/lib/x86_64-linux-gnu/qt5/mkspecs/features/default_pre.prf:
@@ -348,6 +345,7 @@ main.o: ../opencl/main.cpp ../opencl/gpu.h \
 		../opencl/cl/secp256k1_data_structures_parametric_address_space.h \
 		../opencl/cl/secp256k1_set_1_address_space__global.h \
 		../opencl/cl/secp256k1_1_parametric_address_space.h \
+		../opencl/cl/secp256k1_1_parametric_address_space_non_constant.h \
 		../opencl/cl/secp256k1_set_1_address_space__constant.h \
 		../opencl/server.h \
 		../opencl/logging.h
@@ -359,6 +357,7 @@ gpu.o: ../opencl/gpu.cpp ../opencl/gpu.h \
 		../opencl/cl/secp256k1_data_structures_parametric_address_space.h \
 		../opencl/cl/secp256k1_set_1_address_space__global.h \
 		../opencl/cl/secp256k1_1_parametric_address_space.h \
+		../opencl/cl/secp256k1_1_parametric_address_space_non_constant.h \
 		../opencl/cl/secp256k1_set_1_address_space__constant.h \
 		../opencl/logging.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o gpu.o ../opencl/gpu.cpp
@@ -370,6 +369,7 @@ server.o: ../opencl/server.cpp ../opencl/server.h \
 		../opencl/cl/secp256k1_data_structures_parametric_address_space.h \
 		../opencl/cl/secp256k1_set_1_address_space__global.h \
 		../opencl/cl/secp256k1_1_parametric_address_space.h \
+		../opencl/cl/secp256k1_1_parametric_address_space_non_constant.h \
 		../opencl/cl/secp256k1_set_1_address_space__constant.h \
 		../opencl/logging.h \
 		../opencl/miscellaneous.h \
@@ -386,6 +386,7 @@ test.o: ../opencl/test.cpp ../opencl/logging.h \
 		../opencl/cl/secp256k1_data_structures_parametric_address_space.h \
 		../opencl/cl/secp256k1_set_1_address_space__global.h \
 		../opencl/cl/secp256k1_1_parametric_address_space.h \
+		../opencl/cl/secp256k1_1_parametric_address_space_non_constant.h \
 		../opencl/cl/secp256k1_set_1_address_space__constant.h \
 		../opencl/cl/secp256k1_cpp.h \
 		../opencl/miscellaneous.h \
@@ -399,6 +400,7 @@ secp256k1_to_string_methods.o: ../opencl/cl/secp256k1_to_string_methods.cpp ../o
 		../opencl/cl/secp256k1_data_structures_parametric_address_space.h \
 		../opencl/cl/secp256k1_set_1_address_space__global.h \
 		../opencl/cl/secp256k1_1_parametric_address_space.h \
+		../opencl/cl/secp256k1_1_parametric_address_space_non_constant.h \
 		../opencl/cl/secp256k1_set_1_address_space__constant.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o secp256k1_to_string_methods.o ../opencl/cl/secp256k1_to_string_methods.cpp
 
@@ -409,6 +411,7 @@ secp256k1_interface.o: ../opencl/secp256k1_interface.cpp ../opencl/secp256k1_int
 		../opencl/cl/secp256k1_data_structures_parametric_address_space.h \
 		../opencl/cl/secp256k1_set_1_address_space__global.h \
 		../opencl/cl/secp256k1_1_parametric_address_space.h \
+		../opencl/cl/secp256k1_1_parametric_address_space_non_constant.h \
 		../opencl/cl/secp256k1_set_1_address_space__constant.h \
 		../opencl/cl/secp256k1_cpp.h \
 		../opencl/logging.h
@@ -421,11 +424,13 @@ secp256k1_cpp.o: ../opencl/cl/secp256k1_cpp.cpp ../opencl/logging.h \
 		../opencl/cl/secp256k1_data_structures_parametric_address_space.h \
 		../opencl/cl/secp256k1_set_1_address_space__global.h \
 		../opencl/cl/secp256k1_1_parametric_address_space.h \
+		../opencl/cl/secp256k1_1_parametric_address_space_non_constant.h \
 		../opencl/cl/secp256k1_set_1_address_space__constant.h \
 		../opencl/cl/secp256k1_opencl_compute_multiplication_context.cl \
 		../opencl/cl/secp256k1_opencl.h \
 		../opencl/cl/secp256k1.cl \
 		../opencl/cl/secp256k1_1_parametric_address_space.cl \
+		../opencl/cl/secp256k1_1_parametric_address_space_non_constant.cl \
 		../opencl/cl/secp256k1_opencl_compute_generator_context.cl \
 		../opencl/cl/secp256k1_opencl_sign.cl \
 		../opencl/cl/secp256k1_opencl_generate_public_key.cl \

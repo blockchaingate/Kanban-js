@@ -475,6 +475,19 @@ void APPEND_ADDRESS_SPACE(secp256k1_fe_copy__to__global)(__global secp256k1_fe* 
   output->n[9] = input->n[9];
 }
 
+void APPEND_ADDRESS_SPACE(secp256k1_fe_copy)(secp256k1_fe* output, ADDRESS_SPACE const secp256k1_fe* input){
+  output->n[0] = input->n[0];
+  output->n[1] = input->n[1];
+  output->n[2] = input->n[2];
+  output->n[3] = input->n[3];
+  output->n[4] = input->n[4];
+  output->n[5] = input->n[5];
+  output->n[6] = input->n[6];
+  output->n[7] = input->n[7];
+  output->n[8] = input->n[8];
+  output->n[9] = input->n[9];
+}
+
 void APPEND_ADDRESS_SPACE(secp256k1_fe_storage_cmov)(
   secp256k1_fe_storage *r, 
   ADDRESS_SPACE const secp256k1_fe_storage *a, 
@@ -706,6 +719,13 @@ void APPEND_ADDRESS_SPACE(secp256k1_gej_copy__to__global)(__global secp256k1_gej
   APPEND_ADDRESS_SPACE(secp256k1_fe_copy__to__global)(&output->x, &input->x);
   APPEND_ADDRESS_SPACE(secp256k1_fe_copy__to__global)(&output->y, &input->y);
   APPEND_ADDRESS_SPACE(secp256k1_fe_copy__to__global)(&output->z, &input->z);
+}
+
+void APPEND_ADDRESS_SPACE(secp256k1_gej_copy)(secp256k1_gej* output, ADDRESS_SPACE const secp256k1_gej* input){
+  output->infinity = input->infinity;
+  APPEND_ADDRESS_SPACE(secp256k1_fe_copy)(&output->x, &input->x);
+  APPEND_ADDRESS_SPACE(secp256k1_fe_copy)(&output->y, &input->y);
+  APPEND_ADDRESS_SPACE(secp256k1_fe_copy)(&output->z, &input->z);
 }
 
 void APPEND_ADDRESS_SPACE(secp256k1_scalar_copy__to__global)(__global secp256k1_scalar* output, ADDRESS_SPACE secp256k1_scalar* input){
