@@ -27,8 +27,9 @@ __kernel void secp256k1_opencl_sign(
 
   secp256k1_ecdsa_sig_sign(generatorContext, &outputSignatureR, &outputSignatureS, &secretKey, &message, &nonce, NULL);
   size_t outputSizeBuffer;
-  secp256k1_ecdsa_sig_serialize__global(&outputSignature[offset], &outputSizeBuffer, &outputSignatureR, &outputSignatureS);
-  memoryPool_write_uint(outputSizeBuffer, &outputSize[inputMessageIndex]);
+  unsigned int offsetSignature = (33 * 2 + 6) * inputMessageIndex;
+  secp256k1_ecdsa_sig_serialize__global(&outputSignature[offsetSignature], &outputSizeBuffer, &outputSignatureR, &outputSignatureS);
+  memoryPool_write_uint(outputSizeBuffer, &outputSize[inputMessageIndex * 4]);
 }
 
 #include "../opencl/cl/secp256k1.cl"

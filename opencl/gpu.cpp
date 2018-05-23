@@ -212,8 +212,8 @@ bool GPU::initializeKernelsNoBuild() {
     this->kernelSHA256,
     {"result"},
     {SharedMemory::typeVoidPointer},
-    {"offset", "length", "messageIndex", "message"},
-    {SharedMemory::typeUint, SharedMemory::typeUint, SharedMemory::typeUint, SharedMemory::typeVoidPointer},
+    {"offsets", "lengths", "messageIndex", "message"},
+    {SharedMemory::typeVoidPointer, SharedMemory::typeVoidPointer, SharedMemory::typeUint, SharedMemory::typeVoidPointer},
     {},
     {}
   )) {
@@ -681,6 +681,7 @@ bool GPUKernel::constructArguments(
     current->typE = argumentTypes[i];
     size_t defaultBufferSize = 10000000;
     current->theMemory = clCreateBuffer(this->owner->context, bufferFlag, defaultBufferSize, NULL, &ret);
+    current->buffer.reserve(defaultBufferSize);
     if (ret != CL_SUCCESS || current->theMemory == NULL) {
       logGPU << "Failed to create buffer \e[31m" << current->name << "\e[39m. Return code: " << ret << Logger::endL;
       return false;
@@ -724,6 +725,19 @@ bool GPUKernel::SetArguments(std::vector<std::shared_ptr<SharedMemory> >& theArg
     }
   }
   return true;
+}
+
+bool GPUKernel::writeToBuffer(unsigned argumentNumber, const std::vector<unsigned int>& input) {
+  std::vector<unsigned char> converted;
+  converted.resize(input.size() * 4);
+  for (unsigned i = 0; i < input.size(); i ++) {
+    memoryPool_write_uint(input[i], &converted[i * 4]);
+  }
+  return this->writeToBuffer(argumentNumber, converted);
+}
+
+bool GPUKernel::writeToBuffer(unsigned argumentNumber, const std::vector<unsigned char>& input) {
+  return this->writeToBuffer(argumentNumber, &input[0], input.size());
 }
 
 bool GPUKernel::writeToBuffer(unsigned argumentNumber, const std::string& input) {

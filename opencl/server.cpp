@@ -37,7 +37,8 @@ MessagePipeline::MessagePipeline() {
   //Pipe buffers start.
   this->inputMeta = new PipeBasic(this->bufferCapacityMetaData, "metaData");
   this->inputData = new PipeBasic(this->bufferCapacityData, "data");
-  this->bufferOutputGPU = new char[this->bufferCapacityData];
+  this->bufferOutputGPU = new unsigned char[this->bufferCapacityData];
+  this->bufferOutputGPU_second = new unsigned char[this->bufferCapacityData];
   //Pipe buffers end.
 }
 
@@ -58,6 +59,8 @@ MessagePipeline::~MessagePipeline() {
   this->inputMeta = 0;
   delete [] this->bufferOutputGPU;
   this->bufferOutputGPU = 0;
+  delete [] this->bufferOutputGPU_second;
+  this->bufferOutputGPU_second = 0;
   //Pipe buffers end.
   if (this->fileDescriptorOutputData >= 0) {
     close (this->fileDescriptorOutputData);
@@ -215,9 +218,14 @@ void MessageFromNode::reset() {
   this->theMessage = "";
 }
 
+/* Attempts to read up to this->capacity bytes from a given pipe. Will
+ * fall asleep without timeout if no bytes are available.
+ * Returns false on any kind of failure, true otherwise.
+ */
 bool PipeBasic::ReadMore() {
-  if (this->position < this->length)
+  if (this->position < this->length) {
     return true;
+  }
   this->position = 0;
   this->length = 0;
   this->length = read(this->fileDescriptor, this->buffer, this->capacity);
@@ -242,126 +250,406 @@ char PipeBasic::GetChar() {
   return result;
 }
 
-bool MessagePipeline::ReadOne() {
-  std::string currentMetaData;
-  this->currentMessage.reset();
-  while (true) {
-    if (!this->inputMeta->ReadMore())
-      return false;
-    char currentChar = this->inputMeta->GetChar();
+/* Reads available meta data, blocking if
+ * no metadata is available.
+ *
+ * In what follows, we will say that a message is a
+ * "wannabe" if it has complete metadata but no data.
+ * A wannabe message may have its metadata incomplete;
+ * in that case we refer to it as an incomplete wannabe message.
+ *
+ * More precisely, the function does the following.
+ *
+ * 1. If there are completed messages already read,
+ *    returns immediately. Since this function can block,
+ *    we cannot proceed if there are already completed messages, as
+ *    blocking here would leave those unprocessed messages hanging.
+ *
+ * 2. If there are zero pending wannabe messages,
+ *    adds an empty incomplete wannabe message
+ *    to the pending message queue,
+ *    raising the number of wannabe messages to one.
+ *
+ * 3. If there are two or more pending wannabe messages,
+ *    returns immediately: the first of those is
+ *    guaranteed to be a complete wannabe message
+ *    (i.e., has all its metadata), so we should be looking for
+ *    actual data.
+ *
+ * 4. If there is exactly one pending wannabe message,
+ *    which must necessarily be incomplete,
+ *    reads in a potentially blocking way from the metadata pipe.
+ *
+ *    The incomplete wannabe message
+ *    we are processing here must have come
+ *    either from Step 2 or from an empty or
+ *    half-way read metadata from a
+ *    previous run of this function.
+ *
+ * 5. Processes all bytes read from the metadata pipe.
+ *    This creates a number of wannabe messages, all of which have
+ *    complete metadata except potentially the last of them. The last
+ *    wannabe message may end up being incomplete, if, for example,
+ *    the metadata pipe ran out of capacity midway
+ *    through transmitting the metadata of a single message.
+ *    In practice, this is expected to happen extremely rarely.
+ *    In fact, under normal work loads, this should not happen at all as the
+ *    metadata pipe's capacity should never be approached.
+ *
+ */
+
+bool MessagePipeline::ReadAvailableMetaData() {
+  if (this->messagesRead.size() > 0) {
+    //The present function is potentially blocking.
+    //Therefore, if there are non-processed completely read messages,
+    //we must not proceed as
+    //that may leave those non-processed completely read
+    //messages hanging.
+    return true;
+  }
+
+  if (this->messagesWithMetadataButNoData.size() == 0) {
+    this->messagesWithMetadataButNoData.push(MessageFromNode());
+  }
+  if (this->messagesWithMetadataButNoData.size() > 1) {
+    //We have complete metadata for at least one message,
+    //therefore we should proceed to fetch its data.
+    //The last wannabe message
+    //- in the worst case scenario the second one -
+    //has incomplete metadata.
+    return true;
+  }
+  //The following function is blocking - falls asleep if
+  //no data is available.
+  if (!this->inputMeta->ReadMore()) {
+    return false;
+  }
+  //In the following loop, we convert all pending bytes into
+  //"wannabe" messages - messages with metadata but no data.
+  //If we get complete metadata for all pending messages,
+  //we append one last incomplete wannabe message with empty metadata.
+  //This while loop should exit with two or more wannabe messages in the
+  //this->messagesWithMetadataButNoData queue. All except the last of them
+  //must have complete metadata; the last must have incomplete metadata.
+  while(this->inputMeta->position < this->inputMeta->length) {
+    char currentChar = this->inputMeta->GetChar(); // <- increments this->inputMeta->position
     if (currentChar != '\n') {
-      currentMetaData.push_back(currentChar);
+      this->currentMetaDatA.push_back(currentChar);
       continue;
     }
-    if (this->currentMessage.length < 0) {
-      std::stringstream lengthReader(currentMetaData);
-      lengthReader >> this->currentMessage.length;
-      if (this->currentMessage.length <= 0) {
-        logServer << "Failed to read current message length, got: "<< this->currentMessage.length << ". " << Logger::endL;
+    MessageFromNode& currentMessage = this->messagesWithMetadataButNoData.back();
+    if (currentMessage.length < 0) {
+      std::stringstream lengthReader(this->currentMetaDatA);
+      lengthReader >> currentMessage.length;
+      if (currentMessage.length <= 0) {
+        logServer << "Failed to read current message length, got: "
+        << currentMessage.length << ". " << Logger::endL;
         return false;
       }
-      currentMetaData = "";
-    } else if (currentMessage.command == "") {
-      this->currentMessage.command = currentMetaData;
-      currentMetaData = "";
-    } else {
-      this->currentMessage.id = currentMetaData;
-      break;
+      this->currentMetaDatA = "";
+      continue;
+    }
+    if (currentMessage.command == "") {
+      currentMessage.command = this->currentMetaDatA;
+      this->currentMetaDatA = "";
+      continue;
+    }
+    if (currentMessage.command == "") {
+      currentMessage.id = this->currentMetaDatA;
+      this->messagesWithMetadataButNoData.push(MessageFromNode());
+      this->currentMetaDatA = "";
+      continue;
     }
   }
-  while (true) {
-    if (!this->inputData->ReadMore())
+  if (this->messagesWithMetadataButNoData.size() < 2) {
+    logServer << "Fatal error: failed to read complete metadata. " << Logger::endL;
+    return false;
+  }
+  return true;
+}
+
+/* Reads available data, blocking if
+ * none is available.
+ *
+ * We recall that a message is a "wannabe"
+ * if it has metadata but no data. A wannabe message
+ * is incomplete if its metadata is not complete.
+ *
+ * 1. If there are completed messages already read,
+ *    returns immediately. Since this function can block,
+ *    we cannot proceed if there are already completed messages, as
+ *    blocking here would leave those unprocessed messages hanging.
+ *
+ * 2. If the wannabe messages are less than 2,
+ *    generate an error: the last wannabe message is guaranteed
+ *    to be incomplete, hence we don't have enough metadata
+ *    to start reading data.
+ *
+ *    Step 2 should never be triggered.
+ *
+ * 3.
+ *
+ *
+ */
+
+bool MessagePipeline::ReadAvailableData() {
+  if (this->messagesRead.size() > 0) {
+    return true;
+  }
+  if (this->messagesWithMetadataButNoData.size() < 2) {
+    logServer << "Fatal error: not enough metadata to start reading data. " << Logger::endL;
+    return false;
+  }
+
+  //The following loop reads data.
+  //Our strategy is to make a single read of all available bytes,
+  //up to the pipe's capacity.
+  //The bytes are then used to construct as many complete
+  //messages as possible. Under normal circumstances,
+  //the loop is
+  //expected to execute only once, as the first run of the loop
+  //would be expected to generate a complete message
+  //(possibly many messages if they are small).
+  //However, this may fail to be the case if we have a message that
+  //exceeds the data pipe's capacity (should happen extremely rarely).
+  //In that case, the loop will run until the point it is able to
+  //construct at least one complete message.
+  //
+  //Since our data buffer is pretty large (some 50MB at the time of writing),
+  //we cannot afford that many runs of this loop before we run out of RAM memory.
+  //We should plan an appropriate error handling if that RAM memory boundary is approached.
+  //Since normal messages are expected to be in the byte/kilobyte range,
+  //the RAM memory bounds should never be approached under normal circumstances,
+  //even if we have system overload.
+  //
+  //However, we can expect to approach RAM memory bounds as
+  //a result of a malicious attack that has bypassed networking protections.
+  //
+  while (this->messagesRead.size() == 0) {
+    //The following is a potentially blocking read.
+    if (!this->inputData->ReadMore()) {
       return false;
-    int remainingLength = this->currentMessage.length - this->currentMessage.theMessage.size();
-    if (this->inputData->position + remainingLength <= this->inputData->length) {
-      this->currentMessage.theMessage.append(&this->inputData->buffer[this->inputData->position], remainingLength);
-      this->inputData->position += remainingLength;
-      break;
     }
-    int numBytesThatCanBeRead = this->inputData->length - this->inputData->position;
-    this->currentMessage.theMessage.append(& this->inputData->buffer[this->inputData->position], numBytesThatCanBeRead);
-    this->inputData->position += numBytesThatCanBeRead;
+    for (this->inputData->position = 0; this->inputData->position < this->inputData->length; ) {
+      MessageFromNode& currentMessage = this->messagesWithMetadataButNoData.front();
+      int lengthNeeded = currentMessage.length - currentMessage.theMessage.size();
+      if (this->inputData->position + lengthNeeded <= this->inputData->length) {
+        currentMessage.theMessage.append(&this->inputData->buffer[this->inputData->position], lengthNeeded);
+        this->inputData->position += lengthNeeded;
+        //currentMessage now contains a completed message. We are moving it from the wannabe queue to the completed queue.
+        this->messagesRead.push(std::move(this->messagesWithMetadataButNoData.front()));
+        this->messagesWithMetadataButNoData.pop();
+      } else {
+        int numBytesThatCanBeRead = this->inputData->length - this->inputData->position;
+        currentMessage.theMessage.append(& this->inputData->buffer[this->inputData->position], numBytesThatCanBeRead);
+        this->inputData->position += numBytesThatCanBeRead;
+      }
+    }
   }
-  this->messageQueue.push(this->currentMessage);
+  return true;
+}
+
+
+/* Reads one lump of data available in the command and data pipes.
+ * If no data is available, falls asleep.
+ * When available, will read a large lump of data, containing possibly
+ * more than one message from Node. The amount of data read is a function
+ * of the pipe capacities:
+ *
+ * inputData.capacity
+ *
+ * and
+ *
+ * metaData.capacity.
+ */
+
+bool MessagePipeline::ReadAvailable() {
+  if (!this->ReadAvailableMetaData()) {
+    return false;
+  }
+  if (!this->ReadAvailableData()) {
+    return false;
+  }
   return true;
 }
 
 bool MessagePipeline::ReadNext() {
-  if (!this->messageQueue.empty())
+  if (!this->messagesRead.empty()) {
     return true;
-//  bool
-  do {
-    if (!this->ReadOne())
-      return false;
   }
-  while (this->inputMeta->position < this->inputMeta->length);
+  if (!this->ReadAvailable()) {
+    return false;
+  }
   return true;
 }
 
 bool Server::RunOnce() {
-  if (!this->thePipe.ReadNext())
+  if (!this->thePipe.ReadNext()) { //reads all pending messages
     return false;
-  while (!this->thePipe.messageQueue.empty()) {
-    MessageFromNode& theMessage = this->thePipe.messageQueue.front();
-    if (!this->ExecuteNodeCommand(theMessage))
+  }
+  int numQueued = 0;
+  this->packetNumberOfComputations = 0;
+  while (!this->thePipe.messagesRead.empty()) {
+    if (!this->QueueCommand(this->thePipe.messagesRead.front())) {
       return false;
-    this->thePipe.messageQueue.pop();
+    }
+    numQueued ++;
+    this->packetNumberOfComputations ++;
+    this->thePipe.messagesRead.pop();
   }
   return true;
 }
 
-bool Server::ExecuteNodeCommand(MessageFromNode &theMessage) {
+bool Server::QueueCommand(MessageFromNode& theMessage) {
   logServer << "Processing message: " << theMessage.id << ", " << "command: " << theMessage.command
   << ", " << theMessage.length << " bytes. " << Logger::endL;
-  if (theMessage.command == "SHA256")
-    return this->ExecuteSha256(theMessage);
-  if (theMessage.command == "testBuffer")
-    return this->ExecuteTestBuffer(theMessage);
-  if (theMessage.command == "signOneMessage")
-    return this->ExecuteSignOneMessage(theMessage);
+  if (theMessage.command == "SHA256") {
+    return this->QueueSha256(theMessage);
+  }
+  if (theMessage.command == "signOneMessage") {
+    return this->QueueSignOneMessage(theMessage);
+  }
+  if (theMessage.command == "testBuffer") {
+    return this->QueueTestBuffer(theMessage);
+  }
   logServer << "Fatal error: unknown command. Message: " << theMessage.id << ", " << "command: " << theMessage.command
   << ", " << theMessage.length << " bytes. ";
-  if (theMessage.length < 50)
+  if (theMessage.length < 50) {
     logServer << "Message: " << theMessage.theMessage;
+  }
   logServer << Logger::endL;
   return false;
+
 }
 
-bool Server::ExecuteSha256(MessageFromNode &theMessage) {
+bool Server::ExecuteQueued(){
+  std::shared_ptr<GPUKernel> theKernelSha256     = this->theGPU->theKernels[GPU::kernelSHA256];
+  std::shared_ptr<GPUKernel> theKernelSignOne    = this->theGPU->theKernels[GPU::kernelSign];
+  std::shared_ptr<GPUKernel> theKernelTestBuffer = this->theGPU->theKernels[GPU::kernelTestBuffer];
+  if (theKernelSha256->computationIds.size() > 0){
+    if (!this->ExecuteSha256s()) {
+      return false;
+    }
+  }
+  if (theKernelSignOne->computationIds.size() > 0){
+    if (!this->ExecuteSignMessages()) {
+      return false;
+    }
+  }
+  if (theKernelTestBuffer->computationIds.size() > 0){
+    if (!this->ExecuteTestBuffers()) {
+      return false;
+    }
+  }
+  return this->ProcessResults();
+}
+
+bool Server::QueueTestBuffer(MessageFromNode& theMessage) {
+
+}
+
+bool Server::QueueSha256(MessageFromNode& theMessage) {
   std::shared_ptr<GPUKernel> theKernel = this->theGPU->theKernels[GPU::kernelSHA256];
-  theKernel->writeToBuffer(4, theMessage.theMessage);
-  theKernel->writeArgument(1, 0);
-  theKernel->writeArgument(2, theMessage.length);
-  theKernel->writeArgument(3, 0);
-  cl_int ret = clEnqueueNDRangeKernel(
-    this->theGPU->commandQueue, theKernel->kernel, 1, NULL,
-    &theKernel->global_item_size, &theKernel->local_item_size, 0, NULL, NULL
-  );
-  if (ret != CL_SUCCESS) {
-    logServer << "Failed to enqueue kernel. Return code: " << ret << ". ";
+  std::vector<unsigned char>& offsets = theKernel->inputs[0]->buffer;
+  std::vector<unsigned char>& lengths = theKernel->inputs[1]->buffer;
+  std::vector<unsigned char>& messages = theKernel->inputs[3]->buffer;
+  if (messages.size() + theMessage.theMessage.size() > messages.capacity()) {
     return false;
   }
-  cl_mem& result = theKernel->outputs[0]->theMemory;
-  ret = clEnqueueReadBuffer(this->theGPU->commandQueue, result, CL_TRUE, 0, 32, this->thePipe.bufferOutputGPU, 0, NULL, NULL);
+  int oldLengthsSize = lengths.size();
+  lengths.resize(oldLengthsSize + 4);
+  memoryPool_write_uint(theMessage.theMessage.size(), &lengths[oldLengthsSize]);
+  int oldOffsetSize = offsets.size();
+  offsets.resize(oldOffsetSize + 4);
+  memoryPool_write_uint(messages.size(), &offsets[oldLengthsSize]);
+  messages.insert(messages.end(), theMessage.theMessage.begin(), theMessage.theMessage.end());
+  theKernel->computationIds.push_back(theMessage.id);
+  return true;
+}
+
+bool Server::ExecuteSha256s() {
+  std::shared_ptr<GPUKernel> kernelSHA256 = this->theGPU->theKernels[GPU::kernelSHA256];
+  kernelSHA256->writeToBuffer(1, kernelSHA256->inputs[0]->buffer);
+  kernelSHA256->writeToBuffer(2, kernelSHA256->inputs[1]->buffer);
+  kernelSHA256->writeToBuffer(4, kernelSHA256->inputs[3]->buffer);
+  for (unsigned i = 0; i < kernelSHA256->computationIds.size(); i ++){
+    kernelSHA256->writeArgument(3, i);
+    cl_int ret = clEnqueueNDRangeKernel(
+      this->theGPU->commandQueue, kernelSHA256->kernel, 1, NULL,
+      &kernelSHA256->global_item_size, &kernelSHA256->local_item_size, 0, NULL, NULL
+    );
+    if (ret != CL_SUCCESS) {
+      logServer << "Failed to enqueue kernel. Return code: " << ret << ". ";
+      return false;
+    }
+  }
+  kernelSHA256->inputs[0]->buffer.resize(0);
+  kernelSHA256->inputs[1]->buffer.resize(0);
+  kernelSHA256->inputs[3]->buffer.resize(0);
+  return true;
+}
+
+bool Server::ProcessResultsSha256(std::stringstream& output) {
+  std::shared_ptr<GPUKernel> kernelSHA256 = this->theGPU->theKernels[this->theGPU->kernelSHA256];
+  cl_mem& result = kernelSHA256->outputs[0]->theMemory;
+  cl_int ret = clEnqueueReadBuffer(
+    this->theGPU->commandQueue,
+    result,
+    CL_TRUE,
+    0,
+    kernelSHA256->computationIds.size() * 32,
+    this->thePipe.bufferOutputGPU,
+    0,
+    NULL,
+    NULL
+  );
   if (ret != CL_SUCCESS) {
     logServer << "Failed to read buffer. " << Logger::endL;
     return false;
   }
-  std::string outputBinary(this->thePipe.bufferOutputGPU, 32);
-  std::stringstream output;
-  output << "{\"id\":\"" << theMessage.id << "\", \"result\": \"" << Miscellaneous::toStringHex(outputBinary) << "\"}\n";
+  for (unsigned i = 0; i < kernelSHA256->computationIds.size(); i ++) {
+    std::string outputBinary((char*)  &this->thePipe.bufferOutputGPU[i * 32], 32);
+    output << "{\"id\":\"" << kernelSHA256->computationIds[i] << "\", \"result\": \"" << Miscellaneous::toStringHex(outputBinary)
+    << "\", \"packetSize:\"" << this->packetNumberOfComputations << "}\n";
+    logServer << "Computation " << kernelSHA256->computationIds[i] << " completed." << Logger::endL;
 
-  logServer << "Computation " << theMessage.id << " completed, writing ..." << Logger::endL;
-  int numWrittenBytes = write(this->thePipe.fileDescriptorOutputData, output.str().c_str(), output.str().size());
-  logServer << "Computation " << theMessage.id << " completed and sent." << Logger::endL;
-  if (numWrittenBytes < 0) {
-    logServer << "Error writing bytes. " << Logger::endL;
-    return false;
   }
   return true;
 }
 
-bool Server::ExecuteTestBuffer(MessageFromNode &theMessage) {
+bool Server::QueueSignOneMessage(MessageFromNode& theMessage) {
+  if (theMessage.length != 32 * 3) {
+    logServer << "Sign one message: got message of length: " << theMessage.length
+    << ", expected " << 32 * 3 << " bytes." << Logger::endL;
+    return false;
+  }
+  logServer << "Got 96 bytes, as expected: " << Miscellaneous::toStringHex(theMessage.theMessage) << Logger::endL;
+  std::shared_ptr<GPUKernel> kernelSign = this->theGPU->theKernels[GPU::kernelSign];
+
+  std::vector<unsigned char>& outputSignatures = kernelSign->outputs[0]->buffer;
+  std::vector<unsigned char>& nonces = kernelSign->outputs[2]->buffer;
+  std::vector<unsigned char>& secretKeys = kernelSign->inputs[0]->buffer;
+  std::vector<unsigned char>& messages = kernelSign->inputs[1]->buffer;
+  if (
+    messages.size()   + 32 > messages.capacity() ||
+    secretKeys.size() + 32 > secretKeys.capacity() ||
+    nonces.size()     + 32 > nonces.capacity() ||
+    (kernelSign->computationIds.size() + 1) * (MACRO_size_of_signature) > outputSignatures.capacity()
+  ) {
+    return false;
+  }
+  std::string theNonce         = theMessage.theMessage.substr(0,  32);
+  std::string theSecretKey     = theMessage.theMessage.substr(32, 32);
+  std::string theMessageToSign = theMessage.theMessage.substr(64, 32);
+  nonces.insert(nonces.end(), theNonce.begin(), theNonce.end());
+  secretKeys.insert(secretKeys.end(), theSecretKey.begin(), theSecretKey.end());
+  messages.insert(messages.end(), theMessageToSign.begin(), theMessageToSign.end());
+  kernelSign->computationIds.push_back(theMessage.id);
+  this->packetNumberOfComputations ++;
+  return true;
+}
+
+bool Server::ExecuteTestBuffers() {/*
   std::shared_ptr<GPUKernel> theKernel = this->theGPU->theKernels[GPU::kernelTestBuffer];
   theKernel->writeToBuffer(0, theMessage.theMessage);
   cl_int ret = clEnqueueNDRangeKernel(
@@ -382,47 +670,106 @@ bool Server::ExecuteTestBuffer(MessageFromNode &theMessage) {
   if (numWrittenBytes < 0) {
     logServer << "Error writing bytes. " << Logger::endL;
     return false;
+  }*/
+  return false;
+}
+
+bool Server::ExecuteSignMessages() {
+  std::shared_ptr<GPUKernel> kernelSign = this->theGPU->theKernels[this->theGPU->kernelSign];
+  CryptoEC256k1GPU::initializeGeneratorContext(*this->theGPU.get());
+
+  kernelSign->writeToBuffer(2, kernelSign->outputs[2]->buffer);
+  kernelSign->writeToBuffer(3, kernelSign->inputs[0]->buffer);
+  kernelSign->writeToBuffer(4, kernelSign->inputs[1]->buffer);
+  for (unsigned i = 0; i < kernelSign->computationIds.size(); i ++){
+    kernelSign->writeArgument(6, i);
+    cl_int ret = clEnqueueNDRangeKernel(
+      this->theGPU->commandQueue, kernelSign->kernel, 1, NULL,
+      &kernelSign->global_item_size, &kernelSign->local_item_size, 0, NULL, NULL
+    );
+    if (ret != CL_SUCCESS) {
+      logServer << "Failed to enqueue kernel. Return code: " << ret << ". ";
+      return false;
+    }
+  }
+  kernelSign->outputs[2]->buffer.resize(0);
+  kernelSign->inputs[0]->buffer.resize(0);
+  kernelSign->inputs[1]->buffer.resize(0);
+  return true;
+}
+
+bool Server::ProcessResultSignMessages(std::stringstream &output) {
+  std::shared_ptr<GPUKernel> kernelSign = this->theGPU->theKernels[this->theGPU->kernelSign];
+  cl_mem& resultSignatures = kernelSign->outputs[0]->theMemory;
+  cl_int ret = clEnqueueReadBuffer(
+    this->theGPU->commandQueue,
+    resultSignatures,
+    CL_TRUE,
+    0,
+    kernelSign->computationIds.size() * MACRO_MEMORY_POOL_SIZE_Signature,
+    this->thePipe.bufferOutputGPU,
+    0,
+    NULL,
+    NULL
+  );
+  if (ret != CL_SUCCESS) {
+    logServer << "Failed to read buffer. " << Logger::endL;
+    return false;
+  }
+  cl_mem& resultSignatureSizes = kernelSign->outputs[1]->theMemory;
+  ret = clEnqueueReadBuffer(
+    this->theGPU->commandQueue,
+    resultSignatureSizes,
+    CL_TRUE,
+    0,
+    kernelSign->computationIds.size() * 4,
+    this->thePipe.bufferOutputGPU_second,
+    0,
+    NULL,
+    NULL
+  );
+  if (ret != CL_SUCCESS) {
+    logServer << "Failed to read buffer. " << Logger::endL;
+    return false;
+  }
+
+  for (unsigned i = 0; i < kernelSign->computationIds.size(); i ++) {
+    unsigned currentSize = memoryPool_read_uint(&this->thePipe.bufferOutputGPU_second[i * 4]);
+    std::string outputBinary((char*) &this->thePipe.bufferOutputGPU[i * MACRO_MEMORY_POOL_SIZE_Signature], currentSize);
+    output << "{\"id\":\"" << kernelSign->computationIds[i] << "\", \"result\": \"" << Miscellaneous::toStringHex(outputBinary)
+    << "\", \"packetSize:\"" << this->packetNumberOfComputations << "}\n";
+    logServer << "Computation " << kernelSign->computationIds[i] << " completed." << Logger::endL;
   }
   return true;
 }
 
-bool Server::ExecuteSignOneMessage(MessageFromNode& theMessage) {
-  if (theMessage.length != 32 * 3) {
-    logServer << "Sign one message: got message of length: " << theMessage.length
-    << ", expected " << 32 * 3 << " bytes." << Logger::endL;
-    return false;
-  }
-  logServer << "Got 96 bytes, as expected: " << Miscellaneous::toStringHex(theMessage.theMessage) << Logger::endL;
-  unsigned char bufferInputs[32 * 3];
-  Signature outputSignature;
-  for (int i = 0; i < theMessage.length; i ++) {
-    bufferInputs[i] = theMessage.theMessage[i];
-  }
-  if (!CryptoEC256k1GPU::signMessageDefaultBuffers(
-    outputSignature.serialization,
-    &outputSignature.size,
-    &bufferInputs[0],
-    &bufferInputs[32],
-    &bufferInputs[64],
-    0,
-    *this->theGPU.get()
-  )) {
-    return false;
-  }
-  std::string outputSignatureString;
-  outputSignatureString.resize(outputSignature.size);
-  for (unsigned i = 0; i < outputSignature.size; i ++) {
-    outputSignatureString[i] = outputSignature.serialization[i];
-  }
-  std::stringstream output;
-  output << "{\"id\":\"" << theMessage.id << "\", \"result\": \"" << Miscellaneous::toStringHex(outputSignatureString) << "\"}\n";
-
-  logServer << "Computation " << theMessage.id << " completed, writing ..." << Logger::endL;
+bool Server::WriteResults(std::stringstream& output) {
+  logServer << "Writing computation packet ..." << Logger::endL;
   int numWrittenBytes = write(this->thePipe.fileDescriptorOutputData, output.str().c_str(), output.str().size());
+  logServer << "Computation output written." << Logger::endL;
   if (numWrittenBytes < 0) {
     logServer << "Error writing bytes. " << Logger::endL;
     return false;
   }
-  logServer << "Computation " << theMessage.id << " completed and sent." << Logger::endL;
+  if (numWrittenBytes < (signed) output.str().size()) {
+    logServer << "Did not manage to write all bytes. " << Logger::endL;
+    return false;
+  }
   return true;
+}
+
+
+
+bool Server::ProcessResults() {
+  std::stringstream output;
+  if (!this->ProcessResultsSha256(output)) {
+    return false;
+  }
+  if (!this->ProcessResultSignMessages(output)) {
+    return false;
+  }
+  //if (!this->ProcessResultsTestBuffer(output)){
+  //  return false;
+  //}
+  return this->WriteResults(output);
 }

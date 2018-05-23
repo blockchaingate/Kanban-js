@@ -31,20 +31,25 @@ public:
 };
 
 class MessagePipeline {
-  bool ReadOne();
+  bool ReadAvailable();
+  bool ReadAvailableMetaData();
+  bool ReadAvailableData();
 public:
   int fileDescriptorOutputData;
 
   int bufferCapacityData; //Size of main message pipe
   int bufferCapacityMetaData; //Size of metadata pipe
 
-  std::queue<MessageFromNode> messageQueue;
+  std::string currentMetaDatA;
 
-  MessageFromNode currentMessage;
+  std::queue<MessageFromNode> messagesRead;
+
+  std::queue<MessageFromNode> messagesWithMetadataButNoData;
 
   PipeBasic* inputData;
   PipeBasic* inputMeta;
-  char* bufferOutputGPU;
+  unsigned char* bufferOutputGPU;
+  unsigned char* bufferOutputGPU_second;
   bool ReadNext();
   MessagePipeline();
   ~MessagePipeline();
@@ -59,6 +64,8 @@ public:
   int listeningSocketData;
   int listeningSocketOutputData;
 
+  int packetNumberOfComputations;
+
   MessagePipeline thePipe;
 
 
@@ -70,10 +77,23 @@ public:
   ~Server();
   bool Run();
   bool RunOnce();
-  bool ExecuteNodeCommand(MessageFromNode& theMessage);
-  bool ExecuteSha256(MessageFromNode& theMessage);
-  bool ExecuteTestBuffer(MessageFromNode& theMessage);
-  bool ExecuteSignOneMessage(MessageFromNode& theMessage);
+  bool QueueCommand(MessageFromNode& theMessage);
+  bool QueueSha256(MessageFromNode& theMessage);
+  bool QueueTestBuffer(MessageFromNode& theMessage);
+  bool QueueSignOneMessage(MessageFromNode& theMessage);
+
+  bool ExecuteQueued();
+  bool ExecuteTestBuffers();
+  bool ExecuteSignMessages();
+  bool ExecuteSha256s();
+
+  bool ProcessResults();
+  bool ProcessResultsSha256(std::stringstream& output);
+  bool ProcessResultsTestBuffer(std::stringstream& output);
+  bool ProcessResultSignMessages(std::stringstream& output);
+
+  bool WriteResults(std::stringstream& output);
+
   bool initialize();
   bool initializePorts();
   bool initializeOneSocketAndPort(int& outputSocket, std::string& outputPort, std::vector<std::string>& portsToTry);

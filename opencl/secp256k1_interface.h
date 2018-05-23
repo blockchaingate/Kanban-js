@@ -123,11 +123,11 @@ public:
 
 class Signature {
 public:
-  static const int maxSerializationSize = 33 * 2 + 6 + 1;
+  static const int maxSerializationSize = MACRO_size_of_signature + 1;
   secp256k1_scalar r;
   secp256k1_scalar s;
   unsigned char serialization[maxSerializationSize];
-  //Max signature size = 33 * 2 + 6, may be smaller.
+  //Max signature size = 33 * 2 + 6 = MACRO_size_of_signature, may be smaller.
   //We reserve an extra byte in case we want to have null-terminated content.
   unsigned int size;
   void ComputeSerializationFromScalars();

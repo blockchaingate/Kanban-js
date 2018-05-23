@@ -37,6 +37,7 @@ public:
   std::string name;
   cl_mem theMemory;
   cl_mem* memoryExternallyOwned;
+  std::vector<unsigned char> buffer;
   int typE;
   uint uintValue;
   SharedMemory();
@@ -78,6 +79,7 @@ public:
   size_t local_item_size; // Divide work items into groups of this size, initialized to 32
   size_t global_item_size; // Divide work items into groups of this size, initialized to 32
 
+  std::vector<std::string> computationIds; // <- used to pipeline messages.
   bool constructFromFileNameNoBuild(
     const std::string& fileNameNoExtension,
     const std::vector<std::string>& outputNames,
@@ -97,7 +99,9 @@ public:
     const std::vector<int>& argumentTypes,
     bool isInput, bool isOutput
   );
-  void writeToBuffer(unsigned argumentNumber, const std::vector<char>& input);
+  bool writeToBuffer(unsigned argumentNumber, const std::vector<char>& input);
+  bool writeToBuffer(unsigned argumentNumber, const std::vector<unsigned char>& input);
+  bool writeToBuffer(unsigned argumentNumber, const std::vector<unsigned int>& input);
   bool writeToBuffer(unsigned argumentNumber, const std::string& input);
   bool writeToBuffer(unsigned argumentNumber, const void* input, size_t size);
   bool writeArgument(unsigned argumentNumber, uint input);

@@ -45,7 +45,15 @@ __constant uint32_t K[64] = {
 0x748f82ee, 0x78a5636f, 0x84c87814, 0x8cc70208, 0x90befffa, 0xa4506ceb, 0xbef9a3f7, 0xc67178f2
 };
 
-__kernel void sha256GPU(__global char* result, uint32_t offset, uint32_t length, uint32_t messageIndex, __global const char* plain_key) {
+unsigned int memoryPool_read_uint(__global const unsigned char* memoryPoolPointer) {
+  return
+  ((unsigned int) (memoryPoolPointer[0] << 24)) +
+  ((unsigned int) (memoryPoolPointer[1] << 16)) +
+  ((unsigned int) (memoryPoolPointer[2] <<  8)) +
+  ((unsigned int) memoryPoolPointer[3]       ) ;
+}
+
+__kernel void sha256GPU(__global char* result, __global unsigned char* offsets,  __global unsigned char* lengths, uint32_t messageIndex, __global const char* plain_key) {
   int t, gid, msg_pad, currentIndex, lomc;
   int stop, mmod;
   uint32_t i, item, total;
@@ -55,6 +63,10 @@ __kernel void sha256GPU(__global char* result, uint32_t offset, uint32_t length,
   //printf("length: %u num_keys:%u\n", length, total);
   int current_pad;
   msg_pad = 0;
+
+  unsigned int offset = memoryPool_read_uint(&offsets[4 * messageIndex]);
+  unsigned int length = memoryPool_read_uint(&lengths[4 * messageIndex]);
+
   total = length % 64 >= 56 ? 2 : 1 + length / 64;
   //printf("length: %u total:%u\n", length, total);
   digest[0] = H0;

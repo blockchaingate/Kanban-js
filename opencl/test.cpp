@@ -301,6 +301,8 @@ public:
   static unsigned char outputBuffer[10000000];
   static std::vector<uint> messageStarts;
   static std::vector<uint> messageLengths;
+  static std::vector<unsigned char> messageStartsUChar;
+  static std::vector<unsigned char> messageLengthsUChar;
   static void initialize();
   static unsigned totalToCompute;
 };
@@ -310,6 +312,9 @@ std::string testSHA256::inputBuffer;
 unsigned char testSHA256::outputBuffer[10000000];
 std::vector<uint> testSHA256::messageStarts;
 std::vector<uint> testSHA256::messageLengths;
+std::vector<unsigned char> testSHA256::messageStartsUChar;
+std::vector<unsigned char> testSHA256::messageLengthsUChar;
+
 unsigned testSHA256::totalToCompute = 100000;
 
 void testSHA256::initialize() {
@@ -326,11 +331,17 @@ void testSHA256::initialize() {
    "cf5b16a778af8380036ce59e7b0492370b249b11e8f07a51afac45037afee9d1"
   });
   testSHA256::inputBuffer.reserve(100 * testSHA256::totalToCompute);
+  testSHA256::messageStartsUChar.resize(4 * testSHA256::totalToCompute);
+  testSHA256::messageLengthsUChar.resize(4 * testSHA256::totalToCompute);
   for (unsigned i = 0; i < testSHA256::totalToCompute; i ++) {
     unsigned testCounter = i % testSHA256::knownSHA256s.size();
     std::string& currentMessage = testSHA256::knownSHA256s[testCounter][0];
     testSHA256::messageStarts.push_back(testSHA256::inputBuffer.size());
     testSHA256::messageLengths.push_back(currentMessage.size());
+
+    memoryPool_write_uint(testSHA256::inputBuffer.size(), &testSHA256::messageStartsUChar[i*4]);
+    memoryPool_write_uint(currentMessage.size(), &testSHA256::messageLengthsUChar[i*4]);
+
     testSHA256::inputBuffer.append(currentMessage);
     for (unsigned j = 0; j < 32; j ++)
       testSHA256::outputBuffer[i * 32 + j] = 0;
@@ -349,10 +360,10 @@ bool testSHA256(GPU& theGPU) {
   auto timeStart = std::chrono::system_clock::now();
   uint largeTestCounter;
   theKernel->writeToBuffer(4, testSHA256::inputBuffer);
+  theKernel->writeToBuffer(1, testSHA256::messageStartsUChar);
+  theKernel->writeToBuffer(2, testSHA256::messageLengths);
 
   for (largeTestCounter = 0; largeTestCounter < testSHA256::totalToCompute; largeTestCounter ++) {
-    theKernel->writeArgument(1, testSHA256::messageStarts[largeTestCounter]);
-    theKernel->writeArgument(2, testSHA256::messageLengths[largeTestCounter]);
     theKernel->writeArgument(3, largeTestCounter);
     //theKernel->writeToBuffer(0, &theLength, sizeof(uint));
     //std::cout << "DEBUG: Setting arguments ... " << std::endl;

@@ -32,7 +32,7 @@ Please see the file opencl/README.md for technical notes on this code.
 #define MACRO_MEMORY_POOL_SIZE_MultiplicationContext 6000000
 #define MACRO_MEMORY_POOL_SIZE_GeneratorContext 2000000
 #define MACRO_MEMORY_POOL_SIZE_Signature 250000
-
+#define MACRO_size_of_signature (33 * 2 + 6)
 
 __global void* checked_malloc(unsigned int size, __global unsigned char* memoryPool);
 void memoryPool_write_uint(unsigned int numberToWrite, __global unsigned char* memoryPoolPointer);
