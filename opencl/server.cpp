@@ -537,15 +537,13 @@ bool Server::RunOnce() {
   if (!this->thePipe.ReadNext()) { //reads all pending messages
     return false;
   }
-  int numQueued = 0;
   this->packetNumberOfComputations = 0;
   while (!this->thePipe.messagesRead.empty()) {
     if (!this->QueueCommand(this->thePipe.messagesRead.front())) {
-      if (numQueued == 0) {
+      if (this->packetNumberOfComputations == 0) {
         return false;
       }
     }
-    numQueued ++;
     this->packetNumberOfComputations ++;
     this->thePipe.messagesRead.pop_front();
   }
@@ -600,6 +598,9 @@ bool Server::ExecuteQueued() {
 
 bool Server::QueueTestBuffer(MessageFromNode& theMessage) {
   std::shared_ptr<GPUKernel> kernelBuffer = this->theGPU->theKernels[GPU::kernelTestBuffer];
+  if (!kernelBuffer->build()) {
+    return false;
+  }
   std::vector<unsigned char>& buffer = kernelBuffer->outputs[0]->buffer;
   std::vector<unsigned char>& bufferOffsets = kernelBuffer->inputs[0]->buffer;
   if (buffer.size() + theMessage.theMessage.size() > buffer.capacity()) {
@@ -614,7 +615,13 @@ bool Server::QueueTestBuffer(MessageFromNode& theMessage) {
 
 bool Server::QueueSha256(MessageFromNode& theMessage) {
   logServer << "DEBUG: here be i " << Logger::endL;
+  if (this->theGPU->theKernels.find(GPU::kernelSHA256) == this->theGPU->theKernels.end()) {
+    logServer << "DEBUG: this should not happen!!!" << Logger::endL;
+  }
   std::shared_ptr<GPUKernel> theKernel = this->theGPU->theKernels[GPU::kernelSHA256];
+  if (!theKernel->build()) {
+    return false;
+  }
   std::vector<unsigned char>& offsets = theKernel->inputs[0]->buffer;
   std::vector<unsigned char>& lengths = theKernel->inputs[1]->buffer;
   std::vector<unsigned char>& messages = theKernel->inputs[3]->buffer;
@@ -696,6 +703,9 @@ bool Server::QueueSignOneMessage(MessageFromNode& theMessage) {
   }
   logServer << "Got 96 bytes, as expected: " << Miscellaneous::toStringHex(theMessage.theMessage) << Logger::endL;
   std::shared_ptr<GPUKernel> kernelSign = this->theGPU->theKernels[GPU::kernelSign];
+  if (!kernelSign->build()) {
+    return false;
+  }
 
   std::vector<unsigned char>& outputSignatures = kernelSign->outputs[0]->buffer;
   std::vector<unsigned char>& nonces = kernelSign->outputs[2]->buffer;

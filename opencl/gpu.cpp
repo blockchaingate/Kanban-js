@@ -139,12 +139,15 @@ bool GPU::initializeAllFull() {
 }
 
 bool GPU::initializeAllNoBuild() {
+  logGPU << "DEBUG: initializing all no build ... " << Logger::endL;
   if (!this->initializePlatform()) {
     return false;
   }
+  logGPU << "DEBUG: initializing kernels no build ... " << Logger::endL;
   if (!this->initializeKernelsNoBuild()) {
     return false;
   }
+  logGPU << "DEBUG: got to here ... " << Logger::endL;
   return true;
 }
 
