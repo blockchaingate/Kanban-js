@@ -79,29 +79,35 @@ GPUKernel::GPUKernel() {
 
 GPUKernel::~GPUKernel() {
   //logGPU << "Kernel " << this->name << " destruction started. " << Logger::endL;
-  for (unsigned i = 0; i < this->inputs.size(); i ++)
+  for (unsigned i = 0; i < this->inputs.size(); i ++) {
     this->inputs[i]->ReleaseMe();
-  for (unsigned i = 0; i < this->outputs.size(); i ++)
+  }
+  for (unsigned i = 0; i < this->outputs.size(); i ++) {
     this->outputs[i]->ReleaseMe();
-  cl_int ret;
+  }
+  cl_int ret = CL_SUCCESS;
   bool isGood = true;
-  ret = clReleaseProgram(this->program);
+  if (this->program != NULL) {
+    ret = clReleaseProgram(this->program);
+  }
   if (ret != CL_SUCCESS) {
     logGPU << "Error with code: " << ret << " while releasing kernel " << this->name << ". " << Logger::endL;
     isGood = false;
   }
   this->program = NULL;
-  ret = clReleaseKernel(this->kernel);
+  if (this->kernel != NULL) {
+    ret = clReleaseKernel(this->kernel);
+  }
   if (ret != CL_SUCCESS) {
     logGPU << "Error with code: " << ret << " while releasing kernel " << this->name << ". " << Logger::endL;
     isGood = false;
   }
   this->kernel = NULL;
-  if (isGood)
+  if (isGood) {
     logGPU << "Kernel " << this->name << " destroyed successfully. " << Logger::endL;
-  else
+  } else {
     logGPU << "Encountered errors while destroying kernel " << this->name << ". " << Logger::endL;
-
+  }
 }
 
 GPU::GPU() {
