@@ -24,3 +24,9 @@ test/kanban_gpu/debug/
 *.snm
 *.vrb
 build/Makefile
+
+#this auto-generated file should really be in the repo,
+#adding to gitignore in order to not 
+#flood the repo with changes. 
+#Will be commented out when time comes to deploy.
+html/kanban_frontend_browserified.js
