@@ -290,19 +290,20 @@ bool testBasicOperations(GPU& theGPU){
 
 int testMain() {
   GPU theGPU;
+  int debugWarning;
   //theGPU.flagTurnOffToDebugCPU = true;
   //if (!testBasicOperations(theGPU))
   //  return - 1;
-  if (!testMainPart1ComputeContexts(theGPU))
-    return - 1;
-  if (!testMainPart2Signatures(theGPU))
-    return - 1;
-  if (theGPU.flagTurnOffToDebugCPU)
-    return 0;
+  //if (!testMainPart1ComputeContexts(theGPU))
+  //  return - 1;
+  //if (!testMainPart2Signatures(theGPU))
+  //  return - 1;
+  //if (theGPU.flagTurnOffToDebugCPU)
+  //  return 0;
   if (!testSHA256(theGPU))
     return - 1;
-  if (!testSign(theGPU))
-    return - 1;
+  //if (!testSign(theGPU))
+  //  return - 1;
 
   return 0;
 }

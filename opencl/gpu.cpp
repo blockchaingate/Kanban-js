@@ -168,7 +168,7 @@ bool GPU::initializePlatform() {
   if (this->flagInitializedPlatform)
     return true;
   //int debugWarningDisableCacheDuringDevelopmentOnly;
-  setenv("CUDA_CACHE_DISABLE", "1", 1);
+  //setenv("CUDA_CACHE_DISABLE", "1", 1);
   this->context = 0;
   cl_int ret = 0;
   ret = clGetPlatformIDs(2, this->platformIds, &this->numberOfPlatforms);
@@ -749,6 +749,7 @@ bool GPUKernel::constructArguments(
     logGPU << "GPU kernel arguments are neither input nor output" << Logger::endL;
     return false;
   }
+  bufferFlag |= CL_MEM_ALLOC_HOST_PTR;
   if (theArgs.size() != 0) {
     logGPU << "Fatal error: arguments not empty. " << Logger::endL;
     return false;
