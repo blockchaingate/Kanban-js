@@ -9,7 +9,6 @@ function computeUnspentTransactions(id){
 
 }
 
-
 function pollOngoing(request, response, desiredCommand) {
   var callIds = desiredCommand.callIds;
   //console.log(`Call ids so far: ${JSON.stringify(callIds)}`);
