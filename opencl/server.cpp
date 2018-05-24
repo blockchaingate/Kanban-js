@@ -735,6 +735,7 @@ bool Server::ExecuteSignMessages() {
   if (!CryptoEC256k1GPU::initializeGeneratorContext(*this->theGPU.get())) {
     return false;
   }
+  logServer << "DEBUG: Got to message signing. " << Logger::endL;
   kernelSign->writeToBuffer(2, kernelSign->getOutput(2)->buffer);
   kernelSign->writeToBuffer(3, kernelSign->getInput(0)->buffer);
   kernelSign->writeToBuffer(4, kernelSign->getInput(1)->buffer);

@@ -131,11 +131,18 @@ sudo apt install cmake
 ```
 sudo apt install ocl-icd-opencl-dev
 ```
-2. You may want to look into installing the Intel openCL drivers:
+2. Intel drivers info.
 
 https://software.intel.com/en-us/articles/sdk-for-opencl-gsg 
 
 For convenience, the Ubuntu 16.04 openCL installation script is copied in our repository: [intel openCL installation](miscellaneous/INTEL_Apr_18_install_OCL_driver2.sh)
+
+3. AMD drivers info.
+
+https://support.amd.com/en-us/kb-articles/Pages/Radeon-Software-for-Linux-Release-Notes.aspx
+
+https://support.amd.com/en-us/kb-articles/Pages/Installation-Instructions-for-amdgpu-Graphics-Stacks.aspx
+
 
 ### openssl 
 1. Install openssl

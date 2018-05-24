@@ -340,7 +340,7 @@ OpenCLDriver.prototype.start = function () {
     console.log(data.toString());
   });
   this.handleExecutable.stderr.on('data', function(data) {
-    console.log(data);
+    console.log("Error: " + ("" + data).red );
   });
 }
 
@@ -526,7 +526,7 @@ OpenCLDriver.prototype.pipeOneMessagePartTwo = function (message, command) {
     //let bufferHex = Buffer.from(message, 'binary');
     //console.log(`Wrote all ${message.length} bytes : ${miscellaneous.shortenString(bufferHex.toString('hex'), 2000)}`.blue);
   } catch (e){
-    console.log(e);
+    console.log("Fatal error: " + e);
     assert(false);
   }
   this.numProcessed ++;

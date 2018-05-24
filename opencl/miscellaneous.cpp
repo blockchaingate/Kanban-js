@@ -41,10 +41,10 @@ StateMaintainerFolderLocation::StateMaintainerFolderLocation(Logger& inputlogFil
 
 StateMaintainerFolderLocation::~StateMaintainerFolderLocation() {
   if (this->ambientDirectoryAtObjectCreation != "") {
-    OSWrapper::setCurrentPath(this->ambientDirectoryAtObjectCreation);
     *this->logFile << Logger::colorGreen
-    << "Set path (back) to: " << this->ambientDirectoryAtObjectCreation
+    << "Setting path (back) to: " << this->ambientDirectoryAtObjectCreation
     << Logger::colorNormal << Logger::endL;
+    OSWrapper::setCurrentPath(this->ambientDirectoryAtObjectCreation);
   }
   this->ambientDirectoryAtObjectCreation = "";
 }

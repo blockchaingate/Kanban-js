@@ -15,10 +15,10 @@ public:
   std::fstream theFile;
   std::string descriptionPrependToLogs;
   bool flagExtraDescription;
+  bool flagDeallocated;
   enum logModifiers{ endL};
-  friend Logger& operator << (Logger& inputLogger, logModifiers other)
-  { if (other == Logger::endL)
-    {
+  friend Logger& operator << (Logger& inputLogger, logModifiers other) {
+    if (other == Logger::endL) {
       std::cout << std::endl;
       inputLogger.theFile << "\n";
     }
@@ -26,9 +26,12 @@ public:
     return inputLogger;
   }
   template<typename any>
-  friend Logger& operator << (Logger& inputLogger, const any& other)
-  { if (inputLogger.flagExtraDescription)
-    {
+  friend Logger& operator << (Logger& inputLogger, const any& other) {
+    if (inputLogger.flagDeallocated) {
+      std::cout << other << std::endl;
+      return inputLogger;
+    }
+    if (inputLogger.flagExtraDescription) {
       inputLogger.flagExtraDescription = false;
       std::cout << inputLogger.descriptionPrependToLogs;
     }
@@ -37,13 +40,15 @@ public:
     std::cout << other;
     return inputLogger;
   }
-  Logger(const std::string& pathname, const std::string& inputDescriptionPrependToLogs)
-  { this->theFile.open(pathname, std::fstream::out | std::fstream::trunc);
+  Logger(const std::string& pathname, const std::string& inputDescriptionPrependToLogs) {
+    this->theFile.open(pathname, std::fstream::out | std::fstream::trunc);
     this->flagExtraDescription = true;
     this->descriptionPrependToLogs = inputDescriptionPrependToLogs;
+    this->flagDeallocated = false;
   }
-  ~Logger()
-  { this->theFile.close();
+  ~Logger() {
+    this->theFile.close();
+    this->flagDeallocated = true;
   }
 };
 

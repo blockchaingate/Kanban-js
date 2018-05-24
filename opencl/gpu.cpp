@@ -657,7 +657,13 @@ bool GPUKernel::build() {
   }
   StateMaintainerFolderLocation preserveCurrentFolder(logGPU);
   logGPU << "Building program: " << this->name << "..." << Logger::endL;
-  OSWrapper::setCurrentPath("../opencl/cl");
+  try {
+    OSWrapper::setCurrentPath("../opencl/cl");
+  } catch (...) {
+    logGPU << Logger::colorYellow << "Failed to set folder: " << "../opencl/cl" << Logger::colorNormal << Logger::endL;
+    logGPU << "This may be OK if current folder is already correct: " << Logger::colorBlue
+    << OSWrapper::getCurrentPath() << Logger::colorNormal << Logger::endL;
+  }
   logGPU << Logger::colorYellow << "Set current folder to: " << OSWrapper::getCurrentPath()
   << Logger::colorNormal << Logger::endL;
   cl_int ret;
