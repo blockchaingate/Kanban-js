@@ -737,7 +737,7 @@ bool GPUKernel::constructArguments(
   cl_int ret = CL_SUCCESS;
   cl_mem_flags bufferFlag = CL_MEM_READ_WRITE;
   if (isInput && isOutput) {
-    bufferFlag = CL_MEM_READ_WRITE;
+    bufferFlag = CL_MEM_WRITE_ONLY ;// CL_MEM_READ_WRITE;
   }
   if (isInput && !isOutput) {
     bufferFlag = CL_MEM_READ_ONLY;
