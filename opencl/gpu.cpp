@@ -664,15 +664,17 @@ bool GPUKernel::build() {
     logGPU << "This may be OK if current folder is already correct: " << Logger::colorBlue
     << OSWrapper::getCurrentPath() << Logger::colorNormal << Logger::endL;
   }
-  logGPU << Logger::colorYellow << "Set current folder to: " << OSWrapper::getCurrentPath()
-  << Logger::colorNormal << Logger::endL;
+  std::string currentFolder = OSWrapper::getCurrentPath();
+  logGPU << Logger::colorYellow << "Build base folder: " << currentFolder << Logger::colorNormal << Logger::endL;
   cl_int ret;
+  std::stringstream programOptions;
+  programOptions << "-I " << currentFolder;
   ret = clBuildProgram(
     this->program,
     1,
     &this->owner->currentDeviceId,
-    NULL,
-    //programOptions.c_str(),
+    //NULL,
+    programOptions.str().c_str(),
     NULL,
     NULL
   );
