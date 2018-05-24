@@ -57,10 +57,10 @@ class GPU;
 /// 3. Likewise the input arguments correspond to the elements of this->inputs, respecting the order of the this->inputs vector.
 
 class GPUKernel {
+  std::vector<std::shared_ptr<SharedMemory> > outputs; //<- kernel must be built before accessing: use getOutput to enforce.
+  std::vector<std::shared_ptr<SharedMemory> > inputs; //<- kernel must be built before accessing: use getInput to enforce.
 public:
   GPU* owner;
-  std::vector<std::shared_ptr<SharedMemory> > outputs;
-  std::vector<std::shared_ptr<SharedMemory> > inputs;
 
 
   std::vector<std::string> desiredOutputNames;
@@ -80,6 +80,11 @@ public:
   size_t global_item_size; // Divide work items into groups of this size, initialized to 32
 
   std::vector<std::string> computationIds; // <- used to pipeline messages.
+  std::vector<std::shared_ptr<SharedMemory> >& getOutputCollection();
+  std::vector<std::shared_ptr<SharedMemory> >& getInputCollection();
+  std::shared_ptr<SharedMemory>& getOutput(int outputIndex);
+  std::shared_ptr<SharedMemory>& getInput(int inputIndex);
+
   bool constructFromFileNameNoBuild(
     const std::string& fileNameNoExtension,
     const std::vector<std::string>& outputNames,
@@ -168,6 +173,7 @@ public:
   bool flagInitializedKernelsNoBuild;
   bool flagInitializedKernelsFull;
   bool flagTurnOffToDebugCPU;
+  std::shared_ptr<GPUKernel> getKernel(const std::string& kernelName);
   bool initializeAllNoBuild();
   bool initializeAllFull();
   bool initializePlatform();

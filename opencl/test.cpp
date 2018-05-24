@@ -396,7 +396,7 @@ bool testSHA256(GPU& theGPU) {
       std::cout << "Computed " << largeTestCounter << " sha256s in " << elapsed_seconds.count() << " second(s). " << std::endl;
     }
   }
-  cl_mem& result = theKernel->outputs[0]->theMemory;
+  cl_mem& result = theKernel->getOutput(0)->theMemory;
   cl_int ret = clEnqueueReadBuffer (
     theGPU.commandQueue, result, CL_TRUE, 0,
     32 * testSHA256::totalToCompute, testSHA256::outputBuffer, 0, NULL, NULL
@@ -517,7 +517,7 @@ bool testSign(GPU& theGPU) {
       << ((counterTest + 1) / elapsed_seconds.count()) << " signature(s) per second." << std::endl;
     }
   }
-  cl_mem& result = kernelSign->outputs[0]->theMemory;
+  cl_mem& result = kernelSign->getOutput(0)->theMemory;
   cl_int ret = clEnqueueReadBuffer (
     theGPU.commandQueue,
     result,

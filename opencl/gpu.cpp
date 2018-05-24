@@ -138,6 +138,18 @@ bool GPU::initializeAllFull() {
   return true;
 }
 
+std::shared_ptr<GPUKernel> GPU::getKernel(const std::string& kernelName) {
+  if (!this->initializeAllNoBuild()) {
+    logGPU << "Fatal error: failed to initialize kernels in a function where failure is not allowed. " << Logger::endL;
+    assert(false);
+  }
+  if (this->theKernels.find(kernelName) == this->theKernels.end()) {
+    logGPU << "Fatal error: " << kernelName << " is not a known kernel name" << Logger::endL;
+    assert(false);
+  }
+  return this->theKernels[kernelName];
+}
+
 bool GPU::initializeAllNoBuild() {
   logGPU << "DEBUG: initializing all no build ... " << Logger::endL;
   if (!this->initializePlatform()) {
@@ -601,6 +613,42 @@ bool GPUKernel::constructFromFileNameNoBuild(
 
   //std::string programOptions = "-cl-std=CL2.0";
   return true;
+}
+
+std::vector<std::shared_ptr<SharedMemory> >& GPUKernel::getOutputCollection() {
+  if (!this->build()) {
+    logGPU << "Fatal error: requesting outputs of kernel " << this->name << " but it did not build successfully. " << Logger::endL;
+    assert(false);
+  }
+  return this->outputs;
+}
+
+std::vector<std::shared_ptr<SharedMemory> >& GPUKernel::getInputCollection() {
+  if (!this->build()) {
+    logGPU << "Fatal error: requesting inputs of kernel " << this->name << " but it did not build successfully. " << Logger::endL;
+    assert(false);
+  }
+  return this->inputs;
+}
+
+std::shared_ptr<SharedMemory>& GPUKernel::getOutput(int outputIndex) {
+  std::vector<std::shared_ptr<SharedMemory> >& theOutputs = this->getOutputCollection();
+  if (outputIndex < 0 || outputIndex >= (signed) theOutputs.size()) {
+    logGPU << "Fatal error: requested output index " << outputIndex << " is out of bounds (outputs' size: "
+    << theOutputs.size() << ")." << Logger::endL;
+    assert(false);
+  }
+  return theOutputs[outputIndex];
+}
+
+std::shared_ptr<SharedMemory>& GPUKernel::getInput(int inputIndex) {
+  std::vector<std::shared_ptr<SharedMemory> >& theInputs = this->getInputCollection();
+  if (inputIndex < 0 || inputIndex >= (signed) theInputs.size()) {
+    logGPU << "Fatal error: requested input index " << inputIndex << " is out of bounds (inputs' size: "
+    << theInputs.size() << ")." << Logger::endL;
+    assert(false);
+  }
+  return theInputs[inputIndex];
 }
 
 bool GPUKernel::build() {
