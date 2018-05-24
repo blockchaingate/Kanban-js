@@ -698,6 +698,13 @@ bool GPUKernel::build() {
   for (unsigned i = 0; i < this->desiredExternalBufferNames.size(); i ++) {
     const std::string& otherKernelName = this->desiredExternalBufferKernelOwners[i];
     GPUKernel& other = *this->owner->theKernels[otherKernelName].get();
+    if (!other.flagIsBuilt) {
+      logGPU << "Initializing kernel " << this->name << " requires that " << otherKernelName
+      << " be built. Proceeding to do that for you. " << Logger::endL;
+      if (!other.build()) {
+        return false;
+      }
+    }
     this->buffersExternallyOwned.push_back(other.getClMemPointer(this->desiredExternalBufferNames[i]));
   }
   this->constructArguments(this->desiredOutputNames, this->desiredOutputTypes, true, true);
