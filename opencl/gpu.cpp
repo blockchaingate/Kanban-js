@@ -1,5 +1,6 @@
 #include "gpu.h"
 #include "logging.h"
+#include "miscellaneous.h"
 #include <fstream>
 #include <iostream>
 #include <iomanip>
@@ -654,7 +655,11 @@ bool GPUKernel::build() {
   if (this->flagIsBuilt){
     return true;
   }
+  StateMaintainerFolderLocation preserveCurrentFolder(logGPU);
   logGPU << "Building program: " << this->name << "..." << Logger::endL;
+  OSWrapper::setCurrentPath("../opencl/cl");
+  logGPU << Logger::colorYellow << "Set current folder to: " << OSWrapper::getCurrentPath()
+  << Logger::colorNormal << Logger::endL;
   cl_int ret;
   ret = clBuildProgram(
     this->program,

@@ -7,6 +7,8 @@ class Logger
 {
 public:
   static std::string colorRed;
+  static std::string colorYellow;
+  static std::string colorGreen;
   static std::string colorBlue;
   static std::string colorNormal;
 

@@ -33,7 +33,6 @@ all: directories kanban_gpu
 directories: build
 build:
 	mkdir -p ../build
-	mkdir -p ../build/cl
 #	$(info current_dir: $(shell pwd))
 
 kanban_gpu: $(OBJECTS)

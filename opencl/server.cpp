@@ -16,6 +16,9 @@ Logger logServer("../logfiles/logServer.txt", "[ServerGPU] ");
 
 std::string Logger::colorNormal = "\e[39m";
 std::string Logger::colorBlue = "\e[94m";
+std::string Logger::colorYellow = "\e[93m";
+std::string Logger::colorGreen = "\e[92m";
+std::string Logger::colorRed = "\e[91m";
 
 PipeBasic::PipeBasic(int inputCapacity, const std::string& inputName) {
   this->length = 0;

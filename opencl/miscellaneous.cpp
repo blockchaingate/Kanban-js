@@ -26,7 +26,25 @@ std::string Miscellaneous::toStringShorten(const std::string& input, int numChar
   return out.str();
 }
 
-StateMaintainerFolderLocation::StateMaintainerFolderLocation() {
-  this->ambientDirectoryAtObjectCreation = std::experimental::filesystem::current_path();
+void OSWrapper::setCurrentPath(const std::string& desiredPath){
+  std::experimental::filesystem::current_path(desiredPath);
+}
 
+std::string OSWrapper::getCurrentPath(){
+  return std::experimental::filesystem::current_path();
+}
+
+StateMaintainerFolderLocation::StateMaintainerFolderLocation(Logger& inputlogFile) {
+  this->ambientDirectoryAtObjectCreation = OSWrapper::getCurrentPath();
+  this->logFile = &inputlogFile;
+}
+
+StateMaintainerFolderLocation::~StateMaintainerFolderLocation() {
+  if (this->ambientDirectoryAtObjectCreation != "") {
+    OSWrapper::setCurrentPath(this->ambientDirectoryAtObjectCreation);
+    *this->logFile << Logger::colorGreen
+    << "Set path (back) to: " << this->ambientDirectoryAtObjectCreation
+    << Logger::colorNormal << Logger::endL;
+  }
+  this->ambientDirectoryAtObjectCreation = "";
 }
