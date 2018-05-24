@@ -70,8 +70,8 @@ SharedMemory::~SharedMemory() {
 }
 
 GPUKernel::GPUKernel() {
-  this->local_item_size = 32;
-  this->global_item_size = 32;
+  this->local_item_size = 64;
+  this->global_item_size = 64;
   this->numInitializedExternallyOwnedBuffers = 0;
   this->program = NULL;
   this->kernel = NULL;

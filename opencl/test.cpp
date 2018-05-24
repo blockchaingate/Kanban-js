@@ -447,12 +447,12 @@ unsigned char getByte(unsigned char byte1, unsigned char byte2, unsigned char by
 
 void testSignatures::initialize() {
   this->numMessagesPerPipeline = 10000;
-  int totalPipelineSize = this->numMessagesPerPipeline * 32;
+  unsigned totalPipelineSize = this->numMessagesPerPipeline * 32;
   int totalOutputSize = this->numMessagesPerPipeline * 80;
   this->messages.resize(totalPipelineSize);
   this->nonces.resize(totalPipelineSize);
   this->secretKeys.resize(totalPipelineSize);
-  this->outputSignatures.reserve(totalOutputSize);
+  this->outputSignatures.resize(totalOutputSize);
   this->messages[0] = 'a';
   this->messages[1] = 'b';
   this->messages[2] = 'c';
@@ -462,7 +462,7 @@ void testSignatures::initialize() {
   this->secretKeys[0] = 'h';
   this->secretKeys[1] = 'i';
   this->secretKeys[2] = 'j';
-  for (unsigned i = 3; i < this->numMessagesPerPipeline; i ++) {
+  for (unsigned i = 3; i < totalPipelineSize; i ++) {
     this->messages[i] = getByte(this->messages[i - 1], this->messages[i - 2], this->nonces[i - 3]);
     this->nonces[i] = getByte(this->nonces[i - 1], this->nonces[i - 2], this->secretKeys[i - 3]);
     this->secretKeys[i] = getByte(this->secretKeys[i - 1], this->secretKeys[i - 2], this->messages[i - 3]);
@@ -490,8 +490,6 @@ bool testSign(GPU& theGPU) {
   kernelSign->writeToBuffer(4, &theTest.messages[0], theTest.messages.size());
   for (counterTest = 0; counterTest < theTest.numMessagesPerPipeline; counterTest ++) {
     kernelSign->writeArgument(6, counterTest);
-
-    kernelSign->writeArgument(6, counterTest);
     //theKernel->writeToBuffer(0, &theLength, sizeof(uint));
     //std::cout << "DEBUG: Setting arguments ... " << std::endl;
     //std::cout << "DEBUG: arguments set, enqueueing kernel... " << std::endl;
@@ -514,7 +512,7 @@ bool testSign(GPU& theGPU) {
     if (counterTest % 100 == 0) {
       auto timeCurrent = std::chrono::system_clock::now();
       std::chrono::duration<double> elapsed_seconds = timeCurrent - timeStart;
-      std::cout << "Signed " << counterTest << " 32-byte messages in " << elapsed_seconds.count() << " second(s),"
+      std::cout << "Scheduled " << counterTest << " 32-byte messages in " << elapsed_seconds.count() << " second(s),"
       << " current speed: "
       << ((counterTest + 1) / elapsed_seconds.count()) << " signature(s) per second." << std::endl;
     }
