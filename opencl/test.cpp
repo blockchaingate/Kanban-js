@@ -393,13 +393,15 @@ bool testSHA256(GPU& theGPU) {
     if (largeTestCounter % 500 == 0) {
       auto timeCurrent = std::chrono::system_clock::now();
       std::chrono::duration<double> elapsed_seconds = timeCurrent - timeStart;
-      std::cout << "Computed " << largeTestCounter << " sha256s in " << elapsed_seconds.count() << " second(s). " << std::endl;
+      std::cout << "Scheduled " << largeTestCounter << " sha256s in " << elapsed_seconds.count() << " second(s). " << std::endl;
     }
   }
   cl_mem& result = theKernel->getOutput(0)->theMemory;
+  unsigned totalToExtract = 1; // =testSHA256::totalToCompute
+
   cl_int ret = clEnqueueReadBuffer (
     theGPU.commandQueue, result, CL_TRUE, 0,
-    32 * testSHA256::totalToCompute, testSHA256::outputBuffer, 0, NULL, NULL
+    32 * totalToExtract, testSHA256::outputBuffer, 0, NULL, NULL
   );
   if (ret != CL_SUCCESS) {
     logTestGraphicsPU << "Failed to enqueue read buffer. Return code: " << ret << ". " << Logger::endL;
@@ -410,7 +412,7 @@ bool testSHA256(GPU& theGPU) {
   logTestGraphicsPU << "Computed " << largeTestCounter << " sha256s in " << elapsed_seconds.count() << " second(s). " << Logger::endL;
   logTestGraphicsPU << "Speed: " << (testSHA256::totalToCompute / elapsed_seconds.count()) << " hashes per second. " << Logger::endL;
   logTestGraphicsPU << "Checking computations ..." << Logger::endL;
-  for (largeTestCounter = 0; largeTestCounter < testSHA256::totalToCompute; largeTestCounter ++) {
+  for (largeTestCounter = 0; largeTestCounter < totalToExtract; largeTestCounter ++) {
     unsigned testCounteR = largeTestCounter % testSHA256::knownSHA256s.size();
     std::stringstream out;
     unsigned offset = largeTestCounter * 32;
