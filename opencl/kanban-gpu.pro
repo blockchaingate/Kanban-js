@@ -13,7 +13,7 @@ SOURCES += \
     secp256k1_interface.cpp \
     cl/secp256k1_cpp.cpp
 
-LIBS+=-lOpenCL
+LIBS+=-lOpenCL -lstdc++fs
 
 HEADERS += \
     gpu.h \

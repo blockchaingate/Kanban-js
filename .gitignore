@@ -23,6 +23,8 @@ test/kanban_gpu/debug/
 *.nav
 *.snm
 *.vrb
+*.d
+*.o
 build/Makefile
 
 #this auto-generated file should really be in the repo,

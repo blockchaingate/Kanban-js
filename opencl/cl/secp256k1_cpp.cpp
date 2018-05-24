@@ -7,21 +7,21 @@
 #include <stdint.h>
 #include <stdlib.h>
 #include <assert.h>
-#include "logging.h"
+#include "../logging.h"
 extern Logger logGPU;
-#include "cl/secp256k1_cpp.h"
+#include "secp256k1_cpp.h"
 #include <iomanip>
 #include <sstream>
 
 
 #define __kernel
 
-#include "cl/secp256k1_opencl_compute_multiplication_context.cl"
-#include "cl/secp256k1_opencl_compute_generator_context.cl"
-#include "cl/secp256k1_opencl_sign.cl"
-#include "cl/secp256k1_opencl_generate_public_key.cl"
-#include "cl/secp256k1_opencl_verify_signature.cl"
-#include "cl/test_suite_1_basic_operations.cl"
+#include "secp256k1_opencl_compute_multiplication_context.cl"
+#include "secp256k1_opencl_compute_generator_context.cl"
+#include "secp256k1_opencl_sign.cl"
+#include "secp256k1_opencl_generate_public_key.cl"
+#include "secp256k1_opencl_verify_signature.cl"
+#include "test_suite_1_basic_operations.cl"
 void assertFalse(__constant const char* errorMessage, __global unsigned char* memoryPool) {
   (void) memoryPool;
   std::string errorMessageString(errorMessage);
@@ -29,6 +29,6 @@ void assertFalse(__constant const char* errorMessage, __global unsigned char* me
   assert(false);
 }
 
-#include "cl/secp256k1.cl"
+#include "secp256k1.cl"
 
 

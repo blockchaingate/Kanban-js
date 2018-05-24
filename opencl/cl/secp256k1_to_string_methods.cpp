@@ -1,7 +1,7 @@
-#include "logging.h"
+#include "../logging.h"
 #include <sstream>
 #include <iomanip>
-#include "cl/secp256k1_cpp.h"
+#include "secp256k1_cpp.h"
 #include <assert.h>
 extern Logger logGPU;
 

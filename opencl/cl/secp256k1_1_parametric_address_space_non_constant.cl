@@ -5,7 +5,7 @@
 // ADDRESS_SPACE_CONSTANT
 // APPEND_ADDRESS_SPACE
 
-#include "../opencl/cl/secp256k1.h"
+#include "secp256k1.h"
 
 void APPEND_ADDRESS_SPACE(secp256k1_ge_set_all_gej_var)(
   size_t len,

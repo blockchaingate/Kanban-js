@@ -81,8 +81,8 @@ void memoryPool_freeMemory__global(__global void* any);
 
 ///////////////////////
 ///////////////////////
-#include "../opencl/cl/secp256k1_set_1_address_space__default.h"
-#include "../opencl/cl/secp256k1_data_structures_parametric_address_space.h"
+#include "secp256k1_set_1_address_space__default.h"
+#include "secp256k1_data_structures_parametric_address_space.h"
 ///////////////////////
 ///////////////////////
 enum memoryPoolType{
@@ -486,16 +486,16 @@ int secp256k1_eckey_pubkey_serialize(
 
 ///////////////////////
 ///////////////////////
-#include "../opencl/cl/secp256k1_set_1_address_space__global.h"
-#include "../opencl/cl/secp256k1_1_parametric_address_space.h"
-#include "../opencl/cl/secp256k1_1_parametric_address_space_non_constant.h"
+#include "secp256k1_set_1_address_space__global.h"
+#include "secp256k1_1_parametric_address_space.h"
+#include "secp256k1_1_parametric_address_space_non_constant.h"
 ///////////////////////
-#include "../opencl/cl/secp256k1_set_1_address_space__constant.h"
-#include "../opencl/cl/secp256k1_1_parametric_address_space.h"
+#include "secp256k1_set_1_address_space__constant.h"
+#include "secp256k1_1_parametric_address_space.h"
 ///////////////////////
-#include "../opencl/cl/secp256k1_set_1_address_space__default.h"
-#include "../opencl/cl/secp256k1_1_parametric_address_space.h"
-#include "../opencl/cl/secp256k1_1_parametric_address_space_non_constant.h"
+#include "secp256k1_set_1_address_space__default.h"
+#include "secp256k1_1_parametric_address_space.h"
+#include "secp256k1_1_parametric_address_space_non_constant.h"
 ///////////////////////
 ///////////////////////
 

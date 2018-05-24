@@ -1,6 +1,7 @@
 #include "miscellaneous.h"
 #include <sstream>
 #include <iomanip>
+#include <experimental/filesystem>
 
 std::string Miscellaneous::toStringHex(const std::string& other) {
   std::stringstream out;
@@ -23,4 +24,9 @@ std::string Miscellaneous::toStringShorten(const std::string& input, int numChar
   for (int i = 0; i < numCharsAtEnds; i ++)
     out << input[input.size() - numCharsAtEnds + i];
   return out.str();
+}
+
+StateMaintainerFolderLocation::StateMaintainerFolderLocation() {
+  this->ambientDirectoryAtObjectCreation = std::experimental::filesystem::current_path();
+
 }

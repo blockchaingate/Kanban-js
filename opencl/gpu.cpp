@@ -545,7 +545,6 @@ cl_mem* GPUKernel::getClMemPointer(const std::string& bufferName) {
   return 0;
 }
 
-
 bool GPUKernel::constructFromFileNameNoBuild(
   const std::string& fileNameNoExtension,
   const std::vector<std::string>& outputNames,

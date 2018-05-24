@@ -1,6 +1,6 @@
 // See the comments in secp256k1.h for license information
 
-#include "../opencl/cl/secp256k1.h"
+#include "secp256k1.h"
 
 #ifndef FILE_secp256k1_CL_INCLUDED_MUST_GUARD_DUE_TO_OPENCL_NON_DOCUMENTED_BEHAVIOR
 #define FILE_secp256k1_CL_INCLUDED_MUST_GUARD_DUE_TO_OPENCL_NON_DOCUMENTED_BEHAVIOR
@@ -4136,16 +4136,16 @@ int secp256k1_eckey_pubkey_serialize(
 
 ///////////////////////
 ///////////////////////
-#include "../opencl/cl/secp256k1_set_1_address_space__global.h"
-#include "../opencl/cl/secp256k1_1_parametric_address_space.cl"
-#include "../opencl/cl/secp256k1_1_parametric_address_space_non_constant.cl"
+#include "secp256k1_set_1_address_space__global.h"
+#include "secp256k1_1_parametric_address_space.cl"
+#include "secp256k1_1_parametric_address_space_non_constant.cl"
 ///////////////////////
-#include "../opencl/cl/secp256k1_set_1_address_space__constant.h"
-#include "../opencl/cl/secp256k1_1_parametric_address_space.cl"
+#include "secp256k1_set_1_address_space__constant.h"
+#include "secp256k1_1_parametric_address_space.cl"
 ///////////////////////
-#include "../opencl/cl/secp256k1_set_1_address_space__default.h"
-#include "../opencl/cl/secp256k1_1_parametric_address_space.cl"
-#include "../opencl/cl/secp256k1_1_parametric_address_space_non_constant.cl"
+#include "secp256k1_set_1_address_space__default.h"
+#include "secp256k1_1_parametric_address_space.cl"
+#include "secp256k1_1_parametric_address_space_non_constant.cl"
 ///////////////////////
 ///////////////////////
 

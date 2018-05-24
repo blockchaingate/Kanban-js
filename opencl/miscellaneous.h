@@ -2,6 +2,15 @@
 #define MISCELLANEOUS_header
 #include <string>
 
+class StateMaintainerFolderLocation {
+//this is a RAII class that ensures preservation of the
+//current directory.
+public:
+  std::string ambientDirectoryAtObjectCreation;
+  StateMaintainerFolderLocation();
+  ~StateMaintainerFolderLocation();
+};
+
 class Miscellaneous
 {
 public:
