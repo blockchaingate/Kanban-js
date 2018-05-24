@@ -108,8 +108,14 @@ bool CryptoEC256k1GPU::testSuite1BasicOperations(unsigned char* outputMemoryPool
     return false;
   }
   cl_int ret = clEnqueueNDRangeKernel(
-    theGPU.commandQueue, kernelTest->kernel, 1, NULL,
-    &kernelTest->global_item_size, &kernelTest->local_item_size, 0, NULL, NULL
+    theGPU.commandQueue, kernelTest->kernel,
+    1,
+    NULL,
+    kernelTest->global_item_size,
+    kernelTest->local_item_size,
+    0,
+    NULL,
+    NULL
   );
   if (ret != CL_SUCCESS) {
     logGPU << "Failed to enqueue kernel. Return code: " << ret << ". " << Logger::endL;
@@ -144,8 +150,15 @@ bool CryptoEC256k1GPU::computeMultiplicationContext(unsigned char* outputMemoryP
     return false;
   }
   cl_int ret = clEnqueueNDRangeKernel(
-    theGPU.commandQueue, kernelMultiplicationContext->kernel, 1, NULL,
-    &kernelMultiplicationContext->global_item_size, &kernelMultiplicationContext->local_item_size, 0, NULL, NULL
+    theGPU.commandQueue,
+    kernelMultiplicationContext->kernel,
+    1,
+    NULL,
+    kernelMultiplicationContext->global_item_size,
+    kernelMultiplicationContext->local_item_size,
+    0,
+    NULL,
+    NULL
   );
   if (ret != CL_SUCCESS) {
     logGPU << "Failed to enqueue kernel. Return code: " << ret << ". " << Logger::endL;
@@ -190,8 +203,8 @@ bool CryptoEC256k1GPU::computeGeneratorContext(unsigned char* outputMemoryPool, 
     kernelGeneratorContext->kernel,
     1,
     NULL,
-    &kernelGeneratorContext->global_item_size,
-    &kernelGeneratorContext->local_item_size,
+    kernelGeneratorContext->global_item_size,
+    kernelGeneratorContext->local_item_size,
     0,
     NULL,
     NULL
@@ -254,8 +267,8 @@ bool CryptoEC256k1GPU::signMessageDefaultBuffers(
     kernelSign->kernel,
     1,
     NULL,
-    &kernelSign->global_item_size,
-    &kernelSign->local_item_size,
+    kernelSign->global_item_size,
+    kernelSign->local_item_size,
     0,
     NULL,
     NULL
@@ -327,8 +340,8 @@ bool CryptoEC256k1GPU::generatePublicKeyDefaultBuffers(
     kernelGeneratePublicKey->kernel,
     1,
     NULL,
-    &kernelGeneratePublicKey->global_item_size,
-    &kernelGeneratePublicKey->local_item_size,
+    kernelGeneratePublicKey->global_item_size,
+    kernelGeneratePublicKey->local_item_size,
     0,
     NULL,
     NULL
@@ -417,8 +430,8 @@ bool CryptoEC256k1GPU::verifySignatureDefaultBuffers(
     kernelVerifySignature->kernel,
     1,
     NULL,
-    &kernelVerifySignature->global_item_size,
-    &kernelVerifySignature->local_item_size,
+    kernelVerifySignature->global_item_size,
+    kernelVerifySignature->local_item_size,
     0,
     NULL,
     NULL

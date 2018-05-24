@@ -70,8 +70,12 @@ SharedMemory::~SharedMemory() {
 }
 
 GPUKernel::GPUKernel() {
-  this->local_item_size = 64;
-  this->global_item_size = 64;
+  this->local_item_size[0] = 32;
+  this->global_item_size[0] = 32;
+  this->local_item_size[1] = 1;
+  this->global_item_size[1] = 1;
+  this->local_item_size[2] = 1;
+  this->global_item_size[2] = 1;
   this->numInitializedExternallyOwnedBuffers = 0;
   this->program = NULL;
   this->kernel = NULL;
@@ -167,8 +171,8 @@ bool GPU::initializeAllNoBuild() {
 bool GPU::initializePlatform() {
   if (this->flagInitializedPlatform)
     return true;
-  //int debugWarningDisableCacheDuringDevelopmentOnly;
-  //setenv("CUDA_CACHE_DISABLE", "1", 1);
+  int debugWarningDisableCacheDuringDevelopmentOnly;
+  setenv("CUDA_CACHE_DISABLE", "1", 1);
   this->context = 0;
   cl_int ret = 0;
   ret = clGetPlatformIDs(2, this->platformIds, &this->numberOfPlatforms);
@@ -721,7 +725,10 @@ bool GPUKernel::build() {
   }
   this->constructArguments(this->desiredOutputNames, this->desiredOutputTypes, true, true);
   this->constructArguments(this->desiredInputNames, this->desiredInputTypes, true, false);
-  this->SetArguments();
+  if (!this->SetArguments()) {
+    logGPU << "Failed to initialize arguments for kernel: " << this->name << Logger::endL;
+    return false;
+  }
   logGPU << "Kernel: " << this->name << " created successfully. " << Logger::endL;
   this->flagIsBuilt = true;
   return true;
@@ -795,7 +802,9 @@ bool GPUKernel::SetArguments(std::vector<std::shared_ptr<SharedMemory> >& theArg
       ret = clSetKernelArg(this->kernel, i + offset, sizeof(cl_mem), (void *) current->memoryExternallyOwned);
     }
     if (current->typE == SharedMemory::typeVoidPointer)
-      ret = clSetKernelArg(this->kernel, i + offset, sizeof(cl_mem), (void *)& current->theMemory);
+      ret = clSetKernelArg(
+        this->kernel, i + offset, sizeof(cl_mem), (void *)& current->theMemory
+      );
     if (current->typE == SharedMemory::typeUint)
       ret = clSetKernelArg(this->kernel, i + offset, sizeof(uint), &current->uintValue);
 

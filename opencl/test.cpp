@@ -357,8 +357,9 @@ void testSHA256::initialize() {
     memoryPool_write_uint(currentMessage.size(), &testSHA256::messageLengthsUChar[i*4]);
 
     testSHA256::inputBuffer.append(currentMessage);
-    for (unsigned j = 0; j < 32; j ++)
+    for (unsigned j = 0; j < 32; j ++) {
       testSHA256::outputBuffer[i * 32 + j] = 0;
+    }
   }
 }
 
@@ -377,14 +378,22 @@ bool testSHA256(GPU& theGPU) {
   theKernel->writeToBuffer(1, testSHA256::messageStartsUChar);
   theKernel->writeToBuffer(2, testSHA256::messageLengths);
 
-  for (largeTestCounter = 0; largeTestCounter < testSHA256::totalToCompute; largeTestCounter ++) {
-    theKernel->writeArgument(3, largeTestCounter);
+
+  for (largeTestCounter = 0; largeTestCounter < testSHA256::totalToCompute * 100; largeTestCounter ++) {
+    theKernel->writeArgument(3, largeTestCounter % testSHA256::totalToCompute);
     //theKernel->writeToBuffer(0, &theLength, sizeof(uint));
     //std::cout << "DEBUG: Setting arguments ... " << std::endl;
     //std::cout << "DEBUG: arguments set, enqueueing kernel... " << std::endl;
     cl_int ret = clEnqueueNDRangeKernel(
-      theGPU.commandQueue, theKernel->kernel, 1, NULL,
-      &theKernel->global_item_size, &theKernel->local_item_size, 0, NULL, NULL
+      theGPU.commandQueue,
+      theKernel->kernel,
+      3,
+      NULL,
+      theKernel->global_item_size,
+      theKernel->local_item_size,
+      0,
+      NULL,
+      NULL
     );
     if (ret != CL_SUCCESS) {
       logTestGraphicsPU << "Failed to enqueue kernel. Return code: " << ret << ". " << Logger::endL;
@@ -398,7 +407,7 @@ bool testSHA256(GPU& theGPU) {
     }
   }
   cl_mem& result = theKernel->getOutput(0)->theMemory;
-  unsigned totalToExtract = 1; // =testSHA256::totalToCompute
+  unsigned totalToExtract = 1000; // =testSHA256::totalToCompute
 
   cl_int ret = clEnqueueReadBuffer (
     theGPU.commandQueue, result, CL_TRUE, 0,
@@ -417,8 +426,9 @@ bool testSHA256(GPU& theGPU) {
     unsigned testCounteR = largeTestCounter % testSHA256::knownSHA256s.size();
     std::stringstream out;
     unsigned offset = largeTestCounter * 32;
-    for (unsigned i = offset; i < offset + 32; i ++)
+    for (unsigned i = offset; i < offset + 32; i ++) {
       out << std::hex << std::setw(2) << std::setfill('0') << ((int) ((unsigned) testSHA256::outputBuffer[i]));
+    }
     if (out.str() != testSHA256::knownSHA256s[testCounteR][1]) {
       logTestGraphicsPU << "\e[31mSha of message index " << largeTestCounter
       << ": " << testSHA256::knownSHA256s[testCounteR][0] << " is wrongly computed to be: " << out.str()
@@ -499,8 +509,8 @@ bool testSign(GPU& theGPU) {
       kernelSign->kernel,
       1,
       NULL,
-      &kernelSign->global_item_size,
-      &kernelSign->local_item_size,
+      kernelSign->global_item_size,
+      kernelSign->local_item_size,
       0,
       NULL,
       NULL

@@ -76,8 +76,8 @@ public:
   std::string name;
   unsigned numInitializedExternallyOwnedBuffers;
   bool flagIsBuilt;
-  size_t local_item_size; // Divide work items into groups of this size, initialized to 32
-  size_t global_item_size; // Divide work items into groups of this size, initialized to 32
+  size_t local_item_size[3]; // Divide work items into groups of this size, initialized to 32
+  size_t global_item_size[3]; // Divide work items into groups of this size, initialized to 32
 
   std::vector<std::string> computationIds; // <- used to pipeline messages.
   std::vector<std::shared_ptr<SharedMemory> >& getOutputCollection();

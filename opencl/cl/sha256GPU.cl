@@ -53,7 +53,7 @@ unsigned int memoryPool_read_uint(__global const unsigned char* memoryPoolPointe
   ((unsigned int) memoryPoolPointer[3]       ) ;
 }
 
-__kernel void sha256GPU(__global char* result, __global unsigned char* offsets,  __global unsigned char* lengths, uint32_t messageIndex, __global const char* plain_key) {
+__kernel void sha256GPU(__global char* result, __global unsigned char* offsets, __global unsigned char* lengths, uint32_t messageIndex, __global const char* plain_key) {
   int t, gid, msg_pad, currentIndex, lomc;
   int stop, mmod;
   uint32_t i, item, total;

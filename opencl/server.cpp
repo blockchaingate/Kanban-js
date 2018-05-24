@@ -652,8 +652,15 @@ bool Server::ExecuteSha256s() {
   for (unsigned i = 0; i < kernelSHA256->computationIds.size(); i ++) {
     kernelSHA256->writeArgument(3, i);
     cl_int ret = clEnqueueNDRangeKernel(
-      this->theGPU->commandQueue, kernelSHA256->kernel, 1, NULL,
-      &kernelSHA256->global_item_size, &kernelSHA256->local_item_size, 0, NULL, NULL
+      this->theGPU->commandQueue,
+      kernelSHA256->kernel,
+      1,
+      NULL,
+      kernelSHA256->global_item_size,
+      kernelSHA256->local_item_size,
+      0,
+      NULL,
+      NULL
     );
     if (ret != CL_SUCCESS) {
       logServer << "Failed to enqueue kernel. Return code: " << ret << ". ";
@@ -742,8 +749,15 @@ bool Server::ExecuteSignMessages() {
   for (unsigned i = 0; i < kernelSign->computationIds.size(); i ++) {
     kernelSign->writeArgument(6, i);
     cl_int ret = clEnqueueNDRangeKernel(
-      this->theGPU->commandQueue, kernelSign->kernel, 1, NULL,
-      &kernelSign->global_item_size, &kernelSign->local_item_size, 0, NULL, NULL
+      this->theGPU->commandQueue,
+      kernelSign->kernel,
+      1,
+      NULL,
+      kernelSign->global_item_size,
+      kernelSign->local_item_size,
+      0,
+      NULL,
+      NULL
     );
     if (ret != CL_SUCCESS) {
       logServer << "Failed to enqueue kernel. Return code: " << ret << ". ";
@@ -768,8 +782,8 @@ bool Server::ExecuteTestBuffers() {
       kernelBuffers->kernel,
       1,
       NULL,
-      &kernelBuffers->global_item_size,
-      &kernelBuffers->local_item_size,
+      kernelBuffers->global_item_size,
+      kernelBuffers->local_item_size,
       0,
       NULL,
       NULL
