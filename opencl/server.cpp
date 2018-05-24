@@ -688,7 +688,7 @@ bool Server::ProcessResultsSha256(std::stringstream& output) {
     logServer << "DEBUG: Processing results of computation " << i << Logger::endL;
     std::string outputBinary((char*)  &this->thePipe.bufferOutputGPU[i * 32], 32);
     output << "{\"id\":\"" << kernelSHA256->computationIds[i] << "\", \"result\": \"" << Miscellaneous::toStringHex(outputBinary)
-    << "\", \"packetSize:\"" << this->packetNumberOfComputations << "}\n";
+    << "\", \"packetSize\":" << this->packetNumberOfComputations << "}\n";
     logServer << "Computation " << kernelSHA256->computationIds[i] << " completed." << Logger::endL;
   }
   kernelSHA256->computationIds.clear();
@@ -825,7 +825,7 @@ bool Server::ProcessResultsTestBuffer(std::stringstream& output) {
     }
     signed currentSize = nextOffset - currentOffset;
     output << "{\"id\":\"" << kernelBuffers->computationIds[i] << "\", \"result\": \"" << currentSize
-    << " bytes read, no work performed.\", \"packetSize:\"" << this->packetNumberOfComputations << "}\n";
+    << " bytes read, no work performed.\", \"packetSize\":" << this->packetNumberOfComputations << "}\n";
     logServer << "Computation " << kernelBuffers->computationIds[i] << " completed." << Logger::endL;
   }
   kernelBuffers->computationIds.clear();
@@ -880,7 +880,7 @@ bool Server::ProcessResultSignMessages(std::stringstream &output) {
     unsigned currentSize = memoryPool_read_uint(&this->thePipe.bufferOutputGPU_second[i * 4]);
     std::string outputBinary((char*) &this->thePipe.bufferOutputGPU[i * MACRO_MEMORY_POOL_SIZE_Signature], currentSize);
     output << "{\"id\":\"" << kernelSign->computationIds[i] << "\", \"result\": \"" << Miscellaneous::toStringHex(outputBinary)
-    << "\", \"packetSize:\"" << this->packetNumberOfComputations << "}\n";
+    << "\", \"packetSize\":" << this->packetNumberOfComputations << "}\n";
     logServer << "Computation " << kernelSign->computationIds[i] << " completed." << Logger::endL;
   }
   kernelSign->computationIds.clear();
@@ -910,8 +910,8 @@ bool Server::ProcessResults() {
   if (!this->ProcessResultSignMessages(output)) {
     return false;
   }
-  //if (!this->ProcessResultsTestBuffer(output)){
-  //  return false;
-  //}
+  if (!this->ProcessResultsTestBuffer(output)){
+    return false;
+  }
   return this->WriteResults(output);
 }
