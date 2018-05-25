@@ -308,79 +308,94 @@ int testMain() {
   return 0;
 }
 
-class testSHA256 {
+class testerSHA256 {
 public:
-  static std::vector<std::vector<std::string> > knownSHA256s;
-  static std::string inputBuffer;
-  static unsigned char outputBuffer[10000000];
-  static std::vector<uint> messageStarts;
-  static std::vector<uint> messageLengths;
-  static std::vector<unsigned char> messageStartsUChar;
-  static std::vector<unsigned char> messageLengthsUChar;
-  static void initialize();
-  static unsigned totalToCompute;
+  std::vector<std::vector<std::string> > knownSHA256s;
+  std::string inputBuffer;
+  std::vector<unsigned char> outputBuffer;
+  std::vector<uint> messageStarts;
+  std::vector<uint> messageLengths;
+  std::vector<unsigned char> messageStartsUChar;
+  std::vector<unsigned char> messageLengthsUChar;
+  void initialize();
+  unsigned totalToCompute;
 };
 
-std::vector<std::vector<std::string> > testSHA256::knownSHA256s;
-std::string testSHA256::inputBuffer;
-unsigned char testSHA256::outputBuffer[10000000];
-std::vector<uint> testSHA256::messageStarts;
-std::vector<uint> testSHA256::messageLengths;
-std::vector<unsigned char> testSHA256::messageStartsUChar;
-std::vector<unsigned char> testSHA256::messageLengthsUChar;
 
-unsigned testSHA256::totalToCompute = 100000;
-
-void testSHA256::initialize() {
-  testSHA256::knownSHA256s.push_back((std::vector<std::string>) {
+void testerSHA256::initialize() {
+  this->totalToCompute = 100000;
+  this->outputBuffer.resize(12000000);
+  this->knownSHA256s.push_back((std::vector<std::string>) {
     "abc",
     "ba7816bf8f01cfea414140de5dae2223b00361a396177a9cb410ff61f20015ad"
   });
-  testSHA256::knownSHA256s.push_back((std::vector<std::string>) {
+  this->knownSHA256s.push_back((std::vector<std::string>) {
     "abcdbcdecdefdefgefghfghighijhijkijkljklmklmnlmnomnopnopq",
     "248d6a61d20638b8e5c026930c3e6039a33ce45964ff2167f6ecedd419db06c1"
   });
-  testSHA256::knownSHA256s.push_back((std::vector<std::string>) {
+  this->knownSHA256s.push_back((std::vector<std::string>) {
    "abcdefghbcdefghicdefghijdefghijkefghijklfghijklmghijklmnhijklmnoijklmnopjklmnopqklmnopqrlmnopqrsmnopqrstnopqrstu",
    "cf5b16a778af8380036ce59e7b0492370b249b11e8f07a51afac45037afee9d1"
   });
-  testSHA256::inputBuffer.reserve(100 * testSHA256::totalToCompute);
-  testSHA256::messageStartsUChar.resize(4 * testSHA256::totalToCompute);
-  testSHA256::messageLengthsUChar.resize(4 * testSHA256::totalToCompute);
-  for (unsigned i = 0; i < testSHA256::totalToCompute; i ++) {
-    unsigned testCounter = i % testSHA256::knownSHA256s.size();
-    std::string& currentMessage = testSHA256::knownSHA256s[testCounter][0];
-    testSHA256::messageStarts.push_back(testSHA256::inputBuffer.size());
-    testSHA256::messageLengths.push_back(currentMessage.size());
+  this->inputBuffer.reserve(100 * this->totalToCompute);
+  this->inputBuffer.clear();
+  this->messageStartsUChar.resize(4 * this->totalToCompute);
+  this->messageLengthsUChar.resize(4 * this->totalToCompute);
+  for (unsigned i = 0; i < this->totalToCompute; i ++) {
+    unsigned testCounter = i % this->knownSHA256s.size();
+    std::string& currentMessage = this->knownSHA256s[testCounter][0];
+    this->messageStarts.push_back(this->inputBuffer.size());
+    this->messageLengths.push_back(currentMessage.size());
 
-    memoryPool_write_uint(testSHA256::inputBuffer.size(), &testSHA256::messageStartsUChar[i*4]);
-    memoryPool_write_uint(currentMessage.size(), &testSHA256::messageLengthsUChar[i*4]);
+    memoryPool_write_uint((uint32_t) this->inputBuffer.size(), &(this->messageStartsUChar[i * 4]));
+    memoryPool_write_uint((uint32_t) currentMessage.size(), &(this->messageLengthsUChar[i * 4]));
 
-    testSHA256::inputBuffer.append(currentMessage);
+    this->inputBuffer.append(currentMessage);
     for (unsigned j = 0; j < 32; j ++) {
-      testSHA256::outputBuffer[i * 32 + j] = 0;
+      this->outputBuffer[i * 32 + j] = 0;
     }
   }
+  //for (unsigned i = 0; i < 100 ; i++)
+  //  std::cout << "Byte " << i << ": " << (int) this->messageLengthsUChar[i] << std::endl;
+  //for (unsigned i = 0; i < 100 ; i++)
+  //  std::cout << "Offset Byte " << i << ": " << (int) this->messageStartsUChar[i] << std::endl;
+  //for (unsigned i = 0; i < 100 ; i++)
+  //  std::cout << "message Byte " << i << ": " << (int) this->inputBuffer[i] << std::endl;
 }
 
 bool testSHA256(GPU& theGPU) {
   // Create the two input vectors
-  theGPU.initializeAllNoBuild();
-  // Create a command queue
-  std::shared_ptr<GPUKernel> theKernel = theGPU.theKernels[GPU::kernelSHA256];
-  theKernel->build();
-  std::cout << "DEBUG: about to write to buffer. " << std::endl;
-  testSHA256::initialize();
+  std::shared_ptr<GPUKernel> theKernel = theGPU.getKernel(GPU::kernelSHA256);
+  if (!theKernel->build()) {
+    std::cout << "DEBUG: failed to build sha kernel. " << std::endl;
+    assert(false);
+  }
+  testerSHA256 theSHA256Test;
+  theSHA256Test.initialize();
 
   auto timeStart = std::chrono::system_clock::now();
-  uint largeTestCounter;
-  theKernel->writeToBuffer(4, testSHA256::inputBuffer);
-  theKernel->writeToBuffer(1, testSHA256::messageStartsUChar);
-  theKernel->writeToBuffer(2, testSHA256::messageLengths);
+  uint32_t largeTestCounter = 0;
+  std::cout << "DEBUG: before write" << std::endl;
+  if (!theKernel->writeToBuffer(4, theSHA256Test.inputBuffer)) {
+    logTestGraphicsPU << "Bad write" << Logger::endL;
+    assert(false);
+  }
+  std::cout << "DEBUG: before vector? write" << std::endl;
+  if (!theKernel->writeToBuffer(1, theSHA256Test.messageStartsUChar)){
+    logTestGraphicsPU << "Bad write" << Logger::endL;
+    assert(false);
+  }
+  if (!theKernel->writeToBuffer(2, theSHA256Test.messageLengthsUChar)) {
+    logTestGraphicsPU << "Bad write" << Logger::endL;
+    assert(false);
+  }
 
 
-  for (largeTestCounter = 0; largeTestCounter < testSHA256::totalToCompute * 100; largeTestCounter ++) {
-    theKernel->writeArgument(3, largeTestCounter % testSHA256::totalToCompute);
+  for (largeTestCounter = 0; largeTestCounter < theSHA256Test.totalToCompute; largeTestCounter ++) {
+    if (!theKernel->writeArgument(3, largeTestCounter)) {
+      logTestGraphicsPU << "Bad write" << Logger::endL;
+      assert(false);
+    }
     //theKernel->writeToBuffer(0, &theLength, sizeof(uint));
     //std::cout << "DEBUG: Setting arguments ... " << std::endl;
     //std::cout << "DEBUG: arguments set, enqueueing kernel... " << std::endl;
@@ -407,11 +422,18 @@ bool testSHA256(GPU& theGPU) {
     }
   }
   cl_mem& result = theKernel->getOutput(0)->theMemory;
-  unsigned totalToExtract = 1000; // =testSHA256::totalToCompute
-
+  unsigned totalToExtract = theSHA256Test.totalToCompute;
+  logTestGraphicsPU << "Total to extract: " << 32 * totalToExtract << Logger::endL;
   cl_int ret = clEnqueueReadBuffer (
-    theGPU.commandQueue, result, CL_TRUE, 0,
-    32 * totalToExtract, testSHA256::outputBuffer, 0, NULL, NULL
+    theGPU.commandQueue,
+    result,
+    CL_TRUE,
+    0,
+    32 * totalToExtract,
+    &theSHA256Test.outputBuffer[0],
+    0,
+    NULL,
+    NULL
   );
   if (ret != CL_SUCCESS) {
     logTestGraphicsPU << "Failed to enqueue read buffer. Return code: " << ret << ". " << Logger::endL;
@@ -420,19 +442,19 @@ bool testSHA256(GPU& theGPU) {
   auto timeCurrent = std::chrono::system_clock::now();
   std::chrono::duration<double> elapsed_seconds = timeCurrent - timeStart;
   logTestGraphicsPU << "Computed " << largeTestCounter << " sha256s in " << elapsed_seconds.count() << " second(s). " << Logger::endL;
-  logTestGraphicsPU << "Speed: " << (testSHA256::totalToCompute / elapsed_seconds.count()) << " hashes per second. " << Logger::endL;
+  logTestGraphicsPU << "Speed: " << (theSHA256Test.totalToCompute / elapsed_seconds.count()) << " hashes per second. " << Logger::endL;
   logTestGraphicsPU << "Checking computations ..." << Logger::endL;
   for (largeTestCounter = 0; largeTestCounter < totalToExtract; largeTestCounter ++) {
-    unsigned testCounteR = largeTestCounter % testSHA256::knownSHA256s.size();
+    unsigned testCounteR = largeTestCounter % theSHA256Test.knownSHA256s.size();
     std::stringstream out;
     unsigned offset = largeTestCounter * 32;
     for (unsigned i = offset; i < offset + 32; i ++) {
-      out << std::hex << std::setw(2) << std::setfill('0') << ((int) ((unsigned) testSHA256::outputBuffer[i]));
+      out << std::hex << std::setw(2) << std::setfill('0') << ((int) ((unsigned) theSHA256Test.outputBuffer[i]));
     }
-    if (out.str() != testSHA256::knownSHA256s[testCounteR][1]) {
+    if (out.str() != theSHA256Test.knownSHA256s[testCounteR][1]) {
       logTestGraphicsPU << "\e[31mSha of message index " << largeTestCounter
-      << ": " << testSHA256::knownSHA256s[testCounteR][0] << " is wrongly computed to be: " << out.str()
-      << " instead of: " << testSHA256::knownSHA256s[testCounteR][1] << "\e[39m" << Logger::endL;
+      << ": " << theSHA256Test.knownSHA256s[testCounteR][0] << " is wrongly computed to be: " << out.str()
+      << " instead of: " << theSHA256Test.knownSHA256s[testCounteR][1] << "\e[39m" << Logger::endL;
       assert(false);
       return false;
     }

@@ -45,7 +45,7 @@ __constant uint32_t K[64] = {
 0x748f82ee, 0x78a5636f, 0x84c87814, 0x8cc70208, 0x90befffa, 0xa4506ceb, 0xbef9a3f7, 0xc67178f2
 };
 
-unsigned int memoryPool_read_uint(__global const unsigned char* memoryPoolPointer) {
+unsigned int memoryPool_read_uinT(__global const unsigned char* memoryPoolPointer) {
   return
   ((unsigned int) (memoryPoolPointer[0] << 24)) +
   ((unsigned int) (memoryPoolPointer[1] << 16)) +
@@ -53,22 +53,30 @@ unsigned int memoryPool_read_uint(__global const unsigned char* memoryPoolPointe
   ((unsigned int) memoryPoolPointer[3]       ) ;
 }
 
-__kernel void sha256GPU(__global char* result, __global unsigned char* offsets, __global unsigned char* lengths, uint32_t messageIndex, __global const char* plain_key) {
+__kernel void sha256GPU(
+  __global unsigned char* result, 
+  __global const unsigned char* offsets, 
+  __global const unsigned char* messageLengths, 
+  unsigned int messageIndex, 
+  __global const char* plain_key
+) {
   int t, gid, msg_pad, currentIndex, lomc;
   int stop, mmod;
   uint32_t i, item, total;
   uint32_t W[80], temp, A, B, C, D, E, F, G, H, T1, T2;
   uint32_t digest[8];
   //uint32_t num_keys = data_info[1];
-  //printf("length: %u num_keys:%u\n", length, total);
+  //printf("theLength: %u num_keys:%u\n", theLength, total);
   int current_pad;
   msg_pad = 0;
 
-  unsigned int offset = memoryPool_read_uint(&offsets[4 * messageIndex]);
-  unsigned int length = memoryPool_read_uint(&lengths[4 * messageIndex]);
+  uint32_t offset;
+  uint32_t theLength;
+  offset = memoryPool_read_uinT(& (offsets[4 * messageIndex]));
+  theLength = memoryPool_read_uinT(&(messageLengths[4 * messageIndex]));
 
-  total = length % 64 >= 56 ? 2 : 1 + length / 64;
-  //printf("length: %u total:%u\n", length, total);
+  total = theLength % 64 >= 56 ? 2 : 1 + theLength / 64;
+  //printf("theLength: %u total:%u\n", theLength, total);
   digest[0] = H0;
   digest[1] = H1;
   digest[2] = H2;
@@ -91,7 +99,7 @@ __kernel void sha256GPU(__global char* result, __global unsigned char* offsets, 
     for (t = 0; t < 80; t ++) {
       W[t] = 0x00000000;
     }
-    lomc = length + offset - currentIndex;
+    lomc = theLength + offset - currentIndex;
     if (lomc > 0){
       current_pad = (lomc) > 64 ? 64: (lomc);
     } else {
@@ -136,14 +144,14 @@ __kernel void sha256GPU(__global char* result, __global unsigned char* offsets, 
         W[t] =  0x80000000 ;
       }      
       if (current_pad < 56){
-        W[15] = length * 8 ;
-        //printf("length avlue 2 :w[15] :%u\n", W[15]);
+        W[15] = theLength * 8 ;
+        //printf("theLength avlue 2 :w[15] :%u\n", W[15]);
       }
     } else if(current_pad < 0){
-      if (length % 64 == 0)
+      if (theLength % 64 == 0)
         W[0] = 0x80000000;
-      W[15] = length * 8;
-      //printf("length avlue 3 :w[15] :%u\n", W[15]);
+      W[15] = theLength * 8;
+      //printf("theLength avlue 3 :w[15] :%u\n", W[15]);
     }
     for (t = 0; t < 64; t++) {
       if (t >= 16)
@@ -161,10 +169,19 @@ __kernel void sha256GPU(__global char* result, __global unsigned char* offsets, 
     digest[6] += G;
     digest[7] += H;
   }
+  //result[messageIndex] = ((unsigned char) theLength);
   uint32_t resultOffset = messageIndex * 32;
+  //return;
+  if (messageIndex == 0){
+    for (i=0; i< 10000; i++) {
+      uint variable = memoryPool_read_uinT(&(messageLengths[4 * i]));
+      result[i] = variable ;
+    }
+  }
+  return;
   for (t = 0; t < 8; t ++) {
     for (i = 0; i < 4; i ++) {
       result[resultOffset + t * 4 + i] = (unsigned char) (digest[t] >> ((3 - i) * 8) );
     }
-  }
+  }  
 }

@@ -183,7 +183,7 @@ bool GPU::initializePlatform() {
   if (this->flagVerbose) {
     logGPU << "Number of platforms: " << this->numberOfPlatforms << "\n";
   }
-  cl_device_type desiredDeviceType = CL_DEVICE_TYPE_GPU;
+  cl_device_type desiredDeviceType = CL_DEVICE_TYPE_CPU;
   std::string deviceDescription = desiredDeviceType == CL_DEVICE_TYPE_CPU ? "CPU" : "GPU";
   for (unsigned i = 0; i < this->numberOfPlatforms; i ++) {
     ret = clGetDeviceIDs(this->platformIds[i], desiredDeviceType, 2, this->allDevices, &this->numberOfDevices);
@@ -744,7 +744,7 @@ bool GPUKernel::constructArguments(
   cl_int ret = CL_SUCCESS;
   cl_mem_flags bufferFlag = CL_MEM_READ_WRITE;
   if (isInput && isOutput) {
-    bufferFlag = CL_MEM_WRITE_ONLY ;// CL_MEM_READ_WRITE;
+    bufferFlag = CL_MEM_READ_WRITE;
   }
   if (isInput && !isOutput) {
     bufferFlag = CL_MEM_READ_ONLY;
@@ -756,7 +756,7 @@ bool GPUKernel::constructArguments(
     logGPU << "GPU kernel arguments are neither input nor output" << Logger::endL;
     return false;
   }
-  bufferFlag |= CL_MEM_ALLOC_HOST_PTR;
+  //bufferFlag |= CL_MEM_ALLOC_HOST_PTR;
   if (theArgs.size() != 0) {
     logGPU << "Fatal error: arguments not empty. " << Logger::endL;
     return false;
@@ -766,9 +766,12 @@ bool GPUKernel::constructArguments(
     std::shared_ptr<SharedMemory> current = theArgs[theArgs.size() - 1];
     current->name = argumentNames[i];
     current->typE = argumentTypes[i];
+    if (current->typE != current->typeVoidPointer) {
+      continue;
+    }
     size_t defaultBufferSize = 10000000;
     current->theMemory = clCreateBuffer(this->owner->context, bufferFlag, defaultBufferSize, NULL, &ret);
-    current->buffer.reserve(defaultBufferSize);
+    current->buffer.resize(defaultBufferSize);
     if (ret != CL_SUCCESS || current->theMemory == NULL) {
       logGPU << "Failed to create buffer \e[31m" << current->name << "\e[39m. Return code: " << ret << Logger::endL;
       return false;
@@ -817,6 +820,8 @@ bool GPUKernel::SetArguments(std::vector<std::shared_ptr<SharedMemory> >& theArg
 }
 
 bool GPUKernel::writeToBuffer(unsigned argumentNumber, const std::vector<unsigned int>& input) {
+  logGPU << "WRITING vector uint " << Logger::endL;
+
   std::vector<unsigned char> converted;
   converted.resize(input.size() * 4);
   for (unsigned i = 0; i < input.size(); i ++) {
@@ -826,15 +831,17 @@ bool GPUKernel::writeToBuffer(unsigned argumentNumber, const std::vector<unsigne
 }
 
 bool GPUKernel::writeToBuffer(unsigned argumentNumber, const std::vector<unsigned char>& input) {
-  return this->writeToBuffer(argumentNumber, &input[0], input.size());
+  std::cout << std::hex << "About to write to buffer: address: " << (long) (& (input[0])) << std::endl;
+  return this->writeToBuffer(argumentNumber, &(input[0]), input.size());
 }
 
 bool GPUKernel::writeToBuffer(unsigned argumentNumber, const std::string& input) {
+  logGPU << "WRITING STRING " << Logger::endL;
   return this->writeToBuffer(argumentNumber, input.c_str(), input.size());
 }
 
-bool GPUKernel::writeToBuffer(unsigned argumentNumber, const void *input, size_t size) {
-  //std::cout << "DEBUG: writing " << input;
+bool GPUKernel::writeToBuffer(unsigned argumentNumber, const void* inputBuffer, size_t size) {
+  std::cout << std::dec << "DEBUG: writing VOID POINTER " << inputBuffer << ", size: " << size << std::endl;
   //std::cout << " in buffeR: " << &bufferToWriteInto << std::endl;
   cl_mem& bufferToWriteInto =
     argumentNumber < this->outputs.size() ?
@@ -846,27 +853,27 @@ bool GPUKernel::writeToBuffer(unsigned argumentNumber, const void *input, size_t
     CL_TRUE,
     0,
     size,
-    input,
+    inputBuffer,
     0,
     NULL,
     NULL
   );
   if (ret != CL_SUCCESS) {
-    logGPU << "Enqueueing write buffer failed with input: " << input << Logger::endL;
+    logGPU << "Enqueueing write buffer failed with input: " << inputBuffer << Logger::endL;
     return false;
   }
   return true;
 }
 
-bool GPUKernel::writeArgument(unsigned argumentNumber, uint input) {
+bool GPUKernel::writeArgument(unsigned argumentNumber, uint inputArgument) {
   //std::cout << "DEBUG: writing " << input;
   //std::cout << "Setting: argument number: " << argumentNumber << ", input: " << input << std::endl;
   std::shared_ptr<SharedMemory>& currentArgument =
     argumentNumber < this->outputs.size() ?
     this->outputs[argumentNumber] :
     this->inputs[argumentNumber - this->outputs.size()];
-  currentArgument->uintValue = input;
-  cl_int ret = clSetKernelArg(this->kernel, argumentNumber, sizeof(uint), &currentArgument->uintValue);
+  currentArgument->uintValue = inputArgument;
+  cl_int ret = clSetKernelArg(this->kernel, argumentNumber, 4, &inputArgument);
   if (ret != CL_SUCCESS) {
     logGPU << "Set kernel arg failed. " << Logger::endL;
     return false;

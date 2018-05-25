@@ -39,7 +39,7 @@ public:
   cl_mem* memoryExternallyOwned;
   std::vector<unsigned char> buffer;
   int typE;
-  uint uintValue;
+  unsigned int uintValue;
   SharedMemory();
   void ReleaseMe();
   ~SharedMemory();
