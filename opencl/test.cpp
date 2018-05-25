@@ -452,7 +452,8 @@ bool testSHA256(GPU& theGPU) {
   }
   auto timeCurrent = std::chrono::system_clock::now();
   std::chrono::duration<double> elapsed_seconds = timeCurrent - timeStart;
-  logTestGraphicsPU << "Computed " << largeTestCounter << " sha256s in " << elapsed_seconds.count() << " second(s). " << Logger::endL;
+  logTestGraphicsPU << "Computed " << grandTotal
+  << " sha256s in " << elapsed_seconds.count() << " second(s). " << Logger::endL;
   logTestGraphicsPU << "Speed: " << (grandTotal / elapsed_seconds.count()) << " hashes per second. " << Logger::endL;
   logTestGraphicsPU << "Checking computations ..." << Logger::endL;
   for (largeTestCounter = 0; largeTestCounter < theSHA256Test.totalToCompute; largeTestCounter ++) {
