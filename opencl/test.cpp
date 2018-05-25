@@ -375,6 +375,7 @@ bool testSHA256(GPU& theGPU) {
 
   auto timeStart = std::chrono::system_clock::now();
   uint32_t largeTestCounter = 0;
+  uint32_t grandTotal = 0;
   std::cout << "DEBUG: before write" << std::endl;
   if (!theKernel->writeToBuffer(4, theSHA256Test.inputBuffer)) {
     logTestGraphicsPU << "Bad write" << Logger::endL;
@@ -389,62 +390,63 @@ bool testSHA256(GPU& theGPU) {
     logTestGraphicsPU << "Bad write" << Logger::endL;
     assert(false);
   }
-
-
-  for (largeTestCounter = 0; largeTestCounter < theSHA256Test.totalToCompute; largeTestCounter ++) {
-    if (!theKernel->writeArgument(3, largeTestCounter)) {
-      logTestGraphicsPU << "Bad write" << Logger::endL;
-      assert(false);
+  int numPasses = 10;
+  cl_mem& result = theKernel->getOutput(0)->theMemory;
+  for (int i = 0; i < numPasses; i++) {
+    for (largeTestCounter = 0; largeTestCounter < theSHA256Test.totalToCompute; largeTestCounter ++) {
+      grandTotal ++;
+      if (!theKernel->writeArgument(3, largeTestCounter)) {
+        logTestGraphicsPU << "Bad write" << Logger::endL;
+        assert(false);
+      }
+      //theKernel->writeToBuffer(0, &theLength, sizeof(uint));
+      //std::cout << "DEBUG: Setting arguments ... " << std::endl;
+      //std::cout << "DEBUG: arguments set, enqueueing kernel... " << std::endl;
+      cl_int ret = clEnqueueNDRangeKernel(
+        theGPU.commandQueue,
+        theKernel->kernel,
+        3,
+        NULL,
+        theKernel->global_item_size,
+        theKernel->local_item_size,
+        0,
+        NULL,
+        NULL
+      );
+      if (ret != CL_SUCCESS) {
+        logTestGraphicsPU << "Failed to enqueue kernel. Return code: " << ret << ". " << Logger::endL;
+        return false;
+      }
+      //std::cout << "DEBUG: kernel enqueued, proceeding to read buffer. " << std::endl;
+      if (largeTestCounter % 500 == 0) {
+        auto timeCurrent = std::chrono::system_clock::now();
+        std::chrono::duration<double> elapsed_seconds = timeCurrent - timeStart;
+        std::cout << "Scheduled grand total: " << grandTotal << " sha256s in " << elapsed_seconds.count() << " second(s). " << std::endl;
+      }
     }
-    //theKernel->writeToBuffer(0, &theLength, sizeof(uint));
-    //std::cout << "DEBUG: Setting arguments ... " << std::endl;
-    //std::cout << "DEBUG: arguments set, enqueueing kernel... " << std::endl;
-    cl_int ret = clEnqueueNDRangeKernel(
+    logTestGraphicsPU << "Total to extract: " << 32 * theSHA256Test.totalToCompute << Logger::endL;
+    cl_int ret = clEnqueueReadBuffer (
       theGPU.commandQueue,
-      theKernel->kernel,
-      3,
-      NULL,
-      theKernel->global_item_size,
-      theKernel->local_item_size,
+      result,
+      CL_TRUE,
+      0,
+      32 * theSHA256Test.totalToCompute,
+      &theSHA256Test.outputBuffer[0],
       0,
       NULL,
       NULL
     );
     if (ret != CL_SUCCESS) {
-      logTestGraphicsPU << "Failed to enqueue kernel. Return code: " << ret << ". " << Logger::endL;
+      logTestGraphicsPU << "Failed to enqueue read buffer. Return code: " << ret << ". " << Logger::endL;
       return false;
     }
-    //std::cout << "DEBUG: kernel enqueued, proceeding to read buffer. " << std::endl;
-    if (largeTestCounter % 500 == 0) {
-      auto timeCurrent = std::chrono::system_clock::now();
-      std::chrono::duration<double> elapsed_seconds = timeCurrent - timeStart;
-      std::cout << "Scheduled " << largeTestCounter << " sha256s in " << elapsed_seconds.count() << " second(s). " << std::endl;
-    }
-  }
-  cl_mem& result = theKernel->getOutput(0)->theMemory;
-  unsigned totalToExtract = theSHA256Test.totalToCompute;
-  logTestGraphicsPU << "Total to extract: " << 32 * totalToExtract << Logger::endL;
-  cl_int ret = clEnqueueReadBuffer (
-    theGPU.commandQueue,
-    result,
-    CL_TRUE,
-    0,
-    32 * totalToExtract,
-    &theSHA256Test.outputBuffer[0],
-    0,
-    NULL,
-    NULL
-  );
-  if (ret != CL_SUCCESS) {
-    logTestGraphicsPU << "Failed to enqueue read buffer. Return code: " << ret << ". " << Logger::endL;
-    return false;
   }
   auto timeCurrent = std::chrono::system_clock::now();
   std::chrono::duration<double> elapsed_seconds = timeCurrent - timeStart;
   logTestGraphicsPU << "Computed " << largeTestCounter << " sha256s in " << elapsed_seconds.count() << " second(s). " << Logger::endL;
-  logTestGraphicsPU << "Speed: " << (theSHA256Test.totalToCompute / elapsed_seconds.count()) << " hashes per second. " << Logger::endL;
+  logTestGraphicsPU << "Speed: " << (grandTotal / elapsed_seconds.count()) << " hashes per second. " << Logger::endL;
   logTestGraphicsPU << "Checking computations ..." << Logger::endL;
-  for (largeTestCounter = 0; largeTestCounter < totalToExtract; largeTestCounter ++) {
+  for (largeTestCounter = 0; largeTestCounter < theSHA256Test.totalToCompute; largeTestCounter ++) {
     unsigned testCounteR = largeTestCounter % theSHA256Test.knownSHA256s.size();
     std::stringstream out;
     unsigned offset = largeTestCounter * 32;
