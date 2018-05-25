@@ -172,13 +172,6 @@ __kernel void sha256GPU(
   //result[messageIndex] = ((unsigned char) theLength);
   uint32_t resultOffset = messageIndex * 32;
   //return;
-  if (messageIndex == 0){
-    for (i=0; i< 10000; i++) {
-      uint variable = memoryPool_read_uinT(&(messageLengths[4 * i]));
-      result[i] = variable ;
-    }
-  }
-  return;
   for (t = 0; t < 8; t ++) {
     for (i = 0; i < 4; i ++) {
       result[resultOffset + t * 4 + i] = (unsigned char) (digest[t] >> ((3 - i) * 8) );
