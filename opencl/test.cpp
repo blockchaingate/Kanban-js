@@ -293,14 +293,14 @@ bool testGPU(GPU& inputGPU) {
   //theGPU.flagTurnOffToDebugCPU = true;
   //if (!testBasicOperations(theGPU))
   //  return - 1;
-  if (!testMainPart1ComputeContexts(inputGPU))
-    return false;
-  if (!testMainPart2Signatures(inputGPU))
-    return false;
+  //if (!testMainPart1ComputeContexts(inputGPU))
+  //  return false;
+  //if (!testMainPart2Signatures(inputGPU))
+  //  return false;
   if (!testSHA256(inputGPU))
     return false;
-  if (!testSign(inputGPU))
-    return false;
+  //if (!testSign(inputGPU))
+  //  return false;
   return true;
 }
 
