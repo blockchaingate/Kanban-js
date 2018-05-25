@@ -6,19 +6,19 @@ const jsonToHtml = require('./json_to_html');
 const Block = require('../bitcoinjs_src/block');
 const jobsServerSide = require('../jobs');
 
-function getPage(){
+function getPage() {
   return window.kanban.thePage;
 }
 
-function getSpanProgress(){ 
+function getSpanProgress() { 
   return document.getElementById(ids.defaults.progressReport);
 }
 
-function getOutputTXInfoDiv(){
+function getOutputTXInfoDiv() {
   return document.getElementById(ids.defaults.outputRPCTXInfo);
 }
 
-function getOutputTestGPU(){
+function getOutputTestGPU() {
   return document.getElementById(ids.defaults.outputGPUTest);
 }
 
@@ -161,7 +161,13 @@ function testBackEndSignOneMessage() {
   var theNonce = document.getElementById(ids.defaults.inputNodeCallTestNonce).value; 
   var theSecret = document.getElementById(ids.defaults.inputNodeCallTestSecretKey).value; 
   submitRequests.submitGET({
-    url: pathnames.getURLfromNodeCallLabel(pathnames.nodeCalls.testBackEndSignOneMessage.nodeCallLabel, { message: theMessage, nonce: theNonce, secretKey: theSecret}),
+    url: pathnames.getURLfromNodeCallLabel(
+      pathnames.nodeCalls.testBackEndSignOneMessage.nodeCallLabel, { 
+        message: theMessage, 
+        nonce: theNonce, 
+        secretKey: theSecret
+      }
+    ),
     progress: getSpanProgress(),
     result: getOutputTestGPU()
   });  
@@ -185,9 +191,19 @@ function synchronizeUnspentTransactions(){
   });
 }
 
+function testBackEndEngineSha256(){
+  submitRequests.submitGET({
+    url: pathnames.getURLfromNodeCallLabel(pathnames.nodeCalls.testBackEndEngineSha256.nodeCallLabel),
+    progress: getSpanProgress(),
+    result : getOutputTXInfoDiv(),
+    callback: pollServerStart
+  });  
+}
+
 module.exports = {
   synchronizeUnspentTransactions,
   testGPUSha256,
+  testBackEndEngineSha256,
   testBackEndSha256Multiple,
   testBackEndSha256OneMessage,
   testBackEndPipeMultiple,

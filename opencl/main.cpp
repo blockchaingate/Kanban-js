@@ -26,8 +26,8 @@ extern int testMain();
 
 int main(int numberOfArguments, char *arguments[]) {
   if (numberOfArguments == 2)
-    if (((std::string) arguments[1]) == "test")
-    { int result = testMain();
+    if (((std::string) arguments[1]) == "test"){
+      int result = testMain();
       return result;
     }
   Server theServer;

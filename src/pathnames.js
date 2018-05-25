@@ -59,29 +59,32 @@ var nodeCalls = {
     nodeCallLabel: "computeUnspentTransactions", // must be same as key label, used for autocomplete
   }, 
   pollOngoing: {
-    nodeCallLabel: "pollOngoing"
+    nodeCallLabel: "pollOngoing" // must be same as key label, used for autocomplete
   },
   testGPUSha256: {
-    nodeCallLabel: "testGPUSha256"
+    nodeCallLabel: "testGPUSha256" // must be same as key label, used for autocomplete
   },
   testBackEndSha256Multiple: {
-    nodeCallLabel: "testBackEndSha256Multiple"
+    nodeCallLabel: "testBackEndSha256Multiple" // must be same as key label, used for autocomplete
   },
   testBackEndSha256OneMessage: {
-    nodeCallLabel: "testBackEndSha256OneMessage"
+    nodeCallLabel: "testBackEndSha256OneMessage" // must be same as key label, used for autocomplete
   },
   testBackEndPipeMultiple: {
-    nodeCallLabel: "testBackEndPipeMultiple"
+    nodeCallLabel: "testBackEndPipeMultiple" // must be same as key label, used for autocomplete
   },
   testBackEndPipeOneMessage: {
-    nodeCallLabel: "testBackEndPipeOneMessage"
+    nodeCallLabel: "testBackEndPipeOneMessage" // must be same as key label, used for autocomplete
   },
   testBackEndSignOneMessage: {
-    nodeCallLabel: "testBackEndSignOneMessage"
+    nodeCallLabel: "testBackEndSignOneMessage" // must be same as key label, used for autocomplete
   },
   testBackEndSignMultipleMessages: {
-    nodeCallLabel: "testBackEndSignMultipleMessages"
+    nodeCallLabel: "testBackEndSignMultipleMessages" // must be same as key label, used for autocomplete
   },
+  testBackEndEngineSha256: {
+    nodeCallLabel: "testBackEndEngineSha256" // must be same as key label, used for autocomplete
+  }
 };
 
 var gpuCommands = {

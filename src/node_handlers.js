@@ -55,6 +55,7 @@ handlersReturnWhenDone[pathnames.nodeCalls.pollOngoing.nodeCallLabel] = pollOngo
 handlersReturnWhenDone[pathnames.nodeCalls.testBackEndSha256OneMessage.nodeCallLabel] = openCLDriver.testBackEndSha256OneMessage;
 handlersReturnWhenDone[pathnames.nodeCalls.testBackEndPipeOneMessage.nodeCallLabel] = openCLDriver.testBackEndPipeOneMessage;
 handlersReturnWhenDone[pathnames.nodeCalls.testBackEndSignOneMessage.nodeCallLabel] = openCLDriver.testBackEndSignOneMessage;
+handlersReturnWhenDone[pathnames.nodeCalls.testBackEndEngineSha256.nodeCallLabel] = openCLDriver.testBackEndEngineSha256;
 
 for (var label in pathnames.nodeCalls) {
   var currentNodeCallLabel = pathnames.nodeCalls[label].nodeCallLabel;

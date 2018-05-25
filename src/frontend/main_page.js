@@ -75,7 +75,7 @@ Page.prototype.loadPageSettings = function() {
 }
 
 function getPage() {
-  if (window.kanban.page === null || window.kanban.page === undefined){
+  if (window.kanban.page === null || window.kanban.page === undefined) {
     window.kanban.page = new Page();
   }
   return window.kanban.page;

@@ -243,6 +243,7 @@ function OpenCLDriver() {
   this.started = false;
   this.connected = false;
   this.handleExecutable = null;
+  this.handleTestExecutable = null;
   this.gpuConnections = {
     metaData: null,
     data: null,
@@ -645,6 +646,40 @@ function testBackEndSignMultipleMessages(callId) {
   global.kanban.openCLDriver.testBackEndSignMultipleMessagesStart(callId);
 }
 
+function testBackEndEngineSha256(request, response, desiredCommand) {
+  var theDriver = global.kanban.openCLDriver;
+  response.writeHead(200);
+  if (theDriver.handleTestExecutable !== null) {
+    response.end(`Test(s) already running, please wait until they finish. `);
+    return;
+  }
+  var engineInput = "{command:\"testSha256\"}";
+  console.log(`About to execute command ${engineInput}`);
+  theDriver.handleTestExecutable = childProcess.execFile (
+    pathnames.pathname.openCLDriverExecutable, [engineInput], {
+      maxBuffer: 1000000, //Please note: this code should work with a small buffer too, say about 1000.
+      //If not, it's a bug.
+      shell: true,
+      cwd: pathnames.path.openCLDriverBuildPath,
+      encoding: 'binary'
+    },
+    function(code, stdout, stderr) {  
+      var theDriver = global.kanban.openCLDriver;
+      theDriver.handleTestExecutable = null;
+      response.end(`OpenCL driver exited with code: ${code}.`);
+    }
+  );
+  console.log(`Process: ${pathnames.pathname.openCLDriverExecutable} spawned`.green);
+  theDriver.handleTestExecutable.stdout.on('data', function(data) {
+    console.log(data);
+    response.write(data);
+  });
+  theDriver.handleTestExecutable.stderr.on('data', function(data) {
+    console.log(data);
+    response.write(data);
+  });
+}
+
 module.exports = {
   OpenCLDriver,
   testBackEndSha256Multiple,
@@ -652,5 +687,6 @@ module.exports = {
   testBackEndPipeMultiple,
   testBackEndPipeOneMessage,
   testBackEndSignOneMessage,
-  testBackEndSignMultipleMessages
+  testBackEndSignMultipleMessages,
+  testBackEndEngineSha256
 }

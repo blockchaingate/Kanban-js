@@ -90,12 +90,25 @@
   </div>
 </div>
 <div class = "divMainPage" id = "pageTestGPU">
-  <div class = "divControlPanelDefault"><br>
+  <div class = "divControlPanelDefault">
+    <table class = "tableTestComputationEngine">
+      <tr>
+        <th>Command</th><th></th>
+      </tr>
+      <tr>
+        <td>CPP &#8644; GPU [Sha256] </td>
+        <td><button class = "buttonStandard" onclick = "window.kanban.nodeCalls.testBackEndEngineSha256();">go</button></td>
+      </tr>
+    </table>
+  </div>
+  <br>
+  <div class = "divControlPanelDefault">
     <input type = "text" id = "inputNodeCallTestMessage" placeholder = "message"></input>
     <input type = "text" id = "inputNodeCallTestNonce" placeholder = "nonce" value = ""></input>
     <input type = "text" id = "inputNodeCallTestSecretKey" placeholder = "secret key" value = ""></input>
     <input type = "text" id = "inputNodeCallTestPublicKey" placeholder = "public key" value = ""></input>
     <input type = "text" id = "inputNodeCallTestSignature" placeholder = "signature" value = ""></input>
+
 
     <table class = "tableTestKanban">
       <tr><th>Command</th> <th>Input one test</th> <th></th> <th></th></tr>
