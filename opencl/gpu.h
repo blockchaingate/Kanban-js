@@ -165,6 +165,7 @@ public:
   cl_uint numberOfPlatforms;
   cl_device_id allDevices[2];
   cl_uint numberOfDevices;
+  cl_device_type theDesiredDeviceType;
   cl_device_id currentDeviceId;
   cl_context context;
   cl_command_queue commandQueue;
@@ -172,7 +173,6 @@ public:
   bool flagInitializedPlatform;
   bool flagInitializedKernelsNoBuild;
   bool flagInitializedKernelsFull;
-  bool flagTurnOffToDebugCPU;
   std::shared_ptr<GPUKernel> getKernel(const std::string& kernelName);
   bool initializeAllNoBuild();
   bool initializeAllFull();

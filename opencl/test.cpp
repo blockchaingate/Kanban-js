@@ -94,8 +94,6 @@ bool testMainPart1ComputeContexts(GPU& theGPU) {
   /////////////////////////////
   logTestCentralPU << "Multiplication context computed. " << Logger::endL;
   testPrintMultiplicationContext(CryptoEC256k1::bufferMultiplicationContext, "Central PU", logTestCentralPU);
-  if (theGPU.flagTurnOffToDebugCPU)
-    return true;
   /////////////////////////////
 
   //*****GPU tests*******
@@ -103,6 +101,13 @@ bool testMainPart1ComputeContexts(GPU& theGPU) {
   if (!CryptoEC256k1GPU::computeGeneratorContextDefaultBuffers(theGPU))
     return false;
   logTestGraphicsPU << "Generator context computed. " << Logger::endL;
+  std::string idOpenCL;
+  if (theGPU.theDesiredDeviceType == CL_DEVICE_TYPE_GPU) {
+    idOpenCL = "Graphics PU";
+  } else {
+    idOpenCL = "openCL CPU";
+  }
+
   testPrintGeneratorContext(theGPU.bufferGeneratorContext, "Graphics PU", logTestGraphicsPU);
   /////////////////////////////
 
@@ -220,10 +225,6 @@ bool testMainPart2Signatures(GPU& theGPU) {
     message.serialization
   );
   logTestCentralPU << "Verification of a signature that's been tampered with (expected 0): " << (int) signatureResult[0] << Logger::endL;
-  if (theGPU.flagTurnOffToDebugCPU) {
-    return true;
-  }
-
   theSignature.reset();
   CryptoEC256k1GPU::signMessageDefaultBuffers(
     theSignature.serialization,
@@ -288,23 +289,31 @@ bool testBasicOperations(GPU& theGPU){
   return true;
 }
 
-int testMain() {
-  GPU theGPU;
-  int debugWarning;
+bool testGPU(GPU& inputGPU) {
   //theGPU.flagTurnOffToDebugCPU = true;
   //if (!testBasicOperations(theGPU))
   //  return - 1;
-  //if (!testMainPart1ComputeContexts(theGPU))
-  //  return - 1;
-  //if (!testMainPart2Signatures(theGPU))
-  //  return - 1;
-  //if (theGPU.flagTurnOffToDebugCPU)
-  //  return 0;
-  if (!testSHA256(theGPU))
-    return - 1;
-  //if (!testSign(theGPU))
-  //  return - 1;
+  if (!testMainPart1ComputeContexts(inputGPU))
+    return false;
+  if (!testMainPart2Signatures(inputGPU))
+    return false;
+  if (!testSHA256(inputGPU))
+    return false;
+  if (!testSign(inputGPU))
+    return false;
+  return true;
+}
 
+int testMain() {
+  GPU theGPU;
+  GPU theOpenCLCPU;
+  theOpenCLCPU.theDesiredDeviceType = CL_DEVICE_TYPE_CPU;
+  if (! testGPU(theGPU)) {
+    return - 1;
+  }
+  if (! testGPU(theOpenCLCPU)) {
+    return - 1;
+  }
   return 0;
 }
 
@@ -424,7 +433,7 @@ bool testSHA256(GPU& theGPU) {
         std::cout << "Scheduled grand total: " << grandTotal << " sha256s in " << elapsed_seconds.count() << " second(s). " << std::endl;
       }
     }
-    logTestGraphicsPU << "Total to extract: " << 32 * theSHA256Test.totalToCompute << Logger::endL;
+    //logTestGraphicsPU << "Total to extract: " << 32 * theSHA256Test.totalToCompute << Logger::endL;
     cl_int ret = clEnqueueReadBuffer (
       theGPU.commandQueue,
       result,

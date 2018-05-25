@@ -120,7 +120,6 @@ GPU::GPU() {
   this->flagInitializedPlatform = false;
   this->flagInitializedKernelsFull = false;
   this->flagInitializedKernelsNoBuild = false;
-  this->flagTurnOffToDebugCPU = false;
   this->commandQueue = NULL;
   this->context = NULL;
   this->flagMultiplicationContextComputed = false;
@@ -132,6 +131,7 @@ GPU::GPU() {
   this->bufferTestSuite1BasicOperations = new unsigned char [GPU::memoryMultiplicationContext];
   this->bufferGeneratorContext = new unsigned char [GPU::memoryGeneratorContext];
   this->bufferSignature = new unsigned char [GPU::memorySignature];
+  this->theDesiredDeviceType = CL_DEVICE_TYPE_GPU;
 }
 
 bool GPU::initializeAllFull() {
@@ -183,10 +183,9 @@ bool GPU::initializePlatform() {
   if (this->flagVerbose) {
     logGPU << "Number of platforms: " << this->numberOfPlatforms << "\n";
   }
-  cl_device_type desiredDeviceType = CL_DEVICE_TYPE_CPU;
-  std::string deviceDescription = desiredDeviceType == CL_DEVICE_TYPE_CPU ? "CPU" : "GPU";
+  std::string deviceDescription = this->theDesiredDeviceType == CL_DEVICE_TYPE_CPU ? "CPU" : "GPU";
   for (unsigned i = 0; i < this->numberOfPlatforms; i ++) {
-    ret = clGetDeviceIDs(this->platformIds[i], desiredDeviceType, 2, this->allDevices, &this->numberOfDevices);
+    ret = clGetDeviceIDs(this->platformIds[i], this->theDesiredDeviceType, 2, this->allDevices, &this->numberOfDevices);
     if (ret == CL_SUCCESS)
       break;
   }
