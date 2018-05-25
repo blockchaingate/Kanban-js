@@ -1,11 +1,12 @@
 //The current file is licensed under the license terms found in the main header file "vpf.h".
 //For additional information refer to the file "vpf.h".
-#ifndef vpfJson_h_already_included
-#define vpfJson_h_already_included
+#ifndef MACROJson_h_already_included
+#define MACROJson_h_already_included
 
-#include "vpfHeader1General1_ListReferences.h"
-#include "vpfHeader1General6Maps.h"
-static ProjectInformationInstance vpfJson(__FILE__, "Implementation of JSON, work in progress.");
+#include <sstream>
+#include <vector>
+#include <unordered_map>
+#include <memory>
 
 
 /*The best kind of misleading documentation is aspirational
@@ -28,11 +29,6 @@ static ProjectInformationInstance vpfJson(__FILE__, "Implementation of JSON, wor
 // error: 'JSType' is not a cass or namespace
 
 //struct JSHashData;
-class Rational;
-template <typename coefficient>
-class Matrix;
-template <typename coefficient>
-class Vector;
 
 class JSData
 {
@@ -57,8 +53,8 @@ public:
   bool boolean;
   double number;
   std::string string;
-  List<JSData> list;
-  MapReferenceS<std::string, JSData, MathRoutines::hashString> objects;
+  std::vector<JSData> list;
+  std::unordered_map<std::string, std::shared_ptr<JSData> > objects;
   void operator=(const bool other);
   void operator=(int other);
   void operator=(const double other);
@@ -66,15 +62,15 @@ public:
   void operator=(const char* other);
   JSData& operator[](int i);
   JSData& operator[](const std::string& s);
-  JSData GetValue(const std::string& key);
+  JSData GetValueCopy(const std::string& key);
   bool HasKey(const std::string& key);
   void SetKeyValue(const std::string& key, const JSData& value);
-  int GetKeyIndex(const std::string& key);
-  JSData()
-  { this->reset();
+  std::shared_ptr<JSData> copyMe();
+  JSData() {
+    this->reset();
   }
-  JSData(const JSData& other)
-  { this->operator=(other);
+  JSData(const JSData& other){
+    this->operator=(other);
   }
   JSData(const char* other)
   { this->reset();
@@ -91,44 +87,26 @@ public:
     this->list = other.list;
     this->objects = other.objects;
   }
-  void operator=(const List<JSData>& other);
+  void operator=(const std::vector<JSData>& other);
   // there has to be a better way to do this
-  void operator=(const Rational& other);
-
-  void operator=(const List<int>& other);
-  template <typename coefficient>
-  void operator=(const Vector<coefficient>& other);
-  template <typename coefficient>
-  void operator=(const Matrix<coefficient>& other);
+  void operator=(const int& other);
+  void operator=(const std::vector<int>& other);
   bool isTrueRepresentationInJSON();
   // parsing
   void ExtractScalar(const std::string& json, int begin, int end);
   bool IsValidElement();
   void reset(char inputType = JSData::JSUndefined);
-  std::string ToString(bool percentEncodeKeysIncludingDots, bool useHTML = false) const;
+  std::string toString(bool percentEncodeKeysIncludingDots, bool useHTML = false) const;
   template <typename somestream>
   somestream& IntoStream(somestream& out, bool percentEncodeStrings, int indentation = 0, bool useHTML = false) const;
   void readfile(const char* filename);
   bool readstring(const std::string& json, bool stringsWerePercentEncoded, std::stringstream* commentsOnFailure = 0);
   void TryToComputeType();
-  static bool Tokenize(const std::string& input, List<JSData>& output);
+  static bool Tokenize(const std::string& input, std::vector<JSData> &output);
   void writefile(const char* filename) const;
-  static void FilterColumnsJSDataObjectList(List<JSData>& inputOutput, const List<std::string>& columnsToPreserve);
+  static void FilterColumnsJSDataObjectList(std::vector<JSData>& inputOutput, const std::vector<std::string>& columnsToPreserve);
 };
 
 std::ostream& operator<<(std::ostream& out, const JSData& data);
-
-template <typename coefficient>
-void JSData::operator=(const Vector<coefficient>& other)
-{ for (int i = 0; i < other.size; i ++)
-    (*this)[i] = other.TheObjects[i];
-}
-
-template <typename coefficient>
-void JSData::operator=(const Matrix<coefficient>& other)
-{ for (int i = 0; i < other.NumRows; i ++)
-    for (int j = 0; j < other.NumCols; j ++)
-      (*this)[i][j] = other(i, j);
-}
 
 #endif
