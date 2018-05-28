@@ -21,10 +21,15 @@ public:
   std::vector<unsigned char> messages;
   std::vector<unsigned char> nonces;
   std::vector<unsigned char> secretKeys;
+  std::vector<std::string> secretStrings;
   std::vector<unsigned char> outputSignatures;
+  std::vector<unsigned char> outputSignatureSizes;
+  std::vector<std::string> outputSignatureStrings;
   std::vector<unsigned char> publicKeysBuffer;
   std::vector<unsigned char> publicKeysSizes;
   std::vector<std::string> publicKeyStrings;
+  std::vector<unsigned char> outputVerifications;
+
   unsigned numMessagesPerPipeline;
   bool flagInitialized;
   testSignatures() {
@@ -33,7 +38,7 @@ public:
   void initialize();
   bool testSign(GPU& theGPU);
   bool testPublicKeys(GPU& theGPU);
-  bool testVerifySignatures(GPU& theGPU);
+  bool testVerifySignatures(GPU& theGPU, bool tamperWithSignature);
   std::string toStringPublicKeys();
   std::string toStringSignatures();
 };
@@ -55,6 +60,19 @@ public:
   bool testSHA256(GPU& theGPU);
   unsigned totalToCompute;
 };
+
+void readStringsFromBufferWithSizes(
+  const std::vector<unsigned char>& inputBuffer,
+  const std::vector<unsigned char>& inputSizes,
+  unsigned int oneBufferMaxSize,
+  std::vector<std::string>& output
+) {
+  output.resize(inputSizes.size() / 4);
+  for (unsigned i = 0; i< output.size(); i ++) {
+    unsigned int currentSize = memoryPool_read_uint(&inputSizes[4 * i]);
+    output[i].assign((char *) &inputBuffer[i * oneBufferMaxSize], currentSize);
+  }
+}
 
 Logger& getAppropriateLogger(GPU& theGPU) {
   Logger& result = theGPU.theDesiredDeviceType == CL_DEVICE_TYPE_CPU ? logTestCentralPU : logTestGraphicsPU;
@@ -342,17 +360,17 @@ bool testGPU(GPU& inputGPU) {
   //  return false;
   //if (!testMainPart2Signatures(inputGPU))
   //  return false;
-  testerSHA256 theSHA256Tester;
-  if (!theSHA256Tester.testSHA256(inputGPU)) {
+  //testerSHA256 theSHA256Tester;
+  //if (!theSHA256Tester.testSHA256(inputGPU)) {
+  //  return false;
+  //}
+  testSignatures theSignatureTest;
+  if (!theSignatureTest.testPublicKeys(inputGPU)) {
     return false;
   }
-  testSignatures theSignatureTest;
-  //if (!theSignatureTest.testPublicKeys(inputGPU)) {
-  //  return false;
-  //}
-  //if (!theSignatureTest.testSign(inputGPU)) {
-  //  return false;
-  //}
+  if (!theSignatureTest.testSign(inputGPU)) {
+    return false;
+  }
   //if (!theSignatureTest.testVerifySignatures(inputGPU)) {
   //  return false;
   //}
@@ -420,6 +438,7 @@ void testerSHA256::initialize() {
 bool testerSHA256::testSHA256(GPU& theGPU) {
   // Create the two input vectors
   Logger& theTestLogger = getAppropriateLogger(theGPU);
+  theTestLogger << "Running SHA256 benchmark. " << Logger::endL;
   std::shared_ptr<GPUKernel> theKernel = theGPU.getKernel(GPU::kernelSHA256);
   if (!theKernel->build()) {
     std::cout << "DEBUG: failed to build sha kernel. " << std::endl;
@@ -529,15 +548,23 @@ void testSignatures::initialize() {
   }
   this->flagInitialized = true;
   this->numMessagesPerPipeline = 1000;
+  std::cout << "DEBUG: got to here, pt 1" << std::endl;
   unsigned totalPipelineSize = this->numMessagesPerPipeline * 32;
-  int totalOutputSize = this->numMessagesPerPipeline * 80;
   this->messages.resize(totalPipelineSize);
   this->nonces.resize(totalPipelineSize);
   this->secretKeys.resize(totalPipelineSize);
-  this->outputSignatures.resize(totalOutputSize);
-  this->publicKeysSizes.resize(this->numMessagesPerPipeline * 4);
+  this->secretStrings.resize(this->numMessagesPerPipeline);
+  ////////////////////
+  this->outputSignatures.resize(this->numMessagesPerPipeline * MACRO_size_of_signature);
+  this->outputSignatureSizes.resize(this->numMessagesPerPipeline * 4);
+  this->outputSignatureStrings.resize(this->numMessagesPerPipeline);
+  ////////////////////
   this->publicKeysBuffer.resize(this->numMessagesPerPipeline * MACRO_size_of_signature);
+  this->publicKeysSizes.resize(this->numMessagesPerPipeline * 4);
   this->publicKeyStrings.resize(this->numMessagesPerPipeline);
+  ////////////////////
+  this->outputVerifications.resize(this->numMessagesPerPipeline);
+  std::cout << "DEBUG: got to here, pt 2" << std::endl;
   this->messages[0] = 'a';
   this->messages[1] = 'b';
   this->messages[2] = 'c';
@@ -552,9 +579,15 @@ void testSignatures::initialize() {
     this->nonces[i] = getByte(this->nonces[i - 1], this->nonces[i - 2], this->secretKeys[i - 3]);
     this->secretKeys[i] = getByte(this->secretKeys[i - 1], this->secretKeys[i - 2], this->messages[i - 3]);
   }
+  std::cout << "DEBUG: got to here, pt 3" << std::endl;
+  for (unsigned i = 0; i < this->numMessagesPerPipeline; i ++) {
+    this->secretStrings[i].assign((char*) &this->secretKeys[i * 32], 32);
+  }
 }
 
 bool testSignatures::testSign(GPU& theGPU) {
+  Logger& testLogger = getAppropriateLogger(theGPU);
+  testLogger << "Running signature benchmark. " << Logger::endL;
   // Create the two input vectors
   theGPU.initializeAllNoBuild();
   this->initialize();
@@ -570,10 +603,16 @@ bool testSignatures::testSign(GPU& theGPU) {
 
   auto timeStart = std::chrono::system_clock::now();
   unsigned counterTest;
-
-  kernelSign->writeToBuffer(2, &this->nonces[0],     this->nonces.size() );
-  kernelSign->writeToBuffer(3, &this->secretKeys[0], this->secretKeys.size());
-  kernelSign->writeToBuffer(4, &this->messages[0],   this->messages.size());
+  //__global unsigned char* outputSignature,
+  //__global unsigned char* outputSizes,
+  //__global unsigned char* outputInputNonce,
+  //__global unsigned char* inputSecretKey,
+  //__global unsigned char* inputMessage,
+  //__global unsigned char* inputMemoryPoolGeneratorContext,
+  //unsigned int messageIndexChar
+  kernelSign->writeToBuffer(2, this->nonces);
+  kernelSign->writeToBuffer(3, this->secretKeys);
+  kernelSign->writeToBuffer(4, this->messages);
   for (counterTest = 0; counterTest < this->numMessagesPerPipeline; counterTest ++) {
     kernelSign->writeArgument(6, counterTest);
     //theKernel->writeToBuffer(0, &theLength, sizeof(uint));
@@ -591,7 +630,7 @@ bool testSignatures::testSign(GPU& theGPU) {
       NULL
     );
     if (ret != CL_SUCCESS) {
-      logTestGraphicsPU << "Failed to enqueue kernel. Return code: " << ret << ". " << Logger::endL;
+      testLogger << "Failed to enqueue kernel. Return code: " << ret << ". " << Logger::endL;
       return false;
     }
     //std::cout << "DEBUG: kernel enqueued, proceeding to read buffer. " << std::endl;
@@ -603,10 +642,10 @@ bool testSignatures::testSign(GPU& theGPU) {
       << ((counterTest + 1) / elapsed_seconds.count()) << " signature(s) per second." << std::endl;
     }
   }
-  cl_mem& result = kernelSign->getOutput(0)->theMemory;
+  cl_mem& resultBuffers = kernelSign->getOutput(0)->theMemory;
   cl_int ret = clEnqueueReadBuffer (
     theGPU.commandQueue,
-    result,
+    resultBuffers,
     CL_TRUE,
     0,
     this->outputSignatures.size(),
@@ -616,37 +655,44 @@ bool testSignatures::testSign(GPU& theGPU) {
     NULL
   );
   if (ret != CL_SUCCESS) {
-    logTestGraphicsPU << "Failed to enqueue read buffer. Return code: " << ret << ". " << Logger::endL;
+    testLogger << "Failed to enqueue read buffer. Return code: " << ret << ". " << Logger::endL;
     return false;
   }
+  cl_mem& resultSizes = kernelSign->getOutput(1)->theMemory;
+  ret = clEnqueueReadBuffer (
+    theGPU.commandQueue,
+    resultSizes,
+    CL_TRUE,
+    0,
+    this->outputSignatureSizes.size(),
+    &this->outputSignatureSizes[0],
+    0,
+    NULL,
+    NULL
+  );
+  if (ret != CL_SUCCESS) {
+    testLogger << "Failed to enqueue read buffer. Return code: " << ret << ". " << Logger::endL;
+    return false;
+  }
+
   auto timeCurrent = std::chrono::system_clock::now();
   std::chrono::duration<double> elapsed_seconds = timeCurrent - timeStart;
-  logTestGraphicsPU << "Signed " << counterTest << " 32-byte messages in " << elapsed_seconds.count() << " second(s). " << Logger::endL;
-  logTestGraphicsPU << "Speed: "
+  testLogger << "Signed " << counterTest << " 32-byte messages in " << elapsed_seconds.count() << " second(s). " << Logger::endL;
+  testLogger << "Speed: "
   << (this->numMessagesPerPipeline / elapsed_seconds.count()) << " signature(s) per second." << Logger::endL;
-
-  logTestGraphicsPU << "Checking computations ... NOT IMPLEMENTED YET!" << Logger::endL;
-  /*for (largeTestCounter = 0; largeTestCounter < testSHA256::totalToCompute; largeTestCounter ++) {
-    unsigned testCounteR = largeTestCounter % testSHA256::knownSHA256s.size();
-    std::stringstream out;
-    unsigned offset = largeTestCounter * 32;
-    for (unsigned i = offset; i < offset + 32; i ++)
-      out << std::hex << std::setw(2) << std::setfill('0') << ((int) ((unsigned) testSHA256::outputBuffer[i]));
-    if (out.str() != testSHA256::knownSHA256s[testCounteR][1]) {
-      logTestGraphicsPU << "\e[31mSha of message index " << largeTestCounter
-      << ": " << testSHA256::knownSHA256s[testCounteR][0] << " is wrongly computed to be: " << out.str()
-      << " instead of: " << testSHA256::knownSHA256s[testCounteR][1] << "\e[39m" << Logger::endL;
-      assert(false);
-      return false;
-    }
-  }*/
-  logTestGraphicsPU << "Success!" << Logger::endL;
-  std::cout << "\e[32mSuccess!\e[39m" << std::endl;
+  readStringsFromBufferWithSizes(
+    this->outputSignatures,
+    this->outputSignatureSizes,
+    MACRO_size_of_signature,
+    this->outputSignatureStrings
+  );
+  testLogger << this->toStringSignatures() << Logger::endL;
   return true;
 }
 
 bool testSignatures::testPublicKeys(GPU& theGPU) {
   Logger& theTestLogger = getAppropriateLogger(theGPU);
+  theTestLogger << "Running public key generation benchmark. " << Logger::endL;
   this->initialize();
   theGPU.initializeAllNoBuild();
   // Create a command queue
@@ -661,7 +707,7 @@ bool testSignatures::testPublicKeys(GPU& theGPU) {
   auto timeStart = std::chrono::system_clock::now();
   unsigned counterTest = - 1;
 
-  kernelPublicKeys->writeToBuffer(2, &this->secretKeys[0], this->secretKeys.size());
+  kernelPublicKeys->writeToBuffer(2, this->secretKeys);
   for (counterTest = 0; counterTest < this->numMessagesPerPipeline; counterTest ++) {
     kernelPublicKeys->writeArgument(4, counterTest);
     //theKernel->writeToBuffer(0, &theLength, sizeof(uint));
@@ -732,13 +778,17 @@ bool testSignatures::testPublicKeys(GPU& theGPU) {
   << Logger::endL;
   theTestLogger << "Speed: "
   << (this->numMessagesPerPipeline / elapsed_seconds.count()) << " signature(s) per second." << Logger::endL;
+  readStringsFromBufferWithSizes(
+    this->publicKeysBuffer,
+    this->publicKeysSizes,
+    MACRO_size_of_signature,
+    this->publicKeyStrings
+  );
   for (counterTest = 0; counterTest < this->numMessagesPerPipeline; counterTest ++) {
-    unsigned int currentKeySize = memoryPool_read_uint(&this->publicKeysSizes[counterTest * 4]);
-    this->publicKeyStrings[counterTest].clear();
-    this->publicKeyStrings[counterTest].assign(
-      (char*) &this->publicKeysBuffer[MACRO_size_of_signature * counterTest],
-      currentKeySize
-    );
+    if (this->publicKeyStrings.size() == 0) {
+      theTestLogger << "Public key: " << counterTest << " failed to be generated. " << Logger::endL;
+      assert(false);
+    }
   }
   theTestLogger << this->toStringPublicKeys() << Logger::endL;
   return true;
@@ -755,13 +805,31 @@ std::string testSignatures::toStringPublicKeys() {
     if (i >= numSignaturesToShowOnEachEnd && i < this->publicKeyStrings.size() - numSignaturesToShowOnEachEnd) {
       continue;
     }
+    out << "secret_" << i << ": " << Miscellaneous::toStringHex(this->secretStrings[i]) << ", ";
     out << "pk_" << i << ": " << Miscellaneous::toStringHex(this->publicKeyStrings[i]) << "\n";
   }
   return out.str();
 }
 
-/*bool testSignatures::testVerifySignatures(GPU& theGPU) {
+std::string testSignatures::toStringSignatures() {
+  std::stringstream out;
+  out << this->outputSignatureStrings.size() << " signatures generated.\n";
+  unsigned numSignaturesToShowOnEachEnd = 1005;
+  for (unsigned i = 0; i < this->outputSignatureStrings.size(); i ++) {
+    if (i == numSignaturesToShowOnEachEnd) {
+      out << "...\n";
+    }
+    if (i >= numSignaturesToShowOnEachEnd && i < this->outputSignatureStrings.size() - numSignaturesToShowOnEachEnd) {
+      continue;
+    }
+    out << "sig_" << i << ": " << Miscellaneous::toStringHex(this->outputSignatureStrings[i]) << "\n";
+  }
+  return out.str();
+}
+
+bool testSignatures::testVerifySignatures(GPU& theGPU, bool tamperWithSignature) {
   Logger& theTestLogger = getAppropriateLogger(theGPU);
+  theTestLogger << "Running signature verification benchmark. " << Logger::endL;
   this->initialize();
   theGPU.initializeAllNoBuild();
   // Create a command queue
@@ -778,20 +846,43 @@ std::string testSignatures::toStringPublicKeys() {
 
   auto timeStart = std::chrono::system_clock::now();
   unsigned counterTest = - 1;
-
-  kernelPublicKeys->writeToBuffer(2, &this->secretKeys[0], this->secretKeys.size());
+  //openCL function arguments:
+  //__global unsigned char *output,
+  //__global unsigned char *outputMemoryPoolSignature,
+  //__global const unsigned char* inputSignature,
+  //__global const unsigned char* signatureSizes,
+  //__global const unsigned char* publicKey,
+  //__global const unsigned char* publicKeySizes,
+  //__global const unsigned char* message,
+  //__global const unsigned char* memoryPoolMultiplicationContext,
+  //unsigned int messageIndex
+  if (tamperWithSignature){
+    theTestLogger << "Testing good signatures. All signatures should be verified. " << Logger::endL;
+  } else {
+    theTestLogger << "Testing signatures that have been tampered with. All signatures should be invalidated. " << Logger::endL;
+  }
+  if (tamperWithSignature) {
+    for (unsigned i = 0; i < this->numMessagesPerPipeline; i ++) {
+      this->outputSignatures[i * MACRO_size_of_signature + 11] ++;
+    }
+  }
+  kernelVerify->writeToBuffer(2, this->outputSignatures);
+  kernelVerify->writeToBuffer(3, this->outputSignatureSizes);
+  kernelVerify->writeToBuffer(4, this->publicKeysBuffer);
+  kernelVerify->writeToBuffer(5, this->publicKeysSizes);
+  kernelVerify->writeToBuffer(6, this->messages);
   for (counterTest = 0; counterTest < this->numMessagesPerPipeline; counterTest ++) {
-    kernelPublicKeys->writeArgument(4, counterTest);
+    kernelVerify->writeArgument(8, counterTest);
     //theKernel->writeToBuffer(0, &theLength, sizeof(uint));
     //std::cout << "DEBUG: Setting arguments ... " << std::endl;
     //std::cout << "DEBUG: arguments set, enqueueing kernel... " << std::endl;
     cl_int ret = clEnqueueNDRangeKernel(
       theGPU.commandQueue,
-      kernelPublicKeys->kernel,
+      kernelVerify->kernel,
       1,
       NULL,
-      kernelPublicKeys->global_item_size,
-      kernelPublicKeys->local_item_size,
+      kernelVerify->global_item_size,
+      kernelVerify->local_item_size,
       0,
       NULL,
       NULL
@@ -810,14 +901,14 @@ std::string testSignatures::toStringPublicKeys() {
     }
   }
   theTestLogger << "Fetching public keys... " << Logger::endL;
-  cl_mem& resultKeys = kernelPublicKeys->getOutput(0)->theMemory;
+  cl_mem& resultVerifications = kernelVerify->getOutput(0)->theMemory;
   cl_int ret = clEnqueueReadBuffer (
     theGPU.commandQueue,
-    resultKeys,
+    resultVerifications,
     CL_TRUE,
     0,
-    this->publicKeysBuffer.size(),
-    &this->publicKeysBuffer[0],
+    this->outputVerifications.size(),
+    &this->outputVerifications[0],
     0,
     NULL,
     NULL
@@ -826,39 +917,34 @@ std::string testSignatures::toStringPublicKeys() {
     theTestLogger << "Failed to enqueue read buffer. Return code: " << ret << ". " << Logger::endL;
     return false;
   }
-  theTestLogger << "Public keys fetched, fetching sizes... " << Logger::endL;
-  cl_mem& resultKeySizes = kernelPublicKeys->getOutput(1)->theMemory;
-  ret = clEnqueueReadBuffer (
-    theGPU.commandQueue,
-    resultKeySizes,
-    CL_TRUE,
-    0,
-    this->publicKeysSizes.size(),
-    &this->publicKeysSizes[0],
-    0,
-    NULL,
-    NULL
-  );
-  if (ret != CL_SUCCESS) {
-    theTestLogger << "Failed to enqueue read buffer. Return code: " << ret << ". " << Logger::endL;
-    return false;
-  }
-  theTestLogger << "Public keys sizes fetched. " << Logger::endL;
   auto timeCurrent = std::chrono::system_clock::now();
   std::chrono::duration<double> elapsed_seconds = timeCurrent - timeStart;
   theTestLogger << "Generated " << counterTest << " public keys in " << elapsed_seconds.count() << " second(s). "
   << Logger::endL;
   theTestLogger << "Speed: "
   << (this->numMessagesPerPipeline / elapsed_seconds.count()) << " signature(s) per second." << Logger::endL;
+  bool isGood = true;
   for (counterTest = 0; counterTest < this->numMessagesPerPipeline; counterTest ++) {
-    unsigned int currentKeySize = memoryPool_read_uint(&this->publicKeysSizes[counterTest * 4]);
-    this->publicKeyStrings[counterTest].clear();
-    this->publicKeyStrings[counterTest].assign(
-      (char*) &this->publicKeysBuffer[MACRO_size_of_signature * counterTest],
-      currentKeySize
-    );
+    if (this->outputVerifications[counterTest] == 0 && !tamperWithSignature) {
+      theTestLogger << Logger::colorRed << "ERROR: Failed to verify signature " << counterTest << ". " << Logger::endL;
+      isGood = false;
+      break;
+    }
+    if (this->outputVerifications[counterTest] == 1 && tamperWithSignature) {
+      theTestLogger << Logger::colorRed << "ERROR: wrongly verified tampered with signature "
+      << counterTest << ". " << Logger::endL;
+      isGood = false;
+      break;
+    }
+    if (this->outputVerifications[counterTest] != 1 && this->outputVerifications[counterTest] != 0) {
+      theTestLogger << Logger::colorRed << "ERROR: signature verification of signature " << counterTest << " has value: "
+      << this->outputVerifications[counterTest] << ". " << Logger::endL;
+      isGood = false;
+      break;
+    }
   }
-  theTestLogger << this->toStringPublicKeys() << Logger::endL;
+  if (!isGood) {
+    theTestLogger << "FATAL ERROR. " << Logger::endL;
+  }
   return true;
 }
-*/

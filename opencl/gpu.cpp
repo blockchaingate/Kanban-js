@@ -299,15 +299,17 @@ bool GPU::initializeKernelsNoBuild() {
       "publicKey",
       "publicKeySize",
       "message",
-      "memoryPoolMultiplicationContext"
+      "memoryPoolMultiplicationContext",
+      "messageIndex"
     },
     {
       SharedMemory::typeVoidPointer,
-      SharedMemory::typeUint,
       SharedMemory::typeVoidPointer,
-      SharedMemory::typeUint,
       SharedMemory::typeVoidPointer,
-      SharedMemory::typeVoidPointerExternalOwnership
+      SharedMemory::typeVoidPointer,
+      SharedMemory::typeVoidPointer,
+      SharedMemory::typeVoidPointerExternalOwnership,
+      SharedMemory::typeUint
     },
     {
       "outputMultiplicationContext"
