@@ -496,6 +496,9 @@ bool testerSHA256::testSHA256(GPU& theGPU) {
       }
     }
     //theTestLogger << "Total to extract: " << 32 * theSHA256Test.totalToCompute << Logger::endL;
+    if (!theGPU.finish()) {
+      return false;
+    }
     cl_int ret = clEnqueueReadBuffer (
       theGPU.commandQueue,
       result,
@@ -642,6 +645,9 @@ bool testSignatures::testSign(GPU& theGPU) {
       << ((counterTest + 1) / elapsed_seconds.count()) << " signature(s) per second." << std::endl;
     }
   }
+  if (!theGPU.finish()) {
+    return false;
+  }
   cl_mem& resultBuffers = kernelSign->getOutput(0)->theMemory;
   cl_int ret = clEnqueueReadBuffer (
     theGPU.commandQueue,
@@ -737,6 +743,9 @@ bool testSignatures::testPublicKeys(GPU& theGPU) {
       << ((counterTest + 1) / elapsed_seconds.count()) << " public keys per second." << std::endl;
     }
   }
+  if (!theGPU.finish()) {
+    return false;
+  }
   theTestLogger << "Fetching public keys... " << Logger::endL;
   cl_mem& resultKeys = kernelPublicKeys->getOutput(0)->theMemory;
   cl_int ret = clEnqueueReadBuffer (
@@ -777,7 +786,7 @@ bool testSignatures::testPublicKeys(GPU& theGPU) {
   theTestLogger << "Generated " << counterTest << " public keys in " << elapsed_seconds.count() << " second(s). "
   << Logger::endL;
   theTestLogger << "Speed: "
-  << (this->numMessagesPerPipeline / elapsed_seconds.count()) << " signature(s) per second." << Logger::endL;
+  << (this->numMessagesPerPipeline / elapsed_seconds.count()) << " public keys per second." << Logger::endL;
   readStringsFromBufferWithSizes(
     this->publicKeysBuffer,
     this->publicKeysSizes,
@@ -899,6 +908,9 @@ bool testSignatures::testVerifySignatures(GPU& theGPU, bool tamperWithSignature)
       << " current speed: "
       << ((counterTest + 1) / elapsed_seconds.count()) << " public keys per second." << std::endl;
     }
+  }
+  if (!theGPU.finish()) {
+    return false;
   }
   theTestLogger << "Fetching public keys... " << Logger::endL;
   cl_mem& resultVerifications = kernelVerify->getOutput(0)->theMemory;

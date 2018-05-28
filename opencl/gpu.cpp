@@ -157,6 +157,15 @@ std::shared_ptr<GPUKernel> GPU::getKernel(const std::string& kernelName) {
   return this->theKernels[kernelName];
 }
 
+bool GPU::finish() {
+  cl_int ret = clFinish(this->commandQueue);
+  if (ret != CL_SUCCESS) {
+    logGPU << "Fatal error: failed to finish GPU queue. " << Logger::endL;
+    return false;
+  }
+  return true;
+}
+
 bool GPU::initializeAllNoBuild() {
   logGPU << "DEBUG: initializing all no build ... " << Logger::endL;
   if (!this->initializePlatform()) {

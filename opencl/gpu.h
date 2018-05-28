@@ -180,6 +180,7 @@ public:
   bool initializePlatformFull();
   bool initializeKernelsNoBuild();
   bool initializeKernelsFull();
+  bool finish();
   //Static allocation forbidden!
   //Rationale: we need to use file loggers in the
   //destructors. File loggers are statically
