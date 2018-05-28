@@ -11,11 +11,13 @@ __kernel void secp256k1_opencl_generate_public_key(
   __global unsigned char* outputPublicKey,
   __global unsigned char* outputPublicKeySize,
   __global unsigned char* inputSecretKey,
-  __global unsigned char* inputMemoryPoolGeneratorContext
-) {
-   
+  __global unsigned char* inputMemoryPoolGeneratorContext, 
+  unsigned int inputMessageIndex
+) {   
   secp256k1_scalar secretKey;
-  secp256k1_scalar_set_b32__global(&secretKey, inputSecretKey, NULL);
+  unsigned int offset = 32 * inputMessageIndex;
+  unsigned int offsetOutput = MACRO_size_of_signature * inputMessageIndex;
+  secp256k1_scalar_set_b32__global(&secretKey, &inputSecretKey[offset], NULL);
 
   __global secp256k1_ecmult_gen_context* generatorContext =
   memoryPool_read_generatorContextPointer_NON_PORTABLE(inputMemoryPoolGeneratorContext);
@@ -25,10 +27,11 @@ __kernel void secp256k1_opencl_generate_public_key(
   secp256k1_ecmult_gen(generatorContext, &publicKeyJacobianCoordinates, &secretKey);
   secp256k1_ge_set_gej(&publicKey, &publicKeyJacobianCoordinates);
   size_t keySize;
-  if (secp256k1_eckey_pubkey_serialize(&publicKey, outputPublicKey, &keySize, 0) == 1) {
-    memoryPool_write_uint(keySize, outputPublicKeySize);
+  
+  if (secp256k1_eckey_pubkey_serialize(&publicKey, &outputPublicKey[offsetOutput], &keySize, 0) == 1) {
+    memoryPool_write_uint(keySize, &outputPublicKeySize[inputMessageIndex * 4]);
   } else {
-    memoryPool_write_uint(0, outputPublicKeySize);
+    memoryPool_write_uint(0, &outputPublicKeySize[inputMessageIndex * 4]);
   }
 }
 

@@ -22,9 +22,9 @@ In the present text we describe our port of the cryptographic functions that mak
 
 
 \subsection{Findings of our investigation}
-Our investigation of the feasibility of running cryptography using openCL, and using the GPU in general, remain inconclusive. Our initial findings suggest that, without any hardware-specific optimization, the CPU performs considerably better than the GPU - between three and five times better on the hardware combinations we tested. 
+Our investigation of the feasibility of running cryptography using openCL, and using the GPU in general, remain inconclusive. Our initial findings suggest that, without any hardware-specific optimization, the CPU performs considerably better than the GPU - anywhere from three to five times better on the hardware combinations we tested. 
 
-However, online sources such as NVidia's guide \cite{NVIDIA:openCLBestPractices} suggest that custom-tailored software optimizations may yield between 4- and 10- fold speed optimizations on NVidia hardware (depending on the particular device and program type, see \cite[page 22]{NVIDIA:openCLBestPractices}). As CPUs appear to be less amenable to software optimizations, it remains feasible that a GPU may outperform a CPU of a similar class, should a considerable effort be put into software optimizations. 
+However, online sources such as NVidia's guide \cite{NVIDIA:openCLBestPractices} suggest that custom-tailored software optimizations may (or may not) yield between 4- and 10- fold speed optimizations on NVidia hardware, depending on the particular device and program type, see \cite[page 22]{NVIDIA:openCLBestPractices}. As CPUs appear to be less amenable to software optimizations, it remains feasible that a GPU may outperform a CPU of a similar class, should a considerable effort be put into software optimizations. 
 
 Even without such optimizations, openCL remains a viable option as it allows the same code to run on both the CPU and on multiple GPUs (without the need of much engineering), effectively adding the speeds of all involved devices. 
 
@@ -72,7 +72,7 @@ Following Bitcoin, FAB coin uses the standard public/private key cryptography EC
 \[
 y^2 = x^3 + 7
 \]
-(we specify the base point later), over the finite field:
+(we do not specify the base point here), over the finite field:
 
 \[
 \mathbb Z / p\mathbb Z, 

@@ -44,7 +44,8 @@ __kernel void secp256k1_opencl_generate_public_key(
   __global unsigned char* outputPublicKey,
   __global unsigned char* outputPublicKeySize,
   __global unsigned char* inputSecretKey,
-  __global unsigned char* inputMemoryPoolGeneratorContext
+  __global unsigned char* inputMemoryPoolGeneratorContext,
+  unsigned int inputMessageIndex
 );
 
 __kernel void secp256k1_opencl_verify_signature(

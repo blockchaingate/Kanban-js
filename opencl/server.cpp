@@ -867,7 +867,7 @@ bool Server::ProcessResultSignMessages(std::stringstream &output) {
     resultSignatures,
     CL_TRUE,
     0,
-    kernelSign->computationIds.size() * MACRO_MEMORY_POOL_SIZE_Signature,
+    kernelSign->computationIds.size() * MACRO_size_of_signature,
     this->thePipe.bufferOutputGPU,
     0,
     NULL,
@@ -896,7 +896,7 @@ bool Server::ProcessResultSignMessages(std::stringstream &output) {
 
   for (unsigned i = 0; i < kernelSign->computationIds.size(); i ++) {
     unsigned currentSize = memoryPool_read_uint(&this->thePipe.bufferOutputGPU_second[i * 4]);
-    std::string outputBinary((char*) &this->thePipe.bufferOutputGPU[i * MACRO_MEMORY_POOL_SIZE_Signature], currentSize);
+    std::string outputBinary((char*) &this->thePipe.bufferOutputGPU[i * MACRO_size_of_signature], currentSize);
     output << "{\"id\":\"" << kernelSign->computationIds[i] << "\", \"result\": \"" << Miscellaneous::toStringHex(outputBinary)
     << "\", \"packetSize\":" << this->packetNumberOfComputations << "}\n";
     logServer << "Computation " << kernelSign->computationIds[i] << " completed." << Logger::endL;

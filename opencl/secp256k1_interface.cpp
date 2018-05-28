@@ -517,7 +517,8 @@ bool CryptoEC256k1::generatePublicKey(
     outputPublicKey,
     outputSizeBuffer,
     inputSecretKey,
-    inputMemoryPoolGeneratorContext_MUST_BE_INITIALIZED
+    inputMemoryPoolGeneratorContext_MUST_BE_INITIALIZED,
+    0
   );
   *outputPublicKeySize = memoryPool_read_uint(outputSizeBuffer);
   return true;

@@ -5,6 +5,8 @@
 #include <iostream>
 #include <iomanip>
 #include <assert.h>
+#include <chrono>
+
 #define MAX_SOURCE_SIZE (0x100000)
 
 Logger logGPU("../logfiles/logGPU.txt", "[GPU] ");
@@ -327,11 +329,13 @@ bool GPU::initializeKernelsNoBuild() {
     },
     {
       "inputSecretKey",
-      "inputMemoryPoolGeneratorContext"
+      "inputMemoryPoolGeneratorContext",
+      "inputMessageIndex"
     },
     {
       SharedMemory::typeVoidPointer,
-      SharedMemory::typeVoidPointerExternalOwnership
+      SharedMemory::typeVoidPointerExternalOwnership,
+      SharedMemory::typeUint
     },
     {
       "outputGeneratorContext"
@@ -667,6 +671,7 @@ bool GPUKernel::build() {
     logGPU << "This may be OK if current folder is already correct: " << Logger::colorBlue
     << OSWrapper::getCurrentPath() << Logger::colorNormal << Logger::endL;
   }
+  auto timeStart = std::chrono::system_clock::now();
   std::string currentFolder = OSWrapper::getCurrentPath();
   logGPU << Logger::colorYellow << "Build base folder: " << currentFolder << Logger::colorNormal << Logger::endL;
   cl_int ret;
@@ -699,7 +704,9 @@ bool GPUKernel::build() {
     logGPU << theLog;
     return false;
   }
-  logGPU << "Program built." << Logger::endL;
+  auto timeAfterBuild = std::chrono::system_clock::now();
+  std::chrono::duration<double> elapsed_seconds = timeAfterBuild - timeStart;
+  logGPU << "Program built in " << elapsed_seconds.count() << " second(s)."  << Logger::endL;
   logGPU << "Creating openCL kernel..." << Logger::endL;
   this->kernel = clCreateKernel(this->program, this->name.c_str(), &ret);
   if (ret != CL_SUCCESS) {
