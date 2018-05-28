@@ -51,12 +51,13 @@ __kernel void secp256k1_opencl_generate_public_key(
 __kernel void secp256k1_opencl_verify_signature(
   __global unsigned char *output,
   __global unsigned char *outputMemoryPoolSignature,
-  __global const unsigned char *inputSignature,
-  unsigned int signatureSize,
-  __global const unsigned char *publicKey,
-  unsigned int publicKeySize,
-  __global const unsigned char *message,
-  __global const unsigned char *memoryPoolMultiplicationContext
+  __global const unsigned char* inputSignature,
+  __global const unsigned char* signatureSizes,
+  __global const unsigned char* publicKey,
+  __global const unsigned char* publicKeySizes,
+  __global const unsigned char* message,
+  __global const unsigned char* memoryPoolMultiplicationContext,
+  unsigned int messageIndex
 );
 
 __kernel void test_suite_1_basic_operations(

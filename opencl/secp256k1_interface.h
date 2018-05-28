@@ -92,11 +92,11 @@ public:
 
   static bool verifySignature(
     unsigned char* output,
-    unsigned char *outputMemoryPoolSignature,
+    unsigned char* outputMemoryPoolSignature,
     const unsigned char* inputSignature,
-    unsigned int signatureSize,
+    const unsigned int signatureSize,
     const unsigned char* publicKey,
-    unsigned int publicKeySize,
+    const unsigned int publicKeySize,
     const unsigned char* message,
     const unsigned char* memoryPoolMultiplicationContext_MUST_BE_INITIALIZED
   );

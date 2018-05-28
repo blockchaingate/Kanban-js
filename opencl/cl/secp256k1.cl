@@ -185,6 +185,14 @@ unsigned int memoryPool_read_uint(__global const unsigned char* memoryPoolPointe
   ((unsigned int) memoryPoolPointer[3]       ) ;
 }
 
+unsigned int memoryPool_read_uint__default(const unsigned char* memoryPoolPointer) {
+  return
+  ((unsigned int) (memoryPoolPointer[0] << 24)) +
+  ((unsigned int) (memoryPoolPointer[1] << 16)) +
+  ((unsigned int) (memoryPoolPointer[2] <<  8)) +
+  ((unsigned int) memoryPoolPointer[3]       ) ;
+}
+
 unsigned int memoryPool_read_uint_fromOutput(int argumentIndex, __global const unsigned char *memoryPool) {
   return memoryPool_read_uint(&memoryPool[8 + 4 * argumentIndex]);
 }

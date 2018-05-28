@@ -10,14 +10,19 @@
 __kernel void secp256k1_opencl_verify_signature(
   __global unsigned char *output,
   __global unsigned char *outputMemoryPoolSignature,
-  __global const unsigned char *inputSignature,
-  unsigned int signatureSize,
-  __global const unsigned char *publicKey,
-  unsigned int publicKeySize,
-  __global const unsigned char *message,
-  __global const unsigned char *memoryPoolMultiplicationContext
+  __global const unsigned char* inputSignature,
+  __global const unsigned char* signatureSizes,
+  __global const unsigned char* publicKey,
+  __global const unsigned char* publicKeySizes,
+  __global const unsigned char* message,
+  __global const unsigned char* memoryPoolMultiplicationContext,
+  unsigned int messageIndexChar
 ) {
   unsigned char result;
+  unsigned int publicKeySize, signatureSize;
+  unsigned int messageIndex = memoryPool_read_uint__default((unsigned char*)& messageIndexChar);
+  publicKeySize = memoryPool_read_uint(&publicKeySizes[messageIndex * 4]);
+  signatureSize = memoryPool_read_uint(&signatureSizes[messageIndex * 4]);
   __global secp256k1_ecmult_context* multiplicationContextPointer =
   memoryPool_read_multiplicationContextPointer_NON_PORTABLE(memoryPoolMultiplicationContext);
 

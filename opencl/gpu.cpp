@@ -275,12 +275,13 @@ bool GPU::initializeKernelsNoBuild() {
   //openCL function arguments:
   //__global unsigned char *output,
   //__global unsigned char *outputMemoryPoolSignature,
-  //__global const unsigned char *inputSignature,
-  //unsigned int signatureSize,
-  //__global const unsigned char *publicKey,
-  //unsigned int publicKeySize,
-  //__global const unsigned char *message,
-  //__global const unsigned char *memoryPoolMultiplicationContext
+  //__global const unsigned char* inputSignature,
+  //__global const unsigned char* signatureSizes,
+  //__global const unsigned char* publicKey,
+  //__global const unsigned char* publicKeySizes,
+  //__global const unsigned char* message,
+  //__global const unsigned char* memoryPoolMultiplicationContext,
+  //unsigned int messageIndex
 
   if (!this->createKernelNoBuild(
     this->kernelVerifySignature,
@@ -879,7 +880,9 @@ bool GPUKernel::writeArgument(unsigned argumentNumber, uint inputArgument) {
     this->outputs[argumentNumber] :
     this->inputs[argumentNumber - this->outputs.size()];
   currentArgument->uintValue = inputArgument;
-  cl_int ret = clSetKernelArg(this->kernel, argumentNumber, 4, &inputArgument);
+  unsigned char convertedUINT[4];
+  memoryPool_write_uint(inputArgument, convertedUINT);
+  cl_int ret = clSetKernelArg(this->kernel, argumentNumber, 4, &convertedUINT);
   if (ret != CL_SUCCESS) {
     logGPU << "Set kernel arg failed. " << Logger::endL;
     return false;

@@ -760,20 +760,19 @@ std::string testSignatures::toStringPublicKeys() {
   return out.str();
 }
 
-/*
-bool testSignatures::testVerifySignatures(GPU& theGPU) {
+/*bool testSignatures::testVerifySignatures(GPU& theGPU) {
   Logger& theTestLogger = getAppropriateLogger(theGPU);
   this->initialize();
   theGPU.initializeAllNoBuild();
   // Create a command queue
   std::shared_ptr<GPUKernel> kernelVerify = theGPU.theKernels[GPU::kernelVerifySignature];
-  if (! CryptoEC256k1GPU::initializeMultiplicationContext(theGPU)) {
+  if (!CryptoEC256k1GPU::initializeMultiplicationContext(theGPU)) {
     return false;
   }
-  if (! CryptoEC256k1GPU::initializeGeneratorContext(theGPU)) {
+  if (!CryptoEC256k1GPU::initializeGeneratorContext(theGPU)) {
     return false;
   }
-  if (!kernelPublicKeys->build()) {
+  if (!kernelVerify->build()) {
     return false;
   }
 

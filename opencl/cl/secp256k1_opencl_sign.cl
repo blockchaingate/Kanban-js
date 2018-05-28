@@ -14,9 +14,10 @@ __kernel void secp256k1_opencl_sign(
   __global unsigned char* inputSecretKey,
   __global unsigned char* inputMessage,
   __global unsigned char* inputMemoryPoolGeneratorContext,
-  unsigned int inputMessageIndex
+  unsigned int messageIndexChar
 ) {
   secp256k1_scalar secretKey, outputSignatureR, outputSignatureS, message, nonce;
+  unsigned int inputMessageIndex = memoryPool_read_uint__default((unsigned char*) &messageIndexChar);
   unsigned int offset = inputMessageIndex * 32;
   secp256k1_scalar_set_b32__global(&secretKey, &inputSecretKey[offset], NULL);
   secp256k1_scalar_set_b32__global(&message, &inputMessage[offset], NULL);

@@ -543,24 +543,29 @@ bool CryptoEC256k1::generatePublicKeyDefaultBuffers(
 }
 
 bool CryptoEC256k1::verifySignature(
-  unsigned char *output,
-  unsigned char *outputMemoryPoolSignature,
-  const unsigned char *inputSignature,
-  unsigned int signatureSize,
-  const unsigned char *publicKey,
-  unsigned int publicKeySize,
-  const unsigned char *message,
-  const unsigned char *memoryPoolMultiplicationContext_MUST_BE_INITIALIZED
+  unsigned char* output,
+  unsigned char* outputMemoryPoolSignature,
+  const unsigned char* inputSignature,
+  const unsigned int signatureSize,
+  const unsigned char* publicKey,
+  const unsigned int publicKeySize,
+  const unsigned char* message,
+  const unsigned char* memoryPoolMultiplicationContext_MUST_BE_INITIALIZED
 ) {
+  unsigned char signatureSizes[4];
+  unsigned char publicKeySizes[4];
+  memoryPool_write_uint(signatureSize, signatureSizes);
+  memoryPool_write_uint(publicKeySize, publicKeySizes);
   secp256k1_opencl_verify_signature(
     output,
     outputMemoryPoolSignature,
     inputSignature,
-    signatureSize,
+    signatureSizes,
     publicKey,
-    publicKeySize,
+    publicKeySizes,
     message,
-    memoryPoolMultiplicationContext_MUST_BE_INITIALIZED
+    memoryPoolMultiplicationContext_MUST_BE_INITIALIZED,
+    0
   );
   return true;
 }

@@ -53,11 +53,19 @@ unsigned int memoryPool_read_uinT(__global const unsigned char* memoryPoolPointe
   ((unsigned int) memoryPoolPointer[3]       ) ;
 }
 
+unsigned int memoryPool__local_read_uint(const unsigned char* memoryPoolPointer) {
+  return
+  ((unsigned int) (memoryPoolPointer[0] << 24)) +
+  ((unsigned int) (memoryPoolPointer[1] << 16)) +
+  ((unsigned int) (memoryPoolPointer[2] <<  8)) +
+  ((unsigned int)  memoryPoolPointer[3]       ) ;
+}
+
 __kernel void sha256GPU(
   __global unsigned char* result, 
   __global const unsigned char* offsets, 
   __global const unsigned char* messageLengths, 
-  unsigned int messageIndex, 
+  unsigned int messageIndexChar, 
   __global const char* plain_key
 ) {
   int t, gid, msg_pad, currentIndex, lomc;
@@ -65,6 +73,8 @@ __kernel void sha256GPU(
   uint32_t i, item, total;
   uint32_t W[80], temp, A, B, C, D, E, F, G, H, T1, T2;
   uint32_t digest[8];
+  unsigned int messageIndex = memoryPool__local_read_uint((unsigned char*) &messageIndexChar);
+
   //uint32_t num_keys = data_info[1];
   //printf("theLength: %u num_keys:%u\n", theLength, total);
   int current_pad;

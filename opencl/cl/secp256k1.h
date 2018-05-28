@@ -42,6 +42,7 @@ void memoryPool_writeCurrentSizeAsOutput(unsigned int argumentIndex, __global un
 
 
 unsigned int memoryPool_read_uint(__global const unsigned char *memoryPoolPointer);
+unsigned int memoryPool_read_uint__default(const unsigned char *memoryPoolPointer);
 
 unsigned int memoryPool_read_uint_fromOutput(int argumentIndex, __global const unsigned char *memoryPool);
 unsigned int memoryPool_readPoolSize(__global const unsigned char* memoryPool);
