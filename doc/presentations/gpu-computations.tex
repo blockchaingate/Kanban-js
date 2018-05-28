@@ -1,0 +1,90 @@
+\documentclass{article}
+%\usepackage{authblk}
+\usepackage{amssymb, amsmath}
+\usepackage{hyperref}
+\usepackage{verbatim}
+
+%\author[1]{Todor Milev}
+%\affil[1]{FA Enterprise System}
+\title{
+openCL cryptographic computations \\
+for FAB coin
+}
+\author{Todor Milev\footnote{FA Enterprise System}\\ todor@fa.biz}
+\newcommand{\secpTwoFiveSixKone}{{\bf secp256k1}}
+\renewcommand{\mod}{{~\bf mod~}}
+\begin{document}
+\maketitle
+\section{Introduction}
+Public/private key cryptography is arguably the most important aspect of modern crypto-currency systems. The somewhat slow execution of private/public key cryptography algorithms appears to be one of the main bottlenecks of FAB's Kanban system. 
+
+In the present text we describe our port of the cryptographic functions that make up the computational core of fabcoin to openCL - a GPU programming language. Whether this port is to be used in the final version of Kanban - as opposed to using directly the original fabcoin/bitcoin cryptopgrahic library from which the port was derived - remains to be decided.
+
+
+\subsection{Findings of our investigation}
+Our investigation of the feasibility of running cryptography using openCL, and using the GPU in general, remain inconclusive. Our initial findings suggest that, without any hardware-specific optimization, the CPU performs considerably better than the GPU - between three and five times better on the hardware combinations we tested. 
+
+However, online sources such as NVidia's guide \cite{NVIDIA:openCLBestPractices} suggest that custom-tailored software optimizations may yield between 4- and 10- fold speed optimizations on NVidia hardware (depending on the particular device and program type, see \cite[page 22]{NVIDIA:openCLBestPractices}). As CPUs appear to be less amenable to software optimizations, it remains feasible that a GPU may outperform a CPU of a similar class, should a considerable effort be put into software optimizations. 
+
+Even without such optimizations, openCL remains a viable option as it allows the same code to run on both the CPU and on multiple GPUs (without the need of much engineering), effectively adding the speeds of all involved devices. 
+
+However, at present we cannot recommend switching over to using openCL... [to be continued].
+
+
+\subsection{openCL vs CUDA}
+We also considered CUDA (an NVidia proprietary language), but chose to use openCL instead as that allows the use of AMD GPUs, Intel system-on-chip GPUs, Intel and AMD CPUs and the upcoming Intel GPUs \cite{forbes:IntelGPUupcoming}. 
+
+While our primary reason for choosing openCL over CUDA was hardware portability and the ability to run code on the CPU, our decision was partially supported by the ambiguous studies of the performance of openCL vs CUDA. For example, \cite{KarimiEtAl:DBLP:CUDAvsOpenCL} reports between 13\% and 63\% slower performance of openCL vs CUDA, however \cite{MemetiLPKK17:CUDAvsOpenCL:DBLP:journals/corr} reports a slightly better performance of openCL vs CUDA. These reports do appear to depend heavily on the particular benchmark used. Even assuming the most pessimistic estimate of 63\% slower performance of openCL, the ability to run our software on the CPU and non-NVidia hardware appears to be a reasonable trade-off. 
+
+We must mention that, in support of CUDA over openCL, Jason Hong from FA System has informally reported much better performance on SHA256 computations when using CUDA - up to 7-fold increase of performance. The huge differences in speed reported internally may be a function of CUDA-specific code optimizations or a function of the specifics of SHA256 computations. Further investigation into the matter is required. Whether the performance of the other cryptographic functions will be closer to Jason's experience or to the benchmarks reported in \cite{KarimiEtAl:DBLP:CUDAvsOpenCL}, \cite{MemetiLPKK17:CUDAvsOpenCL:DBLP:journals/corr} remains to be investigated.
+
+Our choice of openCL has not been finalized yet; whether we switch to CUDA or to another parallel computation framework remains to be decided.
+
+
+\subsection{The four main cryptographic functions} \label{sectionFourMainCrypto}
+The four main cryptographic functions used to run FAB coin (and all other major crypto-currencies) are as follows.
+\begin{enumerate}
+\item \label{enumFourMainSHA} Secure hashing function.
+\item \label{enumFourMainPrivatePublicKeyGeneration} Private/public key pair generation.
+\item \label{enumFourMainCryptoSignature} Cryptographic signature.
+\item \label{enumFourMainVerification} Cryptographic signature verification.
+\end{enumerate}
+
+\noindent\ref{enumFourMainSHA}) Among many secure hashing functions, FAB uses SHA256 (secure hash algorithm 2, 256 bit). The same algorithm is also used in bitcoin. The secure hash is used to digest messages into 256 bit = 32 byte lengths. SHA256 has the property that, given a message and its digest, it is practically impossible to forge another message that has the same digest. 
+%Likewise, given a digest alone, it is practically impossible to guess a message that it came from - or even prove that a message exists. 
+In this way, SHA256 can be reliably used to identify data. 
+
+\noindent\ref{enumFourMainPrivatePublicKeyGeneration}) Private keys are kept secret and are used to sign data - most importantly, transactions/transfers of funds. The public key is a function of the private key that is published openly alongside a message that may or may not be signed with the private key. 
+
+Private/public key pairs have the property that, given a message, a signature and a public key, everyone can verify that the signature was correctly generated with an unknown private key that matches the known public key, but no one can guess the private key from which the signature and the public key were generated. Furthermore, given a message, no one can generate a signature matching a given public key without knowing the secret private key that corresponds to it.
+
+The main use case of private/public key pairs is as follows. A message - say, a statement of transfer of funds - is published in the open. To consent with the transfer, the original owner of the funds produces the cryptographic signature of the transfer message. Since the original owner's public key is published in the open and is therefore known, everyone can verify the correctness of this transfer, but only the original owner can generate it.
+
+\noindent\ref{enumFourMainCryptoSignature}) Cryptographic signatures are used to sign messages using private keys as described in \ref{enumFourMainPrivatePublicKeyGeneration}). Among many cryptographic schemes for signing messages, FAB coin uses the industry standard ECDSA (Elliptic Curve Digital Signature Algorithm) over the elliptic curve \secpTwoFiveSixKone, see Section \ref{sectionECDSAgeneral}. This is the same algorithm stack as the one used in bitcoin.
+
+The cryptographic signature is a function of the message being signed, the private key, and, in the particular case of (EC)DSA, a one-time use random number.
+
+\noindent\ref{enumFourMainVerification}) The signature verification algorithm is used to verify signatures generated as described in \ref{enumFourMainPrivatePublicKeyGeneration}). The signature verification is a function of the signed message, the signature, and the public key of the signature owner.
+
+\subsection{ECDSA}\label{sectionECDSAgeneral}
+Following Bitcoin, FAB coin uses the standard public/private key cryptography ECDSA over \secpTwoFiveSixKone. Here, ECDSA stands for Elliptic Curve Digital Signature Algorithm and \secpTwoFiveSixKone{} stands for the elliptic curve:
+
+\[
+y^2 = x^3 + 7
+\]
+(we specify the base point later), over the finite field:
+
+\[
+\mathbb Z / p\mathbb Z, 
+\]
+where
+\begin{equation}\label{eqThePrime}
+p= 2^{256} - 2^{32} - 977.
+\end{equation}
+
+At present, fabcoin core uses bitcoin's implementation of \secpTwoFiveSixKone{}. We report here that we ported one of bitcoin's development forks - Pieter Wuille's C project libsecp256k1 \cite{Wuille:secp256k1}  - to openCL. This development branch was chosen as our base as it is also the base of the top-google-search (partial) openCL port \cite{secp256k1:openCLimplementationHanh0}. We did not choose to use \cite{secp256k1:openCLimplementationHanh0} directly as the port appeared to not be self-contained and contained only an implementation of the signature verification function \ref{enumFourMainVerification})  from Section \ref{sectionFourMainCrypto}.
+
+
+\bibliographystyle{plain}
+\bibliography{../bibliography}
+\end{document}

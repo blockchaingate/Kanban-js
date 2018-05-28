@@ -16,6 +16,33 @@ Logger logTestCentralPU("../test/kanban_gpu/debug/logTestCentralPU.txt", "[test 
 Logger logTestGraphicsPU("../test/kanban_gpu/debug/logTestGraphicsPU.txt", "[test GPU] ");
 extern Logger logServer;
 
+class testSignatures {
+public:
+  std::vector<unsigned char> messages;
+  std::vector<unsigned char> nonces;
+  std::vector<unsigned char> secretKeys;
+  std::vector<unsigned char> outputSignatures;
+  std::vector<unsigned char> publicKeys;
+  unsigned numMessagesPerPipeline;
+  void initialize();
+  bool testSign(GPU& theGPU);
+  bool testPublicKeys(GPU& theGPU);
+  bool testVerifySignatures(GPU& theGPU);
+};
+
+class testerSHA256 {
+public:
+  std::vector<std::vector<std::string> > knownSHA256s;
+  std::string inputBuffer;
+  std::vector<unsigned char> outputBuffer;
+  std::vector<uint> messageStarts;
+  std::vector<uint> messageLengths;
+  std::vector<unsigned char> messageStartsUChar;
+  std::vector<unsigned char> messageLengthsUChar;
+  void initialize();
+  unsigned totalToCompute;
+};
+
 void printComments(unsigned char* comments) {
   std::string resultString((char*) comments, 999);
   char returnGPU = resultString[0];
@@ -27,7 +54,6 @@ void printComments(unsigned char* comments) {
   logServer << "extraMessage pr.x: " << Miscellaneous::toStringHex(extraMessage2) << Logger::endL;
   logServer << "extraMessage pr.z: " << Miscellaneous::toStringHex(extraMessage3) << Logger::endL;
 }
-
 
 void testPrintMemoryPoolGeneral(const unsigned char* theMemoryPool, const std::string& computationID, Logger& logTest) {
   logTest << computationID << Logger::endL;
@@ -279,7 +305,6 @@ bool testMainPart2Signatures(GPU& theGPU) {
 
 bool testSHA256(GPU& theGPU);
 
-bool testSign(GPU& theGPU);
 bool testBasicOperations(GPU& theGPU){
   CryptoEC256k1::testSuite1BasicOperationsDefaultBuffers();
   testPrintMemoryPoolGeneral(CryptoEC256k1::bufferTestSuite1BasicOperations, "Central PU", logTestCentralPU);
@@ -290,17 +315,22 @@ bool testBasicOperations(GPU& theGPU){
 }
 
 bool testGPU(GPU& inputGPU) {
-  //theGPU.flagTurnOffToDebugCPU = true;
   //if (!testBasicOperations(theGPU))
   //  return - 1;
   //if (!testMainPart1ComputeContexts(inputGPU))
   //  return false;
   //if (!testMainPart2Signatures(inputGPU))
   //  return false;
-  if (!testSHA256(inputGPU))
-    return false;
-  //if (!testSign(inputGPU))
+  //if (!testSHA256(inputGPU))
   //  return false;
+  testSignatures theSignatureTest;
+  if (!theSignatureTest.testSign(inputGPU)) {
+    return false;
+  }
+  if (!theSignatureTest.testVerifySignatures(inputGPU)) {
+    return false;
+  }
+
   return true;
 }
 
@@ -316,20 +346,6 @@ int testMain() {
   }
   return 0;
 }
-
-class testerSHA256 {
-public:
-  std::vector<std::vector<std::string> > knownSHA256s;
-  std::string inputBuffer;
-  std::vector<unsigned char> outputBuffer;
-  std::vector<uint> messageStarts;
-  std::vector<uint> messageLengths;
-  std::vector<unsigned char> messageStartsUChar;
-  std::vector<unsigned char> messageLengthsUChar;
-  void initialize();
-  unsigned totalToCompute;
-};
-
 
 void testerSHA256::initialize() {
   this->totalToCompute = 100000;
@@ -476,16 +492,6 @@ bool testSHA256(GPU& theGPU) {
   return true;
 }
 
-class testSignatures {
-public:
-  std::vector<unsigned char> messages;
-  std::vector<unsigned char> nonces;
-  std::vector<unsigned char> secretKeys;
-  std::vector<unsigned char> outputSignatures;
-  unsigned numMessagesPerPipeline;
-  void initialize();
-};
-
 unsigned char getByte(unsigned char byte1, unsigned char byte2, unsigned char byte3) {
   return byte1 * byte1 * (byte1 + 3) + byte2 * 7 + byte3 * 3 + 5 + byte1 * byte3;
 }
@@ -514,9 +520,10 @@ void testSignatures::initialize() {
   }
 }
 
-bool testSign(GPU& theGPU) {
+bool testSignatures::testSign(GPU& theGPU) {
   // Create the two input vectors
   theGPU.initializeAllNoBuild();
+  this->initialize();
   CryptoEC256k1GPU::computeGeneratorContextDefaultBuffers(theGPU);
   // Create a command queue
   std::shared_ptr<GPUKernel> kernelSign = theGPU.theKernels[GPU::kernelSign];
@@ -524,16 +531,14 @@ bool testSign(GPU& theGPU) {
     return false;
   }
   std::cout << "DEBUG: about to write to buffer. " << std::endl;
-  testSignatures theTest;
-  theTest.initialize();
 
   auto timeStart = std::chrono::system_clock::now();
   unsigned counterTest;
 
-  kernelSign->writeToBuffer(2, &theTest.nonces[0], theTest.nonces.size() );
-  kernelSign->writeToBuffer(3, &theTest.secretKeys[0], theTest.secretKeys.size());
-  kernelSign->writeToBuffer(4, &theTest.messages[0], theTest.messages.size());
-  for (counterTest = 0; counterTest < theTest.numMessagesPerPipeline; counterTest ++) {
+  kernelSign->writeToBuffer(2, &this->nonces[0],     this->nonces.size() );
+  kernelSign->writeToBuffer(3, &this->secretKeys[0], this->secretKeys.size());
+  kernelSign->writeToBuffer(4, &this->messages[0],   this->messages.size());
+  for (counterTest = 0; counterTest < this->numMessagesPerPipeline; counterTest ++) {
     kernelSign->writeArgument(6, counterTest);
     //theKernel->writeToBuffer(0, &theLength, sizeof(uint));
     //std::cout << "DEBUG: Setting arguments ... " << std::endl;
@@ -568,8 +573,8 @@ bool testSign(GPU& theGPU) {
     result,
     CL_TRUE,
     0,
-    theTest.outputSignatures.size(),
-    &theTest.outputSignatures[0],
+    this->outputSignatures.size(),
+    &this->outputSignatures[0],
     0,
     NULL,
     NULL
@@ -582,7 +587,7 @@ bool testSign(GPU& theGPU) {
   std::chrono::duration<double> elapsed_seconds = timeCurrent - timeStart;
   logTestGraphicsPU << "Signed " << counterTest << " 32-byte messages in " << elapsed_seconds.count() << " second(s). " << Logger::endL;
   logTestGraphicsPU << "Speed: "
-  << (theTest.numMessagesPerPipeline / elapsed_seconds.count()) << " signature(s) per second." << Logger::endL;
+  << (this->numMessagesPerPipeline / elapsed_seconds.count()) << " signature(s) per second." << Logger::endL;
 
   logTestGraphicsPU << "Checking computations ... NOT IMPLEMENTED YET!" << Logger::endL;
   /*for (largeTestCounter = 0; largeTestCounter < testSHA256::totalToCompute; largeTestCounter ++) {
@@ -602,4 +607,9 @@ bool testSign(GPU& theGPU) {
   logTestGraphicsPU << "Success!" << Logger::endL;
   std::cout << "\e[32mSuccess!\e[39m" << std::endl;
   return true;
+}
+
+bool testSignatures::testPublicKeys(GPU& theGPU) {
+  theGPU.initializeAllNoBuild();
+
 }
