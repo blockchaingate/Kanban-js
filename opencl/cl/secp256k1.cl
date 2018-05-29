@@ -2555,7 +2555,7 @@ static void secp256k1_scalar_split_lambda(secp256k1_scalar *r1, secp256k1_scalar
   if ((n) > 0) { \
     *(r) = (pre)[((n)-1)/2]; \
   } else { \
-    secp256k1_ge_neg((r), &(pre)[(-(n)-1)/2]); \
+    secp256k1_ge_neg__global((r), &(pre)[(-(n)-1)/2]); \
   } \
 } while(0)
 
@@ -2820,8 +2820,8 @@ void secp256k1_ecmult(
   __global unsigned char* memoryPool
 ) {
   //openCL: too much memory allocated on the stack: 
-  secp256k1_ge pre_a[ECMULT_TABLE_SIZE(WINDOW_A)];
-  //__global secp256k1_ge* pre_a = (__global secp256k1_ge*) checked_malloc(ECMULT_TABLE_SIZE(WINDOW_A) * sizeof_secp256k1_ge(), memoryPool);
+  //secp256k1_ge pre_a[ECMULT_TABLE_SIZE(WINDOW_A)];
+  __global secp256k1_ge* pre_a = (__global secp256k1_ge*) checked_malloc(ECMULT_TABLE_SIZE(WINDOW_A) * sizeof_secp256k1_ge(), memoryPool);
   secp256k1_ge tmpa;
   secp256k1_fe Z;
   int wnaf_na[256];
@@ -2845,7 +2845,7 @@ void secp256k1_ecmult(
    * of 1/Z, so we can use secp256k1_gej_add_zinv_var, which uses the same
    * isomorphism to efficiently add with a known Z inverse.
    */
-  secp256k1_ecmult_odd_multiples_table_globalz_windowa(pre_a, &Z, a, memoryPool);
+  secp256k1_ecmult_odd_multiples_table_globalz_windowa__global(pre_a, &Z, a, memoryPool);
 
 
   bits_ng = secp256k1_ecmult_wnaf(wnaf_ng, 256, ng, WINDOW_G);
