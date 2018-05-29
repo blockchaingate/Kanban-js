@@ -32,7 +32,7 @@ However, at present we cannot recommend switching over to using openCL... [to be
 
 
 \subsection{openCL vs CUDA}
-We also considered CUDA (an NVidia proprietary language), but chose to use openCL instead as that allows the use of AMD GPUs, Intel system-on-chip GPUs, Intel and AMD CPUs and the upcoming Intel GPUs \cite{forbes:IntelGPUupcoming}. 
+We also considered CUDA (an NVidia proprietary language), but chose to use openCL instead as that allows the use of AMD GPUs, Intel system-on-chip GPUs and, last but not least, the Intel/AMD CPUs running the host system. In addition, the use of openCL should allow for future ports to the upcoming Intel GPUs \cite{forbes:IntelGPUupcoming}. 
 
 While our primary reason for choosing openCL over CUDA was hardware portability and the ability to run code on the CPU, our decision was partially supported by the ambiguous studies of the performance of openCL vs CUDA. For example, \cite{KarimiEtAl:DBLP:CUDAvsOpenCL} reports between 13\% and 63\% slower performance of openCL vs CUDA, however \cite{MemetiLPKK17:CUDAvsOpenCL:DBLP:journals/corr} reports a slightly better performance of openCL vs CUDA. These reports do appear to depend heavily on the particular benchmark used. Even assuming the most pessimistic estimate of 63\% slower performance of openCL, the ability to run our software on the CPU and non-NVidia hardware appears to be a reasonable trade-off. 
 

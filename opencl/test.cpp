@@ -248,10 +248,18 @@ bool testMainPart2Signatures(GPU& theGPU) {
   Signature theSignature;
   PrivateKey theKey;
   GeneratorScalar message;
-  theKey.key.TestAssignString("This is a secret. ");
-  message.TestAssignString("This is a message. ");
-  theKey.nonceMustChangeAfterEverySignature.TestAssignString("This is a nonce. ");
-  theSignature.reset();
+  testSignatures theSignatureTest;
+  theSignatureTest.initialize();
+  for (int i = 0; i < 32; i++) {
+    theKey.key.serialization[i] = theSignatureTest.secretKeys[i];
+    theKey.nonceMustChangeAfterEverySignature.serialization[i] = theSignatureTest.nonces[i];
+    message.serialization[i] = theSignatureTest.messages[i];
+  }
+  theKey.key.ComputeScalarFromSerialization();
+  theKey.nonceMustChangeAfterEverySignature.ComputeScalarFromSerialization();
+  message.ComputeScalarFromSerialization();
+  //theKey.nonceMustChangeAfterEverySignature.TestAssignString("This is a nonce. ");
+  //theSignature.reset();
   CryptoEC256k1::signMessageDefaultBuffers(
     theSignature.serialization,
     &theSignature.size,
@@ -356,22 +364,25 @@ bool testBasicOperations(GPU& theGPU){
 bool testGPU(GPU& inputGPU) {
   //if (!testBasicOperations(theGPU))
   //  return - 1;
-  //if (!testMainPart1ComputeContexts(inputGPU))
-  //  return false;
-  //if (!testMainPart2Signatures(inputGPU))
-  //  return false;
+  if (!testMainPart1ComputeContexts(inputGPU))
+    return false;
+  if (!testMainPart2Signatures(inputGPU))
+    return false;
   //testerSHA256 theSHA256Tester;
   //if (!theSHA256Tester.testSHA256(inputGPU)) {
   //  return false;
   //}
-  testSignatures theSignatureTest;
-  if (!theSignatureTest.testPublicKeys(inputGPU)) {
-    return false;
-  }
-  if (!theSignatureTest.testSign(inputGPU)) {
-    return false;
-  }
-  //if (!theSignatureTest.testVerifySignatures(inputGPU)) {
+  //testSignatures theSignatureTest;
+  //if (!theSignatureTest.testPublicKeys(inputGPU)) {
+  //  return false;
+  //}
+  //if (!theSignatureTest.testSign(inputGPU)) {
+  //  return false;
+  //}
+  //if (!theSignatureTest.testVerifySignatures(inputGPU, false)) {
+  //  return false;
+  //}
+  //if (!theSignatureTest.testVerifySignatures(inputGPU, true)) {
   //  return false;
   //}
   return true;
@@ -938,7 +949,8 @@ bool testSignatures::testVerifySignatures(GPU& theGPU, bool tamperWithSignature)
   bool isGood = true;
   for (counterTest = 0; counterTest < this->numMessagesPerPipeline; counterTest ++) {
     if (this->outputVerifications[counterTest] == 0 && !tamperWithSignature) {
-      theTestLogger << Logger::colorRed << "ERROR: Failed to verify signature " << counterTest << ". " << Logger::endL;
+      theTestLogger << Logger::colorRed << "ERROR: Failed to verify signature " << counterTest << ". "
+      << Logger::colorNormal << Logger::endL;
       isGood = false;
       break;
     }

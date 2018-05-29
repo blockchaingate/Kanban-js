@@ -31,7 +31,7 @@ Please see the file opencl/README.md for technical notes on this code.
 #define MACRO_MessageLogSize 500
 #define MACRO_MEMORY_POOL_SIZE_MultiplicationContext 6000000
 #define MACRO_MEMORY_POOL_SIZE_GeneratorContext 370000
-#define MACRO_MEMORY_POOL_SIZE_Signature 250000
+#define MACRO_MEMORY_POOL_SIZE_Signature 230000
 #define MACRO_size_of_signature (33 * 2 + 6)
 
 __global void* checked_malloc(unsigned int size, __global unsigned char* memoryPool);
@@ -258,18 +258,6 @@ void secp256k1_gej_set_ge__constant(secp256k1_gej *r, __constant const secp256k1
  *  coordinates (with known z-ratios). zr must contain the known z-ratios such
  *  that mul(a[i].z, zr[i+1]) == a[i+1].z. zr[0] is ignored. */
 void secp256k1_ge_set_table_gej_var(size_t len, __global secp256k1_ge *r, __global const secp256k1_gej *a, __global const secp256k1_fe *zr);
-
-/** Bring a batch inputs given in jacobian coordinates (with known z-ratios) to
- *  the same global z "denominator". zr must contain the known z-ratios such
- *  that mul(a[i].z, zr[i+1]) == a[i+1].z. zr[0] is ignored. The x and y
- *  coordinates of the result are stored in r, the common z coordinate is
- *  stored in globalz. */
-void secp256k1_ge_globalz_set_table_gej(
-  size_t len, secp256k1_ge *r,
-  secp256k1_fe *globalz, 
-  __global const secp256k1_gej *a, 
-  __global const secp256k1_fe *zr
-);
 
 /** Set a group element (jacobian) equal to the point at infinity. */
 void secp256k1_gej_set_infinity(secp256k1_gej *r);

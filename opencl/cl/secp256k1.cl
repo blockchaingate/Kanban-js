@@ -1321,58 +1321,52 @@ void secp256k1_gej_set_ge__constant__global(__global secp256k1_gej *r, __constan
 //*******************************************************
 
 static void secp256k1_ge_set_gej_zinv(secp256k1_ge *r, const secp256k1_gej *a, const secp256k1_fe *zi) {
-    secp256k1_fe zi2;
-    secp256k1_fe zi3;
-    secp256k1_fe_sqr(&zi2, zi);
-    secp256k1_fe_mul(&zi3, &zi2, zi);
-    secp256k1_fe_mul(&r->x, &a->x, &zi2);
-    secp256k1_fe_mul(&r->y, &a->y, &zi3);
-    r->infinity = a->infinity;
+  secp256k1_fe zi2;
+  secp256k1_fe zi3;
+  secp256k1_fe_sqr(&zi2, zi);
+  secp256k1_fe_mul(&zi3, &zi2, zi);
+  secp256k1_fe_mul(&r->x, &a->x, &zi2);
+  secp256k1_fe_mul(&r->y, &a->y, &zi3);
+  r->infinity = a->infinity;
 }
 
 void secp256k1_ge_set_xy(secp256k1_ge *r, const secp256k1_fe *x, const secp256k1_fe *y) {
-    r->infinity = 0;
-    r->x = *x;
-    r->y = *y;
+  r->infinity = 0;
+  r->x = *x;
+  r->y = *y;
 }
 
 int secp256k1_ge_is_infinity(const secp256k1_ge *a) {
-    return a->infinity;
-}
-
-void secp256k1_ge_neg(secp256k1_ge *r, const secp256k1_ge *a) {
-    *r = *a;
-    secp256k1_fe_normalize_weak(&r->y);
-    secp256k1_fe_negate(&r->y, &r->y, 1);
+  return a->infinity;
 }
 
 void secp256k1_ge_set_gej(secp256k1_ge *r, secp256k1_gej *a) {
-    secp256k1_fe z2, z3;
-    r->infinity = a->infinity;
-    secp256k1_fe_inv(&a->z, &a->z);
-    secp256k1_fe_sqr(&z2, &a->z);
-    secp256k1_fe_mul(&z3, &a->z, &z2);
-    secp256k1_fe_mul(&a->x, &a->x, &z2);
-    secp256k1_fe_mul(&a->y, &a->y, &z3);
-    secp256k1_fe_set_int(&a->z, 1);
-    r->x = a->x;
-    r->y = a->y;
+  secp256k1_fe z2, z3;
+  r->infinity = a->infinity;
+  secp256k1_fe_inv(&a->z, &a->z);
+  secp256k1_fe_sqr(&z2, &a->z);
+  secp256k1_fe_mul(&z3, &a->z, &z2);
+  secp256k1_fe_mul(&a->x, &a->x, &z2);
+  secp256k1_fe_mul(&a->y, &a->y, &z3);
+  secp256k1_fe_set_int(&a->z, 1);
+  r->x = a->x;
+  r->y = a->y;
 }
 
 static void secp256k1_ge_set_gej_var(secp256k1_ge *r, secp256k1_gej *a) {
-    secp256k1_fe z2, z3;
-    r->infinity = a->infinity;
-    if (a->infinity) {
-        return;
-    }
-    secp256k1_fe_inv_var(&a->z, &a->z);
-    secp256k1_fe_sqr(&z2, &a->z);
-    secp256k1_fe_mul(&z3, &a->z, &z2);
-    secp256k1_fe_mul(&a->x, &a->x, &z2);
-    secp256k1_fe_mul(&a->y, &a->y, &z3);
-    secp256k1_fe_set_int(&a->z, 1);
-    r->x = a->x;
-    r->y = a->y;
+  secp256k1_fe z2, z3;
+  r->infinity = a->infinity;
+  if (a->infinity) {
+    return;
+  }
+  secp256k1_fe_inv_var(&a->z, &a->z);
+  secp256k1_fe_sqr(&z2, &a->z);
+  secp256k1_fe_mul(&z3, &a->z, &z2);
+  secp256k1_fe_mul(&a->x, &a->x, &z2);
+  secp256k1_fe_mul(&a->y, &a->y, &z3);
+  secp256k1_fe_set_int(&a->z, 1);
+  r->x = a->x;
+  r->y = a->y;
 }
 
 void secp256k1_ge_copy__from__global(secp256k1_ge* output, __global const secp256k1_ge* input) {
@@ -1410,37 +1404,6 @@ void secp256k1_ge_set_table_gej_var(
 
     secp256k1_ge_set_gej_zinv(&globalToLocalGE1, &globalToLocalGEJ1, &zi);
     secp256k1_ge_copy__to__global(&r[i], &globalToLocalGE1);
-  }
-}
-
-void secp256k1_ge_globalz_set_table_gej(
-  size_t len, secp256k1_ge *r,
-  secp256k1_fe *globalz,
-  __global const secp256k1_gej *a,
-  __global const secp256k1_fe *zr
-) {
-  size_t i = len - 1;
-  secp256k1_fe zs, globalToLocalFE1;
-  secp256k1_gej globalToLocal1;
-
-  if (len > 0) {
-    /* The z of the final point gives us the "global Z" for the table. */
-    r[i].x = a[i].x;
-    r[i].y = a[i].y;
-    *globalz = a[i].z;
-    r[i].infinity = 0;
-    zs = zr[i];
-
-    /* Work our way backwards, using the z-ratios to scale the x/y values. */
-    while (i > 0) {
-      if (i != len - 1) {
-        secp256k1_fe_copy__from__global(&globalToLocalFE1, &zr[i]);
-        secp256k1_fe_mul(&zs, &zs, &globalToLocalFE1);
-      }
-      i--;
-      secp256k1_gej_copy__from__global(&globalToLocal1, &a[i]);
-      secp256k1_ge_set_gej_zinv(&r[i], &globalToLocal1, &zs);
-    }
   }
 }
 
@@ -2585,7 +2548,7 @@ static void secp256k1_scalar_split_lambda(secp256k1_scalar *r1, secp256k1_scalar
   if ((n) > 0) { \
     *(r) = (pre)[((n)-1)/2]; \
   } else { \
-    secp256k1_ge_neg((r), &(pre)[(-(n)-1)/2]); \
+    secp256k1_ge_neg__global((r), &(pre)[(-(n)-1)/2]); \
   } \
 } while(0)
 
@@ -2746,36 +2709,6 @@ static void secp256k1_ecmult_odd_multiples_table(
   secp256k1_fe_copy__to__global(&prej[n-1].z, &globalToLocalFE1);
 }
 
-/** Fill a table 'pre' with precomputed odd multiples of a.
- *
- *  There are two versions of this function:
- *  - secp256k1_ecmult_odd_multiples_table_globalz_windowa which brings its
- *    resulting point set to a single constant Z denominator, stores the X and Y
- *    coordinates as ge_storage points in pre, and stores the global Z in rz.
- *    It only operates on tables sized for WINDOW_A wnaf multiples.
- *  - secp256k1_ecmult_odd_multiples_table_storage_var, which converts its
- *    resulting point set to actual affine points, and stores those in pre.
- *    It operates on tables of any size, but uses heap-allocated temporaries.
- *
- *  To compute a*P + b*G, we compute a table for P using the first function,
- *  and for G using the second (which requires an inverse, but it only needs to
- *  happen once).
- */
-static void secp256k1_ecmult_odd_multiples_table_globalz_windowa(
-  secp256k1_ge *pre,
-  secp256k1_fe *globalz,
-  const secp256k1_gej *a,
-  __global unsigned char* memoryPool
-  ) {
-  __global secp256k1_gej* prej = (__global secp256k1_gej*) checked_malloc(sizeof_secp256k1_gej() * ECMULT_TABLE_SIZE(WINDOW_A), memoryPool);
-  __global secp256k1_fe* zr =    (__global secp256k1_fe* ) checked_malloc(sizeof_secp256k1_fe()  * ECMULT_TABLE_SIZE(WINDOW_A), memoryPool);
-
-  /* Compute the odd multiples in Jacobian form. */
-  secp256k1_ecmult_odd_multiples_table(ECMULT_TABLE_SIZE(WINDOW_A), prej, zr, a/*, memoryPool*/);
-  /* Bring them to the same Z denominator. */
-  secp256k1_ge_globalz_set_table_gej(ECMULT_TABLE_SIZE(WINDOW_A), pre, globalz, prej, zr);
-}
-
 static void secp256k1_ecmult_odd_multiples_table_storage_var(
   int n,
   __global secp256k1_ge_storage *pre,
@@ -2879,7 +2812,10 @@ void secp256k1_ecmult(
   const secp256k1_scalar *ng,
   __global unsigned char* memoryPool
 ) {
-  secp256k1_ge pre_a[ECMULT_TABLE_SIZE(WINDOW_A)];
+  //openCL: too much memory allocated on the stack: 
+  //secp256k1_ge pre_a[ECMULT_TABLE_SIZE(WINDOW_A)];
+  __global secp256k1_ge* pre_a = (__global secp256k1_ge*) checked_malloc(ECMULT_TABLE_SIZE(WINDOW_A) * sizeof_secp256k1_ge(), memoryPool);
+  
   secp256k1_ge tmpa;
   secp256k1_fe Z;
   int wnaf_na[256];
@@ -2903,7 +2839,7 @@ void secp256k1_ecmult(
    * of 1/Z, so we can use secp256k1_gej_add_zinv_var, which uses the same
    * isomorphism to efficiently add with a known Z inverse.
    */
-  secp256k1_ecmult_odd_multiples_table_globalz_windowa(pre_a, &Z, a, memoryPool);
+  secp256k1_ecmult_odd_multiples_table_globalz_windowa__global(pre_a, &Z, a, memoryPool);
 
 
   bits_ng = secp256k1_ecmult_wnaf(wnaf_ng, 256, ng, WINDOW_G);
@@ -3081,56 +3017,56 @@ void secp256k1_ecmult_const(
   const secp256k1_scalar *scalar,
   __global unsigned char* memoryPool
 ) {
-    secp256k1_ge pre_a[ECMULT_TABLE_SIZE(WINDOW_A)];
-    secp256k1_ge tmpa;
-    secp256k1_fe Z;
+  secp256k1_ge pre_a[ECMULT_TABLE_SIZE(WINDOW_A)];
+  secp256k1_ge tmpa;
+  secp256k1_fe Z;
 
 #ifdef USE_ENDOMORPHISM
-    secp256k1_ge pre_a_lam[ECMULT_TABLE_SIZE(WINDOW_A)];
-    int wnaf_1[1 + WNAF_SIZE(WINDOW_A - 1)];
-    int wnaf_lam[1 + WNAF_SIZE(WINDOW_A - 1)];
-    int skew_1;
-    int skew_lam;
-    secp256k1_scalar q_1, q_lam;
+  secp256k1_ge pre_a_lam[ECMULT_TABLE_SIZE(WINDOW_A)];
+  int wnaf_1[1 + WNAF_SIZE(WINDOW_A - 1)];
+  int wnaf_lam[1 + WNAF_SIZE(WINDOW_A - 1)];
+  int skew_1;
+  int skew_lam;
+  secp256k1_scalar q_1, q_lam;
 #else
-    int wnaf[1 + WNAF_SIZE(WINDOW_A - 1)];
+  int wnaf[1 + WNAF_SIZE(WINDOW_A - 1)];
 #endif
 
-    int i;
-    secp256k1_scalar sc = *scalar;
+  int i;
+  secp256k1_scalar sc = *scalar;
 
-    /* build wnaf representation for q. */
+  /* build wnaf representation for q. */
 #ifdef USE_ENDOMORPHISM
-    /* split q into q_1 and q_lam (where q = q_1 + q_lam*lambda, and q_1 and q_lam are ~128 bit) */
-    secp256k1_scalar_split_lambda(&q_1, &q_lam, &sc);
-    /* no need for zero correction when using endomorphism since even
-     * numbers have one added to them anyway */
-    skew_1   = secp256k1_wnaf_const(wnaf_1,   q_1,   WINDOW_A - 1);
-    skew_lam = secp256k1_wnaf_const(wnaf_lam, q_lam, WINDOW_A - 1);
+  /* split q into q_1 and q_lam (where q = q_1 + q_lam*lambda, and q_1 and q_lam are ~128 bit) */
+  secp256k1_scalar_split_lambda(&q_1, &q_lam, &sc);
+  /* no need for zero correction when using endomorphism since even
+   * numbers have one added to them anyway */
+  skew_1   = secp256k1_wnaf_const(wnaf_1,   q_1,   WINDOW_A - 1);
+  skew_lam = secp256k1_wnaf_const(wnaf_lam, q_lam, WINDOW_A - 1);
 #else
-    int is_zero = secp256k1_scalar_is_zero(scalar);
-    /* the wNAF ladder cannot handle zero, so bump this to one .. we will
-     * correct the result after the fact */
-    sc.d[0] += is_zero;
+  int is_zero = secp256k1_scalar_is_zero(scalar);
+  /* the wNAF ladder cannot handle zero, so bump this to one .. we will
+   * correct the result after the fact */
+  sc.d[0] += is_zero;
 #ifdef VERIFY
-    VERIFY_CHECK(!secp256k1_scalar_is_zero(&sc));
+  VERIFY_CHECK(!secp256k1_scalar_is_zero(&sc));
 #endif
-    secp256k1_wnaf_const(wnaf, sc, WINDOW_A - 1);
+  secp256k1_wnaf_const(wnaf, sc, WINDOW_A - 1);
 #endif
 
-    /* Calculate odd multiples of a.
-     * All multiples are brought to the same Z 'denominator', which is stored
-     * in Z. Due to secp256k1' isomorphism we can do all operations pretending
-     * that the Z coordinate was 1, use affine addition formulae, and correct
-     * the Z coordinate of the result once at the end.
-     */
-    secp256k1_gej_set_ge(r, a);
-    secp256k1_ecmult_odd_multiples_table_globalz_windowa(
-      pre_a, &Z, r, memoryPool
-    );
-    for (i = 0; i < ECMULT_TABLE_SIZE(WINDOW_A); i++) {
-        secp256k1_fe_normalize_weak(&pre_a[i].y);
-    }
+  /* Calculate odd multiples of a.
+   * All multiples are brought to the same Z 'denominator', which is stored
+   * in Z. Due to secp256k1' isomorphism we can do all operations pretending
+   * that the Z coordinate was 1, use affine addition formulae, and correct
+   * the Z coordinate of the result once at the end.
+   */
+  secp256k1_gej_set_ge(r, a);
+  secp256k1_ecmult_odd_multiples_table_globalz_windowa(
+    pre_a, &Z, r, memoryPool
+  );
+  for (i = 0; i < ECMULT_TABLE_SIZE(WINDOW_A); i++) {
+      secp256k1_fe_normalize_weak(&pre_a[i].y);
+  }
 #ifdef USE_ENDOMORPHISM
     for (i = 0; i < ECMULT_TABLE_SIZE(WINDOW_A); i++) {
         secp256k1_ge_mul_lambda(&pre_a_lam[i], &pre_a[i]);

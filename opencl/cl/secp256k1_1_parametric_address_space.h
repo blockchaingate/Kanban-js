@@ -89,6 +89,8 @@ void APPEND_ADDRESS_SPACE(secp256k1_ge_set_all_gej_var)(
 void APPEND_ADDRESS_SPACE(secp256k1_ge_storage_cmov)(secp256k1_ge_storage *r, ADDRESS_SPACE const secp256k1_ge_storage *a, int flag);
 void APPEND_ADDRESS_SPACE(secp256k1_ge_storage_cmov__to__global)(__global secp256k1_ge_storage *r, ADDRESS_SPACE const secp256k1_ge_storage *a, int flag);
 void APPEND_ADDRESS_SPACE(secp256k1_ge_copy__to__global)(__global secp256k1_ge* output, ADDRESS_SPACE const secp256k1_ge* input);
+void APPEND_ADDRESS_SPACE(secp256k1_ge_neg)(secp256k1_ge *r, ADDRESS_SPACE const secp256k1_ge *a);
+
 //******end of group_impl.h******
 
 //******From scalar.h******

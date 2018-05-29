@@ -7,6 +7,7 @@
 
 #include "secp256k1.h"
 
+//******From ecmult_impl.h******
 void APPEND_ADDRESS_SPACE(secp256k1_ge_set_all_gej_var)(
   size_t len,
   ADDRESS_SPACE secp256k1_ge *outputPoints,
@@ -49,6 +50,73 @@ void APPEND_ADDRESS_SPACE(secp256k1_ge_set_all_gej_var)(
 //  int usedForCompilerWarning;
 //  return;
 }
+
+void APPEND_ADDRESS_SPACE(secp256k1_ge_globalz_set_table_gej)(
+  size_t len, 
+  ADDRESS_SPACE secp256k1_ge *r,
+  secp256k1_fe *globalz,
+  __global const secp256k1_gej *a,
+  __global const secp256k1_fe *zr
+) {
+  size_t i = len - 1;
+  secp256k1_fe zs, globalToLocalFE1;
+  secp256k1_gej globalToLocal1;
+  secp256k1_ge globalToLocalGE1;
+
+  if (len > 0) {
+    /* The z of the final point gives us the "global Z" for the table. */
+    r[i].x = a[i].x;
+    r[i].y = a[i].y;
+    *globalz = a[i].z;
+    r[i].infinity = 0;
+    zs = zr[i];
+
+    /* Work our way backwards, using the z-ratios to scale the x/y values. */
+    while (i > 0) {
+      if (i != len - 1) {
+        secp256k1_fe_copy__from__global(&globalToLocalFE1, &zr[i]);
+        secp256k1_fe_mul(&zs, &zs, &globalToLocalFE1);
+      }
+      i--;
+      secp256k1_gej_copy__from__global(&globalToLocal1, &a[i]);
+      secp256k1_ge_set_gej_zinv(&globalToLocalGE1, &globalToLocal1, &zs);
+      r[i] = globalToLocalGE1;
+    }
+  }
+}
+
+/** Fill a table 'pre' with precomputed odd multiples of a.
+ *
+ *  There are two versions of this function:
+ *  - secp256k1_ecmult_odd_multiples_table_globalz_windowa which brings its
+ *    resulting point set to a single constant Z denominator, stores the X and Y
+ *    coordinates as ge_storage points in pre, and stores the global Z in rz.
+ *    It only operates on tables sized for WINDOW_A wnaf multiples.
+ *  - secp256k1_ecmult_odd_multiples_table_storage_var, which converts its
+ *    resulting point set to actual affine points, and stores those in pre.
+ *    It operates on tables of any size, but uses heap-allocated temporaries.
+ *
+ *  To compute a*P + b*G, we compute a table for P using the first function,
+ *  and for G using the second (which requires an inverse, but it only needs to
+ *  happen once).
+ */
+void APPEND_ADDRESS_SPACE(secp256k1_ecmult_odd_multiples_table_globalz_windowa)(
+  ADDRESS_SPACE secp256k1_ge *pre,
+  secp256k1_fe *globalz,
+  const secp256k1_gej *a,
+  __global unsigned char* memoryPool
+) {
+  __global secp256k1_gej* prej = (__global secp256k1_gej*) checked_malloc(sizeof_secp256k1_gej() * ECMULT_TABLE_SIZE(WINDOW_A), memoryPool);
+  __global secp256k1_fe* zr =    (__global secp256k1_fe* ) checked_malloc(sizeof_secp256k1_fe()  * ECMULT_TABLE_SIZE(WINDOW_A), memoryPool);
+
+  /* Compute the odd multiples in Jacobian form. */
+  secp256k1_ecmult_odd_multiples_table(ECMULT_TABLE_SIZE(WINDOW_A), prej, zr, a/*, memoryPool*/);
+  /* Bring them to the same Z denominator. */
+  APPEND_ADDRESS_SPACE(secp256k1_ge_globalz_set_table_gej)(ECMULT_TABLE_SIZE(WINDOW_A), pre, globalz, prej, zr);
+}
+
+//******end of ecmult_impl.h******
+
 
 //******From field_10x26.h******
 void APPEND_ADDRESS_SPACE(secp256k1_fe_copy__to__parametric)(ADDRESS_SPACE secp256k1_fe* output, const secp256k1_fe* input){

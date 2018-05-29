@@ -585,6 +585,12 @@ void APPEND_ADDRESS_SPACE(secp256k1_fe_from_storage__to__global)(__global secp25
 
 //******From group_impl.h******
 
+void APPEND_ADDRESS_SPACE(secp256k1_ge_neg)(secp256k1_ge *r, ADDRESS_SPACE const secp256k1_ge *a) {
+  *r = *a;
+  secp256k1_fe_normalize_weak(&r->y);
+  secp256k1_fe_negate(&r->y, &r->y, 1);
+}
+
 void APPEND_ADDRESS_SPACE(secp256k1_ge_copy__to__global)(__global secp256k1_ge* output, ADDRESS_SPACE const secp256k1_ge* input) {
   output->infinity = input->infinity;
   APPEND_ADDRESS_SPACE(secp256k1_fe_copy__to__global)(&output->x, &input->x);
