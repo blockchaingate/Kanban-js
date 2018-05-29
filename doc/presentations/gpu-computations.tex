@@ -4,10 +4,15 @@
 \usepackage{hyperref}
 \usepackage{verbatim}
 
+\addtolength{\hoffset}{-3.5cm}
+\addtolength{\textwidth}{6.8cm}
+\addtolength{\voffset}{-3cm}
+\addtolength{\textheight}{6cm}
+
 %\author[1]{Todor Milev}
 %\affil[1]{FA Enterprise System}
 \title{
-openCL cryptographic computations \\
+OpenCL cryptographic computations \\
 for FAB coin
 }
 \author{Todor Milev\footnote{FA Enterprise System}\\ todor@fa.biz}
@@ -18,27 +23,43 @@ for FAB coin
 \section{Introduction}
 Public/private key cryptography is arguably the most important aspect of modern crypto-currency systems. The somewhat slow execution of private/public key cryptography algorithms appears to be one of the main bottlenecks of FAB's Kanban system. 
 
-In the present text we describe our port of the cryptographic functions that make up the computational core of fabcoin to the GPU programming language openCL. Whether this port is to be used in the final version of Kanban - as opposed to using directly the original fabcoin/bitcoin cryptopgrahic library from which the port was derived - remains to be decided.
-
+In the present text we describe our port of the cryptographic functions that make up the computational core of fabcoin to the GPU programming language OpenCL. Whether this port is to be used in the final version of Kanban - as opposed to using directly the original fabcoin/bitcoin cryptopgrahic library from which the port was derived - remains to be decided.
 
 \subsection{Findings of our investigation}
-Our investigation of the feasibility of running cryptography using openCL, and using the GPU in general, remain inconclusive. Our initial findings suggest that, without any hardware-specific optimization, the CPU performs considerably better than the GPU - anywhere from three to five times better on the hardware combinations we tested.  Here, we must stress that under openCL, GPU and CPU computations can be ran in parallel within the same run-time, without the need to recompile or launch multiple executables. 
+Our investigation of the feasibility of running cryptography using OpenCL, and using the GPU in general, remain inconclusive. Our initial findings suggest that, without any hardware-specific optimization, the CPU performs considerably better than the GPU - anywhere from three to five times better on the hardware combinations we tested.  Here, we must stress that under OpenCL, GPU and CPU computations can be ran in parallel within the same run-time, without the need to recompile or launch multiple executables. 
 
 However, online sources such as Nvidia's guide \cite{NVIDIA:openCLBestPractices} suggest that custom-tailored software optimizations may (or may not) yield between 4- and 10- fold speed optimizations on Nvidia hardware, depending on the particular device and program type, see \cite[page 22]{NVIDIA:openCLBestPractices}. As CPUs appear to be less amenable to software optimizations, it remains feasible that a GPU may outperform a CPU of a similar class, should a considerable effort be put into software optimizations. 
 
-Even without such optimizations, openCL remains a reasonable option as it allows the same code to run on both the CPU and on multiple GPUs (without the need of much engineering), effectively adding the speeds of all involved devices. 
+Even without such optimizations, OpenCL remains a reasonable option as it allows the same code to run on both the CPU and on multiple GPUs (without the need of much engineering), effectively adding the speeds of all involved devices. 
 
-However, at present we cannot recommend switching over to using openCL... [to be continued].
+%However, at present we cannot recommend switching over to using OpenCL... [to be continued].
+
+\subsection{OpenCL vs CUDA}
+We also considered CUDA (an Nvidia proprietary language), but - for the time being - chose to use OpenCL instead as that allows the use of AMD GPUs, Intel system-on-chip GPUs and, last but not least, the Intel/AMD CPUs running the host system. In addition, the use of OpenCL should allow for future ports to the upcoming Intel GPUs \cite{forbes:IntelGPUupcoming}. 
+
+While our primary reason for choosing OpenCL over CUDA was hardware portability and the ability to run code on the CPU, our decision was partially supported by the ambiguous studies of the performance of OpenCL vs CUDA. For example, \cite{KarimiEtAl:DBLP:CUDAvsOpenCL} reports between 13\% and 63\% slower performance of OpenCL vs CUDA, however \cite{MemetiLPKK17:CUDAvsOpenCL:DBLP:journals/corr} reports a slightly better performance of OpenCL vs CUDA. These reports do appear to depend heavily on the particular benchmark used. Even assuming the most pessimistic estimate of 63\% slower performance of OpenCL, the ability to run our software on the CPU and non-Nvidia hardware appears to be a reasonable trade-off. 
+
+We must mention that, in support of CUDA over OpenCL, Jason Hong from FA System has informally reported much better performance on SHA256 computations when using CUDA - up to 7-fold increase of performance. The huge differences in speed reported internally may be a function of CUDA-specific code optimizations or a function of the specifics of SHA256 computations. Further investigation into the matter is required. Whether the performance of the other cryptographic functions will be closer to Jason's experience or to the benchmarks reported in \cite{KarimiEtAl:DBLP:CUDAvsOpenCL}, \cite{MemetiLPKK17:CUDAvsOpenCL:DBLP:journals/corr} remains to be investigated.
+
+Our choice of OpenCL has not been finalized yet; whether we switch to CUDA or to another parallel computation framework remains to be decided.
 
 
-\subsection{openCL vs CUDA}
-We also considered CUDA (an Nvidia proprietary language), but - for the time being - chose to use openCL instead as that allows the use of AMD GPUs, Intel system-on-chip GPUs and, last but not least, the Intel/AMD CPUs running the host system. In addition, the use of openCL should allow for future ports to the upcoming Intel GPUs \cite{forbes:IntelGPUupcoming}. 
+\subsection{Benchmarks}
 
-While our primary reason for choosing openCL over CUDA was hardware portability and the ability to run code on the CPU, our decision was partially supported by the ambiguous studies of the performance of openCL vs CUDA. For example, \cite{KarimiEtAl:DBLP:CUDAvsOpenCL} reports between 13\% and 63\% slower performance of openCL vs CUDA, however \cite{MemetiLPKK17:CUDAvsOpenCL:DBLP:journals/corr} reports a slightly better performance of openCL vs CUDA. These reports do appear to depend heavily on the particular benchmark used. Even assuming the most pessimistic estimate of 63\% slower performance of openCL, the ability to run our software on the CPU and non-Nvidia hardware appears to be a reasonable trade-off. 
+Speed. All tabulated devices ran the same code. With the exception of a small header file (27 lines for OpenCL and 67 lines for C++), the code is both valid OpenCL and valid C/C++. The total code size is, at the time of writing, 7153 lines of code (= 5049 actual lines + 1294 comments + 810 blank) in a total of 22 files.
 
-We must mention that, in support of CUDA over openCL, Jason Hong from FA System has informally reported much better performance on SHA256 computations when using CUDA - up to 7-fold increase of performance. The huge differences in speed reported internally may be a function of CUDA-specific code optimizations or a function of the specifics of SHA256 computations. Further investigation into the matter is required. Whether the performance of the other cryptographic functions will be closer to Jason's experience or to the benchmarks reported in \cite{KarimiEtAl:DBLP:CUDAvsOpenCL}, \cite{MemetiLPKK17:CUDAvsOpenCL:DBLP:journals/corr} remains to be investigated.
+\begin{tabular}{|l|l|l|l|l|l|}\hline
+Device & run-time & SHA256 & Pub. key gen. & Sign & Sign. verification\\\hline
+Nvidia Quadro K2000 & OpenCL 1.1 &19,007/sec & 170.7/sec & 121.3/sec & 65.7/sec\\\hline
+Intel${}^{\text{\sffamily\textregistered}}$ Xeon${}^{\text{\sffamily\textregistered}}$ CPU E5-2630, 2.60GHz& OpenCL 1.2 &96,028/sec & 2062.6/sec& 1044.3/sec & 638.6/sec\\\hline
+\end{tabular}
 
-Our choice of openCL has not been finalized yet; whether we switch to CUDA or to another parallel computation framework remains to be decided.
+Compilation times. Measures the difficulty of testing code changes.
+
+\begin{tabular}{llllll}
+	Device & run-time & SHA256 & Pub. key gen. & Sign & Sign. verification\\
+	Nvidia Quadro K2000 & OpenCL C 1.1 & &
+\end{tabular}
 
 
 \subsection{The four main cryptographic functions} \label{sectionFourMainCrypto}
@@ -82,7 +103,7 @@ where
 p= 2^{256} - 2^{32} - 977.
 \end{equation}
 
-At present, fabcoin core uses bitcoin's implementation of \secpTwoFiveSixKone{}. We report here that we ported one of bitcoin's development forks - Pieter Wuille's C project libsecp256k1 \cite{Wuille:secp256k1}  - to openCL. This development branch was chosen as our base as it is also the base of the top-google-search (partial) openCL port \cite{secp256k1:openCLimplementationHanh0}. We did not choose to use \cite{secp256k1:openCLimplementationHanh0} directly as the port appeared to not be self-contained and contained only an implementation of the signature verification function \ref{enumFourMainVerification})  from Section \ref{sectionFourMainCrypto}.
+At present, fabcoin core uses bitcoin's implementation of \secpTwoFiveSixKone{}. We report here that we ported one of bitcoin's development forks - Pieter Wuille's C project libsecp256k1 \cite{Wuille:secp256k1}  - to OpenCL. This development branch was chosen as our base as it is also the base of the top-google-search (partial) OpenCL port \cite{secp256k1:openCLimplementationHanh0}. We did not choose to use \cite{secp256k1:openCLimplementationHanh0} directly as the port appeared to not be self-contained and contained only an implementation of the signature verification function \ref{enumFourMainVerification})  from Section \ref{sectionFourMainCrypto}.
 
 
 \bibliographystyle{plain}

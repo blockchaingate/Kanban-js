@@ -388,10 +388,10 @@ bool testGPU(GPU& inputGPU) {
   //  return false;
   //if (!testMainPart2Signatures(inputGPU))
   //  return false;
-  //testerSHA256 theSHA256Tester;
-  //if (!theSHA256Tester.testSHA256(inputGPU)) {
-  //  return false;
-  //}
+  testerSHA256 theSHA256Tester;
+  if (!theSHA256Tester.testSHA256(inputGPU)) {
+    return false;
+  }
   testSignatures theSignatureTest;
   if (!theSignatureTest.testPublicKeys(inputGPU)) {
     return false;
