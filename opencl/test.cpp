@@ -384,27 +384,27 @@ bool testBasicOperations(GPU& theGPU){
 bool testGPU(GPU& inputGPU) {
   //if (!testBasicOperations(theGPU))
   //  return - 1;
-  if (!testMainPart1ComputeContexts(inputGPU))
-    return false;
-  if (!testMainPart2Signatures(inputGPU))
-    return false;
+  //if (!testMainPart1ComputeContexts(inputGPU))
+  //  return false;
+  //if (!testMainPart2Signatures(inputGPU))
+  //  return false;
   //testerSHA256 theSHA256Tester;
   //if (!theSHA256Tester.testSHA256(inputGPU)) {
   //  return false;
   //}
-  //testSignatures theSignatureTest;
-  //if (!theSignatureTest.testPublicKeys(inputGPU)) {
-  //  return false;
-  //}
-  //if (!theSignatureTest.testSign(inputGPU)) {
-  //  return false;
-  //}
-  //if (!theSignatureTest.testVerifySignatures(inputGPU, false)) {
-  //  return false;
-  //}
-  //if (!theSignatureTest.testVerifySignatures(inputGPU, true)) {
-  //  return false;
-  //}
+  testSignatures theSignatureTest;
+  if (!theSignatureTest.testPublicKeys(inputGPU)) {
+    return false;
+  }
+  if (!theSignatureTest.testSign(inputGPU)) {
+    return false;
+  }
+  if (!theSignatureTest.testVerifySignatures(inputGPU, false)) {
+    return false;
+  }
+  if (!theSignatureTest.testVerifySignatures(inputGPU, true)) {
+    return false;
+  }
   return true;
 }
 
@@ -581,7 +581,7 @@ void testSignatures::initialize() {
     return;
   }
   this->flagInitialized = true;
-  this->numMessagesPerPipeline = 1000;
+  this->numMessagesPerPipeline = 2000;
   std::cout << "DEBUG: got to here, pt 1" << std::endl;
   unsigned totalPipelineSize = this->numMessagesPerPipeline * 32;
   this->messages.resize(totalPipelineSize);
@@ -837,7 +837,7 @@ bool testSignatures::testPublicKeys(GPU& theGPU) {
 std::string testSignatures::toStringPublicKeys() {
   std::stringstream out;
   out << this->publicKeyStrings.size() << " public keys generated.\n";
-  unsigned numSignaturesToShowOnEachEnd = 1005;
+  unsigned numSignaturesToShowOnEachEnd = 10;
   for (unsigned i = 0; i < this->publicKeyStrings.size(); i ++) {
     if (i == numSignaturesToShowOnEachEnd) {
       out << "...\n";
@@ -854,7 +854,7 @@ std::string testSignatures::toStringPublicKeys() {
 std::string testSignatures::toStringSignatures() {
   std::stringstream out;
   out << this->outputSignatureStrings.size() << " signatures generated.\n";
-  unsigned numSignaturesToShowOnEachEnd = 1005;
+  unsigned numSignaturesToShowOnEachEnd = 10;
   for (unsigned i = 0; i < this->outputSignatureStrings.size(); i ++) {
     if (i == numSignaturesToShowOnEachEnd) {
       out << "...\n";
@@ -897,9 +897,9 @@ bool testSignatures::testVerifySignatures(GPU& theGPU, bool tamperWithSignature)
   //__global const unsigned char* memoryPoolMultiplicationContext,
   //unsigned int messageIndex
   if (tamperWithSignature){
-    theTestLogger << "Testing good signatures. All signatures should be verified. " << Logger::endL;
-  } else {
     theTestLogger << "Testing signatures that have been tampered with. All signatures should be invalidated. " << Logger::endL;
+  } else {
+    theTestLogger << "Testing good signatures. All signatures should be verified. " << Logger::endL;
   }
   if (tamperWithSignature) {
     for (unsigned i = 0; i < this->numMessagesPerPipeline; i ++) {
@@ -911,6 +911,7 @@ bool testSignatures::testVerifySignatures(GPU& theGPU, bool tamperWithSignature)
   kernelVerify->writeToBuffer(4, this->publicKeysBuffer);
   kernelVerify->writeToBuffer(5, this->publicKeysSizes);
   kernelVerify->writeToBuffer(6, this->messages);
+  int numPipelined = 0;
   for (counterTest = 0; counterTest < this->numMessagesPerPipeline; counterTest ++) {
     kernelVerify->writeArgument(8, counterTest);
     //theKernel->writeToBuffer(0, &theLength, sizeof(uint));
@@ -931,13 +932,23 @@ bool testSignatures::testVerifySignatures(GPU& theGPU, bool tamperWithSignature)
       theTestLogger << "Failed to enqueue kernel. Return code: " << ret << ". " << Logger::endL;
       return false;
     }
+    numPipelined ++;
+    if (numPipelined >= MACRO_max_num_SIGNATURES_IN_PARALLEL) {
+      if (!theGPU.finish()) {
+        theTestLogger << "Failed to finish current computation queue";
+        return false;
+      } else {
+        theTestLogger << "Finished " << numPipelined << " pipelined verifications. " << Logger::endL;
+      }
+      numPipelined = 0;
+    }
     //std::cout << "DEBUG: kernel enqueued, proceeding to read buffer. " << std::endl;
     if (counterTest % 100 == 0) {
       auto timeCurrent = std::chrono::system_clock::now();
       std::chrono::duration<double> elapsed_seconds = timeCurrent - timeStart;
-      std::cout << "Scheduled " << counterTest << " 32-byte messages in " << elapsed_seconds.count() << " second(s),"
+      std::cout << "Scheduled " << counterTest << " 32-byte verifications in " << elapsed_seconds.count() << " second(s),"
       << " current speed: "
-      << ((counterTest + 1) / elapsed_seconds.count()) << " public keys per second." << std::endl;
+      << ((counterTest + 1) / elapsed_seconds.count()) << " scheduled per second." << std::endl;
     }
   }
   if (!theGPU.finish()) {
@@ -962,11 +973,12 @@ bool testSignatures::testVerifySignatures(GPU& theGPU, bool tamperWithSignature)
   }
   auto timeCurrent = std::chrono::system_clock::now();
   std::chrono::duration<double> elapsed_seconds = timeCurrent - timeStart;
-  theTestLogger << "Generated " << counterTest << " public keys in " << elapsed_seconds.count() << " second(s). "
+  theTestLogger << "Verified " << counterTest << " signatures in " << elapsed_seconds.count() << " second(s). "
   << Logger::endL;
   theTestLogger << "Speed: "
   << (this->numMessagesPerPipeline / elapsed_seconds.count()) << " signature(s) per second." << Logger::endL;
   bool isGood = true;
+  int numGood = 0;
   for (counterTest = 0; counterTest < this->numMessagesPerPipeline; counterTest ++) {
     if (this->outputVerifications[counterTest] == 0 && !tamperWithSignature) {
       theTestLogger << Logger::colorRed << "ERROR: Failed to verify signature " << counterTest << ". "
@@ -976,17 +988,19 @@ bool testSignatures::testVerifySignatures(GPU& theGPU, bool tamperWithSignature)
     }
     if (this->outputVerifications[counterTest] == 1 && tamperWithSignature) {
       theTestLogger << Logger::colorRed << "ERROR: wrongly verified tampered with signature "
-      << counterTest << ". " << Logger::endL;
+      << counterTest << ". " << Logger::colorNormal << Logger::endL;
       isGood = false;
       break;
     }
     if (this->outputVerifications[counterTest] != 1 && this->outputVerifications[counterTest] != 0) {
       theTestLogger << Logger::colorRed << "ERROR: signature verification of signature " << counterTest << " has value: "
-      << this->outputVerifications[counterTest] << ". " << Logger::endL;
+      << (int) this->outputVerifications[counterTest] << ". " << Logger::colorNormal << Logger::endL;
       isGood = false;
       break;
     }
+    numGood ++;
   }
+  theTestLogger << numGood << " signatures processed correctly. " << Logger::endL;
   if (!isGood) {
     theTestLogger << "FATAL ERROR. " << Logger::endL;
   }

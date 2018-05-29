@@ -32,6 +32,9 @@ Please see the file opencl/README.md for technical notes on this code.
 #define MACRO_MEMORY_POOL_SIZE_MultiplicationContext 6000000
 #define MACRO_MEMORY_POOL_SIZE_GeneratorContext 370000
 #define MACRO_MEMORY_POOL_SIZE_Signature 230000
+#define MACRO_size_default_buffer 10000000
+#define MACRO_max_num_SIGNATURES_IN_PARALLEL 256
+#define MACRO_size_signature_buffer (MACRO_MEMORY_POOL_SIZE_Signature * MACRO_max_num_SIGNATURES_IN_PARALLEL)
 #define MACRO_size_of_signature (33 * 2 + 6)
 
 __global void* checked_malloc(unsigned int size, __global unsigned char* memoryPool);

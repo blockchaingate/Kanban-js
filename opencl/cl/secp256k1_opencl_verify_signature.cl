@@ -9,7 +9,7 @@
 
 __kernel void secp256k1_opencl_verify_signature(
   __global unsigned char *output,
-  __global unsigned char *outputMemoryPoolSignature,
+  __global unsigned char *outputMemoryPoolSignatureBuffer,
   __global const unsigned char* inputSignature,
   __global const unsigned char* signatureSizes,
   __global const unsigned char* publicKey,
@@ -23,26 +23,38 @@ __kernel void secp256k1_opencl_verify_signature(
   unsigned int messageIndex = memoryPool_read_uint__default((unsigned char*)& messageIndexChar);
   publicKeySize = memoryPool_read_uint(&publicKeySizes[messageIndex * 4]);
   signatureSize = memoryPool_read_uint(&signatureSizes[messageIndex * 4]);
+  unsigned int indexMemPoolSignature;
+  indexMemPoolSignature = (messageIndex % MACRO_max_num_SIGNATURES_IN_PARALLEL);
+  indexMemPoolSignature *= MACRO_MEMORY_POOL_SIZE_Signature;
+  if (indexMemPoolSignature >= MACRO_size_signature_buffer) {
+    assertFalse("This should not happen. ", outputMemoryPoolSignatureBuffer);
+    output[messageIndex] = - 2;
+    return;
+  }
+  __global unsigned char* outputMemoryPoolSignature = &outputMemoryPoolSignatureBuffer[indexMemPoolSignature];
 
   memoryPool_initializeNoZeroingNoLog(MACRO_MEMORY_POOL_SIZE_Signature - 10, outputMemoryPoolSignature);
   memoryPool_write_uint_asOutput(messageIndex, 0, outputMemoryPoolSignature);
   memoryPool_write_uint_asOutput(publicKeySize, 1, outputMemoryPoolSignature);
   memoryPool_write_uint_asOutput(signatureSize, 2, outputMemoryPoolSignature);
-
+ 
   __global secp256k1_ecmult_context* multiplicationContextPointer =
   memoryPool_read_multiplicationContextPointer_NON_PORTABLE(memoryPoolMultiplicationContext);
 
   secp256k1_scalar scalarR, scalarS, scalarMessage;
   secp256k1_ge pointPublicKey;
-  if (secp256k1_eckey_pubkey_parse(&pointPublicKey, publicKey, publicKeySize) != 1) {
-    output[0] = 0;
+  unsigned int offsetPublicKey = messageIndex * MACRO_size_of_signature;
+  unsigned int offsetSignature = messageIndex * MACRO_size_of_signature;
+  unsigned int offsetMessage = messageIndex * 32;
+  if (secp256k1_eckey_pubkey_parse(&pointPublicKey, &publicKey[offsetPublicKey], publicKeySize) != 1) {
+    output[messageIndex] = - 4;
     return;
   }
-  if (secp256k1_ecdsa_sig_parse__global(&scalarR, &scalarS, inputSignature, signatureSize) != 1) {
-    output[0] = 0;
+  if (secp256k1_ecdsa_sig_parse__global(&scalarR, &scalarS, &inputSignature[offsetSignature], signatureSize) != 1) {
+    output[messageIndex] = - 5;
     return;
   }
-  secp256k1_scalar_set_b32__global(&scalarMessage, message, NULL);
+  secp256k1_scalar_set_b32__global(&scalarMessage, &message[offsetMessage], NULL);
 
   result = (unsigned char) secp256k1_ecdsa_sig_verify(
     multiplicationContextPointer,
@@ -52,7 +64,7 @@ __kernel void secp256k1_opencl_verify_signature(
     &scalarMessage,
     outputMemoryPoolSignature
   );
-  output[0] = result;
+  output[messageIndex] = result;
 }
 
 #include "secp256k1.cl"

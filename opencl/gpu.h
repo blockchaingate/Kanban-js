@@ -137,6 +137,8 @@ public:
   //250KB for signature verification
   static const int memorySignature = MACRO_MEMORY_POOL_SIZE_Signature;
 
+  static const int defaultBufferSize = MACRO_size_default_buffer;
+
   //Warning: too-large compile-time non-static memory allocations such as
   //
   //unsigned char bufferMultiplicationContext[MACRO_MEMORY_POOL_SIZE_MultiplicationContext];

@@ -795,9 +795,13 @@ bool GPUKernel::constructArguments(
     if (current->typE != current->typeVoidPointer) {
       continue;
     }
-    size_t defaultBufferSize = 10000000;
-    current->theMemory = clCreateBuffer(this->owner->context, bufferFlag, defaultBufferSize, NULL, &ret);
-    current->buffer.resize(defaultBufferSize);
+    int PleaseRefactor;
+    int bufferSize = GPU::defaultBufferSize;
+    if (current->name == "outputMemoryPoolSignature") {
+      bufferSize = MACRO_size_signature_buffer;
+    }
+    current->theMemory = clCreateBuffer(this->owner->context, bufferFlag, bufferSize, NULL, &ret);
+    current->buffer.resize(GPU::defaultBufferSize);
     if (ret != CL_SUCCESS || current->theMemory == NULL) {
       logGPU << "Failed to create buffer \e[31m" << current->name << "\e[39m. Return code: " << ret << Logger::endL;
       return false;
