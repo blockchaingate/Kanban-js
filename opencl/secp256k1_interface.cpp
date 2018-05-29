@@ -186,6 +186,9 @@ bool CryptoEC256k1GPU::computeMultiplicationContext(unsigned char* outputMemoryP
     logGPU << "Failed to read buffer. Return code: " << ret << Logger::endL;
     return false;
   }
+  if (!theGPU.finish()) {
+    return false;
+  }
   return true;
 }
 
@@ -238,6 +241,9 @@ bool CryptoEC256k1GPU::computeGeneratorContext(unsigned char* outputMemoryPool, 
   );
   if (ret != CL_SUCCESS) {
     logGPU << "Failed to read buffer. Return code: " << ret << Logger::endL;
+    return false;
+  }
+  if (!theGPU.finish()) {
     return false;
   }
   return true;
