@@ -181,6 +181,8 @@ public:
   bool initializeKernelsNoBuild();
   bool initializeKernelsFull();
   bool finish();
+  std::string getId();
+  bool isCPU();
   //Static allocation forbidden!
   //Rationale: we need to use file loggers in the
   //destructors. File loggers are statically

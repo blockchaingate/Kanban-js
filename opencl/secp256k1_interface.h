@@ -37,6 +37,7 @@ public:
   );
   static bool verifySignatureDefaultBuffers(
     unsigned char* output,
+    unsigned char* outputMemoryPoolPassNULLToNotRead,
     const unsigned char* inputSignature,
     unsigned int signatureSize,
     const unsigned char* publicKey,

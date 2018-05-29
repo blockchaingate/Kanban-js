@@ -99,7 +99,7 @@ std::string toStringSecp256k1_GeneratorContext(const secp256k1_ecmult_gen_contex
 
 std::string toStringErrorLog(const unsigned char* memoryPool) {
   std::string result;
-  for (int i = 8 + 4 * MACRO_numberOfOutputs; i < 1000; i ++) {
+  for (int i = memoryPool_readNumberReservedBytesExcludingLog(); i < 1000; i ++) {
     if (memoryPool[i] == '\0')
       break;
     result.push_back((char) memoryPool[i]);
@@ -108,7 +108,7 @@ std::string toStringErrorLog(const unsigned char* memoryPool) {
   return result;
 }
 
-std::string toStringOutputObject(int argumentIndex, const unsigned char* memoryPool) {
+std::string toStringOutputObject(int argumentIndex, const unsigned char* memoryPool, int memoryPoolMaxSize) {
   secp256k1_ge readerECPoint;
   secp256k1_gej readerECPointProjective;
   secp256k1_fe readerFieldElement1;
@@ -121,6 +121,10 @@ std::string toStringOutputObject(int argumentIndex, const unsigned char* memoryP
   out << "Position " << position << ": ";
   if (position == 0) {
     out << "empty";
+    return out.str();
+  }
+  if (position >= (unsigned) memoryPoolMaxSize) {
+    out << "(position invalid)";
     return out.str();
   }
   if (position < memoryPool_readNumberReservedBytesIncludingLog()) {

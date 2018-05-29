@@ -23,6 +23,12 @@ __kernel void secp256k1_opencl_verify_signature(
   unsigned int messageIndex = memoryPool_read_uint__default((unsigned char*)& messageIndexChar);
   publicKeySize = memoryPool_read_uint(&publicKeySizes[messageIndex * 4]);
   signatureSize = memoryPool_read_uint(&signatureSizes[messageIndex * 4]);
+
+  memoryPool_initializeNoZeroingNoLog(MACRO_MEMORY_POOL_SIZE_Signature - 10, outputMemoryPoolSignature);
+  memoryPool_write_uint_asOutput(messageIndex, 0, outputMemoryPoolSignature);
+  memoryPool_write_uint_asOutput(publicKeySize, 1, outputMemoryPoolSignature);
+  memoryPool_write_uint_asOutput(signatureSize, 2, outputMemoryPoolSignature);
+
   __global secp256k1_ecmult_context* multiplicationContextPointer =
   memoryPool_read_multiplicationContextPointer_NON_PORTABLE(memoryPoolMultiplicationContext);
 
@@ -38,7 +44,6 @@ __kernel void secp256k1_opencl_verify_signature(
   }
   secp256k1_scalar_set_b32__global(&scalarMessage, message, NULL);
 
-  memoryPool_initializeNoZeroingNoLog(MACRO_MEMORY_POOL_SIZE_Signature - 10, outputMemoryPoolSignature);
   result = (unsigned char) secp256k1_ecdsa_sig_verify(
     multiplicationContextPointer,
     &scalarR,

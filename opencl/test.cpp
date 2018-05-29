@@ -96,7 +96,13 @@ void printComments(unsigned char* comments) {
   logServer << "extraMessage pr.z: " << Miscellaneous::toStringHex(extraMessage3) << Logger::endL;
 }
 
-void testPrintMemoryPoolGeneral(const unsigned char* theMemoryPool, const std::string& computationID, Logger& logTest) {
+void testPrintMemoryPoolGeneral(
+  const unsigned char* theMemoryPool,
+  int memoryPoolMaxSize,
+  const std::string& computationID,
+  Logger& logTest,
+  bool hasErrorLog
+) {
   logTest << computationID << Logger::endL;
   std::string memoryPoolPrintout;
   //int useFulmemoryPoolSize = 16 * 64 * 64 + 10192 + 100;
@@ -110,14 +116,16 @@ void testPrintMemoryPoolGeneral(const unsigned char* theMemoryPool, const std::s
   memoryPoolPrintout.assign((const char*) theMemoryPool, initialBytesToPrint);
   logTest << Miscellaneous::toStringHex(memoryPoolPrintout) << Logger::endL;
   for (int i = 0; i < MACRO_numberOfOutputs; i ++) {
-    logTest << "Debug " << i << ": " << toStringOutputObject(i, theMemoryPool) << Logger::endL;
+    logTest << "Debug " << i << ": " << toStringOutputObject(i, theMemoryPool, memoryPoolMaxSize) << Logger::endL;
   }
-  logTest << "Computation log:\n"
-  << toStringErrorLog(theMemoryPool) << Logger::endL << Logger::endL;
+  if (hasErrorLog) {
+    logTest << "Computation log:\n"
+    << toStringErrorLog(theMemoryPool) << Logger::endL << Logger::endL;
+  }
 }
 
 void testPrintMultiplicationContext(const unsigned char* theMemoryPool, const std::string& computationID, Logger& logTest) {
-  testPrintMemoryPoolGeneral(theMemoryPool, computationID, logTest);
+  testPrintMemoryPoolGeneral(theMemoryPool, GPU::memoryMultiplicationContext, computationID, logTest, true);
   uint32_t outputPosition = memoryPool_read_uint_fromOutput(0, theMemoryPool);
   logTest << "Position multiplication context: " << outputPosition << Logger::endL;
   secp256k1_ecmult_context multiplicationContext;
@@ -128,7 +136,7 @@ void testPrintMultiplicationContext(const unsigned char* theMemoryPool, const st
 }
 
 void testPrintGeneratorContext(const unsigned char* theMemoryPool, const std::string& computationID, Logger& logTest) {
-  testPrintMemoryPoolGeneral(theMemoryPool, computationID, logTest);
+  testPrintMemoryPoolGeneral(theMemoryPool, GPU::memoryGeneratorContext, computationID, logTest, true);
   uint32_t outputPositionGeneratorContextStruct = memoryPool_read_uint_fromOutput(0, theMemoryPool);
   uint32_t outputPositionGeneratorContextContent = memoryPool_read_uint_fromOutput(1, theMemoryPool);
   logTest << "Context struct position: " << outputPositionGeneratorContextStruct << Logger::endL;
@@ -148,19 +156,20 @@ extern void secp256k1_opencl_compute_generator_context(
 
 bool testMainPart1ComputeContexts(GPU& theGPU) {
   //*****CPU tests*******
+  std::string idCPU = "C++ CPU";
   if (!CryptoEC256k1::computeMultiplicationContextDefaultBuffers())
     return false;
   /////////////////////////////
   if (!CryptoEC256k1::computeGeneratorContextDefaultBuffers())
     return false;
   logTestCentralPU << "Generator context computed. " << Logger::endL;
-  testPrintGeneratorContext(CryptoEC256k1::bufferGeneratorContext, "Central PU", logTestCentralPU);
+  testPrintGeneratorContext(CryptoEC256k1::bufferGeneratorContext, idCPU, logTestCentralPU);
   /////////////////////////////
 
 
   /////////////////////////////
   logTestCentralPU << "Multiplication context computed. " << Logger::endL;
-  testPrintMultiplicationContext(CryptoEC256k1::bufferMultiplicationContext, "Central PU", logTestCentralPU);
+  testPrintMultiplicationContext(CryptoEC256k1::bufferMultiplicationContext, idCPU, logTestCentralPU);
   /////////////////////////////
 
   //*****GPU tests*******
@@ -168,14 +177,7 @@ bool testMainPart1ComputeContexts(GPU& theGPU) {
   if (!CryptoEC256k1GPU::computeGeneratorContextDefaultBuffers(theGPU))
     return false;
   logTestGraphicsPU << "Generator context computed. " << Logger::endL;
-  std::string idOpenCL;
-  if (theGPU.theDesiredDeviceType == CL_DEVICE_TYPE_GPU) {
-    idOpenCL = "Graphics PU";
-  } else {
-    idOpenCL = "openCL CPU";
-  }
-
-  testPrintGeneratorContext(theGPU.bufferGeneratorContext, "Graphics PU", logTestGraphicsPU);
+  testPrintGeneratorContext(theGPU.bufferGeneratorContext, theGPU.getId(), logTestGraphicsPU);
   /////////////////////////////
 
 
@@ -183,7 +185,7 @@ bool testMainPart1ComputeContexts(GPU& theGPU) {
   if (!CryptoEC256k1GPU::computeMultiplicationContextDefaultBuffers(theGPU))
     return false;
   logTestGraphicsPU << "Multiplication context computed. " << Logger::endL;
-  testPrintMultiplicationContext(theGPU.bufferMultiplicationContext, "Graphics PU", logTestGraphicsPU);
+  testPrintMultiplicationContext(theGPU.bufferMultiplicationContext, theGPU.getId(), logTestGraphicsPU);
   /////////////////////////////
 
 
@@ -221,7 +223,9 @@ void GeneratorScalar::TestAssignString(const std::string& input) {
 
 std::string Signature::toString() {
   std::stringstream out;
-  out << "(r,s): " << toStringSecp256k1_Scalar(this->r) << ", " << toStringSecp256k1_Scalar(this->s);
+  out << "(r,s): " << toStringSecp256k1_Scalar(this->r) << ", " << toStringSecp256k1_Scalar(this->s) << "\n";
+  std::string serializationString((char *) this->serialization, this->size);
+  out << "Serialized: " << Miscellaneous::toStringHex(serializationString);
   return out.str();
 }
 
@@ -289,7 +293,9 @@ bool testMainPart2Signatures(GPU& theGPU) {
     message.serialization
   );
   logTestCentralPU << "Verification of signature (expected 1): " << (int) signatureResult[0] << Logger::endL;
-  theSignature.serialization[4] = 5;
+  //testPrintMemoryPoolGeneral(CryptoEC256k1::bufferSignature, GPU::memorySignature, "Central PU", logTestCentralPU, false);
+  //////////
+  theSignature.serialization[11] = 5;
   signatureResult[0] = 3;
   CryptoEC256k1::verifySignatureDefaultBuffers(
     &signatureResult[0],
@@ -300,6 +306,11 @@ bool testMainPart2Signatures(GPU& theGPU) {
     message.serialization
   );
   logTestCentralPU << "Verification of a signature that's been tampered with (expected 0): " << (int) signatureResult[0] << Logger::endL;
+  //testPrintMemoryPoolGeneral(CryptoEC256k1::bufferSignature, GPU::memorySignature, "Central PU", logTestCentralPU, false);
+  logTestCentralPU << "\n\n\n***************Verification end***************\n\n\n" << Logger::endL;
+  //////////////////////////
+  //////////////////////////
+  //////////////////////////
   theSignature.reset();
   CryptoEC256k1GPU::signMessageDefaultBuffers(
     theSignature.serialization,
@@ -323,8 +334,12 @@ bool testMainPart2Signatures(GPU& theGPU) {
   }
   logTestGraphicsPU << "Public key:\n" << thePublicKey.toString() << Logger::endL;
   signatureResult[0] = 3;
+  for (int i = 0; i < GPU::memorySignature; i ++) {
+    theGPU.bufferSignature[i] = 0;
+  }
   if (!CryptoEC256k1GPU::verifySignatureDefaultBuffers(
     &signatureResult[0],
+    &theGPU.bufferSignature[0],
     theSignature.serialization,
     theSignature.size,
     thePublicKey.serialization,
@@ -335,10 +350,13 @@ bool testMainPart2Signatures(GPU& theGPU) {
     logTestGraphicsPU << "ERROR: verifySignature returned false. " << Logger::endL;
   }
   logTestGraphicsPU << "Verification of signature (expected 1): " << (int) signatureResult[0] << Logger::endL;
+  //testPrintMemoryPoolGeneral(theGPU.bufferSignature, GPU::memorySignature, "Graphics PU", logTestGraphicsPU, false);
+  /////////
   theSignature.serialization[4] = 5;
   signatureResult[0] = 3;
   if (!CryptoEC256k1GPU::verifySignatureDefaultBuffers(
     &signatureResult[0],
+    &theGPU.bufferSignature[0],
     theSignature.serialization,
     theSignature.size,
     thePublicKey.serialization,
@@ -349,15 +367,17 @@ bool testMainPart2Signatures(GPU& theGPU) {
     logTestGraphicsPU << "ERROR: verifySignature returned false. " << Logger::endL;
   }
   logTestGraphicsPU << "Verification of a signature that's been tampered with (expected 0): " << (int) signatureResult[0] << Logger::endL;
+  //testPrintMemoryPoolGeneral(theGPU.bufferSignature, GPU::memorySignature, "Graphics PU", logTestGraphicsPU, false);
+  logTestGraphicsPU << "\n\n\n***************Verification end***************\n\n\n" << Logger::endL;
   return true;
 }
 
 bool testBasicOperations(GPU& theGPU){
   CryptoEC256k1::testSuite1BasicOperationsDefaultBuffers();
-  testPrintMemoryPoolGeneral(CryptoEC256k1::bufferTestSuite1BasicOperations, "Central PU", logTestCentralPU);
+  testPrintMemoryPoolGeneral(CryptoEC256k1::bufferTestSuite1BasicOperations, GPU::memorySignature, "Central PU", logTestCentralPU, true);
 
   CryptoEC256k1GPU::testSuite1BasicOperationsDefaultBuffers(theGPU);
-  testPrintMemoryPoolGeneral(theGPU.bufferTestSuite1BasicOperations, "Graphics PU", logTestGraphicsPU);
+  testPrintMemoryPoolGeneral(theGPU.bufferTestSuite1BasicOperations, GPU::memorySignature, "Graphics PU", logTestGraphicsPU, true);
   return true;
 }
 

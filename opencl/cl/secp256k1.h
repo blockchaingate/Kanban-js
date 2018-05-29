@@ -37,7 +37,7 @@ Please see the file opencl/README.md for technical notes on this code.
 __global void* checked_malloc(unsigned int size, __global unsigned char* memoryPool);
 void memoryPool_write_uint(unsigned int numberToWrite, __global unsigned char* memoryPoolPointer);
 void memoryPool_write_uint_asOutput(unsigned int numberToWrite, int argumentIndex, __global unsigned char* memoryPoolPointer);
-void memoryPool_writeString(__constant const char* message, __global unsigned char* memoryPool);
+void memoryPool_writeString(__constant const char* message, int messageSize, __global unsigned char* memoryPool);
 void memoryPool_writeCurrentSizeAsOutput(unsigned int argumentIndex, __global unsigned char* memoryPool);
 
 

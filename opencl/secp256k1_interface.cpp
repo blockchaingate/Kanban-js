@@ -121,6 +121,7 @@ bool CryptoEC256k1GPU::testSuite1BasicOperations(unsigned char* outputMemoryPool
     logGPU << "Failed to enqueue kernel. Return code: " << ret << ". " << Logger::endL;
     return false;
   }
+  theGPU.finish();
   cl_mem& result = kernelTest->getOutput(0)->theMemory;
   ret = clEnqueueReadBuffer(
     theGPU.commandQueue,
@@ -164,6 +165,7 @@ bool CryptoEC256k1GPU::computeMultiplicationContext(unsigned char* outputMemoryP
     logGPU << "Failed to enqueue kernel. Return code: " << ret << ". " << Logger::endL;
     return false;
   }
+  theGPU.finish();
   cl_mem& result = kernelMultiplicationContext->getOutput(0)->theMemory;
   ret = clEnqueueReadBuffer(
     theGPU.commandQueue,
@@ -214,6 +216,7 @@ bool CryptoEC256k1GPU::computeGeneratorContext(unsigned char* outputMemoryPool, 
     << ". Return code: " << ret << ". " << Logger::endL;
     return false;
   }
+  theGPU.finish();
   cl_mem& result = kernelGeneratorContext->getOutput(0)->theMemory;
   logGPU << "DEBUG: enqueued generator context. " << Logger::endL;
   ret = clEnqueueReadBuffer(
@@ -277,6 +280,7 @@ bool CryptoEC256k1GPU::signMessageDefaultBuffers(
     logGPU << "Failed to enqueue kernel. Return code: " << ret << ". " << Logger::endL;
     return false;
   }
+  theGPU.finish();
   cl_mem& resultSignatureSize = kernelSign->getOutput(1)->theMemory;
   unsigned char outputSizeBuffer[4];
 
@@ -350,6 +354,7 @@ bool CryptoEC256k1GPU::generatePublicKeyDefaultBuffers(
     logGPU << "Failed to enqueue kernel. Return code: " << ret << ". " << Logger::endL;
     return false;
   }
+  theGPU.finish();
   cl_mem& resultPublicKeySize = kernelGeneratePublicKey->getOutput(1)->theMemory;
   unsigned char outputSizeBuffer[4];
 
@@ -391,12 +396,13 @@ bool CryptoEC256k1GPU::generatePublicKeyDefaultBuffers(
 }
 
 bool CryptoEC256k1GPU::verifySignatureDefaultBuffers(
-  unsigned char *output,
-  const unsigned char *inputSignature,
+  unsigned char* output,
+  unsigned char* outputMemoryPoolPassNULLToNotRead,
+  const unsigned char* inputSignature,
   unsigned int signatureSize,
-  const unsigned char *publicKey,
+  const unsigned char* publicKey,
   unsigned int publicKeySize,
-  const unsigned char *message,
+  const unsigned char* message,
   GPU &theGPU
 ) {
   //openCL function arguments:
@@ -418,12 +424,29 @@ bool CryptoEC256k1GPU::verifySignatureDefaultBuffers(
   if (!kernelVerifySignature->build()) {
     return false;
   }
-  kernelVerifySignature->writeToBuffer(2, inputSignature, signatureSize);
-  kernelVerifySignature->writeArgument(3, signatureSize);
-  kernelVerifySignature->writeToBuffer(4, publicKey, publicKeySize);
-  kernelVerifySignature->writeArgument(5, publicKeySize);
-  kernelVerifySignature->writeToBuffer(6, message, 32);
+  //__global unsigned char *output,
+  //__global unsigned char *outputMemoryPoolSignature,
+  //__global const unsigned char* inputSignature,
+  //__global const unsigned char* signatureSizes,
+  //__global const unsigned char* publicKey,
+  //__global const unsigned char* publicKeySizes,
+  //__global const unsigned char* message,
+  //__global const unsigned char* memoryPoolMultiplicationContext,
+  //unsigned int messageIndexChar
 
+  unsigned char signatureSizes[4];
+  unsigned char publicKeySizes[4];
+  memoryPool_write_uint(signatureSize, signatureSizes);
+  memoryPool_write_uint(publicKeySize, publicKeySizes);
+
+
+
+  kernelVerifySignature->writeToBuffer(2, inputSignature, signatureSize);
+  kernelVerifySignature->writeToBuffer(3, signatureSizes, 4);
+  kernelVerifySignature->writeToBuffer(4, publicKey, publicKeySize);
+  kernelVerifySignature->writeToBuffer(5, publicKeySizes, 4);
+  kernelVerifySignature->writeToBuffer(6, message, 32);
+  kernelVerifySignature->writeArgument(8, 0);
   logGPU << "DEBUG: Got to generate public key start." << Logger::endL;
   cl_int ret = clEnqueueNDRangeKernel(
     theGPU.commandQueue,
@@ -440,6 +463,7 @@ bool CryptoEC256k1GPU::verifySignatureDefaultBuffers(
     logGPU << "Failed to enqueue verify signature kernel. Return code: " << ret << ". " << Logger::endL;
     return false;
   }
+  theGPU.finish();
   cl_mem& resultSignature = kernelVerifySignature->getOutput(0)->theMemory;
   logGPU << "DEBUG: enqueued output size. " << Logger::endL;
   ret = clEnqueueReadBuffer(
@@ -456,6 +480,25 @@ bool CryptoEC256k1GPU::verifySignatureDefaultBuffers(
   if (ret != CL_SUCCESS) {
     logGPU << "Failed to read size buffer. Return code: " << ret << Logger::endL;
     return false;
+  }
+  if (outputMemoryPoolPassNULLToNotRead != 0) {
+    cl_mem& resultMemoryPool = kernelVerifySignature->getOutput(1)->theMemory;
+    logGPU << "DEBUG: enqueued output size. " << Logger::endL;
+    ret = clEnqueueReadBuffer(
+      theGPU.commandQueue,
+      resultMemoryPool,
+      CL_TRUE,
+      0,
+      MACRO_MEMORY_POOL_SIZE_Signature,
+      (void*) outputMemoryPoolPassNULLToNotRead,
+      0,
+      NULL,
+      NULL
+    );
+    if (ret != CL_SUCCESS) {
+      logGPU << "Signature verification on GPU: failed to read memory pool. Return code: " << ret << Logger::endL;
+      return false;
+    }
   }
   return true;
 }

@@ -137,10 +137,10 @@ GPU::GPU() {
 }
 
 bool GPU::initializeAllFull() {
-  if (! this->initializePlatform()) {
+  if (!this->initializePlatform()) {
     return false;
   }
-  if (! this->initializeKernelsFull())
+  if (!this->initializeKernelsFull())
     return false;
   return true;
 }
@@ -155,6 +155,14 @@ std::shared_ptr<GPUKernel> GPU::getKernel(const std::string& kernelName) {
     assert(false);
   }
   return this->theKernels[kernelName];
+}
+
+std::string GPU::getId() {
+  if (this->theDesiredDeviceType == CL_DEVICE_TYPE_GPU) {
+    return "Graphics PU";
+  } else {
+    return "openCL CPU";
+  }
 }
 
 bool GPU::finish() {
@@ -476,7 +484,7 @@ bool GPU::createKernelNoBuild(
 
 GPU::~GPU() {
   cl_int ret = CL_SUCCESS;
-  if (this->commandQueue != NULL){
+  if (this->commandQueue != NULL) {
     ret = clFlush(this->commandQueue);
     if (ret != CL_SUCCESS) {
       logGPU << "GPU destruction failure with error code: " << ret << ". " << Logger::endL;
@@ -675,7 +683,7 @@ bool GPUKernel::build() {
     return true;
   }
   StateMaintainerFolderLocation preserveCurrentFolder(logGPU);
-  logGPU << "Building program: " << this->name << "..." << Logger::endL;
+  logGPU << this->owner->getId() << ": building program: " << this->name << "..." << Logger::endL;
   try {
     OSWrapper::setCurrentPath("../opencl/cl");
   } catch (...) {

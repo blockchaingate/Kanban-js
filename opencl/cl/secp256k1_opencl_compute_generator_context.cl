@@ -8,13 +8,20 @@
 #endif 
 
 //__constant static const char messageGeneratorContext1[50] = "initialized mempool.\0";
-
+//__constant const char messageB[22] = "initialized mempool.\0";
+//__constant const char messageC[18] = "Entering kernel.\0";
 __kernel void secp256k1_opencl_compute_generator_context(
   __global unsigned char* outputMemoryPoolContainingGeneratorContext
 ) {
+//  printf("%s\n", "\nHere I am");
+//  int debugWarning;
+//  memoryPool_writeString(messageC, 18, outputMemoryPoolContainingGeneratorContext);
+//  printf("%s\n", "\nHere I am pt2");
   memoryPool_initialize(MACRO_MEMORY_POOL_SIZE_GeneratorContext - 100, outputMemoryPoolContainingGeneratorContext);
-  //memoryPool_writeString(messageGeneratorContext1, outputMemoryPoolContainingGeneratorContext);
- 
+//  printf("%s\n", "\nHere I am pt3");
+//  memoryPool_writeString(messageB, 22, outputMemoryPoolContainingGeneratorContext);
+//  printf("%s\n", "\nHere I am pt4");
+//  return;
   memoryPool_writeCurrentSizeAsOutput(0, outputMemoryPoolContainingGeneratorContext);
 
   __global secp256k1_ecmult_gen_context* generatorContext = (__global secp256k1_ecmult_gen_context*) checked_malloc(

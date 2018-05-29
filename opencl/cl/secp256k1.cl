@@ -115,18 +115,21 @@ void memoryPool_initializeNoZeroingNoLog(unsigned int totalSize, __global unsign
   memoryPool_write_uint(totalSize, memoryPool);
   reservedBytes  = memoryPool_readNumberReservedBytesExcludingLog();
   memoryPool_write_uint(reservedBytes, &memoryPool[4]);
+  unsigned int i;
+  for (i = 0; i < MACRO_numberOfOutputs; i ++) {
+    memoryPool_write_uint(0, &memoryPool[8 + 4 * i]);
+  }
 }
 
 void memoryPool_initialize(unsigned int totalSize, __global unsigned char* memoryPool) {
   unsigned int i, reservedBytes;
   memoryPool_initializeNoZeroingNoLog(totalSize, memoryPool);
   reservedBytes  = memoryPool_readNumberReservedBytesExcludingLog();
-  for (i = 0; i < MACRO_numberOfOutputs; i ++) {
-    memoryPool_write_uint(0, &memoryPool[8 + 4 * i]);
-  }
   for (i = reservedBytes; i < totalSize; i ++) {
     memoryPool[i] = (unsigned char) 0;
   }
+  //printf("%s\n", "\nDEBUG: Zeroed mempool");
+
   //Use this snippet if you want initialize the RAM
   //with some pattern other than zeroes (say, you doubt the memory is accessed properly).
   //for (i = 12; i + 4 < totalSize; i += 4){
@@ -135,11 +138,14 @@ void memoryPool_initialize(unsigned int totalSize, __global unsigned char* memor
 
   //Allocate buffer for error messages:
   checked_malloc(MACRO_MessageLogSize, memoryPool);
+  //printf("%s\n", "\nDEBUG: Malloced");
 }
 
-void memoryPool_writeString(__constant const char* message, __global unsigned char* memoryPool) {
+void memoryPool_writeString(__constant const char* message, int messageSize, __global unsigned char* memoryPool) {
   unsigned int i, length, reservedBytes;
   length = MACRO_MessageLogSize - 2;
+  if (length > (unsigned) messageSize)
+    length = messageSize;
   reservedBytes = memoryPool_readNumberReservedBytesExcludingLog();
   for (i = 0; i < length; i ++) {
     memoryPool[i + reservedBytes] = (unsigned char) message[i];
@@ -149,7 +155,20 @@ void memoryPool_writeString(__constant const char* message, __global unsigned ch
   }
 }
 
+int memoryPool_adjustArgumentIndex(int argumentIndex, __global unsigned char* memoryPool) {
+  if (argumentIndex >= 0) {
+    return argumentIndex;
+  }
+  for (int i = 0; i < MACRO_numberOfOutputs; i ++) {
+    if (memoryPool_read_uint_fromOutput(i, memoryPool) == 0) {
+      return i;
+    }
+  }
+  return 0;
+}
+
 void memoryPool_write_uint_asOutput(unsigned int numberToWrite, int argumentIndex, __global unsigned char* memoryPool) {
+  argumentIndex = memoryPool_adjustArgumentIndex(argumentIndex, memoryPool);
   memoryPool_write_uint(numberToWrite, &memoryPool[8 + 4 * argumentIndex]);
 }
 
@@ -241,18 +260,6 @@ void memoryPool_read_secp256k1_gej(secp256k1_gej* output, __global const unsigne
 
 void memoryPool_read_secp256k1_fe(secp256k1_fe* output, __global const unsigned char* memoryPoolPointer) {
   secp256k1_fe_copy__from__global(output, (__global secp256k1_fe*) memoryPoolPointer);
-}
-
-int memoryPool_adjustArgumentIndex(int argumentIndex, __global unsigned char* memoryPool) {
-  if (argumentIndex >= 0) {
-    return argumentIndex;
-  }
-  for (int i = 0; i < MACRO_numberOfOutputs; i ++) {
-    if (memoryPool_read_uint_fromOutput(i, memoryPool) == 0) {
-      return i;
-    }
-  }
-  return 0;
 }
 
 void memoryPool_write_fe_asOutput(
