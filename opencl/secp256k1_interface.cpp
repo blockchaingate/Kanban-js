@@ -121,7 +121,9 @@ bool CryptoEC256k1GPU::testSuite1BasicOperations(unsigned char* outputMemoryPool
     logGPU << "Failed to enqueue kernel. Return code: " << ret << ". " << Logger::endL;
     return false;
   }
-  theGPU.finish();
+  if (!theGPU.finish()) {
+    return false;
+  }
   cl_mem& result = kernelTest->getOutput(0)->theMemory;
   ret = clEnqueueReadBuffer(
     theGPU.commandQueue,
@@ -165,7 +167,9 @@ bool CryptoEC256k1GPU::computeMultiplicationContext(unsigned char* outputMemoryP
     logGPU << "Failed to enqueue kernel. Return code: " << ret << ". " << Logger::endL;
     return false;
   }
-  theGPU.finish();
+  if (!theGPU.finish()) {
+    return false;
+  }
   cl_mem& result = kernelMultiplicationContext->getOutput(0)->theMemory;
   ret = clEnqueueReadBuffer(
     theGPU.commandQueue,
@@ -216,7 +220,9 @@ bool CryptoEC256k1GPU::computeGeneratorContext(unsigned char* outputMemoryPool, 
     << ". Return code: " << ret << ". " << Logger::endL;
     return false;
   }
-  theGPU.finish();
+  if (!theGPU.finish()) {
+    return false;
+  }
   cl_mem& result = kernelGeneratorContext->getOutput(0)->theMemory;
   logGPU << "DEBUG: enqueued generator context. " << Logger::endL;
   ret = clEnqueueReadBuffer(
@@ -280,7 +286,9 @@ bool CryptoEC256k1GPU::signMessageDefaultBuffers(
     logGPU << "Failed to enqueue kernel. Return code: " << ret << ". " << Logger::endL;
     return false;
   }
-  theGPU.finish();
+  if (!theGPU.finish()) {
+    return false;
+  }
   cl_mem& resultSignatureSize = kernelSign->getOutput(1)->theMemory;
   unsigned char outputSizeBuffer[4];
 
@@ -354,7 +362,9 @@ bool CryptoEC256k1GPU::generatePublicKeyDefaultBuffers(
     logGPU << "Failed to enqueue kernel. Return code: " << ret << ". " << Logger::endL;
     return false;
   }
-  theGPU.finish();
+  if (!theGPU.finish()) {
+    return false;
+  }
   cl_mem& resultPublicKeySize = kernelGeneratePublicKey->getOutput(1)->theMemory;
   unsigned char outputSizeBuffer[4];
 
@@ -463,7 +473,9 @@ bool CryptoEC256k1GPU::verifySignatureDefaultBuffers(
     logGPU << "Failed to enqueue verify signature kernel. Return code: " << ret << ". " << Logger::endL;
     return false;
   }
-  theGPU.finish();
+  if (!theGPU.finish()) {
+    return false;
+  }
   cl_mem& resultSignature = kernelVerifySignature->getOutput(0)->theMemory;
   logGPU << "DEBUG: enqueued output size. " << Logger::endL;
   ret = clEnqueueReadBuffer(
