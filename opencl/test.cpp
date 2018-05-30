@@ -399,23 +399,23 @@ bool testGPU(GPU& inputGPU) {
     return false;
   if (!testMainPart2Signatures(inputGPU))
     return false;
-  //testerSHA256 theSHA256Tester;
-  //if (!theSHA256Tester.testSHA256(inputGPU)) {
-  //  return false;
-  //}
-  //testSignatures theSignatureTest;
-  //if (!theSignatureTest.testPublicKeys(inputGPU)) {
-  //  return false;
-  //}
-  //if (!theSignatureTest.testSign(inputGPU)) {
-  //  return false;
-  //}
-  //if (!theSignatureTest.testVerifySignatures(inputGPU, false)) {
-  //  return false;
-  //}
-  //if (!theSignatureTest.testVerifySignatures(inputGPU, true)) {
-  //  return false;
-  //}
+  testerSHA256 theSHA256Tester;
+  if (!theSHA256Tester.testSHA256(inputGPU)) {
+    return false;
+  }
+  testSignatures theSignatureTest;
+  if (!theSignatureTest.testPublicKeys(inputGPU)) {
+    return false;
+  }
+  if (!theSignatureTest.testSign(inputGPU)) {
+    return false;
+  }
+  if (!theSignatureTest.testVerifySignatures(inputGPU, false)) {
+    return false;
+  }
+  if (!theSignatureTest.testVerifySignatures(inputGPU, true)) {
+    return false;
+  }
   return true;
 }
 
@@ -426,12 +426,12 @@ int testMain() {
   if (!testCPP()) {
     return - 1;
   }
-  if (! testGPU(theGPU)) {
+  if (!testGPU(theGPU)) {
     return - 1;
   }
-//  if (! testGPU(theOpenCLCPU)) {
-//    return - 1;
-//  }
+  if (!testGPU(theOpenCLCPU)) {
+    return - 1;
+  }
   return 0;
 }
 
