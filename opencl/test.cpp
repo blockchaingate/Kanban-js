@@ -7,13 +7,15 @@
 #include <chrono>
 #include <assert.h>
 #include "secp256k1_interface.h"
+#include <thread>
 
 
 //Use CentralPU and GraphicsPU, CPU and GPU look too similar,
 //causing unwanted typos.
 
-Logger logTestCentralPU("../test/kanban_gpu/debug/logTestCentralPU.txt", "[test CPU] ");
-Logger logTestGraphicsPU("../test/kanban_gpu/debug/logTestGraphicsPU.txt", "[test GPU] ");
+Logger logTestCentralPU("../test/kanban_gpu/debug/logTestOpenCLCentralPU.txt", "[test CPU] ");
+Logger logTestGraphicsPU("../test/kanban_gpu/debug/logTestOpenCLGraphicsPU.txt", "[test GPU] ");
+Logger logTestCPPThreads("../test/kanban_gpu/debug/logTestCPPThreads.txt", "[test GPU] ");
 extern Logger logServer;
 
 class testSignatures {
@@ -58,6 +60,7 @@ public:
   }
   void initialize();
   bool testSHA256(GPU& theGPU);
+  bool testCPPthreads();
   unsigned totalToCompute;
 };
 
@@ -381,6 +384,14 @@ bool testBasicOperations(GPU& theGPU){
   return true;
 }
 
+bool testCPP(){
+  testerSHA256 theSHA256Tester;
+  if (!theSHA256Tester.testCPPthreads()) {
+    return false;
+  }
+
+}
+
 bool testGPU(GPU& inputGPU) {
   //if (!testBasicOperations(theGPU))
   //  return - 1;
@@ -392,19 +403,19 @@ bool testGPU(GPU& inputGPU) {
   if (!theSHA256Tester.testSHA256(inputGPU)) {
     return false;
   }
-  testSignatures theSignatureTest;
-  if (!theSignatureTest.testPublicKeys(inputGPU)) {
-    return false;
-  }
-  if (!theSignatureTest.testSign(inputGPU)) {
-    return false;
-  }
-  if (!theSignatureTest.testVerifySignatures(inputGPU, false)) {
-    return false;
-  }
-  if (!theSignatureTest.testVerifySignatures(inputGPU, true)) {
-    return false;
-  }
+  //testSignatures theSignatureTest;
+  //if (!theSignatureTest.testPublicKeys(inputGPU)) {
+  //  return false;
+  //}
+  //if (!theSignatureTest.testSign(inputGPU)) {
+  //  return false;
+  //}
+  //if (!theSignatureTest.testVerifySignatures(inputGPU, false)) {
+  //  return false;
+  //}
+  //if (!theSignatureTest.testVerifySignatures(inputGPU, true)) {
+  //  return false;
+  //}
   return true;
 }
 
@@ -570,6 +581,114 @@ bool testerSHA256::testSHA256(GPU& theGPU) {
   theTestLogger << "Success!" << Logger::endL;
   std::cout << "\e[32mSuccess!\e[39m" << std::endl;
   return true;
+}
+
+class ThreadPool {
+  public:
+
+  std::vector<std::shared_ptr<std::thread> > theThreads;
+  int maximumNumberOfThreads;
+  ThreadPool();
+};
+
+ThreadPool::ThreadPool() {
+  this->maximumNumberOfThreads = 1024;
+}
+
+bool testerSHA256::testCPPthreads() {
+  // Create the two input vectors
+  logTestCPPThreads << "Running SHA256 benchmark. " << Logger::endL;
+  this->initialize();
+
+  auto timeStart = std::chrono::system_clock::now();
+  uint32_t largeTestCounter = 0;
+  uint32_t grandTotal = 0;
+
+  /*threadPool thePool;
+  //this->inputBuffer
+  //this->messageStartsUChar
+  //this->messageLengthsUChar
+  //largeTestCounter
+  int numPasses = 10;
+  cl_mem& result = theKernel->getOutput(0)->theMemory;
+  for (int i = 0; i < numPasses; i++) {
+    for (largeTestCounter = 0; largeTestCounter < this->totalToCompute; largeTestCounter ++) {
+      grandTotal ++;
+       std::thread(sha256GPU)
+
+      if (!theKernel->writeArgument(3, )) {
+        theTestLogger << "Bad write" << Logger::endL;
+        assert(false);
+      }
+      //theKernel->writeToBuffer(0, &theLength, sizeof(uint));
+      //std::cout << "DEBUG: Setting arguments ... " << std::endl;
+      //std::cout << "DEBUG: arguments set, enqueueing kernel... " << std::endl;
+      cl_int ret = clEnqueueNDRangeKernel(
+        theGPU.commandQueue,
+        theKernel->kernel,
+        3,
+        NULL,
+        theKernel->global_item_size,
+        theKernel->local_item_size,
+        0,
+        NULL,
+        NULL
+      );
+      if (ret != CL_SUCCESS) {
+        theTestLogger << "Failed to enqueue kernel. Return code: " << ret << ". " << Logger::endL;
+        return false;
+      }
+      //std::cout << "DEBUG: kernel enqueued, proceeding to read buffer. " << std::endl;
+      if (largeTestCounter % 500 == 0) {
+        auto timeCurrent = std::chrono::system_clock::now();
+        std::chrono::duration<double> elapsed_seconds = timeCurrent - timeStart;
+        std::cout << "Scheduled grand total: " << grandTotal << " sha256s in " << elapsed_seconds.count() << " second(s). " << std::endl;
+      }
+    }
+    //theTestLogger << "Total to extract: " << 32 * theSHA256Test.totalToCompute << Logger::endL;
+    if (!theGPU.finish()) {
+      return false;
+    }
+    cl_int ret = clEnqueueReadBuffer (
+      theGPU.commandQueue,
+      result,
+      CL_TRUE,
+      0,
+      32 * this->totalToCompute,
+      &this->outputBuffer[0],
+      0,
+      NULL,
+      NULL
+    );
+    if (ret != CL_SUCCESS) {
+      theTestLogger << "Failed to enqueue read buffer. Return code: " << ret << ". " << Logger::endL;
+      return false;
+    }
+  }
+  auto timeCurrent = std::chrono::system_clock::now();
+  std::chrono::duration<double> elapsed_seconds = timeCurrent - timeStart;
+  theTestLogger << "Computed " << grandTotal
+  << " sha256s in " << elapsed_seconds.count() << " second(s). " << Logger::endL;
+  theTestLogger << "Speed: " << (grandTotal / elapsed_seconds.count()) << " hashes per second. " << Logger::endL;
+  theTestLogger << "Checking computations ..." << Logger::endL;
+  for (largeTestCounter = 0; largeTestCounter < this->totalToCompute; largeTestCounter ++) {
+    unsigned testCounteR = largeTestCounter % this->knownSHA256s.size();
+    std::stringstream out;
+    unsigned offset = largeTestCounter * 32;
+    for (unsigned i = offset; i < offset + 32; i ++) {
+      out << std::hex << std::setw(2) << std::setfill('0') << ((int) ((unsigned) this->outputBuffer[i]));
+    }
+    if (out.str() != this->knownSHA256s[testCounteR][1]) {
+      theTestLogger << "\e[31mSha of message index " << largeTestCounter
+      << ": " << this->knownSHA256s[testCounteR][0] << " is wrongly computed to be: " << out.str()
+      << " instead of: " << this->knownSHA256s[testCounteR][1] << "\e[39m" << Logger::endL;
+      assert(false);
+      return false;
+    }
+  }
+  theTestLogger << "Success!" << Logger::endL;
+  std::cout << "\e[32mSuccess!\e[39m" << std::endl;
+  return true;*/
 }
 
 unsigned char getByte(unsigned char byte1, unsigned char byte2, unsigned char byte3) {
