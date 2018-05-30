@@ -15,7 +15,7 @@ SOURCES += \
     json.cpp \
     encodings.cpp
 
-LIBS+=-lOpenCL -lstdc++fs
+LIBS+=-lOpenCL -lstdc++fs -lpthread
 
 HEADERS += \
     gpu.h \

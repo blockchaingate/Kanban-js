@@ -197,6 +197,11 @@ unsigned int memoryPool_readMaxPoolSize(__global const unsigned char* memoryPool
 }
 
 unsigned int memoryPool_read_uint(__global const unsigned char* memoryPoolPointer) {
+    std::cout << "DEBUG: memoryPoolPointer[0]: " << (unsigned int) memoryPoolPointer[0]  << std::endl;
+    std::cout << "DEBUG: (memoryPoolPointer[0] << 24): " << ((unsigned int) (memoryPoolPointer[0] << 24)) << std::endl;
+    std::cout << "DEBUG: (memoryPoolPointer[1] << 16): " << ((unsigned int) (memoryPoolPointer[1] << 16)) << std::endl;
+    std::cout << "DEBUG: (memoryPoolPointer[2] << 8): "  << ((unsigned int) (memoryPoolPointer[2] << 8)) << std::endl;
+
   return
   ((unsigned int) (memoryPoolPointer[0] << 24)) +
   ((unsigned int) (memoryPoolPointer[1] << 16)) +

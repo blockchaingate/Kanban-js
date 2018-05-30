@@ -50,9 +50,10 @@ unsigned int memoryPool_read_uinT(__global const unsigned char* memoryPoolPointe
   ((unsigned int) (memoryPoolPointer[0] << 24)) +
   ((unsigned int) (memoryPoolPointer[1] << 16)) +
   ((unsigned int) (memoryPoolPointer[2] <<  8)) +
-  ((unsigned int) memoryPoolPointer[3]       ) ;
+  ((unsigned int)  memoryPoolPointer[3]       ) ;
 }
 
+#pragma GCC optimize ("unroll-loops")
 unsigned int memoryPool__local_read_uint(const unsigned char* memoryPoolPointer) {
   return
   ((unsigned int) (memoryPoolPointer[0] << 24)) +
@@ -61,28 +62,47 @@ unsigned int memoryPool__local_read_uint(const unsigned char* memoryPoolPointer)
   ((unsigned int)  memoryPoolPointer[3]       ) ;
 }
 
+#ifndef SECP256k1_H_header
+typedef unsigned char unsigned_character;
+struct unsigned_character_4 {
+  unsigned_character content[4];
+};
+#endif
+
 __kernel void sha256GPU(
   __global unsigned char* result, 
   __global const unsigned char* offsets, 
   __global const unsigned char* messageLengths, 
-  unsigned int messageIndexChar, 
+  struct unsigned_character_4 messageIndexChar,
   __global const char* plain_key
 ) {
-  int t, gid, msg_pad, currentIndex, lomc;
+  int t, currentIndex, lomc;
   int stop, mmod;
   uint32_t i, item, total;
-  uint32_t W[80], temp, A, B, C, D, E, F, G, H, T1, T2;
+  uint32_t W[80], A, B, C, D, E, F, G, H, T1, T2;
   uint32_t digest[8];
-  unsigned int messageIndex = memoryPool__local_read_uint((unsigned char*) &messageIndexChar);
+  unsigned int messageIndex = memoryPool__local_read_uint(messageIndexChar.content);
+
+  //if (messageIndex > 120000) {
+  //  std::cout
+  //  << "Message index too big " << messageIndex << ", message index char: "
+  //  << messageIndexChar
+  //  << std::endl;
+  //  assert(false);
+  //}
+  //std::cout
+  //<< "DEBUG: Got to here, message index: " << messageIndex << ", message index char: "
+  //<< messageIndexChar << std::endl;
+
 
   //uint32_t num_keys = data_info[1];
   //printf("theLength: %u num_keys:%u\n", theLength, total);
   int current_pad;
-  msg_pad = 0;
 
   uint32_t offset;
   uint32_t theLength;
   offset = memoryPool_read_uinT(& (offsets[4 * messageIndex]));
+  //std::cout << "DEBUG: Got to here, offset: " << offset << std::endl;
   theLength = memoryPool_read_uinT(&(messageLengths[4 * messageIndex]));
 
   total = theLength % 64 >= 56 ? 2 : 1 + theLength / 64;
@@ -121,33 +141,33 @@ __kernel void sha256GPU(
       stop = i / 4;
     //    printf("i:%d, stop: %d msg_pad:%d\n",i,stop, msg_pad);
       for (t = 0 ; t < stop ; t++) {
-        W[t] = ((uchar)  plain_key[currentIndex]) << 24;
+        W[t] = ((unsigned char)  plain_key[currentIndex]) << 24;
         currentIndex ++;
-        W[t] |= ((uchar) plain_key[currentIndex]) << 16;
+        W[t] |= ((unsigned char) plain_key[currentIndex]) << 16;
         currentIndex ++;
-        W[t] |= ((uchar) plain_key[currentIndex]) << 8;
+        W[t] |= ((unsigned char) plain_key[currentIndex]) << 8;
         currentIndex ++;
-        W[t] |= (uchar)  plain_key[currentIndex];
+        W[t] |= (unsigned char)  plain_key[currentIndex];
         currentIndex ++;
         //printf("W[%u]: %u\n",t,W[t]);
       }
       mmod = i % 4;
       if (mmod == 3) {
-        W[t] = ((uchar)  plain_key[currentIndex]) << 24;
+        W[t] = ((unsigned char)  plain_key[currentIndex]) << 24;
 	      currentIndex++;
-        W[t] |= ((uchar) plain_key[currentIndex]) << 16;
+        W[t] |= ((unsigned char) plain_key[currentIndex]) << 16;
 	      currentIndex++;
-        W[t] |= ((uchar) plain_key[currentIndex]) << 8;
+        W[t] |= ((unsigned char) plain_key[currentIndex]) << 8;
 	      currentIndex++;
-        W[t] |=  ((uchar) 0x80) ;
+        W[t] |=  ((unsigned char) 0x80) ;
       } else if (mmod == 2) {
-        W[t] = ((uchar)  plain_key[currentIndex]) << 24;
+        W[t] = ((unsigned char)  plain_key[currentIndex]) << 24;
 	      currentIndex++;
-        W[t] |= ((uchar) plain_key[currentIndex]) << 16;
+        W[t] |= ((unsigned char) plain_key[currentIndex]) << 16;
 	      currentIndex++;
         W[t] |=  0x8000 ;
       } else if (mmod == 1) {
-        W[t] = ((uchar)  plain_key[currentIndex]) << 24;
+        W[t] = ((unsigned char)  plain_key[currentIndex]) << 24;
 	      currentIndex++;
         W[t] |=  0x800000 ;
       } else /*if (mmod == 0)*/ {

@@ -865,6 +865,11 @@ bool GPUKernel::writeToBuffer(unsigned argumentNumber, const std::vector<unsigne
   return this->writeToBuffer(argumentNumber, &(input[0]), input.size());
 }
 
+bool GPUKernel::writeToBuffer(unsigned argumentNumber, const std::vector<char>& input) {
+  std::cout << std::hex << "About to write to buffer: address: " << (long) (& (input[0])) << std::endl;
+  return this->writeToBuffer(argumentNumber, &(input[0]), input.size());
+}
+
 bool GPUKernel::writeToBuffer(unsigned argumentNumber, const std::string& input) {
   logGPU << "WRITING STRING " << Logger::endL;
   return this->writeToBuffer(argumentNumber, input.c_str(), input.size());
@@ -893,6 +898,23 @@ bool GPUKernel::writeToBuffer(unsigned argumentNumber, const void* inputBuffer, 
     return false;
   }
   return true;
+}
+
+unsigned_character_4 GPU::getUINTbytes(uint32_t input) {
+  unsigned_character_4 result;
+  memoryPool_write_uint(input, result.content);
+  logGPU << "Converting " << input << " to uintbytes. " << Logger::endL;
+  logGPU << "Output chars: "
+  << ((uint32_t) (result.content[0] << 24))
+  << ", "
+  << ((uint32_t) (result.content[1] << 16))
+  << ", "
+  << ((uint32_t) (result.content[2] << 8))
+  << ", "
+  << ((uint32_t) (result.content[3] ))
+  << Logger::endL;
+
+  return result;
 }
 
 bool GPUKernel::writeArgument(unsigned argumentNumber, uint inputArgument) {

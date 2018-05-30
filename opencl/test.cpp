@@ -48,7 +48,7 @@ public:
 class testerSHA256 {
 public:
   std::vector<std::vector<std::string> > knownSHA256s;
-  std::string inputBuffer;
+  std::vector<char> inputBuffer;
   std::vector<unsigned char> outputBuffer;
   std::vector<uint> messageStarts;
   std::vector<uint> messageLengths;
@@ -389,7 +389,7 @@ bool testCPP(){
   if (!theSHA256Tester.testCPPthreads()) {
     return false;
   }
-
+  return true;
 }
 
 bool testGPU(GPU& inputGPU) {
@@ -423,6 +423,9 @@ int testMain() {
   GPU theGPU;
   GPU theOpenCLCPU;
   theOpenCLCPU.theDesiredDeviceType = CL_DEVICE_TYPE_CPU;
+  if (!testCPP()) {
+    return - 1;
+  }
   if (! testGPU(theGPU)) {
     return - 1;
   }
@@ -463,8 +466,9 @@ void testerSHA256::initialize() {
 
     memoryPool_write_uint((uint32_t) this->inputBuffer.size(), &(this->messageStartsUChar[i * 4]));
     memoryPool_write_uint((uint32_t) currentMessage.size(), &(this->messageLengthsUChar[i * 4]));
-
-    this->inputBuffer.append(currentMessage);
+    for (unsigned k = 0; k < currentMessage.size(); k ++) {
+      this->inputBuffer.push_back(currentMessage[k]);
+    }
     for (unsigned j = 0; j < 32; j ++) {
       this->outputBuffer[i * 32 + j] = 0;
     }
@@ -587,90 +591,90 @@ class ThreadPool {
   public:
 
   std::vector<std::shared_ptr<std::thread> > theThreads;
-  int maximumNumberOfThreads;
+  unsigned int maximumNumberOfThreads;
   ThreadPool();
+  bool joinAll();
 };
 
 ThreadPool::ThreadPool() {
   this->maximumNumberOfThreads = 1024;
 }
 
+bool ThreadPool::joinAll() {
+  logServer << "Joining " << this->theThreads.size() << " threads ... " << Logger::endL;
+  auto timeStart= std::chrono::system_clock::now();
+  for (unsigned i = 0; i < this->theThreads.size(); i ++ ){
+    this->theThreads[i]->join();
+    this->theThreads[i].reset();
+  }
+  this->theThreads.clear();
+  auto timeCurrent = std::chrono::system_clock::now();
+  std::chrono::duration<double> elapsed_seconds = timeCurrent - timeStart;
+  logServer << "Done in " << elapsed_seconds.count() << " second(s). ";
+  return true;
+}
+
+void fireOneThread(testerSHA256* theTester, unsigned int messageIndex) {
+  logTestCPPThreads << "DEBUG: firing up thread with messageIndex: " << messageIndex << " and tester: "
+  << (long) theTester << ". " << Logger::endL;
+
+  //sha256GPU(
+  //  &theTester->outputBuffer[0],
+  //  &theTester->messageStartsUChar[0],
+  //  &theTester->messageLengthsUChar[0],
+  //  GPU::getUINTbytes(messageIndex),
+  //  &theTester->inputBuffer[0]
+  //);
+}
+
+
 bool testerSHA256::testCPPthreads() {
+  /*
   // Create the two input vectors
   logTestCPPThreads << "Running SHA256 benchmark. " << Logger::endL;
+  logTestCPPThreads << "DEBUG: this pointer: " << (long) this << Logger::endL;
   this->initialize();
+  logTestCPPThreads << "Converted uint: " << GPU::getUINTbytes(10) << Logger::endL;
+  logTestCPPThreads << "Converted uint: " << GPU::getUINTbytes(100001) << Logger::endL;
+  uint32_t temp = GPU::getUINTbytes(1);
+  logTestCPPThreads << "Converted uint: " << memoryPool_read_uint((unsigned char*) (&temp)) << Logger::endL;
 
   auto timeStart = std::chrono::system_clock::now();
   uint32_t largeTestCounter = 0;
   uint32_t grandTotal = 0;
-
-  /*threadPool thePool;
+  ThreadPool thePool;
   //this->inputBuffer
   //this->messageStartsUChar
   //this->messageLengthsUChar
   //largeTestCounter
   int numPasses = 10;
-  cl_mem& result = theKernel->getOutput(0)->theMemory;
   for (int i = 0; i < numPasses; i++) {
     for (largeTestCounter = 0; largeTestCounter < this->totalToCompute; largeTestCounter ++) {
+      logTestCPPThreads << "DEBUG: Got to counter: " << largeTestCounter << ". " << Logger::endL;
+      thePool.theThreads.push_back(std::make_shared<std::thread>(fireOneThread, this, largeTestCounter));
+      if (thePool.theThreads.size() >= thePool.maximumNumberOfThreads) {
+        logTestCPPThreads << "DEBUG: About to join all: pool size: " << thePool.theThreads.size() << ". " << Logger::endL;
+        if (!thePool.joinAll()) {
+          return false;
+        }
+      }
       grandTotal ++;
-       std::thread(sha256GPU)
-
-      if (!theKernel->writeArgument(3, )) {
-        theTestLogger << "Bad write" << Logger::endL;
-        assert(false);
-      }
-      //theKernel->writeToBuffer(0, &theLength, sizeof(uint));
-      //std::cout << "DEBUG: Setting arguments ... " << std::endl;
-      //std::cout << "DEBUG: arguments set, enqueueing kernel... " << std::endl;
-      cl_int ret = clEnqueueNDRangeKernel(
-        theGPU.commandQueue,
-        theKernel->kernel,
-        3,
-        NULL,
-        theKernel->global_item_size,
-        theKernel->local_item_size,
-        0,
-        NULL,
-        NULL
-      );
-      if (ret != CL_SUCCESS) {
-        theTestLogger << "Failed to enqueue kernel. Return code: " << ret << ". " << Logger::endL;
-        return false;
-      }
-      //std::cout << "DEBUG: kernel enqueued, proceeding to read buffer. " << std::endl;
       if (largeTestCounter % 500 == 0) {
         auto timeCurrent = std::chrono::system_clock::now();
         std::chrono::duration<double> elapsed_seconds = timeCurrent - timeStart;
-        std::cout << "Scheduled grand total: " << grandTotal << " sha256s in " << elapsed_seconds.count() << " second(s). " << std::endl;
+        std::cout << "So far, scheduled grand total: " << grandTotal << " sha256s in " << elapsed_seconds.count() << " second(s). " << std::endl;
       }
     }
-    //theTestLogger << "Total to extract: " << 32 * theSHA256Test.totalToCompute << Logger::endL;
-    if (!theGPU.finish()) {
-      return false;
-    }
-    cl_int ret = clEnqueueReadBuffer (
-      theGPU.commandQueue,
-      result,
-      CL_TRUE,
-      0,
-      32 * this->totalToCompute,
-      &this->outputBuffer[0],
-      0,
-      NULL,
-      NULL
-    );
-    if (ret != CL_SUCCESS) {
-      theTestLogger << "Failed to enqueue read buffer. Return code: " << ret << ". " << Logger::endL;
+    if (!thePool.joinAll()) {
       return false;
     }
   }
   auto timeCurrent = std::chrono::system_clock::now();
   std::chrono::duration<double> elapsed_seconds = timeCurrent - timeStart;
-  theTestLogger << "Computed " << grandTotal
+  logTestCPPThreads << "Computed " << grandTotal
   << " sha256s in " << elapsed_seconds.count() << " second(s). " << Logger::endL;
-  theTestLogger << "Speed: " << (grandTotal / elapsed_seconds.count()) << " hashes per second. " << Logger::endL;
-  theTestLogger << "Checking computations ..." << Logger::endL;
+  logTestCPPThreads << "Speed: " << (grandTotal / elapsed_seconds.count()) << " hashes per second. " << Logger::endL;
+  logTestCPPThreads << "Checking computations ..." << Logger::endL;
   for (largeTestCounter = 0; largeTestCounter < this->totalToCompute; largeTestCounter ++) {
     unsigned testCounteR = largeTestCounter % this->knownSHA256s.size();
     std::stringstream out;
@@ -679,16 +683,16 @@ bool testerSHA256::testCPPthreads() {
       out << std::hex << std::setw(2) << std::setfill('0') << ((int) ((unsigned) this->outputBuffer[i]));
     }
     if (out.str() != this->knownSHA256s[testCounteR][1]) {
-      theTestLogger << "\e[31mSha of message index " << largeTestCounter
+      logTestCPPThreads << "\e[31mSha of message index " << largeTestCounter
       << ": " << this->knownSHA256s[testCounteR][0] << " is wrongly computed to be: " << out.str()
       << " instead of: " << this->knownSHA256s[testCounteR][1] << "\e[39m" << Logger::endL;
       assert(false);
       return false;
     }
   }
-  theTestLogger << "Success!" << Logger::endL;
-  std::cout << "\e[32mSuccess!\e[39m" << std::endl;
-  return true;*/
+  logTestCPPThreads << "Success!" << Logger::endL;
+  std::cout << "\e[32mSuccess!\e[39m" << std::endl;*/
+  return true;
 }
 
 unsigned char getByte(unsigned char byte1, unsigned char byte2, unsigned char byte3) {

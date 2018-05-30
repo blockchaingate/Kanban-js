@@ -176,6 +176,7 @@ public:
   bool flagInitializedKernelsNoBuild;
   bool flagInitializedKernelsFull;
   std::shared_ptr<GPUKernel> getKernel(const std::string& kernelName);
+  static unsigned_character_4 getUINTbytes(uint32_t input);
   bool initializeAllNoBuild();
   bool initializeAllFull();
   bool initializePlatform();

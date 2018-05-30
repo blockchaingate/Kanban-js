@@ -64,5 +64,13 @@ __kernel void test_suite_1_basic_operations(
   __global unsigned char* memoryPool
 );
 
+__kernel void sha256GPU(
+  __global unsigned char* result,
+  __global const unsigned char* offsets,
+  __global const unsigned char* messageLengths,
+  unsigned int messageIndexChar,
+  __global const char* plain_key
+);
+
 #endif //SECP256K1_CPP_H_header
 
