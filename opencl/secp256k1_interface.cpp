@@ -275,7 +275,7 @@ bool CryptoEC256k1GPU::signMessageDefaultBuffers(
   kernelSign->writeToBuffer(2, outputInputNonce, 32);
   kernelSign->writeToBuffer(3, inputSecretKey, 32);
   kernelSign->writeToBuffer(4, inputMessage, 32);
-  kernelSign->writeArgument(6, inputMessageIndex);
+  kernelSign->writeMessageIndex(inputMessageIndex);
   logGPU << "DEBUG: Got to signature start." << Logger::endL;
   cl_int ret = clEnqueueNDRangeKernel(
     theGPU.commandQueue,
@@ -462,7 +462,7 @@ bool CryptoEC256k1GPU::verifySignatureDefaultBuffers(
   kernelVerifySignature->writeToBuffer(4, publicKey, publicKeySize);
   kernelVerifySignature->writeToBuffer(5, publicKeySizes, 4);
   kernelVerifySignature->writeToBuffer(6, message, 32);
-  kernelVerifySignature->writeArgument(8, 0);
+  kernelVerifySignature->writeMessageIndex(0);
   logGPU << "DEBUG: Got to generate public key start." << Logger::endL;
   cl_int ret = clEnqueueNDRangeKernel(
     theGPU.commandQueue,

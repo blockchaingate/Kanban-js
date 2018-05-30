@@ -256,8 +256,8 @@ bool GPU::initializeKernelsNoBuild() {
     this->kernelSHA256,
     {"result"},
     {SharedMemory::typeVoidPointer},
-    {"offsets", "lengths", "messageIndex", "message"},
-    {SharedMemory::typeVoidPointer, SharedMemory::typeVoidPointer, SharedMemory::typeUint, SharedMemory::typeVoidPointer},
+    {"offsets", "lengths", "message", "messageIndex"},
+    {SharedMemory::typeVoidPointer, SharedMemory::typeVoidPointer, SharedMemory::typeVoidPointer, SharedMemory::typeMessageIndex},
     {},
     {}
   )) {
@@ -326,7 +326,7 @@ bool GPU::initializeKernelsNoBuild() {
       SharedMemory::typeVoidPointer,
       SharedMemory::typeVoidPointer,
       SharedMemory::typeVoidPointerExternalOwnership,
-      SharedMemory::typeUint
+      SharedMemory::typeMessageIndex
     },
     {
       "outputMultiplicationContext"
@@ -355,7 +355,7 @@ bool GPU::initializeKernelsNoBuild() {
     {
       SharedMemory::typeVoidPointer,
       SharedMemory::typeVoidPointerExternalOwnership,
-      SharedMemory::typeUint
+      SharedMemory::typeMessageIndex
     },
     {
       "outputGeneratorContext"
@@ -388,7 +388,7 @@ bool GPU::initializeKernelsNoBuild() {
       SharedMemory::typeVoidPointer,
       SharedMemory::typeVoidPointer,
       SharedMemory::typeVoidPointerExternalOwnership,
-      SharedMemory::typeUint,
+      SharedMemory::typeMessageIndex,
     },
     {
       "outputGeneratorContext"
@@ -404,7 +404,7 @@ bool GPU::initializeKernelsNoBuild() {
     {"buffer"},
     {SharedMemory::typeVoidPointer},
     {"offsets", "messageIndex"},
-    {SharedMemory::typeVoidPointer, SharedMemory::typeUint},
+    {SharedMemory::typeVoidPointer, SharedMemory::typeMessageIndex},
     {},
     {}
   )) {
@@ -838,12 +838,10 @@ bool GPUKernel::SetArguments(std::vector<std::shared_ptr<SharedMemory> >& theArg
       ret = clSetKernelArg(
         this->kernel, i + offset, sizeof(cl_mem), (void *)& current->theMemory
       );
-    if (current->typE == SharedMemory::typeUint)
-      ret = clSetKernelArg(this->kernel, i + offset, sizeof(uint), &current->uintValue);
-
-    if (ret != CL_SUCCESS) {
-      logGPU << "Failed to set argument " << current->name << ". Return code: " << ret << "." << Logger::endL;
-      return false;
+    if (current->typE == SharedMemory::typeMessageIndex) {
+      if (! this->writeMessageIndex(current->uintValue)) {
+        return false;
+      }
     }
   }
   return true;
@@ -900,35 +898,35 @@ bool GPUKernel::writeToBuffer(unsigned argumentNumber, const void* inputBuffer, 
   return true;
 }
 
-unsigned_character_4 GPU::getUINTbytes(uint32_t input) {
-  unsigned_character_4 result;
-  memoryPool_write_uint(input, result.content);
-  logGPU << "Converting " << input << " to uintbytes. " << Logger::endL;
-  logGPU << "Output chars: "
-  << ((uint32_t) (result.content[0] << 24))
-  << ", "
-  << ((uint32_t) (result.content[1] << 16))
-  << ", "
-  << ((uint32_t) (result.content[2] << 8))
-  << ", "
-  << ((uint32_t) (result.content[3] ))
-  << Logger::endL;
-
-  return result;
-}
-
-bool GPUKernel::writeArgument(unsigned argumentNumber, uint inputArgument) {
+bool GPUKernel::writeMessageIndex(uint inputArgument) {
   //std::cout << "DEBUG: writing " << input;
   //std::cout << "Setting: argument number: " << argumentNumber << ", input: " << input << std::endl;
-  std::shared_ptr<SharedMemory>& currentArgument =
-    argumentNumber < this->outputs.size() ?
-    this->outputs[argumentNumber] :
-    this->inputs[argumentNumber - this->outputs.size()];
+  //The message index is always the last argument!
+  int argumentNumber = this->outputs.size() + this->inputs.size() - 1;
+  std::shared_ptr<SharedMemory>& currentArgument = this->inputs[this->inputs.size() - 1];
+  unsigned char byte3, byte2, byte1, byte0;
+  //little/big endian agnostic:
+  //Please note this code arose after multiple issues between openCL devices.
+  //If you decide to fix to a more elegant solution,
+  //please make sure to **test** on amd, intel CPUs
+  //nvidia, intel, amd GPUS with openCL 1.1, 1.2 and 2.0.
+  byte3 = (inputArgument / 16777216) % 256;
+  byte2 = (inputArgument / 65536   ) % 256;
+  byte1 = (inputArgument / 256     ) % 256;
+  byte0 = (inputArgument           ) % 256;
+
   currentArgument->uintValue = inputArgument;
-  unsigned char convertedUINT[4];
-  memoryPool_write_uint(inputArgument, convertedUINT);
-  cl_int ret = clSetKernelArg(this->kernel, argumentNumber, 4, &convertedUINT);
-  if (ret != CL_SUCCESS) {
+
+  cl_int ret3 = clSetKernelArg(this->kernel, argumentNumber    , 1, &byte3);
+  cl_int ret2 = clSetKernelArg(this->kernel, argumentNumber + 1, 1, &byte2);
+  cl_int ret1 = clSetKernelArg(this->kernel, argumentNumber + 2, 1, &byte1);
+  cl_int ret0 = clSetKernelArg(this->kernel, argumentNumber + 3, 1, &byte0);
+  if (
+    ret3 != CL_SUCCESS ||
+    ret2 != CL_SUCCESS ||
+    ret1 != CL_SUCCESS ||
+    ret0 != CL_SUCCESS
+  ) {
     logGPU << "Set kernel arg failed. " << Logger::endL;
     return false;
   }

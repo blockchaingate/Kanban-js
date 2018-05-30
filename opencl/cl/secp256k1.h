@@ -17,11 +17,6 @@ Please see the file opencl/README.md for technical notes on this code.
 #ifndef SECP256k1_H_header
 #define SECP256k1_H_header
 
-typedef unsigned char unsigned_character;
-struct unsigned_character_4 {
-  unsigned_character content[4];
-};
-
 //******From util.h******
 
 #ifndef MACRO_USE_openCL

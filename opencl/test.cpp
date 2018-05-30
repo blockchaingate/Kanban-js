@@ -426,10 +426,10 @@ int testMain() {
   if (!testCPP()) {
     return - 1;
   }
-  if (! testGPU(theGPU)) {
+  if (! testGPU(theOpenCLCPU)) {
     return - 1;
   }
-  if (! testGPU(theOpenCLCPU)) {
+  if (! testGPU(theGPU)) {
     return - 1;
   }
   return 0;
@@ -440,7 +440,7 @@ void testerSHA256::initialize() {
     return;
   }
   this->flagInitialized = true;
-  this->totalToCompute = 100000;
+  this->totalToCompute = 2;
   this->outputBuffer.resize(12000000);
   this->knownSHA256s.push_back((std::vector<std::string>) {
     "abc",
@@ -495,10 +495,6 @@ bool testerSHA256::testSHA256(GPU& theGPU) {
   auto timeStart = std::chrono::system_clock::now();
   uint32_t largeTestCounter = 0;
   uint32_t grandTotal = 0;
-  if (!theKernel->writeToBuffer(4, this->inputBuffer)) {
-    theTestLogger << "Bad write" << Logger::endL;
-    assert(false);
-  }
   if (!theKernel->writeToBuffer(1, this->messageStartsUChar)){
     theTestLogger << "Bad write" << Logger::endL;
     assert(false);
@@ -507,12 +503,16 @@ bool testerSHA256::testSHA256(GPU& theGPU) {
     theTestLogger << "Bad write" << Logger::endL;
     assert(false);
   }
-  int numPasses = 10;
+  if (!theKernel->writeToBuffer(3, this->inputBuffer)) {
+    theTestLogger << "Bad write" << Logger::endL;
+    assert(false);
+  }
+  int numPasses = 2;
   cl_mem& result = theKernel->getOutput(0)->theMemory;
   for (int i = 0; i < numPasses; i++) {
     for (largeTestCounter = 0; largeTestCounter < this->totalToCompute; largeTestCounter ++) {
       grandTotal ++;
-      if (!theKernel->writeArgument(3, largeTestCounter)) {
+      if (!theKernel->writeMessageIndex(largeTestCounter)) {
         theTestLogger << "Bad write" << Logger::endL;
         assert(false);
       }
@@ -771,7 +771,7 @@ bool testSignatures::testSign(GPU& theGPU) {
   kernelSign->writeToBuffer(3, this->secretKeys);
   kernelSign->writeToBuffer(4, this->messages);
   for (counterTest = 0; counterTest < this->numMessagesPerPipeline; counterTest ++) {
-    kernelSign->writeArgument(6, counterTest);
+    kernelSign->writeMessageIndex(counterTest);
     //theKernel->writeToBuffer(0, &theLength, sizeof(uint));
     //std::cout << "DEBUG: Setting arguments ... " << std::endl;
     //std::cout << "DEBUG: arguments set, enqueueing kernel... " << std::endl;
@@ -869,7 +869,7 @@ bool testSignatures::testPublicKeys(GPU& theGPU) {
 
   kernelPublicKeys->writeToBuffer(2, this->secretKeys);
   for (counterTest = 0; counterTest < this->numMessagesPerPipeline; counterTest ++) {
-    kernelPublicKeys->writeArgument(4, counterTest);
+    kernelPublicKeys->writeMessageIndex(counterTest);
     //theKernel->writeToBuffer(0, &theLength, sizeof(uint));
     //std::cout << "DEBUG: Setting arguments ... " << std::endl;
     //std::cout << "DEBUG: arguments set, enqueueing kernel... " << std::endl;
@@ -1036,7 +1036,7 @@ bool testSignatures::testVerifySignatures(GPU& theGPU, bool tamperWithSignature)
   kernelVerify->writeToBuffer(6, this->messages);
   int numPipelined = 0;
   for (counterTest = 0; counterTest < this->numMessagesPerPipeline; counterTest ++) {
-    kernelVerify->writeArgument(8, counterTest);
+    kernelVerify->writeMessageIndex(counterTest);
     //theKernel->writeToBuffer(0, &theLength, sizeof(uint));
     //std::cout << "DEBUG: Setting arguments ... " << std::endl;
     //std::cout << "DEBUG: arguments set, enqueueing kernel... " << std::endl;

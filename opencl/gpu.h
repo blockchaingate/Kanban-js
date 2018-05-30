@@ -32,7 +32,7 @@ public:
   enum {
     typeVoidPointer,
     typeVoidPointerExternalOwnership,
-    typeUint
+    typeMessageIndex
   };
   std::string name;
   cl_mem theMemory;
@@ -109,7 +109,7 @@ public:
   bool writeToBuffer(unsigned argumentNumber, const std::vector<unsigned int>& input);
   bool writeToBuffer(unsigned argumentNumber, const std::string& input);
   bool writeToBuffer(unsigned argumentNumber, const void* input, size_t size);
-  bool writeArgument(unsigned argumentNumber, uint input);
+  bool writeMessageIndex(uint input);
   GPUKernel();
   ~GPUKernel();
   bool SetArguments();
@@ -176,7 +176,6 @@ public:
   bool flagInitializedKernelsNoBuild;
   bool flagInitializedKernelsFull;
   std::shared_ptr<GPUKernel> getKernel(const std::string& kernelName);
-  static unsigned_character_4 getUINTbytes(uint32_t input);
   bool initializeAllNoBuild();
   bool initializeAllFull();
   bool initializePlatform();

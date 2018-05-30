@@ -47,42 +47,63 @@ __constant uint32_t K[64] = {
 
 unsigned int memoryPool_read_uinT(__global const unsigned char* memoryPoolPointer) {
   return
-  ((unsigned int) (memoryPoolPointer[0] << 24)) +
-  ((unsigned int) (memoryPoolPointer[1] << 16)) +
-  ((unsigned int) (memoryPoolPointer[2] <<  8)) +
-  ((unsigned int)  memoryPoolPointer[3]       ) ;
+  (unsigned int) ( ((unsigned int) memoryPoolPointer[0]) << 24) +
+  (unsigned int) ( ((unsigned int) memoryPoolPointer[1]) << 16) +
+  (unsigned int) ( ((unsigned int) memoryPoolPointer[2]) <<  8) +
+  (unsigned int) (  (unsigned int) memoryPoolPointer[3]       ) ;
+}
+
+unsigned int memoryPool_read_uint_from_four_bytes(
+  unsigned char byte3, 
+  unsigned char byte2, 
+  unsigned char byte1, 
+  unsigned char byte0 
+) {
+  return
+  (unsigned int) ( ((unsigned int) byte3) << 24) +
+  (unsigned int) ( ((unsigned int) byte2) << 16) +
+  (unsigned int) ( ((unsigned int) byte1) <<  8) +
+  (unsigned int) (  (unsigned int) byte0       ) ;
 }
 
 #pragma GCC optimize ("unroll-loops")
 unsigned int memoryPool__local_read_uint(const unsigned char* memoryPoolPointer) {
   return
-  ((unsigned int) (memoryPoolPointer[0] << 24)) +
-  ((unsigned int) (memoryPoolPointer[1] << 16)) +
-  ((unsigned int) (memoryPoolPointer[2] <<  8)) +
-  ((unsigned int)  memoryPoolPointer[3]       ) ;
+  (unsigned int) ( ((unsigned int) memoryPoolPointer[0]) << 24) +
+  (unsigned int) ( ((unsigned int) memoryPoolPointer[1]) << 16) +
+  (unsigned int) ( ((unsigned int) memoryPoolPointer[2]) <<  8) +
+  (unsigned int) (  (unsigned int) memoryPoolPointer[3]       ) ;
 }
-
-#ifndef SECP256k1_H_header
-typedef unsigned char unsigned_character;
-struct unsigned_character_4 {
-  unsigned_character content[4];
-};
-#endif
 
 __kernel void sha256GPU(
   __global unsigned char* result, 
   __global const unsigned char* offsets, 
   __global const unsigned char* messageLengths, 
-  struct unsigned_character_4 messageIndexChar,
-  __global const char* plain_key
+  __global const char* plain_key,
+  unsigned char messageIndexByte3,
+  unsigned char messageIndexByte2,
+  unsigned char messageIndexByte1,
+  unsigned char messageIndexByte0
 ) {
   int t, currentIndex, lomc;
   int stop, mmod;
   uint32_t i, item, total;
   uint32_t W[80], A, B, C, D, E, F, G, H, T1, T2;
   uint32_t digest[8];
-  unsigned int messageIndex = memoryPool__local_read_uint(messageIndexChar.content);
-
+  unsigned int messageIndex = memoryPool_read_uint_from_four_bytes(
+    messageIndexByte3,
+    messageIndexByte2,
+    messageIndexByte1,
+    messageIndexByte0
+  );
+  printf("DEBUG message index: %d\n", messageIndex);
+  printf(
+    "%d%d%d%d",
+    (unsigned int) messageIndexByte3,
+    (unsigned int) messageIndexByte2,
+    (unsigned int) messageIndexByte1,
+    (unsigned int) messageIndexByte0
+  );
   //if (messageIndex > 120000) {
   //  std::cout
   //  << "Message index too big " << messageIndex << ", message index char: "

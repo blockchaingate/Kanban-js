@@ -650,7 +650,7 @@ bool Server::ExecuteSha256s() {
   kernelSHA256->writeToBuffer(2, kernelSHA256->getInput(1)->buffer);
   kernelSHA256->writeToBuffer(4, kernelSHA256->getInput(3)->buffer);
   for (unsigned i = 0; i < kernelSHA256->computationIds.size(); i ++) {
-    kernelSHA256->writeArgument(3, i);
+    kernelSHA256->writeMessageIndex(i);
     cl_int ret = clEnqueueNDRangeKernel(
       this->theGPU->commandQueue,
       kernelSHA256->kernel,
@@ -747,7 +747,7 @@ bool Server::ExecuteSignMessages() {
   kernelSign->writeToBuffer(3, kernelSign->getInput(0)->buffer);
   kernelSign->writeToBuffer(4, kernelSign->getInput(1)->buffer);
   for (unsigned i = 0; i < kernelSign->computationIds.size(); i ++) {
-    kernelSign->writeArgument(6, i);
+    kernelSign->writeMessageIndex(i);
     cl_int ret = clEnqueueNDRangeKernel(
       this->theGPU->commandQueue,
       kernelSign->kernel,
@@ -776,7 +776,7 @@ bool Server::ExecuteTestBuffers() {
   kernelBuffers->writeToBuffer(0, kernelBuffers->getOutput(0)->buffer);
   kernelBuffers->writeToBuffer(1, kernelBuffers->getInput(0)->buffer);
   for (unsigned i = 0; i < kernelBuffers->computationIds.size(); i ++) {
-    kernelBuffers->writeArgument(2, i);
+    kernelBuffers->writeMessageIndex(i);
     cl_int ret = clEnqueueNDRangeKernel(
       this->theGPU->commandQueue,
       kernelBuffers->kernel,
