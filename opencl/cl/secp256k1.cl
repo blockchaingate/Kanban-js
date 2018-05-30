@@ -188,6 +188,19 @@ void memoryPool_writeCurrentSizeAsOutput(unsigned int argumentIndex, __global un
   memoryPool_write_uint_asOutput(currentSize, argumentIndex, memoryPool);
 }
 
+unsigned int memoryPool_read_uint_from_four_bytes(
+  unsigned char byteHighest,
+  unsigned char byteHigher ,
+  unsigned char byteLower    ,
+  unsigned char byteLowest
+) {
+  return
+  (unsigned int) ( ((unsigned int) byteHighest) << 24) +
+  (unsigned int) ( ((unsigned int) byteHigher ) << 16) +
+  (unsigned int) ( ((unsigned int) byteLower    ) <<  8) +
+  (unsigned int) (  (unsigned int) byteLowest       ) ;
+}
+
 unsigned int memoryPool_readPoolSize(__global const unsigned char* memoryPool) {
   return memoryPool_read_uint(&memoryPool[4]);
 }
@@ -197,11 +210,6 @@ unsigned int memoryPool_readMaxPoolSize(__global const unsigned char* memoryPool
 }
 
 unsigned int memoryPool_read_uint(__global const unsigned char* memoryPoolPointer) {
-    std::cout << "DEBUG: memoryPoolPointer[0]: " << (unsigned int) memoryPoolPointer[0]  << std::endl;
-    std::cout << "DEBUG: (memoryPoolPointer[0] << 24): " << ((unsigned int) (memoryPoolPointer[0] << 24)) << std::endl;
-    std::cout << "DEBUG: (memoryPoolPointer[1] << 16): " << ((unsigned int) (memoryPoolPointer[1] << 16)) << std::endl;
-    std::cout << "DEBUG: (memoryPoolPointer[2] << 8): "  << ((unsigned int) (memoryPoolPointer[2] << 8)) << std::endl;
-
   return
   ((unsigned int) (memoryPoolPointer[0] << 24)) +
   ((unsigned int) (memoryPoolPointer[1] << 16)) +

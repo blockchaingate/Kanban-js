@@ -183,6 +183,8 @@ public:
   bool initializeKernelsNoBuild();
   bool initializeKernelsFull();
   bool finish();
+  static std::vector<unsigned char> getUintBytesBigEndian(uint32_t input);
+
   std::string getId();
   bool isCPU();
   //Static allocation forbidden!

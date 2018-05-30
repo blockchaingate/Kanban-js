@@ -531,6 +531,7 @@ bool CryptoEC256k1::signMessage(
   unsigned int inputMessageIndex
 ) {
   unsigned char outputSizeBuffer[4];
+  std::vector<unsigned char> theBytes = GPU::getUintBytesBigEndian(inputMessageIndex);
   secp256k1_opencl_sign(
     outputSignature,
     outputSizeBuffer,
@@ -538,7 +539,10 @@ bool CryptoEC256k1::signMessage(
     inputSecretKey,
     inputMessage,
     inputMemoryPoolGeneratorContext_MUST_BE_INITIALIZED,
-    inputMessageIndex
+    theBytes[0],
+    theBytes[1],
+    theBytes[2],
+    theBytes[3]
   );
   *outputSize = memoryPool_read_uint(outputSizeBuffer);
   return true;
@@ -579,6 +583,9 @@ bool CryptoEC256k1::generatePublicKey(
     outputSizeBuffer,
     inputSecretKey,
     inputMemoryPoolGeneratorContext_MUST_BE_INITIALIZED,
+    0,
+    0,
+    0,
     0
   );
   *outputPublicKeySize = memoryPool_read_uint(outputSizeBuffer);
@@ -626,7 +633,7 @@ bool CryptoEC256k1::verifySignature(
     publicKeySizes,
     message,
     memoryPoolMultiplicationContext_MUST_BE_INITIALIZED,
-    0
+    0, 0, 0, 0
   );
   return true;
 }

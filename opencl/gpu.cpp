@@ -819,8 +819,8 @@ bool GPUKernel::SetArguments() {
 }
 
 bool GPUKernel::SetArguments(std::vector<std::shared_ptr<SharedMemory> >& theArgs, unsigned offset) {
-  cl_int ret = CL_SUCCESS;
   //std::cout << "DEBUG: kernel: setting " << theArgs.size() << " arguments. "<< std::endl;
+  cl_int ret = CL_SUCCESS;
   for (unsigned i = 0; i < theArgs.size(); i ++) {
     std::shared_ptr<SharedMemory> current = theArgs[i];
     if (current->typE == SharedMemory::typeVoidPointerExternalOwnership) {
@@ -835,13 +835,18 @@ bool GPUKernel::SetArguments(std::vector<std::shared_ptr<SharedMemory> >& theArg
       ret = clSetKernelArg(this->kernel, i + offset, sizeof(cl_mem), (void *) current->memoryExternallyOwned);
     }
     if (current->typE == SharedMemory::typeVoidPointer)
-      ret = clSetKernelArg(
+    { ret = clSetKernelArg(
         this->kernel, i + offset, sizeof(cl_mem), (void *)& current->theMemory
       );
+    }
     if (current->typE == SharedMemory::typeMessageIndex) {
       if (! this->writeMessageIndex(current->uintValue)) {
         return false;
       }
+    }
+    if (ret != CL_SUCCESS) {
+      logGPU << Logger::colorRed << "Failed to set kernel argument " << current->name << " with return code: "
+      << ret << "." << Logger::colorNormal << Logger::endL;
     }
   }
   return true;
@@ -898,29 +903,33 @@ bool GPUKernel::writeToBuffer(unsigned argumentNumber, const void* inputBuffer, 
   return true;
 }
 
+std::vector<unsigned char> GPU::getUintBytesBigEndian(uint32_t input){
+  std::vector<unsigned char> result;
+  result.resize(4);
+  result[0] = (input / 16777216) % 256;
+  result[1] = (input / 65536   ) % 256;
+  result[2] = (input / 256     ) % 256;
+  result[3] = (input           ) % 256;
+  return result;
+}
+
 bool GPUKernel::writeMessageIndex(uint inputArgument) {
   //std::cout << "DEBUG: writing " << input;
   //std::cout << "Setting: argument number: " << argumentNumber << ", input: " << input << std::endl;
   //The message index is always the last argument!
   int argumentNumber = this->outputs.size() + this->inputs.size() - 1;
   std::shared_ptr<SharedMemory>& currentArgument = this->inputs[this->inputs.size() - 1];
-  unsigned char byte3, byte2, byte1, byte0;
   //little/big endian agnostic:
   //Please note this code arose after multiple issues between openCL devices.
   //If you decide to fix to a more elegant solution,
   //please make sure to **test** on amd, intel CPUs
   //nvidia, intel, amd GPUS with openCL 1.1, 1.2 and 2.0.
-  byte3 = (inputArgument / 16777216) % 256;
-  byte2 = (inputArgument / 65536   ) % 256;
-  byte1 = (inputArgument / 256     ) % 256;
-  byte0 = (inputArgument           ) % 256;
-
+  std::vector<unsigned char> theBytes = GPU::getUintBytesBigEndian(inputArgument);
   currentArgument->uintValue = inputArgument;
-
-  cl_int ret3 = clSetKernelArg(this->kernel, argumentNumber    , 1, &byte3);
-  cl_int ret2 = clSetKernelArg(this->kernel, argumentNumber + 1, 1, &byte2);
-  cl_int ret1 = clSetKernelArg(this->kernel, argumentNumber + 2, 1, &byte1);
-  cl_int ret0 = clSetKernelArg(this->kernel, argumentNumber + 3, 1, &byte0);
+  cl_int ret3 = clSetKernelArg(this->kernel, argumentNumber    , 1, &theBytes[0]);
+  cl_int ret2 = clSetKernelArg(this->kernel, argumentNumber + 1, 1, &theBytes[1]);
+  cl_int ret1 = clSetKernelArg(this->kernel, argumentNumber + 2, 1, &theBytes[2]);
+  cl_int ret0 = clSetKernelArg(this->kernel, argumentNumber + 3, 1, &theBytes[3]);
   if (
     ret3 != CL_SUCCESS ||
     ret2 != CL_SUCCESS ||

@@ -53,7 +53,7 @@ unsigned int memoryPool_read_uinT(__global const unsigned char* memoryPoolPointe
   (unsigned int) (  (unsigned int) memoryPoolPointer[3]       ) ;
 }
 
-unsigned int memoryPool_read_uint_from_four_bytes(
+unsigned int memoryPool_read_uint_from_four_byteS(
   unsigned char byte3, 
   unsigned char byte2, 
   unsigned char byte1, 
@@ -80,30 +80,30 @@ __kernel void sha256GPU(
   __global const unsigned char* offsets, 
   __global const unsigned char* messageLengths, 
   __global const char* plain_key,
-  unsigned char messageIndexByte3,
-  unsigned char messageIndexByte2,
-  unsigned char messageIndexByte1,
-  unsigned char messageIndexByte0
+  unsigned char messageIndexByteHighest,
+  unsigned char messageIndexByteHigher ,
+  unsigned char messageIndexByteLower  ,
+  unsigned char messageIndexByteLowest
 ) {
   int t, currentIndex, lomc;
   int stop, mmod;
   uint32_t i, item, total;
   uint32_t W[80], A, B, C, D, E, F, G, H, T1, T2;
   uint32_t digest[8];
-  unsigned int messageIndex = memoryPool_read_uint_from_four_bytes(
-    messageIndexByte3,
-    messageIndexByte2,
-    messageIndexByte1,
-    messageIndexByte0
+  unsigned int messageIndex = memoryPool_read_uint_from_four_byteS(
+    messageIndexByteHighest,
+    messageIndexByteHigher ,
+    messageIndexByteLower  ,
+    messageIndexByteLowest
   );
-  printf("DEBUG message index: %d\n", messageIndex);
-  printf(
-    "%d%d%d%d",
-    (unsigned int) messageIndexByte3,
-    (unsigned int) messageIndexByte2,
-    (unsigned int) messageIndexByte1,
-    (unsigned int) messageIndexByte0
-  );
+  //printf("DEBUG message index: %d\n", messageIndex);
+  //printf(
+  //  "%d%d%d%d",
+  //  (unsigned int) messageIndexByte3,
+  //  (unsigned int) messageIndexByte2,
+  //  (unsigned int) messageIndexByte1,
+  //  (unsigned int) messageIndexByte0
+  //);
   //if (messageIndex > 120000) {
   //  std::cout
   //  << "Message index too big " << messageIndex << ", message index char: "

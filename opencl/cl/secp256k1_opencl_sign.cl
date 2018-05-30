@@ -14,15 +14,23 @@ __kernel void secp256k1_opencl_sign(
   __global unsigned char* inputSecretKey,
   __global unsigned char* inputMessage,
   __global unsigned char* inputMemoryPoolGeneratorContext,
-  unsigned int messageIndexChar
+  unsigned char messageIndexByteHighest,
+  unsigned char messageIndexByteHigher ,
+  unsigned char messageIndexByteLower  ,
+  unsigned char messageIndexByteLowest
 ) {
   secp256k1_scalar secretKey, outputSignatureR, outputSignatureS, message, nonce;
-  unsigned int inputMessageIndex = memoryPool_read_uint__default((unsigned char*) &messageIndexChar);
+  unsigned int inputMessageIndex = memoryPool_read_uint_from_four_bytes(
+    messageIndexByteHighest,
+    messageIndexByteHigher ,
+    messageIndexByteLower  ,
+    messageIndexByteLowest
+  );
   unsigned int offset = inputMessageIndex * 32;
   secp256k1_scalar_set_b32__global(&secretKey, &inputSecretKey[offset], NULL);
   secp256k1_scalar_set_b32__global(&message, &inputMessage[offset], NULL);
   secp256k1_scalar_set_b32__global(&nonce, &outputInputNonce[offset], NULL);
-
+ 
   __global secp256k1_ecmult_gen_context* generatorContext =
   memoryPool_read_generatorContextPointer_NON_PORTABLE(inputMemoryPoolGeneratorContext);
 

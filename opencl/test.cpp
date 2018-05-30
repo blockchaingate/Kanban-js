@@ -355,7 +355,7 @@ bool testMainPart2Signatures(GPU& theGPU) {
   logTestGraphicsPU << "Verification of signature (expected 1): " << (int) signatureResult[0] << Logger::endL;
   //testPrintMemoryPoolGeneral(theGPU.bufferSignature, GPU::memorySignature, "Graphics PU", logTestGraphicsPU, false);
   /////////
-  theSignature.serialization[4] = 5;
+  theSignature.serialization[11] = 5;
   signatureResult[0] = 3;
   if (!CryptoEC256k1GPU::verifySignatureDefaultBuffers(
     &signatureResult[0],
@@ -395,14 +395,14 @@ bool testCPP(){
 bool testGPU(GPU& inputGPU) {
   //if (!testBasicOperations(theGPU))
   //  return - 1;
-  //if (!testMainPart1ComputeContexts(inputGPU))
-  //  return false;
-  //if (!testMainPart2Signatures(inputGPU))
-  //  return false;
-  testerSHA256 theSHA256Tester;
-  if (!theSHA256Tester.testSHA256(inputGPU)) {
+  if (!testMainPart1ComputeContexts(inputGPU))
     return false;
-  }
+  if (!testMainPart2Signatures(inputGPU))
+    return false;
+  //testerSHA256 theSHA256Tester;
+  //if (!theSHA256Tester.testSHA256(inputGPU)) {
+  //  return false;
+  //}
   //testSignatures theSignatureTest;
   //if (!theSignatureTest.testPublicKeys(inputGPU)) {
   //  return false;
@@ -426,12 +426,12 @@ int testMain() {
   if (!testCPP()) {
     return - 1;
   }
-  if (! testGPU(theOpenCLCPU)) {
-    return - 1;
-  }
   if (! testGPU(theGPU)) {
     return - 1;
   }
+//  if (! testGPU(theOpenCLCPU)) {
+//    return - 1;
+//  }
   return 0;
 }
 
@@ -440,7 +440,7 @@ void testerSHA256::initialize() {
     return;
   }
   this->flagInitialized = true;
-  this->totalToCompute = 2;
+  this->totalToCompute = 100000;
   this->outputBuffer.resize(12000000);
   this->knownSHA256s.push_back((std::vector<std::string>) {
     "abc",
@@ -507,7 +507,7 @@ bool testerSHA256::testSHA256(GPU& theGPU) {
     theTestLogger << "Bad write" << Logger::endL;
     assert(false);
   }
-  int numPasses = 2;
+  int numPasses = 1;
   cl_mem& result = theKernel->getOutput(0)->theMemory;
   for (int i = 0; i < numPasses; i++) {
     for (largeTestCounter = 0; largeTestCounter < this->totalToCompute; largeTestCounter ++) {

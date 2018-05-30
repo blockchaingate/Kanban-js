@@ -43,6 +43,12 @@ void memoryPool_write_uint_asOutput(unsigned int numberToWrite, int argumentInde
 void memoryPool_writeString(__constant const char* message, int messageSize, __global unsigned char* memoryPool);
 void memoryPool_writeCurrentSizeAsOutput(unsigned int argumentIndex, __global unsigned char* memoryPool);
 
+unsigned int memoryPool_read_uint_from_four_bytes(
+  unsigned char byteHighest,
+  unsigned char byteHigher ,
+  unsigned char byteLower  ,
+  unsigned char byteLowest
+);
 
 unsigned int memoryPool_read_uint(__global const unsigned char *memoryPoolPointer);
 unsigned int memoryPool_read_uint__default(const unsigned char *memoryPoolPointer);

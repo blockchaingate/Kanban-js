@@ -12,10 +12,18 @@ __kernel void secp256k1_opencl_generate_public_key(
   __global unsigned char* outputPublicKeySize,
   __global unsigned char* inputSecretKey,
   __global unsigned char* inputMemoryPoolGeneratorContext, 
-  unsigned int messageIndexChar
-) {   
+  unsigned char messageIndexByteHighest,
+  unsigned char messageIndexByteHigher ,
+  unsigned char messageIndexByteLower  ,
+  unsigned char messageIndexByteLowest
+) {
   secp256k1_scalar secretKey;
-  unsigned int inputMessageIndex = memoryPool_read_uint__default((unsigned char*)& messageIndexChar);
+  unsigned int inputMessageIndex = memoryPool_read_uint_from_four_bytes(
+    messageIndexByteHighest,
+    messageIndexByteHigher ,
+    messageIndexByteLower  ,
+    messageIndexByteLowest
+  );
   unsigned int offset = 32 * inputMessageIndex;
   unsigned int offsetOutput = MACRO_size_of_signature * inputMessageIndex;
   secp256k1_scalar_set_b32__global(&secretKey, &inputSecretKey[offset], NULL);

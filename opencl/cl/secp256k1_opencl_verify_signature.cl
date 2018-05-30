@@ -16,11 +16,19 @@ __kernel void secp256k1_opencl_verify_signature(
   __global const unsigned char* publicKeySizes,
   __global const unsigned char* message,
   __global const unsigned char* memoryPoolMultiplicationContext,
-  unsigned int messageIndexChar
+  unsigned char messageIndexByteHighest,
+  unsigned char messageIndexByteHigher ,
+  unsigned char messageIndexByteLower  ,
+  unsigned char messageIndexByteLowest
 ) {
   unsigned char result;
   unsigned int publicKeySize, signatureSize;
-  unsigned int messageIndex = memoryPool_read_uint__default((unsigned char*)& messageIndexChar);
+  unsigned int messageIndex = memoryPool_read_uint_from_four_bytes(
+    messageIndexByteHighest,
+    messageIndexByteHigher,
+    messageIndexByteLower,
+    messageIndexByteLowest
+  );
   publicKeySize = memoryPool_read_uint(&publicKeySizes[messageIndex * 4]);
   signatureSize = memoryPool_read_uint(&signatureSizes[messageIndex * 4]);
   unsigned int indexMemPoolSignature;
@@ -30,7 +38,7 @@ __kernel void secp256k1_opencl_verify_signature(
     assertFalse("This should not happen. ", outputMemoryPoolSignatureBuffer);
     output[messageIndex] = - 2;
     return;
-  }
+  } 
   __global unsigned char* outputMemoryPoolSignature = &outputMemoryPoolSignatureBuffer[indexMemPoolSignature];
 
   memoryPool_initializeNoZeroingNoLog(MACRO_MEMORY_POOL_SIZE_Signature - 10, outputMemoryPoolSignature);

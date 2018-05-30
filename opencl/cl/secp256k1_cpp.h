@@ -32,12 +32,15 @@ __kernel void secp256k1_opencl_compute_generator_context(
 
 __kernel void secp256k1_opencl_sign(
   __global unsigned char* outputSignature,
-  __global unsigned char* outputSize,
+  __global unsigned char* outputSizes,
   __global unsigned char* outputInputNonce,
   __global unsigned char* inputSecretKey,
   __global unsigned char* inputMessage,
   __global unsigned char* inputMemoryPoolGeneratorContext,
-  unsigned int inputMessageIndex
+  unsigned char messageIndexByteHighest,
+  unsigned char messageIndexByteHigher ,
+  unsigned char messageIndexByteLower  ,
+  unsigned char messageIndexByteLowest
 );
 
 __kernel void secp256k1_opencl_generate_public_key(
@@ -45,7 +48,10 @@ __kernel void secp256k1_opencl_generate_public_key(
   __global unsigned char* outputPublicKeySize,
   __global unsigned char* inputSecretKey,
   __global unsigned char* inputMemoryPoolGeneratorContext,
-  unsigned int inputMessageIndex
+  unsigned char messageIndexByteHighest,
+  unsigned char messageIndexByteHigher ,
+  unsigned char messageIndexByteLower  ,
+  unsigned char messageIndexByteLowest
 );
 
 __kernel void secp256k1_opencl_verify_signature(
@@ -57,7 +63,10 @@ __kernel void secp256k1_opencl_verify_signature(
   __global const unsigned char* publicKeySizes,
   __global const unsigned char* message,
   __global const unsigned char* memoryPoolMultiplicationContext,
-  unsigned int messageIndex
+  unsigned char messageIndexByteHighest,
+  unsigned char messageIndexByteHigher ,
+  unsigned char messageIndexByteLower  ,
+  unsigned char messageIndexByteLowest
 );
 
 __kernel void test_suite_1_basic_operations(
@@ -68,8 +77,11 @@ __kernel void sha256GPU(
   __global unsigned char* result,
   __global const unsigned char* offsets,
   __global const unsigned char* messageLengths,
-  unsigned int messageIndexChar,
-  __global const char* plain_key
+  __global const char* plain_key,
+  unsigned char messageIndexByteHighest,
+  unsigned char messageIndexByteHigher ,
+  unsigned char messageIndexByteLower  ,
+  unsigned char messageIndexByteLowest
 );
 
 #endif //SECP256K1_CPP_H_header
