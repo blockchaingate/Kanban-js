@@ -417,14 +417,14 @@ bool testCPP(){
 bool testGPU(GPU& inputGPU) {
   //if (!testBasicOperations(theGPU))
   //  return - 1;
-  if (!testMainPart1ComputeContexts(inputGPU))
-    return false;
-  if (!testMainPart2Signatures(inputGPU))
-    return false;
   testerSHA256 theSHA256Tester;
   if (!theSHA256Tester.testSHA256(inputGPU)) {
     return false;
   }
+  if (!testMainPart1ComputeContexts(inputGPU))
+    return false;
+  if (!testMainPart2Signatures(inputGPU))
+    return false;
   testSignatures theSignatureTest;
   if (!theSignatureTest.testPublicKeys(inputGPU)) {
     return false;
