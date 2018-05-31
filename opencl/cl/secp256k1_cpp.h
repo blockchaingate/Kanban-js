@@ -84,5 +84,13 @@ __kernel void sha256GPU(
   unsigned char messageIndexByteLowest
 );
 
+__kernel void sha256_twice_GPU_fetch_best(
+  __global unsigned char* result,
+  __global const char* messages32bytesLength,
+  unsigned char messageIndexByteHighest,
+  unsigned char messageIndexByteHigher ,
+  unsigned char messageIndexByteLower  ,
+  unsigned char messageIndexByteLowest
+);
 #endif //SECP256K1_CPP_H_header
 

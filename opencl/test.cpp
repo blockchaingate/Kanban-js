@@ -37,17 +37,18 @@ public:
   unsigned numMessagesPerPipeline;
   bool flagInitialized;
   testSignatures() {
-    this->numMessagesPerPipeline = 2000;
+    this->numMessagesPerPipeline = 2048;
     this->flagInitialized = false;
   }
   void initialize();
   bool testPublicKeys(GPU& theGPU);
   bool testSign(GPU& theGPU);
   bool testVerifySignatures(GPU& theGPU, bool tamperWithSignature);
+  bool testSHA256NoOutput(GPU& theGPU);
   bool testPublicKeysCPP();
   bool testSignCPP();
   bool testVerifySignaturesCPP(bool tamperWithSignature);
-  bool testSHA256NoOutput(GPU& theGPU);
+  bool testSHA256NoOutputCPP();
   std::string toStringPublicKeys();
   std::string toStringSignatures();
 };
@@ -396,23 +397,27 @@ bool testBasicOperations(GPU& theGPU){
 }
 
 bool testCPP(){
-  testerSHA256 theSHA256Tester;
-  if (!theSHA256Tester.testSHA256CPP()) {
-    return false;
-  }
+  //testerSHA256 theSHA256Tester;
+  //if (!theSHA256Tester.testSHA256CPP()) {
+  //  return false;
+  //}
   testSignatures theSignTester;
-  if (!theSignTester.testPublicKeysCPP()) {
+  if (!theSignTester.testSHA256NoOutputCPP()) {
     return false;
   }
-  if (!theSignTester.testSignCPP()) {
-    return false;
-  }
-  if (!theSignTester.testVerifySignaturesCPP(false)) {
-    return false;
-  }
-  if (!theSignTester.testVerifySignaturesCPP(true)) {
-    return false;
-  }
+
+  //if (!theSignTester.testPublicKeysCPP()) {
+  //  return false;
+  //}
+  //if (!theSignTester.testSignCPP()) {
+  //  return false;
+  //}
+  //if (!theSignTester.testVerifySignaturesCPP(false)) {
+  //  return false;
+  //}
+  //if (!theSignTester.testVerifySignaturesCPP(true)) {
+  //  return false;
+  //}
   return true;
 }
 
@@ -450,15 +455,15 @@ int testMain() {
   GPU theGPU;
   GPU theOpenCLCPU;
   theOpenCLCPU.theDesiredDeviceType = CL_DEVICE_TYPE_CPU;
-  //if (!testCPP()) {
+  if (!testCPP()) {
+    return - 1;
+  }
+  //if (!testGPU(theOpenCLCPU)) {
   //  return - 1;
   //}
-  if (!testGPU(theOpenCLCPU)) {
-    return - 1;
-  }
-  if (!testGPU(theGPU)) {
-    return - 1;
-  }
+  //if (!testGPU(theGPU)) {
+  //  return - 1;
+  //}
   return 0;
 }
 
@@ -524,7 +529,7 @@ bool testSignatures::testSHA256NoOutput(GPU& theGPU) {
     theTestLogger << "Bad write" << Logger::endL;
     assert(false);
   }
-  int numKernels = 256;
+  int numKernels = 2048;
   int totalSHAs = numKernels * 256 * 256;
   for (int i = 0; i < numKernels; i++) {
     if (!theKernel->writeMessageIndex(i)) {
@@ -575,7 +580,7 @@ bool testSignatures::testSHA256NoOutput(GPU& theGPU) {
     best.assign((char *) &this->outputSHAs[i * 32], 32);
     sha256GPU_inner__global(bestShaIntermediate, 32, best.c_str());
     sha256GPU_inner__global(bestSha, 32, (char*) bestShaIntermediate);
-    bestSHAString.assign((char *) bestSha , 32);
+    bestSHAString.assign((char *) bestSha, 32);
     theTestLogger << "Best " << i << ": "
     << Miscellaneous::toStringHex(best) << " with double-sha: "
     << Miscellaneous::toStringHex(bestSHAString) << Logger::endL;
@@ -588,7 +593,6 @@ bool testSignatures::testSHA256NoOutput(GPU& theGPU) {
   theTestLogger << "Speed: " << (totalSHAs / elapsed_seconds.count()) << " double hashes per second. " << Logger::endL;
   return true;
 }
-
 
 bool testerSHA256::testSHA256(GPU& theGPU) {
   // Create the two input vectors
@@ -1108,6 +1112,62 @@ void startVerification(testSignatures* theTester, uint32_t messageIndex) {
     bytes[2],
     bytes[3]
   );
+}
+
+void startSHA256twiceFetchBest(testSignatures* theTester, uint32_t messageIndex){
+  std::vector<unsigned char> bytes = GPU::getUintBytesBigEndian(messageIndex);
+  sha256_twice_GPU_fetch_best(
+    &theTester->outputSHAs[0],
+    (char *) &theTester->secretKeys[0],
+    bytes[0],
+    bytes[1],
+    bytes[2],
+    bytes[3]
+  );
+}
+
+bool testSignatures::testSHA256NoOutputCPP() {
+  // Create the two input vectors
+  logTestCPPThreads << "Run SHA256 mining style benchmark." << Logger::endL;
+  this->initialize();
+  ThreadPool thePool;
+  auto timeStart = std::chrono::system_clock::now();
+  uint32_t numKernels = 256;
+  int totalSHAs = numKernels * 256 * 256;
+  thePool.maximumNumberOfThreads = 2048;
+  this->outputSHAs.resize(32 * numKernels);
+  for (uint32_t i = 0; i < numKernels; i++) {
+    thePool.theThreads.push_back(std::make_shared<std::thread>(startSHA256twiceFetchBest, this, i));
+    if (thePool.theThreads.size() >= thePool.maximumNumberOfThreads) {
+      //logTestCPPThreads << "DEBUG: About to join all: pool size: " << thePool.theThreads.size() << ". " << Logger::endL;
+      if (!thePool.joinAll()) {
+        return false;
+      }
+    }
+  }
+  logTestCPPThreads << "Enqueued: " << numKernels << " kernels, waiting ... " << Logger::endL;
+  if (!thePool.joinAll()) {
+    return false;
+  }
+  for (uint32_t i = 0; i < numKernels; i++){
+    std::string best, bestSHAString;
+    unsigned char bestSha[32];
+    unsigned char bestShaIntermediate[32];
+    best.assign((char *) &this->outputSHAs[i * 32], 32);
+    sha256GPU_inner__global(bestShaIntermediate, 32, best.c_str());
+    sha256GPU_inner__global(bestSha, 32, (char*) bestShaIntermediate);
+    bestSHAString.assign((char *) bestSha , 32);
+    logTestCPPThreads << "Best " << i << ": "
+    << Miscellaneous::toStringHex(best) << " with double-sha: "
+    << Miscellaneous::toStringHex(bestSHAString) << Logger::endL;
+  }
+
+  auto timeCurrent = std::chrono::system_clock::now();
+  std::chrono::duration<double> elapsed_seconds = timeCurrent - timeStart;
+  logTestCPPThreads << "Computed " << totalSHAs
+  << " sha256s in " << elapsed_seconds.count() << " second(s). " << Logger::endL;
+  logTestCPPThreads << "Speed: " << (totalSHAs / elapsed_seconds.count()) << " double hashes per second. " << Logger::endL;
+  return true;
 }
 
 bool testSignatures::testVerifySignaturesCPP(bool tamperWithSignature) {
