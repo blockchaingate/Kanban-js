@@ -248,6 +248,10 @@ bool GPU::initializePlatform() {
     logGPU << "Failed to create command queue." << Logger::endL;
     return false;
   }
+  if (this->commandQueue == NULL) {
+    logGPU << "Command queue is NULL." << Logger::endL;
+    return false;
+  }
   this->flagInitializedPlatform = true;
   return true;
 }
