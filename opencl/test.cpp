@@ -421,23 +421,23 @@ bool testGPU(GPU& inputGPU) {
   if (!theSHA256Tester.testSHA256(inputGPU)) {
     return false;
   }
-  if (!testMainPart1ComputeContexts(inputGPU))
-    return false;
-  if (!testMainPart2Signatures(inputGPU))
-    return false;
-  testSignatures theSignatureTest;
-  if (!theSignatureTest.testPublicKeys(inputGPU)) {
-    return false;
-  }
-  if (!theSignatureTest.testSign(inputGPU)) {
-    return false;
-  }
-  if (!theSignatureTest.testVerifySignatures(inputGPU, false)) {
-    return false;
-  }
-  if (!theSignatureTest.testVerifySignatures(inputGPU, true)) {
-    return false;
-  }
+  //if (!testMainPart1ComputeContexts(inputGPU))
+  //  return false;
+  //if (!testMainPart2Signatures(inputGPU))
+  //  return false;
+  //testSignatures theSignatureTest;
+  //if (!theSignatureTest.testPublicKeys(inputGPU)) {
+  //  return false;
+  //}
+  //if (!theSignatureTest.testSign(inputGPU)) {
+  //  return false;
+  //}
+  //if (!theSignatureTest.testVerifySignatures(inputGPU, false)) {
+  //  return false;
+  //}
+  //if (!theSignatureTest.testVerifySignatures(inputGPU, true)) {
+  //  return false;
+  //}
   return true;
 }
 
