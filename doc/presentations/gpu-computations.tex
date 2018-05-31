@@ -52,27 +52,35 @@ In the present text we describe our port of the cryptographic functions that mak
 
 Speed. All tabulated devices ran the same code. With the exception of a small header file (27 lines for OpenCL and 67 lines for C++), the code is both valid OpenCL and valid C/C++. The total code size is, at the time of writing, 7153 lines of code (= 5049 actual lines + 1294 comments + 810 blank) in a total of 22 files.
 
-\noindent\begin{tabular}{|p{5.5cm}|l|r||r|r|r|}\hline
-Device & run-time & SHA256 & Pub. key & Sign & Verification\\\hline
-Nvidia Quadro K2000 (2 computational units) & OpenCL 1.1 &19,007/sec & 171/sec & 121/sec & 66/sec\\\hline
+
+\begin{tabular}{lll}
+Name & Description & Function name (look in kanban/opencl/ ... )\\
+mine SHA256$^{\circ2}$& vary input of  $\text{SHA256}(\text{SHA256}(x))$, fetch best\\
+\end{tabular}
+
+\noindent\begin{tabular}{|p{5.5cm}|l|r|r||r|r|r|}\hline
+Device & run-time &mine SHA256$^{\circ2}$& SHA256 & Pub. key & Sign & Verification\\\hline
+Nvidia Quadro K2000 (2 computational units) & OpenCL 1.1 & &19,007/sec & 171/sec & 121/sec & 66/sec\\\hline
 \multirow{2}{*}{ \shortstack{
 Intel${}^{\text{\sffamily\textregistered}}$ Xeon${}^{\text{\sffamily\textregistered}}$ CPU\\ E5-2630 @ 2.60GHz (12 cores)
-}} & OpenCL 1.2 &96,028/sec & 2,063/sec& 1,044/sec & 639/sec\\\cline{2-6}
-&C++ std::thread& 36,040/sec&13,937/sec&6,471/sec&5,505/sec \\\hline\hline
-Intel${}^{\text{\sffamily\textregistered}}$ HD Graphics (SOC, see next) @ 1.1Ghz Intel${}^{\text{\sffamily\textregistered}}$ (23 computational units) & OpenCL 2.0& 55,769/sec& N/A & N/A& N/A \\\hline
+}} & OpenCL 1.2 & &96,028/sec & 2,063/sec& 1,044/sec & 639/sec\\\cline{2-7}
+& C++ std::thread& & 36,040/sec&13,937/sec&6,471/sec&5,505/sec \\\hline\hline
+Intel${}^{\text{\sffamily\textregistered}}$ HD Graphics (SOC, see next) @ 1.1Ghz Intel${}^{\text{\sffamily\textregistered}}$ (23 computational units) & OpenCL 2.0& & 55,769/sec& N/A & N/A& N/A \\\hline
 \multirow{2}{*}{\shortstack{
 Intel${}^{\text{\sffamily\textregistered}}$ Core${}^{\text{\sffamily\texttrademark}}$ CPU \\
 i5-8250U @ 1.6Ghz (8 cores)
-}} & OpenCL 2.0 &130,844/sec& 1,765/sec &1,018/sec& 533/sec\\\cline{2-6}
-&C++ std::thread& 48,865/sec& 13,643/sec&5,961/sec&4,136/sec \\\hline\hline
-Radeon${}^{\text{\sffamily\texttrademark}}$ RX 480 Graphics @1266 Mhz &OpenCL 1.2& 31,621/sec& N/A & N/A& N/A
+}} & OpenCL 2.0 & &130,844/sec& 1,765/sec &1,018/sec& 533/sec\\\cline{2-7}
+&C++ std::thread&  &48,865/sec& 13,643/sec&5,961/sec&4,136/sec \\\hline\hline
+Nvidia GeForce GTX 1080 @1.86Ghz (20 computational units)&OpenCL 1.2& &34,967/sec&N/A&N/A&N/A\\\hline
+
+Radeon${}^{\text{\sffamily\texttrademark}}$ RX 480 Graphics @1266 Mhz &OpenCL 1.2&  &31,621/sec& N/A & N/A& N/A
 \\\hline
 
 \multirow{2}{*}{\shortstack{
 Intel${}^{\text{\sffamily\textregistered}}$ Core${}^{\text{\sffamily\texttrademark}}$ CPU \\ i5-7600 @ 3.50GHz (4 cores)
 }} 
-&OpenCL 2.0& 237,161/sec & 1,497/sec & 2,592/sec&  856/sec\\\cline{2-6}
-&C++ std::thread&84,259/sec&21,719/sec&6,930/sec&5,093/sec\\\hline
+&OpenCL 2.0&  &237,161/sec & 1,497/sec & 2,592/sec&  856/sec\\\cline{2-6}
+&C++ std::thread &&84,259/sec&21,719/sec&6,930/sec&5,093/sec\\\hline
 \end{tabular}
 
 

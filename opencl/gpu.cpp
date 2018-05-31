@@ -274,7 +274,7 @@ bool GPU::initializeKernelsNoBuild() {
     return false;
   }
   if (!this->createKernelNoBuild(
-    this->kernelSHA256NoOutput,
+    this->kernelSHA256TwiceFetchBest,
     {"result"},
     {SharedMemory::typeVoidPointer},
     {"message", "messageIndex"},
@@ -544,7 +544,7 @@ GPU::~GPU() {
 }
 
 std::string GPU::kernelSHA256 = "sha256GPU";
-std::string GPU::kernelSHA256NoOutput = "sha256GPU_no_output";
+std::string GPU::kernelSHA256TwiceFetchBest = "sha256_twice_GPU_fetch_best";
 std::string GPU::kernelTestBuffer = "testBuffer";
 std::string GPU::kernelInitializeMultiplicationContext = "secp256k1_opencl_compute_multiplication_context";
 std::string GPU::kernelInitializeGeneratorContext = "secp256k1_opencl_compute_generator_context";

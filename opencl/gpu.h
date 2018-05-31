@@ -122,7 +122,7 @@ private:
   GPU(const GPU& other);
 public:
   static std::string kernelSHA256;
-  static std::string kernelSHA256NoOutput;
+  static std::string kernelSHA256TwiceFetchBest;
   static std::string kernelTestBuffer;
   static std::string kernelInitializeMultiplicationContext;
   static std::string kernelInitializeGeneratorContext;

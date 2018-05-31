@@ -9,9 +9,10 @@
 
 
 void sha256GPU_first_2_bytes_output_lastSHA(unsigned char* resulT, char* input) {
-  unsigned char current[32];
+  unsigned char shaOnce[32];
+  unsigned char shaTwice[32];
   unsigned char best[32];
-  for (int k=0; k<32 ;k++){
+  for (int k = 0; k < 32 ;k ++){
     resulT[k] = input[k];
   }  
   sha256GPU_inner(best, 32, input);
@@ -19,28 +20,29 @@ void sha256GPU_first_2_bytes_output_lastSHA(unsigned char* resulT, char* input) 
     input[0] ++;
     for (int j = 0; j < 256; j ++) {
       input[1] ++;
-      sha256GPU_inner(current, 32, input);
+      sha256GPU_inner(shaOnce, 32, input);
+      sha256GPU_inner(shaTwice, 32, shaOnce);
       bool isGood = false;
       for (int k = 0; k < 32; k ++) {
-        if (best[k] < current[k]) {
+        if (best[k] < shaTwice[k]) {
           break;
         }
-        if (best[k] > current[k]) {
+        if (best[k] > shaTwice[k]) {
           isGood = true;
           break;
         }
       }
       if (isGood) {
-        for (int k=0; k<32 ;k++){
+        for (int k = 0; k < 32; k ++){
           resulT[k] = input[k];
-          best[k]=current[k];
+          best[k] = shaTwice[k];
         }
       }
     }
 	} 
 }
  
-__kernel void sha256GPU_no_output(
+__kernel void sha256_twice_GPU_fetch_best(
   __global unsigned char* result, 
   __global const char* messages32bytesLength,
   unsigned char messageIndexByteHighest,

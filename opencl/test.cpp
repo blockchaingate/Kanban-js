@@ -512,7 +512,7 @@ bool testSignatures::testSHA256NoOutput(GPU& theGPU) {
   // Create the two input vectors
   Logger& theTestLogger = getAppropriateLogger(theGPU);
   theTestLogger << "Running SHA256 mining style benchmark. " << Logger::endL;
-  std::shared_ptr<GPUKernel> theKernel = theGPU.getKernel(GPU::kernelSHA256NoOutput);
+  std::shared_ptr<GPUKernel> theKernel = theGPU.getKernel(GPU::kernelSHA256TwiceFetchBest);
   if (!theKernel->build()) {
     std::cout << "DEBUG: failed to build mining style SHA kernel. " << std::endl;
     assert(false);
@@ -571,11 +571,13 @@ bool testSignatures::testSHA256NoOutput(GPU& theGPU) {
   for (int i = 0; i < numKernels; i++){
     std::string best, bestSHAString;
     unsigned char bestSha[32];
+    unsigned char bestShaIntermediate[32];
     best.assign((char *) &this->outputSHAs[i * 32], 32);
-    sha256GPU_inner__global(bestSha, 32, best.c_str());
+    sha256GPU_inner__global(bestShaIntermediate, 32, best.c_str());
+    sha256GPU_inner__global(bestSha, 32, (char*) bestShaIntermediate);
     bestSHAString.assign((char *) bestSha , 32);
     theTestLogger << "Best " << i << ": "
-    << Miscellaneous::toStringHex(best) << " with sha: "
+    << Miscellaneous::toStringHex(best) << " with double-sha: "
     << Miscellaneous::toStringHex(bestSHAString) << Logger::endL;
   }
 
