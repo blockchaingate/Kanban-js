@@ -274,6 +274,17 @@ bool GPU::initializeKernelsNoBuild() {
     return false;
   }
   if (!this->createKernelNoBuild(
+    this->kernelSHA256NoOutput,
+    {"result"},
+    {SharedMemory::typeVoidPointer},
+    {"message", "messageIndex"},
+    {SharedMemory::typeVoidPointer, SharedMemory::typeMessageIndex},
+    {},
+    {}
+  )) {
+    return false;
+  }
+  if (!this->createKernelNoBuild(
     this->kernelInitializeMultiplicationContext,
     {"outputMultiplicationContext"},
     {
@@ -533,6 +544,7 @@ GPU::~GPU() {
 }
 
 std::string GPU::kernelSHA256 = "sha256GPU";
+std::string GPU::kernelSHA256NoOutput = "sha256GPU_no_output";
 std::string GPU::kernelTestBuffer = "testBuffer";
 std::string GPU::kernelInitializeMultiplicationContext = "secp256k1_opencl_compute_multiplication_context";
 std::string GPU::kernelInitializeGeneratorContext = "secp256k1_opencl_compute_generator_context";

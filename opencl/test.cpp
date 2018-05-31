@@ -33,6 +33,7 @@ public:
   std::vector<unsigned char> outputVerifications;
   std::vector<unsigned char> outputGeneratorContexts;
 
+  std::vector<unsigned char> outputSHAs;
   unsigned numMessagesPerPipeline;
   bool flagInitialized;
   testSignatures() {
@@ -46,6 +47,7 @@ public:
   bool testPublicKeysCPP();
   bool testSignCPP();
   bool testVerifySignaturesCPP(bool tamperWithSignature);
+  bool testSHA256NoOutput(GPU& theGPU);
   std::string toStringPublicKeys();
   std::string toStringSignatures();
 };
@@ -417,15 +419,18 @@ bool testCPP(){
 bool testGPU(GPU& inputGPU) {
   //if (!testBasicOperations(theGPU))
   //  return - 1;
-  testerSHA256 theSHA256Tester;
-  if (!theSHA256Tester.testSHA256(inputGPU)) {
-    return false;
-  }
+  //testerSHA256 theSHA256Tester;
+  //if (!theSHA256Tester.testSHA256(inputGPU)) {
+  //  return false;
+  //}
   //if (!testMainPart1ComputeContexts(inputGPU))
   //  return false;
   //if (!testMainPart2Signatures(inputGPU))
   //  return false;
-  //testSignatures theSignatureTest;
+  testSignatures theSignatureTest;
+  if (!theSignatureTest.testSHA256NoOutput(inputGPU)) {
+    return false;
+  }
   //if (!theSignatureTest.testPublicKeys(inputGPU)) {
   //  return false;
   //}
@@ -448,9 +453,9 @@ int testMain() {
   //if (!testCPP()) {
   //  return - 1;
   //}
-  if (!testGPU(theGPU)) {
-    return - 1;
-  }
+  //if (!testGPU(theGPU)) {
+  //  return - 1;
+  //}
   if (!testGPU(theOpenCLCPU)) {
     return - 1;
   }
@@ -502,6 +507,86 @@ void testerSHA256::initialize() {
   //for (unsigned i = 0; i < 100 ; i++)
   //  std::cout << "message Byte " << i << ": " << (int) this->inputBuffer[i] << std::endl;
 }
+
+bool testSignatures::testSHA256NoOutput(GPU& theGPU) {
+  // Create the two input vectors
+  Logger& theTestLogger = getAppropriateLogger(theGPU);
+  theTestLogger << "Running SHA256 mining style benchmark. " << Logger::endL;
+  std::shared_ptr<GPUKernel> theKernel = theGPU.getKernel(GPU::kernelSHA256NoOutput);
+  if (!theKernel->build()) {
+    std::cout << "DEBUG: failed to build mining style SHA kernel. " << std::endl;
+    assert(false);
+  }
+  this->initialize();
+
+  auto timeStart = std::chrono::system_clock::now();
+  if (!theKernel->writeToBuffer(1, this->secretKeys)){
+    theTestLogger << "Bad write" << Logger::endL;
+    assert(false);
+  }
+  int numKernels = 256;
+  int totalSHAs = numKernels * 256 * 256;
+  for (int i = 0; i < numKernels; i++) {
+    if (!theKernel->writeMessageIndex(i)) {
+      theTestLogger << "Bad write" << Logger::endL;
+      assert(false);
+    }
+    cl_int ret = clEnqueueNDRangeKernel(
+      theGPU.commandQueue,
+      theKernel->kernel,
+      3,
+      NULL,
+      theKernel->global_item_size,
+      theKernel->local_item_size,
+      0,
+      NULL,
+      NULL
+    );
+    if (ret != CL_SUCCESS) {
+      theTestLogger << "Failed to enqueue kernel. Return code: " << ret << ". " << Logger::endL;
+      return false;
+    }
+  }
+  theTestLogger << "Enqueued: " << numKernels << " kernels, waiting ... " << Logger::endL;
+  if (!theGPU.finish()) {
+    return false;
+  }
+  cl_mem& result = theKernel->getOutput(0)->theMemory;
+  this->outputSHAs.resize(32 * numKernels);
+  cl_int ret = clEnqueueReadBuffer (
+    theGPU.commandQueue,
+    result,
+    CL_TRUE,
+    0,
+    32 * numKernels,
+    &this->outputSHAs[0],
+    0,
+    NULL,
+    NULL
+  );
+  if (ret != CL_SUCCESS) {
+    theTestLogger << "Failed to enqueue read buffer. Return code: " << ret << ". " << Logger::endL;
+    return false;
+  }
+  for (int i = 0; i < numKernels; i++){
+    std::string best, bestSHAString;
+    unsigned char bestSha[32];
+    best.assign((char *) &this->outputSHAs[i * 32], 32);
+    sha256GPU_inner__global(bestSha, 32, best.c_str());
+    bestSHAString.assign((char *) bestSha , 32);
+    theTestLogger << "Best " << i << ": "
+    << Miscellaneous::toStringHex(best) << " with sha: "
+    << Miscellaneous::toStringHex(bestSHAString) << Logger::endL;
+  }
+
+  auto timeCurrent = std::chrono::system_clock::now();
+  std::chrono::duration<double> elapsed_seconds = timeCurrent - timeStart;
+  theTestLogger << "Computed " << totalSHAs
+  << " sha256s in " << elapsed_seconds.count() << " second(s). " << Logger::endL;
+  theTestLogger << "Speed: " << (totalSHAs / elapsed_seconds.count()) << " hashes per second. " << Logger::endL;
+  return true;
+}
+
 
 bool testerSHA256::testSHA256(GPU& theGPU) {
   // Create the two input vectors
@@ -748,9 +833,9 @@ void testSignatures::initialize() {
   this->secretKeys[1] = 'i';
   this->secretKeys[2] = 'j';
   for (unsigned i = 3; i < totalPipelineSize; i ++) {
-    this->messages[i] = getByte(this->messages[i - 1], this->messages[i - 2], this->nonces[i - 3]);
-    this->nonces[i] = getByte(this->nonces[i - 1], this->nonces[i - 2], this->secretKeys[i - 3]);
-    this->secretKeys[i] = getByte(this->secretKeys[i - 1], this->secretKeys[i - 2], this->messages[i - 3]);
+    this->messages[i] = getByte(this->messages[i - 1], this->messages[i - 2], this->nonces[i - 3]) + i % 256;
+    this->nonces[i] = getByte(this->nonces[i - 1], this->nonces[i - 2], this->secretKeys[i - 3])+ i % 256 + 1;
+    this->secretKeys[i] = getByte(this->secretKeys[i - 1], this->secretKeys[i - 2], this->messages[i - 3])+ i % 256 + 2;
   }
   std::cout << "DEBUG: got to here, pt 3" << std::endl;
   for (unsigned i = 0; i < this->numMessagesPerPipeline; i ++) {

@@ -144,10 +144,6 @@ void APPEND_ADDRESS_SPACE(secp256k1_ge_copy)(ADDRESS_SPACE secp256k1_ge* output,
 
 
 
-
-
-
-
 /* Code from: https://github.com/Fruneng/opencl_sha_al_im
  */
 
