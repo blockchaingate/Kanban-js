@@ -223,9 +223,9 @@ bool CryptoEC256k1GPU::computeGeneratorContext(unsigned char* outputMemoryPool, 
     << ". Return code: " << ret << ". " << Logger::endL;
     return false;
   }
-  //if (!theGPU.finish()) {
-  //  return false;
-  //}
+  if (!theGPU.finish()) {
+    return false;
+  }
   cl_mem& result = kernelGeneratorContext->getOutput(0)->theMemory;
   logGPU << "DEBUG: enqueued generator context. " << Logger::endL;
   ret = clEnqueueReadBuffer(
