@@ -424,46 +424,47 @@ bool testCPP(){
 bool testGPU(GPU& inputGPU) {
   //if (!testBasicOperations(theGPU))
   //  return - 1;
-  //testerSHA256 theSHA256Tester;
-  //if (!theSHA256Tester.testSHA256(inputGPU)) {
-  //  return false;
-  //}
-  //if (!testMainPart1ComputeContexts(inputGPU))
-  //  return false;
-  //if (!testMainPart2Signatures(inputGPU))
-  //  return false;
+  testerSHA256 theSHA256Tester;
+  if (!theSHA256Tester.testSHA256(inputGPU)) {
+    return false;
+  }
+  if (!testMainPart1ComputeContexts(inputGPU)) {
+    return false;
+  }
+  if (!testMainPart2Signatures(inputGPU))
+    return false;
   testSignatures theSignatureTest;
   if (!theSignatureTest.testSHA256NoOutput(inputGPU)) {
     return false;
   }
-  //if (!theSignatureTest.testPublicKeys(inputGPU)) {
-  //  return false;
-  //}
-  //if (!theSignatureTest.testSign(inputGPU)) {
-  //  return false;
-  //}
-  //if (!theSignatureTest.testVerifySignatures(inputGPU, false)) {
-  //  return false;
-  //}
-  //if (!theSignatureTest.testVerifySignatures(inputGPU, true)) {
-  //  return false;
-  //}
+  if (!theSignatureTest.testPublicKeys(inputGPU)) {
+    return false;
+  }
+  if (!theSignatureTest.testSign(inputGPU)) {
+    return false;
+  }
+  if (!theSignatureTest.testVerifySignatures(inputGPU, false)) {
+    return false;
+  }
+  if (!theSignatureTest.testVerifySignatures(inputGPU, true)) {
+    return false;
+  }
   return true;
 }
 
 int testMain() {
   GPU theGPU;
   GPU theOpenCLCPU;
-  theOpenCLCPU.theDesiredDeviceType = CL_DEVICE_TYPE_CPU;
-  if (!testCPP()) {
+  //theOpenCLCPU.theDesiredDeviceType = CL_DEVICE_TYPE_CPU;
+  //if (!testCPP()) {
+  //  return - 1;
+  //}
+  if (!testGPU(theGPU)) {
     return - 1;
   }
-  //if (!testGPU(theOpenCLCPU)) {
-  //  return - 1;
-  //}
-  //if (!testGPU(theGPU)) {
-  //  return - 1;
-  //}
+  if (!testGPU(theOpenCLCPU)) {
+    return - 1;
+  }
   return 0;
 }
 

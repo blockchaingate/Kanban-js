@@ -13,6 +13,8 @@
 /* Code from: https://github.com/Fruneng/opencl_sha_al_im
  */
 
+#define MACRO_sha256GPU_inner_global_already_included
+
 void APPEND_ADDRESS_SPACE(sha256GPU_inner)(
   ADDRESS_SPACE unsigned char* result, 
   unsigned int length, 

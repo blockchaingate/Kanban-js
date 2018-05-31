@@ -8,6 +8,12 @@
 #endif
 #include "secp256k1_implementation.h"
 
+#ifndef MACRO_sha256GPU_inner_global_already_included
+#define MACRO_sha256GPU_inner_global_already_included
+#include "secp256k1_set_1_address_space__global.h"
+#include "secp256k1_1_parametric_address_space_non_constant_miner.cl"
+#endif
+
 
 __kernel void sha256GPU(
   __global unsigned char* result, 
