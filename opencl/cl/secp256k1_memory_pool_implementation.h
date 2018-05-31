@@ -263,44 +263,6 @@ void memoryPool_freeMemory__global(__global void* any) {
   (void) any;
 }
 
-void memoryPool_read_secp256k1_ge(secp256k1_ge* output, __global const unsigned char* memoryPoolPointer) {
-  secp256k1_ge_copy__from__global(output, (__global secp256k1_ge*) memoryPoolPointer);
-}
-
-void memoryPool_read_secp256k1_gej(secp256k1_gej* output, __global const unsigned char* memoryPoolPointer) {
-  secp256k1_gej_copy__from__global(output, (__global secp256k1_gej*) memoryPoolPointer);
-}
-
-void memoryPool_read_secp256k1_fe(secp256k1_fe* output, __global const unsigned char* memoryPoolPointer) {
-  secp256k1_fe_copy__from__global(output, (__global secp256k1_fe*) memoryPoolPointer);
-}
-
-void memoryPool_write_fe_asOutput(
-  const secp256k1_fe* input, int argumentIndex, __global unsigned char* memoryPool
-) {
-  argumentIndex = memoryPool_adjustArgumentIndex(argumentIndex, memoryPool);
-  __global secp256k1_fe* serializerPointer;
-  __global unsigned char* typePointer;
-  memoryPool_writeCurrentSizeAsOutput(argumentIndex, memoryPool);
-  typePointer = (__global unsigned char*) checked_malloc(sizeof_uint(), memoryPool);
-  memoryPool_write_uint(memoryPoolType_fe, typePointer);
-  serializerPointer = (__global secp256k1_fe*) checked_malloc(sizeof_secp256k1_fe(), memoryPool);
-  secp256k1_fe_copy__to__global(serializerPointer, input);
-}
-
-void memoryPool_write_gej_asOutput(
-  const secp256k1_gej* input, int argumentIndex, __global unsigned char* memoryPool
-) {
-  argumentIndex = memoryPool_adjustArgumentIndex(argumentIndex, memoryPool);
-  __global secp256k1_gej* serializerPointer;
-  __global unsigned char* typePointer;
-  memoryPool_writeCurrentSizeAsOutput(argumentIndex, memoryPool);
-  typePointer = (__global unsigned char*) checked_malloc(sizeof_uint(), memoryPool);
-  memoryPool_write_uint(memoryPoolType_gej, typePointer);
-  serializerPointer = (__global secp256k1_gej*) checked_malloc(sizeof_secp256k1_gej(), memoryPool);
-  secp256k1_gej_copy__to__global(serializerPointer, input);
-}
-
 __global secp256k1_ecmult_gen_context* memoryPool_read_generatorContextPointer_NON_PORTABLE(
   __global const unsigned char* memoryPool
 ) {
