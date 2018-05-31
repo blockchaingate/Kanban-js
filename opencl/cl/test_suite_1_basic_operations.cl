@@ -7,21 +7,7 @@
 //To do: make the header file structure more intuitive.
 #endif
 
-
-
-/** Generator for secp256k1, value 'g' defined in
- *  "Standards for Efficient Cryptography" (SEC2) 2.7.1.
- */
-#ifndef DEFINED_ALREADY_secp256k1_ge_const_g
-#define DEFINED_ALREADY_secp256k1_ge_const_g
-___static__constant secp256k1_ge secp256k1_ge_const_g = SECP256K1_GE_CONST(
-    0x79BE667EUL, 0xF9DCBBACUL, 0x55A06295UL, 0xCE870B07UL,
-    0x029BFCDBUL, 0x2DCE28D9UL, 0x59F2815BUL, 0x16F81798UL,
-    0x483ADA77UL, 0x26A3C465UL, 0x5DA4FBFCUL, 0x0E1108A8UL,
-    0xFD17B448UL, 0xA6855419UL, 0x9C47D08FUL, 0xFB10D4B8UL
-);
-#endif
-
+#include "secp256k1_implementation.h"
 
 //WARNING: do not move this function, or you may trigger
 //undocumented openCL behavior.
@@ -137,4 +123,3 @@ __kernel void test_suite_1_basic_operations(
 
 
 
-#include "secp256k1.cl"

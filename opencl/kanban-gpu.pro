@@ -27,6 +27,3 @@ HEADERS += \
     secp256k1_interface.h \
     json.h \
     encodings.h
-
-DISTFILES += \
-    cl/testBuffer.cl

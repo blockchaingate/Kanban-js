@@ -41,4 +41,4 @@ __kernel void secp256k1_opencl_sign(
   memoryPool_write_uint(outputSizeBuffer, &outputSizes[inputMessageIndex * 4]);
 }
 
-#include "secp256k1.cl"
+#include "secp256k1_1_parametric_address_space_non_constant_miner.h"

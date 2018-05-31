@@ -32,4 +32,4 @@ __kernel void secp256k1_opencl_compute_generator_context(
   secp256k1_ecmult_gen_context_build(generatorContext, outputMemoryPoolContainingGeneratorContext);
 }
 
-#include "secp256k1.cl"
+#include "secp256k1_implementation.h"

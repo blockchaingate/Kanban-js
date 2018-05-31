@@ -6,6 +6,7 @@
 //inside of secp256k1.cl.
 //To do: make the header file structure more intuitive.
 #endif
+#include "secp256k1_implementation.h"
 
 
 __kernel void sha256GPU(
@@ -30,5 +31,3 @@ __kernel void sha256GPU(
 
   sha256GPU_inner__global(&result[resultOffset], theLength, &plain_key[offset]);
 }
-
-#include "secp256k1.cl"

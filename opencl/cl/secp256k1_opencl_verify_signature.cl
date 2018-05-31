@@ -75,4 +75,4 @@ __kernel void secp256k1_opencl_verify_signature(
   output[messageIndex] = result;
 }
 
-#include "secp256k1.cl"
+#include "secp256k1_implementation.h"

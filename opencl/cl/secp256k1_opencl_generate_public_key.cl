@@ -7,6 +7,9 @@
 //To do: make the header file structure more intuitive.
 #endif
 
+#include "secp256k1_implementation.h"
+
+
 __kernel void secp256k1_opencl_generate_public_key(
   __global unsigned char* outputPublicKey,
   __global unsigned char* outputPublicKeySize,
@@ -44,4 +47,3 @@ __kernel void secp256k1_opencl_generate_public_key(
   }
 }
 
-#include "secp256k1.cl"

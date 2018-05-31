@@ -1,5 +1,5 @@
 // This file is inteded as a pre-processor tool
-// for converting the program secp256k1.cl
+// for converting the program secp256k1_implementation.h
 // into a C/CPP program.
 // The file extension of the present file is cpp to avoid IDE configuration issues (qtCreator does handle well .c and .cl extensions).
 
@@ -13,7 +13,6 @@ extern Logger logGPU;
 #include <iomanip>
 #include <sstream>
 
-
 #define __kernel
 
 #include "secp256k1_opencl_compute_multiplication_context.cl"
@@ -22,14 +21,10 @@ extern Logger logGPU;
 #include "secp256k1_opencl_generate_public_key.cl"
 #include "secp256k1_opencl_verify_signature.cl"
 #include "test_suite_1_basic_operations.cl"
-#include "sha256GPU.cl"
+#include "sha256GPU_implementation.h"
 void assertFalse(__constant const char* errorMessage, __global unsigned char* memoryPool) {
   (void) memoryPool;
   std::string errorMessageString(errorMessage);
   std::cout << errorMessageString << std::endl;
   assert(false);
 }
-
-#include "secp256k1.cl"
-
-
