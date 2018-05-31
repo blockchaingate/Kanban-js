@@ -445,9 +445,9 @@ int testMain() {
   GPU theGPU;
   GPU theOpenCLCPU;
   theOpenCLCPU.theDesiredDeviceType = CL_DEVICE_TYPE_CPU;
-  if (!testCPP()) {
-    return - 1;
-  }
+  //if (!testCPP()) {
+  //  return - 1;
+  //}
   if (!testGPU(theGPU)) {
     return - 1;
   }

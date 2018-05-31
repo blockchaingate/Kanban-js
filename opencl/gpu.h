@@ -169,6 +169,7 @@ public:
   cl_uint numberOfDevices;
   cl_device_type theDesiredDeviceType;
   cl_device_id currentDeviceId;
+  std::string deviceInfo;
   cl_context context;
   cl_command_queue commandQueue;
   bool flagVerbose;

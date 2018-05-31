@@ -158,17 +158,22 @@ std::shared_ptr<GPUKernel> GPU::getKernel(const std::string& kernelName) {
 }
 
 std::string GPU::getId() {
+  std::stringstream out;
   if (this->theDesiredDeviceType == CL_DEVICE_TYPE_GPU) {
-    return "Graphics PU";
+    out << "Graphics PU";
   } else {
-    return "openCL CPU";
+    out << "OpenCL CPU";
   }
+  if (this->deviceInfo != "") {
+    out << ", " << this->deviceInfo;
+  }
+  return out.str();
 }
 
 bool GPU::finish() {
   cl_int ret = clFinish(this->commandQueue);
   if (ret != CL_SUCCESS) {
-    logGPU << "Fatal error: failed to finish GPU queue. " << Logger::endL;
+    logGPU << "Fatal error: failed to finish GPU queue. Return code: " << ret << ". " << Logger::endL;
     return false;
   }
   return true;
@@ -216,6 +221,7 @@ bool GPU::initializePlatform() {
     logGPU << "Number of devices of type: " << deviceDescription << ": " << this->numberOfDevices << "\n";
   }
   this->currentDeviceId = this->allDevices[0];
+  this->deviceInfo = OpenCLFunctions::getDeviceName(this->currentDeviceId);
   if (this->flagVerbose) {
     logGPU << "Device name: " << OpenCLFunctions::getDeviceName(this->currentDeviceId) << "\n";
     logGPU << "Driver version: " << OpenCLFunctions::getDriverVersion(this->currentDeviceId) << "\n";
