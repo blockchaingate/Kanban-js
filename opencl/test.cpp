@@ -31,16 +31,21 @@ public:
   std::vector<unsigned char> publicKeysSizes;
   std::vector<std::string> publicKeyStrings;
   std::vector<unsigned char> outputVerifications;
+  std::vector<unsigned char> outputGeneratorContexts;
 
   unsigned numMessagesPerPipeline;
   bool flagInitialized;
   testSignatures() {
+    this->numMessagesPerPipeline = 2000;
     this->flagInitialized = false;
   }
   void initialize();
-  bool testSign(GPU& theGPU);
   bool testPublicKeys(GPU& theGPU);
+  bool testSign(GPU& theGPU);
   bool testVerifySignatures(GPU& theGPU, bool tamperWithSignature);
+  bool testPublicKeysCPP();
+  bool testSignCPP();
+  bool testVerifySignaturesCPP(bool tamperWithSignature);
   std::string toStringPublicKeys();
   std::string toStringSignatures();
 };
@@ -160,11 +165,13 @@ extern void secp256k1_opencl_compute_generator_context(
 bool testMainPart1ComputeContexts(GPU& theGPU) {
   //*****CPU tests*******
   std::string idCPU = "C++ CPU";
-  if (!CryptoEC256k1::computeMultiplicationContextDefaultBuffers())
+  if (!CryptoEC256k1::computeMultiplicationContextDefaultBuffers()) {
     return false;
+  }
   /////////////////////////////
-  if (!CryptoEC256k1::computeGeneratorContextDefaultBuffers())
+  if (!CryptoEC256k1::computeGeneratorContextDefaultBuffers()) {
     return false;
+  }
   logTestCentralPU << "Generator context computed. " << Logger::endL;
   testPrintGeneratorContext(CryptoEC256k1::bufferGeneratorContext, idCPU, logTestCentralPU);
   /////////////////////////////
@@ -177,16 +184,18 @@ bool testMainPart1ComputeContexts(GPU& theGPU) {
 
   //*****GPU tests*******
   /////////////////////////////
-  if (!CryptoEC256k1GPU::computeGeneratorContextDefaultBuffers(theGPU))
+  if (!CryptoEC256k1GPU::computeGeneratorContextDefaultBuffers(theGPU)) {
     return false;
+  }
   logTestGraphicsPU << "Generator context computed. " << Logger::endL;
   testPrintGeneratorContext(theGPU.bufferGeneratorContext, theGPU.getId(), logTestGraphicsPU);
   /////////////////////////////
 
 
   /////////////////////////////
-  if (!CryptoEC256k1GPU::computeMultiplicationContextDefaultBuffers(theGPU))
+  if (!CryptoEC256k1GPU::computeMultiplicationContextDefaultBuffers(theGPU)) {
     return false;
+  }
   logTestGraphicsPU << "Multiplication context computed. " << Logger::endL;
   testPrintMultiplicationContext(theGPU.bufferMultiplicationContext, theGPU.getId(), logTestGraphicsPU);
   /////////////////////////////
@@ -385,8 +394,21 @@ bool testBasicOperations(GPU& theGPU){
 }
 
 bool testCPP(){
-  testerSHA256 theSHA256Tester;
-  if (!theSHA256Tester.testCPPthreads()) {
+  //testerSHA256 theSHA256Tester;
+  //if (!theSHA256Tester.testCPPthreads()) {
+  //  return false;
+  //}
+  testSignatures theSignTester;
+  if (!theSignTester.testPublicKeysCPP()) {
+    return false;
+  }
+  if (!theSignTester.testSignCPP()) {
+    return false;
+  }
+  if (!theSignTester.testVerifySignaturesCPP(false)) {
+    return false;
+  }
+  if (!theSignTester.testVerifySignaturesCPP(true)) {
     return false;
   }
   return true;
@@ -597,7 +619,7 @@ class ThreadPool {
 };
 
 ThreadPool::ThreadPool() {
-  this->maximumNumberOfThreads = 1024;
+  this->maximumNumberOfThreads = 1024 * 10;
 }
 
 bool ThreadPool::joinAll() {
@@ -614,30 +636,24 @@ bool ThreadPool::joinAll() {
   return true;
 }
 
-void fireOneThread(testerSHA256* theTester, unsigned int messageIndex) {
-  logTestCPPThreads << "DEBUG: firing up thread with messageIndex: " << messageIndex << " and tester: "
-  << (long) theTester << ". " << Logger::endL;
+void startOneSHA256Thread(testerSHA256* theTester, uint32_t messageIndex) {
+  //logTestCPPThreads << "DEBUG: firing up thread with messageIndex: " << messageIndex << " and tester: "
+  //<< (long) theTester << ". " << Logger::endL;
+  std::vector<unsigned char> bytes = GPU::getUintBytesBigEndian(messageIndex);
 
-  //sha256GPU(
-  //  &theTester->outputBuffer[0],
-  //  &theTester->messageStartsUChar[0],
-  //  &theTester->messageLengthsUChar[0],
-  //  GPU::getUINTbytes(messageIndex),
-  //  &theTester->inputBuffer[0]
-  //);
+  sha256GPU(
+    &theTester->outputBuffer[0],
+    &theTester->messageStartsUChar[0],
+    &theTester->messageLengthsUChar[0],
+    &theTester->inputBuffer[0],
+    bytes[0], bytes[1], bytes[2], bytes[3]
+  );
 }
 
-
 bool testerSHA256::testCPPthreads() {
-  /*
   // Create the two input vectors
   logTestCPPThreads << "Running SHA256 benchmark. " << Logger::endL;
-  logTestCPPThreads << "DEBUG: this pointer: " << (long) this << Logger::endL;
   this->initialize();
-  logTestCPPThreads << "Converted uint: " << GPU::getUINTbytes(10) << Logger::endL;
-  logTestCPPThreads << "Converted uint: " << GPU::getUINTbytes(100001) << Logger::endL;
-  uint32_t temp = GPU::getUINTbytes(1);
-  logTestCPPThreads << "Converted uint: " << memoryPool_read_uint((unsigned char*) (&temp)) << Logger::endL;
 
   auto timeStart = std::chrono::system_clock::now();
   uint32_t largeTestCounter = 0;
@@ -650,16 +666,16 @@ bool testerSHA256::testCPPthreads() {
   int numPasses = 10;
   for (int i = 0; i < numPasses; i++) {
     for (largeTestCounter = 0; largeTestCounter < this->totalToCompute; largeTestCounter ++) {
-      logTestCPPThreads << "DEBUG: Got to counter: " << largeTestCounter << ". " << Logger::endL;
-      thePool.theThreads.push_back(std::make_shared<std::thread>(fireOneThread, this, largeTestCounter));
+      //logTestCPPThreads << "DEBUG: Got to counter: " << largeTestCounter << ". " << Logger::endL;
+      thePool.theThreads.push_back(std::make_shared<std::thread>(startOneSHA256Thread, this, largeTestCounter));
       if (thePool.theThreads.size() >= thePool.maximumNumberOfThreads) {
-        logTestCPPThreads << "DEBUG: About to join all: pool size: " << thePool.theThreads.size() << ". " << Logger::endL;
+        //logTestCPPThreads << "DEBUG: About to join all: pool size: " << thePool.theThreads.size() << ". " << Logger::endL;
         if (!thePool.joinAll()) {
           return false;
         }
       }
       grandTotal ++;
-      if (largeTestCounter % 500 == 0) {
+      if (largeTestCounter % 10000 == 0) {
         auto timeCurrent = std::chrono::system_clock::now();
         std::chrono::duration<double> elapsed_seconds = timeCurrent - timeStart;
         std::cout << "So far, scheduled grand total: " << grandTotal << " sha256s in " << elapsed_seconds.count() << " second(s). " << std::endl;
@@ -691,7 +707,7 @@ bool testerSHA256::testCPPthreads() {
     }
   }
   logTestCPPThreads << "Success!" << Logger::endL;
-  std::cout << "\e[32mSuccess!\e[39m" << std::endl;*/
+  std::cout << "\e[32mSuccess!\e[39m" << std::endl;
   return true;
 }
 
@@ -704,8 +720,6 @@ void testSignatures::initialize() {
     return;
   }
   this->flagInitialized = true;
-  this->numMessagesPerPipeline = 2000;
-  std::cout << "DEBUG: got to here, pt 1" << std::endl;
   unsigned totalPipelineSize = this->numMessagesPerPipeline * 32;
   this->messages.resize(totalPipelineSize);
   this->nonces.resize(totalPipelineSize);
@@ -721,6 +735,8 @@ void testSignatures::initialize() {
   this->publicKeyStrings.resize(this->numMessagesPerPipeline);
   ////////////////////
   this->outputVerifications.resize(this->numMessagesPerPipeline);
+  ///////////////////
+  this->outputGeneratorContexts.resize(MACRO_size_signature_buffer);
   std::cout << "DEBUG: got to here, pt 2" << std::endl;
   this->messages[0] = 'a';
   this->messages[1] = 'b';
@@ -847,6 +863,251 @@ bool testSignatures::testSign(GPU& theGPU) {
     this->outputSignatureStrings
   );
   testLogger << this->toStringSignatures() << Logger::endL;
+  return true;
+}
+
+void startOneSignature(testSignatures* theTester, uint32_t messageIndex) {
+  std::vector<unsigned char> bytes = GPU::getUintBytesBigEndian(messageIndex);
+  secp256k1_opencl_sign(
+    &theTester->outputSignatures[0],
+    &theTester->outputSignatureSizes[0],
+    &theTester->nonces[0],
+    &theTester->secretKeys[0],
+    &theTester->messages[0],
+    CryptoEC256k1::bufferGeneratorContext,
+    bytes[0],
+    bytes[1],
+    bytes[2],
+    bytes[3]
+  );
+}
+
+bool testSignatures::testSignCPP() {
+  logTestCPPThreads << "Running signature benchmark. " << Logger::endL;
+  // Create the two input vectors
+  this->initialize();
+
+  auto timeStart = std::chrono::system_clock::now();
+  uint32_t counterTest;
+  //__global unsigned char* outputSignature,
+  //__global unsigned char* outputSizes,
+  //__global unsigned char* outputInputNonce,
+  //__global unsigned char* inputSecretKey,
+  //__global unsigned char* inputMessage,
+  //__global unsigned char* inputMemoryPoolGeneratorContext,
+  //unsigned int messageIndexChar
+  //kernelSign->writeToBuffer(2, this->nonces);
+  //kernelSign->writeToBuffer(3, this->secretKeys);
+  //kernelSign->writeToBuffer(4, this->messages);
+
+  ThreadPool thePool;
+  //logTestCPPThreads << "DEBUG: Got to counter: " << largeTestCounter << ". " << Logger::endL;
+  for (counterTest = 0; counterTest < this->numMessagesPerPipeline; counterTest ++) {
+    thePool.theThreads.push_back(std::make_shared<std::thread>(startOneSignature, this, counterTest));
+    if (thePool.theThreads.size() >= thePool.maximumNumberOfThreads) {
+      //logTestCPPThreads << "DEBUG: About to join all: pool size: " << thePool.theThreads.size() << ". " << Logger::endL;
+      if (!thePool.joinAll()) {
+        return false;
+      }
+    }
+    //std::cout << "DEBUG: kernel enqueued, proceeding to read buffer. " << std::endl;
+    if (counterTest % 1000 == 0) {
+      auto timeCurrent = std::chrono::system_clock::now();
+      std::chrono::duration<double> elapsed_seconds = timeCurrent - timeStart;
+      std::cout << "Scheduled " << counterTest << " 32-byte messages in " << elapsed_seconds.count() << " second(s),"
+      << " current speed: "
+      << ((counterTest + 1) / elapsed_seconds.count()) << " signature(s) per second." << std::endl;
+    }
+  }
+  if (!thePool.joinAll()) {
+    return false;
+  }
+  auto timeCurrent = std::chrono::system_clock::now();
+  std::chrono::duration<double> elapsed_seconds = timeCurrent - timeStart;
+  logTestCPPThreads << "Signed " << counterTest << " 32-byte messages in "
+  << elapsed_seconds.count() << " second(s). " << Logger::endL;
+  logTestCPPThreads << "Speed: "
+  << (this->numMessagesPerPipeline / elapsed_seconds.count()) << " signature(s) per second." << Logger::endL;
+  readStringsFromBufferWithSizes(
+    this->outputSignatures,
+    this->outputSignatureSizes,
+    MACRO_size_of_signature,
+    this->outputSignatureStrings
+  );
+  logTestCPPThreads << this->toStringSignatures() << Logger::endL;
+  return true;
+}
+
+void startPublicKeys(testSignatures* theTester, uint32_t messageIndex) {
+  std::vector<unsigned char> bytes = GPU::getUintBytesBigEndian(messageIndex);
+  secp256k1_opencl_generate_public_key(
+    &theTester->publicKeysBuffer[0],
+    &theTester->publicKeysSizes[0],
+    &theTester->secretKeys[0],
+    CryptoEC256k1::bufferGeneratorContext,
+    bytes[0],
+    bytes[1],
+    bytes[2],
+    bytes[3]
+  );
+}
+
+bool testSignatures::testPublicKeysCPP() {
+  logTestCPPThreads << "Running public key generation benchmark. " << Logger::endL;
+  this->numMessagesPerPipeline = 10000;
+  this->initialize();
+  // Create a command queue
+  auto timeStart = std::chrono::system_clock::now();
+  uint32_t counterTest = 1;
+  ThreadPool thePool;
+  if (!CryptoEC256k1::computeGeneratorContextDefaultBuffers()) {
+    return false;
+  }
+  for (counterTest = 0; counterTest < this->numMessagesPerPipeline; counterTest ++) {
+    thePool.theThreads.push_back(std::make_shared<std::thread>(startPublicKeys, this, counterTest));
+    if (thePool.theThreads.size() >= thePool.maximumNumberOfThreads) {
+      //logTestCPPThreads << "DEBUG: About to join all: pool size: " << thePool.theThreads.size() << ". " << Logger::endL;
+      if (!thePool.joinAll()) {
+        return false;
+      }
+    }
+    //std::cout << "DEBUG: kernel enqueued, proceeding to read buffer. " << std::endl;
+    if (counterTest % 1000 == 0) {
+      auto timeCurrent = std::chrono::system_clock::now();
+      std::chrono::duration<double> elapsed_seconds = timeCurrent - timeStart;
+      std::cout << "Scheduled " << counterTest << " 32-byte messages in " << elapsed_seconds.count() << " second(s),"
+      << " current speed: "
+      << ((counterTest + 1) / elapsed_seconds.count()) << " public keys per second." << std::endl;
+    }
+  }
+  if (!thePool.joinAll()) {
+    return false;
+  }
+  auto timeCurrent = std::chrono::system_clock::now();
+  std::chrono::duration<double> elapsed_seconds = timeCurrent - timeStart;
+  logTestCPPThreads << "Generated " << counterTest << " public keys in " << elapsed_seconds.count() << " second(s). "
+  << Logger::endL;
+  logTestCPPThreads << "Speed: "
+  << (this->numMessagesPerPipeline / elapsed_seconds.count()) << " public keys per second." << Logger::endL;
+  readStringsFromBufferWithSizes(
+    this->publicKeysBuffer,
+    this->publicKeysSizes,
+    MACRO_size_of_signature,
+    this->publicKeyStrings
+  );
+  for (counterTest = 0; counterTest < this->numMessagesPerPipeline; counterTest ++) {
+    if (this->publicKeyStrings.size() == 0) {
+      logTestCPPThreads << "Public key: " << counterTest << " failed to be generated. " << Logger::endL;
+      assert(false);
+    }
+  }
+  logTestCPPThreads << this->toStringPublicKeys() << Logger::endL;
+  return true;
+}
+
+void startVerification(testSignatures* theTester, uint32_t messageIndex) {
+  std::vector<unsigned char> bytes = GPU::getUintBytesBigEndian(messageIndex);
+  secp256k1_opencl_verify_signature(
+    &theTester->outputVerifications[0],
+    &theTester->outputGeneratorContexts[0],
+    &theTester->outputSignatures[0],
+    &theTester->outputSignatureSizes[0],
+    &theTester->publicKeysBuffer[0],
+    &theTester->publicKeysSizes[0],
+    &theTester->messages[0],
+    CryptoEC256k1::bufferMultiplicationContext,
+    bytes[0],
+    bytes[1],
+    bytes[2],
+    bytes[3]
+  );
+}
+
+bool testSignatures::testVerifySignaturesCPP(bool tamperWithSignature) {
+  logTestCPPThreads << "Running signature verification benchmark. " << Logger::endL;
+  this->initialize();
+  if (!CryptoEC256k1::computeMultiplicationContextDefaultBuffers()) {
+    return false;
+  }
+  auto timeStart = std::chrono::system_clock::now();
+  uint32_t counterTest = 0;
+  //openCL function arguments:
+  //__global unsigned char *output,
+  //__global unsigned char *outputMemoryPoolSignature,
+  //__global const unsigned char* inputSignature,
+  //__global const unsigned char* signatureSizes,
+  //__global const unsigned char* publicKey,
+  //__global const unsigned char* publicKeySizes,
+  //__global const unsigned char* message,
+  //__global const unsigned char* memoryPoolMultiplicationContext,
+  //unsigned int messageIndex
+  if (tamperWithSignature){
+    logTestCPPThreads << "Testing signatures that have been tampered with. All signatures should be invalidated. " << Logger::endL;
+  } else {
+    logTestCPPThreads << "Testing good signatures. All signatures should be verified. " << Logger::endL;
+  }
+  if (tamperWithSignature) {
+    for (unsigned i = 0; i < this->numMessagesPerPipeline; i ++) {
+      this->outputSignatures[i * MACRO_size_of_signature + 11] ++;
+    }
+  }
+  ThreadPool thePool;
+  for (counterTest = 0; counterTest < this->numMessagesPerPipeline; counterTest ++) {
+    thePool.theThreads.push_back(std::make_shared<std::thread>(startVerification, this, counterTest));
+    if (
+      thePool.theThreads.size() >= thePool.maximumNumberOfThreads ||
+      thePool.theThreads.size() >= MACRO_max_num_SIGNATURES_IN_PARALLEL
+    ) {
+      //logTestCPPThreads << "DEBUG: About to join all: pool size: " << thePool.theThreads.size() << ". " << Logger::endL;
+      if (!thePool.joinAll()) {
+        return false;
+      }
+    }
+    //std::cout << "DEBUG: kernel enqueued, proceeding to read buffer. " << std::endl;
+    if (counterTest % 1000 == 0) {
+      auto timeCurrent = std::chrono::system_clock::now();
+      std::chrono::duration<double> elapsed_seconds = timeCurrent - timeStart;
+      std::cout << "Scheduled " << counterTest << " 32-byte verifications in " << elapsed_seconds.count() << " second(s),"
+      << " current speed: "
+      << ((counterTest + 1) / elapsed_seconds.count()) << " scheduled per second." << std::endl;
+    }
+  }
+  if (!thePool.joinAll()) {
+    return false;
+  }
+  auto timeCurrent = std::chrono::system_clock::now();
+  std::chrono::duration<double> elapsed_seconds = timeCurrent - timeStart;
+  logTestCPPThreads << "Verified " << counterTest << " signatures in " << elapsed_seconds.count() << " second(s). "
+  << Logger::endL;
+  logTestCPPThreads << "Speed: "
+  << (this->numMessagesPerPipeline / elapsed_seconds.count()) << " signature(s) per second." << Logger::endL;
+  bool isGood = true;
+  int numGood = 0;
+  for (counterTest = 0; counterTest < this->numMessagesPerPipeline; counterTest ++) {
+    if (this->outputVerifications[counterTest] == 0 && !tamperWithSignature) {
+      logTestCPPThreads << Logger::colorRed << "ERROR: Failed to verify signature " << counterTest << ". "
+      << Logger::colorNormal << Logger::endL;
+      isGood = false;
+      break;
+    }
+    if (this->outputVerifications[counterTest] == 1 && tamperWithSignature) {
+      logTestCPPThreads << Logger::colorRed << "ERROR: wrongly verified tampered with signature "
+      << counterTest << ". " << Logger::colorNormal << Logger::endL;
+      isGood = false;
+      break;
+    }
+    if (this->outputVerifications[counterTest] != 1 && this->outputVerifications[counterTest] != 0) {
+      logTestCPPThreads << Logger::colorRed << "ERROR: signature verification of signature " << counterTest << " has value: "
+      << (int) this->outputVerifications[counterTest] << ". " << Logger::colorNormal << Logger::endL;
+      isGood = false;
+      break;
+    }
+    numGood ++;
+  }
+  logTestCPPThreads << numGood << " signatures processed correctly. " << Logger::endL;
+  if (!isGood) {
+    logTestCPPThreads << "FATAL ERROR. " << Logger::endL;
+  }
   return true;
 }
 
