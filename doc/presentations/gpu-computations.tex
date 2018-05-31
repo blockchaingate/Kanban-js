@@ -3,6 +3,7 @@
 \usepackage{amssymb, amsmath}
 \usepackage{hyperref}
 \usepackage{verbatim}
+\usepackage{multirow}
 
 \addtolength{\hoffset}{-3.5cm}
 \addtolength{\textwidth}{6.8cm}
@@ -48,16 +49,19 @@ Our choice of OpenCL has not been finalized yet; whether we switch to CUDA or to
 
 Speed. All tabulated devices ran the same code. With the exception of a small header file (27 lines for OpenCL and 67 lines for C++), the code is both valid OpenCL and valid C/C++. The total code size is, at the time of writing, 7153 lines of code (= 5049 actual lines + 1294 comments + 810 blank) in a total of 22 files.
 
-\begin{tabular}{|p{6cm}|l|l|l|l|l|}\hline
-Device & run-time & SHA256 & Pub. key gen. & Sign & Sign. verification\\\hline
-Nvidia Quadro K2000 (2 computational units) & OpenCL 1.1 &19,007/sec & 170.7/sec & 121.3/sec & 65.7/sec\\\hline
-Intel${}^{\text{\sffamily\textregistered}}$ Xeon${}^{\text{\sffamily\textregistered}}$ CPU E5-2630 @ 2.60GHz (12 cores)& OpenCL 1.2 &96,028/sec & 2062.6/sec& 1044.3/sec & 638.6/sec\\\hline
+\noindent\begin{tabular}{|p{5.5cm}|l|r|r|r|r|}\hline
+Device & run-time & SHA256 & Pub. key gen. & Sign & Verification\\\hline
+Nvidia Quadro K2000 (2 computational units) & OpenCL 1.1 &19,007/sec & 171/sec & 121/sec & 66/sec\\\hline
+\multirow{2}{*}{ \shortstack{
+Intel${}^{\text{\sffamily\textregistered}}$ Xeon${}^{\text{\sffamily\textregistered}}$ CPU\\ E5-2630 @ 2.60GHz (12 cores)
+}} & OpenCL 1.2 &96,028/sec & 2,063/sec& 1,044/sec & 639/sec\\\cline{2-6}
+&C++ std::thread& 36,040/sec&13,937/sec&6,471/sec&5,505/sec \\\hline
 Intel${}^{\text{\sffamily\textregistered}}$ HD Graphics (SOC, see next) @ 1.1Ghz Intel${}^{\text{\sffamily\textregistered}}$ (23 computational units) & OpenCL 2.0& 55,769/sec& N/A (see below) & N/A& N/A \\\hline
-Intel${}^{\text{\sffamily\textregistered}}$ Core${}^{\text{\sffamily\texttrademark}}$ i5-8250U CPU @ 1.6Ghz (8 cores)& OpenCL 2.0 &130,844/sec& 1765.3/sec &1018.4/sec& 532.5/sec\\\hline 
+Intel${}^{\text{\sffamily\textregistered}}$ Core${}^{\text{\sffamily\texttrademark}}$ i5-8250U CPU @ 1.6Ghz (8 cores)& OpenCL 2.0 &130,844/sec& 1,765/sec &1018/sec& 533/sec\\\hline 
 Radeon${}^{\text{\sffamily\texttrademark}}$ RX 480 Graphics @1266 Mhz &OpenCL 1.2& 31,621/sec& N/A (see below) & N/A& N/A
 \\\hline
 
-Intel${}^{\text{\sffamily\textregistered}}$ Core${}^{\text{\sffamily\texttrademark}}$ i5-7600 CPU @ 3.50GHz (4 cores) &OpenCL 2.0& 237,161/sec & 1497.1/sec & 2592.1/sec&  855.7/sec\\\hline
+Intel${}^{\text{\sffamily\textregistered}}$ Core${}^{\text{\sffamily\texttrademark}}$ i5-7600 CPU @ 3.50GHz (4 cores) &OpenCL 2.0& 237,161/sec & 1,497/sec & 2,592/sec&  856/sec\\\hline
 
 \end{tabular}
 

@@ -65,7 +65,7 @@ public:
   }
   void initialize();
   bool testSHA256(GPU& theGPU);
-  bool testCPPthreads();
+  bool testSHA256CPP();
   unsigned totalToCompute;
 };
 
@@ -394,10 +394,10 @@ bool testBasicOperations(GPU& theGPU){
 }
 
 bool testCPP(){
-  //testerSHA256 theSHA256Tester;
-  //if (!theSHA256Tester.testCPPthreads()) {
-  //  return false;
-  //}
+  testerSHA256 theSHA256Tester;
+  if (!theSHA256Tester.testSHA256CPP()) {
+    return false;
+  }
   testSignatures theSignTester;
   if (!theSignTester.testPublicKeysCPP()) {
     return false;
@@ -529,7 +529,7 @@ bool testerSHA256::testSHA256(GPU& theGPU) {
     theTestLogger << "Bad write" << Logger::endL;
     assert(false);
   }
-  int numPasses = 1;
+  int numPasses = 10;
   cl_mem& result = theKernel->getOutput(0)->theMemory;
   for (int i = 0; i < numPasses; i++) {
     for (largeTestCounter = 0; largeTestCounter < this->totalToCompute; largeTestCounter ++) {
@@ -650,7 +650,7 @@ void startOneSHA256Thread(testerSHA256* theTester, uint32_t messageIndex) {
   );
 }
 
-bool testerSHA256::testCPPthreads() {
+bool testerSHA256::testSHA256CPP() {
   // Create the two input vectors
   logTestCPPThreads << "Running SHA256 benchmark. " << Logger::endL;
   this->initialize();
