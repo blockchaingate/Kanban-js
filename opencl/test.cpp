@@ -453,10 +453,10 @@ int testMain() {
   //if (!testCPP()) {
   //  return - 1;
   //}
-  //if (!testGPU(theGPU)) {
-  //  return - 1;
-  //}
   if (!testGPU(theOpenCLCPU)) {
+    return - 1;
+  }
+  if (!testGPU(theGPU)) {
     return - 1;
   }
   return 0;
@@ -585,7 +585,7 @@ bool testSignatures::testSHA256NoOutput(GPU& theGPU) {
   std::chrono::duration<double> elapsed_seconds = timeCurrent - timeStart;
   theTestLogger << "Computed " << totalSHAs
   << " sha256s in " << elapsed_seconds.count() << " second(s). " << Logger::endL;
-  theTestLogger << "Speed: " << (totalSHAs / elapsed_seconds.count()) << " hashes per second. " << Logger::endL;
+  theTestLogger << "Speed: " << (totalSHAs / elapsed_seconds.count()) << " double hashes per second. " << Logger::endL;
   return true;
 }
 
