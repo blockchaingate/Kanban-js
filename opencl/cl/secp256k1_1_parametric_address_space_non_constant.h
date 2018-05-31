@@ -36,7 +36,7 @@ void APPEND_ADDRESS_SPACE(secp256k1_ge_globalz_set_table_gej)(
 //******end of group_impl.h******
 
 
-static void APPEND_ADDRESS_SPACE(sha256GPU_inner)(
+void APPEND_ADDRESS_SPACE(sha256GPU_inner)(
   ADDRESS_SPACE unsigned char* result, 
   unsigned int length, 
   ADDRESS_SPACE const char* message

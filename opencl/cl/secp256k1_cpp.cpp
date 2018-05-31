@@ -21,7 +21,16 @@ extern Logger logGPU;
 #include "secp256k1_opencl_generate_public_key.cl"
 #include "secp256k1_opencl_verify_signature.cl"
 #include "test_suite_1_basic_operations.cl"
-#include "sha256GPU_implementation.h"
+#include "sha256GPU.cl"
+
+///////////////////////
+#include "secp256k1_set_1_address_space__global.h"
+#include "secp256k1_1_parametric_address_space_non_constant_miner.cl"
+///////////////////////
+#include "secp256k1_set_1_address_space__default.h"
+#include "secp256k1_1_parametric_address_space_non_constant_miner.cl"
+///////////////////////
+
 void assertFalse(__constant const char* errorMessage, __global unsigned char* memoryPool) {
   (void) memoryPool;
   std::string errorMessageString(errorMessage);

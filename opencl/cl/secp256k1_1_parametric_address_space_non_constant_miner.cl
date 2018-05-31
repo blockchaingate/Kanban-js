@@ -6,6 +6,8 @@
 // APPEND_ADDRESS_SPACE
 
 #include "secp256k1.h"
+#include "secp256k1_miner_implementation.h"
+#include "secp256k1_memory_pool_implementation.h"
 
 
 /* Code from: https://github.com/Fruneng/opencl_sha_al_im
@@ -47,7 +49,7 @@ void APPEND_ADDRESS_SPACE(sha256GPU_inner)(
     F = digest[5];
     G = digest[6];
     H = digest[7];
-#pragma unroll
+//#pragma unroll
     for (t = 0; t < 80; t ++) {
       W[t] = 0x00000000;
     }
