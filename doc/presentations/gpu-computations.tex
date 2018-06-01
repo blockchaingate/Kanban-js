@@ -5,6 +5,8 @@
 \usepackage{verbatim}
 \usepackage{multirow}
 \usepackage{xcolor}
+\usepackage{footnote}
+\makesavenoteenv{tabular}
 
 \addtolength{\hoffset}{-3.5cm}
 \addtolength{\textwidth}{6.8cm}
@@ -13,6 +15,8 @@
 
 \newcommand{\NotImplementedYet}{\textbf{\color{orange}NI}}
 \newcommand{\NotRanDueToDriverIssues}{\textbf{\color{orange}ND}}
+\newcommand{\NotCorrect}{\textbf{\color{red}NC}}
+\newcommand{\NotBuilding}{\textbf{\color{red}NB}}
 
 %\author[1]{Todor Milev}
 %\affil[1]{FA Enterprise System}
@@ -30,93 +34,97 @@ Public/private key cryptography is arguably the most important aspect of modern 
 
 In the present text we describe our port of the cryptographic functions that make up the computational core of fabcoin to the GPU programming language OpenCL. Whether this port is to be used in the final version of Kanban - as opposed to using directly the original fabcoin/bitcoin cryptopgrahic library from which the port was derived - remains to be decided.
 
-\subsection{Findings of our investigation}
-[Coming soon]
+\section{Port of secp256k1 to openCL}
+The primary result of our investigation is the porting of the fabcoin core/bitcoin core cryptographic library \secpTwoFiveSixKone{} from C/C++ to openCL. We took special care to keep our code as valid C/C++. I do not believe there has been any performance penalty introduced by the port, however that can be tested in the future. 
 
-%Our investigation of the feasibility of running cryptography using OpenCL, and using the GPU in general, remain inconclusive. Our initial findings suggest that, without any hardware-specific optimization, the CPU performs considerably better than the GPU - anywhere from three to five times better on the hardware combinations we tested.  Here, we must stress that under OpenCL, GPU and CPU computations can be ran in parallel within the same run-time, without the need to recompile or launch multiple executables. 
+\begin{enumerate}
+\item All calls to malloc/free were refactored to a custom memory pool. 
+\item Inputs and outputs were pipelined into single memory buffers. 
+\item In this way, our ported code allows lock-less parallelization in both OpenCL (where that is enforced by design) and in C++, where that is the simplest and most reliable way to achieve parallelization. 
 
-%However, online sources such as Nvidia's guide \cite{NVIDIA:openCLBestPractices} suggest that custom-tailored software optimizations may (or may not) yield between 4- and 10- fold speed optimizations on Nvidia hardware, depending on the particular device and program type, see \cite[page 22]{NVIDIA:openCLBestPractices}. As CPUs appear to be less amenable to software optimizations, it remains feasible that a GPU may outperform a CPU of a similar class, should a considerable effort be put into software optimizations. 
+To the reader familiar with C++ threads, the parallelization model of OpenCL consist in providing the equivalent of thread creation achieved by a so called kernel queue and the equivalent of thread join.
 
-%Even without such optimizations, OpenCL remains a reasonable option as it allows the same code to run on both the CPU and on multiple GPUs (without the need of much engineering), effectively adding the speeds of all involved devices. 
+\item We provided both an openCL and an std::thread benchmark for our code.
 
-%However, at present we cannot recommend switching over to using OpenCL... [to be continued].
+\item Should we decide to focus on C++ and abandon openCL, the std::thread C++ parallelization can remain in use. 
+
+\item We implemented a TCP server to handle parallelization of a one-channel pipeline of cryptographic computation requests to openCL. The server requires further testing for reliability.  
+
+It remains to be decided whether that design will be retained. 
+
+The design has the advantage that it should allow for easy implementation of asynchronous calls. Should the computational engine hang due to a programming mistake, this design would allow the server's driver to restart it without any noticeable downtime.
+
+\item For the purposes of our tests, we connected our TCP server to a node.js server for handling of networking. 
+
+It remains to be decided whether the node.js code will remain in use. 
+
+The advantages of the node.js server are that it provides a secure well-tested out-of-the box platform for secure asynchronous message based networking. Node.js's main limitations are that it has restrictions on RAM memory use, however those can be solved by moving all large RAM allocations to the computational engine.
+
+\item Unlike our benchmarks where all code runs using both openCL std::thread, we have yet to implement std::thread parallelization in our TCP server. In view of the other properties of our setup, this should be achieved quite easily. 
+
+We would like to note that running both C++ and openCL in the same executable should incur neither run-time overhead nor boot time slow down.
+
+
+ 
+\end{enumerate}
+
+We based our port off of Pieter Wuille's C project libsecp256k1 \cite{Wuille:secp256k1}, a development branch of the bitcoin core crypto library. According to his github profile, Pieter Wuille appears to be the \emph{de facto} lead developer of bitcoin's ECDSA implementation. We chose the development branch as it is also the base of the top-google-search (partial) OpenCL port \cite{secp256k1:openCLimplementationHanh0}. We did not choose to use \cite{secp256k1:openCLimplementationHanh0} directly as the port appeared to not be self-contained and contained only an implementation of the signature verification function \ref{enumFourMainVerification})  from Section \ref{sectionFourMainCrypto}.
+
+
+\subsection{OpenCL findings}
+Our investigation of the feasibility of running cryptography using OpenCL, and using the GPU in general, remain inconclusive. Our initial findings are as follows. 
+\begin{itemize}
+\item The performance of openCL vs C++ on CPUs varies enormously depending on the specifics of the software task. For example, C++ appears to outperform openCL 6 to 9 times in signature verification, whereas, in the opposite direction, OpenCL outperforms C++ by a factor of 6 to 8 on double-hash SHA256 computations (mining). 
+
+All aforementioned benchmarks were carried on the same devices, running the same code except for different parallelizations (openCL vs C++) and different respective compilers.
+
+\item In our implementation, CPUs outperform GPUs on openCL on all tasks, including mining. Since this information does not match the experience of other users, this must be due to the specifics of our openCL port. Clearly there is a lot of room for improvement in this direction.
+
+\item We saw very little difficulty porting the SHA256/mining code (the initial port happened in less than a day). However, our crypto library took more than 3 weeks to port. Even so, our current cryptographic library port fails to build on 1 out of 4 GPUs, and runs incorrectly on 2 out of 4, with only 1 NVidia GPU running all code as expected. 
+
+Our (non-mutually exclusive) hypotheses for the causes of this failure are the following.
+\begin{itemize}
+\item GPUs have very small stack sizes (between 32kb and 64kb). A large program such as the cryptographic library may trigger those limits. This is not something that would easily be diagnozed in a small program such as a SHA256 miner.
+
+\item Yet-to-be-diagnosed race conditions, possibly related to overflowing stacks (see the previous).
+
+\item Issues with the OpenCL drivers.
+
+\end{itemize}
+
+Except for drivers and hardware support, it is my belief that all of these issues can be investigated and reliably fixed, however that will require additional development time.
+
+\item Performance is extremely sensitive to the software task. Functions that access a lot of RAM memory, such as signature verification, run much faster under C++. Functions that access a very limited range of memory addresses, such as SHA256, run much faster under openCL, even on the same device.
+
+Clearly the location of memory addresses and the amount of RAM memory used depends on the algorithms used, so performance appears to be much more a function of software than of hardware. Our implementation of signature verification, \verb|secp256k1_ecdsa_sig_verify| (same as in fabcoin core/bitcoin) is optimized to use a lot of RAM memory but not as much computational power. It does so by storing points on the elliptic curve secp256k1 using their WNAF representation (windowed non-adjacent form). This method is quite inefficient memory-wise and can be traded off for a much smaller RAM memory use, but much larger processor use. Whether that would result in performance gains on specific devices remains to be investigated. Further investigation of the matter will require additional development time.
+
+\item On the positive side,  online sources such as Nvidia's guide \cite{NVIDIA:openCLBestPractices} suggest that custom-tailored software optimizations may (or may not) yield between 4- and 10- fold speed optimizations on Nvidia hardware, depending on the particular device and program type, see \cite[page 22]{NVIDIA:openCLBestPractices}. As our code is already heavily optimized for CPUs, it remains feasible that a GPU may outperform a CPU of a similar class, should a considerable effort be put into software optimizations. 
+
+Even without such optimizations, OpenCL remains a reasonable option as it allows the same code to run on both the CPU and on multiple GPUs (without the need of much engineering), effectively adding the speeds of all involved devices. 
+
+\item Since our openCL code runs also C++, all common errors are caught promptly. However, hunting for hardware specific errors - for example, stack overflow due to GPU limitations of otherwise correct code - is greatly hampered by very long build times. 
+\end{itemize}
+
 
 \subsection{OpenCL vs CUDA}
-[Coming soon]
-%We also considered CUDA (an Nvidia proprietary language), but - for the time being - chose to use OpenCL instead as that allows the use of AMD GPUs, Intel system-on-chip GPUs and, last but not least, the Intel/AMD CPUs running the host system. In addition, the use of OpenCL should allow for future ports to the upcoming Intel GPUs \cite{forbes:IntelGPUupcoming}. 
+We also considered CUDA (an Nvidia proprietary language), but - for the time being - chose to use OpenCL instead as that allows the use of AMD GPUs, Intel system-on-chip GPUs and, last but not least, the Intel/AMD CPUs running the host system. In addition, the use of OpenCL should allow for future ports to the upcoming Intel GPUs \cite{forbes:IntelGPUupcoming}. 
 
-%While our primary reason for choosing OpenCL over CUDA was hardware portability and the ability to run code on the CPU, our decision was partially supported by the ambiguous studies of the performance of OpenCL vs CUDA. For example, \cite{KarimiEtAl:DBLP:CUDAvsOpenCL} reports between 13\% and 63\% slower performance of OpenCL vs CUDA, however \cite{MemetiLPKK17:CUDAvsOpenCL:DBLP:journals/corr} reports a slightly better performance of OpenCL vs CUDA. These reports do appear to depend heavily on the particular benchmark used. Even assuming the most pessimistic estimate of 63\% slower performance of OpenCL, the ability to run our software on the CPU and non-Nvidia hardware appears to be a reasonable trade-off. 
+While our primary reason for choosing OpenCL over CUDA was hardware portability and the ability to run code on the CPU, our decision was partially supported by the ambiguous studies of the performance of OpenCL vs CUDA. For example, \cite{KarimiEtAl:DBLP:CUDAvsOpenCL} reports between 13\% and 63\% slower performance of OpenCL vs CUDA, however the more recent \cite{MemetiLPKK17:CUDAvsOpenCL:DBLP:journals/corr} reports a slightly better performance of OpenCL vs CUDA. These reports do appear to depend heavily on the particular benchmark used. Even assuming the most pessimistic estimate of 63\% slower performance of OpenCL, the ability to run our software on the CPU and non-Nvidia hardware appears to be a reasonable trade-off. 
 
-%We must mention that, in support of CUDA over OpenCL, Jason Hong from FA System has informally reported much better performance on SHA256 computations when using CUDA - up to 7-fold increase of performance. The huge differences in speed reported internally may be a function of CUDA-specific code optimizations or a function of the specifics of SHA256 computations. Further investigation into the matter is required. Whether the performance of the other cryptographic functions will be closer to Jason's experience or to the benchmarks reported in \cite{KarimiEtAl:DBLP:CUDAvsOpenCL}, \cite{MemetiLPKK17:CUDAvsOpenCL:DBLP:journals/corr} remains to be investigated.
-
-%Our choice of OpenCL has not been finalized yet; whether we switch to CUDA or to another parallel computation framework remains to be decided.
-
-
-\subsection{Benchmarks}
-
-Speed. All tabulated devices ran the same code. With the exception of a small header file (27 lines for OpenCL and 67 lines for C++), the code is both valid OpenCL and valid C/C++. The total code size is, at the time of writing, 7153 lines of code (= 5049 actual lines + 1294 comments + 810 blank) in a total of 22 files.
-
-
-\begin{tabular}{|l|l|l|}\hline
-Name & Description & Function name (look in kanban/opencl/ ... )\\\hline
-mine SHA256$^{\circ2}$& vary input of  $\text{SHA256}(\text{SHA256}(x))$, fetch best& \verb|sha256_twice_GPU_fetch_best|\\\hline
-\end{tabular}
-
-\begin{tabular}{|l|l|}\hline
-Label & Description \\\hline
-\NotImplementedYet & not implemented yet.\\\hline
-\NotRanDueToDriverIssues& did not run yet due to colliding drivers; older versions may have ran correctly \\\hline
-\end{tabular}
+We must mention that, in support of CUDA over OpenCL, Jason Hong and Sam Gong have informally reported much better performance on SHA256 computations when using CUDA - up to 7-fold increase of performance. The huge differences in speed reported internally may be a function of CUDA-specific code optimizations or a function of the specifics of SHA256 computations. From our experience with OpenCL, we know that performance is greatly affected by the RAM memory use and access patterns. For example, our performance metrics of openCL vs C++ swung up to 8 fold in both directions, for a total of up to 64 fold performance difference (2 orders of magnitude) on the same device. I would not be surprised if similar phenomena manifest themselves while programming using CUDA.  Should we choose to use CUDA, whether the performance of the other cryptographic functions will be closer to Jason's experience or to the benchmarks reported in \cite{KarimiEtAl:DBLP:CUDAvsOpenCL}, \cite{MemetiLPKK17:CUDAvsOpenCL:DBLP:journals/corr} remains to be investigated.
 
 
 
-\noindent\begin{tabular}{|p{5.5cm}|l|r|r||r|r|r|}\hline
-Device & run-time &mine SHA256$^{\circ2}$& SHA256 & Pub. key & Sign & Verification\\\hline
-Nvidia Quadro K2000 (2 computational units) & OpenCL 1.1 &21,260/sec &19,007/sec & 171/sec & 121/sec & 66/sec\\\hline
-\multirow{2}{*}{ \shortstack{
-Intel${}^{\text{\sffamily\textregistered}}$ Xeon${}^{\text{\sffamily\textregistered}}$ CPU\\ E5-2630 @ 2.60GHz (12 cores)
-}} & OpenCL 1.2 &5.98 million/sec &96,028/sec & 2,063/sec& 1,044/sec & 639/sec\\ \cline{2-7}
-& C++ std::thread& 0.99 million/sec& 36,040/sec&13,937/sec&6,471/sec& 5,505/sec \\\hline\hline
-Intel${}^{\text{\sffamily\textregistered}}$ HD Graphics (SOC, see next) @ 1.1Ghz Intel${}^{\text{\sffamily\textregistered}}$ (23 computational units) & OpenCL 2.0& 76,365/sec  & 55,769/sec& N/A & N/A& N/A \\\hline
-\multirow{2}{*}{\shortstack{ Intel${}^{\text{\sffamily\textregistered}}$ Core${}^{\text{\sffamily\texttrademark}}$ CPU \\
-i5-8250U @ 1.6Ghz (8 cores)}} & OpenCL 2.0 & 5.55 million/sec &130,844/sec& 1,765/sec &1,018/sec& 533/sec\\\cline{2-7}
-&C++ std::thread&\NotImplementedYet  &48,865/sec& 13,643/sec&5,961/sec&4,136/sec \\\hline\hline
-
-Nvidia GeForce GTX 1080 @1.86Ghz (20 computational units) &OpenCL 1.2&{\color{red} 46,759/sec} &34,967/sec&N/A&N/A&N/A\\\hline
-
-Radeon${}^{\text{\sffamily\texttrademark}}$ RX 480 Graphics @1266 Mhz &OpenCL 1.2&\NotRanDueToDriverIssues  &31,621/sec& N/A & N/A& N/A
-\\\hline
-
-\multirow{2}{*}{\shortstack{
-Intel${}^{\text{\sffamily\textregistered}}$ Core${}^{\text{\sffamily\texttrademark}}$ CPU \\ i5-7600 @ 3.50GHz (4 cores)
-}} 
-&OpenCL 2.0&7.89 million/sec  &237,161/sec & 1,497/sec & 2,592/sec&  856/sec\\\cline{2-7}
-&C++ std::thread &\NotImplementedYet&84,259/sec&21,719/sec&6,930/sec&5,093/sec\\\hline
-\end{tabular}
-
-
-
-Compilation times. Measures the difficulty of testing code changes.
-
-\noindent\begin{tabular}{|p{5cm}|l|r||r|r|r|r|}\hline
-Device & run-time & SHA256 & init& Pub. key & Sign & Verification\\\hline
-Nvidia Quadro K2000 & OpenCL 1.1 &0.5 sec& 23.3 sec &3.5 sec &6.1 sec &11.5 sec\\\hline 
-Intel${}^{\text{\sffamily\textregistered}}$ Xeon${}^{\text{\sffamily\textregistered}}$ CPU E5-2630 @ 2.60GHz (12 cores)&  OpenCL 1.2&0.1 sec&379.2 sec&147.7 sec&360.3 sec&362.6 sec\\\hline \hline
-Intel${}^{\text{\sffamily\textregistered}}$ HD Graphics (SOC, see next) @ 1.1Ghz Intel${}^{\text{\sffamily\textregistered}}$ (23 computational units)& OpenCL 2.0& 0.3 sec &69.4 sec &2.8 sec&19.3 sec   & 39.9 sec \\\hline
-Intel${}^{\text{\sffamily\textregistered}}$ Core${}^{\text{\sffamily\texttrademark}}$ CPU 
-i5-8250U @ 1.6Ghz (8 cores)& OpenCL 2.0&0.1 sec&417.7 sec &154.5 sec &382.6 sec &379.8 sec \\\hline\hline 
-Radeon${}^{\text{\sffamily\texttrademark}}$ RX 480 Graphics @1266 Mhz &OpenCL 1.2&0.2 sec  &45.1 sec &1.9 sec&11.3 sec&23.9 sec \\\hline 
-Intel${}^{\text{\sffamily\textregistered}}$ Core${}^{\text{\sffamily\texttrademark}}$ CPU i5-7600 @ 3.50GHz (4 cores)&OpenCL 2.0&0.1 sec&234.7 sec&90.8 sec&235.0 sec&232.4 sec \\\hline
-\end{tabular}
+Our choice of OpenCL has not been finalized yet; whether we switch to CUDA or to another parallel computation framework (such as openMP, openACC, or simply using std::thread) remains to be decided.
 
 
 \subsection{The four main cryptographic functions} \label{sectionFourMainCrypto}
 The four main cryptographic functions used to run FAB coin (and all other major crypto-currencies, powered by various algorithms) are as follows.
 \begin{enumerate}
-\item \label{enumFourMainSHA} Secure hashing function.
-\item \label{enumFourMainPrivatePublicKeyGeneration} Private/public key pair generation.
-\item \label{enumFourMainCryptoSignature} Cryptographic signature.
-\item \label{enumFourMainVerification} Cryptographic signature verification.
+	\item \label{enumFourMainSHA} Secure hashing function.
+	\item \label{enumFourMainPrivatePublicKeyGeneration} Private/public key pair generation.
+	\item \label{enumFourMainCryptoSignature} Cryptographic signature.
+	\item \label{enumFourMainVerification} Cryptographic signature verification.
 \end{enumerate}
 
 \noindent\ref{enumFourMainSHA}) Among many secure hashing functions, FAB uses SHA256 (secure hash algorithm 2, 256 bit). The same algorithm is also used in bitcoin. The secure hash is used to digest messages into 256 bit = 32 byte lengths. SHA256 has the property that, given a message and its digest, it is practically impossible to forge another message that has the same digest. 
@@ -134,8 +142,7 @@ The main use case of private/public key pairs is as follows. A message - say, a 
 The cryptographic signature is a function of the message being signed, the private key, and, in the particular case of (EC)DSA, a one-time use random number.
 
 \noindent\ref{enumFourMainVerification}) The signature verification algorithm is used to verify signatures generated as described in \ref{enumFourMainPrivatePublicKeyGeneration}). The signature verification is a function of the signed message, the signature, and the public key of the signature owner.
-
-\subsection{ECDSA}\label{sectionECDSAgeneral}
+\subsection{A brief description of ECDSA}\label{sectionECDSAgeneral}
 Following Bitcoin, FAB coin uses the standard public/private key cryptography ECDSA over \secpTwoFiveSixKone. Here, ECDSA stands for Elliptic Curve Digital Signature Algorithm and \secpTwoFiveSixKone{} stands for the elliptic curve:
 
 \[
@@ -151,7 +158,109 @@ where
 p= 2^{256} - 2^{32} - 977.
 \end{equation}
 
-At present, fabcoin core uses bitcoin's implementation of \secpTwoFiveSixKone{}. We report here that we ported one of bitcoin's development forks - Pieter Wuille's C project libsecp256k1 \cite{Wuille:secp256k1}  - to OpenCL. This development branch was chosen as our base as it is also the base of the top-google-search (partial) OpenCL port \cite{secp256k1:openCLimplementationHanh0}. We did not choose to use \cite{secp256k1:openCLimplementationHanh0} directly as the port appeared to not be self-contained and contained only an implementation of the signature verification function \ref{enumFourMainVerification})  from Section \ref{sectionFourMainCrypto}.
+\subsection{Benchmarks}
+
+Speed. All tabulated devices ran the same code. With the exception of a small header file (27 lines for OpenCL and 67 lines for C++), the code is both valid OpenCL and valid C/C++. The total code size is, at the time of writing, 7153 lines of code (= 5049 actual lines + 1294 comments + 810 blank) in a total of 22 files.
+
+
+\noindent \begin{tabular}{|l|p{5.5cm}|l|p{3cm}|}\hline
+	Name & Description & Function& non-stack RAM/comp. unit \\\hline
+	mine SHA256$^{\circ2}$& vary input of  $\text{SHA256}(\text{SHA256}(x))$, fetch best& \verb|sha256_twice_GPU_fetch_best| & \begin{tabular}{@{}l} read: 32 bytes \\ write: 32 bytes \end{tabular} \\ \hline
+	SHA256 &  hash function used in fabcoin& \verb|sha256GPU|& \begin{tabular}{@{}p{3cm}} read: Message size + 4 bytes \\ write: 32 bytes
+	\end{tabular} \\\hline
+	init & initializations needed for signatures and verifications & \begin{tabular}{l} \verb|secp256k1_ecmult_gen_context_build|, \\ \verb|secp256k1_ecmult_context_build|\end{tabular}& \begin{tabular}{@{}p{4cm}}read: none\\write: (3.7 + 6) MB \end{tabular}   \\\hline
+	Pub. key & generate public key &  \verb|secp256k1_ecmult_gen| &\begin{tabular}{@{}p{4cm}}read: 3.7 MB \footnote{Can be reduced to 230 KB}\\ write: 76 bytes \end{tabular} \\\hline
+	Sign & Sign a message securely, hardened & \verb|secp256k1_opencl_sign|& \begin{tabular}{@{}p{4cm}} read: 6MB\footnote{Can be reduced} \\ write: 76 bytes  \end{tabular} \\\hline 
+	Verify & Verify a signature of a message against a public key & \verb|secp256k1_ecdsa_sig_verify| & \begin{tabular}{@{}p{4cm}}read: 6 MB \\ write: 230 KB  \end{tabular}\\\hline
+\end{tabular}
+
+\noindent \begin{tabular}{|l|l|}\hline
+	Label & Description \\\hline
+	\NotImplementedYet & not implemented yet.\\\hline
+	\NotRanDueToDriverIssues& did not run yet due to colliding drivers; older versions may have ran correctly \\\hline
+	\NotCorrect& Compiles builds and runs without errors but produces incorrect results \\\hline
+	\NotBuilding& Does not build\\\hline
+\end{tabular}
+
+
+
+\noindent\begin{tabular}{|p{5.5cm}|l|r|r||r|r|r|}\hline
+	Device & run-time &mine SHA256$^{\circ2}$& SHA256 & Pub. key & Sign & Verify\\\hline
+	Nvidia Quadro K2000 (2 computational units) & OpenCL 1.1 &21,260/sec &19,007/sec & 171/sec & 121/sec & 66/sec\\\hline
+	\multirow{2}{*}{ \shortstack{
+			Intel${}^{\text{\sffamily\textregistered}}$ Xeon${}^{\text{\sffamily\textregistered}}$ CPU\\ E5-2630 @ 2.60GHz (12 cores)
+	}} & OpenCL 1.2 &5.98 million/sec &96,028/sec & 2,063/sec& 1,044/sec & 639/sec\\ \cline{2-7}
+	& C++ std::thread& 0.99 million/sec& 36,040/sec&13,937/sec&6,471/sec& 5,505/sec \\\hline\hline
+	Intel${}^{\text{\sffamily\textregistered}}$ HD Graphics (SOC, see next) @ 1.1Ghz Intel${}^{\text{\sffamily\textregistered}}$ (23 computational units) & OpenCL 2.0& 76,365/sec  & 55,769/sec& \NotCorrect & \NotCorrect & \NotCorrect \\\hline
+	\multirow{2}{*}{\shortstack{ Intel${}^{\text{\sffamily\textregistered}}$ Core${}^{\text{\sffamily\texttrademark}}$ CPU \\
+			i5-8250U @ 1.6Ghz (8 cores)}} & OpenCL 2.0 & 5.55 million/sec &130,844/sec& 1,765/sec &1,018/sec& 533/sec\\\cline{2-7}
+	&C++ std::thread& 0.73 million/sec  &48,865/sec& 13,643/sec&5,961/sec&4,136/sec \\\hline\hline
+	
+	Nvidia GeForce GTX 1080 @1.86Ghz (20 computational units) &OpenCL 1.2&{\color{red} 46,759/sec} &34,967/sec&\NotBuilding &\NotBuilding&\NotBuilding\\\hline
+	
+	Radeon${}^{\text{\sffamily\texttrademark}}$ RX 480 Graphics @1266 Mhz &OpenCL 1.2&\NotRanDueToDriverIssues  &31,621/sec& \NotCorrect & \NotCorrect & \NotCorrect
+	\\\hline
+	
+	\multirow{2}{*}{\shortstack{
+			Intel${}^{\text{\sffamily\textregistered}}$ Core${}^{\text{\sffamily\texttrademark}}$ CPU \\ i5-7600 @ 3.50GHz (4 cores)
+	}} 
+	&OpenCL 2.0&7.89 million/sec  &237,161/sec & 1,497/sec & 2,592/sec&  856/sec\\\cline{2-7}
+	&C++ std::thread &1.01 million/sec&84,259/sec&21,719/sec&6,930/sec&5,093/sec\\\hline
+\end{tabular}
+
+
+
+Compilation times. Measures the difficulty of testing code changes.
+
+\noindent\begin{tabular}{|p{5cm}|l|r||r|r|r|r|}\hline
+	Device & run-time & SHA256 & init& Pub. key & Sign & Verify\\\hline
+	Nvidia Quadro K2000 & OpenCL 1.1 &0.5 sec& 23.3 sec &3.5 sec &6.1 sec &11.5 sec\\\hline 
+	Intel${}^{\text{\sffamily\textregistered}}$ Xeon${}^{\text{\sffamily\textregistered}}$ CPU E5-2630 @ 2.60GHz (12 cores)&  OpenCL 1.2&0.1 sec&379.2 sec&147.7 sec&360.3 sec&362.6 sec\\\hline \hline
+	Intel${}^{\text{\sffamily\textregistered}}$ HD Graphics (SOC, see next) @ 1.1Ghz Intel${}^{\text{\sffamily\textregistered}}$ (23 computational units)& OpenCL 2.0& 0.3 sec &69.4 sec &2.8 sec&19.3 sec   & 39.9 sec \\\hline
+	Intel${}^{\text{\sffamily\textregistered}}$ Core${}^{\text{\sffamily\texttrademark}}$ CPU 
+	i5-8250U @ 1.6Ghz (8 cores)& OpenCL 2.0&0.1 sec&417.7 sec &154.5 sec &382.6 sec &379.8 sec \\\hline\hline 
+	Radeon${}^{\text{\sffamily\texttrademark}}$ RX 480 Graphics @1266 Mhz &OpenCL 1.2&0.2 sec  &45.1 sec &1.9 sec&11.3 sec&23.9 sec \\\hline 
+	Intel${}^{\text{\sffamily\textregistered}}$ Core${}^{\text{\sffamily\texttrademark}}$ CPU i5-7600 @ 3.50GHz (4 cores)&OpenCL 2.0&0.1 sec&234.7 sec&90.8 sec&235.0 sec&232.4 sec \\\hline
+\end{tabular}
+
+
+
+
+\section{Conclusions}
+In view of the fact that our cryptographic library port parallelizes well on the CPU and runs on the GPU, I see no reason to rush towards potentially difficult software optimizations - for now. 
+
+As proposed by Jason Hong, I think that we should delay further development of our cryptographic functions, and instead focus on building a first version of Kanban. I think we should focus on profile our entire system before we start pursuing difficult software optimizations. 
+
+Jason has proposed to me that I clone fabcoin, deploy a network of clones on AWS (Amazom Web Services) and build a performance profile on this live system. From there, we should proceed to gradually modify the system to perform the functions of Kanban as proposed in the white paper.
+
+I think Jason's proposal is the right way to proceed for the time being; we should revisit GPU optimizations when the main functionality of Kanban works and we have a proper benchmark to measure the main bottlenecks in the system. 
+
+\subsection{Data handling in Kanban}
+I do not see an in-GPU database as a high priority. Instead, I propose we use C++'s RAM memory in the first version of Kanban, and then focus on upgrading to a GPU database when time permits and as dictated by our (yet to be constructed) benchmarks. 
+
+For the first version of Kanban, I would propose we store the main tables using the C++ data structure \verb|std::unordered_map|. Constant-time lookup of a table whose rows are labeled by addresses can be achieved at the cost of about 20 bytes per stored row of information. Assuming we store account balance (say, 8 bytes) and an extra 4 bytes of information (say, number of confirmations) for every address, we can achieve constant-time address lookup in 
+
+\[
+\underbrace{34}_{\text{address size}} + \underbrace{8}_{\text{account ballance}} + \underbrace{4}_{\text{meta info}} + \underbrace{20}_{\text{to achieve constant time lookup}} = 56 \text{ bytes}
+\]
+per address. According to \url{https://blockchain.info}, at present there are about 440,000 unique addresses. Therefore we can store the account information of all bitcoin addresses using only
+\[
+56\cdot 440,000 = 24640000 \approx 25~\text{MB}.
+\]
+
+Should we want to hold $100$ addresses for every alive human right now, we need only 
+\[
+100\cdot 7.3 \cdot 10^9 \cdot 56 \approx 40~\text{TB} 
+\]
+of information. The use of $1,000$ shards brings down the memory use of each system to the completely feasible amount of $40~\text{GB}$. It therefore seems reasonable to postpone the engineering of more specialized data structures to the time when FAB coin starts getting near the estimates above, as at that time I expect we will have a lot greater engineering resources available.
+
+
+We should note that it is possible to store all UTXOs (unspent transaction outputs) in RAM memory for a system as large as is bitcoin at present (some 56.6 million UTXOs at the time of writing, according to \url{https://blockchain.info}). According to \cite{cryptoeprint:2017:analysisofbitcoinUTXOs}, $52.5$ million UTXOs take about $3$ GB of RAM. To achieve constant time lookup, one needs about 20 bytes per transaction, so another 
+\[
+52.5 \cdot 10^6 \cdot 20 = 1.05\text{~GB}
+\]
+of RAM memory. In this way, the entire bitcoin UTXO data set can be stored and looked up using a little more than 4 GB. With sharding, it should be possible to scale the storage of all UTXOs thousands at a scale thousands of times larger than bitcoin at present.
+\newpage
 
 
 \bibliographystyle{plain}
