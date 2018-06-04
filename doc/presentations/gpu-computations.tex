@@ -44,7 +44,7 @@ The primary result of our investigation is the porting of the fabcoin core/bitco
 
 To the reader familiar with C++ threads, the parallelization model of OpenCL consist in providing the equivalent of thread creation achieved by a so called kernel queue and the equivalent of thread join.
 
-\item We provided both an openCL and an std::thread benchmark for our code.
+\item We provided both an openCL and a std::thread benchmark for our code.
 
 \item Should we decide to focus on C++ and abandon openCL, the std::thread C++ parallelization can remain in use. 
 
@@ -58,7 +58,7 @@ The design has the advantage that it should allow for easy implementation of asy
 
 It remains to be decided whether the node.js code will remain in use. 
 
-The advantages of the node.js server are that it provides a secure well-tested out-of-the box platform for secure asynchronous message based networking. Node.js's main limitations are that it has restrictions on RAM memory use, however those can be solved by moving all large RAM allocations to the computational engine.
+The advantages of the node.js server are that it provides a secure well-tested out-of-the box platform for asynchronous message based networking. Node.js's main limitations are that it has restrictions on RAM memory use, however those can be solved by moving all large RAM allocations to the computational engine.
 
 \item Unlike our benchmarks where all code runs using both openCL std::thread, we have yet to implement std::thread parallelization in our TCP server. In view of the other properties of our setup, this should be achieved quite easily. 
 
