@@ -18,7 +18,9 @@ var defaults = {
   outputGPUTest: "divGPUTestOutput",
   outputFabcoinInitialization: "divFabcoinInitialization",
   radioButtonBestBlock: "radioBestBlockHash",
-  radioBlockInfo: "radioBlockInfo",
+  radioButtonBlockInfo: "radioButtonBlockInfo",
+  radioButtonTransactionsSetInfo: "radioButtonTransactionsSetInfo",
+  radioButtonTransactionsListUnspent: "radioButtonTransactionsListUnspent",
   checkboxBlockVerbose: "checkboxBlockVerbose",
 }
 

@@ -52,6 +52,9 @@ function fabcoinInitialize(request, response, desiredCommand) {
       numberRequestsRunning --;
       if (code === 0){
         response.writeHead(200);
+        if (finalData === "") {
+          finalData = `Server started correctly on ${theNet} (nothing to output). `;
+        }
         response.end(finalData);
       } else {
         response.writeHead(200);

@@ -39,7 +39,11 @@ function updateBlockInfoPage(){
 }
 
 function updateTXInfoPage(){
-  getTXoutSetInfo();
+  if (document.getElementById(ids.defaults.radioButtonTransactionsListUnspent).checked === true) {
+    getListUnspent();
+  } else {
+    getTXoutSetInfo();
+  }
 }
 
 function updatePages(){
@@ -84,7 +88,7 @@ function getBlock() {
   if (document.getElementById(ids.defaults.checkboxBlockVerbose).checked){
     getPage().pages.blockInfo.verbosity = "1";  
   }
-  document.getElementById(ids.defaults.radioBlockInfo).checked = true;
+  document.getElementById(ids.defaults.radioButtonBlockInfo).checked = true;
   var theURL = pathnames.getURLfromRPCLabel(
     pathnames.rpcCalls.getBlock.rpcCall, {
       blockHash: getBlockHash().value, 
@@ -206,7 +210,7 @@ function listUnspentCallback(input, outputComponent) {
   jsonToHtml.writeJSONtoDOMComponent(input, outputComponent);
 }
 
-function listUnspent() {
+function getListUnspent() {
   submitRequests.submitGET({
     url: pathnames.getURLfromRPCLabel(pathnames.rpcCalls.listUnspent.rpcCall, {
       net: getPage().pages.blockInfo.currentNet,
@@ -227,6 +231,6 @@ module.exports = {
   getTXoutSetInfo,
   getTXout,
   getReceivedByAccount,
+  getListUnspent,
   listAccounts,
-  listUnspent
 }

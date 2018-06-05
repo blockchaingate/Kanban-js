@@ -21,7 +21,7 @@ function handle_requests(request, response){
     response.writeHead(400, {"Content-type": "text/plain"});
     return response.end(`Bad url: ${escapeHtml(e)}`);
   }
-  console.log(`DEBUG: The url is pt 2: ${request.url}`.red);
+  //console.log(`DEBUG: The url is pt 2: ${request.url}`.red);
   if (parsedURL.pathname in pathnames.url.whiteListed){
     //console.log(`The url is pt 3: ${request.url}`.red);
     return handleFile(request, response);
@@ -36,7 +36,7 @@ function handle_requests(request, response){
     return handleNodeCall(request, response);
   }
   
-  console.log(`DEBUG: The url is pt 5: ${request.url}`.red);
+  //console.log(`DEBUG: The url is pt 5: ${request.url}`.red);
   response.writeHead(200);
   response.end(`Uknown request ${escapeHtml(request.url)}`);
 }

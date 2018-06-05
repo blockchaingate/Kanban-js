@@ -9,7 +9,7 @@ function Page() {
       ids: {
         page: ids.defaults.pageFabcoinInitialization
       },
-      updateFunction: fabcoinInitialization.startFabcoinDaemonInNeeded,      
+      updateFunction: fabcoinInitialization.startFabcoinDaemonIfNeeded,      
     },
     blockInfo: {
       ids: {
@@ -23,7 +23,7 @@ function Page() {
       ids: {
         page: ids.defaults.pageTXInfo
       },
-      updateFunction: rpcCalls.getTXoutSetInfo
+      updateFunction: rpcCalls.updateTXInfoPage
     },
     network: {
       ids: {
