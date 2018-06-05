@@ -9,9 +9,9 @@ const fabCli = require('./fabcoin_cli_call');
 const fabcoinInitialization = require('./fabcoin_initialization');
 const nodeHandlers = require('./node_handlers');
 
-function handle_requests(request, response){
+function handle_requests(request, response) {
   //console.log(`The url is: ${request.url}`.red);
-  if (request.url in pathnames.url.synonyms){
+  if (request.url in pathnames.url.synonyms) {
     request.url = pathnames.url.synonyms[request.url];
   }
   var parsedURL = null;
@@ -22,17 +22,17 @@ function handle_requests(request, response){
     return response.end(`Bad url: ${escapeHtml(e)}`);
   }
   //console.log(`DEBUG: The url is pt 2: ${request.url}`.red);
-  if (parsedURL.pathname in pathnames.url.whiteListed){
+  if (parsedURL.pathname in pathnames.url.whiteListed) {
     //console.log(`The url is pt 3: ${request.url}`.red);
     return handleFile(request, response);
   }
-  if (parsedURL.pathname === pathnames.url.known.fabcoinInitialization){
+  if (parsedURL.pathname === pathnames.url.known.fabcoinInitialization) {
     return handleFabcoinInitialization(request, response);
   }
-  if (parsedURL.pathname === pathnames.url.known.rpc){
+  if (parsedURL.pathname === pathnames.url.known.rpc) {
     return handleRPC(request, response);
   }
-  if (parsedURL.pathname === pathnames.url.known.node){
+  if (parsedURL.pathname === pathnames.url.known.node) {
     return handleNodeCall(request, response);
   }
   
@@ -41,7 +41,7 @@ function handle_requests(request, response){
   response.end(`Uknown request ${escapeHtml(request.url)}`);
 }
 
-function handleFabcoinInitialization(request, response){
+function handleFabcoinInitialization(request, response) {
   var parsedURL = null;
   var query = null;
   var queryCommand = null;
@@ -56,7 +56,7 @@ function handleFabcoinInitialization(request, response){
   return fabcoinInitialization.fabcoinInitialize(request, response, queryCommand);
 }
 
-function handleRPC(request, response){
+function handleRPC(request, response) {
   var parsedURL = null;
   var query = null;
   var queryCommand = null;
@@ -71,7 +71,7 @@ function handleRPC(request, response){
   return fabCli.rpcCall(request, response, queryCommand);
 }
 
-function handleNodeCall(request, response){
+function handleNodeCall(request, response) {
   var parsedURL = null;
   var query = null;
   var queryCommand = null;
@@ -86,16 +86,16 @@ function handleNodeCall(request, response){
   return nodeHandlers.dispatch(request, response, queryCommand);
 }
 
-function handleFile(request, response){
+function handleFile(request, response) {
   var thePathName = pathnames.url.whiteListed[request.url];
-  fs.readFile(thePathName, function(error, data){
-    if (error){
+  fs.readFile(thePathName, function(error, data) {
+    if (error) {
       response.writeHead(400, `File error.`);
       response.end(`While fetching: ${escape(request.url)} got the error: ${error}. `);
       return;
     }
     var mimeType = mime.lookup(thePathName);
-    if (!mimeType){
+    if (!mimeType) {
       mimeType = "application/x-binary";
     }
     response.writeHead(200, {"Content-type": mimeType});

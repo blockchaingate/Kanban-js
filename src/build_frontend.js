@@ -4,7 +4,7 @@ const pathnames = require('./pathnames');
 const browserify = require('browserify');
 const colors = require('colors');
 
-function buildFrontEnd(){
+function buildFrontEnd() {
   console.log(`Process ${process.pid} running.`.green);
   //Run browserify
   var theBrowserifier = browserify();

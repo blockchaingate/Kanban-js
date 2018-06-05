@@ -165,8 +165,13 @@ var fabcoinInitialization = "fabcoinInitialization";
 var fabcoinInitializationProcedures = {
   startFabcoind: {
     fabcoinInitialization: "startFabcoind", //must be same as label, used for autocomplete
-    command: "startFabcoind",
-    net: "-testnet"
+    command: pathname.fabcoind,
+    cli: [ ["net", "-testnet"], "-daemon"]
+  },
+  killAll: {
+    fabcoinInitialization: "killAll",
+    command: "killall",
+    cli: ["fabcoind"]
   }
 }
 
@@ -182,9 +187,9 @@ function getURLfromNodeCall(theNodeCallLabel, additionalArguments) {
       theRequest[label] = additionalArguments[label];
     }
   }
-  if (theNodeCall.required !== undefined){
-    for (var counterRequiredArguments = 0; counterRequiredArguments < theNodeCall.required.length; counterRequiredArguments ++){
-      if (!(theNodeCall.required[counterRequiredArguments] in theRequest)){
+  if (theNodeCall.required !== undefined) {
+    for (var counterRequiredArguments = 0; counterRequiredArguments < theNodeCall.required.length; counterRequiredArguments ++) {
+      if (!(theNodeCall.required[counterRequiredArguments] in theRequest)) {
         throw (`Mandatory argument ${theNodeCall.required[counterRequiredArguments]} missing.`);
       }
     }
@@ -192,58 +197,84 @@ function getURLfromNodeCall(theNodeCallLabel, additionalArguments) {
   return `${url.known.node}?command=${encodeURIComponent(JSON.stringify(theRequest))}`;
 }
 
-function getURLfromRPCLabel(theRPClabel, theArguments){
+function getURLfromRPCLabel(theRPClabel, theArguments) {
   var theRequest = {};
   theRequest[rpcCall] = theRPClabel;
   var theRPCCall = rpcCalls[theRPClabel];
-  for (var label in theRPCCall){
-    if (typeof theRPCCall[label] === "string"){
+  for (var label in theRPCCall) {
+    if (typeof theRPCCall[label] === "string") {
       theRequest[label] = theRPCCall[label]
     } 
   }
-  if (theArguments === undefined){
+  if (theArguments === undefined) {
     theArguments = {};
   }
-  for (var label in theArguments){
-    if (typeof theRPCCall[label] !== "string" && theRPCCall[label] !== null){
+  for (var label in theArguments) {
+    if (typeof theRPCCall[label] !== "string" && theRPCCall[label] !== null) {
       continue; // <- label not valid for this RPC call
     }
-    if (typeof theArguments[label] === "string"){
+    if (typeof theArguments[label] === "string") {
       theRequest[label] = theArguments[label];
     } 
   }
   return `${url.known.rpc}?command=${encodeURIComponent(JSON.stringify(theRequest))}`;
 }
 
-function getRPCcallArguments(theRPCLabel, additionalArguments, errors){
+function getRPCcallArguments(theRPCLabel, additionalArguments, errors) {
   var result = [];
   if (!(theRPCLabel in rpcCalls)){
     errors.push(`Uknown or non-implemented rpc command: ${theRPCLabel}.`);
     return null;
   }
   var theRPCCall = rpcCalls[theRPCLabel];
-  for (var counterCommand = 0; counterCommand < theRPCCall.cli.length; counterCommand ++){
+  for (var counterCommand = 0; counterCommand < theRPCCall.cli.length; counterCommand ++) {
     var currentLabel = theRPCCall.cli[counterCommand];
-    if (!(currentLabel in additionalArguments)){
-      if (!(currentLabel in theRPCCall)){
+    if (!(currentLabel in additionalArguments)) {
+      if (!(currentLabel in theRPCCall)) {
         console.log(`WARNING: no default given for ${currentLabel} in rpc call labeled ${theRPCLabel}. If this is an optional argument, set the default to an empty string.`.red);
         continue;
       }
-      if (typeof theRPCCall[currentLabel] === null){
+      if (typeof theRPCCall[currentLabel] === null) {
         errors.push(`Mandatory argument ${currentLabel} missing for rpc command: ${theRPCLabel}`);
         return null;
       }
-      if (theRPCCall[currentLabel] === ""){
+      if (theRPCCall[currentLabel] === "") {
         continue;
       }
       result.push(theRPCCall[currentLabel]);
     } else {
-      if (typeof additionalArguments[currentLabel] === "string"){
-        if (additionalArguments[currentLabel] !== ""){
+      if (typeof additionalArguments[currentLabel] === "string") {
+        if (additionalArguments[currentLabel] !== "") {
           result.push(additionalArguments[currentLabel]);
           //console.log(`Pusing label ${currentLabel} with value: ${additionalArguments[currentLabel]}.`);
         } 
       }
+    }
+  }
+  return result;
+}
+
+function getFabcoinInitializationCallArguments(theCallLabel, additionalArguments, errors) {
+  var result = [];
+  if (!(theCallLabel in fabcoinInitializationProcedures)) {
+    errors.push(`Uknown or non-implemented rpc command: ${theCallLabel}.`);
+    return null;
+  }
+  var theInitCall = fabcoinInitializationProcedures[theCallLabel];
+
+  for (var counterCommand = 0; counterCommand < theInitCall.cli.length; counterCommand ++) {
+    var currentArgument = theInitCall.cli[counterCommand];
+    if (typeof currentArgument === "string") {
+      result.push(currentArgument);
+      continue;
+    }
+    var currentLabel = currentArgument[0];
+    var currentValue = currentArgument[1];
+    if (currentLabel in additionalArguments) {
+      currentValue = additionalArguments[currentLabel];
+    }
+    if (currentValue !== "" && typeof currentValue === "string") {
+      result.push(currentValue);
     }
   }
   return result;
@@ -263,5 +294,6 @@ module.exports = {
   getURLfromRPCLabel,
   getURLfromNodeCall,
   getRPCcallArguments,
+  getFabcoinInitializationCallArguments,
   gpuCommands
 }

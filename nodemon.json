@@ -1,4 +1,4 @@
 {
-  "ignore": ["html/*.*", "html/*"]
+  "ignore": ["html/*.*", "html/*", "fabcoin/*"]
 }
 

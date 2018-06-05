@@ -5,32 +5,32 @@ const ids = require('./ids_dom_elements');
 const jsonToHtml = require('./json_to_html');
 const Block = require('../bitcoinjs_src/block');
 
-function getPage(){
+function getPage() {
   return window.kanban.thePage;
 }
 
-function getBlockHash(){
+function getBlockHash() {
   return document.getElementById(ids.defaults.inputBlockHash);
 }
 
-function getBestBlockIndex(){
+function getBestBlockIndex() {
   return document.getElementById(ids.defaults.inputBestBlockIndex);
 }
 
-function getSpanProgress(){ 
+function getSpanProgress() { 
   return document.getElementById(ids.defaults.progressReport);
 }
 
-function getOutputBlockInfoDiv(){
+function getOutputBlockInfoDiv() {
   return document.getElementById(ids.defaults.outputRPCBlockInfo);
 }
 
-function getOutputTXInfoDiv(){
+function getOutputTXInfoDiv() {
   return document.getElementById(ids.defaults.outputRPCTXInfo);
 }
 
-function updateBlockInfoPage(){
-  if (getPage().pages.blockInfo.updateFunction === getBlock){
+function updateBlockInfoPage() {
+  if (getPage().pages.blockInfo.updateFunction === getBlock) {
     document.getElementById(ids.defaults.radioButtonBestBlock).checked = true;
     getBestBlockHash();
   } else {
@@ -38,7 +38,7 @@ function updateBlockInfoPage(){
   }
 }
 
-function updateTXInfoPage(){
+function updateTXInfoPage() {
   if (document.getElementById(ids.defaults.radioButtonTransactionsListUnspent).checked === true) {
     getListUnspent();
   } else {
@@ -46,36 +46,36 @@ function updateTXInfoPage(){
   }
 }
 
-function updatePages(){
+function updatePages() {
   var currentPage = getPage().pages[getPage().currentPageLabel]; 
-  if (currentPage === getPage().pages.txInfo){
+  if (currentPage === getPage().pages.txInfo) {
     return updateTXInfoPage();
   }
-  if (currentPage === getPage().pages.blockInfo){
+  if (currentPage === getPage().pages.blockInfo) {
     return updateBlockInfoPage();
   }
-  if (currentPage === getPage().pages.network){
+  if (currentPage === getPage().pages.network) {
     return getPage().pages.network.updateFunction();
   }
 }
 
-function setTestNet(){
+function setTestNet() {
   getPage().pages.blockInfo.currentNet = "-testnet";
   updatePages();
 }
 
-function setMainNet(){
+function setMainNet() {
   getPage().pages.blockInfo.currentNet = "-mainnet";
   updatePages();
 }
 
-function setRegtest(){
+function setRegtest() {
   getPage().pages.blockInfo.currentNet = "-regtest";
   updatePages();
 }
 
-function getBlockCallback(inputHex, outputComponent){
-  if (getPage().pages.blockInfo.verbosity === "0"){
+function getBlockCallback(inputHex, outputComponent) {
+  if (getPage().pages.blockInfo.verbosity === "0") {
     var theBlock = Block.fromHex(inputHex);
     jsonToHtml.writeJSONtoDOMComponent(theBlock.toHumanReadableHex(), outputComponent);
     getPage().pages.blockInfo.updateFunction = getBlock;
@@ -85,7 +85,7 @@ function getBlockCallback(inputHex, outputComponent){
 }
 function getBlock() {
   getPage().pages.blockInfo.verbosity = "0";
-  if (document.getElementById(ids.defaults.checkboxBlockVerbose).checked){
+  if (document.getElementById(ids.defaults.checkboxBlockVerbose).checked) {
     getPage().pages.blockInfo.verbosity = "1";  
   }
   document.getElementById(ids.defaults.radioButtonBlockInfo).checked = true;
@@ -133,7 +133,7 @@ function getBestBlockHash() {
       net: getPage().pages.blockInfo.currentNet
     });
   } else {
-    theURL = pathnames.getURLfromRPCLabel(pathnames.rpcCalls.getBlockHash.rpcCall,{
+    theURL = pathnames.getURLfromRPCLabel(pathnames.rpcCalls.getBlockHash.rpcCall, {
       net: getPage().pages.blockInfo.currentNet,
       index: index
     });
@@ -161,11 +161,11 @@ function getTXoutSetInfo(){
   });  
 }
 
-function getTXoutCallback(input, outputComponent){
+function getTXoutCallback(input, outputComponent) {
   jsonToHtml.writeJSONtoDOMComponent(input, outputComponent);
 }
 
-function getTXout(){
+function getTXout() {
   submitRequests.submitGET({
     url: pathnames.getURLfromRPCLabel(pathnames.rpcCalls.getTXOut.rpcCall, {
       net: getPage().pages.blockInfo.currentNet,

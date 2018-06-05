@@ -5,16 +5,30 @@ const ids = require('./ids_dom_elements');
 const jsonToHtml = require('./json_to_html');
 //const Block = require('../bitcoinjs_src/block');
 
-function getSpanProgress(){ 
+function getSpanProgress() { 
   return document.getElementById(ids.defaults.progressReport);
 }
 
-function getOutputFabcoinInitialization(){
+function getOutputFabcoinInitialization() {
   return document.getElementById(ids.defaults.outputFabcoinInitialization);
 }
 
 function fabcoinInitializationCallback(input, outputComponent) {
   jsonToHtml.writeJSONtoDOMComponent(input, outputComponent);
+}
+
+function killAllFabcoinDaemons() {
+  var theURL = `
+${pathnames.url.known.fabcoinInitialization}?command={
+"${pathnames.fabcoinInitialization}":"${pathnames.fabcoinInitializationProcedures.killAll.fabcoinInitialization}", 
+"net":"${window.kanban.thePage.pages.blockInfo.currentNet}"
+}`;
+  submitRequests.submitGET({
+    url: theURL,
+    progress: getSpanProgress(),
+    result : getOutputFabcoinInitialization(),
+    callback: fabcoinInitializationCallback    
+  });
 }
 
 function startFabcoinDaemon() {
@@ -38,5 +52,6 @@ function startFabcoinDaemonIfNeeded() {
 
 module.exports = {
   startFabcoinDaemon,
-  startFabcoinDaemonIfNeeded
+  startFabcoinDaemonIfNeeded,
+  killAllFabcoinDaemons
 }

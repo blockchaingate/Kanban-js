@@ -10,7 +10,7 @@ function writeJSONtoDOMComponent(inputJSON, theDomComponent) {
   theDomComponent.innerHTML = outputHTML;
 }
 
-function getTableHorizontallyLaidFromJSON(input){
+function getTableHorizontallyLaidFromJSON(input) {
   if (typeof input === "string") {
     return input;
   }
@@ -78,7 +78,7 @@ function getHtmlFromArrayOfObjects(input, doIncludeTogglePolling, outputPolling)
   if (typeof inputJSON === "object" && !Array.isArray(inputJSON)) {
     inputJSON = [inputJSON];
   }
-  if (Array.isArray(inputJSON)){
+  if (Array.isArray(inputJSON)) {
     var labelsRows = getLabelsRows(inputJSON);
     result += "<table class='tableJSON'>";
     result += "<tr>";

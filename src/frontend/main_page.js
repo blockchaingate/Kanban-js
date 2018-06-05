@@ -9,7 +9,7 @@ function Page() {
       ids: {
         page: ids.defaults.pageFabcoinInitialization
       },
-      updateFunction: fabcoinInitialization.startFabcoinDaemonIfNeeded,      
+      //updateFunction: fabcoinInitialization.startFabcoinDaemonIfNeeded,      
     },
     blockInfo: {
       ids: {

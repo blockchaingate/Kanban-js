@@ -2,7 +2,7 @@
 const pathnames = require('./pathnames');
 const colors = require('colors');
 
-function Jobs(){
+function Jobs() {
   this.ongoing = {};
   this.recentlyFinished = {};
   this.jobHandler = null;
@@ -15,7 +15,7 @@ Jobs.prototype.getNumberOfJobs = function() {
   return Object.keys(this.ongoing).length;
 }
 
-Jobs.prototype.getOngoingIds = function(){
+Jobs.prototype.getOngoingIds = function() {
   return Object.keys(this.ongoing);
 }
 
@@ -33,13 +33,13 @@ Jobs.prototype.finishJob = function (id, message) {
   this.recentlyFinished[id] = {
     message: message
   };
-  if (id in this.ongoing){
+  if (id in this.ongoing) {
     delete this.ongoing[id];
   }
-  if (Object.keys(this.recentlyFinished).length > this.maxRecentlyFinishedJobsToRetain){
+  if (Object.keys(this.recentlyFinished).length > this.maxRecentlyFinishedJobsToRetain) {
     var keysOrdered = Object.keys(this.recentlyFinished).sort();
     var totalToDelete = this.maxRecentlyFinishedJobsToRetain - this.numRecentlyFinishedJobsToRetainOnPrune;
-    for (var counterKeys = 0 ; counterKeys < totalToDelete; counterKeys ++){
+    for (var counterKeys = 0 ; counterKeys < totalToDelete; counterKeys ++) {
       delete this.recentlyFinished[keysOrdered[counterKeys]];
     }
     console.log(`After pruning, remaining jobs: ${JSON.stringify(this.recentlyFinished)}`);
@@ -54,7 +54,7 @@ Jobs.prototype.addJob = function (jobHandler, jobFunctionLabel) {
     status: pathnames.nodeCallStatuses.starting,
     name: jobFunctionLabel
   }
-  process.nextTick(function(){
+  process.nextTick(function() {
     console.log(`handling callid: ${callId}`);
     jobHandler(callId);
   });

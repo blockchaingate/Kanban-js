@@ -39,7 +39,7 @@ var portHttps = 52907;
 var portHttp = 51846;
 
 var serverHTTPS = https.createServer(options, handleRequests.handle_requests);
-serverHTTPS.listen(portHttps, function(){
+serverHTTPS.listen(portHttps, function() {
   console.log(`Listening on https port: ${portHttps}`.green);
 });
 

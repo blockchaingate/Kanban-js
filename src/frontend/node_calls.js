@@ -43,14 +43,14 @@ function doPollServer(output) {
 function doPollServerCallback(inputText, output) {
   //console.log("polling");
   var numOngoingCalls = jobs.getNumberOfJobs();
-  if (numOngoingCalls === 0){
+  if (numOngoingCalls === 0) {
     clearInterval(pollId);
     pollId = null;
   }
   var resultHtml = "";
   resultHtml += `Last updated: ${new Date()}.<br>`; 
   var outputElement, outputId;
-  if (typeof output === "string"){
+  if (typeof output === "string") {
     outputId = output;
     outputElement = document.getElementById(output);
   } else {
@@ -59,7 +59,7 @@ function doPollServerCallback(inputText, output) {
   }
   try {
     jobs.ongoing = JSON.parse(inputText);
-    for (var callId in jobs.ongoing){
+    for (var callId in jobs.ongoing) {
       if (jobs.ongoing[callId].status === pathnames.nodeCallStatuses.notFound) {
         delete jobs.ongoing[callId];
       }
@@ -67,13 +67,13 @@ function doPollServerCallback(inputText, output) {
 
     var foundOngoing = false;
     resultHtml += `${Object.keys(jobs.ongoing).length} job(s).<br>`;
-    for (var callId in jobs.ongoing){
+    for (var callId in jobs.ongoing) {
       if (jobs.ongoing[callId].status !== pathnames.nodeCallStatuses.recentlyFinished) {
         foundOngoing = true;
         break;
       }
     }
-    if (!foundOngoing){
+    if (!foundOngoing) {
       clearInterval(pollId);
     }
   } catch (e) {
@@ -182,7 +182,7 @@ function testBackEndSignMultipleMessages() {
   });
 }
 
-function synchronizeUnspentTransactions(){
+function synchronizeUnspentTransactions() {
   submitRequests.submitGET({
     url: pathnames.getURLfromNodeCall(pathnames.nodeCalls.computeUnspentTransactions.nodeCall),
     progress: getSpanProgress(),
@@ -191,7 +191,7 @@ function synchronizeUnspentTransactions(){
   });
 }
 
-function testBackEndEngineSha256(){
+function testBackEndEngineSha256() {
   submitRequests.submitGET({
     url: pathnames.getURLfromNodeCall(pathnames.nodeCalls.testBackEndEngineSha256.nodeCall),
     progress: getSpanProgress(),

@@ -11,7 +11,7 @@ var maxRequestsRunning = 4;
 function fabcoinInitialize(request, response, desiredCommand) {
   console.log("DEBUG: got to here");
   numberRequestsRunning ++;
-  if (numberRequestsRunning > maxRequestsRunning){
+  if (numberRequestsRunning > maxRequestsRunning) {
     response.writeHead(500);
     numberRequestsRunning --;
     return response.end(`Too many (${numberRequestsRunning}) requests running, maximum allowed: ${maxRequestsRunning}`);
@@ -27,13 +27,10 @@ function fabcoinInitialize(request, response, desiredCommand) {
     numberRequestsRunning --;
     return response.end(`Fabcoin initialization call label ${theCallLabel} not found. `);    
   }
-  var theNet = "-testnet";
-  if (desiredCommand["net"] !== undefined && desiredCommand["net"] !== null) {
-    theNet = desiredCommand["net"];
-  }
-  var theArguments = [theNet, "-daemon"];
-  
-  var theCommand = `${pathnames.pathname.fabcoind}`;
+  var theErrors = [];
+  var theArguments = pathnames.getFabcoinInitializationCallArguments(theCallLabel, desiredCommand, theErrors);
+  var theCall = pathnames.fabcoinInitializationProcedures[theCallLabel];
+  var theCommand = `${theCall.command}`;
   console.log(`Executing fabcoin initialization command: ${theCommand}.`.blue);
   console.log(`Arguments: ${theArguments}.`.green);
   var finalData = "";
@@ -53,7 +50,7 @@ function fabcoinInitialize(request, response, desiredCommand) {
       if (code === 0){
         response.writeHead(200);
         if (finalData === "") {
-          finalData = `Server started correctly on ${theNet} (nothing to output). `;
+          finalData = `Nothing to output: most likely your command was executed correctly.`;
         }
         response.end(finalData);
       } else {
@@ -61,7 +58,7 @@ function fabcoinInitialize(request, response, desiredCommand) {
         response.end(`{"error": "${finalData}"}`);
       }
     });
-  } catch (e){
+  } catch (e) {
     response.writeHead(500);
     numberRequestsRunning --;
     response.end(`Eror: ${escapeHtml(e)}. `);

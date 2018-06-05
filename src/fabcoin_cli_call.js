@@ -7,30 +7,30 @@ const escapeHtml = require('escape-html');
 var numberRequestsRunning = 0;
 var maxRequestsRunning = 4;
 
-function rpcCall(request, response, desiredCommand){
+function rpcCall(request, response, desiredCommand) {
   numberRequestsRunning ++;
-  if (numberRequestsRunning > maxRequestsRunning){
+  if (numberRequestsRunning > maxRequestsRunning) {
     response.writeHead(500);
     numberRequestsRunning--;
     return response.end(`Too many (${numberRequestsRunning}) requests running, maximum allowed: ${maxRequestsRunning}`);
   }
-  if (desiredCommand[pathnames.rpcCall] === undefined){
+  if (desiredCommand[pathnames.rpcCall] === undefined) {
     response.writeHead(400);
     numberRequestsRunning --;
     return response.end(`Request is missing the ${pathnames.rpcCall} entry. `);        
   }
   var theCallLabel = desiredCommand[pathnames.rpcCall];
-  if (!(theCallLabel in pathnames.rpcCalls)){
+  if (!(theCallLabel in pathnames.rpcCalls)) {
     response.writeHead(400);
     numberRequestsRunning --;
     return response.end(`RPC call label ${theCallLabel} not found. `);    
   }
   var errors = [];
   var theArguments = pathnames.getRPCcallArguments(theCallLabel, desiredCommand, errors);
-  if (theArguments === null){
+  if (theArguments === null) {
     response.writeHead(400);
-    numberRequestsRunning--;
-    if (errors.length > 0){
+    numberRequestsRunning --;
+    if (errors.length > 0) {
       response.end(`{"error":"${errors[0]}"`);
     } else {
       response.end("Error while extracting rpc call arguments. ");      
@@ -43,18 +43,18 @@ function rpcCall(request, response, desiredCommand){
   var finalData = "";
   try {
     var child = childProcess.spawn(theCommand, theArguments);
-    child.stdout.on('data', function(data){
+    child.stdout.on('data', function(data) {
       console.log(data.toString());
       finalData += data.toString();
     });
-    child.stderr.on('data', function(data){
+    child.stderr.on('data', function(data) {
       console.log(data.toString());
       finalData += data.toString();
     });
-    child.on('exit', function(code){
+    child.on('exit', function(code) {
       console.log(`RPC call exited with code: ${code}`.green);
       numberRequestsRunning --;
-      if (code === 0){
+      if (code === 0) {
         response.writeHead(200);
         response.end(finalData);
       } else {
@@ -62,7 +62,7 @@ function rpcCall(request, response, desiredCommand){
         response.end(`{"error": "${finalData}"}`);
       }
     });
-  } catch (e){
+  } catch (e) {
     response.writeHead(500);
     numberRequestsRunning --;
     response.end(`Eror: ${escapeHtml(e)}. `);
