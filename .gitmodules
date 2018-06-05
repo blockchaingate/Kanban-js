@@ -1,0 +1,3 @@
+[submodule "fabcoin"]
+	path = fabcoin
+	url = ./fabcoin/

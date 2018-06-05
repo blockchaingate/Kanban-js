@@ -94,6 +94,10 @@ button.buttonStandard{
   padding: 5px;
 }
 
+button.buttonStandardSelected{
+  background-color: skyblue;
+}
+
 button.buttonStandard:hover{
   background-color: lightskyblue;
 }

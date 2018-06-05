@@ -4,8 +4,8 @@ var path = {
   base: `${__dirname}/..`,
   certificates: `${__dirname}/../certificates_secret`,
   HTML: `${__dirname}/../html`,
-  fabcoin: `${__dirname}/../../fabcoin-dev`,
-  fabcoinSrc: `${__dirname}/../../fabcoin-dev/src`,
+  fabcoin: `${__dirname}/../fabcoin`,
+  fabcoinSrc: `${__dirname}/../fabcoin/src`,
   openCLDriverBuildPath: `${__dirname}/../build`,
 };
 
@@ -31,7 +31,8 @@ url.known = {
   frontEndHTML: "/kanban_frontend.html",
   frontEndCSS: "/kanban_frontend.css",
   rpc: "/rpc",
-  node: "/node"  
+  node: "/node",
+  fabcoinInitialization: "/fabcoin_initialization"  
 };
 
 url.whiteListed = {};
@@ -46,7 +47,7 @@ url.synonyms = {
   "/" : url.known.frontEndHTML
 };
 
-var nodeCallLabel = "nodeCallLabel";
+var nodeCall = "nodeCall";
 
 var nodeCallStatuses = {
   starting: "Starting",
@@ -56,34 +57,34 @@ var nodeCallStatuses = {
 
 var nodeCalls = {
   computeUnspentTransactions: {
-    nodeCallLabel: "computeUnspentTransactions", // must be same as key label, used for autocomplete
+    nodeCall: "computeUnspentTransactions", // must be same as key label, used for autocomplete
   }, 
   pollOngoing: {
-    nodeCallLabel: "pollOngoing" // must be same as key label, used for autocomplete
+    nodeCall: "pollOngoing" // must be same as key label, used for autocomplete
   },
   testGPUSha256: {
-    nodeCallLabel: "testGPUSha256" // must be same as key label, used for autocomplete
+    nodeCall: "testGPUSha256" // must be same as key label, used for autocomplete
   },
   testBackEndSha256Multiple: {
-    nodeCallLabel: "testBackEndSha256Multiple" // must be same as key label, used for autocomplete
+    nodeCall: "testBackEndSha256Multiple" // must be same as key label, used for autocomplete
   },
   testBackEndSha256OneMessage: {
-    nodeCallLabel: "testBackEndSha256OneMessage" // must be same as key label, used for autocomplete
+    nodeCall: "testBackEndSha256OneMessage" // must be same as key label, used for autocomplete
   },
   testBackEndPipeMultiple: {
-    nodeCallLabel: "testBackEndPipeMultiple" // must be same as key label, used for autocomplete
+    nodeCall: "testBackEndPipeMultiple" // must be same as key label, used for autocomplete
   },
   testBackEndPipeOneMessage: {
-    nodeCallLabel: "testBackEndPipeOneMessage" // must be same as key label, used for autocomplete
+    nodeCall: "testBackEndPipeOneMessage" // must be same as key label, used for autocomplete
   },
   testBackEndSignOneMessage: {
-    nodeCallLabel: "testBackEndSignOneMessage" // must be same as key label, used for autocomplete
+    nodeCall: "testBackEndSignOneMessage" // must be same as key label, used for autocomplete
   },
   testBackEndSignMultipleMessages: {
-    nodeCallLabel: "testBackEndSignMultipleMessages" // must be same as key label, used for autocomplete
+    nodeCall: "testBackEndSignMultipleMessages" // must be same as key label, used for autocomplete
   },
   testBackEndEngineSha256: {
-    nodeCallLabel: "testBackEndEngineSha256" // must be same as key label, used for autocomplete
+    nodeCall: "testBackEndEngineSha256" // must be same as key label, used for autocomplete
   }
 };
 
@@ -94,7 +95,7 @@ var gpuCommands = {
   verifyOneSignature: "verifyOneSignature"
 };
 
-var rpcCallLabel = "rpcCallLabel";
+var rpcCall = "rpcCall";
 /**
  * Use null for mandatory variables.
  * Use "" for optional variables.
@@ -102,13 +103,13 @@ var rpcCallLabel = "rpcCallLabel";
  */
 var rpcCalls = {
   getPeerInfo: {
-    rpcCallLabel: "getPeerInfo", //must be same as rpc label, used for autocomplete
+    rpcCall: "getPeerInfo", //must be same as rpc label, used for autocomplete
     command: "getpeerinfo",
     net: "-testnet",
     cli: ["net", "command"]
   },
   getBlock: {
-    rpcCallLabel: "getBlock", //must be same as rpc label, used for autocomplete
+    rpcCall: "getBlock", //must be same as rpc label, used for autocomplete
     command: "getblock",
     blockHash: null, // mandatory input
     net: "-testnet",
@@ -116,57 +117,66 @@ var rpcCalls = {
     cli: ["net", "command", "blockHash", "verbosity"]
   },
   getBestBlockHash: {
-    rpcCallLabel: "getBestBlockHash", //must be same as rpc label, used for autocomplete
+    rpcCall: "getBestBlockHash", //must be same as rpc label, used for autocomplete
     command: "getbestblockhash",
     net: "-testnet",
     cli: ["net", "command"]
   },
   getBlockHash: {
-    rpcCallLabel: "getBlockHash", //must be same as rpc label, used for autocomplete
+    rpcCall: "getBlockHash", //must be same as rpc label, used for autocomplete
     command: "getblockhash",
     index: "index",
     net: "-testnet",
     cli: ["net", "command", "index"]
   },
   getTXOutSetInfo: {
-    rpcCallLabel: "getTXOutSetInfo", //must be same as rpc label, used for autocomplete
+    rpcCall: "getTXOutSetInfo", //must be same as rpc label, used for autocomplete
     command: "gettxoutsetinfo",
     net: "-testnet",
     cli: ["net", "command"]
   },
   listUnspent: {
-    rpcCallLabel: "listUnspent", //must be same as rpc label, used for autocomplete
+    rpcCall: "listUnspent", //must be same as rpc label, used for autocomplete
     command: "listunspent",
     net: "-testnet",
     cli: ["net", "command"]
   },
   getTXOut: {
-    rpcCallLabel: "getTXOut", //must be same as rpc label, used for autocomplete
+    rpcCall: "getTXOut", //must be same as rpc label, used for autocomplete
     command: "gettxout",
     net: "-testnet",
     cli: ["net", "command"]
   },
   getReceivedByAccount: {
-    rpcCallLabel: "getReceivedByAccount", //must be same as rpc label, used for autocomplete
+    rpcCall: "getReceivedByAccount", //must be same as rpc label, used for autocomplete
     command: "getreceivedbyaccount",
     net: "-testnet",
     cli: ["net", "command"]
   },
   listAccounts: {
-    rpcCallLabel: "listAccounts", //must be same as rpc label, used for autocomplete
+    rpcCall: "listAccounts", //must be same as rpc label, used for autocomplete
     command: "listaccounts",
     net: "-testnet",
     cli: ["net", "command"]
   }
 }
 
-function getURLfromNodeCallLabel(theNodeCallLabel, additionalArguments) {
+var fabcoinInitialization = "fabcoinInitialization";
+var fabcoinInitializationProcedures = {
+  startFabcoind: {
+    fabcoinInitialization: "startFabcoind", //must be same as label, used for autocomplete
+    command: "startFabcoind",
+    net: "-testnet"
+  }
+}
+
+function getURLfromNodeCall(theNodeCallLabel, additionalArguments) {
   var theNodeCall = nodeCalls[theNodeCallLabel];
   if (theNodeCall === undefined){
     throw(`Node call ${theNodeCallLabel} not registered in the nodeCalls data structure. `);
   }
   var theRequest = {};
-  theRequest[nodeCallLabel] = theNodeCallLabel;
+  theRequest[nodeCall] = theNodeCallLabel;
   if (typeof additionalArguments === "object") {
     for (var label in additionalArguments) {
       theRequest[label] = additionalArguments[label];
@@ -184,7 +194,7 @@ function getURLfromNodeCallLabel(theNodeCallLabel, additionalArguments) {
 
 function getURLfromRPCLabel(theRPClabel, theArguments){
   var theRequest = {};
-  theRequest[rpcCallLabel] = theRPClabel;
+  theRequest[rpcCall] = theRPClabel;
   var theRPCCall = rpcCalls[theRPClabel];
   for (var label in theRPCCall){
     if (typeof theRPCCall[label] === "string"){
@@ -246,10 +256,12 @@ module.exports = {
   rpcCalls,
   nodeCalls,
   nodeCallStatuses,
-  rpcCallLabel,
-  nodeCallLabel,
+  fabcoinInitializationProcedures,
+  rpcCall,
+  nodeCall,
+  fabcoinInitialization,
   getURLfromRPCLabel,
-  getURLfromNodeCallLabel,
+  getURLfromNodeCall,
   getRPCcallArguments,
   gpuCommands
 }

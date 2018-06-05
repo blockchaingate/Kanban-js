@@ -6,7 +6,8 @@ function writeJSONtoDOMComponent(inputJSON, theDomComponent) {
   if (typeof theDomComponent === "string") {
     theDomComponent = document.getElementById(theDomComponent);
   }
-  theDomComponent.innerHTML = getHtmlFromArrayOfObjects(inputJSON);
+  var outputHTML = getHtmlFromArrayOfObjects(inputJSON);
+  theDomComponent.innerHTML = outputHTML;
 }
 
 function getTableHorizontallyLaidFromJSON(input){

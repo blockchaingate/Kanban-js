@@ -5,6 +5,12 @@
 <div class = "divPageAndMenu">
 <div class = "divControlPanelDefault">
   <label class = "containerRadioButton">
+    <input type = "radio" name = "net" checked = "checked" onchange = "window.kanban.rpc.setRegtest();">
+    <span class = "radioMark"></span>
+    Regtest
+  </label>
+  &nbsp;&nbsp;&nbsp;
+  <label class = "containerRadioButton">
     <input type = "radio" name = "net" checked = "checked" onchange = "window.kanban.rpc.setTestNet();">
     <span class = "radioMark"></span>
     TestNet
@@ -15,10 +21,16 @@
     <span class = "radioMark"></span>
     MainNet
   </label>
+  &nbsp;&nbsp;&nbsp;
+  <button class = "buttonStandard" onclick = "window.kanban.fabcoinInitialization.startFabcoinDaemon();">Start</button>
 </div>
 <div class = "divControlPanelDefault">
   <span id = "spanProgressReport" class = "spanProgressReport"> </span>
 </div>
+<div class = "divMainPage" id = "pageFabcoinInitialization">
+  <div class = "divControlPanelDefault" id = "divFabcoinInitialization"></div>
+</div><!--pageFabcoinInitialization-->
+
 <div class = "divMainPage" id = "pageRPCBlockInfo">
   <div class = "divControlPanelDefault">
       <label class = "containerRadioButton">
@@ -144,10 +156,11 @@
     <img alt = "FAB Coin" src = "/fabcoin.svg" class = "imgFabLogo">
   </div>
   <div class = "divMenuButtonPanel">
+    <div><button class = "buttonSelectPage" onclick = "window.kanban.thePage.selectPage('fabcoinInitialization');">Start</button> </div>
     <div><button class = "buttonSelectPage" onclick = "window.kanban.thePage.selectPage('blockInfo');">Blocks</button> </div>
     <div><button class = "buttonSelectPage" onclick = "window.kanban.thePage.selectPage('txInfo');">Transactions</button> </div>
     <div><button class = "buttonSelectPage" onclick = "window.kanban.thePage.selectPage('network');">Network</button> </div>
-    <div><button class = "buttonSelectPage" onclick = "window.kanban.thePage.selectPage('testGPU');">Test GPU</button> </div>
+    <!--div><button class = "buttonSelectPage" onclick = "window.kanban.thePage.selectPage('testGPU');">Test GPU</button> </div-->
   </div>
 </div><!--divMenu-->
 </div><!--divPageAndMenu-->

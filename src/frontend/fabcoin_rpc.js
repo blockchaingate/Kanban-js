@@ -61,7 +61,12 @@ function setTestNet(){
 }
 
 function setMainNet(){
-  getPage().pages.blockInfo.currentNet = "";
+  getPage().pages.blockInfo.currentNet = "-mainnet";
+  updatePages();
+}
+
+function setRegtest(){
+  getPage().pages.blockInfo.currentNet = "-regtest";
   updatePages();
 }
 
@@ -81,7 +86,7 @@ function getBlock() {
   }
   document.getElementById(ids.defaults.radioBlockInfo).checked = true;
   var theURL = pathnames.getURLfromRPCLabel(
-    pathnames.rpcCalls.getBlock.rpcCallLabel, {
+    pathnames.rpcCalls.getBlock.rpcCall, {
       blockHash: getBlockHash().value, 
       verbosity: getPage().pages.blockInfo.verbosity,
       net: getPage().pages.blockInfo.currentNet,
@@ -101,7 +106,7 @@ function getPeerInfoCallBack(input, outputComponent) {
 
 function getPeerInfo() {
   submitRequests.submitGET({
-    url: pathnames.getURLfromRPCLabel(pathnames.rpcCalls.getPeerInfo.rpcCallLabel, {
+    url: pathnames.getURLfromRPCLabel(pathnames.rpcCalls.getPeerInfo.rpcCall, {
       net: getPage().pages.blockInfo.currentNet,
     }),
     progress: getSpanProgress(),
@@ -120,11 +125,11 @@ function getBestBlockHash() {
   var index = getBestBlockIndex().value;  
   var theURL = "";
   if (index === null || index === undefined || index === "") {
-    theURL = pathnames.getURLfromRPCLabel(pathnames.rpcCalls.getBestBlockHash.rpcCallLabel, {
+    theURL = pathnames.getURLfromRPCLabel(pathnames.rpcCalls.getBestBlockHash.rpcCall, {
       net: getPage().pages.blockInfo.currentNet
     });
   } else {
-    theURL = pathnames.getURLfromRPCLabel(pathnames.rpcCalls.getBlockHash.rpcCallLabel,{
+    theURL = pathnames.getURLfromRPCLabel(pathnames.rpcCalls.getBlockHash.rpcCall,{
       net: getPage().pages.blockInfo.currentNet,
       index: index
     });
@@ -143,7 +148,7 @@ function getTXoutSetInfoCallback(input, outputComponent) {
 
 function getTXoutSetInfo(){
   submitRequests.submitGET({
-    url: pathnames.getURLfromRPCLabel(pathnames.rpcCalls.getTXOutSetInfo.rpcCallLabel, {
+    url: pathnames.getURLfromRPCLabel(pathnames.rpcCalls.getTXOutSetInfo.rpcCall, {
       net: getPage().pages.blockInfo.currentNet,
     }),
     progress: getSpanProgress(),
@@ -158,7 +163,7 @@ function getTXoutCallback(input, outputComponent){
 
 function getTXout(){
   submitRequests.submitGET({
-    url: pathnames.getURLfromRPCLabel(pathnames.rpcCalls.getTXOut.rpcCallLabel, {
+    url: pathnames.getURLfromRPCLabel(pathnames.rpcCalls.getTXOut.rpcCall, {
       net: getPage().pages.blockInfo.currentNet,
     }),
     progress: getSpanProgress(),
@@ -173,7 +178,7 @@ function getReceivedByAccountCallback(input, outputComponent) {
 
 function getReceivedByAccount() {
   submitRequests.submitGET({
-    url: pathnames.getURLfromRPCLabel(pathnames.rpcCalls.getReceivedByAccount.rpcCallLabel, {
+    url: pathnames.getURLfromRPCLabel(pathnames.rpcCalls.getReceivedByAccount.rpcCall, {
       net: getPage().pages.blockInfo.currentNet,
     }),
     progress: getSpanProgress(),
@@ -188,7 +193,7 @@ function listAccountsCallback(input, outputComponent) {
 
 function listAccounts() {
   submitRequests.submitGET({
-    url: pathnames.getURLfromRPCLabel(pathnames.rpcCalls.listAccounts.rpcCallLabel, {
+    url: pathnames.getURLfromRPCLabel(pathnames.rpcCalls.listAccounts.rpcCall, {
       net: getPage().pages.blockInfo.currentNet,
     }),
     progress: getSpanProgress(),
@@ -203,7 +208,7 @@ function listUnspentCallback(input, outputComponent) {
 
 function listUnspent() {
   submitRequests.submitGET({
-    url: pathnames.getURLfromRPCLabel(pathnames.rpcCalls.listUnspent.rpcCallLabel, {
+    url: pathnames.getURLfromRPCLabel(pathnames.rpcCalls.listUnspent.rpcCall, {
       net: getPage().pages.blockInfo.currentNet,
     }),
     progress: getSpanProgress(),
@@ -218,6 +223,7 @@ module.exports = {
   getBlock,
   setTestNet,
   setMainNet,
+  setRegtest,
   getTXoutSetInfo,
   getTXout,
   getReceivedByAccount,

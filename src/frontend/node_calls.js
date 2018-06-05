@@ -33,7 +33,7 @@ var jobs = window.kanban.jobs;
 function doPollServer(output) {
   //console.log(jobs.getOngoingIds());
   submitRequests.submitGET({
-    url: pathnames.getURLfromNodeCallLabel(pathnames.nodeCalls.pollOngoing.nodeCallLabel),
+    url: pathnames.getURLfromNodeCall(pathnames.nodeCalls.pollOngoing.nodeCall),
     progress: getSpanProgress(),
     result: output,
     callback: doPollServerCallback
@@ -113,7 +113,7 @@ function pollServerStart(id, output) {
 
 function testGPUSha256() {
   submitRequests.submitGET({
-    url: pathnames.getURLfromNodeCallLabel(pathnames.nodeCalls.testGPUSha256.nodeCallLabel),
+    url: pathnames.getURLfromNodeCall(pathnames.nodeCalls.testGPUSha256.nodeCall),
     progress: getSpanProgress(),
     result: getOutputTestGPU(),
     callback: pollServerStart
@@ -122,7 +122,7 @@ function testGPUSha256() {
 
 function testBackEndSha256Multiple() {
   submitRequests.submitGET({
-    url: pathnames.getURLfromNodeCallLabel(pathnames.nodeCalls.testBackEndSha256Multiple.nodeCallLabel),
+    url: pathnames.getURLfromNodeCall(pathnames.nodeCalls.testBackEndSha256Multiple.nodeCall),
     progress: getSpanProgress(),
     result: getOutputTestGPU(),
     callback: pollServerStart
@@ -132,7 +132,7 @@ function testBackEndSha256Multiple() {
 function testBackEndSha256OneMessage() {
   var theMessage = document.getElementById(ids.defaults.inputNodeCallTestMessage).value; 
   submitRequests.submitGET({
-    url: pathnames.getURLfromNodeCallLabel(pathnames.nodeCalls.testBackEndSha256OneMessage.nodeCallLabel, { message: theMessage}),
+    url: pathnames.getURLfromNodeCall(pathnames.nodeCalls.testBackEndSha256OneMessage.nodeCall, { message: theMessage}),
     progress: getSpanProgress(),
     result: getOutputTestGPU()
   });
@@ -140,7 +140,7 @@ function testBackEndSha256OneMessage() {
 
 function testBackEndPipeMultiple() {
   submitRequests.submitGET({
-    url: pathnames.getURLfromNodeCallLabel(pathnames.nodeCalls.testBackEndPipeMultiple.nodeCallLabel),
+    url: pathnames.getURLfromNodeCall(pathnames.nodeCalls.testBackEndPipeMultiple.nodeCall),
     progress: getSpanProgress(),
     result: getOutputTestGPU(),
     callback: pollServerStart
@@ -150,7 +150,7 @@ function testBackEndPipeMultiple() {
 function testBackEndPipeOneMessage() {
   var theMessage = document.getElementById(ids.defaults.inputNodeCallTestMessage).value; 
   submitRequests.submitGET({
-    url: pathnames.getURLfromNodeCallLabel(pathnames.nodeCalls.testBackEndPipeOneMessage.nodeCallLabel, { message: theMessage}),
+    url: pathnames.getURLfromNodeCall(pathnames.nodeCalls.testBackEndPipeOneMessage.nodeCall, { message: theMessage}),
     progress: getSpanProgress(),
     result: getOutputTestGPU()
   });
@@ -161,8 +161,8 @@ function testBackEndSignOneMessage() {
   var theNonce = document.getElementById(ids.defaults.inputNodeCallTestNonce).value; 
   var theSecret = document.getElementById(ids.defaults.inputNodeCallTestSecretKey).value; 
   submitRequests.submitGET({
-    url: pathnames.getURLfromNodeCallLabel(
-      pathnames.nodeCalls.testBackEndSignOneMessage.nodeCallLabel, { 
+    url: pathnames.getURLfromNodeCall(
+      pathnames.nodeCalls.testBackEndSignOneMessage.nodeCall, { 
         message: theMessage, 
         nonce: theNonce, 
         secretKey: theSecret
@@ -175,7 +175,7 @@ function testBackEndSignOneMessage() {
 
 function testBackEndSignMultipleMessages() {
   submitRequests.submitGET({
-    url: pathnames.getURLfromNodeCallLabel(pathnames.nodeCalls.testBackEndSignMultipleMessages.nodeCallLabel),
+    url: pathnames.getURLfromNodeCall(pathnames.nodeCalls.testBackEndSignMultipleMessages.nodeCall),
     progress: getSpanProgress(),
     result: getOutputTestGPU(),
     callback: pollServerStart
@@ -184,7 +184,7 @@ function testBackEndSignMultipleMessages() {
 
 function synchronizeUnspentTransactions(){
   submitRequests.submitGET({
-    url: pathnames.getURLfromNodeCallLabel(pathnames.nodeCalls.computeUnspentTransactions.nodeCallLabel),
+    url: pathnames.getURLfromNodeCall(pathnames.nodeCalls.computeUnspentTransactions.nodeCall),
     progress: getSpanProgress(),
     result : getOutputTXInfoDiv(),
     callback: pollServerStart
@@ -193,7 +193,7 @@ function synchronizeUnspentTransactions(){
 
 function testBackEndEngineSha256(){
   submitRequests.submitGET({
-    url: pathnames.getURLfromNodeCallLabel(pathnames.nodeCalls.testBackEndEngineSha256.nodeCallLabel),
+    url: pathnames.getURLfromNodeCall(pathnames.nodeCalls.testBackEndEngineSha256.nodeCall),
     progress: getSpanProgress(),
     result : getOutputTXInfoDiv(),
     callback: pollServerStart

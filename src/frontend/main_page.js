@@ -1,9 +1,16 @@
 "use strict";
 const rpcCalls = require('./fabcoin_rpc');
+const fabcoinInitialization = require('./fabcoin_initialization');
 const ids = require('./ids_dom_elements');
 
 function Page() {
   this.pages = {
+    fabcoinInitialization:{
+      ids: {
+        page: ids.defaults.pageFabcoinInitialization
+      },
+      updateFunction: fabcoinInitialization.startFabcoinDaemonInNeeded,      
+    },
     blockInfo: {
       ids: {
         page: ids.defaults.pageBlockInfo

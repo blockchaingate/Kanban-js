@@ -7,52 +7,48 @@ const escapeHtml = require('escape-html');
 var numberRequestsRunning = 0;
 var maxRequestsRunning = 4;
 
-function rpcCall(request, response, desiredCommand){
+
+function fabcoinInitialize(request, response, desiredCommand) {
+  console.log("DEBUG: got to here");
   numberRequestsRunning ++;
   if (numberRequestsRunning > maxRequestsRunning){
     response.writeHead(500);
-    numberRequestsRunning--;
+    numberRequestsRunning --;
     return response.end(`Too many (${numberRequestsRunning}) requests running, maximum allowed: ${maxRequestsRunning}`);
   }
-  if (desiredCommand[pathnames.rpcCall] === undefined){
+  if (desiredCommand[pathnames.fabcoinInitialization] === undefined) {
     response.writeHead(400);
     numberRequestsRunning --;
-    return response.end(`Request is missing the ${pathnames.rpcCall} entry. `);        
+    return response.end(`Request is missing the ${pathnames.fabcoinInitialization} entry. `);        
   }
-  var theCallLabel = desiredCommand[pathnames.rpcCall];
-  if (!(theCallLabel in pathnames.rpcCalls)){
+  var theCallLabel = desiredCommand[pathnames.fabcoinInitialization];
+  if (!(theCallLabel in pathnames.fabcoinInitializationProcedures)){
     response.writeHead(400);
     numberRequestsRunning --;
-    return response.end(`RPC call label ${theCallLabel} not found. `);    
+    return response.end(`Fabcoin initialization call label ${theCallLabel} not found. `);    
   }
-  var errors = [];
-  var theArguments = pathnames.getRPCcallArguments(theCallLabel, desiredCommand, errors);
-  if (theArguments === null){
-    response.writeHead(400);
-    numberRequestsRunning--;
-    if (errors.length > 0){
-      response.end(`{"error":"${errors[0]}"`);
-    } else {
-      response.end("Error while extracting rpc call arguments. ");      
-    }
-    return;
+  var theNet = "-testnet";
+  if (desiredCommand["net"] !== undefined && desiredCommand["net"] !== null) {
+    theNet = desiredCommand["net"];
   }
-  var theCommand = `${pathnames.pathname.fabcoinCli}`;
-  console.log(`Executing rpc command: ${theCommand}.`.blue);
+  var theArguments = [theNet, "-daemon"];
+  
+  var theCommand = `${pathnames.pathname.fabcoind}`;
+  console.log(`Executing fabcoin initialization command: ${theCommand}.`.blue);
   console.log(`Arguments: ${theArguments}.`.green);
   var finalData = "";
   try {
     var child = childProcess.spawn(theCommand, theArguments);
-    child.stdout.on('data', function(data){
+    child.stdout.on('data', function(data) {
       console.log(data.toString());
       finalData += data.toString();
     });
-    child.stderr.on('data', function(data){
+    child.stderr.on('data', function(data) {
       console.log(data.toString());
       finalData += data.toString();
     });
-    child.on('exit', function(code){
-      console.log(`RPC call exited with code: ${code}`.green);
+    child.on('exit', function(code) {
+      console.log(`Fabcoin initialization exited with code: ${code}`.green);
       numberRequestsRunning --;
       if (code === 0){
         response.writeHead(200);
@@ -72,5 +68,5 @@ function rpcCall(request, response, desiredCommand){
 }
 
 module.exports = {
-  rpcCall
+  fabcoinInitialize
 }

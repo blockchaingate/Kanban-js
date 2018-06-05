@@ -44,42 +44,42 @@ function pollOngoing(request, response, desiredCommand) {
 }
 
 var handlersReturnImmediately = {};
-handlersReturnImmediately[pathnames.nodeCalls.computeUnspentTransactions.nodeCallLabel] = computeUnspentTransactions;
-handlersReturnImmediately[pathnames.nodeCalls.testGPUSha256.nodeCallLabel] = null;
-handlersReturnImmediately[pathnames.nodeCalls.testBackEndSha256Multiple.nodeCallLabel] = openCLDriver.testBackEndSha256Multiple;
-handlersReturnImmediately[pathnames.nodeCalls.testBackEndPipeMultiple.nodeCallLabel] = openCLDriver.testBackEndPipeMultiple;
-handlersReturnImmediately[pathnames.nodeCalls.testBackEndSignMultipleMessages.nodeCallLabel] = openCLDriver.testBackEndSignMultipleMessages;
+handlersReturnImmediately[pathnames.nodeCalls.computeUnspentTransactions.nodeCall] = computeUnspentTransactions;
+handlersReturnImmediately[pathnames.nodeCalls.testGPUSha256.nodeCall] = null;
+handlersReturnImmediately[pathnames.nodeCalls.testBackEndSha256Multiple.nodeCall] = openCLDriver.testBackEndSha256Multiple;
+handlersReturnImmediately[pathnames.nodeCalls.testBackEndPipeMultiple.nodeCall] = openCLDriver.testBackEndPipeMultiple;
+handlersReturnImmediately[pathnames.nodeCalls.testBackEndSignMultipleMessages.nodeCall] = openCLDriver.testBackEndSignMultipleMessages;
 
 var handlersReturnWhenDone = {};
-handlersReturnWhenDone[pathnames.nodeCalls.pollOngoing.nodeCallLabel] = pollOngoing;
-handlersReturnWhenDone[pathnames.nodeCalls.testBackEndSha256OneMessage.nodeCallLabel] = openCLDriver.testBackEndSha256OneMessage;
-handlersReturnWhenDone[pathnames.nodeCalls.testBackEndPipeOneMessage.nodeCallLabel] = openCLDriver.testBackEndPipeOneMessage;
-handlersReturnWhenDone[pathnames.nodeCalls.testBackEndSignOneMessage.nodeCallLabel] = openCLDriver.testBackEndSignOneMessage;
-handlersReturnWhenDone[pathnames.nodeCalls.testBackEndEngineSha256.nodeCallLabel] = openCLDriver.testBackEndEngineSha256;
+handlersReturnWhenDone[pathnames.nodeCalls.pollOngoing.nodeCall] = pollOngoing;
+handlersReturnWhenDone[pathnames.nodeCalls.testBackEndSha256OneMessage.nodeCall] = openCLDriver.testBackEndSha256OneMessage;
+handlersReturnWhenDone[pathnames.nodeCalls.testBackEndPipeOneMessage.nodeCall] = openCLDriver.testBackEndPipeOneMessage;
+handlersReturnWhenDone[pathnames.nodeCalls.testBackEndSignOneMessage.nodeCall] = openCLDriver.testBackEndSignOneMessage;
+handlersReturnWhenDone[pathnames.nodeCalls.testBackEndEngineSha256.nodeCall] = openCLDriver.testBackEndEngineSha256;
 
 for (var label in pathnames.nodeCalls) {
-  var currentNodeCallLabel = pathnames.nodeCalls[label].nodeCallLabel;
+  var currentnodeCall = pathnames.nodeCalls[label].nodeCall;
   if (
-    handlersReturnImmediately[currentNodeCallLabel] === undefined && 
-    handlersReturnWhenDone[currentNodeCallLabel] === undefined
+    handlersReturnImmediately[currentnodeCall] === undefined && 
+    handlersReturnWhenDone[currentnodeCall] === undefined
   ) {
-    assert.ok(false, `Handler of node call ${currentNodeCallLabel} is not allowed to  be undefined. `);
+    assert.ok(false, `Handler of node call ${currentnodeCall} is not allowed to  be undefined. `);
   }
   if (
-    handlersReturnImmediately[currentNodeCallLabel] !== undefined && 
-    handlersReturnWhenDone[currentNodeCallLabel] !== undefined
+    handlersReturnImmediately[currentnodeCall] !== undefined && 
+    handlersReturnWhenDone[currentnodeCall] !== undefined
   ) {
-    assert.ok(false, `Node call ${currentNodeCallLabel} must have only one type of handler. `);
+    assert.ok(false, `Node call ${currentnodeCall} must have only one type of handler. `);
   }
 }
 
 var numSimultaneousCalls = 0;
 var maxSimultaneousCalls = 4;
 function dispatch(request, response, desiredCommand) {
-  //console.log(`command: ${JSON.stringify(desiredCommand)}, nodeCallLabel = ${pathnames.nodeCallLabel}`);
+  //console.log(`command: ${JSON.stringify(desiredCommand)}, nodeCall = ${pathnames.nodeCall}`);
   var isGood = false;
-  var currentCommandLabel = desiredCommand[pathnames.nodeCallLabel];
-  //console.log(`nodecalllabel: ${pathnames.nodeCallLabel}, currentCommandLabel: ${JSON.stringify(currentCommandLabel)}`);
+  var currentCommandLabel = desiredCommand[pathnames.nodeCall];
+  //console.log(`nodeCall: ${pathnames.nodeCall}, currentCommandLabel: ${JSON.stringify(currentCommandLabel)}`);
   if (typeof currentCommandLabel === "string") {
     isGood = currentCommandLabel in pathnames.nodeCalls;
   }
