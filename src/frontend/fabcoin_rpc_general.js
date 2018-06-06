@@ -49,7 +49,7 @@ function getReceivedByAccount() {
     url: pathnames.getURLfromRPCLabel(pathnames.rpcCalls.getReceivedByAccount.rpcCall, {
       net: globals.mainPage().pages.blockInfo.currentNet,
     }),
-    progress: mainPage.getProgressSpan(),
+    progress: globals.spanProgress(),
     result : getOutputTXInfoDiv(),
     callback: getReceivedByAccountCallback
   });  
@@ -64,7 +64,7 @@ function listAccounts() {
     url: pathnames.getURLfromRPCLabel(pathnames.rpcCalls.listAccounts.rpcCall, {
       net: globals.getPage().currentNet,
     }),
-    progress: mainPage.getProgressSpan(),
+    progress: globals.spanProgress(),
     result : getOutputTXInfoDiv(),
     callback: listAccountsCallback
   });  
@@ -79,7 +79,7 @@ function getListUnspent() {
     url: pathnames.getURLfromRPCLabel(pathnames.rpcCalls.listUnspent.rpcCall, {
       net: globals.getPage().currentNet,
     }),
-    progress: mainPage.getProgressSpan(),
+    progress: globals.spanProgress(),
     result : getOutputTXInfoDiv(),
     callback: listUnspentCallback
   });  

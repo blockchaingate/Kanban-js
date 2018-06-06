@@ -1,6 +1,6 @@
 "use strict";
 const rpcCallsGeneral = require('./fabcoin_rpc_general');
-const rpcCallsBlock = require('./fabcoin_rpc_block');
+const rpcCallsBlocks = require('./fabcoin_rpc_blocks');
 const rpcCallsNetwork = require('./fabcoin_rpc_network');
 const rpcCallsTransactions = require('./fabcoin_rpc_transactions');
 const fabcoinInitialization = require('./fabcoin_initialization');
@@ -20,7 +20,7 @@ function Page() {
         page: ids.defaults.pageBlockInfo
       },
       verbosity: "0",
-      updateFunction: rpcCallsBlock.updateBlockInfoPage,
+      updateFunction: rpcCallsBlocks.updateBlockInfoPage,
     },
     txInfo: {
       ids: {

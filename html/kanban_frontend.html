@@ -36,19 +36,19 @@
 <div class = "divMainPage" id = "pageRPCBlockInfo">
   <div class = "divControlPanelDefault">
     <label class = "containerRadioButton">
-      <input type = "radio" name = "rpcCallBlockInfo" id = "radioBestBlockHash" onchange = "window.kanban.rpc.getBestBlockHash();" checked = "checked" >
+      <input type = "radio" name = "rpcCallBlockInfo" id = "radioBestBlockHash" onchange = "window.kanban.rpc.blocks.getBestBlockHash();" checked = "checked" >
       <span class = "radioMark"></span>
       Best block
     </label>
-    <input type = "text" id = "inputBestBlockIndex" size = "5" onchange = "window.kanban.rpc.getBestBlockHash();"></input>
+    <input type = "text" id = "inputBestBlockIndex" size = "5" onchange = "window.kanban.rpc.blocks.getBestBlockHash();"></input>
     <label class = "containerRadioButton">
-      <input type = "radio" name = "rpcCallBlockInfo" id = "radioButtonBlockInfo" onchange = "window.kanban.rpc.getBlock();">
+      <input type = "radio" name = "rpcCallBlockInfo" id = "radioButtonBlockInfo" onchange = "window.kanban.rpc.blocks.getBlock();">
       <span class = "radioMark"></span>
       Block info
     </label>
     <input type = "text" id = "inputBlockHash" size = "60"></input> 
     <label class = "containerCheckbox">
-      <input type = "checkbox" name = "verbose" id = "checkboxBlockVerbose" onchange = "window.kanban.rpc.getBlock();" checked = "checked" >
+      <input type = "checkbox" name = "verbose" id = "checkboxBlockVerbose" onchange = "window.kanban.rpc.blocks.getBlock();" checked = "checked" >
       <span class = "checkMark"></span>
       Verbose
     </label>
@@ -64,13 +64,13 @@
     &nbsp;&nbsp;&nbsp;     
     -->
     <label class = "containerRadioButton">
-      <input id = "radioButtonTransactionsSetInfo" type = "radio" name = "rpcCallTxInfo" onchange = "window.kanban.rpc.getTXoutSetInfo();" checked = "checked">
+      <input id = "radioButtonTransactionsSetInfo" type = "radio" name = "rpcCallTxInfo" onchange = "window.kanban.rpc.transactions.getTXoutSetInfo();" checked = "checked">
       <span class = "radioMark"></span>
       TX set info
     </label>
     &nbsp;&nbsp;&nbsp;
     <label class = "containerRadioButton">
-      <input id = "radioButtonTransactionsListUnspent" type = "radio" name = "rpcCallTxInfo" onchange = "window.kanban.rpc.getListUnspent();">
+      <input id = "radioButtonTransactionsListUnspent" type = "radio" name = "rpcCallTxInfo" onchange = "window.kanban.rpc.transactions.getListUnspent();">
       <span class = "radioMark"></span>
       List unspent
     </label>

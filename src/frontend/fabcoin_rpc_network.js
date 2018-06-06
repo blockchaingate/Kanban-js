@@ -28,7 +28,7 @@ function getPeerInfo() {
     url: pathnames.getURLfromRPCLabel(pathnames.rpcCalls.getPeerInfo.rpcCall, {
       net: globals.mainPage().currentNet
     }),
-    progress: globals.progressSpan(),
+    progress: globals.spanProgress(),
     result : ids.defaults.outputRPCNetwork,
     callback: getNetworkInfoCallBack
   });
@@ -39,7 +39,7 @@ function getNetworkInfo() {
     url: pathnames.getURLfromRPCLabel(pathnames.rpcCalls.getNetworkInfo.rpcCall, {
       net: globals.mainPage().currentNet
     }),
-    progress: globals.progressSpan(),
+    progress: globals.spanProgress(),
     result : ids.defaults.outputRPCNetwork,
     callback: getNetworkInfoCallBack
   });
@@ -50,7 +50,7 @@ function getNetTotals() {
     url: pathnames.getURLfromRPCLabel(pathnames.rpcCalls.getNetTotals.rpcCall, {
       net: globals.mainPage().currentNet
     }),
-    progress: globals.progressSpan(),
+    progress: globals.spanProgress(),
     result : ids.defaults.outputRPCNetwork,
     callback: getNetworkInfoCallBack
   });

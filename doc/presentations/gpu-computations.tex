@@ -229,9 +229,9 @@ Compilation times. Measures the difficulty of testing code changes.
 \section{Conclusions}
 In view of the fact that our cryptographic library port parallelizes well on the CPU and runs on the GPU, I see no reason to rush towards potentially difficult software optimizations - for now. 
 
-As proposed by Jason Hong, I think that we should delay further development of our cryptographic functions, and instead focus on building a first version of Kanban. I think we should focus on profile our entire system before we start pursuing difficult software optimizations. 
+As proposed by Jason Hong, I think that we should delay further development of our cryptographic functions, and instead focus on building a first version of Kanban. I think we should focus on profiling our entire system before we start pursuing difficult software optimizations. 
 
-Jason has proposed to me that I clone fabcoin, deploy a network of clones on AWS (Amazom Web Services) and build a performance profile on this live system. From there, we should proceed to gradually modify the system to perform the functions of Kanban as proposed in the white paper.
+Jason has proposed to me that I clone fabcoin core, deploy a network of clones on AWS (Amazom Web Services) and build a performance profile on this live system. From there, we should proceed to gradually modify the system to perform the functions of Kanban as proposed in the white paper.
 
 I think Jason's proposal is the right way to proceed for the time being; we should revisit GPU optimizations when the main functionality of Kanban works and we have a proper benchmark to measure the main bottlenecks in the system. 
 
@@ -241,25 +241,25 @@ I do not see an in-GPU database as a high priority. Instead, I propose we use C+
 For the first version of Kanban, I would propose we store the main tables using the C++ data structure \verb|std::unordered_map|. Constant-time lookup of a table whose rows are labeled by addresses can be achieved at the cost of about 20 bytes per stored row of information. Assuming we store account balance (say, 8 bytes) and an extra 4 bytes of information (say, number of confirmations) for every address, we can achieve constant-time address lookup in 
 
 \[
-\underbrace{34}_{\text{address size}} + \underbrace{8}_{\text{account ballance}} + \underbrace{4}_{\text{meta info}} + \underbrace{20}_{\text{to achieve constant time lookup}} = 56 \text{ bytes}
+\underbrace{34}_{\text{address size}} + \underbrace{8}_{\text{account ballance}} + \underbrace{4}_{\text{meta info}} + \underbrace{20}_{\text{to achieve constant time lookup}} = 66 \text{ bytes}
 \]
 per address. According to \url{https://blockchain.info}, at present there are about 440,000 unique addresses. Therefore we can store the account information of all bitcoin addresses using only
 \[
-56\cdot 440,000 = 24640000 \approx 25~\text{MB}.
+66\cdot 440,000 = 24640000 \approx 29~\text{MB}.
 \]
 
 Should we want to hold $100$ addresses for every alive human right now, we need only 
 \[
-100\cdot 7.3 \cdot 10^9 \cdot 56 \approx 40~\text{TB} 
+100\cdot 7.3 \cdot 10^9 \cdot 66 \approx 48~\text{TB} 
 \]
-of information. The use of $1,000$ shards brings down the memory use of each system to the completely feasible amount of $40~\text{GB}$. It therefore seems reasonable to postpone the engineering of more specialized data structures to the time when FAB coin starts getting near the estimates above, as at that time I expect we will have a lot greater engineering resources available.
+of information. The use of $1,000$ shards brings down the memory use of each system to the completely feasible amount of $48~\text{GB}$. It therefore seems reasonable to postpone the engineering of more specialized data structures to the time when FAB coin starts getting near the estimates above, as at that time I expect we will have a lot greater engineering resources available.
 
 
 We should note that it is possible to store all UTXOs (unspent transaction outputs) in RAM memory for a system as large as is bitcoin at present (some 56.6 million UTXOs at the time of writing, according to \url{https://blockchain.info}). According to \cite{cryptoeprint:2017:analysisofbitcoinUTXOs}, $52.5$ million UTXOs take about $3$ GB of RAM. To achieve constant time lookup, one needs about 20 bytes per transaction, so another 
 \[
 52.5 \cdot 10^6 \cdot 20 = 1.05\text{~GB}
 \]
-of RAM memory. In this way, the entire bitcoin UTXO data set can be stored and looked up using a little more than 4 GB. With sharding, it should be possible to scale the storage of all UTXOs thousands at a scale thousands of times larger than bitcoin at present.
+of RAM memory. In this way, the entire bitcoin UTXO data set can be stored and looked up using a little more than $4$ GB. With sharding, it should be possible to scale the storage of all UTXOs thousands at a scale thousands of times larger than bitcoin at present.
 \newpage
 
 

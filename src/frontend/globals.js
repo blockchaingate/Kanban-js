@@ -5,11 +5,11 @@ function mainPage() {
   return window.kanban.thePage;
 }
 
-function progressSpan() { 
+function spanProgress() { 
   return document.getElementById(ids.defaults.progressReport);
 }
 
 module.exports = {
   mainPage,
-  progressSpan
+  spanProgress
 }

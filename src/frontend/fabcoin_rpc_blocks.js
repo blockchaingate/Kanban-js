@@ -15,31 +15,31 @@ function getBestBlockIndex() {
 }
 
 function getBlockCallback(inputHex, outputComponent) {
-  if (getPage().pages.blockInfo.verbosity === "0") {
+  if (globals.mainPage().pages.blockInfo.verbosity === "0") {
     var theBlock = Block.fromHex(inputHex);
     jsonToHtml.writeJSONtoDOMComponent(theBlock.toHumanReadableHex(), outputComponent);
-    getPage().pages.blockInfo.updateFunction = getBlock;
   } else {
     jsonToHtml.writeJSONtoDOMComponent(inputHex, outputComponent);
   }
 }
+
 function getBlock() {
-  getPage().pages.blockInfo.verbosity = "0";
+  globals.mainPage().pages.blockInfo.verbosity = "0";
   if (document.getElementById(ids.defaults.checkboxBlockVerbose).checked) {
-    getPage().pages.blockInfo.verbosity = "1";  
+    globals.mainPage().pages.blockInfo.verbosity = "1";  
   }
   document.getElementById(ids.defaults.radioButtonBlockInfo).checked = true;
   var theURL = pathnames.getURLfromRPCLabel(
     pathnames.rpcCalls.getBlock.rpcCall, {
       blockHash: getBlockHash().value, 
-      verbosity: getPage().pages.blockInfo.verbosity,
-      net: globals.getPage().currentNet,
+      verbosity: globals.mainPage().pages.blockInfo.verbosity,
+      net: globals.mainPage().currentNet,
     }
   );
   submitRequests.submitGET({
     url: theURL,
-    progress: getSpanProgress(),
-    result : getOutputBlockInfoDiv(),
+    progress: globals.spanProgress(),
+    result : ids.defaults.outputRPCBlockInfo,
     callback: getBlockCallback
   });
 }
@@ -47,7 +47,6 @@ function getBlock() {
 function getBestBlockHashCallback(inputHex, outputComponent) {
   getBlockHash().value = inputHex;
   jsonToHtml.writeJSONtoDOMComponent(inputHex, outputComponent);
-  getPage().pages.blockInfo.updateFunction = getBestBlockHash;  
 }
 
 function getBestBlockHash() {
@@ -55,33 +54,37 @@ function getBestBlockHash() {
   var theURL = "";
   if (index === null || index === undefined || index === "") {
     theURL = pathnames.getURLfromRPCLabel(pathnames.rpcCalls.getBestBlockHash.rpcCall, {
-      net: globals.getPage().currentNet
+      net: globals.mainPage().currentNet
     });
   } else {
     theURL = pathnames.getURLfromRPCLabel(pathnames.rpcCalls.getBlockHash.rpcCall, {
-      net: globals.getPage().currentNet,
+      net: globals.mainPage().currentNet,
       index: index
     });
   }
   submitRequests.submitGET({
     url: theURL,
-    progress: getSpanProgress(),
-    result : getOutputBlockInfoDiv(),
+    progress: globals.spanProgress(),
+    result : ids.defaults.outputRPCBlockInfo,
     callback: getBestBlockHashCallback
   });
 }
 
 function updateBlockInfoPage() {
-  if (getPage().pages.blockInfo.updateFunction === getBlock) {
-    document.getElementById(ids.defaults.radioButtonBestBlock).checked = true;
-    getBestBlockHash();
-  } else {
-    getPage().pages.blockInfo.updateFunction();
+  var theRadioButtons = document.getElementsByName("rpcCallBlockInfo");
+  for (var counterRadioButtons = 0; counterRadioButtons < theRadioButtons.length; counterRadioButtons ++) {
+    var currentRadioButton = theRadioButtons[counterRadioButtons];
+    if (currentRadioButton.checked) { 
+      var event = new Event('change');
+      currentRadioButton.dispatchEvent(event);
+      return;
+    }
   }
 }
 
 
 module.exports = {
   getBestBlockHash,
-  getBlock
+  getBlock,
+  updateBlockInfoPage
 }
