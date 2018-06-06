@@ -51,8 +51,22 @@ function startFabcoinDaemonIfNeeded() {
   startFabcoinDaemon();
 }
 
+function gitPull() {
+  var theURL = `
+${pathnames.url.known.fabcoinInitialization}?command={
+"${pathnames.fabcoinInitialization}":"${pathnames.fabcoinInitializationProcedures.gitPull.fabcoinInitialization}"
+}`;  
+  submitRequests.submitGET({
+    url: theURL,
+    progress: getSpanProgress(),
+    result : getOutputFabcoinInitialization(),
+    callback: fabcoinInitializationCallback    
+  });  
+}
+
 module.exports = {
   startFabcoinDaemon,
   startFabcoinDaemonIfNeeded,
-  killAllFabcoinDaemons
+  killAllFabcoinDaemons,
+  gitPull
 }
