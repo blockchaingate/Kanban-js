@@ -4,6 +4,7 @@ const pathnames = require('../pathnames');
 const ids = require('./ids_dom_elements');
 const jsonToHtml = require('./json_to_html');
 //const Block = require('../bitcoinjs_src/block');
+const globals = require('./globals');
 
 function getSpanProgress() { 
   return document.getElementById(ids.defaults.progressReport);
@@ -21,7 +22,7 @@ function killAllFabcoinDaemons() {
   var theURL = `
 ${pathnames.url.known.fabcoinInitialization}?command={
 "${pathnames.fabcoinInitialization}":"${pathnames.fabcoinInitializationProcedures.killAll.fabcoinInitialization}", 
-"net":"${window.kanban.thePage.pages.blockInfo.currentNet}"
+"net":"${globals.mainPage().currentNet}"
 }`;
   submitRequests.submitGET({
     url: theURL,
@@ -35,7 +36,7 @@ function startFabcoinDaemon() {
   var theURL = `
 ${pathnames.url.known.fabcoinInitialization}?command={
 "${pathnames.fabcoinInitialization}":"${pathnames.fabcoinInitializationProcedures.startFabcoind.fabcoinInitialization}", 
-"net":"${window.kanban.thePage.pages.blockInfo.currentNet}"
+"net":"${globals.mainPage().currentNet}"
 }`;
 
   submitRequests.submitGET({

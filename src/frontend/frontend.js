@@ -1,6 +1,10 @@
 window.kanban = {};
 window.kanban.thePage = require('./main_page').getPage();
-window.kanban.rpc = require('./fabcoin_rpc');
+window.kanban.rpc = {};
+window.kanban.rpc.general = require('./fabcoin_rpc_general');
+window.kanban.rpc.block = require('./fabcoin_rpc_block');
+window.kanban.rpc.transactions = require('./fabcoin_rpc_transactions');
+window.kanban.rpc.network = require('./fabcoin_rpc_network');
 window.kanban.fabcoinInitialization = require('./fabcoin_initialization');
 window.kanban.nodeCalls = require('./node_calls');
 window.kanban.ids = require('./ids_dom_elements');

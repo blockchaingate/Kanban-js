@@ -7,7 +7,6 @@ const escapeHtml = require('escape-html');
 var numberRequestsRunning = 0;
 var maxRequestsRunning = 4;
 
-
 function fabcoinInitialize(request, response, desiredCommand) {
   console.log("DEBUG: got to here");
   numberRequestsRunning ++;

@@ -108,6 +108,18 @@ var rpcCalls = {
     net: "-testnet",
     cli: ["net", "command"]
   },
+  getNetworkInfo: {
+    rpcCall: "getNetworkInfo", //must be same as rpc label, used for autocomplete
+    command: "getnetworkinfo",
+    net: "-testnet",
+    cli: ["net", "command"]
+  },
+  getNetTotals: {
+    rpcCall: "getNetTotals", //must be same as rpc label, used for autocomplete
+    command: "getnettotals",
+    net: "-testnet",
+    cli: ["net", "command"]
+  },
   getBlock: {
     rpcCall: "getBlock", //must be same as rpc label, used for autocomplete
     command: "getblock",
@@ -255,6 +267,7 @@ function getRPCcallArguments(theRPCLabel, additionalArguments, errors) {
 }
 
 function getFabcoinInitializationCallArguments(theCallLabel, additionalArguments, errors) {
+  console.log("DEBUG: extracting additional arguments from: " + JSON.stringify(additionalArguments));
   var result = [];
   if (!(theCallLabel in fabcoinInitializationProcedures)) {
     errors.push(`Uknown or non-implemented rpc command: ${theCallLabel}.`);

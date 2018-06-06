@@ -1,9 +1,13 @@
 "use strict";
-const rpcCalls = require('./fabcoin_rpc');
+const rpcCallsGeneral = require('./fabcoin_rpc_general');
+const rpcCallsBlock = require('./fabcoin_rpc_block');
+const rpcCallsNetwork = require('./fabcoin_rpc_network');
+const rpcCallsTransactions = require('./fabcoin_rpc_transactions');
 const fabcoinInitialization = require('./fabcoin_initialization');
 const ids = require('./ids_dom_elements');
 
 function Page() {
+  this.currentNet = "-testnet";
   this.pages = {
     fabcoinInitialization:{
       ids: {
@@ -15,21 +19,20 @@ function Page() {
       ids: {
         page: ids.defaults.pageBlockInfo
       },
-      currentNet: "-testnet",
       verbosity: "0",
-      updateFunction: rpcCalls.getBestBlockHash,
+      updateFunction: rpcCallsBlock.updateBlockInfoPage,
     },
     txInfo: {
       ids: {
         page: ids.defaults.pageTXInfo
       },
-      updateFunction: rpcCalls.updateTXInfoPage
+      updateFunction: rpcCallsTransactions.updateTXInfoPage
     },
     network: {
       ids: {
         page: ids.defaults.pageNetwork
       },
-      updateFunction: rpcCalls.getPeerInfo
+      updateFunction: rpcCallsNetwork.updateNetworkPage
     },
     testGPU: {
       ids: {
@@ -68,24 +71,35 @@ Page.prototype.selectPage = function(pageLabel) {
 Page.prototype.storePageSettings = function() {
   try {
     localStorage.setItem("currentPageLabel", this.currentPageLabel);
+    localStorage.setItem("currentNet", this.currentNet);
   } catch (e) {
     console.log(`While trying to load local storage, got error: ${e}. Is local storage available?`);
   }  
 }
 
 Page.prototype.loadPageSettings = function() {
+  var allowedCurrentNetValues = {
+    "-mainnet": true,
+    "": true,
+    "-testnet": true,
+    "-regtest": true
+  }
   try {
     this.currentPageLabel = localStorage.getItem("currentPageLabel");
+    var currentNetCandidate = localStorage.getItem("currentNet");
+    if (currentNetCandidate in allowedCurrentNetValues) {
+      this.currentNet = currentNetCandidate;
+    }
   } catch (e) {
     console.log(`While trying to load local storage, got error: ${e}. Is local storage available?`);
   }
 }
 
 function getPage() {
-  if (window.kanban.page === null || window.kanban.page === undefined) {
-    window.kanban.page = new Page();
+  if (window.kanban.thePage === null || window.kanban.thePage === undefined) {
+    window.kanban.thePage = new Page();
   }
-  return window.kanban.page;
+  return window.kanban.thePage;
 }
 
 module.exports = {

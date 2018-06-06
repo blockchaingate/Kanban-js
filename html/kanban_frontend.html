@@ -5,19 +5,19 @@
 <div class = "divPageAndMenu">
 <div class = "divControlPanelDefault">
   <label class = "containerRadioButton">
-    <input type = "radio" name = "net" checked = "checked" onchange = "window.kanban.rpc.setRegtest();">
+    <input type = "radio" name = "net" checked = "checked" onchange = "window.kanban.rpc.general.setRegtest();">
     <span class = "radioMark"></span>
     Regtest
   </label>
   &nbsp;&nbsp;&nbsp;
   <label class = "containerRadioButton">
-    <input type = "radio" name = "net" checked = "checked" onchange = "window.kanban.rpc.setTestNet();">
+    <input type = "radio" name = "net" checked = "checked" onchange = "window.kanban.rpc.general.setTestNet();">
     <span class = "radioMark"></span>
     TestNet
   </label>
   &nbsp;&nbsp;&nbsp;
   <label class = "containerRadioButton">
-    <input type = "radio" name = "net" onchange = "window.kanban.rpc.setMainNet();">
+    <input type = "radio" name = "net" onchange = "window.kanban.rpc.general.setMainNet();">
     <span class = "radioMark"></span>
     MainNet
   </label>
@@ -101,11 +101,23 @@
 <div class = "divMainPage" id = "pageNetwork">
   <div class = "divControlPanelDefault">
     <label class = "containerRadioButton">
-      <input type = "radio" name = "rpcCallNetwork" onchange = "window.kanban.rpc.getPeerInfo();" checked = "checked">
+      <input type = "radio" name = "rpcCallNetwork" onchange = "window.kanban.rpc.network.getPeerInfo();" checked = "checked">
       <span class = "radioMark"></span>
       Peer info
     </label>
-  </div>
+    &nbsp;&nbsp;&nbsp;
+    <label class = "containerRadioButton">
+      <input type = "radio" name = "rpcCallNetwork" onchange = "window.kanban.rpc.network.getNetworkInfo();">
+      <span class = "radioMark"></span>
+      Network info
+    </label>
+    &nbsp;&nbsp;&nbsp;
+    <label class = "containerRadioButton">
+      <input type = "radio" name = "rpcCallNetwork" onchange = "window.kanban.rpc.network.getNetTotals();">
+      <span class = "radioMark"></span>
+      Net totals
+    </label>
+  </div><br>
   <div class = "divControlPanelDefault">
     <div id = "divKanbanRPCOutputNetwork"></div>
   </div>
@@ -166,10 +178,10 @@
   </div>
   <div class = "divMenuButtonPanel">
     <div><button class = "buttonSelectPage" onclick = "window.kanban.thePage.selectPage('fabcoinInitialization');">Start</button> </div>
+    <div><button class = "buttonSelectPage" onclick = "window.kanban.thePage.selectPage('network');">Network</button> </div>
     <div><button class = "buttonSelectPage" onclick = "window.kanban.thePage.selectPage('send');">Send</button> </div>
     <div><button class = "buttonSelectPage" onclick = "window.kanban.thePage.selectPage('blockInfo');">Blocks</button> </div>
     <div><button class = "buttonSelectPage" onclick = "window.kanban.thePage.selectPage('txInfo');">Transactions</button> </div>
-    <div><button class = "buttonSelectPage" onclick = "window.kanban.thePage.selectPage('network');">Network</button> </div>
     <!--div><button class = "buttonSelectPage" onclick = "window.kanban.thePage.selectPage('testGPU');">Test GPU</button> </div-->
   </div>
 </div><!--divMenu-->
