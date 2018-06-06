@@ -198,10 +198,16 @@ var fabcoinInitializationProcedures = {
     command: "killall",
     cli: ["fabcoind"]
   },
-  gitPull: {
-    fabcoinInitialization: "gitPull",
+  gitPullNode: {
+    fabcoinInitialization: "gitPullNode",
     command: "git",
     path: path.base,
+    cli: ["pull"]
+  },
+  gitPullFabcoin: {
+    fabcoinInitialization: "gitPullFabcoin",
+    command: "git",
+    path: path.fabcoin,
     cli: ["pull"]
   }
 }

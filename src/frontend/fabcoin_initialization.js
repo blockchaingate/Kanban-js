@@ -51,10 +51,10 @@ function startFabcoinDaemonIfNeeded() {
   startFabcoinDaemon();
 }
 
-function gitPull() {
+function gitPullNode() {
   var theURL = `
 ${pathnames.url.known.fabcoinInitialization}?command={
-"${pathnames.fabcoinInitialization}":"${pathnames.fabcoinInitializationProcedures.gitPull.fabcoinInitialization}"
+"${pathnames.fabcoinInitialization}":"${pathnames.fabcoinInitializationProcedures.gitPullNode.fabcoinInitialization}"
 }`;  
   submitRequests.submitGET({
     url: theURL,
@@ -64,9 +64,24 @@ ${pathnames.url.known.fabcoinInitialization}?command={
   });  
 }
 
+function gitPullFabcoin() {
+  var theURL = `
+${pathnames.url.known.fabcoinInitialization}?command={
+"${pathnames.fabcoinInitialization}":"${pathnames.fabcoinInitializationProcedures.gitPullFabcoin.fabcoinInitialization}"
+}`;  
+  submitRequests.submitGET({
+    url: theURL,
+    progress: getSpanProgress(),
+    result : getOutputFabcoinInitialization(),
+    callback: fabcoinInitializationCallback    
+  });  
+}
+
+
 module.exports = {
   startFabcoinDaemon,
   startFabcoinDaemonIfNeeded,
   killAllFabcoinDaemons,
-  gitPull
+  gitPullNode,
+  gitPullFabcoin
 }
