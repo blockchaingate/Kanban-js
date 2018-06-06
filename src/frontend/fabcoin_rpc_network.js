@@ -5,23 +5,16 @@ const ids = require('./ids_dom_elements');
 const jsonToHtml = require('./json_to_html');
 //const Block = require('../bitcoinjs_src/block');
 const globals = require('./globals');
+const RPCGeneral = require('./fabcoin_rpc_general');
+
 
 function updateNetworkPage() {
-  var theRadioButtons = document.getElementsByName("rpcCallNetwork");
-  for (var counterRadio = 0; counterRadio < theRadioButtons.length; counterRadio ++) {
-    var currentRadio = theRadioButtons[counterRadio];
-    if (currentRadio.checked) {
-      var event = new Event("change");
-      currentRadio.dispatchEvent(event);
-      return;
-    }
-  }
+  RPCGeneral.updatePageFromRadioButtonsByName("rpcCallNetwork");
 }
 
 function getNetworkInfoCallBack(input, outputComponent) {
   jsonToHtml.writeJSONtoDOMComponent(input, outputComponent);
 }
-
 
 function getPeerInfo() {
   submitRequests.submitGET({

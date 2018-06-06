@@ -240,6 +240,7 @@ TestSuitePipeBuffer.prototype.initMessageStats = testSuiteInitMessageStats;
 TestSuiteSignatures.prototype.initMessageStats = testSuiteInitMessageStats;
 
 function OpenCLDriver() {
+  this.enabled = true;
   this.started = false;
   this.connected = false;
   this.handleExecutable = null;
@@ -311,7 +312,7 @@ OpenCLDriver.prototype.processOutputOneChunk = function(chunk) {
 }
 
 OpenCLDriver.prototype.start = function () {
-  if (this.started) {
+  if (this.started || ! this.enabled) {
     return;
   }
   this.started = true;
@@ -385,7 +386,7 @@ OpenCLDriver.prototype.connectData = function () {
 }
 
 OpenCLDriver.prototype.connect = function () {
-  if (this.connected) {
+  if (this.connected || ! this.enabled) {
     return;
   }
   console.log(`trying to connect to: metadata`.blue);
@@ -407,6 +408,9 @@ OpenCLDriver.prototype.connect = function () {
 }
 
 OpenCLDriver.prototype.startAndConnect = function () {
+  if (! this.enabled) {
+    return;
+  }
   this.start();
   setTimeout(global.kanban.openCLDriver.connect.bind(global.kanban.openCLDriver), 2000);
 }

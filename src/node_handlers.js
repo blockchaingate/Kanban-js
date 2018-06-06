@@ -3,6 +3,7 @@ const pathnames = require('./pathnames');
 const assert = require('assert')
 const childProcess = require('child_process');
 const openCLDriver = require('./open_cl_driver');
+const globals = require('./globals');
 var jobs = global.kanban.jobs;
 
 function computeUnspentTransactions(id){
@@ -77,6 +78,11 @@ var numSimultaneousCalls = 0;
 var maxSimultaneousCalls = 4;
 function dispatch(request, response, desiredCommand) {
   //console.log(`command: ${JSON.stringify(desiredCommand)}, nodeCall = ${pathnames.nodeCall}`);
+  if (!globals.openCLDriver().enabled) {
+    response.writeHead(200);
+    return response.end(`Server-side computations/openCL have been disabled from source code (file src/app.js).`);
+  }
+
   var isGood = false;
   var currentCommandLabel = desiredCommand[pathnames.nodeCall];
   //console.log(`nodeCall: ${pathnames.nodeCall}, currentCommandLabel: ${JSON.stringify(currentCommandLabel)}`);

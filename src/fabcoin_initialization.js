@@ -30,11 +30,19 @@ function fabcoinInitialize(request, response, desiredCommand) {
   var theArguments = pathnames.getFabcoinInitializationCallArguments(theCallLabel, desiredCommand, theErrors);
   var theCall = pathnames.fabcoinInitializationProcedures[theCallLabel];
   var theCommand = `${theCall.command}`;
+  const defaultOptions = {
+    cwd: undefined,
+    env: process.env
+  };
   console.log(`Executing fabcoin initialization command: ${theCommand}.`.blue);
   console.log(`Arguments: ${theArguments}.`.green);
+  if (theCall.path !== undefined && theCall.path !== null && theCall.path !== "") {
+    defaultOptions.cwd = theCall.path;
+    console.log(`Command will start from: ${defaultOptions.cwd}`.yellow);
+  }
   var finalData = "";
   try {
-    var child = childProcess.spawn(theCommand, theArguments);
+    var child = childProcess.spawn(theCommand, theArguments, defaultOptions);
     child.stdout.on('data', function(data) {
       console.log(data.toString());
       finalData += data.toString();

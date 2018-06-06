@@ -5,6 +5,8 @@ const ids = require('./ids_dom_elements');
 const jsonToHtml = require('./json_to_html');
 const Block = require('../bitcoinjs_src/block');
 const globals = require('./globals');
+const RPCGeneral = require('./fabcoin_rpc_general');
+
 
 function getTXoutSetInfoCallback(input, outputComponent) {
   jsonToHtml.writeJSONtoDOMComponent(input, outputComponent);
@@ -13,9 +15,9 @@ function getTXoutSetInfoCallback(input, outputComponent) {
 function getTXoutSetInfo(){
   submitRequests.submitGET({
     url: pathnames.getURLfromRPCLabel(pathnames.rpcCalls.getTXOutSetInfo.rpcCall, {
-      net: globals.getPage().currentNet,
+      net: globals.mainPage().currentNet,
     }),
-    progress: getSpanProgress(),
+    progress: globals.spanProgress(),
     result : getOutputTXInfoDiv(),
     callback: getTXoutSetInfoCallback
   });  
@@ -28,9 +30,9 @@ function getTXoutCallback(input, outputComponent) {
 function getTXout() {
   submitRequests.submitGET({
     url: pathnames.getURLfromRPCLabel(pathnames.rpcCalls.getTXOut.rpcCall, {
-      net: globals.getPage().currentNet,
+      net: globals.mainPage().currentNet,
     }),
-    progress: getSpanProgress(),
+    progress: globals.spanProgress(),
     result : getOutputTXInfoDiv(),
     callback: getTXoutCallback
   });  
@@ -41,14 +43,27 @@ function getOutputTXInfoDiv() {
 }
 
 function updateTXInfoPage() {
-  if (document.getElementById(ids.defaults.radioButtonTransactionsListUnspent).checked === true) {
-    getListUnspent();
-  } else {
-    getTXoutSetInfo();
-  }
+  RPCGeneral.updatePageFromRadioButtonsByName("rpcCallTxInfo");
+}
+
+function listUnspentCallback(input, outputComponent) {
+  jsonToHtml.writeJSONtoDOMComponent(input, outputComponent);
+}
+
+function getListUnspent() {
+  submitRequests.submitGET({
+    url: pathnames.getURLfromRPCLabel(pathnames.rpcCalls.listUnspent.rpcCall, {
+      net: globals.mainPage().currentNet,
+    }),
+    progress: globals.spanProgress(),
+    result : getOutputTXInfoDiv(),
+    callback: listUnspentCallback
+  });  
 }
 
 module.exports = {
   getTXoutSetInfo,
-  getTXout
+  getTXout,
+  getListUnspent,
+  updateTXInfoPage
 }

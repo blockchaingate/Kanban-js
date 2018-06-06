@@ -70,19 +70,16 @@ function listAccounts() {
   });  
 }
 
-function listUnspentCallback(input, outputComponent) {
-  jsonToHtml.writeJSONtoDOMComponent(input, outputComponent);
-}
-
-function getListUnspent() {
-  submitRequests.submitGET({
-    url: pathnames.getURLfromRPCLabel(pathnames.rpcCalls.listUnspent.rpcCall, {
-      net: globals.getPage().currentNet,
-    }),
-    progress: globals.spanProgress(),
-    result : getOutputTXInfoDiv(),
-    callback: listUnspentCallback
-  });  
+function updatePageFromRadioButtonsByName(desiredRadioButtonName) {
+  var theRadioButtons = document.getElementsByName(desiredRadioButtonName);
+  for (var counterRadioButtons = 0; counterRadioButtons < theRadioButtons.length; counterRadioButtons ++) {
+    var currentRadioButton = theRadioButtons[counterRadioButtons];
+    if (currentRadioButton.checked) { 
+      var event = new Event('change');
+      currentRadioButton.dispatchEvent(event);
+      return;
+    }
+  }
 }
 
 module.exports = {
@@ -90,6 +87,6 @@ module.exports = {
   setMainNet,
   setRegtest,
   getReceivedByAccount,
-  getListUnspent,
   listAccounts,
+  updatePageFromRadioButtonsByName
 }

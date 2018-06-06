@@ -1,4 +1,5 @@
 "use strict";
+const pathBuiltIn = require('path');
 
 var path = {
   base: `${__dirname}/..`,
@@ -8,6 +9,11 @@ var path = {
   fabcoinSrc: `${__dirname}/../fabcoin/src`,
   openCLDriverBuildPath: `${__dirname}/../build`,
 };
+for (var label in path) {
+//  console.log(`Debug: path ${path[label]} `);
+  path[label] = pathBuiltIn.normalize(path[label]);
+//  console.log(`normalized to: ${path[label]}`);
+}
 
 var pathname = {
   privateKey: `${path.certificates}/private_key.pem`,
@@ -22,6 +28,13 @@ var pathname = {
   fabcoinCli: `${path.fabcoinSrc}/fabcoin-cli`,
   openCLDriverExecutable: `${path.openCLDriverBuildPath}/kanban-gpu`
 };
+
+for (var label in pathname) {
+  //console.log(`Debug: path ${pathname[label]} `);
+  pathname[label] = pathBuiltIn.normalize(pathname[label]);
+  //console.log(`normalized to: ${pathname[label]}`);
+}
+  
 
 var url = {};
 url.known = {
@@ -184,6 +197,12 @@ var fabcoinInitializationProcedures = {
     fabcoinInitialization: "killAll",
     command: "killall",
     cli: ["fabcoind"]
+  },
+  gitPull: {
+    fabcoinInitialization: "gitPull",
+    command: "git",
+    path: path.base,
+    cli: ["pull"]
   }
 }
 
