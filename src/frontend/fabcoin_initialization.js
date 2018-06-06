@@ -77,11 +77,24 @@ ${pathnames.url.known.fabcoinInitialization}?command={
   });  
 }
 
+function makeFabcoin() {
+  var theURL = `
+${pathnames.url.known.fabcoinInitialization}?command={
+"${pathnames.fabcoinInitialization}":"${pathnames.fabcoinInitializationProcedures.makeFabcoin.fabcoinInitialization}"
+}`;  
+  submitRequests.submitGET({
+    url: theURL,
+    progress: getSpanProgress(),
+    result : getOutputFabcoinInitialization(),
+    callback: fabcoinInitializationCallback    
+  });  
+}
 
 module.exports = {
   startFabcoinDaemon,
   startFabcoinDaemonIfNeeded,
   killAllFabcoinDaemons,
   gitPullNode,
-  gitPullFabcoin
+  gitPullFabcoin,
+  makeFabcoin
 }

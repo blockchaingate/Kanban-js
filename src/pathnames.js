@@ -209,6 +209,12 @@ var fabcoinInitializationProcedures = {
     command: "git",
     path: path.fabcoin,
     cli: ["pull"]
+  },
+  makeFabcoin: {
+    fabcoinInitialization: "makeFabcoin",
+    command: "make",
+    path: path.fabcoin,
+    cli: []
   }
 }
 
