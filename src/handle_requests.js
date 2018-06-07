@@ -8,8 +8,9 @@ const url  = require('url');
 const fabCli = require('./handlers_fabcoin_cli');
 const fabcoinInitialization = require('./handlers_fabcoin_initialization');
 const handlersComputationalEngine = require('./handlers_computational_engine');
+const handlersMyNodes = require('./handlers_my_nodes');
 
-function handle_requests(request, response) {
+function handleRequests(request, response) {
   //console.log(`The url is: ${request.url}`.red);
   if (request.url in pathnames.url.synonyms) {
     request.url = pathnames.url.synonyms[request.url];
@@ -29,10 +30,13 @@ function handle_requests(request, response) {
   if (parsedURL.pathname === pathnames.url.known.fabcoinInitialization) {
     return handleFabcoinInitialization(request, response);
   }
+  if (parsedURL.pathname === pathnames.url.known.myNodesCommand) {
+    return handleMyNodesCall(request, response);
+  }
   if (parsedURL.pathname === pathnames.url.known.rpc) {
     return handleRPC(request, response);
   }
-  if (parsedURL.pathname === pathnames.url.known.node) {
+  if (parsedURL.pathname === pathnames.url.known.computationEngine) {
     return handleComputationalEngineCall(request, response);
   }
   
@@ -86,6 +90,22 @@ function handleComputationalEngineCall(request, response) {
   return handlersComputationalEngine.dispatch(request, response, queryCommand);
 }
 
+function handleMyNodesCall(request, response) {
+  var parsedURL = null;
+  var query = null;
+  var queryCommand = null;
+  try {
+    parsedURL = url.parse(request.url);
+    query = queryString.parse(parsedURL.query);
+    queryCommand = JSON.parse(query.command);
+  } catch (e) {
+    response.writeHead(400);
+    return response.end(`Bad node call request: ${e}`);
+  }
+  return handlersMyNodes.myNodeCall(request, response, queryCommand);
+}
+
+
 function handleFile(request, response) {
   var thePathName = pathnames.url.whiteListed[request.url];
   var mimeType = mime.lookup(thePathName);
@@ -121,5 +141,5 @@ function handleFile(request, response) {
 }
 
 module.exports = {
-  handle_requests
+  handleRequests
 }

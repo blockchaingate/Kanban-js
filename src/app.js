@@ -29,12 +29,12 @@ const handleRequests = require('./handle_requests');
 var portHttps = 52907;
 var portHttp = 51846;
 
-var serverHTTPS = https.createServer(certificateOptions, handleRequests.handle_requests);
+var serverHTTPS = https.createServer(certificateOptions, handleRequests.handleRequests);
 serverHTTPS.listen(portHttps, function() {
   console.log(`Listening on https port: ${portHttps}`.green);
 });
 
-var serverHTTP = http.createServer(handleRequests.handle_requests);
+var serverHTTP = http.createServer(handleRequests.handleRequests);
 serverHTTP.listen(portHttp, function(){
   console.log(`Listening on http port: ${portHttp}`.yellow);
 });

@@ -17,6 +17,7 @@ var defaults = {
   outputRPCTXInfo: "divKanbanRPCOutputTXInfo",
   outputRPCNetwork: "divKanbanRPCOutputNetwork",
   outputGPUTest: "divGPUTestOutput",
+  outputMyNodes: "divMyNodesOutput",
   outputFabcoinInitialization: "divFabcoinInitialization",
   radioButtonBestBlock: "radioBestBlockHash",
   radioButtonBlockInfo: "radioButtonBlockInfo",

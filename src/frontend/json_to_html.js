@@ -71,7 +71,7 @@ function getHtmlFromArrayOfObjects(input, doIncludeTogglePolling, outputPolling)
     try {
       inputJSON = JSON.parse(inputJSON);
     } catch (e) {
-      return `<error>Error while parsing ${escape(inputJSON)}: ${e}</error>`;
+      return `<error>Error while parsing ${inputJSON}: ${e}</error>`;
     }
   }
   var result = "";

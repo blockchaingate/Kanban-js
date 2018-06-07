@@ -48,8 +48,9 @@ var url = {
     frontEndHTML: "/kanban_frontend.html",
     frontEndCSS: "/kanban_frontend.css",
     rpc: "/rpc",
-    node: "/node",
+    computationEngine: "/computation_engine",
     fabcoinInitialization: "/fabcoin_initialization",
+    myNodesCommand: "/my_nodes",
     logFileTestNet: "/logFileTestNet",
     logFileMainNet: "/logFileMainNet"
   },
@@ -228,6 +229,14 @@ var fabcoinInitializationProcedures = {
   }
 }
 
+var myNodesCommand = "myNodesCommand";
+
+var myNodesCommands = {
+  fetchNodeInfo : {
+    myNodesCommand: "fetchNodeInfo", //must be same as label, used for autocomplete
+  }
+}
+
 function getURLfromComputationalEngineCall(theComputationalEngineCallLabel, additionalArguments) {
   var theComputationalEngineCall = computationalEngineCalls[theComputationalEngineCallLabel];
   if (theComputationalEngineCall === undefined){
@@ -334,20 +343,50 @@ function getFabcoinInitializationCallArguments(theCallLabel, additionalArguments
   return result;
 }
 
+function getURLFromFabcoinInitialization(theNodeCallLabel, theArguments) {
+}
+
+function getURLFromMyNodesCall(theMyNodesCallLabel, theArguments) {
+  var theRequest = {};
+  theRequest[myNodesCommand] = theMyNodesCallLabel;
+  var theMyNodesCall = myNodesCommands[theMyNodesCallLabel];
+  if (theArguments === undefined) {
+    theArguments = {};
+  }
+  for (var label in theArguments) {
+    if (typeof theArguments[label] !== "string" && theMyNodesCall[label] !== null) {
+      continue; // <- label not valid for this RPC call
+    }
+    if (typeof theArguments[label] === "string") {
+      theRequest[label] = theArguments[label];
+    } 
+  }
+  return `${url.known.myNodesCommand}?command=${encodeURIComponent(JSON.stringify(theRequest))}`;
+}
+
 module.exports = {
   pathname,
   path,
   url,
+  computationalEngineCallStatuses,
+  ///////////////
+  //information on the various calls:
   rpcCalls,
   computationalEngineCalls,
-  computationalEngineCallStatuses,
   fabcoinInitializationProcedures,
+  myNodesCommands,
+  ///////////////
+  //label for the various type of command:
   rpcCall,
   computationalEngineCall,
   fabcoinInitialization,
+  myNodesCommand,
+  ///////////////
   getURLfromRPCLabel,
   getURLfromComputationalEngineCall,
+  getURLFromMyNodesCall,
+  getURLFromFabcoinInitialization,
   getRPCcallArguments,
   getFabcoinInitializationCallArguments,
-  gpuCommands
+  gpuCommands,
 }

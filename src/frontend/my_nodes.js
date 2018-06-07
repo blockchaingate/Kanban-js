@@ -6,9 +6,23 @@ const jsonToHtml = require('./json_to_html');
 //const Block = require('../bitcoinjs_src/block');
 const globals = require('./globals');
 
-function updateMyNodes() {
-  console.log("updating my nodes");
+function myNodesOutputCallback(input, outputComponent) {
+  jsonToHtml.writeJSONtoDOMComponent(input, outputComponent);
+}
 
+function getMyNodesOutput() { 
+  return document.getElementById(ids.defaults.outputMyNodes);
+}
+
+function updateMyNodes() {
+  var theURL = pathnames.getURLFromMyNodesCall(pathnames.myNodesCommands.fetchNodeInfo.myNodesCommand, {});
+  submitRequests.submitGET({
+    url: theURL,
+    progress: globals.spanProgress(),
+    result : getMyNodesOutput(),
+    callback: myNodesOutputCallback
+  });  
+  
 }
 
 module.exports = {
