@@ -1,9 +1,16 @@
 "use strict";
+
+var ports ={ 
+  https: 52907,
+  http: 51846
+};
+
 const pathBuiltIn = require('path');
 
 var path = {
   base: `${__dirname}/..`,
-  certificates: `${__dirname}/../secrets_server_only`,
+  secretsServerOnly: `${__dirname}/../secrets_server_only`,
+  secretsAdmin: `${__dirname}/../secrets_admin`,
   HTML: `${__dirname}/../html`,
   fabcoin: `${__dirname}/../fabcoin`,
   fabcoinSrc: `${__dirname}/../fabcoin/src`,
@@ -20,8 +27,9 @@ for (var label in path) {
 }
 
 var pathname = {
-  privateKey: `${path.certificates}/private_key.pem`,
-  certificate: `${path.certificates}/certificate.pem`,
+  privateKey: `${path.secretsServerOnly}/private_key.pem`,
+  certificate: `${path.secretsServerOnly}/certificate.pem`,
+  configurationSecretsAdmin: `${path.secretsAdmin}/configuration.json`,
   faviconIco: `${path.HTML}/favicon.ico`,
   fabcoinSvg: `${path.HTML}/fabcoin.svg`,
   frontEndBrowserifiedJS: `${path.HTML}/kanban_frontend_browserified.js`,
@@ -39,7 +47,6 @@ for (var label in pathname) {
   //console.log(`normalized to: ${pathname[label]}`);
 }
   
-
 var url = {
   known: {
     faviconIco : "/favicon.ico",
@@ -367,6 +374,7 @@ function getURLFromMyNodesCall(theMyNodesCallLabel, theArguments) {
 module.exports = {
   pathname,
   path,
+  ports,
   url,
   computationalEngineCallStatuses,
   ///////////////

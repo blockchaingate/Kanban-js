@@ -26,15 +26,12 @@ const buildFrontEnd = require('./build_frontend').buildFrontEnd();
 const handleRequests = require('./handle_requests'); 
 //<- must come after openCL driver loading, even if the driver is disabled.
 
-var portHttps = 52907;
-var portHttp = 51846;
-
 var serverHTTPS = https.createServer(certificateOptions, handleRequests.handleRequests);
-serverHTTPS.listen(portHttps, function() {
-  console.log(`Listening on https port: ${portHttps}`.green);
+serverHTTPS.listen(pathnames.ports.https, function() {
+  console.log(`Listening on https port: ${pathnames.ports.https}`.green);
 });
 
 var serverHTTP = http.createServer(handleRequests.handleRequests);
-serverHTTP.listen(portHttp, function(){
-  console.log(`Listening on http port: ${portHttp}`.yellow);
+serverHTTP.listen(pathnames.ports.http, function(){
+  console.log(`Listening on http port: ${pathnames.ports.http}`.yellow);
 });
