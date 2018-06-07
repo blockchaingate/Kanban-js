@@ -15,7 +15,8 @@ function updatePages() {
   var pagesToUpdate = {
     txInfo: true,
     blockInfo: true,
-    network: true
+    network: true,
+    fabcoinInitialization: true
   };
   if (currentLabel in pagesToUpdate) {
     var currentPage = globals.mainPage().pages[currentLabel];
@@ -25,19 +26,25 @@ function updatePages() {
   }
 }
 
-function setTestNet() {
-  globals.mainPage().currentNet = "-testnet";
+function setNet(netName) {
+  var thePage = globals.mainPage();
+  thePage.currentNet = netName;
+  thePage.storePageSettings(); 
+  var currentNet = thePage.getCurrentNetwork();
+  document.getElementById(currentNet.radioBoxId).checked = true;
   updatePages();
+}
+
+function setTestNet() {
+  setNet("-testnet");
 }
 
 function setMainNet() {
-  globals.mainPage().currentNet = "-mainnet";
-  updatePages();
+  setNet("-mainnet");
 }
 
 function setRegtest() {
-  globals.mainPage().currentNet = "-regtest";
-  updatePages();
+  setNet("-regtest");
 }
 
 function getReceivedByAccountCallback(input, outputComponent) {

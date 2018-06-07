@@ -22,7 +22,12 @@ var defaults = {
   radioButtonTransactionsSetInfo: "radioButtonTransactionsSetInfo",
   radioButtonTransactionsListUnspent: "radioButtonTransactionsListUnspent",
   checkboxBlockVerbose: "checkboxBlockVerbose",
-}
+  raioBoxesNetwork: {
+    mainnet: "radioBoxSetMainnet",
+    testnet: "radioBoxSetTestnet",
+    regtest: "radioBoxSetRegtest"
+  }
+};
 
 module.exports = {
   defaults

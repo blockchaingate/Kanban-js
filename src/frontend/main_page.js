@@ -5,15 +5,37 @@ const rpcCallsNetwork = require('./fabcoin_rpc_network');
 const rpcCallsTransactions = require('./fabcoin_rpc_transactions');
 const fabcoinInitialization = require('./fabcoin_initialization');
 const ids = require('./ids_dom_elements');
+const pathnames = require('../pathnames');
 
 function Page() {
-  this.currentNet = "-testnet";
+  this.fabcoinNetworks = {
+    mainnet: {
+      name: "-mainnet",
+      logFileLink: pathnames.url.known.logFileMainNet,
+      radioBoxId: ids.defaults.raioBoxesNetwork.mainnet
+    },
+    testnet: {
+      name: "-testnet",
+      logFileLink: pathnames.url.known.logFileTestNet,
+      radioBoxId: ids.defaults.raioBoxesNetwork.testnet
+    },
+    regtest: {
+      name: "-regtest",
+      logFileLink: null,
+      radioBoxId: ids.defaults.raioBoxesNetwork.regtest
+    }
+  }
+  this.currentNet = this.fabcoinNetworks.testnet.name;
+  this.allowedNetworkNames = {};
+  for (var label in this.fabcoinNetworks) {
+    this.allowedNetworkNames[this.fabcoinNetworks[label].name] = label;
+  }
   this.pages = {
-    fabcoinInitialization:{
+    fabcoinInitialization: {
       ids: {
         page: ids.defaults.pageFabcoinInitialization
       },
-      //updateFunction: fabcoinInitialization.startFabcoinDaemonIfNeeded,      
+      updateFunction: fabcoinInitialization.updateFabcoinInitializationPage,      
     },
     blockInfo: {
       ids: {
@@ -44,8 +66,18 @@ function Page() {
   this.currentPageLabel = null;
 }
 
+Page.prototype.getCurrentNetwork = function () {
+  if (this.currentNet in this.allowedNetworkNames) {
+    var networkNameInternal = this.allowedNetworkNames[this.currentNet];
+    return this.fabcoinNetworks[networkNameInternal];
+  }
+  return this.fabcoinNetworks.testnet;
+}
+
 Page.prototype.initialize = function() {
   this.loadPageSettings();
+  var currentNet = this.getCurrentNetwork();
+  document.getElementById(currentNet.radioBoxId).checked = true;
   this.initializeCurrentPage();
 }
 
@@ -78,16 +110,10 @@ Page.prototype.storePageSettings = function() {
 }
 
 Page.prototype.loadPageSettings = function() {
-  var allowedCurrentNetValues = {
-    "-mainnet": true,
-    "": true,
-    "-testnet": true,
-    "-regtest": true
-  }
   try {
     this.currentPageLabel = localStorage.getItem("currentPageLabel");
     var currentNetCandidate = localStorage.getItem("currentNet");
-    if (currentNetCandidate in allowedCurrentNetValues) {
+    if (currentNetCandidate in this.allowedNetworkNames) {
       this.currentNet = currentNetCandidate;
     }
   } catch (e) {

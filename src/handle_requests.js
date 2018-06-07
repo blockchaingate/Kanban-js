@@ -88,18 +88,35 @@ function handleNodeCall(request, response) {
 
 function handleFile(request, response) {
   var thePathName = pathnames.url.whiteListed[request.url];
-  fs.readFile(thePathName, function(error, data) {
-    if (error) {
+  var mimeType = mime.lookup(thePathName);
+  if (!mimeType) {
+    mimeType = "application/x-binary";
+  }
+  var theFileSender = fs.createReadStream(thePathName, {highWaterMark: 1024 * 512});
+  //console.log("Created filesender");
+  var headerWritten = false;
+  var numBlocksSent = 0;
+  theFileSender.on("data", function(data) {
+    //console.log(`File block index: ${numBlocksSent}` );
+    numBlocksSent ++;
+    if (!headerWritten) {
+      response.writeHead(200, {"Content-type": mimeType});
+      headerWritten = true;
+    }
+    response.write(data);
+  });
+  theFileSender.on("close", function(){
+    //console.log("Got exit");
+    response.end();
+  });
+  theFileSender.on("error", function(error) {
+    //console.log("Got error");
+    if (!headerWritten) {
       response.writeHead(400, `File error.`);
-      response.end(`While fetching: ${escape(request.url)} got the error: ${error}. `);
-      return;
+      headerWritten = true;
     }
-    var mimeType = mime.lookup(thePathName);
-    if (!mimeType) {
-      mimeType = "application/x-binary";
-    }
-    response.writeHead(200, {"Content-type": mimeType});
-    response.end(data);
+    response.end(`While fetching: ${escape(request.url)} got the error: ${error}. `);
+    theFileSender.close();
   });
 }
 

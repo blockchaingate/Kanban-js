@@ -18,6 +18,14 @@ function fabcoinInitializationCallback(input, outputComponent) {
   jsonToHtml.writeJSONtoDOMComponent(input, outputComponent);
 }
 
+function updateFabcoinInitializationPage() {
+  var currentNetwork = globals.mainPage().getCurrentNetwork();
+  if (currentNetwork.logFileLink !== undefined && currentNetwork.logFileLink !== null) {
+    var theLink = document.getElementById("linkLogFileFabcoin");
+    theLink.setAttribute("href", currentNetwork.logFileLink);
+  }
+}
+
 function killAllFabcoinDaemons() {
   var theURL = `
 ${pathnames.url.known.fabcoinInitialization}?command={
@@ -96,5 +104,6 @@ module.exports = {
   killAllFabcoinDaemons,
   gitPullNode,
   gitPullFabcoin,
-  makeFabcoin
+  makeFabcoin,
+  updateFabcoinInitializationPage
 }

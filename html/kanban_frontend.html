@@ -5,19 +5,19 @@
 <div class = "divPageAndMenu">
 <div class = "divControlPanelDefault">
   <label class = "containerRadioButton">
-    <input type = "radio" name = "net" checked = "checked" onchange = "window.kanban.rpc.general.setRegtest();">
+    <input id = "radioBoxSetRegtest" type = "radio" name = "net" checked = "checked" onchange = "window.kanban.rpc.general.setRegtest();">
     <span class = "radioMark"></span>
     Regtest
   </label>
   &nbsp;&nbsp;&nbsp;
   <label class = "containerRadioButton">
-    <input type = "radio" name = "net" checked = "checked" onchange = "window.kanban.rpc.general.setTestNet();">
+    <input id = "radioBoxSetTestnet" type = "radio" name = "net" checked = "checked" onchange = "window.kanban.rpc.general.setTestNet();">
     <span class = "radioMark"></span>
     TestNet
   </label>
   &nbsp;&nbsp;&nbsp;
   <label class = "containerRadioButton">
-    <input type = "radio" name = "net" onchange = "window.kanban.rpc.general.setMainNet();">
+    <input id = "radioBoxSetMainnet" type = "radio" name = "net" onchange = "window.kanban.rpc.general.setMainNet();">
     <span class = "radioMark"></span>
     MainNet
   </label>
@@ -32,6 +32,7 @@
     <button class = "buttonStandard" onclick = "window.kanban.fabcoinInitialization.gitPullNode();">git pull node</button>
     <button class = "buttonStandard" onclick = "window.kanban.fabcoinInitialization.gitPullFabcoin();">git pull FABcoin</button>
     <button class = "buttonStandard" onclick = "window.kanban.fabcoinInitialization.makeFabcoin();">make FABcoin</button>
+    <a href = "/logFileTestNet" target = "_blank" id = "linkLogFileFabcoin">Log file </a>
   </div>
   <div class = "divControlPanelDefault" id = "divFabcoinInitialization"></div><!--divFabcoinInitialization-->
 </div><!--pageFabcoinInitialization-->
