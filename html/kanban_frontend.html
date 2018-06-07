@@ -27,12 +27,22 @@
 </div>
 <div class = "divMainPage" id = "pageFabcoinInitialization">
   <div class = "divControlPanelDefault">
-    fabcoind: <button class = "buttonStandard" onclick = "window.kanban.fabcoinInitialization.startFabcoinDaemon();">Start</button>
-    <button class = "buttonStandard" onclick = "window.kanban.fabcoinInitialization.killAllFabcoinDaemons();">Kill all</button>
-    <button class = "buttonStandard" onclick = "window.kanban.fabcoinInitialization.gitPullNode();">git pull node</button>
-    <button class = "buttonStandard" onclick = "window.kanban.fabcoinInitialization.gitPullFabcoin();">git pull FABcoin</button>
-    <button class = "buttonStandard" onclick = "window.kanban.fabcoinInitialization.makeFabcoin();">make FABcoin</button>
-    <a href = "/logFileTestNet" target = "_blank" id = "linkLogFileFabcoin">Log file </a>
+    <table> 
+      <tr>
+      <td>fabcoind</td> 
+      <td>
+      <button class = "buttonStandard" onclick = "window.kanban.fabcoinInitialization.startFabcoinDaemon();">Start</button>
+      <button class = "buttonStandard" onclick = "window.kanban.fabcoinInitialization.killAllFabcoinDaemons();">Kill all</button>
+      <button class = "buttonStandard" onclick = "window.kanban.fabcoinInitialization.gitPullFabcoin();">git pull FABcoin</button>
+      <button class = "buttonStandard" onclick = "window.kanban.fabcoinInitialization.makeFabcoin();">make FABcoin</button>
+      <a href = "/logFileTestNet" target = "_blank" id = "linkLogFileFabcoin">Log file </a>
+      </td>
+    </tr>
+    <tr>
+      <td>node</td>
+      <td><button class = "buttonStandard" onclick = "window.kanban.fabcoinInitialization.gitPullNode();">git pull node</button></td>
+    </tr>
+    </table>
   </div>
   <div class = "divControlPanelDefault" id = "divFabcoinInitialization"></div><!--divFabcoinInitialization-->
 </div><!--pageFabcoinInitialization-->

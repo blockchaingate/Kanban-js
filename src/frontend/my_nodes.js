@@ -16,7 +16,8 @@ function MyNode(inputParsed) {
 MyNode.prototype.toHTMLasTRelement = function () {
   var result = "";
   result += "<tr>";
-  result += `<td>${this.name}</td><td><a href = 'http://${this.ipAddress}:${pathnames.ports.http}'>${this.ipAddress}:${pathnames.ports.http}</a></td><td></td>`;
+  result += `<td>${this.name}</td><td><a href = 'http://${this.ipAddress}:${pathnames.ports.http}'>${this.ipAddress}:${pathnames.ports.http}</a></td>`;
+  result += `<td>${this.user}</td><td>${this.sshKey}</td>`;
   result += "</tr>";
   return result;
 } 
@@ -39,6 +40,7 @@ function MyNodesContainer (inputJSON) {
 MyNodesContainer.prototype.toHTML = function () {
   var result = "";
   result += "<table class = 'tableJSON'>";
+  result += "<tr><th> name </th><th>ip address</th><th>user</th><th>ssh key</th></tr>";
   for (var counterNode = 0; counterNode < this.nodeNamesOrdered.length; counterNode ++) {
     var currentNode = this.myNodes[this.nodeNamesOrdered[counterNode]];
     result += currentNode.toHTMLasTRelement();
@@ -60,7 +62,7 @@ function myNodesOutputCallback(input, outputComponent) {
   try {
     allMyNodes = new MyNodesContainer(input);
     var result = "";
-    result += allMyNodes.toHTMLWithDebug();
+    result += allMyNodes.toHTML();
     outputComponent.innerHTML = result;
   } catch (e) {
     outputComponent.innerHTML = `Error: ${e}`;
