@@ -11,8 +11,8 @@ function getToggleButton(buttonInfo) {
 function getToggleButtonPausePolling(buttonInfo) {
   return `<button class = "buttonProgress"
     onclick="if (this.nextSibling.nextSibling.style.display === 'none')
-    {this.nextSibling.nextSibling.style.display = ''; this.childNodes[1].innerHTML = '&#9660;'; window.kanban.nodeCalls.clearPollId();} else {
-    this.nextSibling.nextSibling.style.display = 'none'; this.childNodes[1].innerHTML = '&#9668;';window.kanban.nodeCalls.pollServerDoStart(${buttonInfo.output});}"><span>${buttonInfo.label}</span><b>&#9668;</b></button><br><span class="spanRESTDeveloperInfo" style="display:none">${buttonInfo.content}</span>`;
+    {this.nextSibling.nextSibling.style.display = ''; this.childNodes[1].innerHTML = '&#9660;'; window.kanban.computationalEngineCalls.clearPollId();} else {
+    this.nextSibling.nextSibling.style.display = 'none'; this.childNodes[1].innerHTML = '&#9668;';window.kanban.computationalEngineCalls.pollServerDoStart(${buttonInfo.output});}"><span>${buttonInfo.label}</span><b>&#9668;</b></button><br><span class="spanRESTDeveloperInfo" style="display:none">${buttonInfo.content}</span>`;
 }
 
 function recordProgressDone(progress) {

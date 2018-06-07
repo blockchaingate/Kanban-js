@@ -22,7 +22,7 @@ const fs = require('fs');
 const execSync = require('child_process').execSync;
 const colors = require('colors');
 const buildFrontEnd = require('./build_frontend');
-const fabcoinInitializeFolders = require('./fabcoin_initialize_folders');
+const fabcoinInitializeFolders = require('./initialize_fabcoin_folders');
 
 
 ////////Generate server private keys if needed

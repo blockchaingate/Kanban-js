@@ -6,5 +6,5 @@ window.kanban.rpc.blocks = require('./fabcoin_rpc_blocks');
 window.kanban.rpc.transactions = require('./fabcoin_rpc_transactions');
 window.kanban.rpc.network = require('./fabcoin_rpc_network');
 window.kanban.fabcoinInitialization = require('./fabcoin_initialization');
-window.kanban.nodeCalls = require('./node_calls');
+window.kanban.computationalEngineCalls = require('./computational_engile_calls');
 window.kanban.ids = require('./ids_dom_elements');

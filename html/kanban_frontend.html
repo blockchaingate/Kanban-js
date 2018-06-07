@@ -36,7 +36,9 @@
   </div>
   <div class = "divControlPanelDefault" id = "divFabcoinInitialization"></div><!--divFabcoinInitialization-->
 </div><!--pageFabcoinInitialization-->
+<div class = "divMainPage" id = "pageMyNodes">
 
+</div> <!--pageMyNodes-->
 <div class = "divMainPage" id = "pageRPCBlockInfo">
   <div class = "divControlPanelDefault">
     <label class = "containerRadioButton">
@@ -64,7 +66,7 @@
 </div> <!--pageRPCBlockInfo-->
 <div class = "divMainPage" id = "pageTXInfo" >
   <div class = "divControlPanelDefault">
-    <!--button class = "buttonStandard" onclick = "window.kanban.nodeCalls.synchronizeUnspentTransactions()">Synchronize</button>
+    <!--button class = "buttonStandard" onclick = "window.kanban.computationalEngineCalls.synchronizeUnspentTransactions()">Synchronize</button>
     &nbsp;&nbsp;&nbsp;     
     -->
     <label class = "containerRadioButton">
@@ -134,17 +136,17 @@
       </tr>
       <tr>
         <td>CPP &#8644; GPU [Sha256] </td>
-        <td><button class = "buttonStandard" onclick = "window.kanban.nodeCalls.testBackEndEngineSha256();">go</button></td>
+        <td><button class = "buttonStandard" onclick = "window.kanban.computationalEngineCalls.testBackEndEngineSha256();">go</button></td>
       </tr>
     </table>
   </div>
   <br>
   <div class = "divControlPanelDefault">
-    <input type = "text" id = "inputNodeCallTestMessage" placeholder = "message"></input>
-    <input type = "text" id = "inputNodeCallTestNonce" placeholder = "nonce" value = ""></input>
-    <input type = "text" id = "inputNodeCallTestSecretKey" placeholder = "secret key" value = ""></input>
-    <input type = "text" id = "inputNodeCallTestPublicKey" placeholder = "public key" value = ""></input>
-    <input type = "text" id = "inputNodeCallTestSignature" placeholder = "signature" value = ""></input>
+    <input type = "text" id = "inputComputationalEngineCallTestMessage" placeholder = "message"></input>
+    <input type = "text" id = "inputComputationalEngineCallTestNonce" placeholder = "nonce" value = ""></input>
+    <input type = "text" id = "inputComputationalEngineCallTestSecretKey" placeholder = "secret key" value = ""></input>
+    <input type = "text" id = "inputComputationalEngineCallTestPublicKey" placeholder = "public key" value = ""></input>
+    <input type = "text" id = "inputComputationalEngineCallTestSignature" placeholder = "signature" value = ""></input>
 
 
     <table class = "tableTestKanban">
@@ -152,22 +154,22 @@
       <tr>
         <td>Browser &#8644; node &#8644; CPP &#8644; GPU [SHA256]</td> 
         <td>message</td>
-        <td><button class = "buttonStandard" onclick = "window.kanban.nodeCalls.testBackEndSha256OneMessage();">one</button></td>
-        <td><button class = "buttonStandard" onclick = "window.kanban.nodeCalls.testBackEndSha256Multiple();">multiple</button></td>
+        <td><button class = "buttonStandard" onclick = "window.kanban.computationalEngineCalls.testBackEndSha256OneMessage();">one</button></td>
+        <td><button class = "buttonStandard" onclick = "window.kanban.computationalEngineCalls.testBackEndSha256Multiple();">multiple</button></td>
       </tr>
       <tr>
         <td>Browser &#8644; node &#8644; CPP &#8644; GPU[do nothing]</td>
         <td>-</td>
-        <td><button class = "buttonStandard" onclick = "window.kanban.nodeCalls.testBackEndPipeOneMessage();">one</button></td>
-        <td><button class = "buttonStandard" onclick = "window.kanban.nodeCalls.testBackEndPipeMultiple();">multiple</button></td>
+        <td><button class = "buttonStandard" onclick = "window.kanban.computationalEngineCalls.testBackEndPipeOneMessage();">one</button></td>
+        <td><button class = "buttonStandard" onclick = "window.kanban.computationalEngineCalls.testBackEndPipeMultiple();">multiple</button></td>
       </tr>
       <tr>
         <td>Browser &#8644; node &#8644; CPP &#8644; GPU[sign]</td>
         <td>message, nonce, secret</td>
         <td>
-        <button class = "buttonStandard" onclick = "window.kanban.nodeCalls.testBackEndSignOneMessage();">one</button> 
+        <button class = "buttonStandard" onclick = "window.kanban.computationalEngineCalls.testBackEndSignOneMessage();">one</button> 
         </td>
-        <td><button class = "buttonStandard" onclick = "window.kanban.nodeCalls.testBackEndSignMultipleMessages();">multiple</button></td>
+        <td><button class = "buttonStandard" onclick = "window.kanban.computationalEngineCalls.testBackEndSignMultipleMessages();">multiple</button></td>
       </tr>
     </table>    
   </div><!--divControlPanelDefault-->
@@ -182,6 +184,7 @@
   </div>
   <div class = "divMenuButtonPanel">
     <div><button class = "buttonSelectPage" onclick = "window.kanban.thePage.selectPage('fabcoinInitialization');">Start</button> </div>
+    <div><button class = "buttonSelectPage" onclick = "window.kanban.thePage.selectPage('myNodes');">My nodes</button> </div>
     <div><button class = "buttonSelectPage" onclick = "window.kanban.thePage.selectPage('network');">Network</button> </div>
     <div><button class = "buttonSelectPage" onclick = "window.kanban.thePage.selectPage('send');">Send</button> </div>
     <div><button class = "buttonSelectPage" onclick = "window.kanban.thePage.selectPage('blockInfo');">Blocks</button> </div>

@@ -5,9 +5,9 @@ const mime = require('mime-types');
 const escapeHtml = require('escape-html');
 const queryString = require('querystring');
 const url  = require('url');
-const fabCli = require('./fabcoin_cli_call');
-const fabcoinInitialization = require('./fabcoin_initialization');
-const nodeHandlers = require('./node_handlers');
+const fabCli = require('./handlers_fabcoin_cli');
+const fabcoinInitialization = require('./handlers_fabcoin_initialization');
+const handlersComputationalEngine = require('./handlers_computational_engine');
 
 function handle_requests(request, response) {
   //console.log(`The url is: ${request.url}`.red);
@@ -33,7 +33,7 @@ function handle_requests(request, response) {
     return handleRPC(request, response);
   }
   if (parsedURL.pathname === pathnames.url.known.node) {
-    return handleNodeCall(request, response);
+    return handleComputationalEngineCall(request, response);
   }
   
   //console.log(`DEBUG: The url is pt 5: ${request.url}`.red);
@@ -71,7 +71,7 @@ function handleRPC(request, response) {
   return fabCli.rpcCall(request, response, queryCommand);
 }
 
-function handleNodeCall(request, response) {
+function handleComputationalEngineCall(request, response) {
   var parsedURL = null;
   var query = null;
   var queryCommand = null;
@@ -83,7 +83,7 @@ function handleNodeCall(request, response) {
     response.writeHead(400);
     return response.end(`Bad node call request: ${e}`);
   }
-  return nodeHandlers.dispatch(request, response, queryCommand);
+  return handlersComputationalEngine.dispatch(request, response, queryCommand);
 }
 
 function handleFile(request, response) {

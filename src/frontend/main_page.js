@@ -6,6 +6,7 @@ const rpcCallsTransactions = require('./fabcoin_rpc_transactions');
 const fabcoinInitialization = require('./fabcoin_initialization');
 const ids = require('./ids_dom_elements');
 const pathnames = require('../pathnames');
+const myNodes = require('./my_nodes')
 
 function Page() {
   this.fabcoinNetworks = {
@@ -36,6 +37,12 @@ function Page() {
         page: ids.defaults.pageFabcoinInitialization
       },
       updateFunction: fabcoinInitialization.updateFabcoinInitializationPage,      
+    },
+    myNodes: {
+      ids: {
+        page: ids.defaults.pageMyNodes
+      },
+      updateFunction: myNodes.updateMyNodes
     },
     blockInfo: {
       ids: {

@@ -51,7 +51,7 @@ Jobs.prototype.addJob = function (jobHandler, jobFunctionLabel) {
   this.totalJobs ++;
   var callId = `currentCommandLabel_${this.totalJobs}_${this.getNumberOfJobs()}_${timeInMilliseconds}`;
   this.ongoing[callId] = {
-    status: pathnames.nodeCallStatuses.starting,
+    status: pathnames.computationalEngineCallStatuses.starting,
     name: jobFunctionLabel
   }
   process.nextTick(function() {

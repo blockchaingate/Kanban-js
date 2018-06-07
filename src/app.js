@@ -14,7 +14,7 @@ require('./initialize_opencl_driver').initializeOpenCLDriver();
 //<- Creates and starts the openCL driver.
 //<- At the time of writing, the driver is disabled with a hard-coded flag.
 
-require('./fabcoin_initialize_folders').initializeFolders();
+require('./initialize_fabcoin_folders').initializeFolders();
 //<- Find the location of the .fabcoin configuration folder (log files, ...)
 
 var certificateOptions = require('./initialize_certificates').getCertificateOptions(); 

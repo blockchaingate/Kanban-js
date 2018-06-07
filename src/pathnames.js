@@ -70,44 +70,44 @@ url.synonyms = {
   "/" : url.known.frontEndHTML
 };
 
-var nodeCall = "nodeCall";
+var computationalEngineCall = "computationalEngineCall";
 
-var nodeCallStatuses = {
+var computationalEngineCallStatuses = {
   starting: "Starting",
   recentlyFinished: "Recently finished",
   notFound: "Not found"
 };
 
-var nodeCalls = {
+var computationalEngineCalls = {
   computeUnspentTransactions: {
-    nodeCall: "computeUnspentTransactions", // must be same as key label, used for autocomplete
+    computationalEngineCall: "computeUnspentTransactions", // must be same as key label, used for autocomplete
   }, 
   pollOngoing: {
-    nodeCall: "pollOngoing" // must be same as key label, used for autocomplete
+    computationalEngineCall: "pollOngoing" // must be same as key label, used for autocomplete
   },
   testGPUSha256: {
-    nodeCall: "testGPUSha256" // must be same as key label, used for autocomplete
+    computationalEngineCall: "testGPUSha256" // must be same as key label, used for autocomplete
   },
   testBackEndSha256Multiple: {
-    nodeCall: "testBackEndSha256Multiple" // must be same as key label, used for autocomplete
+    computationalEngineCall: "testBackEndSha256Multiple" // must be same as key label, used for autocomplete
   },
   testBackEndSha256OneMessage: {
-    nodeCall: "testBackEndSha256OneMessage" // must be same as key label, used for autocomplete
+    computationalEngineCall: "testBackEndSha256OneMessage" // must be same as key label, used for autocomplete
   },
   testBackEndPipeMultiple: {
-    nodeCall: "testBackEndPipeMultiple" // must be same as key label, used for autocomplete
+    computationalEngineCall: "testBackEndPipeMultiple" // must be same as key label, used for autocomplete
   },
   testBackEndPipeOneMessage: {
-    nodeCall: "testBackEndPipeOneMessage" // must be same as key label, used for autocomplete
+    computationalEngineCall: "testBackEndPipeOneMessage" // must be same as key label, used for autocomplete
   },
   testBackEndSignOneMessage: {
-    nodeCall: "testBackEndSignOneMessage" // must be same as key label, used for autocomplete
+    computationalEngineCall: "testBackEndSignOneMessage" // must be same as key label, used for autocomplete
   },
   testBackEndSignMultipleMessages: {
-    nodeCall: "testBackEndSignMultipleMessages" // must be same as key label, used for autocomplete
+    computationalEngineCall: "testBackEndSignMultipleMessages" // must be same as key label, used for autocomplete
   },
   testBackEndEngineSha256: {
-    nodeCall: "testBackEndEngineSha256" // must be same as key label, used for autocomplete
+    computationalEngineCall: "testBackEndEngineSha256" // must be same as key label, used for autocomplete
   }
 };
 
@@ -228,22 +228,22 @@ var fabcoinInitializationProcedures = {
   }
 }
 
-function getURLfromNodeCall(theNodeCallLabel, additionalArguments) {
-  var theNodeCall = nodeCalls[theNodeCallLabel];
-  if (theNodeCall === undefined){
-    throw(`Node call ${theNodeCallLabel} not registered in the nodeCalls data structure. `);
+function getURLfromComputationalEngineCall(theComputationalEngineCallLabel, additionalArguments) {
+  var theComputationalEngineCall = computationalEngineCalls[theComputationalEngineCallLabel];
+  if (theComputationalEngineCall === undefined){
+    throw(`Node call ${theComputationalEngineCallLabel} not registered in the computationalEngineCalls data structure. `);
   }
   var theRequest = {};
-  theRequest[nodeCall] = theNodeCallLabel;
+  theRequest[computationalEngineCall] = theComputationalEngineCallLabel;
   if (typeof additionalArguments === "object") {
     for (var label in additionalArguments) {
       theRequest[label] = additionalArguments[label];
     }
   }
-  if (theNodeCall.required !== undefined) {
-    for (var counterRequiredArguments = 0; counterRequiredArguments < theNodeCall.required.length; counterRequiredArguments ++) {
-      if (!(theNodeCall.required[counterRequiredArguments] in theRequest)) {
-        throw (`Mandatory argument ${theNodeCall.required[counterRequiredArguments]} missing.`);
+  if (theComputationalEngineCall.required !== undefined) {
+    for (var counterRequiredArguments = 0; counterRequiredArguments < theComputationalEngineCall.required.length; counterRequiredArguments ++) {
+      if (!(theComputationalEngineCall.required[counterRequiredArguments] in theRequest)) {
+        throw (`Mandatory argument ${theComputationalEngineCall.required[counterRequiredArguments]} missing.`);
       }
     }
   }
@@ -339,14 +339,14 @@ module.exports = {
   path,
   url,
   rpcCalls,
-  nodeCalls,
-  nodeCallStatuses,
+  computationalEngineCalls,
+  computationalEngineCallStatuses,
   fabcoinInitializationProcedures,
   rpcCall,
-  nodeCall,
+  computationalEngineCall,
   fabcoinInitialization,
   getURLfromRPCLabel,
-  getURLfromNodeCall,
+  getURLfromComputationalEngineCall,
   getRPCcallArguments,
   getFabcoinInitializationCallArguments,
   gpuCommands
