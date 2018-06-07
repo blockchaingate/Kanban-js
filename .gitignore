@@ -1,5 +1,6 @@
 node_modules/
-certificates_secret/
+secrets_admin/
+secrets_server_only/
 experimental/*
 build/
 

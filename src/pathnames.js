@@ -3,7 +3,7 @@ const pathBuiltIn = require('path');
 
 var path = {
   base: `${__dirname}/..`,
-  certificates: `${__dirname}/../certificates_secret`,
+  certificates: `${__dirname}/../secrets_server_only`,
   HTML: `${__dirname}/../html`,
   fabcoin: `${__dirname}/../fabcoin`,
   fabcoinSrc: `${__dirname}/../fabcoin/src`,
