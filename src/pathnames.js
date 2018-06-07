@@ -8,9 +8,13 @@ var path = {
   fabcoin: `${__dirname}/../fabcoin`,
   fabcoinSrc: `${__dirname}/../fabcoin/src`,
   openCLDriverBuildPath: `${__dirname}/../build`,
+  fabcoinConfigurationFolder: null
 };
 for (var label in path) {
-//  console.log(`Debug: path ${path[label]} `);
+  //console.log(`Debug: path ${path[label]} `);
+  if (path[label] === null) {
+    continue;
+  }
   path[label] = pathBuiltIn.normalize(path[label]);
 //  console.log(`normalized to: ${path[label]}`);
 }
@@ -45,7 +49,9 @@ url.known = {
   frontEndCSS: "/kanban_frontend.css",
   rpc: "/rpc",
   node: "/node",
-  fabcoinInitialization: "/fabcoin_initialization"  
+  fabcoinInitialization: "/fabcoin_initialization",
+  logFileTestNet: "/logFileTestNet",
+  logFileMainNet: "/logFileMainNet"
 };
 
 url.whiteListed = {};
