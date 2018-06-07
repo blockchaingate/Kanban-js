@@ -59,7 +59,9 @@ var url = {
     fabcoinInitialization: "/fabcoin_initialization",
     myNodesCommand: "/my_nodes",
     logFileTestNet: "/logFileTestNet",
-    logFileMainNet: "/logFileMainNet"
+    logFileTestNetSession: "/logFileTestNetSession",
+    logFileMainNet: "/logFileMainNet",
+    logFileMainNetSession: "/logFileMainNetSession",
   },
   whiteListed: {
 

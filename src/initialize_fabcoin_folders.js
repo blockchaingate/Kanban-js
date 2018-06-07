@@ -14,7 +14,9 @@ function initializeFolders() {
       pathnames.path.fabcoinConfigurationFolder = path.normalize(pathnames.path.fabcoinConfigurationFolder);
       console.log(`Using fabcoin configuration folder: ${pathnames.path.fabcoinConfigurationFolder}`.green);
       pathnames.url.whiteListed[pathnames.url.known.logFileTestNet] = `${pathnames.path.fabcoinConfigurationFolder}/testnet3/debug.log`;
+      pathnames.url.whiteListed[pathnames.url.known.logFileTestNetSession] = `${pathnames.path.fabcoinConfigurationFolder}/testnet3/debug_session.log`;
       pathnames.url.whiteListed[pathnames.url.known.logFileMainNet] = `${pathnames.path.fabcoinConfigurationFolder}/debug.log`;
+      pathnames.url.whiteListed[pathnames.url.known.logFileMainNetSession] = `${pathnames.path.fabcoinConfigurationFolder}/debug_session.log`;
       break;
     }
     currentPath = path.normalize(currentPath + "../");

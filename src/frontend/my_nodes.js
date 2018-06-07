@@ -16,8 +16,10 @@ function MyNode(inputParsed) {
 MyNode.prototype.toHTMLasTRelement = function () {
   var result = "";
   result += "<tr>";
-  result += `<td>${this.name}</td><td><a href = 'http://${this.ipAddress}:${pathnames.ports.http}'>${this.ipAddress}:${pathnames.ports.http}</a></td>`;
-  result += `<td>${this.user}</td><td>${this.sshKey}</td>`;
+  result += `<td>${this.name}</td>`
+  result += `<td><a href = 'http://${this.ipAddress}:${pathnames.ports.http}' target = "_blank">${this.ipAddress}:${pathnames.ports.http}</a></td>`;
+  result += `<td><a href = 'http://${this.ipAddress}:${pathnames.ports.http}${pathnames.url.known.logFileTestNetSession}' target = "_blank">testnet log</a></td>`;
+  result += `<td>${this.user}</td><td>${this.sshKey}</td>`
   result += "</tr>";
   return result;
 } 
@@ -40,7 +42,7 @@ function MyNodesContainer (inputJSON) {
 MyNodesContainer.prototype.toHTML = function () {
   var result = "";
   result += "<table class = 'tableJSON'>";
-  result += "<tr><th> name </th><th>ip address</th><th>user</th><th>ssh key</th></tr>";
+  result += "<tr><th> name </th><th>ip address</th><th>log</th><th>user</th><th>ssh key</th></tr>";
   for (var counterNode = 0; counterNode < this.nodeNamesOrdered.length; counterNode ++) {
     var currentNode = this.myNodes[this.nodeNamesOrdered[counterNode]];
     result += currentNode.toHTMLasTRelement();
