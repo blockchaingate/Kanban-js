@@ -40,18 +40,22 @@ for (var label in pathname) {
 }
   
 
-var url = {};
-url.known = {
-  faviconIco : "/favicon.ico",
-  fabcoinSvg : "/fabcoin.svg",
-  frontEndBrowserifiedJS: "/kanban_frontend_browserified.js",
-  frontEndHTML: "/kanban_frontend.html",
-  frontEndCSS: "/kanban_frontend.css",
-  rpc: "/rpc",
-  node: "/node",
-  fabcoinInitialization: "/fabcoin_initialization",
-  logFileTestNet: "/logFileTestNet",
-  logFileMainNet: "/logFileMainNet"
+var url = {
+  known: {
+    faviconIco : "/favicon.ico",
+    fabcoinSvg : "/fabcoin.svg",
+    frontEndBrowserifiedJS: "/kanban_frontend_browserified.js",
+    frontEndHTML: "/kanban_frontend.html",
+    frontEndCSS: "/kanban_frontend.css",
+    rpc: "/rpc",
+    node: "/node",
+    fabcoinInitialization: "/fabcoin_initialization",
+    logFileTestNet: "/logFileTestNet",
+    logFileMainNet: "/logFileMainNet"
+  },
+  whiteListed: {
+
+  }
 };
 
 url.whiteListed = {};

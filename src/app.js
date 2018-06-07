@@ -6,57 +6,30 @@
 
 "use strict";
 const pathnames = require('./pathnames');
-const path = require('path');
 const https = require('https');
 const http = require('http');
-const openCLDriver = require('./open_cl_driver');
-const jobs = require('./jobs');
-global.kanban = {
-  openCLDriver: new openCLDriver.OpenCLDriver(),
-  jobs: new jobs.Jobs()
-};
-const handleRequests = require('./handle_requests');
-const fs = require('fs');
-const execSync = require('child_process').execSync;
 const colors = require('colors');
-const buildFrontEnd = require('./build_frontend');
 
-buildFrontEnd.buildFrontEnd();
-// This line is from the Node.js HTTPS documentation.
+require('./initialize_opencl_driver').initializeOpenCLDriver();
+//<- Creates and starts the openCL driver.
+//<- At the time of writing, the driver is disabled with a hard-coded flag.
 
-console.log(`The OpenCL driver is disabled from source code (file ${__filename}).`.blue);
-global.kanban.openCLDriver.enabled = false;
-global.kanban.openCLDriver.startAndConnect();
+require('./fabcoin_initialize_folders').initializeFolders();
+//<- Find the location of the .fabcoin configuration folder (log files, ...)
 
-var currentPath = pathnames.path.base + "/";
-while (currentPath !== "/") {
-  var currentPathFabcoin = currentPath + ".fabcoin";
-  //console.log("DEBUG: trying current path: " + currentPath + ", fab path: " + currentPathFabcoin);
-  if (fs.existsSync(currentPathFabcoin)) {
-    pathnames.path.fabcoinConfigurationFolder = currentPathFabcoin;
-    pathnames.path.fabcoinConfigurationFolder = path.normalize(pathnames.path.fabcoinConfigurationFolder);
-    console.log(`Using fabcoin configuration folder: ${pathnames.path.fabcoinConfigurationFolder}`.green);
-    break;
-  }
-  currentPath = path.normalize(currentPath + "../");
-}
-if (pathnames.path.fabcoinConfigurationFolder === null) {
-  console.log("Was not able to find the fabcoin configuration folder .fabcoin in any of the parent folders. ".red);
-}
+var certificateOptions = require('./initialize_certificates').getCertificateOptions(); 
+//<-Read/create certificates as necessary. 
 
-if (!fs.existsSync(pathnames.pathname.privateKey)) {
-  console.log(`Private key file: ${pathnames.pathname.privateKey} appears not to exist. Let me create that for you. Answer all prompts please (enter for defaults). `);
-  execSync(`openssl req -new -newkey rsa:2048 -days 3000 -nodes -x509 -subj "/C=CA/ST=ON/L=Markham/O=FA Enterprise System/CN=none" -keyout ${pathnames.pathname.privateKey} -out ${pathnames.pathname.certificate}`);
-}
-var options = {
-  cert: fs.readFileSync(pathnames.pathname.certificate),
-  key: fs.readFileSync(pathnames.pathname.privateKey)
-};
+const buildFrontEnd = require('./build_frontend').buildFrontEnd();
+//<- builds the frontend javascript from source using browserify.
+
+const handleRequests = require('./handle_requests'); 
+//<- must come after openCL driver loading, even if the driver is disabled.
 
 var portHttps = 52907;
 var portHttp = 51846;
 
-var serverHTTPS = https.createServer(options, handleRequests.handle_requests);
+var serverHTTPS = https.createServer(certificateOptions, handleRequests.handle_requests);
 serverHTTPS.listen(portHttps, function() {
   console.log(`Listening on https port: ${portHttps}`.green);
 });
