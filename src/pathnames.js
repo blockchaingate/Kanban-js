@@ -244,6 +244,12 @@ var myNodesCommand = "myNodesCommand";
 var myNodesCommands = {
   fetchNodeInfo : {
     myNodesCommand: "fetchNodeInfo", //must be same as label, used for autocomplete
+  },
+  sshNodeToRemoteMachineRestart: {
+    myNodesCommand: "sshNodeToRemoteMachineRestart",
+    cli: {
+      machineName: null
+    }
   }
 }
 
@@ -364,8 +370,12 @@ function getURLFromMyNodesCall(theMyNodesCallLabel, theArguments) {
     theArguments = {};
   }
   for (var label in theArguments) {
-    if (typeof theArguments[label] !== "string" && theMyNodesCall[label] !== null) {
+    if (typeof theArguments[label] !== "string") {
       continue; // <- label not valid for this RPC call
+    }
+    if (!(label in theMyNodesCall.cli)) {
+      console.log(`Warning: label: ${label} is not listed in the ${theMyNodesCallLabel}.cli object.`);
+      continue;
     }
     if (typeof theArguments[label] === "string") {
       theRequest[label] = theArguments[label];
