@@ -3,12 +3,14 @@
 {
 "name": "node1",
 "ipAddress": "123.45.67.89",
-"sshKey": "fake_ssh_key_1"
+"user": "ubuntu",
+"sshKey": "fake_private_ssh_key_1"
 }, 
 {
 "name": "node2",
+"user": "ubuntu",
 "ipAddress": "124.35.67.89",
-"sshKey": "fake_ssh_key_2"
+"sshKey": "fake_private_ssh_key_2"
 }
 ]
 }

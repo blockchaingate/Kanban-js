@@ -19,7 +19,7 @@ MyNode.prototype.toHTMLasTRelement = function () {
   result += `<td>${this.name}</td>`
   result += `<td>
 <a href = 'http://${this.ipAddress}:${pathnames.ports.http}' target = "_blank">${this.ipAddress}:${pathnames.ports.http}</a><br>
-<a href = 'https://${this.ipAddress}:${pathnames.ports.https}' target = "_blank">${this.ipAddress}:${pathnames.ports.https} (https)</a>
+<a href = 'https://${this.ipAddress}:${pathnames.ports.https}' target = "_blank">https://${this.ipAddress}:${pathnames.ports.https}</a>
 </td>`;
   result += `<td><a href = 'http://${this.ipAddress}:${pathnames.ports.http}${pathnames.url.known.logFileTestNetSession}' target = "_blank">testnet log</a></td>`;
   result += `<td>${this.user}</td><td>${this.sshKey}</td>`

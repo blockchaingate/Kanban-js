@@ -6,6 +6,9 @@
   "scripts": {
     "serve": "node src/app.js",
     "develop": "nodemon src/app.js",
+    "daemon": "node src/daemon.js",
+    "daemonStart": "node src/daemon.js start",
+    "daemonStop": "node src/daemon.js stop",
     "test": "node lib/unit.js"
   },
   "repository": {
@@ -26,9 +29,10 @@
     "bitcoinjs-lib": "^3.3.2",
     "browserify": "^16.1.1",
     "colors": "^1.2.1",
+    "daemonize2": "^0.4.2",
     "escape-html": "^1.0.3",
     "mime-types": "^2.1.18",
-    "nodemon": "^1.17.3",
+    "nodemon": "^1.17.5",
     "nooocl": "^0.12.5",
     "random-seed": "^0.3.0",
     "randomstring": "^1.1.5"

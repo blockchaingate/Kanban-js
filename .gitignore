@@ -27,6 +27,7 @@ test/kanban_gpu/debug/
 *.d
 *.o
 *.pdf
+*.pid
 build/Makefile
 
 #this auto-generated file should really be in the repo,
