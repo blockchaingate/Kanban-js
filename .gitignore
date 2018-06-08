@@ -26,6 +26,7 @@ test/kanban_gpu/debug/
 *.vrb
 *.d
 *.o
+*.pdf
 build/Makefile
 
 #this auto-generated file should really be in the repo,
