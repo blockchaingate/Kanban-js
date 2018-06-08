@@ -23,6 +23,9 @@ function handleRequests(request, response) {
     return response.end(`Bad url: ${escapeHtml(e)}`);
   }
   //console.log(`DEBUG: The url is pt 2: ${request.url}`.red);
+  if (parsedURL.pathname === pathnames.url.known.ping) {
+    return handlePing(request, response);
+  }
   if (parsedURL.pathname in pathnames.url.whiteListed) {
     //console.log(`The url is pt 3: ${request.url}`.red);
     return handleFile(request, response);
@@ -105,6 +108,12 @@ function handleMyNodesCall(request, response) {
   return handlersMyNodes.myNodeCall(request, response, queryCommand);
 }
 
+function handlePing(request, response) {
+  response.writeHead('200', {
+    'Access-Control-Allow-Origin': '*'
+  });
+  response.end('pong');
+}
 
 function handleFile(request, response) {
   var thePathName = pathnames.url.whiteListed[request.url];

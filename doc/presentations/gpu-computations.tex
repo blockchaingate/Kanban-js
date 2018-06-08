@@ -160,7 +160,7 @@ p= 2^{256} - 2^{32} - 977.
 
 \subsection{Benchmarks}
 
-Speed. All tabulated devices ran the same code. With the exception of a small header file (27 lines for OpenCL and 67 lines for C++), the code is both valid OpenCL and valid C/C++. The total code size is, at the time of writing, 7153 lines of code (= 5049 actual lines + 1294 comments + 810 blank) in a total of 22 files.
+Speed. With the exception of a small header file (27 lines for OpenCL and 67 lines for C++), all tabulated devices ran the same code. Assuming the inclusion of the aforementioned header, the code is valid and compiled both as OpenCL and C/C++. The total code size is, at the time of writing, 7153 lines of code (= 5049 actual lines + 1294 comments + 810 blank) in a total of 22 files.
 
 
 \noindent \begin{tabular}{|l|p{5.5cm}|l|p{3cm}|}\hline
@@ -259,7 +259,7 @@ We should note that it is possible to store all UTXOs (unspent transaction outpu
 \[
 52.5 \cdot 10^6 \cdot 20 = 1.05\text{~GB}
 \]
-of RAM memory. In this way, the entire bitcoin UTXO data set can be stored and looked up using a little more than $4$ GB. With sharding, it should be possible to scale the storage of all UTXOs thousands at a scale thousands of times larger than bitcoin at present.
+of RAM memory. In this way, the entire bitcoin UTXO data set can be stored and looked up using a little more than $4$ GB. With sharding, it should be possible to scale the storage of all UTXOs at a scale thousands of times larger than bitcoin is at present.
 \newpage
 
 

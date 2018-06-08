@@ -49,8 +49,9 @@ for (var label in pathname) {
   
 var url = {
   known: {
-    faviconIco : "/favicon.ico",
-    fabcoinSvg : "/fabcoin.svg",
+    ping: "/ping",
+    faviconIco: "/favicon.ico",
+    fabcoinSvg: "/fabcoin.svg",
     frontEndBrowserifiedJS: "/kanban_frontend_browserified.js",
     frontEndHTML: "/kanban_frontend.html",
     frontEndCSS: "/kanban_frontend.css",

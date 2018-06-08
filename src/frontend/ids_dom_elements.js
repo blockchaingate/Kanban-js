@@ -8,6 +8,7 @@ var defaults = {
   pageMyNodes: "pageMyNodes",
   pageFabcoinInitialization: "pageFabcoinInitialization",
   progressReport: "spanProgressReport",
+  spanPingColumnHeader: "spanPingColumnHeader",
   inputBlockHash: "inputBlockHash",
   inputBestBlockIndex: "inputBestBlockIndex",
   inputComputationalEngineCallTestMessage: "inputComputationalEngineCallTestMessage",
