@@ -12,14 +12,20 @@ function MyNode(inputParsed) {
   this.ipAddress = inputParsed.ipAddress;
   this.sshKey = inputParsed.sshKey;
   this.user = inputParsed.user;
+  this.timePingStart = null;
+  this.timePingEnd = null;
 }
 
 MyNode.prototype.getPingURL = function () {
   return `http://${this.ipAddress}:${pathnames.ports.http}${pathnames.url.known.ping}`;
 }
 
-MyNode.prototype.getSpanPingId = function () {
-  return `spanPing${this.ipAddress}`;
+MyNode.prototype.getSpanPingProgressId = function () {
+  return `spanPingProgress${this.ipAddress}`;
+}
+
+MyNode.prototype.getSpanPingStatsId = function () {
+  return `spanPingStats${this.ipAddress}`;
 }
 
 MyNode.prototype.toHTMLasTRelement = function () {
@@ -35,7 +41,10 @@ MyNode.prototype.toHTMLasTRelement = function () {
  target = "_blank">
 testnet log
 </a></td>`;
-  result += `<td><span id='${this.getSpanPingId()}'>?</span></td>`;
+  result += `<td>
+<span id='${this.getSpanPingProgressId()}'>?</span>
+<span id='${this.getSpanPingStatsId()}'></span>
+</td>`;
   var sshKeyShortened = miscellaneous.shortenString(this.sshKey, 70);
   result += `<td>${this.user}</td><td>${sshKeyShortened}</td>`
   result += "</tr>";
@@ -45,6 +54,7 @@ testnet log
 function MyNodesContainer(inputJSON) {
   this.nodesRaw = JSON.parse(inputJSON).myNodes;
   this.myNodes = {};
+  this.myNodesPingStatSpans = {};
   this.nodeNamesOrdered = [];
   for (var counterNodes = 0; counterNodes < this.nodesRaw.length; counterNodes ++) {
     var currentNodeRaw = this.nodesRaw[counterNodes];
@@ -53,6 +63,7 @@ function MyNodesContainer(inputJSON) {
       currentName += `ERROR: ${currentName} already listed as a node.`;
     }
     this.myNodes[currentName] = new MyNode(currentNodeRaw);
+    this.myNodesPingStatSpans[this.myNodes[currentName].getSpanPingStatsId()] = currentName;
     this.nodeNamesOrdered.push(currentName);
   }
 }
@@ -76,18 +87,26 @@ MyNodesContainer.prototype.toHTML = function () {
   return result;
 }
 
-function emptyCallBack(input, output) {
-
+function callbackWritePingStats(input, output) {
+  var currentNode = allMyNodes.myNodes[allMyNodes.myNodesPingStatSpans[output]];
+  var outputSpan = document.getElementById(output);
+  currentNode.timePingEnd = (new Date()).getTime(); 
+  var timeElapsed = currentNode.timePingEnd - currentNode.timePingStart;
+  outputSpan.innerHTML = `${timeElapsed.toFixed(2)} ms`;
+  //console.log(`${currentNode.name}: ${currentNode.ipAddress} `);
+  //console.log("DEBUG input: " + input);
+  //console.log("DEBUG output: " + output);
 }
 
 MyNodesContainer.prototype.pingMyNodes = function () {
   for (var currentNodeLabel in this.myNodes) {
     var currentNode = this.myNodes[currentNodeLabel];
+    currentNode.timePingStart = (new Date()).getTime();
     submitRequests.submitGET({
       url: currentNode.getPingURL(),
-      progress: currentNode.getSpanPingId(),
-      result : null,
-      callback: emptyCallBack        
+      progress: currentNode.getSpanPingProgressId(),
+      result : currentNode.getSpanPingStatsId(),
+      callback: callbackWritePingStats        
     });
   }
 }
