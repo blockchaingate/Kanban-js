@@ -7,7 +7,10 @@ const implementation = require('./implementation_handlers_my_nodes');
 
 var handlersReturnWhenDone = {};
 handlersReturnWhenDone[pathnames.myNodesCommands.fetchNodeInfo.myNodesCommand] = implementation.fetchNodeInfo;
-handlersReturnWhenDone[pathnames.myNodesCommands.sshNodeToRemoteMachineGitPull.myNodesCommand] = implementation.sshNodeToRemoteMachineGitPull;
+handlersReturnWhenDone[pathnames.myNodesCommands.sshNodeToOneRemoteMachineGitPull.myNodesCommand] = implementation.sshNodeToOneRemoteMachineGitPull;
+handlersReturnWhenDone[pathnames.myNodesCommands.sshNodeToOneRemoteMachineKillallFabcoind.myNodesCommand] = implementation.sshNodeToOneRemoteMachineKillallFabcoind; 
+handlersReturnWhenDone[pathnames.myNodesCommands.sshNodeToOneRemoteMachineNodeRestart.myNodesCommand] = implementation.sshNodeToOneRemoteMachineNodeRestart; 
+handlersReturnWhenDone[pathnames.myNodesCommands.sshNodeToOneRemoteMachineStartFabcoind.myNodesCommand] = implementation.sshNodeToOneRemoteMachineStartFabcoind; 
 
 function myNodeCall(request, response, desiredCommand) {
   //console.log("DEBUG: Got to here");

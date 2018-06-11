@@ -59,6 +59,11 @@ function getSSHKeyFromMachine(theMachine) {
 }
 
 function sshNodeToRemoteMachineExecuteCommands(machineName, theCommand, response) {
+  if (!(machineName in configurationSecretsAdminContent.myNodes)) {
+    response.writeHead(200);
+    response.end(`Machine name: ${machineName} not found. `);
+    return;
+  }
   try {
     var theMachine = configurationSecretsAdminContent.myNodes[machineName];
     var theConnection = new SSHClient();
@@ -102,17 +107,40 @@ function sshNodeToRemoteMachineExecuteCommands(machineName, theCommand, response
     });
   } catch (e) {
     response.writeHead(200);
-    response.end(`Error while trying to ssh. ${e}`);
+    response.end(`Error while trying to ssh into machine: ${machineName}. ${e}`);
   }
 }
 
-function sshNodeToRemoteMachineGitPull(request, response, desiredCommand) {
+function sshNodeToOneRemoteMachineGitPull(request, response, desiredCommand) {
   readSecretsAdminConfiguration(sshNodeToRemoteMachineExecuteCommands.bind(
-    null, desiredCommand.machineName, "cd Kanban\ngit pull\ncd fabcoin\ngit pull", response
+    null, desiredCommand.machineName, "cd Kanban\ngit pull\nnpm install\ncd fabcoin\ngit pull", response
+  ));
+}
+
+function sshNodeToOneRemoteMachineKillallFabcoind(request, response, desiredCommand) {
+  readSecretsAdminConfiguration(sshNodeToRemoteMachineExecuteCommands.bind(
+    null, desiredCommand.machineName, "killall fabcoind", response
+  ));
+}
+
+function sshNodeToOneRemoteMachineNodeRestart(request, response, desiredCommand) {
+  readSecretsAdminConfiguration(sshNodeToRemoteMachineExecuteCommands.bind(
+    null, desiredCommand.machineName, "cd Kanban\nnpm run daemonStop\nnpm run daemonStart", response
+  ));
+}
+
+function sshNodeToOneRemoteMachineStartFabcoind(request, response, desiredCommand) {
+  var theNet = desiredCommand.net;
+  console.log(`DEBUG: Desired command net: ${theNet}`);
+  readSecretsAdminConfiguration(sshNodeToRemoteMachineExecuteCommands.bind(
+    null, desiredCommand.machineName, `cd Kanban/fabcoin/src\n./fabcoind ${theNet} --daemon`, response
   ));
 }
 
 module.exports = {
   fetchNodeInfo,
-  sshNodeToRemoteMachineGitPull
+  sshNodeToOneRemoteMachineGitPull,
+  sshNodeToOneRemoteMachineKillallFabcoind,
+  sshNodeToOneRemoteMachineNodeRestart,
+  sshNodeToOneRemoteMachineStartFabcoind
 }

@@ -27,12 +27,6 @@ MyNode.prototype.getURLPingBrowserToNode = function () {
   return `http://${this.ipAddress}:${pathnames.ports.http}${pathnames.url.known.ping}`;
 }
 
-MyNode.prototype.getURLsshNodeToRemoteMachineGitPull = function () {
-  return pathnames.getURLFromMyNodesCall(pathnames.myNodesCommands.sshNodeToRemoteMachineGitPull.myNodesCommand, {
-    machineName: this.name
-  });
-}
-
 MyNode.prototype.getSpanBrowserToRemoteProgressId = function () {
   return `SpanBrowserToRemoteProgress${this.ipAddress}`;
 }
@@ -63,7 +57,7 @@ MyNode.prototype.toHTMLasTRelement = function () {
 testnet log
 </a></td>`;
   result += `<td>
-<button class = "buttonStandard" onclick = "window.kanban.myNodes.pingOneNode('${this.name}')">ping</button>
+<button class = "buttonStandard" onclick = "window.kanban.myNodes.browserToOneRemoteNodePing('${this.name}')">ping</button>
 </td>
 `;
 result += `<td>
@@ -71,7 +65,10 @@ result += `<td>
 <span id='${this.getSpanBrowserToRemoteResultId()}'></span>
 </td>`;
   result += `<td>
-<button class = "buttonStandard" onclick = "window.kanban.myNodes.sshNodeToOneRemoteMachineGitPull('${this.name}')">git pull</button>
+<button class = "buttonStandard" onclick = "window.kanban.myNodes.sshNodeToOneRemoteMachineGitPull('${this.name}')">update</button>
+<button class = "buttonStandard" onclick = "window.kanban.myNodes.sshNodeToOneRemoteMachineNodeRestart('${this.name}')">restart</button>
+<button class = "buttonStandard" onclick = "window.kanban.myNodes.sshNodeToOneRemoteMachineKillallFabcoind('${this.name}')">kill fab</button>
+<button class = "buttonStandard" onclick = "window.kanban.myNodes.sshNodeToOneRemoteMachineFabcoindStart('${this.name}')">start fab</button>
 </td>`;
   result += `<td>
   <span id='${this.getSpanNodeToRemoteMachineProgressId()}'></span>
@@ -140,16 +137,16 @@ function callbackWriteNodeToRemoteResult(input, output) {
   var currentNode = allMyNodes.myNodes[allMyNodes.myNodesNodeToRemoteMachine[output]];
   var outputSpan = document.getElementById(output);
   currentNode.timeEnd.sshNodeToRemoteMachine = (new Date()).getTime(); 
-  var timeElapsed = currentNode.timeEnd.sshNodeToRemoteMachine - currentNode.timeStart.sshNodeToRemoteMachine;
-  outputSpan.innerHTML = `${input}<br>${timeElapsed.toFixed(2)} ms`;
+  var timeElapsed = (currentNode.timeEnd.sshNodeToRemoteMachine - currentNode.timeStart.sshNodeToRemoteMachine) / 1000;
+  outputSpan.innerHTML = `${input}<br>${timeElapsed.toFixed(2)} s`;
   //console.log(`${currentNode.name}: ${currentNode.ipAddress} `);
   //console.log("DEBUG input: " + input);
   //console.log("DEBUG output: " + output);
 }
 
-MyNodesContainer.prototype.pingMyNodes = function () {
+MyNodesContainer.prototype.browserToAllRemoteNodePing = function () {
   for (var currentNodeLabel in this.myNodes) {
-    this.pingOneNode(currentNodeLabel);
+    this.browserToOneRemoteNodePing(currentNodeLabel);
   }
 }
 
@@ -159,7 +156,25 @@ MyNodesContainer.prototype.sshNodeToAllRemoteMachineGitPull = function() {
   }
 }
 
-MyNodesContainer.prototype.pingOneNode = function(currentNodeLabel) {
+MyNodesContainer.prototype.sshNodeToAllRemoteMachineKillallFabcoind = function() {
+  for (var currentNodeLabel in this.myNodes) {
+    this.sshNodeToOneRemoteMachineKillallFabcoind(currentNodeLabel);
+  }
+}
+
+MyNodesContainer.prototype.sshNodeToAllRemoteMachineNodeRestart = function() {
+  for (var currentNodeLabel in this.myNodes) {
+    this.sshNodeToOneRemoteMachineNodeRestart(currentNodeLabel);
+  }
+}
+
+MyNodesContainer.prototype.sshNodeToAllRemoteMachineFabcoindStart = function() {
+  for (var currentNodeLabel in this.myNodes) {
+    this.sshNodeToOneRemoteMachineFabcoindStart(currentNodeLabel);
+  }
+}
+
+MyNodesContainer.prototype.browserToOneRemoteNodePing = function(currentNodeLabel) {
   var currentNode = this.myNodes[currentNodeLabel];
   currentNode.timeStart.pingBrowserToNode = (new Date()).getTime();
   submitRequests.submitGET({
@@ -173,9 +188,57 @@ MyNodesContainer.prototype.pingOneNode = function(currentNodeLabel) {
 MyNodesContainer.prototype.sshNodeToOneRemoteMachineGitPull = function(currentNodeLabel) {
   var currentNode = this.myNodes[currentNodeLabel];
   currentNode.timeStart.sshNodeToRemoteMachine = (new Date()).getTime();
+  var theURL = pathnames.getURLFromMyNodesCall(pathnames.myNodesCommands.sshNodeToOneRemoteMachineGitPull.myNodesCommand, {
+    machineName: currentNodeLabel
+  });
   console.log(`DEBUG: name: ${currentNode.name}, start time: ${currentNode.timeStart.sshNodeToRemoteMachine}`);
-  var theURL = currentNode.getURLsshNodeToRemoteMachineGitPull();
-  console.log(theURL);
+  console.log("DEBUG: the url: " + theURL);
+  submitRequests.submitGET({
+    url: theURL,
+    progress: currentNode.getSpanNodeToRemoteMachineProgressId(),
+    result : currentNode.getSpanNodeToRemoteMachineResultId(),
+    callback: callbackWriteNodeToRemoteResult        
+  });
+}
+
+MyNodesContainer.prototype.sshNodeToOneRemoteMachineKillallFabcoind = function(currentNodeLabel) {
+  var currentNode = this.myNodes[currentNodeLabel];
+  currentNode.timeStart.sshNodeToRemoteMachine = (new Date()).getTime();
+  var theURL = pathnames.getURLFromMyNodesCall(pathnames.myNodesCommands.sshNodeToOneRemoteMachineKillallFabcoind.myNodesCommand, {
+    machineName: currentNodeLabel
+  });
+  console.log("DEBUG: the url: " + theURL);
+  submitRequests.submitGET({
+    url: theURL,
+    progress: currentNode.getSpanNodeToRemoteMachineProgressId(),
+    result : currentNode.getSpanNodeToRemoteMachineResultId(),
+    callback: callbackWriteNodeToRemoteResult        
+  });
+}
+
+MyNodesContainer.prototype.sshNodeToOneRemoteMachineNodeRestart = function(currentNodeLabel) {
+  var currentNode = this.myNodes[currentNodeLabel];
+  currentNode.timeStart.sshNodeToRemoteMachine = (new Date()).getTime();
+  var theURL = pathnames.getURLFromMyNodesCall(pathnames.myNodesCommands.sshNodeToOneRemoteMachineNodeRestart.myNodesCommand, {
+    machineName: currentNodeLabel
+  });
+  //console.log(theURL);
+  submitRequests.submitGET({
+    url: theURL,
+    progress: currentNode.getSpanNodeToRemoteMachineProgressId(),
+    result : currentNode.getSpanNodeToRemoteMachineResultId(),
+    callback: callbackWriteNodeToRemoteResult        
+  });
+}
+
+MyNodesContainer.prototype.sshNodeToOneRemoteMachineFabcoindStart = function(currentNodeLabel) {
+  var currentNode = this.myNodes[currentNodeLabel];
+  currentNode.timeStart.sshNodeToRemoteMachine = (new Date()).getTime();
+  var theURL = pathnames.getURLFromMyNodesCall(pathnames.myNodesCommands.sshNodeToOneRemoteMachineStartFabcoind.myNodesCommand, {
+    machineName: currentNodeLabel,
+    net: globals.mainPage().currentNet
+  });
+  //console.log(theURL);
   submitRequests.submitGET({
     url: theURL,
     progress: currentNode.getSpanNodeToRemoteMachineProgressId(),
@@ -193,8 +256,8 @@ MyNodesContainer.prototype.toHTMLWithDebug = function () {
 
 var allMyNodes = null;
 
-function pingMyNodes() {
-  allMyNodes.pingMyNodes();
+function browserToAllRemoteNodePing() {
+  allMyNodes.browserToAllRemoteNodePing();
 }
 
 function sshNodeToOneRemoteMachineGitPull(currentNodeLabel) {
@@ -205,8 +268,32 @@ function sshNodeToAllRemoteMachineGitPull() {
   allMyNodes.sshNodeToAllRemoteMachineGitPull();
 }
 
-function pingOneNode(currentNodeLabel) {
-  allMyNodes.pingOneNode(currentNodeLabel);
+function sshNodeToOneRemoteMachineKillallFabcoind(currentNodeLabel) {
+  allMyNodes.sshNodeToOneRemoteMachineKillallFabcoind(currentNodeLabel);
+}
+
+function sshNodeToAllRemoteMachineKillallFabcoind() {
+  allMyNodes.sshNodeToAllRemoteMachineKillallFabcoind();
+}
+
+function sshNodeToOneRemoteMachineNodeRestart(currentNodeLabel) {
+  allMyNodes.sshNodeToOneRemoteMachineNodeRestart(currentNodeLabel);
+}
+
+function sshNodeToAllRemoteMachineNodeRestart() {
+  allMyNodes.sshNodeToAllRemoteMachineNodeRestart();
+}
+
+function browserToOneRemoteNodePing(currentNodeLabel) {
+  allMyNodes.browserToOneRemoteNodePing(currentNodeLabel);
+}
+
+function sshNodeToAllRemoteMachineFabcoindStart() {
+  allMyNodes.sshNodeToAllRemoteMachineFabcoindStart();
+}
+
+function sshNodeToOneRemoteMachineFabcoindStart(currentNodeLabel) {
+  allMyNodes.sshNodeToOneRemoteMachineFabcoindStart(currentNodeLabel);
 }
 
 function myNodesOutputCallback(input, outputComponent) {
@@ -237,8 +324,14 @@ function updateMyNodes() {
 
 module.exports = {
   updateMyNodes,
-  pingMyNodes,
-  pingOneNode,
+  browserToAllRemoteNodePing,
+  browserToOneRemoteNodePing,
   sshNodeToOneRemoteMachineGitPull,
-  sshNodeToAllRemoteMachineGitPull
+  sshNodeToAllRemoteMachineGitPull,
+  sshNodeToOneRemoteMachineKillallFabcoind,
+  sshNodeToAllRemoteMachineKillallFabcoind,
+  sshNodeToOneRemoteMachineNodeRestart,
+  sshNodeToAllRemoteMachineNodeRestart,
+  sshNodeToOneRemoteMachineFabcoindStart,
+  sshNodeToAllRemoteMachineFabcoindStart
 }

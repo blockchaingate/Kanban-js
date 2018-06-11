@@ -242,14 +242,33 @@ var fabcoinInitializationProcedures = {
 var myNodesCommand = "myNodesCommand";
 
 var myNodesCommands = {
-  fetchNodeInfo : {
+  fetchNodeInfo: {
     myNodesCommand: "fetchNodeInfo", //must be same as label, used for autocomplete
   },
-  sshNodeToRemoteMachineGitPull: {
-    myNodesCommand: "sshNodeToRemoteMachineGitPull",
+  sshNodeToOneRemoteMachineGitPull: {
+    myNodesCommand: "sshNodeToOneRemoteMachineGitPull",
     cli: {
       machineName: null
     }
+  },
+  sshNodeToOneRemoteMachineKillallFabcoind: {
+    myNodesCommand: "sshNodeToOneRemoteMachineKillallFabcoind",
+    cli: {
+      machineName: null
+    }
+  },
+  sshNodeToOneRemoteMachineNodeRestart: {
+    myNodesCommand: "sshNodeToOneRemoteMachineNodeRestart",
+    cli: {
+      machineName: null
+    }    
+  },
+  sshNodeToOneRemoteMachineStartFabcoind: {
+    myNodesCommand: "sshNodeToOneRemoteMachineStartFabcoind",
+    cli: {
+      machineName: null,
+      net: null
+    }    
   }
 }
 
