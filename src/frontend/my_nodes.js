@@ -153,6 +153,12 @@ MyNodesContainer.prototype.pingMyNodes = function () {
   }
 }
 
+MyNodesContainer.prototype.sshNodeToAllRemoteMachineGitPull = function() {
+  for (var currentNodeLabel in this.myNodes) {
+    this.sshNodeToOneRemoteMachineGitPull(currentNodeLabel);
+  }
+}
+
 MyNodesContainer.prototype.pingOneNode = function(currentNodeLabel) {
   var currentNode = this.myNodes[currentNodeLabel];
   currentNode.timeStart.pingBrowserToNode = (new Date()).getTime();
@@ -195,6 +201,10 @@ function sshNodeToOneRemoteMachineGitPull(currentNodeLabel) {
   allMyNodes.sshNodeToOneRemoteMachineGitPull(currentNodeLabel);
 }
 
+function sshNodeToAllRemoteMachineGitPull() {
+  allMyNodes.sshNodeToAllRemoteMachineGitPull();
+}
+
 function pingOneNode(currentNodeLabel) {
   allMyNodes.pingOneNode(currentNodeLabel);
 }
@@ -229,5 +239,6 @@ module.exports = {
   updateMyNodes,
   pingMyNodes,
   pingOneNode,
-  sshNodeToOneRemoteMachineGitPull
+  sshNodeToOneRemoteMachineGitPull,
+  sshNodeToAllRemoteMachineGitPull
 }
