@@ -7,6 +7,7 @@ const implementation = require('./implementation_handlers_my_nodes');
 
 var handlersReturnWhenDone = {};
 handlersReturnWhenDone[pathnames.myNodesCommands.fetchNodeInfo.myNodesCommand] = implementation.fetchNodeInfo;
+handlersReturnWhenDone[pathnames.myNodesCommands.sshNodeToRemoteMachineGitPull.myNodesCommand] = implementation.sshNodeToRemoteMachineGitPull;
 
 function myNodeCall(request, response, desiredCommand) {
   //console.log("DEBUG: Got to here");
@@ -21,6 +22,7 @@ function myNodeCall(request, response, desiredCommand) {
     if (!(commandLabel in handlersReturnWhenDone)) {
       response.writeHead(200);
       responseJSON.error = `Command: ${commandLabel} is recognized but appears to not be implemented yet.`;  
+      console.log(responseJSON.error);
       return response.end(JSON.stringify(responseJSON));   
     }
     return handlersReturnWhenDone[commandLabel](request, response, desiredCommand);

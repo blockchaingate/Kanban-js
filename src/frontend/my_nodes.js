@@ -7,10 +7,11 @@ const jsonToHtml = require('./json_to_html');
 const globals = require('./globals');
 const miscellaneous = require('../miscellaneous');
 
-function MyNode(inputParsed) {
-  this.name = inputParsed.name;
+function MyNode(inputName, inputParsed) {
+  this.name = inputName;
   this.ipAddress = inputParsed.ipAddress;
   this.sshKey = inputParsed.sshKey;
+  this.sshKeySameAs = inputParsed.sshKeySameAs;
   this.user = inputParsed.user;
   this.timeStart = {
     pingBrowserToNode: null,
@@ -26,8 +27,8 @@ MyNode.prototype.getURLPingBrowserToNode = function () {
   return `http://${this.ipAddress}:${pathnames.ports.http}${pathnames.url.known.ping}`;
 }
 
-MyNode.prototype.getURLsshNodeToRemoteMachine = function () {
-  return pathnames.getURLFromMyNodesCall(pathnames.myNodesCommands.sshNodeToRemoteMachineRestart.myNodesCommand, {
+MyNode.prototype.getURLsshNodeToRemoteMachineGitPull = function () {
+  return pathnames.getURLFromMyNodesCall(pathnames.myNodesCommands.sshNodeToRemoteMachineGitPull.myNodesCommand, {
     machineName: this.name
   });
 }
@@ -36,7 +37,7 @@ MyNode.prototype.getSpanBrowserToRemoteProgressId = function () {
   return `SpanBrowserToRemoteProgress${this.ipAddress}`;
 }
 
-MyNode.prototype.getSpanBrowserToRemoteStatsId = function () {
+MyNode.prototype.getSpanBrowserToRemoteResultId = function () {
   return `SpanBrowserToRemoteStats${this.ipAddress}`;
 }
 
@@ -67,16 +68,21 @@ testnet log
 `;
 result += `<td>
 <span id='${this.getSpanBrowserToRemoteProgressId()}'>?</span>
-<span id='${this.getSpanBrowserToRemoteStatsId()}'></span>
+<span id='${this.getSpanBrowserToRemoteResultId()}'></span>
 </td>`;
   result += `<td>
-<button class = "buttonStandard" onclick = "window.kanban.myNodes.sshRedeployOneNode('${this.name}')">restart</button>
+<button class = "buttonStandard" onclick = "window.kanban.myNodes.sshNodeToOneRemoteMachineGitPull('${this.name}')">git pull</button>
 </td>`;
   result += `<td>
   <span id='${this.getSpanNodeToRemoteMachineProgressId()}'></span>
   <span id='${this.getSpanNodeToRemoteMachineResultId()}'></span>  
 </td>`;
-  var sshKeyShortened = miscellaneous.shortenString(this.sshKey, 70);
+  var sshKeyShortened = "not specified";
+  if (typeof this.sshKey === "string") {
+    sshKeyShortened = miscellaneous.shortenString(this.sshKey, 100);
+  } else if (this.sshKeySameAs !== undefined) {
+    sshKeyShortened = `Same as ${this.sshKeySameAs}`;
+  }
   result += `<td>${this.user}</td><td>${sshKeyShortened}</td>`
   result += "</tr>";
   return result;
@@ -85,16 +91,14 @@ result += `<td>
 function MyNodesContainer(inputJSON) {
   this.nodesRaw = JSON.parse(inputJSON).myNodes;
   this.myNodes = {};
-  this.myNodesPingStatSpans = {};
+  this.myNodesBrowserToRemoteResult = {};
+  this.myNodesNodeToRemoteMachine = {};
   this.nodeNamesOrdered = [];
-  for (var counterNodes = 0; counterNodes < this.nodesRaw.length; counterNodes ++) {
-    var currentNodeRaw = this.nodesRaw[counterNodes];
-    var currentName = currentNodeRaw.name;
-    if (currentName in this.myNodes) {
-      currentName += `ERROR: ${currentName} already listed as a node.`;
-    }
-    this.myNodes[currentName] = new MyNode(currentNodeRaw);
-    this.myNodesPingStatSpans[this.myNodes[currentName].getSpanBrowserToRemoteStatsId()] = currentName;
+  for (var currentName in this.nodesRaw) {
+    var currentNodeRaw = this.nodesRaw[currentName];
+    this.myNodes[currentName] = new MyNode(currentName, currentNodeRaw);
+    this.myNodesBrowserToRemoteResult[this.myNodes[currentName].getSpanBrowserToRemoteResultId()] = currentName;
+    this.myNodesNodeToRemoteMachine[this.myNodes[currentName].getSpanNodeToRemoteMachineResultId()] = currentName;
     this.nodeNamesOrdered.push(currentName);
   }
 }
@@ -121,12 +125,23 @@ MyNodesContainer.prototype.toHTML = function () {
   return result;
 }
 
-function callbackWritePingStats(input, output) {
-  var currentNode = allMyNodes.myNodes[allMyNodes.myNodesPingStatSpans[output]];
+function callbackWriteBrowserToRemoteResult(input, output) {
+  var currentNode = allMyNodes.myNodes[allMyNodes.myNodesBrowserToRemoteResult[output]];
   var outputSpan = document.getElementById(output);
   currentNode.timeEnd.pingBrowserToNode = (new Date()).getTime(); 
   var timeElapsed = currentNode.timeEnd.pingBrowserToNode - currentNode.timeStart.pingBrowserToNode;
   outputSpan.innerHTML = `${timeElapsed.toFixed(2)} ms`;
+  //console.log(`${currentNode.name}: ${currentNode.ipAddress} `);
+  //console.log("DEBUG input: " + input);
+  //console.log("DEBUG output: " + output);
+}
+
+function callbackWriteNodeToRemoteResult(input, output) {
+  var currentNode = allMyNodes.myNodes[allMyNodes.myNodesNodeToRemoteMachine[output]];
+  var outputSpan = document.getElementById(output);
+  currentNode.timeEnd.sshNodeToRemoteMachine = (new Date()).getTime(); 
+  var timeElapsed = currentNode.timeEnd.sshNodeToRemoteMachine - currentNode.timeStart.sshNodeToRemoteMachine;
+  outputSpan.innerHTML = `${input}<br>${timeElapsed.toFixed(2)} ms`;
   //console.log(`${currentNode.name}: ${currentNode.ipAddress} `);
   //console.log("DEBUG input: " + input);
   //console.log("DEBUG output: " + output);
@@ -144,23 +159,23 @@ MyNodesContainer.prototype.pingOneNode = function(currentNodeLabel) {
   submitRequests.submitGET({
     url: currentNode.getURLPingBrowserToNode(),
     progress: currentNode.getSpanBrowserToRemoteProgressId(),
-    result : currentNode.getSpanBrowserToRemoteStatsId(),
-    callback: callbackWritePingStats        
+    result : currentNode.getSpanBrowserToRemoteResultId(),
+    callback: callbackWriteBrowserToRemoteResult        
   });
 }
 
-MyNodesContainer.prototype.sshRedeployOneNode = function(currentNodeLabel) {
+MyNodesContainer.prototype.sshNodeToOneRemoteMachineGitPull = function(currentNodeLabel) {
   var currentNode = this.myNodes[currentNodeLabel];
   currentNode.timeStart.sshNodeToRemoteMachine = (new Date()).getTime();
   console.log(`DEBUG: name: ${currentNode.name}, start time: ${currentNode.timeStart.sshNodeToRemoteMachine}`);
-  var theURL = currentNode.getURLsshNodeToRemoteMachine();
+  var theURL = currentNode.getURLsshNodeToRemoteMachineGitPull();
   console.log(theURL);
-  //submitRequests.submitGET({
-  //  url: currentNode.getURLPingBrowserToNode(),
-  //  progress: currentNode.getSpanBrowserToRemoteProgressId(),
-  //  result : currentNode.getSpanBrowserToRemoteStatsId(),
-  //  callback: callbackWritePingStats        
-  //});
+  submitRequests.submitGET({
+    url: theURL,
+    progress: currentNode.getSpanNodeToRemoteMachineProgressId(),
+    result : currentNode.getSpanNodeToRemoteMachineResultId(),
+    callback: callbackWriteNodeToRemoteResult        
+  });
 }
 
 MyNodesContainer.prototype.toHTMLWithDebug = function () {
@@ -176,8 +191,8 @@ function pingMyNodes() {
   allMyNodes.pingMyNodes();
 }
 
-function sshRedeployOneNode(currentNodeLabel) {
-  allMyNodes.sshRedeployOneNode(currentNodeLabel);
+function sshNodeToOneRemoteMachineGitPull(currentNodeLabel) {
+  allMyNodes.sshNodeToOneRemoteMachineGitPull(currentNodeLabel);
 }
 
 function pingOneNode(currentNodeLabel) {
@@ -214,5 +229,5 @@ module.exports = {
   updateMyNodes,
   pingMyNodes,
   pingOneNode,
-  sshRedeployOneNode
+  sshNodeToOneRemoteMachineGitPull
 }

@@ -245,8 +245,8 @@ var myNodesCommands = {
   fetchNodeInfo : {
     myNodesCommand: "fetchNodeInfo", //must be same as label, used for autocomplete
   },
-  sshNodeToRemoteMachineRestart: {
-    myNodesCommand: "sshNodeToRemoteMachineRestart",
+  sshNodeToRemoteMachineGitPull: {
+    myNodesCommand: "sshNodeToRemoteMachineGitPull",
     cli: {
       machineName: null
     }
