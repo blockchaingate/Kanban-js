@@ -13,22 +13,22 @@ const myNodes = require('./my_nodes')
 function Page() {
   this.fabcoinNetworks = {
     regtest: {
-      name: "-regtest",
+      name: pathnames.networkNames.regtest,
       logFileLink: null,
       radioBoxId: ids.defaults.raioBoxesNetwork.regtest
     },
     testnetNoDNS: {
-      name: "-testnetnodns",
+      name: pathnames.networkNames.testNetNoDNS,
       logFileLink: pathnames.url.known.logFileTestNetNoDNS,
       radioBoxId: ids.defaults.raioBoxesNetwork.testnetNoDNS
     },
     testnet: {
-      name: "-testnet",
+      name: pathnames.networkNames.testnet,
       logFileLink: pathnames.url.known.logFileTestNet,
       radioBoxId: ids.defaults.raioBoxesNetwork.testnet
     },
     mainnet: {
-      name: "-mainnet",
+      name: pathnames.networkNames.mainNet,
       logFileLink: pathnames.url.known.logFileMainNet,
       radioBoxId: ids.defaults.raioBoxesNetwork.mainnet
     },

@@ -40,6 +40,18 @@ function rpcCall(request, response, desiredCommand) {
   var theCommand = `${pathnames.pathname.fabcoinCli}`;
   console.log(`Executing rpc command: ${theCommand}.`.blue);
   console.log(`Arguments: ${theArguments}.`.green);
+  if (theArguments.length > 10 || theArguments.length === undefined) {
+    response.writeHead(200);
+    return response.end(`Got ${theArguments.length} arguments: too many or too few. `);
+  }
+  var currentNet = pathnames.getRPCNet(theArguments);
+  var relaxSecurity = pathnames.hasRelaxedNetworkSecurity(currentNet);
+  for (var counterArguments = 0; counterArguments < theArguments.length; counterArguments ++) {
+    if (theArguments[counterArguments] in pathnames.rpcCallsBannedUnlessSecurityRelaxed && !relaxSecurity) {
+      response.writeHead(200);
+      return response.end(`Command ${theArguments[counterArguments]} not allowed except on -regtest and -testnetnodns`);
+    }
+  } 
   var finalData = "";
   try {
     var child = childProcess.spawn(theCommand, theArguments);

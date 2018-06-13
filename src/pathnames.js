@@ -131,6 +131,21 @@ var gpuCommands = {
   verifyOneSignature: "verifyOneSignature"
 };
 
+var networkNames = {
+  regtest: "-regtest",
+  testNetNoDNS: "-testnetnodns",
+  testNet: "-testnet",
+  mainNet: "-mainnet"
+};
+
+var networkNamesRPCBySecurity = {};
+networkNamesRPCBySecurity[networkNames.regtest] = 1;
+networkNamesRPCBySecurity[networkNames.testNetNoDNS] = 10;
+networkNamesRPCBySecurity[networkNames.testNet] = 100;
+networkNamesRPCBySecurity[networkNames.mainNet] = 1000;
+
+
+
 var rpcCall = "rpcCall";
 /**
  * Use null for mandatory variables.
@@ -141,52 +156,52 @@ var rpcCalls = {
   getPeerInfo: {
     rpcCall: "getPeerInfo", //must be same as rpc label, used for autocomplete
     command: "getpeerinfo",
-    net: "-testnetnodns",
+    net: networkNames.testNetNoDNS,
     cli: ["net", "command"]
   },
   getNetworkInfo: {
     rpcCall: "getNetworkInfo", //must be same as rpc label, used for autocomplete
     command: "getnetworkinfo",
-    net: "-testnetnodns",
+    net: networkNames.testNetNoDNS,
     cli: ["net", "command"]
   },
   getNetTotals: {
     rpcCall: "getNetTotals", //must be same as rpc label, used for autocomplete
     command: "getnettotals",
-    net: "-testnetnodns",
+    net: networkNames.testNetNoDNS,
     cli: ["net", "command"]
   },
   getBlock: {
     rpcCall: "getBlock", //must be same as rpc label, used for autocomplete
     command: "getblock",
     blockHash: null, // mandatory input
-    net: "-testnetnodns",
+    net: networkNames.testNetNoDNS,
     verbosity: null, // mandatory input
     cli: ["net", "command", "blockHash", "verbosity"]
   },
   getBestBlockHash: {
     rpcCall: "getBestBlockHash", //must be same as rpc label, used for autocomplete
     command: "getbestblockhash",
-    net: "-testnetnodns",
+    net: networkNames.testNetNoDNS,
     cli: ["net", "command"]
   },
   getBlockHash: {
     rpcCall: "getBlockHash", //must be same as rpc label, used for autocomplete
     command: "getblockhash",
     index: "index",
-    net: "-testnetnodns",
+    net: networkNames.testNetNoDNS,
     cli: ["net", "command", "index"]
   },
   getTXOutSetInfo: {
     rpcCall: "getTXOutSetInfo", //must be same as rpc label, used for autocomplete
     command: "gettxoutsetinfo",
-    net: "-testnetnodns",
+    net: networkNames.testNetNoDNS,
     cli: ["net", "command"]
   },
   listReceivedByAddress: {
     rpcCall: "listReceivedByAddress", //must be same as rpc label, used for autocomplete
     command: "listreceivedbyaddress",
-    net: "-testnetnodns",
+    net: networkNames.testNetNoDNS,
     minimumConfirmations: '0',
     includeEmpty: 'true',
     cli: ["net", "command", "minimumConfirmations", "includeEmpty"]
@@ -194,19 +209,19 @@ var rpcCalls = {
   getMiningInfo: {
     rpcCall: "getMiningInfo", //must be same as rpc label, used for autocomplete
     command: "getmininginfo",
-    net: "-testnetnodns",
+    net: networkNames.testNetNoDNS,
     cli: ["net", "command"]
   },
   getGenerate: {
     rpcCall: "getGenerate", //must be same as rpc label, used for autocomplete
     command: "getgenerate",
-    net: "-testnetnodns",
+    net: networkNames.testNetNoDNS,
     cli: ["net", "command"]
   },
   generateToAddress: {
     rpcCall: "generateToAddress", //must be same as rpc label, used for autocomplete
     command: "generatetoaddress",
-    net: "-testnetnodns",
+    net: networkNames.testNetNoDNS,
     numberOfBlocks: "100", 
     address: "",
     maxTries: "100000000",
@@ -215,35 +230,45 @@ var rpcCalls = {
   listUnspent: {
     rpcCall: "listUnspent", //must be same as rpc label, used for autocomplete
     command: "listunspent",
-    net: "-testnetnodns",
+    net: networkNames.testNetNoDNS,
     cli: ["net", "command"]
+  },
+  dumpPrivateKey: {
+    rpcCall: "dumpPrivateKey", //must be same as rpc label, used for autocomplete
+    command: "dumpprivkey",
+    net: networkNames.testNetNoDNS,
+    address: "",
+    cli: ["net", "command", "address"]
   },
   getTXOut: {
     rpcCall: "getTXOut", //must be same as rpc label, used for autocomplete
     command: "gettxout",
-    net: "-testnetnodns",
+    net: networkNames.testNetNoDNS,
     cli: ["net", "command"]
   },
   getReceivedByAccount: {
     rpcCall: "getReceivedByAccount", //must be same as rpc label, used for autocomplete
     command: "getreceivedbyaccount",
-    net: "-testnetnodns",
+    net: networkNames.testNetNoDNS,
     cli: ["net", "command"]
   },
   listAccounts: {
     rpcCall: "listAccounts", //must be same as rpc label, used for autocomplete
     command: "listaccounts",
-    net: "-testnetnodns",
+    net: networkNames.testNetNoDNS,
     cli: ["net", "command"]
   }
 }
+
+var rpcCallsBannedUnlessSecurityRelaxed = {};
+rpcCallsBannedUnlessSecurityRelaxed[rpcCalls.dumpPrivateKey.command] = true;
 
 var fabcoinInitialization = "fabcoinInitialization";
 var fabcoinInitializationProcedures = {
   startFabcoind: {
     fabcoinInitialization: "startFabcoind", //must be same as label, used for autocomplete
     command: pathname.fabcoind,
-    cli: [ ["net", "-testnetnodns"], ["mine", ""], "-daemon"]
+    cli: [ ["net", networkNames.testNetNoDNS], ["mine", ""], "-daemon"]
   },
   killAll: {
     fabcoinInitialization: "killAll",
@@ -354,6 +379,39 @@ function getURLfromRPCLabel(theRPClabel, theArguments) {
   return `${url.known.rpc}?command=${encodeURIComponent(JSON.stringify(theRequest))}`;
 }
 
+function getRPCNet(theArguments) {
+  if (typeof theArguments.length !== "number") {
+    return networkNames.mainNet;
+  }
+  if (theArguments.length > 10) {
+    return networkNames.mainNet;
+  }
+  var bestNetworkSoFar = "";
+  for (var counterArguments = 0 ; counterArguments < theArguments.length; counterArguments ++) {
+    var currentNetCandidate = theArguments[counterArguments];
+    if (currentNetCandidate in networkNamesRPCBySecurity) {
+      if (bestNetworkSoFar == "") {
+        bestNetworkSoFar = currentNetCandidate;
+      } else {
+        if (networkNamesRPCBySecurity[bestNetworkSoFar] < networkNamesRPCBySecurity[currentNetCandidate]) {
+          currentNetCandidate = bestNetworkSoFar;
+        }
+      }
+    }
+  }
+  if (bestNetworkSoFar === "") {
+    bestNetworkSoFar = networkNames.mainNet;
+  }
+  return bestNetworkSoFar;
+}
+
+function hasRelaxedNetworkSecurity(networkRPCName) {
+  if (!(networkRPCName in networkNamesRPCBySecurity)) {
+    return false;
+  }
+  return networkNamesRPCBySecurity[networkRPCName] < networkNamesRPCBySecurity[networkNames.testNet];
+}
+
 function getRPCcallArguments(theRPCLabel, additionalArguments, errors) {
   var result = [];
   if (!(theRPCLabel in rpcCalls)){
@@ -446,9 +504,12 @@ module.exports = {
   ports,
   url,
   computationalEngineCallStatuses,
+  networkNames,
+  hasRelaxedNetworkSecurity,
   ///////////////
   //information on the various calls:
   rpcCalls,
+  rpcCallsBannedUnlessSecurityRelaxed,
   computationalEngineCalls,
   fabcoinInitializationProcedures,
   myNodesCommands,
@@ -464,6 +525,7 @@ module.exports = {
   getURLFromMyNodesCall,
   getURLFromFabcoinInitialization,
   getRPCcallArguments,
+  getRPCNet,
   getFabcoinInitializationCallArguments,
   gpuCommands,
 }

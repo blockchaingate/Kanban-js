@@ -158,8 +158,17 @@
   </div><!--divControlPanelDefault-->
   <br>
   <div class = "divControlPanelDefault">
-    <div id = "divSendReceive"></div>
+    <div id = "divSendReceiveOutputRadio"></div>
   </div><!--divControlPanelDefault-->
+  <br>
+  <div class = "divControlPanelDefault">
+    <button class = "buttonStandard" onclick = "window.kanban.rpc.sendReceive.dumpPrivateKey();"> <b style = "color:red">Private key</b></button>
+    <input type = "text" id = "inputAddressWhoseKeyToDump" size = "8"></input> 
+  </div><!--divControlPanelDefault-->
+  <br>
+  <div class = "divControlPanelDefault">
+    <div id = "divSendReceiveOutputButtons"></div>
+  </div><!--divControlPanelDefault-->    
 </div><!--pageSend-->
 
 <div class = "divMainPage" id = "pageMine">
@@ -175,21 +184,22 @@
         <span class = "radioMark"></span>
         Is mining?
       </label>
-      &nbsp;&nbsp;&nbsp;
-      <label class = "containerRadioButton">
-        <input type = "radio" name = "rpcMine" onchange = "window.kanban.rpc.mine.generateToAddress();">
-        <span class = "radioMark"></span>
-        generate
-      </label>
-      <input type = "text" id = "inputNumberOfBlocks" size = "3" value = "105"></input> 
-      <input type = "text" id = "inputMaxNumberOfTries" size = "8" value = "10000000"></input> 
-      <input type = "text" id = "inputMiningAddress" size = "8"></input> 
-
     </div><!--divControlPanelDefault-->
     <br>
     <div class = "divControlPanelDefault">
-      <div id = "divMineOutput"></div>
+      <div id = "divMineRadioOutput"></div>
     </div><!--divControlPanelDefault-->
+    <br>
+    <div class = "divControlPanelDefault">
+        <button class = "buttonStandard" onclick = "window.kanban.rpc.mine.generateToAddress();">generate blocks</button> 
+        <input type = "text" id = "inputNumberOfBlocks" size = "3" value = "105"></input> 
+        <input type = "text" id = "inputMaxNumberOfTries" size = "8" value = "10000000"></input> 
+        <input type = "text" id = "inputMiningAddress" size = "8"></input> 
+    </div>
+    <br>
+    <div class = "divControlPanelDefault">
+      <div id = "divMineButtonsOutput"></div>
+    </div><!--divControlPanelDefault-->  
   </div><!--pageSend-->
 
 <div class = "divMainPage" id = "pageNetwork">

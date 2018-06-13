@@ -10,8 +10,12 @@ function sendReceiveCallbackStandard(input, outputComponent) {
   jsonToHtml.writeJSONtoDOMComponent(input, outputComponent);
 }
 
-function getOutputSendReceive() {
-  return document.getElementById(ids.defaults.outputSendReceive);
+function getOutputSendReceiveRadio() {
+  return document.getElementById(ids.defaults.outputSendReceiveRadio);
+}
+
+function getOutputSendReceiveButtons() {
+  return document.getElementById(ids.defaults.outputSendReceiveButtons);
 }
 
 function getReceivedByAddress() {
@@ -20,16 +24,30 @@ function getReceivedByAddress() {
       net: globals.mainPage().currentNet,
     }),
     progress: globals.spanProgress(),
-    result : getOutputSendReceive(),
+    result : getOutputSendReceiveRadio(),
+    callback: sendReceiveCallbackStandard
+  });  
+}
+
+function dumpPrivateKey() {
+  var theAddress = document.getElementById(ids.defaults.inputAddressWhoseKeyToDump).value;
+  submitRequests.submitGET({
+    url: pathnames.getURLfromRPCLabel(pathnames.rpcCalls.dumpPrivateKey.rpcCall, {
+      net: globals.mainPage().currentNet,
+      address: theAddress
+    }),
+    progress: globals.spanProgress(),
+    result : getOutputSendReceiveButtons(),
     callback: sendReceiveCallbackStandard
   });  
 }
 
 function updateSendReceivePage() {
-  console.log("DEBUG: here i am");
   getReceivedByAddress();
 }
 
 module.exports = {
-  updateSendReceivePage
+  updateSendReceivePage,
+  getReceivedByAddress, 
+  dumpPrivateKey
 }

@@ -39,19 +39,19 @@ function setNet(netName) {
 }
 
 function setTestNetNoDNS() {
-  setNet("-testnetnodns");
+  setNet(pathnames.networkNames.testNetNoDNS);
 }
 
 function setTestNet() {
-  setNet("-testnet");
+  setNet(pathnames.networkNames.testNet);
 }
 
 function setMainNet() {
-  setNet("-mainnet");
+  setNet(pathnames.networkNames.mainNet);
 }
 
 function setRegtest() {
-  setNet("-regtest");
+  setNet(pathnames.networkNames.regtest);
 }
 
 function getReceivedByAccountCallback(input, outputComponent) {

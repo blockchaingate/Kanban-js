@@ -10,8 +10,12 @@ function callbackMineStandard(input, outputComponent) {
   jsonToHtml.writeJSONtoDOMComponent(input, outputComponent);
 }
 
-function getOutputMining() {
-  return document.getElementById(ids.defaults.outputMine);
+function getOutputMiningRadio() {
+  return document.getElementById(ids.defaults.outputMineRadio);
+}
+
+function getOutputMiningButtons() {
+  return document.getElementById(ids.defaults.outputMineButtons);
 }
 
 function getMiningInfo() {
@@ -20,7 +24,7 @@ function getMiningInfo() {
       net: globals.mainPage().currentNet,
     }),
     progress: globals.spanProgress(),
-    result : getOutputMining(),
+    result : getOutputMiningRadio(),
     callback: callbackMineStandard
   });  
 }
@@ -31,7 +35,7 @@ function getGenerate() {
       net: globals.mainPage().currentNet,
     }),
     progress: globals.spanProgress(),
-    result : getOutputMining(),
+    result : getOutputMiningRadio(),
     callback: callbackMineStandard
   });  
 }
@@ -48,7 +52,7 @@ function generateToAddress() {
       maxTries: maxTries,  
     }),
     progress: globals.spanProgress(),
-    result : getOutputMining(),
+    result : getOutputMiningButtons(),
     callback: callbackMineStandard
   });  
 }

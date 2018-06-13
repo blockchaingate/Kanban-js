@@ -137,10 +137,17 @@ function sshNodeToOneRemoteMachineStartFabcoind(request, response, desiredComman
   ));
 }
 
+function sshNodeToOneRemoteMachineDeleteFabcoinConfiguration(request, response, desiredCommand) {
+  readSecretsAdminConfiguration(sshNodeToRemoteMachineExecuteCommands.bind(
+    null, desiredCommand.machineName, `rm -r .fabcoin/`, response
+  ));
+}
+
 module.exports = {
   fetchNodeInfo,
   sshNodeToOneRemoteMachineGitPull,
   sshNodeToOneRemoteMachineKillallFabcoind,
   sshNodeToOneRemoteMachineNodeRestart,
-  sshNodeToOneRemoteMachineStartFabcoind
+  sshNodeToOneRemoteMachineStartFabcoind,
+  sshNodeToOneRemoteMachineDeleteFabcoinConfiguration
 }

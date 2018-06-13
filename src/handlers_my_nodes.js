@@ -11,6 +11,7 @@ handlersReturnWhenDone[pathnames.myNodesCommands.sshNodeToOneRemoteMachineGitPul
 handlersReturnWhenDone[pathnames.myNodesCommands.sshNodeToOneRemoteMachineKillallFabcoind.myNodesCommand] = implementation.sshNodeToOneRemoteMachineKillallFabcoind; 
 handlersReturnWhenDone[pathnames.myNodesCommands.sshNodeToOneRemoteMachineNodeRestart.myNodesCommand] = implementation.sshNodeToOneRemoteMachineNodeRestart; 
 handlersReturnWhenDone[pathnames.myNodesCommands.sshNodeToOneRemoteMachineStartFabcoind.myNodesCommand] = implementation.sshNodeToOneRemoteMachineStartFabcoind; 
+handlersReturnWhenDone[pathnames.myNodesCommands.sshNodeToOneRemoteMachineDeleteFabcoinConfiguration.myNodesCommand] = implementation.sshNodeToOneRemoteMachineDeleteFabcoinConfiguration; 
 
 function myNodeCall(request, response, desiredCommand) {
   //console.log("DEBUG: Got to here");
