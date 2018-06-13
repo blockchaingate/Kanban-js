@@ -1,0 +1,23 @@
+\section{Changes fabcoin}
+\begin{frame}[fragile]
+\frametitle{Changes to fabcoin (C++)}
+\begin{itemize}
+\item Created a new \verb|TestNetNoDNS|.
+\begin{itemize}
+\item Goals: use to profile/test both single client and network.
+\item Like \verb|Regtest|, but with network. 
+\item Like \verb|TestNet|, but without DNS: only seeded ip addresses ``in a box''. 
+\item Rationale: too many changes to \verb|TestNet|, future management\dots
+\item Internal use only: no need to keep stable.
+\end{itemize}
+\item Technical.
+\begin{itemize}
+\item New \verb|fabcoin-cli| option \verb|-testnetnodns|.
+\item New rpc port: $23117$.
+\item Different equihash difficulty: $N=48$, $K=5$ ($101$ blocks in seconds).
+\item New genesis block.
+\item New code: auto-mine genesis block if initial solution not given.
+\end{itemize}
+\end{itemize}
+
+\end{frame}
