@@ -59,6 +59,8 @@ var url = {
     computationEngine: "/computation_engine",
     fabcoinInitialization: "/fabcoin_initialization",
     myNodesCommand: "/my_nodes",
+    logFileTestNetNoDNS: "/logFileTestNetNoDNS",
+    logFileTestNetNoDNSSession: "/logFileTestNetSessionNoDNS",
     logFileTestNet: "/logFileTestNet",
     logFileTestNetSession: "/logFileTestNetSession",
     logFileMainNet: "/logFileMainNet",
@@ -139,70 +141,99 @@ var rpcCalls = {
   getPeerInfo: {
     rpcCall: "getPeerInfo", //must be same as rpc label, used for autocomplete
     command: "getpeerinfo",
-    net: "-testnet",
+    net: "-testnetnodns",
     cli: ["net", "command"]
   },
   getNetworkInfo: {
     rpcCall: "getNetworkInfo", //must be same as rpc label, used for autocomplete
     command: "getnetworkinfo",
-    net: "-testnet",
+    net: "-testnetnodns",
     cli: ["net", "command"]
   },
   getNetTotals: {
     rpcCall: "getNetTotals", //must be same as rpc label, used for autocomplete
     command: "getnettotals",
-    net: "-testnet",
+    net: "-testnetnodns",
     cli: ["net", "command"]
   },
   getBlock: {
     rpcCall: "getBlock", //must be same as rpc label, used for autocomplete
     command: "getblock",
     blockHash: null, // mandatory input
-    net: "-testnet",
+    net: "-testnetnodns",
     verbosity: null, // mandatory input
     cli: ["net", "command", "blockHash", "verbosity"]
   },
   getBestBlockHash: {
     rpcCall: "getBestBlockHash", //must be same as rpc label, used for autocomplete
     command: "getbestblockhash",
-    net: "-testnet",
+    net: "-testnetnodns",
     cli: ["net", "command"]
   },
   getBlockHash: {
     rpcCall: "getBlockHash", //must be same as rpc label, used for autocomplete
     command: "getblockhash",
     index: "index",
-    net: "-testnet",
+    net: "-testnetnodns",
     cli: ["net", "command", "index"]
   },
   getTXOutSetInfo: {
     rpcCall: "getTXOutSetInfo", //must be same as rpc label, used for autocomplete
     command: "gettxoutsetinfo",
-    net: "-testnet",
+    net: "-testnetnodns",
     cli: ["net", "command"]
+  },
+  listReceivedByAddress: {
+    rpcCall: "listReceivedByAddress", //must be same as rpc label, used for autocomplete
+    command: "listreceivedbyaddress",
+    net: "-testnetnodns",
+    minimumConfirmations: '0',
+    includeEmpty: 'true',
+    cli: ["net", "command", "minimumConfirmations", "includeEmpty"]
+  },
+  getMiningInfo: {
+    rpcCall: "getMiningInfo", //must be same as rpc label, used for autocomplete
+    command: "getmininginfo",
+    net: "-testnetnodns",
+    cli: ["net", "command"]
+  },
+  getGenerate: {
+    rpcCall: "getGenerate", //must be same as rpc label, used for autocomplete
+    command: "getgenerate",
+    net: "-testnetnodns",
+    cli: ["net", "command"]
+  },
+  generateToAddress: {
+    rpcCall: "generateToAddress", //must be same as rpc label, used for autocomplete
+    command: "generatetoaddress",
+    net: "-testnetnodns",
+    numberOfBlocks: "100", 
+    address: "",
+    maxTries: "100000000",
+    cli: ["net", "command", "numberOfBlocks", "address", "maxTries"]
   },
   listUnspent: {
     rpcCall: "listUnspent", //must be same as rpc label, used for autocomplete
     command: "listunspent",
-    net: "-testnet",
+    net: "-testnetnodns",
     cli: ["net", "command"]
   },
   getTXOut: {
     rpcCall: "getTXOut", //must be same as rpc label, used for autocomplete
     command: "gettxout",
-    net: "-testnet",
+    net: "-testnetnodns",
     cli: ["net", "command"]
   },
   getReceivedByAccount: {
     rpcCall: "getReceivedByAccount", //must be same as rpc label, used for autocomplete
     command: "getreceivedbyaccount",
-    net: "-testnet",
+    net: "-testnetnodns",
     cli: ["net", "command"]
   },
   listAccounts: {
     rpcCall: "listAccounts", //must be same as rpc label, used for autocomplete
     command: "listaccounts",
-    net: "-testnet",
+    net: "-testnetnodns",
     cli: ["net", "command"]
   }
 }
@@ -212,7 +243,7 @@ var fabcoinInitializationProcedures = {
   startFabcoind: {
     fabcoinInitialization: "startFabcoind", //must be same as label, used for autocomplete
     command: pathname.fabcoind,
-    cli: [ ["net", "-testnet"], "-daemon"]
+    cli: [ ["net", "-testnetnodns"], ["mine", ""], "-daemon"]
   },
   killAll: {
     fabcoinInitialization: "killAll",

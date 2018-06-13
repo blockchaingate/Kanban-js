@@ -6,9 +6,14 @@ var defaults = {
   pageNetwork: "pageNetwork",
   pageTestGPU: "pageTestGPU",
   pageMyNodes: "pageMyNodes",
+  pageSend: "pageSend",
+  pageMine: "pageMine",
   pageFabcoinInitialization: "pageFabcoinInitialization",
   progressReport: "spanProgressReport",
   spanPingColumnHeader: "spanPingColumnHeader",
+  inputNumberOfBlocks: "inputNumberOfBlocks",
+  inputMaxNumberOfTries: "inputMaxNumberOfTries",
+  inputMiningAddress: "inputMiningAddress",
   inputBlockHash: "inputBlockHash",
   inputBestBlockIndex: "inputBestBlockIndex",
   inputComputationalEngineCallTestMessage: "inputComputationalEngineCallTestMessage",
@@ -19,6 +24,8 @@ var defaults = {
   outputRPCNetwork: "divKanbanRPCOutputNetwork",
   outputGPUTest: "divGPUTestOutput",
   outputMyNodes: "divMyNodesOutput",
+  outputSendReceive: "divSendReceive",
+  outputMine: "divMineOutput",
   outputFabcoinInitialization: "divFabcoinInitialization",
   radioButtonBestBlock: "radioBestBlockHash",
   radioButtonBlockInfo: "radioButtonBlockInfo",
@@ -26,9 +33,10 @@ var defaults = {
   radioButtonTransactionsListUnspent: "radioButtonTransactionsListUnspent",
   checkboxBlockVerbose: "checkboxBlockVerbose",
   raioBoxesNetwork: {
-    mainnet: "radioBoxSetMainnet",
+    regtest: "radioBoxSetRegtest",
+    testnetNoDNS: "radioBoxSetTestnetNoDNS",
     testnet: "radioBoxSetTestnet",
-    regtest: "radioBoxSetRegtest"
+    mainnet: "radioBoxSetMainnet"
   }
 };
 

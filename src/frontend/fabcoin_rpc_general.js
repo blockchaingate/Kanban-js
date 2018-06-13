@@ -16,7 +16,10 @@ function updatePages() {
     txInfo: true,
     blockInfo: true,
     network: true,
-    fabcoinInitialization: true
+    fabcoinInitialization: true,
+    send: true,
+    myNodes: true,
+    mine: true
   };
   if (currentLabel in pagesToUpdate) {
     var currentPage = globals.mainPage().pages[currentLabel];
@@ -33,6 +36,10 @@ function setNet(netName) {
   var currentNet = thePage.getCurrentNetwork();
   document.getElementById(currentNet.radioBoxId).checked = true;
   updatePages();
+}
+
+function setTestNetNoDNS() {
+  setNet("-testnetnodns");
 }
 
 function setTestNet() {
@@ -90,9 +97,10 @@ function updatePageFromRadioButtonsByName(desiredRadioButtonName) {
 }
 
 module.exports = {
+  setRegtest,
+  setTestNetNoDNS,
   setTestNet,
   setMainNet,
-  setRegtest,
   getReceivedByAccount,
   listAccounts,
   updatePageFromRadioButtonsByName

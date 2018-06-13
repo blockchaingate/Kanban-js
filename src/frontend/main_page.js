@@ -3,6 +3,8 @@ const rpcCallsGeneral = require('./fabcoin_rpc_general');
 const rpcCallsBlocks = require('./fabcoin_rpc_blocks');
 const rpcCallsNetwork = require('./fabcoin_rpc_network');
 const rpcCallsTransactions = require('./fabcoin_rpc_transactions');
+const rpcCallsSendReceive = require('./fabcoin_rpc_send_receive');
+const rpcCallsMine = require('./fabcoin_rpc_mine');
 const fabcoinInitialization = require('./fabcoin_initialization');
 const ids = require('./ids_dom_elements');
 const pathnames = require('../pathnames');
@@ -10,21 +12,26 @@ const myNodes = require('./my_nodes')
 
 function Page() {
   this.fabcoinNetworks = {
-    mainnet: {
-      name: "-mainnet",
-      logFileLink: pathnames.url.known.logFileMainNet,
-      radioBoxId: ids.defaults.raioBoxesNetwork.mainnet
+    regtest: {
+      name: "-regtest",
+      logFileLink: null,
+      radioBoxId: ids.defaults.raioBoxesNetwork.regtest
+    },
+    testnetNoDNS: {
+      name: "-testnetnodns",
+      logFileLink: pathnames.url.known.logFileTestNetNoDNS,
+      radioBoxId: ids.defaults.raioBoxesNetwork.testnetNoDNS
     },
     testnet: {
       name: "-testnet",
       logFileLink: pathnames.url.known.logFileTestNet,
       radioBoxId: ids.defaults.raioBoxesNetwork.testnet
     },
-    regtest: {
-      name: "-regtest",
-      logFileLink: null,
-      radioBoxId: ids.defaults.raioBoxesNetwork.regtest
-    }
+    mainnet: {
+      name: "-mainnet",
+      logFileLink: pathnames.url.known.logFileMainNet,
+      radioBoxId: ids.defaults.raioBoxesNetwork.mainnet
+    },
   }
   this.currentNet = this.fabcoinNetworks.testnet.name;
   this.allowedNetworkNames = {};
@@ -43,6 +50,18 @@ function Page() {
         page: ids.defaults.pageMyNodes
       },
       updateFunction: myNodes.updateMyNodes
+    },
+    send: {
+      ids: {
+        page: ids.defaults.pageSend
+      },
+      updateFunction: rpcCallsSendReceive.updateSendReceivePage
+    },
+    mine: {
+      ids: {
+        page: ids.defaults.pageMine
+      },
+      updateFunction: rpcCallsMine.updateMiningPage
     },
     blockInfo: {
       ids: {

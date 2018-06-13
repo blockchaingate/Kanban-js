@@ -40,13 +40,14 @@ ${pathnames.url.known.fabcoinInitialization}?command={
   });
 }
 
-function startFabcoinDaemon() {
-  var theURL = `
-${pathnames.url.known.fabcoinInitialization}?command={
-"${pathnames.fabcoinInitialization}":"${pathnames.fabcoinInitializationProcedures.startFabcoind.fabcoinInitialization}", 
-"net":"${globals.mainPage().currentNet}"
-}`;
-
+function startFabcoinDaemon(useMining) {
+  var theURL = `${pathnames.url.known.fabcoinInitialization}?command={`;
+  theURL += `"${pathnames.fabcoinInitialization}":"${pathnames.fabcoinInitializationProcedures.startFabcoind.fabcoinInitialization}",`;
+  theURL += `"net":"${globals.mainPage().currentNet}"`;
+  if (useMining) {
+    theURL += `, "mine": "-gen"`;
+  }
+  theURL += "}";
   submitRequests.submitGET({
     url: theURL,
     progress: getSpanProgress(),
@@ -55,15 +56,10 @@ ${pathnames.url.known.fabcoinInitialization}?command={
   });
 }
 
-function startFabcoinDaemonIfNeeded() {
-  startFabcoinDaemon();
-}
-
 function gitPullNode() {
-  var theURL = `
-${pathnames.url.known.fabcoinInitialization}?command={
-"${pathnames.fabcoinInitialization}":"${pathnames.fabcoinInitializationProcedures.gitPullNode.fabcoinInitialization}"
-}`;  
+  var theURL = `${pathnames.url.known.fabcoinInitialization}?command={`;
+  theURL += `"${pathnames.fabcoinInitialization}":"${pathnames.fabcoinInitializationProcedures.gitPullNode.fabcoinInitialization}"`;
+  theURL += `}`;  
   submitRequests.submitGET({
     url: theURL,
     progress: getSpanProgress(),
@@ -100,7 +96,6 @@ ${pathnames.url.known.fabcoinInitialization}?command={
 
 module.exports = {
   startFabcoinDaemon,
-  startFabcoinDaemonIfNeeded,
   killAllFabcoinDaemons,
   gitPullNode,
   gitPullFabcoin,

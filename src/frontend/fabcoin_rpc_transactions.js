@@ -12,7 +12,7 @@ function getTXoutSetInfoCallback(input, outputComponent) {
   jsonToHtml.writeJSONtoDOMComponent(input, outputComponent);
 }
 
-function getTXoutSetInfo(){
+function getTXoutSetInfo() {
   submitRequests.submitGET({
     url: pathnames.getURLfromRPCLabel(pathnames.rpcCalls.getTXOutSetInfo.rpcCall, {
       net: globals.mainPage().currentNet,

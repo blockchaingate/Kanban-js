@@ -11,6 +11,12 @@
   </label>
   &nbsp;&nbsp;&nbsp;
   <label class = "containerRadioButton">
+    <input id = "radioBoxSetTestnetNoDNS" type = "radio" name = "net" checked = "checked" onchange = "window.kanban.rpc.general.setTestNetNoDNS();">
+    <span class = "radioMark"></span>
+    TestNetNoDNS
+  </label>
+  &nbsp;&nbsp;&nbsp;
+  <label class = "containerRadioButton">
     <input id = "radioBoxSetTestnet" type = "radio" name = "net" checked = "checked" onchange = "window.kanban.rpc.general.setTestNet();">
     <span class = "radioMark"></span>
     TestNet
@@ -31,14 +37,15 @@
       <tr>
       <td>fabcoind</td> 
       <td>
-      <button class = "buttonStandard" onclick = "window.kanban.fabcoinInitialization.startFabcoinDaemon();">Start</button>
+      <button class = "buttonStandard" onclick = "window.kanban.fabcoinInitialization.startFabcoinDaemon(false);">Start</button>
+      <button class = "buttonStandard" onclick = "window.kanban.fabcoinInitialization.startFabcoinDaemon(true);">Start with mining</button>
       <button class = "buttonStandard" onclick = "window.kanban.fabcoinInitialization.killAllFabcoinDaemons();">Kill all</button>
       <button class = "buttonStandard" onclick = "window.kanban.fabcoinInitialization.gitPullFabcoin();">git pull FABcoin</button>
       <button class = "buttonStandard" onclick = "window.kanban.fabcoinInitialization.makeFabcoin();">make FABcoin</button>
       &nbsp;
-      <a href = "/logFileTestNet" target = "_blank" id = "linkLogFileFabcoin">Log file </a>
+      <a href = "/logFileTestNetNoDNS" target = "_blank" id = "linkLogFileFabcoin">Log file </a>
       &nbsp;
-      <a href = "/logFileTestNetSession" target = "_blank" id = "linkLogFileFabcoin">Session log file </a>
+      <a href = "/logFileTestNetNoDNSSession" target = "_blank" id = "linkLogFileFabcoin">Session log file </a>
       </td>
     </tr>
     <tr>
@@ -47,6 +54,7 @@
     </tr>
     </table>
   </div>
+  <br>
   <div class = "divControlPanelDefault" id = "divFabcoinInitialization"></div><!--divFabcoinInitialization-->
 </div><!--pageFabcoinInitialization-->
 <div class = "divMainPage" id = "pageMyNodes">
@@ -133,6 +141,56 @@
     <div id = "divKanbanRPCOutputTXInfo"></div>
   </div>
 </div> <!--pageTXInfo-->
+<div class = "divMainPage" id = "pageSend">
+  <div class = "divControlPanelDefault">
+    <label class = "containerRadioButton">
+      <input type = "radio" name = "rpcSend" onchange = "window.kanban.rpc.sendReceive.listReceivedByAddress();" checked = "checked">
+      <span class = "radioMark"></span>
+      Received
+    </label>
+    &nbsp;&nbsp;&nbsp;
+    <!--label class = "containerRadioButton">
+      <input type = "radio" name = "rpcSend" onchange = "window.kanban.rpc.sendReceive.listReceivedByAddress();" checked = "checked">
+      <span class = "radioMark"></span>
+      Received
+    </label-->
+  </div><!--divControlPanelDefault-->
+  <br>
+  <div class = "divControlPanelDefault">
+    <div id = "divSendReceive"></div>
+  </div><!--divControlPanelDefault-->
+</div><!--pageSend-->
+
+<div class = "divMainPage" id = "pageMine">
+    <div class = "divControlPanelDefault">
+      <label class = "containerRadioButton">
+        <input type = "radio" name = "rpcMine" onchange = "window.kanban.rpc.mine.getMiningInfo();" checked = "checked">
+        <span class = "radioMark"></span>
+        Mining info
+      </label>
+      &nbsp;&nbsp;&nbsp;
+      <label class = "containerRadioButton">
+        <input type = "radio" name = "rpcMine" onchange = "window.kanban.rpc.mine.getGenerate();">
+        <span class = "radioMark"></span>
+        Is mining?
+      </label>
+      &nbsp;&nbsp;&nbsp;
+      <label class = "containerRadioButton">
+        <input type = "radio" name = "rpcMine" onchange = "window.kanban.rpc.mine.generateToAddress();">
+        <span class = "radioMark"></span>
+        generate
+      </label>
+      <input type = "text" id = "inputNumberOfBlocks" size = "3" value = "105"></input> 
+      <input type = "text" id = "inputMaxNumberOfTries" size = "8" value = "10000000"></input> 
+      <input type = "text" id = "inputMiningAddress" size = "8"></input> 
+
+    </div><!--divControlPanelDefault-->
+    <br>
+    <div class = "divControlPanelDefault">
+      <div id = "divMineOutput"></div>
+    </div><!--divControlPanelDefault-->
+  </div><!--pageSend-->
+
 <div class = "divMainPage" id = "pageNetwork">
   <div class = "divControlPanelDefault">
     <label class = "containerRadioButton">
@@ -216,6 +274,7 @@
     <div><button class = "buttonSelectPage" onclick = "window.kanban.thePage.selectPage('myNodes');">My nodes</button> </div>
     <div><button class = "buttonSelectPage" onclick = "window.kanban.thePage.selectPage('network');">Network</button> </div>
     <div><button class = "buttonSelectPage" onclick = "window.kanban.thePage.selectPage('send');">Send</button> </div>
+    <div><button class = "buttonSelectPage" onclick = "window.kanban.thePage.selectPage('mine');">Mine</button> </div>
     <div><button class = "buttonSelectPage" onclick = "window.kanban.thePage.selectPage('blockInfo');">Blocks</button> </div>
     <div><button class = "buttonSelectPage" onclick = "window.kanban.thePage.selectPage('txInfo');">Transactions</button> </div>
     <!--div><button class = "buttonSelectPage" onclick = "window.kanban.thePage.selectPage('testGPU');">Test GPU</button> </div-->
