@@ -282,6 +282,12 @@ var myNodesCommands = {
       machineName: null
     }
   },
+  sshNodeToOneRemoteMachineDeleteFabcoinConfiguration: {
+    myNodesCommand: "sshNodeToOneRemoteMachineDeleteFabcoinConfiguration",
+    cli: {
+      machineName: null
+    }
+  },
   sshNodeToOneRemoteMachineKillallFabcoind: {
     myNodesCommand: "sshNodeToOneRemoteMachineKillallFabcoind",
     cli: {

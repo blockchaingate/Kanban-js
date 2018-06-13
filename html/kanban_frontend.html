@@ -60,15 +60,16 @@
 <div class = "divMainPage" id = "pageMyNodes">
   <div class = "divControlPanelDefault">
     <b>All Browser &#8644; remote nodejs</b><br>
-    <button class = "buttonStandard" onclick = "window.kanban.myNodes.browserToAllRemoteNodePing();">ping</button>
+    <button class = "buttonStandard" onclick = "window.kanban.allMyNodes.browserToAllRemoteNodePing();">ping</button>
   </div><!--divControlPanelDefault-->
   <br>
   <div class = "divControlPanelDefault">
     <b>All local node &#8644; remote machine</b><br>
-    <button class = "buttonStandard" onclick = "window.kanban.myNodes.sshNodeToAllRemoteMachineGitPull();">update</button>
-    <button class = "buttonStandard" onclick = "window.kanban.myNodes.sshNodeToAllRemoteMachineNodeRestart();">restart</button>
-    <button class = "buttonStandard" onclick = "window.kanban.myNodes.sshNodeToAllRemoteMachineKillallFabcoind();">kill fab</button>
-    <button class = "buttonStandard" onclick = "window.kanban.myNodes.sshNodeToAllRemoteMachineFabcoindStart();">start fab</button>
+    <button class = "buttonStandard" onclick = "window.kanban.allMyNodes.sshNodeToAllRemoteMachineGitPull();">update</button>
+    <button class = "buttonStandard" onclick = "window.kanban.allMyNodes.sshNodeToAllRemoteMachineNodeRestart();">restart</button>
+    <button class = "buttonStandard" onclick = "window.kanban.allMyNodes.sshNodeToAllRemoteMachineDeleteFabcoinConfiguration();">del .fabcoin</button>
+    <button class = "buttonStandard" onclick = "window.kanban.allMyNodes.sshNodeToAllRemoteMachineKillallFabcoind();">kill fab</button>
+    <button class = "buttonStandard" onclick = "window.kanban.allMyNodes.sshNodeToAllRemoteMachineFabcoindStart();">start fab</button>
   </div><!--divControlPanelDefault-->
       <br>
   <div class = "divControlPanelDefault">  

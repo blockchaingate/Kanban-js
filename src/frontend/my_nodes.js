@@ -57,7 +57,7 @@ MyNode.prototype.toHTMLasTRelement = function () {
 testnet log
 </a></td>`;
   result += `<td>
-<button class = "buttonStandard" onclick = "window.kanban.myNodes.browserToOneRemoteNodePing('${this.name}')">ping</button>
+<button class = "buttonStandard" onclick = "window.kanban.allMyNodes.browserToOneRemoteNodePing('${this.name}')">ping</button>
 </td>
 `;
 result += `<td>
@@ -65,10 +65,11 @@ result += `<td>
 <span id='${this.getSpanBrowserToRemoteResultId()}'></span>
 </td>`;
   result += `<td>
-<button class = "buttonStandard" onclick = "window.kanban.myNodes.sshNodeToOneRemoteMachineGitPull('${this.name}')">update</button>
-<button class = "buttonStandard" onclick = "window.kanban.myNodes.sshNodeToOneRemoteMachineNodeRestart('${this.name}')">restart</button>
-<button class = "buttonStandard" onclick = "window.kanban.myNodes.sshNodeToOneRemoteMachineKillallFabcoind('${this.name}')">kill fab</button>
-<button class = "buttonStandard" onclick = "window.kanban.myNodes.sshNodeToOneRemoteMachineFabcoindStart('${this.name}')">start fab</button>
+<button class = "buttonStandard" onclick = "window.kanban.allMyNodes.sshNodeToOneRemoteMachineGitPull('${this.name}')">update</button>
+<button class = "buttonStandard" onclick = "window.kanban.allMyNodes.sshNodeToOneRemoteMachineNodeRestart('${this.name}')">restart</button>
+<button class = "buttonStandard" onclick = "window.kanban.allMyNodes.sshNodeToOneRemoteMachineKillallFabcoind('${this.name}')">kill fab</button>
+<button class = "buttonStandard" onclick = "window.kanban.allMyNodes.sshNodeToOneRemoteMachineDeleteFabcoinConfiguration('${this.name}')">kill fab</button>
+<button class = "buttonStandard" onclick = "window.kanban.allMyNodes.sshNodeToOneRemoteMachineFabcoindStart('${this.name}')">start fab</button>
 </td>`;
   result += `<td>
   <span id='${this.getSpanNodeToRemoteMachineProgressId()}'></span>
@@ -123,6 +124,7 @@ MyNodesContainer.prototype.toHTML = function () {
 }
 
 function callbackWriteBrowserToRemoteResult(input, output) {
+  var allMyNodes = window.kanban.allMyNodes;
   var currentNode = allMyNodes.myNodes[allMyNodes.myNodesBrowserToRemoteResult[output]];
   var outputSpan = document.getElementById(output);
   currentNode.timeEnd.pingBrowserToNode = (new Date()).getTime(); 
@@ -134,6 +136,7 @@ function callbackWriteBrowserToRemoteResult(input, output) {
 }
 
 function callbackWriteNodeToRemoteResult(input, output) {
+  var allMyNodes = window.kanban.allMyNodes;
   var currentNode = allMyNodes.myNodes[allMyNodes.myNodesNodeToRemoteMachine[output]];
   var outputSpan = document.getElementById(output);
   currentNode.timeEnd.sshNodeToRemoteMachine = (new Date()).getTime(); 
@@ -174,6 +177,12 @@ MyNodesContainer.prototype.sshNodeToAllRemoteMachineFabcoindStart = function() {
   }
 }
 
+MyNodesContainer.prototype.sshNodeToAllRemoteMachineDeleteFabcoinConfiguration = function() {
+  for (var currentNodeLabel in this.myNodes) {
+    this.sshNodeToOneRemoteMachineDeleteFabcoinConfiguration(currentNodeLabel);
+  }
+}
+
 MyNodesContainer.prototype.browserToOneRemoteNodePing = function(currentNodeLabel) {
   var currentNode = this.myNodes[currentNodeLabel];
   currentNode.timeStart.pingBrowserToNode = (new Date()).getTime();
@@ -205,6 +214,21 @@ MyNodesContainer.prototype.sshNodeToOneRemoteMachineKillallFabcoind = function(c
   var currentNode = this.myNodes[currentNodeLabel];
   currentNode.timeStart.sshNodeToRemoteMachine = (new Date()).getTime();
   var theURL = pathnames.getURLFromMyNodesCall(pathnames.myNodesCommands.sshNodeToOneRemoteMachineKillallFabcoind.myNodesCommand, {
+    machineName: currentNodeLabel
+  });
+  console.log("DEBUG: the url: " + theURL);
+  submitRequests.submitGET({
+    url: theURL,
+    progress: currentNode.getSpanNodeToRemoteMachineProgressId(),
+    result : currentNode.getSpanNodeToRemoteMachineResultId(),
+    callback: callbackWriteNodeToRemoteResult        
+  });
+}
+
+MyNodesContainer.prototype.sshNodeToOneRemoteMachineDeleteFabcoinConfiguration = function(currentNodeLabel) {
+  var currentNode = this.myNodes[currentNodeLabel];
+  currentNode.timeStart.sshNodeToRemoteMachine = (new Date()).getTime();
+  var theURL = pathnames.getURLFromMyNodesCall(pathnames.myNodesCommands.sshNodeToOneRemoteMachineDeleteFabcoinConfiguration.myNodesCommand, {
     machineName: currentNodeLabel
   });
   console.log("DEBUG: the url: " + theURL);
@@ -254,51 +278,10 @@ MyNodesContainer.prototype.toHTMLWithDebug = function () {
   return result;
 }
 
-var allMyNodes = null;
-
-function browserToAllRemoteNodePing() {
-  allMyNodes.browserToAllRemoteNodePing();
-}
-
-function sshNodeToOneRemoteMachineGitPull(currentNodeLabel) {
-  allMyNodes.sshNodeToOneRemoteMachineGitPull(currentNodeLabel);
-}
-
-function sshNodeToAllRemoteMachineGitPull() {
-  allMyNodes.sshNodeToAllRemoteMachineGitPull();
-}
-
-function sshNodeToOneRemoteMachineKillallFabcoind(currentNodeLabel) {
-  allMyNodes.sshNodeToOneRemoteMachineKillallFabcoind(currentNodeLabel);
-}
-
-function sshNodeToAllRemoteMachineKillallFabcoind() {
-  allMyNodes.sshNodeToAllRemoteMachineKillallFabcoind();
-}
-
-function sshNodeToOneRemoteMachineNodeRestart(currentNodeLabel) {
-  allMyNodes.sshNodeToOneRemoteMachineNodeRestart(currentNodeLabel);
-}
-
-function sshNodeToAllRemoteMachineNodeRestart() {
-  allMyNodes.sshNodeToAllRemoteMachineNodeRestart();
-}
-
-function browserToOneRemoteNodePing(currentNodeLabel) {
-  allMyNodes.browserToOneRemoteNodePing(currentNodeLabel);
-}
-
-function sshNodeToAllRemoteMachineFabcoindStart() {
-  allMyNodes.sshNodeToAllRemoteMachineFabcoindStart();
-}
-
-function sshNodeToOneRemoteMachineFabcoindStart(currentNodeLabel) {
-  allMyNodes.sshNodeToOneRemoteMachineFabcoindStart(currentNodeLabel);
-}
-
 function myNodesOutputCallback(input, outputComponent) {
   try {
-    allMyNodes = new MyNodesContainer(input);
+    window.kanban.allMyNodes = new MyNodesContainer(input);
+    var allMyNodes = window.kanban.allMyNodes;
     var result = "";
     result += allMyNodes.toHTML();
     outputComponent.innerHTML = result;
@@ -323,15 +306,5 @@ function updateMyNodes() {
 }
 
 module.exports = {
-  updateMyNodes,
-  browserToAllRemoteNodePing,
-  browserToOneRemoteNodePing,
-  sshNodeToOneRemoteMachineGitPull,
-  sshNodeToAllRemoteMachineGitPull,
-  sshNodeToOneRemoteMachineKillallFabcoind,
-  sshNodeToAllRemoteMachineKillallFabcoind,
-  sshNodeToOneRemoteMachineNodeRestart,
-  sshNodeToAllRemoteMachineNodeRestart,
-  sshNodeToOneRemoteMachineFabcoindStart,
-  sshNodeToAllRemoteMachineFabcoindStart
+  updateMyNodes
 }

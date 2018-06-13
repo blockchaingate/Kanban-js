@@ -11,3 +11,4 @@ window.kanban.fabcoinInitialization = require('./fabcoin_initialization');
 window.kanban.computationalEngineCalls = require('./computational_engile_calls');
 window.kanban.ids = require('./ids_dom_elements');
 window.kanban.myNodes = require('./my_nodes');
+window.kanban.allMyNodes = null;
