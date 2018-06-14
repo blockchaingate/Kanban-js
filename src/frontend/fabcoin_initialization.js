@@ -87,7 +87,7 @@ function makeFabcoin() {
 function deleteFabcoinConfiguration() {
   var theURL = pathnames.getURLFromFabcoinInitialization(
     pathnames.fabcoinInitializationProcedures.deleteFabcoinConfiguration.fabcoinInitialization, {
-      folder: getNetworkDataFromRPCNetworkOption(globals.mainPage().getRPCNetworkOption()).folder
+      folder: globals.mainPage().getCurrentNetwork().folder
     }
   );  
   submitRequests.submitGET({
@@ -97,7 +97,6 @@ function deleteFabcoinConfiguration() {
     callback: fabcoinInitializationCallback    
   });  
 }
-
 
 module.exports = {
   startFabcoinDaemon,

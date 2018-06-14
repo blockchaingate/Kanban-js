@@ -300,6 +300,10 @@ rpcCallsBannedUnlessSecurityRelaxed[rpcCalls.dumpPrivateKey.command] = true;
 
 var fabcoinInitialization = "fabcoinInitialization";
 
+var pathsComputedAtRunTime = {
+  fabcoinConfigurationFolder: null
+}
+
 //To be documented on request. Please email me/tell me in person if you want 
 //me to document the structure below.
 //Not doing it right away because I am still refactoring it heavily.  
@@ -311,7 +315,7 @@ var fabcoinInitializationProcedures = {
       net: [networkRPCOption.regtest, networkRPCOption.testNetNoDNS, networkRPCOption.testNet],
       mine: ["", "-gen"]
     },
-    cli: [ ["net", networkRPCOption.testNetNoDNS], ["mine", ""], "-daemon"] 
+    cli: [ ["net", networkRPCOption.testNetNoDNS], ["mine", ""], "-daemon"] //when the argument is an array, the second is the default
   },
   killAll: {
     fabcoinInitialization: "killAll",
@@ -339,7 +343,7 @@ var fabcoinInitializationProcedures = {
   deleteFabcoinConfiguration: {
     fabcoinInitialization: "deleteFabcoinConfiguration",
     command: "rm",
-    path: "~/",
+    path: "fabcoinConfigurationFolder", //<- looked up from pathsComputedAtRunTime
     allowedArgumentValues: {
       folder: [networkData.regtest.folder, networkData.testNetNoDNS.folder]
     },
@@ -498,6 +502,26 @@ function getRPCcallArguments(theRPCLabel, additionalArguments, errors) {
   return result;
 }
 
+function isAllowedArgumentForFabInitialization(theInitCall, theLabel, theValue, errors) {
+  if (theInitCall.allowedArgumentValues === undefined) {
+    return true;
+  }
+  if (!(theLabel in theInitCall.allowedArgumentValues)) {
+    return true;
+  }
+  var currentAllowedValues = theInitCall.allowedArgumentValues[theLabel];
+  for (var counterAllowed = 0; counterAllowed < currentAllowedValues.length; counterAllowed ++) {
+    if (theValue === currentAllowedValues[counterAllowed]) {
+      return true;
+    }
+  }
+  errors.push( 
+    `Value ${theValue} not allowed as input with name ${theLabel} of command ${theInitCall.fabcoinInitialization}.
+    The allowed values are ${currentAllowedValues.join(', ')}. `
+  );
+  return false;
+}
+
 function getFabcoinInitializationCallArguments(theCallLabel, additionalArguments, errors) {
   console.log("DEBUG: extracting additional arguments from: " + JSON.stringify(additionalArguments));
   var result = [];
@@ -518,6 +542,9 @@ function getFabcoinInitializationCallArguments(theCallLabel, additionalArguments
     if (currentLabel in additionalArguments) {
       currentValue = additionalArguments[currentLabel];
     }
+    if (!isAllowedArgumentForFabInitialization(theInitCall, currentLabel, currentValue, errors)) {
+      return;
+    }
     if (currentValue !== "" && typeof currentValue === "string") {
       result.push(currentValue);
     }
@@ -526,14 +553,12 @@ function getFabcoinInitializationCallArguments(theCallLabel, additionalArguments
 }
 
 function getURLFromFabcoinInitialization(theCallLabel, theArguments) {
-  var result = "";
-  result += `${url.known.fabcoinInitialization}?command={"${fabcoinInitialization}":"${theCallLabel}"`;
-  var currentCall = fabcoinInitializationProcedures[theCallLabel];
+  var theRequest = {};
+  theRequest[fabcoinInitialization] = theCallLabel;
   for (var label in theArguments) {
-    result += `,"${label}":"${theArguments[label]}"`
+    theRequest[label] = theArguments[label];
   }
-  result += "}";
-  return result;
+  return `${url.known.fabcoinInitialization}?command=${encodeURIComponent(JSON.stringify(theRequest))}`;
 }
 
 function getURLFromMyNodesCall(theMyNodesCallLabel, theArguments) {
@@ -561,6 +586,7 @@ function getURLFromMyNodesCall(theMyNodesCallLabel, theArguments) {
 module.exports = {
   pathname,
   path,
+  pathsComputedAtRunTime,
   ports,
   url,
   computationalEngineCallStatuses,

@@ -25,6 +25,8 @@ function initializeFolders() {
   }
   if (pathnames.path.fabcoinConfigurationFolder === null) {
     console.log("Was not able to find the fabcoin configuration folder .fabcoin in any of the parent folders. ".red);
+  } else {
+    pathnames.pathsComputedAtRunTime.fabcoinConfigurationFolder = pathnames.path.fabcoinConfigurationFolder;
   }
 }
 

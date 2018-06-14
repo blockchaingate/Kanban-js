@@ -6,27 +6,33 @@ function buttonProgressClick(buttonElement) {
   if (buttonElement.nextSibling.nextSibling.style.display === 'none') {
     buttonElement.nextSibling.nextSibling.style.display = ''
     buttonElement.childNodes[1].innerHTML = '&#9660;'; 
-    buttonElement.parentElement.setAttribute('addressDisplayStyle', "");
+    buttonElement.parentElement.setAttribute('addressDisplayStyle', "shown");
   } else {
     buttonElement.nextSibling.nextSibling.style.display = 'none';
     buttonElement.childNodes[1].innerHTML = '&#9668;';
-    buttonElement.parentElement.setAttribute('addressDisplayStyle', "none");
+    buttonElement.parentElement.setAttribute('addressDisplayStyle', "hidden");
   }
 }
 
 function getToggleButton(buttonInfo) {
   var result = "";
-  var addressDisplayStyle = "none";
+  var addressDisplayStyle = "hidden";
   if (buttonInfo.parent !== undefined) {
     addressDisplayStyle = buttonInfo.parent.getAttribute("addressDisplayStyle");
   }
-  if (addressDisplayStyle === undefined) {
-    addressDisplayStyle = "none";
+  if (addressDisplayStyle === undefined || addressDisplayStyle === "") {
+    addressDisplayStyle = "hidden";
+  }
+  var addressDisplayStyleString = "";
+  var buttonArrow = "&#9668;";
+  if (addressDisplayStyle === "hidden") { 
+    addressDisplayStyleString = "none";
+    buttonArrow = "&#9660;";
   }
   result += `<button class = "buttonProgress" `;
   result += `onclick = "window.kanban.submitRequests.buttonProgressClick(this);">`;
-  result += `<span>${buttonInfo.label}</span><b>&#9668;</b></button>`;
-  result += `<br><span class="spanRESTDeveloperInfo" style="display:${addressDisplayStyle}">${buttonInfo.content}</span>`;
+  result += `<span>${buttonInfo.label}</span><b>${buttonArrow}</b></button>`;
+  result += `<br><span class="spanRESTDeveloperInfo" style = "display:${addressDisplayStyleString}">${buttonInfo.content}</span>`;
   return result;
 }
 
@@ -55,7 +61,7 @@ function recordProgressStarted(progress, address) {
   if (typeof progress === "string") {
     progress = document.getElementById(progress);
   }
-  addressHTML = `<a href="${address}" target="_blank">${unescape(address)}</a>`;
+  addressHTML = `<a href="${address}" target = "_blank">${unescape(address)}</a>`;
   progress.innerHTML = getToggleButton({
     content: addressHTML, 
     label: "<b style=\"color:orange\">Sent</b>",

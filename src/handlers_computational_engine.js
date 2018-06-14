@@ -6,7 +6,7 @@ const openCLDriver = require('./open_cl_driver');
 const globals = require('./globals');
 var jobs = global.kanban.jobs;
 
-function computeUnspentTransactions(id){
+function computeUnspentTransactions(id) {
 
 }
 
@@ -98,7 +98,7 @@ function dispatch(request, response, desiredCommand) {
     return handlersReturnWhenDone[currentCommandLabel](request, response, desiredCommand);
   }
   var numOngoingCalls = jobs.getNumberOfJobs(); 
-  if (numOngoingCalls > maxSimultaneousCalls){
+  if (numOngoingCalls > maxSimultaneousCalls) {
     response.writeHead(200);
     response.end(`Maximum number of ongoing calls reached: ${numOngoingCalls}. `);
     return;

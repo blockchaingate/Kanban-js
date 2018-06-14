@@ -39,10 +39,16 @@
     <td><button class = "buttonStandard" onclick = "window.kanban.fabcoinInitialization.gitPullNode();">update</button></td>
     </tr>
     <tr>
+    <td>fabcoin all nets</td>
+    <td>
+    <button class = "buttonStandard" onclick = "window.kanban.fabcoinInitialization.killAllFabcoinDaemons();">kill fab</button>
+    </td>
+    </tr>
+    <tr>
     <td>fabcoind</td> 
     <td>
     <button class = "buttonStandard" onclick = "window.kanban.fabcoinInitialization.gitPullFabcoin();">update</button>
-    <button class = "buttonStandard" onclick = "window.kanban.fabcoinInitialization.killAllFabcoinDaemons();">kill fab</button>
+    <button class = "buttonStandard" onclick = "window.kanban.fabcoinInitialization.deleteFabcoinConfiguration();">del .fabcoin</button>
     <button class = "buttonStandard" onclick = "window.kanban.fabcoinInitialization.startFabcoinDaemon(false);">start fab</button>
     <button class = "buttonStandard" onclick = "window.kanban.fabcoinInitialization.startFabcoinDaemon(true);">start fab mining</button>
     <button class = "buttonStandard" onclick = "window.kanban.fabcoinInitialization.makeFabcoin();">make fab</button>
