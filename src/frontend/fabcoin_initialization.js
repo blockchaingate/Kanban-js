@@ -27,11 +27,7 @@ function updateFabcoinInitializationPage() {
 }
 
 function killAllFabcoinDaemons() {
-  var theURL = `
-${pathnames.url.known.fabcoinInitialization}?command={
-"${pathnames.fabcoinInitialization}":"${pathnames.fabcoinInitializationProcedures.killAll.fabcoinInitialization}", 
-"net":"${globals.mainPage().currentNet}"
-}`;
+  var theURL = pathnames.getURLFromFabcoinInitialization(pathnames.fabcoinInitializationProcedures.killAll.fabcoinInitialization);
   submitRequests.submitGET({
     url: theURL,
     progress: getSpanProgress(),
@@ -41,13 +37,15 @@ ${pathnames.url.known.fabcoinInitialization}?command={
 }
 
 function startFabcoinDaemon(useMining) {
-  var theURL = `${pathnames.url.known.fabcoinInitialization}?command={`;
-  theURL += `"${pathnames.fabcoinInitialization}":"${pathnames.fabcoinInitializationProcedures.startFabcoind.fabcoinInitialization}",`;
-  theURL += `"net":"${globals.mainPage().currentNet}"`;
+  var mineString = "";
   if (useMining) {
-    theURL += `, "mine": "-gen"`;
+    mineString = "-gen";
   }
-  theURL += "}";
+  var theURL = pathnames.getURLFromFabcoinInitialization(
+    pathnames.fabcoinInitializationProcedures.startFabcoind.fabcoinInitialization, {
+      mine: mineString
+    }
+  );
   submitRequests.submitGET({
     url: theURL,
     progress: getSpanProgress(),
@@ -57,9 +55,7 @@ function startFabcoinDaemon(useMining) {
 }
 
 function gitPullNode() {
-  var theURL = `${pathnames.url.known.fabcoinInitialization}?command={`;
-  theURL += `"${pathnames.fabcoinInitialization}":"${pathnames.fabcoinInitializationProcedures.gitPullNode.fabcoinInitialization}"`;
-  theURL += `}`;  
+  var theURL = pathnames.getURLFromFabcoinInitialization(pathnames.fabcoinInitializationProcedures.gitPullNode.fabcoinInitialization);
   submitRequests.submitGET({
     url: theURL,
     progress: getSpanProgress(),
@@ -69,10 +65,7 @@ function gitPullNode() {
 }
 
 function gitPullFabcoin() {
-  var theURL = `
-${pathnames.url.known.fabcoinInitialization}?command={
-"${pathnames.fabcoinInitialization}":"${pathnames.fabcoinInitializationProcedures.gitPullFabcoin.fabcoinInitialization}"
-}`;  
+  var theURL = pathnames.getURLFromFabcoinInitialization(pathnames.fabcoinInitializationProcedures.gitPullFabcoin.fabcoinInitialization);
   submitRequests.submitGET({
     url: theURL,
     progress: getSpanProgress(),
@@ -82,10 +75,7 @@ ${pathnames.url.known.fabcoinInitialization}?command={
 }
 
 function makeFabcoin() {
-  var theURL = `
-${pathnames.url.known.fabcoinInitialization}?command={
-"${pathnames.fabcoinInitialization}":"${pathnames.fabcoinInitializationProcedures.makeFabcoin.fabcoinInitialization}"
-}`;  
+  var theURL = pathnames.getURLFromFabcoinInitialization(pathnames.fabcoinInitializationProcedures.makeFabcoin.fabcoinInitialization);
   submitRequests.submitGET({
     url: theURL,
     progress: getSpanProgress(),
@@ -94,11 +84,27 @@ ${pathnames.url.known.fabcoinInitialization}?command={
   });  
 }
 
+function deleteFabcoinConfiguration() {
+  var theURL = pathnames.getURLFromFabcoinInitialization(
+    pathnames.fabcoinInitializationProcedures.deleteFabcoinConfiguration.fabcoinInitialization, {
+      folder: getNetworkDataFromRPCNetworkOption(globals.mainPage().getRPCNetworkOption()).folder
+    }
+  );  
+  submitRequests.submitGET({
+    url: theURL,
+    progress: getSpanProgress(),
+    result : getOutputFabcoinInitialization(),
+    callback: fabcoinInitializationCallback    
+  });  
+}
+
+
 module.exports = {
   startFabcoinDaemon,
   killAllFabcoinDaemons,
   gitPullNode,
   gitPullFabcoin,
   makeFabcoin,
+  deleteFabcoinConfiguration,
   updateFabcoinInitializationPage
 }

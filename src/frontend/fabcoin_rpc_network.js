@@ -19,7 +19,7 @@ function getNetworkInfoCallBack(input, outputComponent) {
 function getPeerInfo() {
   submitRequests.submitGET({
     url: pathnames.getURLfromRPCLabel(pathnames.rpcCalls.getPeerInfo.rpcCall, {
-      net: globals.mainPage().currentNet
+      net: globals.mainPage().getRPCNetworkOption()
     }),
     progress: globals.spanProgress(),
     result : ids.defaults.outputRPCNetwork,
@@ -30,7 +30,7 @@ function getPeerInfo() {
 function getNetworkInfo() {
   submitRequests.submitGET({
     url: pathnames.getURLfromRPCLabel(pathnames.rpcCalls.getNetworkInfo.rpcCall, {
-      net: globals.mainPage().currentNet
+      net: globals.mainPage().getRPCNetworkOption()
     }),
     progress: globals.spanProgress(),
     result : ids.defaults.outputRPCNetwork,
@@ -41,7 +41,7 @@ function getNetworkInfo() {
 function getNetTotals() {
   submitRequests.submitGET({
     url: pathnames.getURLfromRPCLabel(pathnames.rpcCalls.getNetTotals.rpcCall, {
-      net: globals.mainPage().currentNet
+      net: globals.mainPage().getRPCNetworkOption()
     }),
     progress: globals.spanProgress(),
     result : ids.defaults.outputRPCNetwork,

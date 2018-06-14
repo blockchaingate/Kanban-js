@@ -34,23 +34,23 @@
 <div class = "divMainPage" id = "pageFabcoinInitialization">
   <div class = "divControlPanelDefault">
     <table> 
-      <tr>
-      <td>fabcoind</td> 
-      <td>
-      <button class = "buttonStandard" onclick = "window.kanban.fabcoinInitialization.startFabcoinDaemon(false);">Start</button>
-      <button class = "buttonStandard" onclick = "window.kanban.fabcoinInitialization.startFabcoinDaemon(true);">Start with mining</button>
-      <button class = "buttonStandard" onclick = "window.kanban.fabcoinInitialization.killAllFabcoinDaemons();">Kill all</button>
-      <button class = "buttonStandard" onclick = "window.kanban.fabcoinInitialization.gitPullFabcoin();">git pull FABcoin</button>
-      <button class = "buttonStandard" onclick = "window.kanban.fabcoinInitialization.makeFabcoin();">make FABcoin</button>
-      &nbsp;
-      <a href = "/logFileTestNetNoDNS" target = "_blank" id = "linkLogFileFabcoin">Log file </a>
-      &nbsp;
-      <a href = "/logFileTestNetNoDNSSession" target = "_blank" id = "linkLogFileFabcoin">Session log file </a>
-      </td>
+    <tr>
+    <td>node</td>
+    <td><button class = "buttonStandard" onclick = "window.kanban.fabcoinInitialization.gitPullNode();">update</button></td>
     </tr>
     <tr>
-      <td>node</td>
-      <td><button class = "buttonStandard" onclick = "window.kanban.fabcoinInitialization.gitPullNode();">git pull node</button></td>
+    <td>fabcoind</td> 
+    <td>
+    <button class = "buttonStandard" onclick = "window.kanban.fabcoinInitialization.gitPullFabcoin();">update</button>
+    <button class = "buttonStandard" onclick = "window.kanban.fabcoinInitialization.killAllFabcoinDaemons();">kill fab</button>
+    <button class = "buttonStandard" onclick = "window.kanban.fabcoinInitialization.startFabcoinDaemon(false);">start fab</button>
+    <button class = "buttonStandard" onclick = "window.kanban.fabcoinInitialization.startFabcoinDaemon(true);">start fab mining</button>
+    <button class = "buttonStandard" onclick = "window.kanban.fabcoinInitialization.makeFabcoin();">make fab</button>
+    &nbsp;
+    <a href = "/logFileTestNetNoDNS" target = "_blank" id = "linkLogFileFabcoin">Log file </a>
+    &nbsp;
+    <a href = "/logFileTestNetNoDNSSession" target = "_blank" id = "linkLogFileFabcoin">Session log file </a>
+    </td>
     </tr>
     </table>
   </div>

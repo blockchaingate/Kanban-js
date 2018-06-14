@@ -31,42 +31,27 @@ function updatePages() {
 
 function setNet(netName) {
   var thePage = globals.mainPage();
-  thePage.currentNet = netName;
+  thePage.currentNetwork = netName;
   thePage.storePageSettings(); 
-  var currentNet = thePage.getCurrentNetwork();
-  document.getElementById(currentNet.radioBoxId).checked = true;
+  var radioId = thePage.fabcoinNetworkRadioIds[netName];
+  document.getElementById(radioId).checked = true;
   updatePages();
 }
 
 function setTestNetNoDNS() {
-  setNet(pathnames.networkNames.testNetNoDNS);
+  setNet(pathnames.networkData.testNetNoDNS.rpcOption);
 }
 
 function setTestNet() {
-  setNet(pathnames.networkNames.testNet);
+  setNet(pathnames.networkData.testNet.rpcOption);
 }
 
 function setMainNet() {
-  setNet(pathnames.networkNames.mainNet);
+  setNet(pathnames.networkData.mainNet.rpcOption);
 }
 
 function setRegtest() {
-  setNet(pathnames.networkNames.regtest);
-}
-
-function getReceivedByAccountCallback(input, outputComponent) {
-  jsonToHtml.writeJSONtoDOMComponent(input, outputComponent);
-}
-
-function getReceivedByAccount() {
-  submitRequests.submitGET({
-    url: pathnames.getURLfromRPCLabel(pathnames.rpcCalls.getReceivedByAccount.rpcCall, {
-      net: globals.mainPage().pages.blockInfo.currentNet,
-    }),
-    progress: globals.spanProgress(),
-    result : getOutputTXInfoDiv(),
-    callback: getReceivedByAccountCallback
-  });  
+  setNet(pathnames.networkData.regtest.rpcOption);
 }
 
 function listAccountsCallback(input, outputComponent) {
@@ -76,7 +61,7 @@ function listAccountsCallback(input, outputComponent) {
 function listAccounts() {
   submitRequests.submitGET({
     url: pathnames.getURLfromRPCLabel(pathnames.rpcCalls.listAccounts.rpcCall, {
-      net: globals.getPage().currentNet,
+      net: globals.getPage().getRPCNetworkOption(),
     }),
     progress: globals.spanProgress(),
     result : getOutputTXInfoDiv(),
@@ -101,7 +86,6 @@ module.exports = {
   setTestNetNoDNS,
   setTestNet,
   setMainNet,
-  getReceivedByAccount,
   listAccounts,
   updatePageFromRadioButtonsByName
 }

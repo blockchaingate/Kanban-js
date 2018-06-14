@@ -21,7 +21,7 @@ function getOutputSendReceiveButtons() {
 function getReceivedByAddress() {
   submitRequests.submitGET({
     url: pathnames.getURLfromRPCLabel(pathnames.rpcCalls.listReceivedByAddress.rpcCall, {
-      net: globals.mainPage().currentNet,
+      net: globals.mainPage().getRPCNetworkOption(),
     }),
     progress: globals.spanProgress(),
     result : getOutputSendReceiveRadio(),
@@ -33,7 +33,7 @@ function dumpPrivateKey() {
   var theAddress = document.getElementById(ids.defaults.inputAddressWhoseKeyToDump).value;
   submitRequests.submitGET({
     url: pathnames.getURLfromRPCLabel(pathnames.rpcCalls.dumpPrivateKey.rpcCall, {
-      net: globals.mainPage().currentNet,
+      net: globals.mainPage().getRPCNetworkOption(),
       address: theAddress
     }),
     progress: globals.spanProgress(),

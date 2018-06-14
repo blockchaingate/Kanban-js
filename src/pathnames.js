@@ -131,20 +131,49 @@ var gpuCommands = {
   verifyOneSignature: "verifyOneSignature"
 };
 
-var networkNames = {
-  regtest: "-regtest",
-  testNetNoDNS: "-testnetnodns",
-  testNet: "-testnet",
-  mainNet: "-mainnet"
+var networkData = {
+  regtest: {
+    name: "regtest", //<-same as label, for autocomplete
+    rpcOption: "-regtest",
+    folder: "regtest/",
+    security: 1,
+    logFileLink: null
+  },
+  testNetNoDNS: {
+    name: "testNetNoDNS", //<-same as label, for autocomplete
+    rpcOption: "-testnetnodns",
+    folder: "testnet_no_dns/",
+    security: 10,
+    logFileLink: url.known.logFileTestNetNoDNS
+  },
+  testNet: {
+    name: "testNet", //<-same as label, for autocomplete
+    rpcOption: "-testnet",
+    folder: "testnet3/",
+    security: 100,
+    logFileLink: url.known.logFileTestNet,
+  },
+  mainNet: { 
+    name: "mainNet", //<-same as label, for autocomplete
+    rpcOption: "-mainnet",
+    folder: "./",
+    security: 1000,
+    logFileLink: url.known.logFileMainNet,
+  }
 };
 
-var networkNamesRPCBySecurity = {};
-networkNamesRPCBySecurity[networkNames.regtest] = 1;
-networkNamesRPCBySecurity[networkNames.testNetNoDNS] = 10;
-networkNamesRPCBySecurity[networkNames.testNet] = 100;
-networkNamesRPCBySecurity[networkNames.mainNet] = 1000;
+var networkSecurityByRPCOption = {}; //<- for convenience
+var networkRPCOption = {}; //<- for convenience
+var networkNameByRPCNetworkOption = {}; //<- for convenience
+for (var label in networkData) {
+  networkSecurityByRPCOption[networkData[label].rpcOption] = networkData[label].security;
+  networkRPCOption[label] = networkData[label].rpcOption;
+  networkNameByRPCNetworkOption[networkData[label].rpcOption] = label;
+}
 
-
+function getNetworkDataFromRPCNetworkOption(RPCNetworkOption) {
+  return networkData[networkNameByRPCNetworkOption[RPCNetworkOption]];
+}
 
 var rpcCall = "rpcCall";
 /**
@@ -156,106 +185,112 @@ var rpcCalls = {
   getPeerInfo: {
     rpcCall: "getPeerInfo", //must be same as rpc label, used for autocomplete
     command: "getpeerinfo",
-    net: networkNames.testNetNoDNS,
+    allowedArgumentValues: {
+      net: [
+        networkData.regtest.rpcOption, 
+        networkData.testNetNoDNS.rpcOption,
+        networkData.testNet.rpcOption,
+        networkData.mainNet.rpcOption
+      ]
+    },
     cli: ["net", "command"]
   },
   getNetworkInfo: {
     rpcCall: "getNetworkInfo", //must be same as rpc label, used for autocomplete
     command: "getnetworkinfo",
-    net: networkNames.testNetNoDNS,
     cli: ["net", "command"]
   },
   getNetTotals: {
     rpcCall: "getNetTotals", //must be same as rpc label, used for autocomplete
     command: "getnettotals",
-    net: networkNames.testNetNoDNS,
     cli: ["net", "command"]
   },
   getBlock: {
     rpcCall: "getBlock", //must be same as rpc label, used for autocomplete
     command: "getblock",
-    blockHash: null, // mandatory input
-    net: networkNames.testNetNoDNS,
-    verbosity: null, // mandatory input
+    allowedArgumentValues: {
+      net: [
+        networkData.regtest.rpcOption, 
+        networkData.testNetNoDNS.rpcOption,
+        networkData.testNet.rpcOption,
+        networkData.mainNet.rpcOption
+      ]
+    },
+    mandatoryArguments: { //<- values give defaults, null for none
+      blockHash: null,
+      verbosity: null
+    },
     cli: ["net", "command", "blockHash", "verbosity"]
   },
   getBestBlockHash: {
     rpcCall: "getBestBlockHash", //must be same as rpc label, used for autocomplete
     command: "getbestblockhash",
-    net: networkNames.testNetNoDNS,
     cli: ["net", "command"]
   },
   getBlockHash: {
     rpcCall: "getBlockHash", //must be same as rpc label, used for autocomplete
     command: "getblockhash",
     index: "index",
-    net: networkNames.testNetNoDNS,
     cli: ["net", "command", "index"]
   },
   getTXOutSetInfo: {
     rpcCall: "getTXOutSetInfo", //must be same as rpc label, used for autocomplete
     command: "gettxoutsetinfo",
-    net: networkNames.testNetNoDNS,
     cli: ["net", "command"]
   },
   listReceivedByAddress: {
     rpcCall: "listReceivedByAddress", //must be same as rpc label, used for autocomplete
     command: "listreceivedbyaddress",
-    net: networkNames.testNetNoDNS,
-    minimumConfirmations: '0',
-    includeEmpty: 'true',
+    mandatoryArguments: { //<- values give defaults, null for none
+      minimumConfirmations: '0',
+      includeEmpty: 'true'
+    },
     cli: ["net", "command", "minimumConfirmations", "includeEmpty"]
   },
   getMiningInfo: {
     rpcCall: "getMiningInfo", //must be same as rpc label, used for autocomplete
     command: "getmininginfo",
-    net: networkNames.testNetNoDNS,
     cli: ["net", "command"]
   },
   getGenerate: {
     rpcCall: "getGenerate", //must be same as rpc label, used for autocomplete
     command: "getgenerate",
-    net: networkNames.testNetNoDNS,
     cli: ["net", "command"]
   },
   generateToAddress: {
     rpcCall: "generateToAddress", //must be same as rpc label, used for autocomplete
     command: "generatetoaddress",
-    net: networkNames.testNetNoDNS,
-    numberOfBlocks: "100", 
-    address: "",
-    maxTries: "100000000",
+    mandatoryArguments: {
+      numberOfBlocks: "100", 
+      address: null,
+      maxTries: "100000000",
+    },
     cli: ["net", "command", "numberOfBlocks", "address", "maxTries"]
   },
   listUnspent: {
     rpcCall: "listUnspent", //must be same as rpc label, used for autocomplete
     command: "listunspent",
-    net: networkNames.testNetNoDNS,
     cli: ["net", "command"]
   },
   dumpPrivateKey: {
     rpcCall: "dumpPrivateKey", //must be same as rpc label, used for autocomplete
     command: "dumpprivkey",
-    net: networkNames.testNetNoDNS,
     address: "",
     cli: ["net", "command", "address"]
   },
   getTXOut: {
     rpcCall: "getTXOut", //must be same as rpc label, used for autocomplete
     command: "gettxout",
-    net: networkNames.testNetNoDNS,
     cli: ["net", "command"]
   },
   getReceivedByAccount: {
     rpcCall: "getReceivedByAccount", //must be same as rpc label, used for autocomplete
     command: "getreceivedbyaccount",
-    net: networkNames.testNetNoDNS,
     cli: ["net", "command"]
   },
   listAccounts: {
     rpcCall: "listAccounts", //must be same as rpc label, used for autocomplete
     command: "listaccounts",
-    net: networkNames.testNetNoDNS,
     cli: ["net", "command"]
   }
 }
@@ -264,11 +299,19 @@ var rpcCallsBannedUnlessSecurityRelaxed = {};
 rpcCallsBannedUnlessSecurityRelaxed[rpcCalls.dumpPrivateKey.command] = true;
 
 var fabcoinInitialization = "fabcoinInitialization";
+
+//To be documented on request. Please email me/tell me in person if you want 
+//me to document the structure below.
+//Not doing it right away because I am still refactoring it heavily.  
 var fabcoinInitializationProcedures = {
   startFabcoind: {
     fabcoinInitialization: "startFabcoind", //must be same as label, used for autocomplete
     command: pathname.fabcoind,
-    cli: [ ["net", networkNames.testNetNoDNS], ["mine", ""], "-daemon"]
+    allowedArgumentValues: {
+      net: [networkRPCOption.regtest, networkRPCOption.testNetNoDNS, networkRPCOption.testNet],
+      mine: ["", "-gen"]
+    },
+    cli: [ ["net", networkRPCOption.testNetNoDNS], ["mine", ""], "-daemon"] 
   },
   killAll: {
     fabcoinInitialization: "killAll",
@@ -292,6 +335,15 @@ var fabcoinInitializationProcedures = {
     command: "make",
     path: path.fabcoin,
     cli: []
+  },
+  deleteFabcoinConfiguration: {
+    fabcoinInitialization: "deleteFabcoinConfiguration",
+    command: "rm",
+    path: "~/",
+    allowedArgumentValues: {
+      folder: [networkData.regtest.folder, networkData.testNetNoDNS.folder]
+    },
+    cli: ["-r", ["folder", networkData.testNetNoDNS.folder]]
   }
 }
 
@@ -381,40 +433,40 @@ function getURLfromRPCLabel(theRPClabel, theArguments) {
 
 function getRPCNet(theArguments) {
   if (typeof theArguments.length !== "number") {
-    return networkNames.mainNet;
+    return networkData.mainNet.rpcOption;
   }
   if (theArguments.length > 10) {
-    return networkNames.mainNet;
+    return networkData.mainNet.rpcOption;
   }
   var bestNetworkSoFar = "";
   for (var counterArguments = 0 ; counterArguments < theArguments.length; counterArguments ++) {
     var currentNetCandidate = theArguments[counterArguments];
-    if (currentNetCandidate in networkNamesRPCBySecurity) {
+    if (currentNetCandidate in networkSecurityByRPCOption) {
       if (bestNetworkSoFar == "") {
         bestNetworkSoFar = currentNetCandidate;
       } else {
-        if (networkNamesRPCBySecurity[bestNetworkSoFar] < networkNamesRPCBySecurity[currentNetCandidate]) {
+        if (networkSecurityByRPCOption[bestNetworkSoFar] < networkSecurityByRPCOption[currentNetCandidate]) {
           currentNetCandidate = bestNetworkSoFar;
         }
       }
     }
   }
   if (bestNetworkSoFar === "") {
-    bestNetworkSoFar = networkNames.mainNet;
+    bestNetworkSoFar = networkData.mainNet.rpcOption;
   }
   return bestNetworkSoFar;
 }
 
-function hasRelaxedNetworkSecurity(networkRPCName) {
-  if (!(networkRPCName in networkNamesRPCBySecurity)) {
+function hasRelaxedNetworkSecurity(networkRPCOption) {
+  if (!(networkRPCOption in networkSecurityByRPCOption)) {
     return false;
   }
-  return networkNamesRPCBySecurity[networkRPCName] < networkNamesRPCBySecurity[networkNames.testNet];
+  return networkSecurityByRPCOption[networkRPCOption] < networkData.testNet.security;
 }
 
 function getRPCcallArguments(theRPCLabel, additionalArguments, errors) {
   var result = [];
-  if (!(theRPCLabel in rpcCalls)){
+  if (!(theRPCLabel in rpcCalls)) {
     errors.push(`Uknown or non-implemented rpc command: ${theRPCLabel}.`);
     return null;
   }
@@ -473,7 +525,15 @@ function getFabcoinInitializationCallArguments(theCallLabel, additionalArguments
   return result;
 }
 
-function getURLFromFabcoinInitialization(theNodeCallLabel, theArguments) {
+function getURLFromFabcoinInitialization(theCallLabel, theArguments) {
+  var result = "";
+  result += `${url.known.fabcoinInitialization}?command={"${fabcoinInitialization}":"${theCallLabel}"`;
+  var currentCall = fabcoinInitializationProcedures[theCallLabel];
+  for (var label in theArguments) {
+    result += `,"${label}":"${theArguments[label]}"`
+  }
+  result += "}";
+  return result;
 }
 
 function getURLFromMyNodesCall(theMyNodesCallLabel, theArguments) {
@@ -504,7 +564,7 @@ module.exports = {
   ports,
   url,
   computationalEngineCallStatuses,
-  networkNames,
+  networkData,
   hasRelaxedNetworkSecurity,
   ///////////////
   //information on the various calls:
@@ -520,6 +580,7 @@ module.exports = {
   fabcoinInitialization,
   myNodesCommand,
   ///////////////
+  getNetworkDataFromRPCNetworkOption,
   getURLfromRPCLabel,
   getURLfromComputationalEngineCall,
   getURLFromMyNodesCall,

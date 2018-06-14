@@ -21,7 +21,7 @@ function getOutputMiningButtons() {
 function getMiningInfo() {
   submitRequests.submitGET({
     url: pathnames.getURLfromRPCLabel(pathnames.rpcCalls.getMiningInfo.rpcCall, {
-      net: globals.mainPage().currentNet,
+      net: globals.mainPage().getRPCNetworkOption(),
     }),
     progress: globals.spanProgress(),
     result : getOutputMiningRadio(),
@@ -32,7 +32,7 @@ function getMiningInfo() {
 function getGenerate() {
   submitRequests.submitGET({
     url: pathnames.getURLfromRPCLabel(pathnames.rpcCalls.getGenerate.rpcCall, {
-      net: globals.mainPage().currentNet,
+      net: globals.mainPage().getRPCNetworkOption(),
     }),
     progress: globals.spanProgress(),
     result : getOutputMiningRadio(),
@@ -46,7 +46,7 @@ function generateToAddress() {
   var maxTries = document.getElementById(ids.defaults.inputMaxNumberOfTries).value;
   submitRequests.submitGET({
     url: pathnames.getURLfromRPCLabel(pathnames.rpcCalls.generateToAddress.rpcCall, {
-      net: globals.mainPage().currentNet,
+      net: globals.mainPage().getRPCNetworkOption(),
       address: address,
       numberOfBlocks: numberOfBlocks, 
       maxTries: maxTries,  

@@ -44,8 +44,8 @@ function rpcCall(request, response, desiredCommand) {
     response.writeHead(200);
     return response.end(`Got ${theArguments.length} arguments: too many or too few. `);
   }
-  var currentNet = pathnames.getRPCNet(theArguments);
-  var relaxSecurity = pathnames.hasRelaxedNetworkSecurity(currentNet);
+  var currentRPCNetOption = pathnames.getRPCNet(theArguments);
+  var relaxSecurity = pathnames.hasRelaxedNetworkSecurity(currentRPCNetOption);
   for (var counterArguments = 0; counterArguments < theArguments.length; counterArguments ++) {
     if (theArguments[counterArguments] in pathnames.rpcCallsBannedUnlessSecurityRelaxed && !relaxSecurity) {
       response.writeHead(200);

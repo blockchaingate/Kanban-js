@@ -34,7 +34,7 @@ function getBlock() {
     pathnames.rpcCalls.getBlock.rpcCall, {
       blockHash: getBlockHash().value, 
       verbosity: globals.mainPage().pages.blockInfo.verbosity,
-      net: globals.mainPage().currentNet,
+      net: globals.mainPage().getRPCNetworkOption(),
     }
   );
   submitRequests.submitGET({
@@ -55,11 +55,11 @@ function getBestBlockHash() {
   var theURL = "";
   if (index === null || index === undefined || index === "") {
     theURL = pathnames.getURLfromRPCLabel(pathnames.rpcCalls.getBestBlockHash.rpcCall, {
-      net: globals.mainPage().currentNet
+      net: globals.mainPage().getRPCNetworkOption()
     });
   } else {
     theURL = pathnames.getURLfromRPCLabel(pathnames.rpcCalls.getBlockHash.rpcCall, {
-      net: globals.mainPage().currentNet,
+      net: globals.mainPage().getRPCNetworkOption(),
       index: index
     });
   }

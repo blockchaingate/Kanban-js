@@ -11,33 +11,11 @@ const pathnames = require('../pathnames');
 const myNodes = require('./my_nodes')
 
 function Page() {
-  this.fabcoinNetworks = {
-    regtest: {
-      name: pathnames.networkNames.regtest,
-      logFileLink: null,
-      radioBoxId: ids.defaults.raioBoxesNetwork.regtest
-    },
-    testnetNoDNS: {
-      name: pathnames.networkNames.testNetNoDNS,
-      logFileLink: pathnames.url.known.logFileTestNetNoDNS,
-      radioBoxId: ids.defaults.raioBoxesNetwork.testnetNoDNS
-    },
-    testnet: {
-      name: pathnames.networkNames.testnet,
-      logFileLink: pathnames.url.known.logFileTestNet,
-      radioBoxId: ids.defaults.raioBoxesNetwork.testnet
-    },
-    mainnet: {
-      name: pathnames.networkNames.mainNet,
-      logFileLink: pathnames.url.known.logFileMainNet,
-      radioBoxId: ids.defaults.raioBoxesNetwork.mainnet
-    },
+  this.fabcoinNetworkRadioIds = {};
+  for (var netLabel in pathnames.networkData) {
+    this.fabcoinNetworkRadioIds[netLabel] = ids.defaults.radioBoxesNetwork[netLabel];
   }
-  this.currentNet = this.fabcoinNetworks.testnet.name;
-  this.allowedNetworkNames = {};
-  for (var label in this.fabcoinNetworks) {
-    this.allowedNetworkNames[this.fabcoinNetworks[label].name] = label;
-  }
+  this.currentNetworkName = pathnames.networkData.testNetNoDNS.name;
   this.pages = {
     fabcoinInitialization: {
       ids: {
@@ -92,23 +70,15 @@ function Page() {
   this.currentPageLabel = null;
 }
 
-Page.prototype.getCurrentNetwork = function () {
-  if (this.currentNet in this.allowedNetworkNames) {
-    var networkNameInternal = this.allowedNetworkNames[this.currentNet];
-    return this.fabcoinNetworks[networkNameInternal];
-  }
-  return this.fabcoinNetworks.testnet;
-}
-
 Page.prototype.initialize = function() {
   this.loadPageSettings();
-  var currentNet = this.getCurrentNetwork();
-  document.getElementById(currentNet.radioBoxId).checked = true;
+  var currentRadioId = this.fabcoinNetworkRadioIds[this.currentNetworkName];
+  document.getElementById(currentRadioId).checked = true;
   this.initializeCurrentPage();
 }
 
 Page.prototype.initializeCurrentPage = function() {
-  for (var label in this.pages){
+  for (var label in this.pages) {
     document.getElementById(this.pages[label].ids.page).style.display = "none";
   }
   if (this.currentPageLabel in this.pages) {
@@ -129,19 +99,24 @@ Page.prototype.selectPage = function(pageLabel) {
 Page.prototype.storePageSettings = function() {
   try {
     localStorage.setItem("currentPageLabel", this.currentPageLabel);
-    localStorage.setItem("currentNet", this.currentNet);
+    localStorage.setItem("currentNetworkName", this.currentNetworkName);
   } catch (e) {
     console.log(`While trying to load local storage, got error: ${e}. Is local storage available?`);
   }  
 }
 
+Page.prototype.getRPCNetworkOption = function () {
+  return pathnames.networkData[this.currentNetworkName].rpcOption;
+}
+
 Page.prototype.loadPageSettings = function() {
   try {
     this.currentPageLabel = localStorage.getItem("currentPageLabel");
-    var currentNetCandidate = localStorage.getItem("currentNet");
-    if (currentNetCandidate in this.allowedNetworkNames) {
-      this.currentNet = currentNetCandidate;
+    var incomingNetworkName = localStorage.getItem("currentNetworkName");
+    if (incomingNetworkName in pathnames.networkData) {
+      this.currentNetworkName = incomingNetworkName;
     }
+    this.computeRPCNetworkOption();
   } catch (e) {
     console.log(`While trying to load local storage, got error: ${e}. Is local storage available?`);
   }

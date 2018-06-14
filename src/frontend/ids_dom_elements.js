@@ -35,11 +35,11 @@ var defaults = {
   radioButtonTransactionsSetInfo: "radioButtonTransactionsSetInfo",
   radioButtonTransactionsListUnspent: "radioButtonTransactionsListUnspent",
   checkboxBlockVerbose: "checkboxBlockVerbose",
-  raioBoxesNetwork: {
+  radioBoxesNetwork: {
     regtest: "radioBoxSetRegtest",
-    testnetNoDNS: "radioBoxSetTestnetNoDNS",
-    testnet: "radioBoxSetTestnet",
-    mainnet: "radioBoxSetMainnet"
+    testNetNoDNS: "radioBoxSetTestnetNoDNS",
+    testNet: "radioBoxSetTestnet",
+    mainNet: "radioBoxSetMainnet"
   }
 };
 

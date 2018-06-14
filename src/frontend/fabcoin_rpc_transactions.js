@@ -15,7 +15,7 @@ function getTXoutSetInfoCallback(input, outputComponent) {
 function getTXoutSetInfo() {
   submitRequests.submitGET({
     url: pathnames.getURLfromRPCLabel(pathnames.rpcCalls.getTXOutSetInfo.rpcCall, {
-      net: globals.mainPage().currentNet,
+      net: globals.mainPage().getRPCNetworkOption(),
     }),
     progress: globals.spanProgress(),
     result : getOutputTXInfoDiv(),
@@ -30,7 +30,7 @@ function getTXoutCallback(input, outputComponent) {
 function getTXout() {
   submitRequests.submitGET({
     url: pathnames.getURLfromRPCLabel(pathnames.rpcCalls.getTXOut.rpcCall, {
-      net: globals.mainPage().currentNet,
+      net: globals.mainPage().getRPCNetworkOption(),
     }),
     progress: globals.spanProgress(),
     result : getOutputTXInfoDiv(),
@@ -53,7 +53,7 @@ function listUnspentCallback(input, outputComponent) {
 function getListUnspent() {
   submitRequests.submitGET({
     url: pathnames.getURLfromRPCLabel(pathnames.rpcCalls.listUnspent.rpcCall, {
-      net: globals.mainPage().currentNet,
+      net: globals.mainPage().getRPCNetworkOption(),
     }),
     progress: globals.spanProgress(),
     result : getOutputTXInfoDiv(),

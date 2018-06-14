@@ -260,7 +260,7 @@ MyNodesContainer.prototype.sshNodeToOneRemoteMachineFabcoindStart = function(cur
   currentNode.timeStart.sshNodeToRemoteMachine = (new Date()).getTime();
   var theURL = pathnames.getURLFromMyNodesCall(pathnames.myNodesCommands.sshNodeToOneRemoteMachineStartFabcoind.myNodesCommand, {
     machineName: currentNodeLabel,
-    net: globals.mainPage().currentNet
+    net: globals.mainPage().getRPCNetworkOption()
   });
   //console.log(theURL);
   submitRequests.submitGET({
