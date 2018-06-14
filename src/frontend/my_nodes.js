@@ -48,11 +48,10 @@ MyNode.prototype.toHTMLasTRelement = function () {
   result += "<tr>";
   result += `<td>${this.name}</td>`
   result += `<td>
-<a href = 'http://${this.ipAddress}:${pathnames.ports.http}' target = "_blank">${this.ipAddress}:${pathnames.ports.http}</a><br>
 <a href = 'https://${this.ipAddress}:${pathnames.ports.https}' target = "_blank">https://${this.ipAddress}:${pathnames.ports.https}</a>
 </td>`;
   result += `<td>
-<a href = 'http://${this.ipAddress}:${pathnames.ports.http}${pathnames.url.known.logFileTestNetNoDNSSession}' 
+<a href = 'https://${this.ipAddress}:${pathnames.ports.https}${pathnames.url.known.logFileTestNetNoDNSSession}' 
  target = "_blank">
 testnet log
 </a></td>`;

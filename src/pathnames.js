@@ -279,7 +279,7 @@ var rpcCalls = {
     mandatoryFixedArguments: { //<- values give defaults, null for none
       command: "listreceivedbyaddress",
     },
-    mandatoryArguments: { //<- values give defaults, null for none
+    mandatoryModifiableArguments: { //<- values give defaults, null for none
       minimumConfirmations: '0',
       includeEmpty: 'true'
     },
@@ -313,7 +313,7 @@ var rpcCalls = {
     mandatoryFixedArguments: { //<- values give defaults, null for none
       command: "generatetoaddress",
     },
-    mandatoryArguments: {
+    mandatoryModifiableArguments: {
       numberOfBlocks: "100", 
       address: null,
       maxTries: "100000000",

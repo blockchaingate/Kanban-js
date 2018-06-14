@@ -10,6 +10,28 @@ const fabcoinInitialization = require('./handlers_fabcoin_initialization');
 const handlersComputationalEngine = require('./handlers_computational_engine');
 const handlersMyNodes = require('./handlers_my_nodes');
 
+function handleRequestsHTTP(request, response) {
+  if (request.url in pathnames.url.synonyms) {
+    request.url = pathnames.url.synonyms[request.url];
+  }
+  var parsedURL = null;
+  try {
+    parsedURL = url.parse(request.url);
+  } catch (e) {
+    response.writeHead(400, {"Content-type": "text/plain"});
+    return response.end(`Bad url: ${escapeHtml(e)}`);
+  }
+  if (parsedURL.pathname === pathnames.url.known.ping) {
+    return handlePing(request, response);
+  }
+  var hostname = parsedURL.hostname; 
+  if (hostname === null || hostname === undefined) {
+    hostname = "localhost";
+  }
+  response.writeHead(307, {Location: `https://${hostname}:${pathnames.ports.https}${parsedURL.path}`});
+  response.end();
+}
+
 function handleRequests(request, response) {
   //console.log(`The url is: ${request.url}`.red);
   if (request.url in pathnames.url.synonyms) {
@@ -150,5 +172,6 @@ function handleFile(request, response) {
 }
 
 module.exports = {
-  handleRequests
+  handleRequests,
+  handleRequestsHTTP
 }

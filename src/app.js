@@ -31,7 +31,7 @@ serverHTTPS.listen(pathnames.ports.https, function() {
   console.log(`Listening on https port: ${pathnames.ports.https}`.green);
 });
 
-var serverHTTP = http.createServer(handleRequests.handleRequests);
-serverHTTP.listen(pathnames.ports.http, function(){
+var serverHTTP = http.createServer(handleRequests.handleRequestsHTTP);
+serverHTTP.listen(pathnames.ports.http, function() {
   console.log(`Listening on http port: ${pathnames.ports.http}`.yellow);
 });
