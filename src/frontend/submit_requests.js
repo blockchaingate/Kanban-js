@@ -20,14 +20,14 @@ function getToggleButton(buttonInfo) {
   if (buttonInfo.parent !== undefined) {
     addressDisplayStyle = buttonInfo.parent.getAttribute("addressDisplayStyle");
   }
-  if (addressDisplayStyle === undefined || addressDisplayStyle === "") {
+  if (addressDisplayStyle === undefined || addressDisplayStyle === "" || addressDisplayStyle === null) {
     addressDisplayStyle = "hidden";
   }
   var addressDisplayStyleString = "";
-  var buttonArrow = "&#9668;";
+  var buttonArrow = "&#9660;";
   if (addressDisplayStyle === "hidden") { 
     addressDisplayStyleString = "none";
-    buttonArrow = "&#9660;";
+    buttonArrow = "&#9668;";
   }
   result += `<button class = "buttonProgress" `;
   result += `onclick = "window.kanban.submitRequests.buttonProgressClick(this);">`;

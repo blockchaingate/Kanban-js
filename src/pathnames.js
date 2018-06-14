@@ -181,116 +181,203 @@ var rpcCall = "rpcCall";
  * Use "" for optional variables.
  * The cli argument gives the order of the commands.
  */
+
+var allowedArgumentValuesDefaults = {
+  net: [
+    networkData.regtest.rpcOption, 
+    networkData.testNetNoDNS.rpcOption,
+    networkData.testNet.rpcOption,
+    networkData.mainNet.rpcOption
+  ]
+}
+
 var rpcCalls = {
+  getBlock: {
+    rpcCall: "getBlock", //must be same as rpc label, used for autocomplete
+    mandatoryFixedArguments: { //<- values give defaults, null for none
+      command: "getblock"
+    },
+    //mandatoryModifiableArguments can be omitted if there are none.
+    mandatoryModifiableArguments: { //<- values give defaults, null for none
+      blockHash: null,
+      verbosity: null
+    },
+    //optional modifiable arguments are implied by the value of cli
+    //Specify the optional modifyable arguments only if you want to give them default values.
+    optionalModifiableArguments: { //<- values give defaults, null for none. 
+    },
+    allowedArgumentValues: { //<- pass null to use global defaults
+      net: null
+    },
+    cli: ["net", "command", "blockHash", "verbosity"]
+  },
   getPeerInfo: {
     rpcCall: "getPeerInfo", //must be same as rpc label, used for autocomplete
-    command: "getpeerinfo",
+    mandatoryFixedArguments: { //<-values give defaults, null for none
+      command: "getpeerinfo"
+    },
     allowedArgumentValues: {
-      net: [
-        networkData.regtest.rpcOption, 
-        networkData.testNetNoDNS.rpcOption,
-        networkData.testNet.rpcOption,
-        networkData.mainNet.rpcOption
-      ]
+      net: null
     },
     cli: ["net", "command"]
   },
   getNetworkInfo: {
     rpcCall: "getNetworkInfo", //must be same as rpc label, used for autocomplete
-    command: "getnetworkinfo",
+    mandatoryFixedArguments: { //<- values give defaults, null for none
+      command: "getblock"
+    },
+    allowedArgumentValues: {
+      net: null
+    },
     cli: ["net", "command"]
   },
   getNetTotals: {
     rpcCall: "getNetTotals", //must be same as rpc label, used for autocomplete
-    command: "getnettotals",
-    cli: ["net", "command"]
-  },
-  getBlock: {
-    rpcCall: "getBlock", //must be same as rpc label, used for autocomplete
-    command: "getblock",
+    mandatoryFixedArguments: { //<- values give defaults, null for none
+      command: "getnettotals"
+    },
     allowedArgumentValues: {
-      net: [
-        networkData.regtest.rpcOption, 
-        networkData.testNetNoDNS.rpcOption,
-        networkData.testNet.rpcOption,
-        networkData.mainNet.rpcOption
-      ]
+      net: null
     },
-    mandatoryArguments: { //<- values give defaults, null for none
-      blockHash: null,
-      verbosity: null
-    },
-    cli: ["net", "command", "blockHash", "verbosity"]
+    cli: ["net", "command"]
   },
   getBestBlockHash: {
     rpcCall: "getBestBlockHash", //must be same as rpc label, used for autocomplete
-    command: "getbestblockhash",
+    mandatoryFixedArguments: { //<- values give defaults, null for none
+      command: "getbestblockhash",
+    },
+    allowedArgumentValues: {
+      net: null
+    },
     cli: ["net", "command"]
   },
   getBlockHash: {
     rpcCall: "getBlockHash", //must be same as rpc label, used for autocomplete
-    command: "getblockhash",
-    index: "index",
+    mandatoryFixedArguments: { //<- values give defaults, null for none
+      command: "getblockhash",
+    },
+    mandatoryModifiableArguments: { //<- values give defaults, null for none
+      index: null
+    },
+    allowedArgumentValues: {
+      net: null
+    },
     cli: ["net", "command", "index"]
   },
   getTXOutSetInfo: {
     rpcCall: "getTXOutSetInfo", //must be same as rpc label, used for autocomplete
-    command: "gettxoutsetinfo",
+    mandatoryFixedArguments: { //<- values give defaults, null for none
+      command: "gettxoutsetinfo",
+    },
+    allowedArgumentValues: {
+      net: null
+    },
     cli: ["net", "command"]
   },
   listReceivedByAddress: {
     rpcCall: "listReceivedByAddress", //must be same as rpc label, used for autocomplete
-    command: "listreceivedbyaddress",
+    mandatoryFixedArguments: { //<- values give defaults, null for none
+      command: "listreceivedbyaddress",
+    },
     mandatoryArguments: { //<- values give defaults, null for none
       minimumConfirmations: '0',
       includeEmpty: 'true'
+    },
+    allowedArgumentValues: {
+      net: null
     },
     cli: ["net", "command", "minimumConfirmations", "includeEmpty"]
   },
   getMiningInfo: {
     rpcCall: "getMiningInfo", //must be same as rpc label, used for autocomplete
-    command: "getmininginfo",
+    mandatoryFixedArguments: { //<- values give defaults, null for none
+      command: "getmininginfo",
+    },
+    allowedArgumentValues: {
+      net: null
+    },
     cli: ["net", "command"]
   },
   getGenerate: {
     rpcCall: "getGenerate", //must be same as rpc label, used for autocomplete
-    command: "getgenerate",
+    mandatoryFixedArguments: { //<- values give defaults, null for none
+      command: "getgenerate",
+    },
+    allowedArgumentValues: {
+      net: null
+    },
     cli: ["net", "command"]
   },
   generateToAddress: {
     rpcCall: "generateToAddress", //must be same as rpc label, used for autocomplete
-    command: "generatetoaddress",
+    mandatoryFixedArguments: { //<- values give defaults, null for none
+      command: "generatetoaddress",
+    },
     mandatoryArguments: {
       numberOfBlocks: "100", 
       address: null,
       maxTries: "100000000",
     },
+    allowedArgumentValues: {
+      net: null
+    },
     cli: ["net", "command", "numberOfBlocks", "address", "maxTries"]
   },
   listUnspent: {
     rpcCall: "listUnspent", //must be same as rpc label, used for autocomplete
-    command: "listunspent",
+    mandatoryFixedArguments: { //<- values give defaults, null for none
+      command: "listunspent",
+    },
+    allowedArgumentValues: {
+      net: null
+    },
     cli: ["net", "command"]
   },
   dumpPrivateKey: {
     rpcCall: "dumpPrivateKey", //must be same as rpc label, used for autocomplete
-    command: "dumpprivkey",
+    mandatoryFixedArguments: { //<- values give defaults, null for none
+      command: "dumpprivkey",
+    },
+    mandatoryModifiableArguments: { //<- values give defaults, null for none
+      address: null
+    },
+    allowedArgumentValues: {
+      net: [ //<- restricted network access!
+        networkData.testNetNoDNS.rpcOption, 
+        networkData.regtest.rpcOption
+      ]
+    },
     address: "",
     cli: ["net", "command", "address"]
   },
   getTXOut: {
     rpcCall: "getTXOut", //must be same as rpc label, used for autocomplete
-    command: "gettxout",
+    mandatoryFixedArguments: { //<- values give defaults, null for none
+      command: "gettxout",
+    },
+    allowedArgumentValues: {
+      net: null
+    },
     cli: ["net", "command"]
   },
   getReceivedByAccount: {
     rpcCall: "getReceivedByAccount", //must be same as rpc label, used for autocomplete
-    command: "getreceivedbyaccount",
+    mandatoryFixedArguments: { //<- values give defaults, null for none
+      command: "getreceivedbyaccount",
+    },
+    allowedArgumentValues: {
+      net: null
+    },
     cli: ["net", "command"]
   },
   listAccounts: {
     rpcCall: "listAccounts", //must be same as rpc label, used for autocomplete
-    command: "listaccounts",
+    mandatoryFixedArguments: { //<- values give defaults, null for none
+      command: "listaccounts",
+    },
+    allowedArgumentValues: {
+      net: null
+    },
     cli: ["net", "command"]
   }
 }
@@ -414,13 +501,9 @@ function getURLfromComputationalEngineCall(theComputationalEngineCallLabel, addi
 
 function getURLfromRPCLabel(theRPClabel, theArguments) {
   var theRequest = {};
-  theRequest[rpcCall] = theRPClabel;
   var theRPCCall = rpcCalls[theRPClabel];
-  for (var label in theRPCCall) {
-    if (typeof theRPCCall[label] === "string") {
-      theRequest[label] = theRPCCall[label]
-    } 
-  }
+  theRequest[rpcCall] = theRPClabel;
+  theRequest["command"] = theRPCCall.command;
   if (theArguments === undefined) {
     theArguments = {};
   }
@@ -468,6 +551,51 @@ function hasRelaxedNetworkSecurity(networkRPCOption) {
   return networkSecurityByRPCOption[networkRPCOption] < networkData.testNet.security;
 }
 
+function isAllowedRPCCallArgument(theRPCCall, argumentLabel, argumentValue, errors) {
+  var allowedArgumentValues = theRPCCall.allowedArgumentValues;
+  if (!(argumentLabel in allowedArgumentValues)) {
+    return true;
+  }
+  var currentAllowedValues = allowedArgumentValues[argumentLabel];
+  if (currentAllowedValues === null) {
+    currentAllowedValues = allowedArgumentValuesDefaults[argumentLabel];
+  }
+  for (var counterAllowed = 0; counterAllowed < currentAllowedValues.length; counterAllowed ++) {
+    if (argumentValue === currentAllowedValues[counterAllowed]) {
+      return true;
+    }
+  }
+  errors.push( 
+    `Value ${argumentValue} not allowed as input with name ${argumentLabel} of command ${theRPCCall.rpcCall}.
+    The allowed values are ${currentAllowedValues.join(', ')}. `
+  );
+  return false;
+}
+
+var allowedCharsInRPCArgumentsArray = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ-1234567890";
+var allowedCharsInRPCArgumentsObject = {};
+for (var counterAllowed = 0; counterAllowed < allowedCharsInRPCArgumentsArray.length; counterAllowed ++) {
+  allowedCharsInRPCArgumentsObject[counterAllowed] = true;
+}
+
+function isValidRPCArgumentInTermsOfCharacters(label, input, errors) {
+  if (typeof input !== "string") {
+    errors.push(`Input with label ${label} must be a string. `);
+    return false;
+  }
+  if (input.length > 1000) {
+    errors.push(`Input with label ${label} of length ${input.length} is too long. `);
+    return false;
+  }
+  for (var counterInput = 0; counterInput < input.length; counterInput ++) {
+    if (!(input[counterInput] in allowedCharsInRPCArgumentsObject)) {
+      errors.push(`Input with label ${label} contains the forbidden character ${input[counterInput]} at position ${counterInput}.`);
+      return false;
+    }
+  }
+  return true;
+}
+
 function getRPCcallArguments(theRPCLabel, additionalArguments, errors) {
   var result = [];
   if (!(theRPCLabel in rpcCalls)) {
@@ -475,29 +603,51 @@ function getRPCcallArguments(theRPCLabel, additionalArguments, errors) {
     return null;
   }
   var theRPCCall = rpcCalls[theRPCLabel];
-  for (var counterCommand = 0; counterCommand < theRPCCall.cli.length; counterCommand ++) {
-    var currentLabel = theRPCCall.cli[counterCommand];
-    if (!(currentLabel in additionalArguments)) {
-      if (!(currentLabel in theRPCCall)) {
-        console.log(`WARNING: no default given for ${currentLabel} in rpc call labeled ${theRPCLabel}. If this is an optional argument, set the default to an empty string.`.red);
-        continue;
-      }
-      if (typeof theRPCCall[currentLabel] === null) {
-        errors.push(`Mandatory argument ${currentLabel} missing for rpc command: ${theRPCLabel}`);
-        return null;
-      }
-      if (theRPCCall[currentLabel] === "") {
-        continue;
-      }
-      result.push(theRPCCall[currentLabel]);
-    } else {
-      if (typeof additionalArguments[currentLabel] === "string") {
-        if (additionalArguments[currentLabel] !== "") {
-          result.push(additionalArguments[currentLabel]);
-          //console.log(`Pusing label ${currentLabel} with value: ${additionalArguments[currentLabel]}.`);
-        } 
+  var theRPCcli = theRPCCall.cli;
+  var mandatoryFixedArguments = theRPCCall.mandatoryFixedArguments;
+  var mandatoryModifiableArguments = theRPCCall.mandatoryModifiableArguments;
+  var optionalModifiableArguments = theRPCCall.optionalModifiableArguments;
+
+  for (var counterCommand = 0; counterCommand < theRPCcli.length; counterCommand ++) {
+    var currentLabel = theRPCcli[counterCommand];
+    if (currentLabel in mandatoryFixedArguments) {
+      result.push(mandatoryFixedArguments[currentLabel]);
+      continue;
+    }
+    var currentValueCandidate = null;
+    if (optionalModifiableArguments !== undefined) {
+      if (currentLabel in optionalModifiableArguments) {
+        if (optionalModifiableArguments[currentLabel] !== null) {
+          currentValueCandidate = optionalModifiableArguments[currentLabel];
+        }
       }
     }
+    var isMandatory = false;
+    if (mandatoryModifiableArguments !== undefined) {
+      if (currentLabel in mandatoryModifiableArguments) {
+        isMandatory = true;
+        if (mandatoryModifiableArguments[currentLabel] !== null) {
+          currentValueCandidate = mandatoryModifiableArguments[currentLabel];
+        }
+      }
+    }
+    if (currentLabel in additionalArguments) {
+      currentValueCandidate = additionalArguments[currentLabel];
+    }
+    if (currentValueCandidate === null) {
+      if (isMandatory) {
+        errors.push(`Could not extract mandatory variable with label ${currentLabel} in rpc call labeled ${theRPCLabel}.`);
+        return null;
+      }
+      continue;
+    }
+    if (!isAllowedRPCCallArgument(theRPCCall, currentLabel, currentValueCandidate, errors)) {
+      return null;
+    }
+    if (!isValidRPCArgumentInTermsOfCharacters(currentLabel, currentValueCandidate, errors)) {
+      return null;
+    }
+    result.push(currentValueCandidate);
   }
   return result;
 }
