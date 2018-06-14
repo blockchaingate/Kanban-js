@@ -12,11 +12,12 @@ function initializeFolders() {
     if (fs.existsSync(currentPathFabcoin)) {
       pathnames.path.fabcoinConfigurationFolder = currentPathFabcoin;
       pathnames.path.fabcoinConfigurationFolder = path.normalize(pathnames.path.fabcoinConfigurationFolder);
+      var networkData = pathnames.networkData;
       console.log(`Using fabcoin configuration folder: ${pathnames.path.fabcoinConfigurationFolder}`.green);
-      pathnames.url.whiteListed[pathnames.url.known.logFileTestNetNoDNS] = `${pathnames.path.fabcoinConfigurationFolder}/testnet_no_dns/debug.log`;
-      pathnames.url.whiteListed[pathnames.url.known.logFileTestNetNoDNSSession] = `${pathnames.path.fabcoinConfigurationFolder}/testnet_no_dns/debug_session.log`;
-      pathnames.url.whiteListed[pathnames.url.known.logFileTestNet] = `${pathnames.path.fabcoinConfigurationFolder}/testnet3/debug.log`;
-      pathnames.url.whiteListed[pathnames.url.known.logFileTestNetSession] = `${pathnames.path.fabcoinConfigurationFolder}/testnet3/debug_session.log`;
+      pathnames.url.whiteListed[pathnames.url.known.logFileTestNetNoDNS] = `${pathnames.path.fabcoinConfigurationFolder}/${networkData.testNetNoDNS.folder}debug.log`;
+      pathnames.url.whiteListed[pathnames.url.known.logFileTestNetNoDNSSession] = `${pathnames.path.fabcoinConfigurationFolder}/${networkData.testNetNoDNS.folder}debug_session.log`;
+      pathnames.url.whiteListed[pathnames.url.known.logFileTestNet] = `${pathnames.path.fabcoinConfigurationFolder}/${networkData.testNet.folder}debug.log`;
+      pathnames.url.whiteListed[pathnames.url.known.logFileTestNetSession] = `${pathnames.path.fabcoinConfigurationFolder}/${networkData.testNet.folder}debug_session.log`;
       pathnames.url.whiteListed[pathnames.url.known.logFileMainNet] = `${pathnames.path.fabcoinConfigurationFolder}/debug.log`;
       pathnames.url.whiteListed[pathnames.url.known.logFileMainNetSession] = `${pathnames.path.fabcoinConfigurationFolder}/debug_session.log`;
       break;

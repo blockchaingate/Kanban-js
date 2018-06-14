@@ -17,10 +17,11 @@ function getNetworkInfoCallBack(input, outputComponent) {
 }
 
 function getPeerInfo() {
+  var theURL = pathnames.getURLfromRPCLabel(pathnames.rpcCalls.getPeerInfo.rpcCall, {
+    net: globals.mainPage().getRPCNetworkOption()
+  });
   submitRequests.submitGET({
-    url: pathnames.getURLfromRPCLabel(pathnames.rpcCalls.getPeerInfo.rpcCall, {
-      net: globals.mainPage().getRPCNetworkOption()
-    }),
+    url: theURL,
     progress: globals.spanProgress(),
     result : ids.defaults.outputRPCNetwork,
     callback: getNetworkInfoCallBack

@@ -43,7 +43,8 @@ function startFabcoinDaemon(useMining) {
   }
   var theURL = pathnames.getURLFromFabcoinInitialization(
     pathnames.fabcoinInitializationProcedures.startFabcoind.fabcoinInitialization, {
-      mine: mineString
+      mine: mineString,
+      net: globals.mainPage().getRPCNetworkOption()
     }
   );
   submitRequests.submitGET({

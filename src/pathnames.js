@@ -60,7 +60,7 @@ var url = {
     fabcoinInitialization: "/fabcoin_initialization",
     myNodesCommand: "/my_nodes",
     logFileTestNetNoDNS: "/logFileTestNetNoDNS",
-    logFileTestNetNoDNSSession: "/logFileTestNetSessionNoDNS",
+    logFileTestNetNoDNSSession: "/logFileTestNetNoDNSSession",
     logFileTestNet: "/logFileTestNet",
     logFileTestNetSession: "/logFileTestNetSession",
     logFileMainNet: "/logFileMainNet",
@@ -224,7 +224,7 @@ var rpcCalls = {
   getNetworkInfo: {
     rpcCall: "getNetworkInfo", //must be same as rpc label, used for autocomplete
     mandatoryFixedArguments: { //<- values give defaults, null for none
-      command: "getblock"
+      command: "getnetworkinfo"
     },
     allowedArgumentValues: {
       net: null
@@ -508,12 +508,11 @@ function getURLfromRPCLabel(theRPClabel, theArguments) {
     theArguments = {};
   }
   for (var label in theArguments) {
-    if (typeof theRPCCall[label] !== "string" && theRPCCall[label] !== null) {
+    if (typeof theArguments[label] !== "string") {
+      console.log(`Bad value ${theArguments[label]} for label ${label} in rpc arguments. `);
       continue; // <- label not valid for this RPC call
     }
-    if (typeof theArguments[label] === "string") {
-      theRequest[label] = theArguments[label];
-    } 
+    theRequest[label] = theArguments[label];
   }
   return `${url.known.rpc}?command=${encodeURIComponent(JSON.stringify(theRequest))}`;
 }
@@ -575,7 +574,7 @@ function isAllowedRPCCallArgument(theRPCCall, argumentLabel, argumentValue, erro
 var allowedCharsInRPCArgumentsArray = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ-1234567890";
 var allowedCharsInRPCArgumentsObject = {};
 for (var counterAllowed = 0; counterAllowed < allowedCharsInRPCArgumentsArray.length; counterAllowed ++) {
-  allowedCharsInRPCArgumentsObject[counterAllowed] = true;
+  allowedCharsInRPCArgumentsObject[allowedCharsInRPCArgumentsArray[counterAllowed]] = true;
 }
 
 function isValidRPCArgumentInTermsOfCharacters(label, input, errors) {
