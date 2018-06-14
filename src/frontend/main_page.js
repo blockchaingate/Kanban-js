@@ -116,10 +116,13 @@ Page.prototype.loadPageSettings = function() {
     if (incomingNetworkName in pathnames.networkData) {
       this.currentNetworkName = incomingNetworkName;
     }
-    this.computeRPCNetworkOption();
   } catch (e) {
     console.log(`While trying to load local storage, got error: ${e}. Is local storage available?`);
   }
+}
+
+Page.prototype.getCurrentNetwork = function () {
+  return pathnames.networkData[this.currentNetworkName];
 }
 
 function getPage() {

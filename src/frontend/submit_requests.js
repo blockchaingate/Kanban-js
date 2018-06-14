@@ -1,11 +1,33 @@
 "use srict";
 const escapeHtml = require('escape-html');
 
+function buttonProgressClick(buttonElement) {
+  console.log(buttonElement);
+  if (buttonElement.nextSibling.nextSibling.style.display === 'none') {
+    buttonElement.nextSibling.nextSibling.style.display = ''
+    buttonElement.childNodes[1].innerHTML = '&#9660;'; 
+    buttonElement.parentElement.setAttribute('addressDisplayStyle', "");
+  } else {
+    buttonElement.nextSibling.nextSibling.style.display = 'none';
+    buttonElement.childNodes[1].innerHTML = '&#9668;';
+    buttonElement.parentElement.setAttribute('addressDisplayStyle', "none");
+  }
+}
+
 function getToggleButton(buttonInfo) {
-  return `<button class = "buttonProgress"
-    onclick="if (this.nextSibling.nextSibling.style.display === 'none')
-    {this.nextSibling.nextSibling.style.display = ''; this.childNodes[1].innerHTML = '&#9660;';} else {
-    this.nextSibling.nextSibling.style.display = 'none'; this.childNodes[1].innerHTML = '&#9668;';}"><span>${buttonInfo.label}</span><b>&#9668;</b></button><br><span class="spanRESTDeveloperInfo" style="display:none">${buttonInfo.content}</span>`;
+  var result = "";
+  var addressDisplayStyle = "none";
+  if (buttonInfo.parent !== undefined) {
+    addressDisplayStyle = buttonInfo.parent.getAttribute("addressDisplayStyle");
+  }
+  if (addressDisplayStyle === undefined) {
+    addressDisplayStyle = "none";
+  }
+  result += `<button class = "buttonProgress" `;
+  result += `onclick = "window.kanban.submitRequests.buttonProgressClick(this);">`;
+  result += `<span>${buttonInfo.label}</span><b>&#9668;</b></button>`;
+  result += `<br><span class="spanRESTDeveloperInfo" style="display:${addressDisplayStyle}">${buttonInfo.content}</span>`;
+  return result;
 }
 
 function getToggleButtonPausePolling(buttonInfo) {
@@ -34,7 +56,11 @@ function recordProgressStarted(progress, address) {
     progress = document.getElementById(progress);
   }
   addressHTML = `<a href="${address}" target="_blank">${unescape(address)}</a>`;
-  progress.innerHTML = getToggleButton({content: addressHTML, label: "<b style=\"color:orange\">Sent</b>"});
+  progress.innerHTML = getToggleButton({
+    content: addressHTML, 
+    label: "<b style=\"color:orange\">Sent</b>",
+    parent: progress
+  });
 }
 
 function recordResult(resultText, resultSpan) {
@@ -91,6 +117,7 @@ function submitGET(inputObject) {
 
 module.exports = {
   submitGET,
+  buttonProgressClick,
   getToggleButton,
   getToggleButtonPausePolling
 }

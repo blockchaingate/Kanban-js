@@ -9,6 +9,7 @@ window.kanban.rpc.sendReceive = require('./fabcoin_rpc_send_receive');
 window.kanban.rpc.mine = require('./fabcoin_rpc_mine');
 window.kanban.fabcoinInitialization = require('./fabcoin_initialization');
 window.kanban.computationalEngineCalls = require('./computational_engile_calls');
+window.kanban.submitRequests = require('./submit_requests');
 window.kanban.ids = require('./ids_dom_elements');
 window.kanban.myNodes = require('./my_nodes');
 window.kanban.allMyNodes = null;

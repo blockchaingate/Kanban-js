@@ -31,7 +31,7 @@ function updatePages() {
 
 function setNet(netName) {
   var thePage = globals.mainPage();
-  thePage.currentNetwork = netName;
+  thePage.currentNetworkName = netName;
   thePage.storePageSettings(); 
   var radioId = thePage.fabcoinNetworkRadioIds[netName];
   document.getElementById(radioId).checked = true;
@@ -39,19 +39,19 @@ function setNet(netName) {
 }
 
 function setTestNetNoDNS() {
-  setNet(pathnames.networkData.testNetNoDNS.rpcOption);
+  setNet(pathnames.networkData.testNetNoDNS.name);
 }
 
 function setTestNet() {
-  setNet(pathnames.networkData.testNet.rpcOption);
+  setNet(pathnames.networkData.testNet.name);
 }
 
 function setMainNet() {
-  setNet(pathnames.networkData.mainNet.rpcOption);
+  setNet(pathnames.networkData.mainNet.name);
 }
 
 function setRegtest() {
-  setNet(pathnames.networkData.regtest.rpcOption);
+  setNet(pathnames.networkData.regtest.name);
 }
 
 function listAccountsCallback(input, outputComponent) {
