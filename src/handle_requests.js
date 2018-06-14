@@ -25,8 +25,14 @@ function handleRequestsHTTP(request, response) {
     return handlePing(request, response);
   }
   var hostname = parsedURL.hostname; 
+  //  console.log(hostname);
   if (hostname === null || hostname === undefined) {
-    hostname = "localhost";
+    hostname = request.headers.host;
+    //console.log("hostname non-chopped: " + hostname);
+    if (hostname.endsWith(`:${pathnames.ports.http}`)) {
+      hostname = hostname.substring(0, hostname.length - pathnames.ports.http.toString().length - 1);
+    }
+    //console.log("hostname later: " + hostname);
   }
   response.writeHead(307, {Location: `https://${hostname}:${pathnames.ports.https}${parsedURL.path}`});
   response.end();
