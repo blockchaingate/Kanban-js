@@ -24,7 +24,7 @@ function MyNode(inputName, inputParsed) {
 }
 
 MyNode.prototype.getURLPingBrowserToNode = function () {
-  return `http://${this.ipAddress}:${pathnames.ports.http}${pathnames.url.known.ping}`;
+  return `https://${this.ipAddress}:${pathnames.ports.https}${pathnames.url.known.ping}`;
 }
 
 MyNode.prototype.getSpanBrowserToRemoteProgressId = function () {
