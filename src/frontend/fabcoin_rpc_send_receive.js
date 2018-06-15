@@ -18,6 +18,37 @@ function getOutputSendReceiveButtons() {
   return document.getElementById(ids.defaults.outputSendReceiveButtons);
 }
 
+function getAddressInputValue(){
+  return document.getElementById(ids.defaults.inputAddressSendReceive).value;
+}
+
+function getAccountInputValue(){
+  return document.getElementById(ids.defaults.inputAccountName).value;
+}
+
+function getBalance() {
+  submitRequests.submitGET({
+    url: pathnames.getURLfromRPCLabel(pathnames.rpcCalls.getBalance.rpcCall, {
+      net: globals.mainPage().getRPCNetworkOption(),
+      account: getAccountInputValue()
+    }),
+    progress: globals.spanProgress(),
+    result : getOutputSendReceiveRadio(),
+    callback: sendReceiveCallbackStandard
+  });  
+}
+
+function listAccounts() {
+  submitRequests.submitGET({
+    url: pathnames.getURLfromRPCLabel(pathnames.rpcCalls.listAccounts.rpcCall, {
+      net: globals.mainPage().getRPCNetworkOption(),
+    }),
+    progress: globals.spanProgress(),
+    result : getOutputSendReceiveRadio(),
+    callback: sendReceiveCallbackStandard
+  });  
+}
+
 function getReceivedByAddress() {
   submitRequests.submitGET({
     url: pathnames.getURLfromRPCLabel(pathnames.rpcCalls.listReceivedByAddress.rpcCall, {
@@ -30,11 +61,22 @@ function getReceivedByAddress() {
 }
 
 function dumpPrivateKey() {
-  var theAddress = document.getElementById(ids.defaults.inputAddressWhoseKeyToDump).value;
   submitRequests.submitGET({
     url: pathnames.getURLfromRPCLabel(pathnames.rpcCalls.dumpPrivateKey.rpcCall, {
       net: globals.mainPage().getRPCNetworkOption(),
-      address: theAddress
+      address: getAddressInputValue()
+    }),
+    progress: globals.spanProgress(),
+    result : getOutputSendReceiveButtons(),
+    callback: sendReceiveCallbackStandard
+  });  
+}
+
+function getAccountAddress() {
+  submitRequests.submitGET({
+    url: pathnames.getURLfromRPCLabel(pathnames.rpcCalls.getAccountAddress.rpcCall, {
+      net: globals.mainPage().getRPCNetworkOption(),
+      account: getAccountInputValue()
     }),
     progress: globals.spanProgress(),
     result : getOutputSendReceiveButtons(),
@@ -49,5 +91,8 @@ function updateSendReceivePage() {
 module.exports = {
   updateSendReceivePage,
   getReceivedByAddress, 
+  listAccounts,
+  getBalance,
+  getAccountAddress,
   dumpPrivateKey
 }

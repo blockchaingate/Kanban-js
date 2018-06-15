@@ -31,7 +31,7 @@ function rpcCall(request, response, desiredCommand) {
     response.writeHead(400);
     numberRequestsRunning --;
     if (errors.length > 0) {
-      response.end(`{"error":"${errors[0]}"`);
+      response.end(`{"error":"${errors[0]}"}`);
     } else {
       response.end("Error while extracting rpc call arguments. ");      
     }

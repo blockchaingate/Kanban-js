@@ -12,6 +12,30 @@ function getTXoutSetInfoCallback(input, outputComponent) {
   jsonToHtml.writeJSONtoDOMComponent(input, outputComponent);
 }
 
+function getNumberOfTransactions() {
+  return document.getElementById(ids.defaults.inputNumberOfTransactions).value;
+}
+
+function getTransactionId() {
+  return document.getElementById(ids.defaults.inputTransactionId).value;
+}
+
+function getOutputTXInfoDiv() {
+  return document.getElementById(ids.defaults.outputRPCTXInfo);
+}
+
+function getOutputTXInfoDivButtons() {
+  return document.getElementById(ids.defaults.outputTransactionsButtons);
+}
+
+function updateTXInfoPage() {
+  RPCGeneral.updatePageFromRadioButtonsByName("rpcCallTxInfo");
+}
+
+function listUnspentCallback(input, outputComponent) {
+  jsonToHtml.writeJSONtoDOMComponent(input, outputComponent);
+}
+
 function getTXoutSetInfo() {
   submitRequests.submitGET({
     url: pathnames.getURLfromRPCLabel(pathnames.rpcCalls.getTXOutSetInfo.rpcCall, {
@@ -38,18 +62,6 @@ function getTXout() {
   });  
 }
 
-function getOutputTXInfoDiv() {
-  return document.getElementById(ids.defaults.outputRPCTXInfo);
-}
-
-function updateTXInfoPage() {
-  RPCGeneral.updatePageFromRadioButtonsByName("rpcCallTxInfo");
-}
-
-function listUnspentCallback(input, outputComponent) {
-  jsonToHtml.writeJSONtoDOMComponent(input, outputComponent);
-}
-
 function getListUnspent() {
   submitRequests.submitGET({
     url: pathnames.getURLfromRPCLabel(pathnames.rpcCalls.listUnspent.rpcCall, {
@@ -61,9 +73,35 @@ function getListUnspent() {
   });  
 }
 
+function getTransaction() {
+  submitRequests.submitGET({
+    url: pathnames.getURLfromRPCLabel(pathnames.rpcCalls.getTransaction.rpcCall, {
+      net: globals.mainPage().getRPCNetworkOption(),
+      txid: getTransactionId()
+    }),
+    progress: globals.spanProgress(),
+    result : getOutputTXInfoDivButtons(),
+    callback: listUnspentCallback
+  }); 
+}
+
+function listTransactions() {
+  submitRequests.submitGET({
+    url: pathnames.getURLfromRPCLabel(pathnames.rpcCalls.listTransactions.rpcCall, {
+      net: globals.mainPage().getRPCNetworkOption()//,
+//      count: getNumberOfTransactions()
+    }),
+    progress: globals.spanProgress(),
+    result : getOutputTXInfoDiv(),
+    callback: listUnspentCallback
+  });  
+}
+
 module.exports = {
   getTXoutSetInfo,
   getTXout,
   getListUnspent,
+  getTransaction,
+  listTransactions,
   updateTXInfoPage
 }

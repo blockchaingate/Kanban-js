@@ -333,6 +333,32 @@ var rpcCalls = {
     },
     cli: ["net", "command"]
   },
+  listTransactions: {
+    rpcCall: "listTransactions", //must be same as rpc label, used for autocomplete
+    mandatoryFixedArguments: { //<- values give defaults, null for none
+      command: "listtransactions",
+    },
+    optionalModifiableArguments: {
+      count: null
+    },
+    allowedArgumentValues: {
+      net: null
+    },
+    cli: ["net", "command", "count"]
+  },
+  getTransaction: {
+    rpcCall: "getTransaction", //must be same as rpc label, used for autocomplete
+    mandatoryFixedArguments: { //<- values give defaults, null for none
+      command: "gettransaction",
+    },
+    mandatoryModifiableArguments: {
+      txid: null
+    },
+    allowedArgumentValues: {
+      net: null
+    },
+    cli: ["net", "command", "txid"]
+  },
   dumpPrivateKey: {
     rpcCall: "dumpPrivateKey", //must be same as rpc label, used for autocomplete
     mandatoryFixedArguments: { //<- values give defaults, null for none
@@ -350,6 +376,24 @@ var rpcCalls = {
     address: "",
     cli: ["net", "command", "address"]
   },
+  getAccountAddress: {
+    rpcCall: "getAccountAddress", //must be same as rpc label, used for autocomplete
+    mandatoryFixedArguments: { //<- values give defaults, null for none
+      command: "getaccountaddress",
+    },
+    mandatoryModifiableArguments: { //<- values give defaults, null for none
+      account: null
+    },
+    allowedArgumentValues: {
+      net: [ //<- restricted network access!
+        networkData.regtest.rpcOption,
+        networkData.testNetNoDNS.rpcOption,
+        networkData.testNet.rpcOption 
+      ]
+    },
+    address: "",
+    cli: ["net", "command", "account"]
+  },
   getTXOut: {
     rpcCall: "getTXOut", //must be same as rpc label, used for autocomplete
     mandatoryFixedArguments: { //<- values give defaults, null for none
@@ -360,15 +404,18 @@ var rpcCalls = {
     },
     cli: ["net", "command"]
   },
-  getReceivedByAccount: {
-    rpcCall: "getReceivedByAccount", //must be same as rpc label, used for autocomplete
+  getBalance: {
+    rpcCall: "getBalance", //must be same as rpc label, used for autocomplete
     mandatoryFixedArguments: { //<- values give defaults, null for none
-      command: "getreceivedbyaccount",
+      command: "getbalance",
+    },
+    mandatoryModifiableArguments: { //<- values give defaults, null for none
+      account: null
     },
     allowedArgumentValues: {
       net: null
     },
-    cli: ["net", "command"]
+    cli: ["net", "command", "account"]
   },
   listAccounts: {
     rpcCall: "listAccounts", //must be same as rpc label, used for autocomplete
@@ -565,7 +612,7 @@ function isAllowedRPCCallArgument(theRPCCall, argumentLabel, argumentValue, erro
     }
   }
   errors.push( 
-    `Value ${argumentValue} not allowed as input with name ${argumentLabel} of command ${theRPCCall.rpcCall}.
+    `Variable <b>${argumentLabel}</b> not allowed to take on value <b>${argumentValue}</b> in command <b>${theRPCCall.rpcCall}</b>.
     The allowed values are ${currentAllowedValues.join(', ')}. `
   );
   return false;
@@ -665,7 +712,7 @@ function isAllowedArgumentForFabInitialization(theInitCall, theLabel, theValue, 
     }
   }
   errors.push( 
-    `Value ${theValue} not allowed as input with name ${theLabel} of command ${theInitCall.fabcoinInitialization}.
+    `Variable <b>${theLabel}</b> not allowed to take on value <b>${theValue}</b> in command <b>${theInitCall.fabcoinInitialization}</b>.
     The allowed values are ${currentAllowedValues.join(', ')}. `
   );
   return false;

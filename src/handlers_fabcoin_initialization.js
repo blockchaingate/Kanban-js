@@ -30,7 +30,7 @@ function fabcoinInitialize(request, response, desiredCommand) {
   var theArguments = pathnames.getFabcoinInitializationCallArguments(theCallLabel, desiredCommand, theErrors);
   if (theErrors.length > 0) {
     response.writeHead(200);
-    return response.end(`Error: ${theErrors[0]}`);
+    return response.end(`{"error": "${theErrors[0]}"}`);
   }
   var theCall = pathnames.fabcoinInitializationProcedures[theCallLabel];
   var theCommand = `${theCall.command}`;

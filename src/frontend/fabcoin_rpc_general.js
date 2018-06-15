@@ -58,17 +58,6 @@ function listAccountsCallback(input, outputComponent) {
   jsonToHtml.writeJSONtoDOMComponent(input, outputComponent);
 }
 
-function listAccounts() {
-  submitRequests.submitGET({
-    url: pathnames.getURLfromRPCLabel(pathnames.rpcCalls.listAccounts.rpcCall, {
-      net: globals.getPage().getRPCNetworkOption(),
-    }),
-    progress: globals.spanProgress(),
-    result : getOutputTXInfoDiv(),
-    callback: listAccountsCallback
-  });  
-}
-
 function updatePageFromRadioButtonsByName(desiredRadioButtonName) {
   var theRadioButtons = document.getElementsByName(desiredRadioButtonName);
   for (var counterRadioButtons = 0; counterRadioButtons < theRadioButtons.length; counterRadioButtons ++) {
@@ -86,6 +75,5 @@ module.exports = {
   setTestNetNoDNS,
   setTestNet,
   setMainNet,
-  listAccounts,
   updatePageFromRadioButtonsByName
 }

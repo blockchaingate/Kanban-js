@@ -114,48 +114,55 @@
     &nbsp;&nbsp;&nbsp;     
     -->
     <label class = "containerRadioButton">
-      <input id = "radioButtonTransactionsSetInfo" type = "radio" name = "rpcCallTxInfo" onchange = "window.kanban.rpc.transactions.getTXoutSetInfo();" checked = "checked">
+      <input type = "radio" name = "rpcCallTxInfo" onchange = "window.kanban.rpc.transactions.getTXoutSetInfo();" checked = "checked">
       <span class = "radioMark"></span>
       TX set info
     </label>
     &nbsp;&nbsp;&nbsp;
     <label class = "containerRadioButton">
-      <input id = "radioButtonTransactionsListUnspent" type = "radio" name = "rpcCallTxInfo" onchange = "window.kanban.rpc.transactions.getListUnspent();">
+      <input type = "radio" name = "rpcCallTxInfo" onchange = "window.kanban.rpc.transactions.getListUnspent();">
       <span class = "radioMark"></span>
       List unspent
     </label>
     &nbsp;&nbsp;&nbsp;
-          <!--label class = "containerRadioButton">
-      <input type = "radio" name = "rpcCallTxInfo" onchange = "window.kanban.rpc.listUnspent();">
+    <label class = "containerRadioButton">
+      <input type = "radio" name = "rpcCallTxInfo" onchange = "window.kanban.rpc.transactions.listTransactions();">
       <span class = "radioMark"></span>
-      Unspent
+      Recent transactions
     </label>
-    <input type = "text" id = "inputCurrentTX"></input>
+    <!--input type = "text" id = "inputNumberOfTransactions" size = "3" placeholder = "#txos"></input--> 
+  </div><br>
+  <div class = "divControlPanelDefault">
+    <div id = "divKanbanRPCOutputTXInfo"></div>
+  </div><br>
+  <div class = "divControlPanelDefault">
+    <button class = "buttonStandard" onclick = "window.kanban.rpc.transactions.getTransaction();">Transaction</button>
+    <input type = "text" id = "inputTransactionId" size = "8"></input> 
+  </div><br>
+  <div class = "divControlPanelDefault">
+    <div id = "divTransactionsOutputButtons"></div>
+  </div>  
+</div> <!--pageTXInfo-->
+<div class = "divMainPage" id = "pageSend">
+  <div class = "divControlPanelDefault">
+    <label class = "containerRadioButton">
+      <input type = "radio" name = "rpcSend" onchange = "window.kanban.rpc.sendReceive.getReceivedByAddress();" checked = "checked">
+      <span class = "radioMark"></span>
+      Received
+    </label>
     &nbsp;&nbsp;&nbsp;
     <label class = "containerRadioButton">
-      <input type = "radio" name = "rpcCallTxInfo" onchange = "window.kanban.rpc.listAccounts();">
+      <input type = "radio" name = "rpcSend" onchange = "window.kanban.rpc.sendReceive.listAccounts();">
       <span class = "radioMark"></span>
       Accounts
     </label>
     &nbsp;&nbsp;&nbsp;
     <label class = "containerRadioButton">
-      <input type = "radio" name = "rpcCallTxInfo" onchange = "window.kanban.rpc.getReceivedByAccount();">
+      <input type = "radio" name = "rpcSend" onchange = "window.kanban.rpc.sendReceive.getBalance();">
       <span class = "radioMark"></span>
-      Received by account
-    </label-->
-  </div><br>
-  <div class = "divControlPanelDefault">
-    <div id = "divKanbanRPCOutputTXInfo"></div>
-  </div>
-</div> <!--pageTXInfo-->
-<div class = "divMainPage" id = "pageSend">
-  <div class = "divControlPanelDefault">
-    <label class = "containerRadioButton">
-      <input type = "radio" name = "rpcSend" onchange = "window.kanban.rpc.sendReceive.listReceivedByAddress();" checked = "checked">
-      <span class = "radioMark"></span>
-      Received
+      Account balance
     </label>
-    &nbsp;&nbsp;&nbsp;
+
     <!--label class = "containerRadioButton">
       <input type = "radio" name = "rpcSend" onchange = "window.kanban.rpc.sendReceive.listReceivedByAddress();" checked = "checked">
       <span class = "radioMark"></span>
@@ -168,8 +175,13 @@
   </div><!--divControlPanelDefault-->
   <br>
   <div class = "divControlPanelDefault">
-    <button class = "buttonStandard" onclick = "window.kanban.rpc.sendReceive.dumpPrivateKey();"> <b style = "color:red">Private key</b></button>
-    <input type = "text" id = "inputAddressWhoseKeyToDump" size = "8"></input> 
+    <input type = "text" id = "inputAccountName" size = "6" placeholder = "account name"></input> 
+    <input type = "text" id = "inputAddressSendReceive" size = "30" placeholder = "address"></input> 
+    <!--input type = "text" id = "inputPrivateKeyForSending" size = "30" placeholder = "private key"></input--> 
+    <br><br>
+    <button class = "buttonStandard" onclick = "window.kanban.rpc.sendReceive.getAccountAddress();">Create account</button>
+    <button class = "buttonStandard" onclick = "window.kanban.rpc.sendReceive.dumpPrivateKey();"><b style = "color:red">Private key</b></button>
+    <button class = "buttonStandard" onclick = "window.kanban.rpc.sendReceive.sendToAdress();">Send </button>
   </div><!--divControlPanelDefault-->
   <br>
   <div class = "divControlPanelDefault">
