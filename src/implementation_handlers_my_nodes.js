@@ -94,16 +94,20 @@ function sshNodeToRemoteMachineExecuteCommands(machineName, theCommand, response
             formattedData += "<br>";
           }
           gotData = true;
-          formattedData += `<b style='color:red'>${data}</b>`;
+          formattedData += `<b style='color:orange'>${data}</b>`;
           response.write(formattedData);
           //console.log('STDERR: ' + data);
         });
       });
+    }).on('error', function(theError) {
+      response.writeHead(200);
+      response.end(`<b style='color:red'>Error connecting. ${theError}</b>`);
     }).connect({
       host: theMachine.ipAddress,
       port: 22,
       username: theMachine.user,
-      privateKey: getSSHKeyFromMachine(theMachine)
+      privateKey: getSSHKeyFromMachine(theMachine),
+      readyTimeout: 500
     });
   } catch (e) {
     response.writeHead(200);
@@ -136,11 +140,13 @@ function sshNodeToOneRemoteMachineNodeRestart(request, response, desiredCommand)
   //3.2 (awk 'NR!=1 {print $2}') -- ignore first line, print second column of each line.
   //3.3 (xargs kill) -- pass on the results as an argument to kill. There may be several. 
   //4. npm run daemonStart <- the start counterpart of command 1)
-
+  //
+  //`cd Kanban\nnpm run daemonStop\nkillall node\nlsof -i tcp:${pathnames.ports.https} | awk 'NR!=1 {print $2}' | xargs kill\nnpm run daemonStart`
+  //
   readSecretsAdminConfiguration(sshNodeToRemoteMachineExecuteCommands.bind(
     null, 
     desiredCommand.machineName, 
-    `cd Kanban\nnpm run daemonStop\nkillall node\nlsof -i tcp:${pathnames.ports.https} | awk 'NR!=1 {print $2}' | xargs kill\nnpm run daemonStart`, 
+    `cd Kanban\nnpm run daemonStop\nnpm run daemonStart`, 
     response
   ));
 }

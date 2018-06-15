@@ -162,11 +162,11 @@ function handleFile(request, response) {
     }
     response.write(data);
   });
-  theFileSender.on("close", function(){
+  theFileSender.on('close', function(){
     //console.log("Got exit");
     response.end();
   });
-  theFileSender.on("error", function(error) {
+  theFileSender.on('error', function(error) {
     //console.log("Got error");
     if (!headerWritten) {
       response.writeHead(400, `File error.`);
