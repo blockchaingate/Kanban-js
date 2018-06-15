@@ -359,6 +359,19 @@ var rpcCalls = {
     },
     cli: ["net", "command", "txid"]
   },
+  decodeRawTransaction: {
+    rpcCall: "decodeRawTransaction", //must be same as rpc label, used for autocomplete
+    mandatoryFixedArguments: { //<- values give defaults, null for none
+      command: "decoderawtransaction",
+    },
+    mandatoryModifiableArguments: {
+      rawTransaction: null
+    },
+    allowedArgumentValues: {
+      net: null
+    },
+    cli: ["net", "command", "rawTransaction"]
+  },
   dumpPrivateKey: {
     rpcCall: "dumpPrivateKey", //must be same as rpc label, used for autocomplete
     mandatoryFixedArguments: { //<- values give defaults, null for none

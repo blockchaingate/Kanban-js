@@ -73,11 +73,11 @@
     <b>All local node &#8644; remote machine</b><br>
     <button class = "buttonStandard" onclick = "window.kanban.allMyNodes.sshNodeToAllRemoteMachineGitPull();">update</button>
     <button class = "buttonStandard" onclick = "window.kanban.allMyNodes.sshNodeToAllRemoteMachineNodeRestart();">restart</button>
-    <button class = "buttonStandard" onclick = "window.kanban.allMyNodes.sshNodeToAllRemoteMachineDeleteFabcoinConfiguration();">del .fabcoin</button>
     <button class = "buttonStandard" onclick = "window.kanban.allMyNodes.sshNodeToAllRemoteMachineKillallFabcoind();">kill fab</button>
+    <button class = "buttonStandard" onclick = "window.kanban.allMyNodes.sshNodeToAllRemoteMachineDeleteFabcoinConfiguration();">del .fabcoin</button>
     <button class = "buttonStandard" onclick = "window.kanban.allMyNodes.sshNodeToAllRemoteMachineFabcoindStart();">start fab</button>
   </div><!--divControlPanelDefault-->
-      <br>
+  <br>
   <div class = "divControlPanelDefault">  
   <div id = "divMyNodesOutput">
   </div><!--divMyNodesOutput-->
@@ -108,41 +108,6 @@
     <div id = "divKanbanRPCOutputBlockInfo"></div>
   </div>
 </div> <!--pageRPCBlockInfo-->
-<div class = "divMainPage" id = "pageTXInfo" >
-  <div class = "divControlPanelDefault">
-    <!--button class = "buttonStandard" onclick = "window.kanban.computationalEngineCalls.synchronizeUnspentTransactions()">Synchronize</button>
-    &nbsp;&nbsp;&nbsp;     
-    -->
-    <label class = "containerRadioButton">
-      <input type = "radio" name = "rpcCallTxInfo" onchange = "window.kanban.rpc.transactions.getTXoutSetInfo();" checked = "checked">
-      <span class = "radioMark"></span>
-      TX set info
-    </label>
-    &nbsp;&nbsp;&nbsp;
-    <label class = "containerRadioButton">
-      <input type = "radio" name = "rpcCallTxInfo" onchange = "window.kanban.rpc.transactions.getListUnspent();">
-      <span class = "radioMark"></span>
-      List unspent
-    </label>
-    &nbsp;&nbsp;&nbsp;
-    <label class = "containerRadioButton">
-      <input type = "radio" name = "rpcCallTxInfo" onchange = "window.kanban.rpc.transactions.listTransactions();">
-      <span class = "radioMark"></span>
-      Recent transactions
-    </label>
-    <!--input type = "text" id = "inputNumberOfTransactions" size = "3" placeholder = "#txos"></input--> 
-  </div><br>
-  <div class = "divControlPanelDefault">
-    <div id = "divKanbanRPCOutputTXInfo"></div>
-  </div><br>
-  <div class = "divControlPanelDefault">
-    <button class = "buttonStandard" onclick = "window.kanban.rpc.transactions.getTransaction();">Transaction</button>
-    <input type = "text" id = "inputTransactionId" size = "8"></input> 
-  </div><br>
-  <div class = "divControlPanelDefault">
-    <div id = "divTransactionsOutputButtons"></div>
-  </div>  
-</div> <!--pageTXInfo-->
 <div class = "divMainPage" id = "pageSend">
   <div class = "divControlPanelDefault">
     <label class = "containerRadioButton">
@@ -190,35 +155,35 @@
 </div><!--pageSend-->
 
 <div class = "divMainPage" id = "pageMine">
-    <div class = "divControlPanelDefault">
-      <label class = "containerRadioButton">
-        <input type = "radio" name = "rpcMine" onchange = "window.kanban.rpc.mine.getMiningInfo();" checked = "checked">
-        <span class = "radioMark"></span>
-        Mining info
-      </label>
-      &nbsp;&nbsp;&nbsp;
-      <label class = "containerRadioButton">
-        <input type = "radio" name = "rpcMine" onchange = "window.kanban.rpc.mine.getGenerate();">
-        <span class = "radioMark"></span>
-        Is mining?
-      </label>
-    </div><!--divControlPanelDefault-->
-    <br>
-    <div class = "divControlPanelDefault">
-      <div id = "divMineRadioOutput"></div>
-    </div><!--divControlPanelDefault-->
-    <br>
-    <div class = "divControlPanelDefault">
-        <button class = "buttonStandard" onclick = "window.kanban.rpc.mine.generateToAddress();">generate blocks</button> 
-        <input type = "text" id = "inputNumberOfBlocks" size = "3" value = "105"></input> 
-        <input type = "text" id = "inputMaxNumberOfTries" size = "8" value = "10000000"></input> 
-        <input type = "text" id = "inputMiningAddress" size = "8"></input> 
-    </div>
-    <br>
-    <div class = "divControlPanelDefault">
-      <div id = "divMineButtonsOutput"></div>
-    </div><!--divControlPanelDefault-->  
-  </div><!--pageSend-->
+  <div class = "divControlPanelDefault">
+    <label class = "containerRadioButton">
+      <input type = "radio" name = "rpcMine" onchange = "window.kanban.rpc.mine.getMiningInfo();" checked = "checked">
+      <span class = "radioMark"></span>
+      Mining info
+    </label>
+    &nbsp;&nbsp;&nbsp;
+    <label class = "containerRadioButton">
+      <input type = "radio" name = "rpcMine" onchange = "window.kanban.rpc.mine.getGenerate();">
+      <span class = "radioMark"></span>
+      Is mining?
+    </label>
+  </div><!--divControlPanelDefault-->
+  <br>
+  <div class = "divControlPanelDefault">
+    <div id = "divMineRadioOutput"></div>
+  </div><!--divControlPanelDefault-->
+  <br>
+  <div class = "divControlPanelDefault">
+      <button class = "buttonStandard" onclick = "window.kanban.rpc.mine.generateToAddress();">generate blocks</button> 
+      <input type = "text" id = "inputNumberOfBlocks" size = "3" value = "105"></input> 
+      <input type = "text" id = "inputMaxNumberOfTries" size = "8" value = "10000000"></input> 
+      <input type = "text" id = "inputMiningAddress" size = "8"></input> 
+  </div>
+  <br>
+  <div class = "divControlPanelDefault">
+    <div id = "divMineButtonsOutput"></div>
+  </div><!--divControlPanelDefault-->  
+</div><!--pageSend-->
 
 <div class = "divMainPage" id = "pageNetwork">
   <div class = "divControlPanelDefault">
@@ -244,6 +209,42 @@
     <div id = "divKanbanRPCOutputNetwork"></div>
   </div>
 </div>
+<div class = "divMainPage" id = "pageTXInfo">
+  <div class = "divControlPanelDefault">
+    <!--button class = "buttonStandard" onclick = "window.kanban.computationalEngineCalls.synchronizeUnspentTransactions()">Synchronize</button>
+    &nbsp;&nbsp;&nbsp;     
+    -->
+    <label class = "containerRadioButton">
+      <input type = "radio" name = "rpcCallTxInfo" onchange = "window.kanban.rpc.transactions.getTXoutSetInfo();" checked = "checked">
+      <span class = "radioMark"></span>
+      TX set info
+    </label>
+    &nbsp;&nbsp;&nbsp;
+    <label class = "containerRadioButton">
+      <input type = "radio" name = "rpcCallTxInfo" onchange = "window.kanban.rpc.transactions.getListUnspent();">
+      <span class = "radioMark"></span>
+      List unspent
+    </label>
+    &nbsp;&nbsp;&nbsp;
+    <label class = "containerRadioButton">
+      <input type = "radio" name = "rpcCallTxInfo" onchange = "window.kanban.rpc.transactions.listTransactions();">
+      <span class = "radioMark"></span>
+      Recent transactions
+    </label>
+    <!--input type = "text" id = "inputNumberOfTransactions" size = "3" placeholder = "#txos"></input--> 
+  </div><br>
+  <div class = "divControlPanelDefault">
+    <div id = "divKanbanRPCOutputTXInfo"></div>
+  </div><br>
+  <div class = "divControlPanelDefault">
+    <button class = "buttonStandard" onclick = "window.kanban.rpc.transactions.interpretTransaction();">Transaction</button>
+    <input type = "text" id = "inputTransactionId" size = "8" placeholder = "txid or raw"></input>
+
+  </div><br>
+  <div class = "divControlPanelDefault">
+    <div id = "divTransactionsOutputButtons"></div>
+  </div>  
+</div> <!--pageTXInfo-->
 <div class = "divMainPage" id = "pageTestGPU">
   <div class = "divControlPanelDefault">
     <table class = "tableTestComputationEngine">
@@ -263,8 +264,6 @@
     <input type = "text" id = "inputComputationalEngineCallTestSecretKey" placeholder = "secret key" value = ""></input>
     <input type = "text" id = "inputComputationalEngineCallTestPublicKey" placeholder = "public key" value = ""></input>
     <input type = "text" id = "inputComputationalEngineCallTestSignature" placeholder = "signature" value = ""></input>
-
-
     <table class = "tableTestKanban">
       <tr><th>Command</th> <th>Input one test</th> <th></th> <th></th></tr>
       <tr>
@@ -299,13 +298,13 @@
     <img alt = "FAB Coin" src = "/fabcoin.svg" class = "imgFabLogo">
   </div>
   <div class = "divMenuButtonPanel">
-    <div><button class = "buttonSelectPage" onclick = "window.kanban.thePage.selectPage('fabcoinInitialization');">Start</button> </div>
-    <div><button class = "buttonSelectPage" onclick = "window.kanban.thePage.selectPage('myNodes');">My nodes</button> </div>
-    <div><button class = "buttonSelectPage" onclick = "window.kanban.thePage.selectPage('network');">Network</button> </div>
-    <div><button class = "buttonSelectPage" onclick = "window.kanban.thePage.selectPage('send');">Send</button> </div>
-    <div><button class = "buttonSelectPage" onclick = "window.kanban.thePage.selectPage('mine');">Mine</button> </div>
-    <div><button class = "buttonSelectPage" onclick = "window.kanban.thePage.selectPage('blockInfo');">Blocks</button> </div>
-    <div><button class = "buttonSelectPage" onclick = "window.kanban.thePage.selectPage('txInfo');">Transactions</button> </div>
+    <div><button class = "buttonSelectPage" onclick = "window.kanban.thePage.selectPage('fabcoinInitialization');">Start</button></div>
+    <div><button class = "buttonSelectPage" onclick = "window.kanban.thePage.selectPage('myNodes');">My nodes</button></div>
+    <div><button class = "buttonSelectPage" onclick = "window.kanban.thePage.selectPage('network');">Network</button></div>
+    <div><button class = "buttonSelectPage" onclick = "window.kanban.thePage.selectPage('send');">Send</button></div>
+    <div><button class = "buttonSelectPage" onclick = "window.kanban.thePage.selectPage('mine');">Mine</button></div>
+    <div><button class = "buttonSelectPage" onclick = "window.kanban.thePage.selectPage('blockInfo');">Blocks</button></div>
+    <div><button class = "buttonSelectPage" onclick = "window.kanban.thePage.selectPage('txInfo');">Transactions</button></div>
     <!--div><button class = "buttonSelectPage" onclick = "window.kanban.thePage.selectPage('testGPU');">Test GPU</button> </div-->
   </div>
 </div><!--divMenu-->

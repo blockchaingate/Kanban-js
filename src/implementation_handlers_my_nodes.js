@@ -107,7 +107,7 @@ function sshNodeToRemoteMachineExecuteCommands(machineName, theCommand, response
       port: 22,
       username: theMachine.user,
       privateKey: getSSHKeyFromMachine(theMachine),
-      readyTimeout: 500
+      readyTimeout: 5000 //<- 5 second timeout
     });
   } catch (e) {
     response.writeHead(200);

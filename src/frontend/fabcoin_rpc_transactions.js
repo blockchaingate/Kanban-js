@@ -6,6 +6,7 @@ const jsonToHtml = require('./json_to_html');
 const Block = require('../bitcoinjs_src/block');
 const globals = require('./globals');
 const RPCGeneral = require('./fabcoin_rpc_general');
+const encodingBasic = require('../encodings_basic')
 
 
 function getTXoutSetInfoCallback(input, outputComponent) {
@@ -16,7 +17,7 @@ function getNumberOfTransactions() {
   return document.getElementById(ids.defaults.inputNumberOfTransactions).value;
 }
 
-function getTransactionId() {
+function getTransactionRawInput() {
   return document.getElementById(ids.defaults.inputTransactionId).value;
 }
 
@@ -73,11 +74,35 @@ function getListUnspent() {
   });  
 }
 
-function getTransaction() {
+function interpretTransaction() {
+  var rawTransactionInput = getTransactionRawInput().trim();
+  if (encodingBasic.isHexStringLowerCase(rawTransactionInput)) {
+    if (rawTransactionInput.length <= 64) {
+      //string is hex-encoded and of length <= 64. We assume it is a txid.
+      return getTransaction(rawTransactionInput);
+    }
+    //string is hex-encoded of length > 64. We assume it is a raw transaction.
+    return decodeRawTransaction(rawTransactionInput);
+  }
+}
+
+function decodeRawTransaction(rawTransactionHexEncoded) {
+  submitRequests.submitGET({
+    url: pathnames.getURLfromRPCLabel(pathnames.rpcCalls.rawTransaction.rpcCall, {
+      net: globals.mainPage().getRPCNetworkOption(),
+      txid: rawTransactionHexEncoded
+    }),
+    progress: globals.spanProgress(),
+    result : getOutputTXInfoDivButtons(),
+    callback: listUnspentCallback
+  }); 
+}
+
+function getTransaction(txidHexEncodedString) {
   submitRequests.submitGET({
     url: pathnames.getURLfromRPCLabel(pathnames.rpcCalls.getTransaction.rpcCall, {
       net: globals.mainPage().getRPCNetworkOption(),
-      txid: getTransactionId()
+      txid: txidHexEncodedString
     }),
     progress: globals.spanProgress(),
     result : getOutputTXInfoDivButtons(),
@@ -102,6 +127,7 @@ module.exports = {
   getTXout,
   getListUnspent,
   getTransaction,
+  interpretTransaction,
   listTransactions,
   updateTXInfoPage
 }
