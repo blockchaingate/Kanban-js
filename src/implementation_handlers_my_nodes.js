@@ -124,8 +124,24 @@ function sshNodeToOneRemoteMachineKillallFabcoind(request, response, desiredComm
 }
 
 function sshNodeToOneRemoteMachineNodeRestart(request, response, desiredCommand) {
+  //Command explanation.
+  //1. npm run daemonStop <- stops the npm daemon via runs daemon.js, for more details see also package.json.
+  //2. killall node <- kills node if it didn't stop properly. Should not happen, but has happened due to programming mistakes of mine.
+  //3. lsof -i tcp:${pathnames.ports.https} | awk 'NR!=1 {print $2}' | xargs kill
+  //Kills all listeners to the https port. 
+  //For more explanation on the command see 
+  //https://stackoverflow.com/questions/5043808/how-to-find-processes-based-on-port-and-kill-them-all
+  //Copied from the aforementioned site:
+  //3.1 (lsof -i tcp:${PORT_NUMBER}) -- list all processes that is listening on that tcp port.
+  //3.2 (awk 'NR!=1 {print $2}') -- ignore first line, print second column of each line.
+  //3.3 (xargs kill) -- pass on the results as an argument to kill. There may be several. 
+  //4. npm run daemonStart <- the start counterpart of command 1)
+
   readSecretsAdminConfiguration(sshNodeToRemoteMachineExecuteCommands.bind(
-    null, desiredCommand.machineName, "cd Kanban\nnpm run daemonStop\nnpm run daemonStart", response
+    null, 
+    desiredCommand.machineName, 
+    `cd Kanban\nnpm run daemonStop\nkillall node\nlsof -i tcp:${pathnames.ports.https} | awk 'NR!=1 {print $2}' | xargs kill\nnpm run daemonStart`, 
+    response
   ));
 }
 
