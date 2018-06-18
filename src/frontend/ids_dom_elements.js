@@ -43,6 +43,7 @@ var defaults = {
   radioButtonBestBlock: "radioBestBlockHash",
   radioButtonBlockInfo: "radioButtonBlockInfo",
   checkboxBlockVerbose: "checkboxBlockVerbose",
+  checkboxSyncronizeOmni: "checkboxSyncronizeOmni",
   radioBoxesNetwork: {
     regtest: "radioBoxSetRegtest",
     testNetNoDNS: "radioBoxSetTestnetNoDNS",

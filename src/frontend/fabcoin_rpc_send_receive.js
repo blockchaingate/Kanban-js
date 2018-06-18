@@ -132,10 +132,10 @@ function sendTxidToAddress() {
 
 var pairsToUpdateLabelToId = {
   "address" : ids.defaults.inputSendAddress,
+  "privateKey": ids.defaults.inputSendPrivateKey,
   "amount": ids.defaults.inputAmountForSending,
   "txid": ids.defaults.inputTransactionIdForSending,
-  "vout": ids.defaults.inputSendIndexValueOut,
-  "privateKey": ids.defaults.inputSendPrivateKey
+  "vout": ids.defaults.inputSendIndexValueOut
 }
 
 var pairsToUpdateIdsToLabels = {};
@@ -144,6 +144,9 @@ for (var label in pairsToUpdateLabelToId) {
 }
 
 function updateOmniFromInputs() {
+  if (!document.getElementById(ids.defaults.checkboxSyncronizeOmni).checked) {
+    return;
+  }
   var resultObject = {};
   var numObjects = 0;
   for (var label in pairsToUpdateLabelToId) {
@@ -166,7 +169,82 @@ function updateOmniFromInputs() {
   document.getElementById(ids.defaults.inputOmniForSending).value = resultString;
 }
 
+function generate1kTransactions() {
+  document.getElementById(ids.defaults.checkboxSyncronizeOmni).checked = false;
+  
+  console.log("Got to here");
+}
+
+function TransactionTester() {
+  this.timeStart = (new Date()).getTime();
+  this.timeStartSigning = null;
+  this.resultString = "";
+  this.progressStringTXadd = "";
+  this.transactionId = getTransactionIdToSend();
+  this.address = getAddressInputValue();
+  this.amountTotal = getAmountForSending();
+  this.numOutputs = 1000;
+  this.theNetwork = globals.mainPage().getCurrentTransactionProtocolLabel();
+  this.numOutputsGenerated = 0;
+  this.numOutputsSigned = 0;
+  this.theTransaction = new TransactionBuilder(this.theNetwork);
+  this.voutIndex = getSendIndexValueOut();
+  this.thePrivateKeyString = getPrivateKey();
+  this.theKey = ECKey.fromWIF(this.thePrivateKeyString, this.theNetwork);
+
+}
+
+TransactionTester.prototype.toStringProgressTXAdd = function () {
+  this.progressStringTXadd = "";
+  var elapsedTime = (new Date()).getTime() - this.timeStart;
+  var speed = this.numOutputsGenerated / elapsedTime * 1000; 
+  this.progressStringTXadd += `Added ${this.numOutputsGenerated} outputs out of ${this.numOutputs} in ${elapsedTime} ms. `;
+  this.progressStringTXadd += `<br>Speed: ${speed.toFixed(1)} per second. `;
+  return this.progressStringTXadd;
+}
+
+TransactionTester.prototype.generateTX1kOutputsPart3 = function(outputIndex) {
+  this.theTransaction.sign(outputIndex, this.theKey);
+  this.numOutputsSigned ++;
+  if (this.numOutputsSigned >= this.numOutputs) {
+
+  }
+}
+
+TransactionTester.prototype.generateTX1kOutputsPart2 = function (outputIndex) {
+  this.numOutputsGenerated ++;
+  this.theTransaction.addOutput(this.address, this.amountInEachOutput);
+  if (this.numOutputsGenerated % 10 === 0) {
+    document.getElementById(ids.defaults.outputSendReceiveButtons).innerHTML = this.toStringProgress() + "<br>" + this.resultString;
+  }
+  if (this.numOutputsGenerated === this.numOutputs) {
+    for (var counterSigned = 0; counterSigned < this.numOutputs; counterSigned ++) {
+      setTimeout(this.generateTX1kOutputsPart3.bind(this, counterSigned), 0);
+    }
+  }
+}
+
+TransactionTester.prototype.generateTX1kOutputs = function() {
+  document.getElementById(ids.defaults.checkboxSyncronizeOmni).checked = false;
+  this.amountInEachOutput = (this.amountTotal - 200) / this.numOutputs;
+  this.resultString += `About compose a transaction with <b>${this.numOutputs}</b> outputs worth <b>${this.amountInEachOutput}</b> lius each. `;
+  this.resultString += `<br>Sender's private key: <b>${this.thePrivateKeyString}</b>.`;
+  this.resultString += `<br>All <b>${this.numOutputs}</b> outputs are sent to a single beneficiary: <b>${this.address}</b>.`;
+  document.getElementById(ids.defaults.outputSendReceiveButtons).innerHTML = this.resultString;
+  this.theTransaction.addInput(this.transactionId, this.voutIndex);
+  for (var counterTransaction = 0; counterTransaction < this.numOutputs; counterTransaction ++) {
+    setTimeout(this.generateTX1kOutputsPart2.bind(this, counterTransaction), 0);
+  }
+}
+
+function generateTX1kOutputs() {
+  (new TransactionTester()).generateTX1kOutputs();
+}
+
 function updateInputsFromOmni() {
+  if (!document.getElementById(ids.defaults.checkboxSyncronizeOmni).checked) {
+    return;
+  }
   try {
     var parsed = jsonic(getOmniForSending());
     var isGood = true;
@@ -198,6 +276,8 @@ function updateInputsFromOmni() {
 }
 
 module.exports = {
+  generateTX1kOutputs,
+  generate1kTransactions,
   updateOmniFromInputs,
   updateInputsFromOmni,
   updateSendReceivePage,

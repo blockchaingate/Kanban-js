@@ -147,12 +147,20 @@
     <input type = "text" id = "inputTransactionIdForSending" onkeyup = "window.kanban.rpc.sendReceive.updateOmniFromInputs()" size = "53" placeholder = "txid"></input>
     <input type = "text" id = "inputAmountForSending" onkeyup = "window.kanban.rpc.sendReceive.updateOmniFromInputs()" size = "3" placeholder = "amount"></input>
     <input type = "text" id = "inputSendIndexValueOut" onkeyup = "window.kanban.rpc.sendReceive.updateOmniFromInputs()" size = "3" placeholder = "vout index"></input><br>
+    <label class = "containerCheckbox">
+      <input type = "checkbox" name = "verbose" id = "checkboxSyncronizeOmni" onchange = "window.kanban.rpc.blocks.getBlock();" checked = "checked" >
+      <span class = "checkMark"></span>
+      &#8645;Synchronize omni
+    </label><br>
+
     <textarea id = "inputSendRawTransaction" rows = "2" cols = "100" placeholder = "raw send transaction"></textarea><br>
     <textarea class = "inputOmni" type = "text" id = "inputOmniForSending" onkeyup = "window.kanban.rpc.sendReceive.updateInputsFromOmni()" rows = "6" cols = "100" placeholder = "omni input"></textarea>
 
     <!--input type = "text" id = "inputPrivateKeyForSending" size = "30" placeholder = "private key"></input--> 
     <br><br>
     <!--button class = "buttonStandard" onclick = "window.kanban.rpc.sendReceive.getAccountAddress();">Create account</button-->
+    <b>Browser:</b><button class = "buttonStandard" onclick = "window.kanban.rpc.sendReceive.generateTX1kOutputs()">gen tx 1k outs</button> <button class = "buttonStandard" onclick = "window.kanban.rpc.sendReceive.generate1kTransactions()">gen 1k tx</button> 
+    <b>Node: </b>
     <button class = "buttonStandard" onclick = "window.kanban.rpc.sendReceive.dumpPrivateKey();"><b style = "color:red">Private key</b></button>
     <button class = "buttonStandard" onclick = "window.kanban.rpc.sendReceive.sendTxidToAddress();">Send</button>
   </div><!--divControlPanelDefault-->
