@@ -2,13 +2,13 @@
 const escapeHtml = require('escape-html');
 
 function buttonProgressClick(buttonElement) {
-  console.log(buttonElement);
-  if (buttonElement.nextSibling.nextSibling.style.display === 'none') {
-    buttonElement.nextSibling.nextSibling.style.display = ''
+  //console.log(buttonElement);
+  if (buttonElement.nextSibling.nextSibling.nextSibling.style.display === 'none') {
+    buttonElement.nextSibling.nextSibling.nextSibling.style.display = ''
     buttonElement.childNodes[1].innerHTML = '&#9660;'; 
     buttonElement.parentElement.setAttribute('addressDisplayStyle', "shown");
   } else {
-    buttonElement.nextSibling.nextSibling.style.display = 'none';
+    buttonElement.nextSibling.nextSibling.nextSibling.style.display = 'none';
     buttonElement.childNodes[1].innerHTML = '&#9668;';
     buttonElement.parentElement.setAttribute('addressDisplayStyle', "hidden");
   }
@@ -31,7 +31,7 @@ function getToggleButton(buttonInfo) {
   }
   result += `<button class = "buttonProgress" `;
   result += `onclick = "window.kanban.submitRequests.buttonProgressClick(this);">`;
-  result += `<span>${buttonInfo.label}</span><b>${buttonArrow}</b></button>`;
+  result += `<span>${buttonInfo.label}</span><b>${buttonArrow}</b></button><span class = "timerSpan"></span>`;
   result += `<br><span class="spanRESTDeveloperInfo" style = "display:${addressDisplayStyleString}">${buttonInfo.content}</span>`;
   return result;
 }
@@ -51,10 +51,14 @@ function recordProgressDone(progress) {
     progress = document.getElementById(progress);
   }
   var theButton = progress.childNodes[0].childNodes[0];
-  theButton.childNodes[0].innerHTML = "<b style='color:green'>Received</b>";
+  var startTime = parseInt(progress.getAttribute("startTime"));
+  var elapsedTime = (new Date()).getTime();
+  var timeMs = elapsedTime - startTime;
+  progress.getElementsByClassName("timerSpan")[0].innerHTML = `${timeMs} ms`;
+  theButton.childNodes[0].innerHTML = `<b style='color:green'>Received</b>`;
 }
 
-function recordProgressStarted(progress, address) {
+function recordProgressStarted(progress, address, startTime) {
   if (progress === null || progress === undefined) {
     return;
   }
@@ -62,6 +66,7 @@ function recordProgressStarted(progress, address) {
     progress = document.getElementById(progress);
   }
   addressHTML = `<a href="${address}" target = "_blank">${unescape(address)}</a>`;
+  progress.setAttribute("startTime", startTime.toFixed());
   progress.innerHTML = getToggleButton({
     content: addressHTML, 
     label: "<b style=\"color:orange\">Sent</b>",
@@ -107,7 +112,7 @@ function submitGET(inputObject) {
   var result = inputObject.result;
   var callback = inputObject.callback;
   var xhr = new XMLHttpRequest();
-  recordProgressStarted(progress, theAddress);
+  recordProgressStarted(progress, theAddress, (new Date()).getTime());
   xhr.open('GET', theAddress, true);
   xhr.setRequestHeader('Accept', 'text/html');
   xhr.onload = function () {
