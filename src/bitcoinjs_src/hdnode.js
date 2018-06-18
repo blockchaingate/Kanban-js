@@ -80,7 +80,7 @@ HDNode.fromBase58 = function (string, networks) {
   }
 
   if (version !== network.bip32.private &&
-    version !== network.bip32.public) throw new Error('Invalid network version')
+    version !== network.bip32.public) throw new Error(`Invalid network version ${version}. `)
 
   // 1 byte: depth: 0x00 for master nodes, 0x01 for level-1 descendants, ...
   var depth = buffer[4]

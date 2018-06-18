@@ -11,7 +11,7 @@ module.exports = {
     },
     pubKeyHash: 0x00,
     scriptHash: 0x05,
-    wif: 0x80
+    wif: 0x80 //<-128
   },
   testnet: {
     messagePrefix: '\x18Bitcoin Signed Message:\n',
@@ -22,7 +22,7 @@ module.exports = {
     },
     pubKeyHash: 0x6f,
     scriptHash: 0xc4,
-    wif: 0xef
+    wif: 0xef //<-239
   },
   litecoin: {
     messagePrefix: '\x19Litecoin Signed Message:\n',

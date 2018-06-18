@@ -5,6 +5,7 @@ const ids = require('./ids_dom_elements');
 const jsonToHtml = require('./json_to_html');
 const globals = require('./globals');
 const TransactionBuilder = require('../bitcoinjs_src/transaction_builder');
+const ECKey = require('../bitcoinjs_src/ecpair')
 const jsonic = require('jsonic');
 
 function sendReceiveCallbackStandard(input, outputComponent) {
@@ -39,8 +40,8 @@ function getSendIndexValueOut() {
   return parseInt(document.getElementById(ids.defaults.inputSendIndexValueOut).value);
 }
 
-function getToAddress() {
-  return document.getElementById(ids.defaults.inputSendToAddress).value;
+function getPrivateKey() {
+  return document.getElementById(ids.defaults.inputSendPrivateKey).value;
 }
 
 function getOmniForSending() {
@@ -113,10 +114,14 @@ function buildSendTransaction() {
   var transactionId = getTransactionIdToSend();
   var address = getAddressInputValue();
   var amount = getAmountForSending();
-  var theTransaction = new TransactionBuilder(globals.mainPage().getCurrentTransactionProtocolLabel());
+  var theNetwork = globals.mainPage().getCurrentTransactionProtocolLabel();
+  var theTransaction = new TransactionBuilder(theNetwork);
   var voutIndex = getSendIndexValueOut();
+  var thePrivateKeyString = getPrivateKey();
   theTransaction.addInput(transactionId, voutIndex);
-  theTransaction.addOutput(address, amount); 
+  theTransaction.addOutput(address, amount);
+  var theKey = ECKey.fromWIF(thePrivateKeyString, theNetwork);
+  theTransaction.sign(0, theKey);
   return theTransaction;
 }
 
@@ -129,7 +134,8 @@ var pairsToUpdateLabelToId = {
   "address" : ids.defaults.inputSendAddress,
   "amount": ids.defaults.inputAmountForSending,
   "txid": ids.defaults.inputTransactionIdForSending,
-  "vout": ids.defaults.inputSendIndexValueOut 
+  "vout": ids.defaults.inputSendIndexValueOut,
+  "privateKey": ids.defaults.inputSendPrivateKey
 }
 
 var pairsToUpdateIdsToLabels = {};
@@ -179,6 +185,7 @@ function updateInputsFromOmni() {
       document.getElementById(ids.defaults.inputSendRawTransaction).value = buildSendTransaction().tx.toHex();
     } catch (e) {
       isGood = false;
+      console.log(e);
     }
     if (!isGood) {
       theOmni.classList.add("inputOmniWithError");

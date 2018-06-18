@@ -23,6 +23,7 @@ var defaults = {
   inputOmniForSending: "inputOmniForSending",
   inputNumberOfTransactions: "inputNumberOfTransactions",
   inputSendRawTransaction: "inputSendRawTransaction",
+  inputSendPrivateKey: "inputSendPrivateKey",
   inputTransactionId: "inputTransactionId",
   inputSendIndexValueOut: "inputSendIndexValueOut",
   inputComputationalEngineCallTestMessage: "inputComputationalEngineCallTestMessage",
