@@ -105,6 +105,10 @@ Page.prototype.storePageSettings = function() {
   }  
 }
 
+Page.prototype.getCurrentTransactionProtocolLabel = function () {
+  return pathnames.networkData[this.currentNetworkName].transactionProtocolLabel;
+}
+
 Page.prototype.getRPCNetworkOption = function () {
   return pathnames.networkData[this.currentNetworkName].rpcOption;
 }

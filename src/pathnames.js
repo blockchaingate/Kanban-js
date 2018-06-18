@@ -1,6 +1,6 @@
 "use strict";
 
-var ports ={ 
+var ports = { 
   https: 52907,
   http: 51846
 };
@@ -137,14 +137,17 @@ var networkData = {
     rpcOption: "-regtest",
     folder: "regtest/",
     security: 1,
-    logFileLink: null
+    logFileLink: null,
+    transactionProtocolLabel: "testnet"
   },
   testNetNoDNS: {
     name: "testNetNoDNS", //<-same as label, for autocomplete
     rpcOption: "-testnetnodns",
     folder: "testnet_no_dns/",
     security: 10,
-    logFileLink: url.known.logFileTestNetNoDNS
+    logFileLink: url.known.logFileTestNetNoDNS,
+    transactionProtocolLabel: "testnet"
+  
   },
   testNet: {
     name: "testNet", //<-same as label, for autocomplete
@@ -152,6 +155,7 @@ var networkData = {
     folder: "testnet3/",
     security: 100,
     logFileLink: url.known.logFileTestNet,
+    transactionProtocolLabel: "testnet"
   },
   mainNet: { 
     name: "mainNet", //<-same as label, for autocomplete
@@ -159,6 +163,7 @@ var networkData = {
     folder: "./",
     security: 1000,
     logFileLink: url.known.logFileMainNet,
+    transactionProtocolLabel: "bitcoin"  
   }
 };
 

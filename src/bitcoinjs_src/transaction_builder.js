@@ -469,6 +469,9 @@ function buildInput (input, allowIncomplete) {
 
 function TransactionBuilder (network, maximumFeeRate) {
   this.prevTxMap = {}
+  if (typeof network === "string") {
+    network = networks[network];
+  }
   this.network = network || networks.bitcoin
 
   // WARNING: This is __NOT__ to be relied on, its just another potential safety mechanism (safety in-depth)

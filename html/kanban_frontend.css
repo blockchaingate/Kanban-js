@@ -206,8 +206,13 @@ img.imgFabLogo{
   background: white;
 }
 
+.inputOmni {
+  transition: all 2s;
+}
 
-
+.inputOmniWithError {
+  background: pink;
+}
 
 
 /* Customize the label (the container) */
