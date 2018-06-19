@@ -39,7 +39,7 @@ div.divMenuCollapsed{
 div.divControlPanelDefault{
   margin: 10px;
   padding: 10px;
-
+  transition: all 3s;
   border: 1px solid black;
   display: inline-block;
 }
@@ -107,6 +107,7 @@ button.buttonProgress {
   background: none;
   transition: 2s all;
   border-radius: 2px;
+  margin-top: 5px;
 }
 
 button.buttonProgress:hover {
@@ -206,6 +207,14 @@ img.imgFabLogo{
   background: white;
 }
 
+.textAreaStandard{
+  display: inline-block;
+}
+
+.inputStandard {
+  transition: all 2s;
+}
+
 .inputOmni {
   transition: all 2s;
 }
@@ -214,6 +223,10 @@ img.imgFabLogo{
   background: pink;
 }
 
+.updatedRecently {
+  transition: all 1s;
+  background: lightcyan;
+}
 
 /* Customize the label (the container) */
 .containerCheckBox {

@@ -37,7 +37,7 @@ SpeedReport.prototype.toString = function () {
   if (this.timeProgress !== null) {
     var timeElapsed = this.timeProgress - this.timeStart;
     var speed = this.soFarProcessed / timeElapsed * 1000;
-    result += ` in ${timeElapsed} ms, speed: <b>${speed}</b> per second.`;
+    result += ` in ${timeElapsed} ms, speed: <b>${speed.toFixed(1)}</b> per second.`;
   }
   return result;
 }

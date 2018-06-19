@@ -5,12 +5,30 @@ const ids = require('./ids_dom_elements');
 const jsonToHtml = require('./json_to_html');
 const globals = require('./globals');
 const TransactionBuilder = require('../bitcoinjs_src/transaction_builder');
-const ECKey = require('../bitcoinjs_src/ecpair')
+const ECKey = require('../bitcoinjs_src/ecpair');
+const Block = require('../bitcoinjs_src/block');
 const jsonic = require('jsonic');
 const miscellaneous = require('../miscellaneous');
+const encodingBasic = require('../encodings_basic');
+const rpcGeneral = require('./fabcoin_rpc_general');
 
-function sendReceiveCallbackStandard(input, outputComponent) {
+function callbackStandardSendReceive(input, outputComponent) {
   jsonToHtml.writeJSONtoDOMComponent(input, outputComponent);
+}
+
+function callbackTransactionFetch(input, outputComponent) {
+  jsonToHtml.writeJSONtoDOMComponent(input, outputComponent);
+  try {
+    var parsed = JSON.parse(input);
+    if (parsed.hex !== undefined && parsed.hex !== null) {
+      submitRequests.updateInnerHtml(ids.defaults.inputSendInputRawTransaction, parsed.hex);
+    }
+    if (parsed.txid !== undefined && parsed.txid !== null) {
+      submitRequests.updateInnerHtml(ids.defaults.inputSendTransactionId, parsed.txid);
+    }
+  } catch (e) {
+    console.log(`Error while interpreting transaction. ${e}`);
+  }
 }
 
 function getOutputSendReceiveRadio() {
@@ -21,20 +39,16 @@ function getOutputSendReceiveButtons() {
   return document.getElementById(ids.defaults.outputSendReceiveButtons);
 }
 
+function getOutputTXInfoDivButtons() {
+  return document.getElementById(ids.defaults.outputTransactionsButtons);
+}
+
 function getAddressInputValue() {
   return document.getElementById(ids.defaults.inputSendAddress).value;
 }
 
-function getAccountInputValue() {
-  return document.getElementById(ids.defaults.inputAccountName).value;
-}
-
-function getTransactionIdToSend() {
-  return document.getElementById(ids.defaults.inputTransactionIdForSending).value;
-}
-
 function getAmountForSending() {
-  return parseInt(document.getElementById(ids.defaults.inputAmountForSending).value);
+  return parseInt(document.getElementById(ids.defaults.inputSendAmount).value);
 }
 
 function getSendIndexValueOut() {
@@ -49,16 +63,20 @@ function getOmniForSending() {
   return document.getElementById(ids.defaults.inputOmniForSending).value;
 }
 
-function getBalance() {
-  submitRequests.submitGET({
-    url: pathnames.getURLfromRPCLabel(pathnames.rpcCalls.getBalance.rpcCall, {
-      net: globals.mainPage().getRPCNetworkOption(),
-      account: getAccountInputValue()
-    }),
-    progress: globals.spanProgress(),
-    result : getOutputSendReceiveRadio(),
-    callback: sendReceiveCallbackStandard
-  });  
+function getBlockHash() {
+  return document.getElementById(ids.defaults.inputBlockHash);
+}
+
+function getBestBlockIndex() {
+  return document.getElementById(ids.defaults.inputBestBlockIndex);
+}
+
+function getTransactionRawInput() {
+  return document.getElementById(ids.defaults.inputSendInputRawTransaction).value;
+}
+
+function getTransactionIdToSend() {
+  return document.getElementById(ids.defaults.inputSendTransactionId).value;
 }
 
 function listAccounts() {
@@ -68,7 +86,7 @@ function listAccounts() {
     }),
     progress: globals.spanProgress(),
     result : getOutputSendReceiveRadio(),
-    callback: sendReceiveCallbackStandard
+    callback: callbackStandardSendReceive
   });  
 }
 
@@ -79,8 +97,13 @@ function getReceivedByAddress() {
     }),
     progress: globals.spanProgress(),
     result : getOutputSendReceiveRadio(),
-    callback: sendReceiveCallbackStandard
+    callback: callbackStandardSendReceive
   });  
+}
+
+function callbackDumpPrivateKey(input, output){
+  submitRequests.updateInnerHtml(ids.defaults.inputSendPrivateKey, input);
+  updateOmniFromInputs();
 }
 
 function dumpPrivateKey() {
@@ -90,8 +113,8 @@ function dumpPrivateKey() {
       address: getAddressInputValue()
     }),
     progress: globals.spanProgress(),
-    result : getOutputSendReceiveButtons(),
-    callback: sendReceiveCallbackStandard
+    result : document.getElementById(ids.defaults.inputSendPrivateKey),
+    callback: callbackDumpPrivateKey
   });  
 }
 
@@ -103,12 +126,8 @@ function getAccountAddress() {
     }),
     progress: globals.spanProgress(),
     result : getOutputSendReceiveButtons(),
-    callback: sendReceiveCallbackStandard
+    callback: callbackStandardSendReceive
   });  
-}
-
-function updateSendReceivePage() {
-  getReceivedByAddress();
 }
 
 function buildSendTransaction() {
@@ -134,8 +153,8 @@ function sendTxidToAddress() {
 var pairsToUpdateLabelToId = {
   "address" : ids.defaults.inputSendAddress,
   "privateKey": ids.defaults.inputSendPrivateKey,
-  "amount": ids.defaults.inputAmountForSending,
-  "txid": ids.defaults.inputTransactionIdForSending,
+  "amount": ids.defaults.inputSendAmount,
+  "txid": ids.defaults.inputSendTransactionId,
   "vout": ids.defaults.inputSendIndexValueOut
 }
 
@@ -167,12 +186,13 @@ function updateOmniFromInputs() {
     }
     indexCurrent ++;
   }
-  document.getElementById(ids.defaults.inputOmniForSending).value = resultString;
+  submitRequests.updateInnerHtml(ids.defaults.inputOmniForSending, resultString);
+  updateComposedRawTransactionFromOmni();
 }
 
 function generate1kTransactions() {
   document.getElementById(ids.defaults.checkboxSyncronizeOmni).checked = false;
-  
+  (new TransactionTester()).generate1kTransactions();
   console.log("Got to here");
 }
 
@@ -182,30 +202,79 @@ function TransactionTester() {
   this.transactionId = getTransactionIdToSend();
   this.address = getAddressInputValue();
   this.amountTotal = getAmountForSending();
+  this.amountInEachOutputLargeTX = 0;
+  this.amountInEachOutputSmallTX = 0;
   this.numOutputs = 1000;
   this.progressAdd = new miscellaneous.SpeedReport ({
     name: "Add outputs",
     total: this.numOutputs
   });
+  this.progressSign = new miscellaneous.SpeedReport({
+    name: "Sign transactions",
+    timeStart: null,
+    total: this.numOutputs
+  });
+  this.resultString = "";
+  this.callbackLargeTransactionGenerated = null;
   this.theNetwork = globals.mainPage().getCurrentTransactionProtocolLabel();
-  this.theTransaction = new TransactionBuilder(this.theNetwork);
+  this.transactionLarge = new TransactionBuilder(this.theNetwork);
+  this.tranactionsSmall = [];
   this.voutIndex = getSendIndexValueOut();
   this.thePrivateKeyString = getPrivateKey();
   this.theKey = ECKey.fromWIF(this.thePrivateKeyString, this.theNetwork);
 }
 
+TransactionTester.prototype.generate1kTransactions = function() {
+  this.callbackLargeTransactionGenerated = this.generate1kTransactionsPart2.bind(this);
+  this.generateTX1kOutputs();
+}
+
+TransactionTester.prototype.generate1kTransactionsPart2 = function () {
+  this.progressSign.timeStart = (new Date()).getTime();
+  this.tranactionsSmall = Array.prototype.fill(null,0, this.numOutputs);
+  this.amountInEachOutputLargeTX = this.amountInEachOutputSmallTX - 100;
+  if (this.amountInEachOutputLargeTX < 1) {
+    this.amountInEachOutputLargeTX = 100;
+  }
+  for (var counterSign = 0; counterSign < this.numOutputs; counterSign ++) {
+    setTimeout(this.generate1kTransactionsSignOneTransaction.bind(this, counterSign), 0);
+  }
+}
+
+TransactionTester.prototype.generate1kTransactionsSignOneTransaction = function (indexTransaction) {
+  this.tranactionsSmall[indexTransaction] = new TransactionBuilder(this.theNetwork);
+  var currentInId = this.transactionLarge.tx.getId();
+  this.tranactionsSmall[indexTransaction].addInput(currentInId, indexTransaction);
+  this.tranactionsSmall[indexTransaction].addOutput(this.address, this.amountInEachOutputLargeTX);
+  this.tranactionsSmall[indexTransaction].sign(0, this.theKey);
+  this.progressSign.soFarProcessed ++;
+  if (this.progressSign.soFarProcessed % 10 === 0) {
+    this.progressSign.timeProgress = (new Date()).getTime();
+    document.getElementById(ids.defaults.outputSendReceiveButtons).innerHTML = this.toStringProgress();
+  }
+}
+
 TransactionTester.prototype.toStringProgress = function () {
-  return `${this.progressAdd.toString()}`;
+  var result = "";
+  result += this.progressAdd.toString();
+  if (this.progressSign.timeStart !== null) {
+    result+= `<br>${this.progressSign.toString()}`;
+  }
+  result += `<br>${this.resultString}`;
+  return result;
 }
 
 TransactionTester.prototype.generateTX1kOutputsPart3 = function() {
-  this.theTransaction.sign(0, this.theKey);
-  document.getElementById(ids.defaults.inputSendRawTransaction).value = this.theTransaction.tx.toHex();
+  this.transactionLarge.sign(0, this.theKey);
+  document.getElementById(ids.defaults.inputSendComposedRawTransaction).value = this.transactionLarge.tx.toHex();
+  if (this.callbackLargeTransactionGenerated !== null && this.callbackLargeTransactionGenerated !== undefined) {
+    this.callbackLargeTransactionGenerated();
+  }
 }
 
 TransactionTester.prototype.generateTX1kOutputsPart2 = function (outputIndex) {
   this.progressAdd.soFarProcessed ++;
-  this.theTransaction.addOutput(this.address, this.amountInEachOutput);
+  this.transactionLarge.addOutput(this.address, this.amountInEachOutputLargeTX);
   if (this.progressAdd.soFarProcessed % 10 === 0) {
     this.progressAdd.timeProgress = (new Date()).getTime();
     document.getElementById(ids.defaults.outputSendReceiveButtons).innerHTML = this.toStringProgress();
@@ -217,12 +286,12 @@ TransactionTester.prototype.generateTX1kOutputsPart2 = function (outputIndex) {
 
 TransactionTester.prototype.generateTX1kOutputs = function() {
   document.getElementById(ids.defaults.checkboxSyncronizeOmni).checked = false;
-  this.amountInEachOutput = (this.amountTotal - 200) / this.numOutputs;
-  this.resultString += `About compose a transaction with <b>${this.numOutputs}</b> outputs worth <b>${this.amountInEachOutput}</b> lius each. `;
+  this.amountInEachOutputLargeTX = (this.amountTotal - 200) / this.numOutputs;
+  this.resultString += `About to compose a transaction with <b>${this.numOutputs}</b> outputs worth <b>${this.amountInEachOutputLargeTX}</b> lius each. `;
   this.resultString += `<br>Sender's private key: <b>${this.thePrivateKeyString}</b>.`;
   this.resultString += `<br>All <b>${this.numOutputs}</b> outputs are sent to a single beneficiary: <b>${this.address}</b>.`;
   document.getElementById(ids.defaults.outputSendReceiveButtons).innerHTML = this.resultString;
-  this.theTransaction.addInput(this.transactionId, this.voutIndex);
+  this.transactionLarge.addInput(this.transactionId, this.voutIndex);
   for (var counterTransaction = 0; counterTransaction < this.numOutputs; counterTransaction ++) {
     setTimeout(this.generateTX1kOutputsPart2.bind(this, counterTransaction), 0);
   }
@@ -230,6 +299,28 @@ TransactionTester.prototype.generateTX1kOutputs = function() {
 
 function generateTX1kOutputs() {
   (new TransactionTester()).generateTX1kOutputs();
+}
+
+function hasEmptyValue(id) {
+  return document.getElementById(id).value === null || document.getElementById(id).value === "";
+}
+
+function updateComposedRawTransactionFromOmni() {
+  if ( 
+    hasEmptyValue(ids.defaults.inputSendTransactionId) ||
+    hasEmptyValue(ids.defaults.inputSendIndexValueOut) ||
+    hasEmptyValue(ids.defaults.inputSendAmount) ||
+    hasEmptyValue(ids.defaults.inputSendPrivateKey) ||
+    hasEmptyValue(ids.defaults.inputSendAddress)
+  ) {
+    return;
+  }
+  var theOmni = document.getElementById(ids.defaults.inputOmniForSending);
+  try {
+    submitRequests.updateInnerHtml(ids.defaults.inputSendComposedRawTransaction, buildSendTransaction().tx.toHex());
+  } catch (e) {
+    console.log(e);
+  }
 }
 
 function updateInputsFromOmni() {
@@ -247,15 +338,9 @@ function updateInputsFromOmni() {
       if (parsed[label] === undefined || parsed[label] === null) {
         continue;
       }
-      document.getElementById(pairsToUpdateLabelToId[label]).value = parsed[label];
+      submitRequests.updateInnerHtml(pairsToUpdateLabelToId[label], parsed[label]);
     }
-    var theOmni = document.getElementById(ids.defaults.inputOmniForSending);
-    try {
-      document.getElementById(ids.defaults.inputSendRawTransaction).value = buildSendTransaction().tx.toHex();
-    } catch (e) {
-      isGood = false;
-      console.log(e);
-    }
+    updateComposedRawTransactionFromOmni();
     if (!isGood) {
       theOmni.classList.add("inputOmniWithError");
     } else {
@@ -266,7 +351,165 @@ function updateInputsFromOmni() {
   }
 }
 
+function interpretTransaction() {
+  var rawTransaction = getTransactionRawInput().trim();
+  var transactionId = getTransactionIdToSend().trim();
+  if (transactionId === null || transactionId === "" && rawTransaction.length > 0) {
+    return decodeRawTransaction(rawTransaction);
+  }
+  if (transactionId.length > 0) {
+    submitRequests.updateInnerHtml(ids.defaults.inputSendComposedRawTransaction, "");
+    return getTransaction(transactionId);
+  }
+}
+
+function decodeRawTransaction(rawTransactionHexEncoded) {
+  submitRequests.submitGET({
+    url: pathnames.getURLfromRPCLabel(pathnames.rpcCalls.decodeRawTransaction.rpcCall, {
+      net: globals.mainPage().getRPCNetworkOption(),
+      rawTransaction: rawTransactionHexEncoded
+    }),
+    progress: globals.spanProgress(),
+    result : getOutputTXInfoDivButtons(),
+    callback: callbackTransactionFetch
+  }); 
+}
+
+function getTransaction(txidHexEncodedString) {
+  submitRequests.submitGET({
+    url: pathnames.getURLfromRPCLabel(pathnames.rpcCalls.getTransaction.rpcCall, {
+      net: globals.mainPage().getRPCNetworkOption(),
+      txid: txidHexEncodedString
+    }),
+    progress: globals.spanProgress(),
+    result : getOutputTXInfoDivButtons(),
+    callback: callbackTransactionFetch
+  }); 
+}
+
+function getTXoutSetInfo() {
+  submitRequests.submitGET({
+    url: pathnames.getURLfromRPCLabel(pathnames.rpcCalls.getTXOutSetInfo.rpcCall, {
+      net: globals.mainPage().getRPCNetworkOption(),
+    }),
+    progress: globals.spanProgress(),
+    result : getOutputSendReceiveRadio(),
+    callback: callbackStandardSendReceive
+  });  
+}
+
+function getTXout() {
+  submitRequests.submitGET({
+    url: pathnames.getURLfromRPCLabel(pathnames.rpcCalls.getTXOut.rpcCall, {
+      net: globals.mainPage().getRPCNetworkOption(),
+    }),
+    progress: globals.spanProgress(),
+    result : getOutputSendReceiveRadio(),
+    callback: callbackStandardSendReceive
+  });  
+}
+
+function getListUnspent() {
+  submitRequests.submitGET({
+    url: pathnames.getURLfromRPCLabel(pathnames.rpcCalls.listUnspent.rpcCall, {
+      net: globals.mainPage().getRPCNetworkOption(),
+    }),
+    progress: globals.spanProgress(),
+    result : getOutputSendReceiveRadio(),
+    callback: callbackStandardSendReceive
+  });  
+}
+
+function listTransactions() {
+  submitRequests.submitGET({
+    url: pathnames.getURLfromRPCLabel(pathnames.rpcCalls.listTransactions.rpcCall, {
+      net: globals.mainPage().getRPCNetworkOption()//,
+//      count: getNumberOfTransactions()
+    }),
+    progress: globals.spanProgress(),
+    result : getOutputSendReceiveRadio(),
+    callback: callbackStandardSendReceive
+  });  
+}
+
+function callbackGetBlock(inputHex, outputComponent) {
+  if (globals.mainPage().pages.send.verbosity === "0") {
+    var theBlock = Block.fromHex(inputHex);
+    jsonToHtml.writeJSONtoDOMComponent(theBlock.toHumanReadableHex(), outputComponent);
+  } else {
+    jsonToHtml.writeJSONtoDOMComponent(inputHex, outputComponent);
+    try {
+      var parsedBlock = JSON.parse(inputHex);
+      if (parsedBlock.height !== undefined && parsedBlock.height !== null) {
+        submitRequests.updateInnerHtml(ids.defaults.inputBestBlockIndex, parsedBlock.height);
+      }
+    } catch (e) {
+      console.log(`Error parsing block. ${e}.`);
+    }
+  }
+}
+
+function getBlock() {
+  globals.mainPage().pages.send.verbosity = "0";
+  if (document.getElementById(ids.defaults.checkboxBlockVerbose).checked) {
+    globals.mainPage().pages.send.verbosity = "1";  
+  }
+  document.getElementById(ids.defaults.radioButtonsSend.blockInfo).checked = true;
+  var theURL = pathnames.getURLfromRPCLabel(
+    pathnames.rpcCalls.getBlock.rpcCall, {
+      blockHash: getBlockHash().value, 
+      verbosity: globals.mainPage().pages.send.verbosity,
+      net: globals.mainPage().getRPCNetworkOption(),
+    }
+  );
+  submitRequests.submitGET({
+    url: theURL,
+    progress: globals.spanProgress(),
+    result : getOutputSendReceiveRadio(),
+    callback: callbackGetBlock
+  });
+}
+
+function getBestBlockHashCallback(inputHex, outputComponent) {
+  submitRequests.updateInnerHtml(ids.defaults.inputBlockHash, inputHex);
+  jsonToHtml.writeJSONtoDOMComponent(inputHex, outputComponent);
+}
+
+function getBestBlockHash() {
+  document.getElementById(ids.defaults.radioButtonsSend.bestBlock).checked = true;
+  var index = getBestBlockIndex().value;
+  var theURL = "";
+  if (index === null || index === undefined || index === "") {
+    theURL = pathnames.getURLfromRPCLabel(pathnames.rpcCalls.getBestBlockHash.rpcCall, {
+      net: globals.mainPage().getRPCNetworkOption()
+    });
+  } else {
+    theURL = pathnames.getURLfromRPCLabel(pathnames.rpcCalls.getBlockHash.rpcCall, {
+      net: globals.mainPage().getRPCNetworkOption(),
+      index: index
+    });
+  }
+  submitRequests.submitGET({
+    url: theURL,
+    progress: globals.spanProgress(),
+    result : getOutputSendReceiveRadio(),
+    callback: getBestBlockHashCallback
+  });
+}
+
+function updateSendReceivePage() {
+  rpcGeneral.updatePageFromRadioButtonsByName("rpcSend");
+}
+
 module.exports = {
+  getBlock,
+  getBestBlockHash,
+  getTXoutSetInfo,
+  getTXout,
+  getListUnspent,
+  listTransactions,
+  getTransaction,
+  interpretTransaction,
   generateTX1kOutputs,
   generate1kTransactions,
   updateOmniFromInputs,
@@ -274,7 +517,6 @@ module.exports = {
   updateSendReceivePage,
   getReceivedByAddress, 
   listAccounts,
-  getBalance,
   getAccountAddress,
   sendTxidToAddress,
   dumpPrivateKey

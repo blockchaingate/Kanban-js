@@ -8,7 +8,6 @@ var numberRequestsRunning = 0;
 var maxRequestsRunning = 4;
 
 function fabcoinInitialize(request, response, desiredCommand) {
-  console.log("DEBUG: got to here");
   numberRequestsRunning ++;
   if (numberRequestsRunning > maxRequestsRunning) {
     response.writeHead(500);

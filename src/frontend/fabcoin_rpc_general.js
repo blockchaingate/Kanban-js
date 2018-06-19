@@ -13,8 +13,6 @@ function getOutputBlockInfoDiv() {
 function updatePages() {
   var currentLabel = globals.mainPage().currentPageLabel;
   var pagesToUpdate = {
-    txInfo: true,
-    blockInfo: true,
     network: true,
     fabcoinInitialization: true,
     send: true,

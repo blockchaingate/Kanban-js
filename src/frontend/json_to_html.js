@@ -61,6 +61,7 @@ function getLabelsRows(input) {
   return result;
 }
 
+var numberCallsGetHtmlFromArrayOfObjects = 0;
 function getHtmlFromArrayOfObjects(input, doIncludeTogglePolling, outputPolling) {
   var inputJSON = input;
   if (typeof inputJSON === "string") {
@@ -74,6 +75,15 @@ function getHtmlFromArrayOfObjects(input, doIncludeTogglePolling, outputPolling)
       return `<error>Error while parsing ${inputJSON}: ${e}</error>`;
     }
   }
+  var rawButton = "";
+  if (doIncludeTogglePolling === true) {
+    rawButton = submitRequests.getToggleButtonPausePolling({label: "raw", content: JSON.stringify(input), output: outputPolling});
+  } else {
+    rawButton = submitRequests.getToggleButton({label: "raw", content: JSON.stringify(input)});
+  }
+  numberCallsGetHtmlFromArrayOfObjects ++;
+  var theId = `clearButton${numberCallsGetHtmlFromArrayOfObjects}`;
+  var clearButton = `<button id = '${theId}' class = "buttonProgress" onclick = "window.kanban.submitRequests.deleteParent(this.id);">clear</button>`;
   var result = "";
   if (typeof inputJSON === "object" && !Array.isArray(inputJSON)) {
     inputJSON = [inputJSON];
@@ -97,11 +107,9 @@ function getHtmlFromArrayOfObjects(input, doIncludeTogglePolling, outputPolling)
   } else {
     result += inputJSON + "<br>";
   }
-  if (doIncludeTogglePolling === true) {
-    result += submitRequests.getToggleButtonPausePolling({label: "raw result", content: JSON.stringify(input), output: outputPolling});
-  } else {
-    result += submitRequests.getToggleButton({label: "raw result", content: JSON.stringify(input)});
-  }
+  result += rawButton;
+  result += clearButton;
+
   return result;
 }
 

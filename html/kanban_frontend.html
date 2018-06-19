@@ -3,7 +3,7 @@
 <link rel = "stylesheet" type = "text/css" href = "/kanban_frontend.css">
 <body onload = "window.kanban.thePage.initialize();">
 <div class = "divPageAndMenu">
-<div class = "divControlPanelDefault">
+<div class = "divControlPanelDefault" style = "width: 87%; max-height: 20px;">
   <label class = "containerRadioButton">
     <input id = "radioBoxSetRegtest" type = "radio" name = "net" onchange = "window.kanban.rpc.general.setRegtest();">
     <span class = "radioMark"></span>
@@ -27,8 +27,7 @@
     <span class = "radioMark"></span>
     MainNet
   </label>
-</div>
-<div class = "divControlPanelDefault">
+  &nbsp;&nbsp;&nbsp;&nbsp;
   <span id = "spanProgressReport" class = "spanProgressReport"> </span>
 </div>
 <div class = "divMainPage" id = "pageFabcoinInitialization">
@@ -83,31 +82,6 @@
   </div><!--divMyNodesOutput-->
   </div><!--divControlPanelDefault-->
 </div> <!--pageMyNodes-->
-<div class = "divMainPage" id = "pageRPCBlockInfo">
-  <div class = "divControlPanelDefault">
-    <label class = "containerRadioButton">
-      <input type = "radio" name = "rpcCallBlockInfo" id = "radioBestBlockHash" onchange = "window.kanban.rpc.blocks.getBestBlockHash();" checked = "checked" >
-      <span class = "radioMark"></span>
-      Best block
-    </label>
-    <input type = "text" id = "inputBestBlockIndex" size = "5" onchange = "window.kanban.rpc.blocks.getBestBlockHash();"></input>
-    <label class = "containerRadioButton">
-      <input type = "radio" name = "rpcCallBlockInfo" id = "radioButtonBlockInfo" onchange = "window.kanban.rpc.blocks.getBlock();">
-      <span class = "radioMark"></span>
-      Block info
-    </label>
-    <input type = "text" id = "inputBlockHash" size = "60"></input> 
-    <label class = "containerCheckbox">
-      <input type = "checkbox" name = "verbose" id = "checkboxBlockVerbose" onchange = "window.kanban.rpc.blocks.getBlock();" checked = "checked" >
-      <span class = "checkMark"></span>
-      Verbose
-    </label>
-    
-  </div><br>
-  <div class = "divControlPanelDefault">
-    <div id = "divKanbanRPCOutputBlockInfo"></div>
-  </div>
-</div> <!--pageRPCBlockInfo-->
 <div class = "divMainPage" id = "pageSend">
   <div class = "divControlPanelDefault">
     <label class = "containerRadioButton">
@@ -117,17 +91,30 @@
     </label>
     &nbsp;&nbsp;&nbsp;
     <label class = "containerRadioButton">
-      <input type = "radio" name = "rpcSend" onchange = "window.kanban.rpc.sendReceive.listAccounts();">
+      <input type = "radio" name = "rpcSend" onchange = "window.kanban.rpc.sendReceive.listTransactions();">
       <span class = "radioMark"></span>
-      Accounts
+      Recent transactions
     </label>
     &nbsp;&nbsp;&nbsp;
     <label class = "containerRadioButton">
-      <input type = "radio" name = "rpcSend" onchange = "window.kanban.rpc.sendReceive.getBalance();">
-      <span class = "radioMark"></span>
-      Account balance
-    </label>
-
+        <input type = "radio" name = "rpcSend" id = "radioBestBlockHash" onchange = "window.kanban.rpc.sendReceive.getBestBlockHash();">
+        <span class = "radioMark"></span>
+        Block height
+      </label>
+      <input type = "text" class = "inputStandard" style = "font-size:x-small;" id = "inputBestBlockIndex" size = "5" onkeyup = "window.kanban.rpc.sendReceive.getBestBlockHash();" placeholder = "empty=best"></input>
+      <label class = "containerRadioButton">
+        <input type = "radio" name = "rpcSend" id = "radioButtonBlockInfo" onchange = "window.kanban.rpc.sendReceive.getBlock();">
+        <span class = "radioMark"></span>
+        Block info
+      </label>
+      <input type = "text" id = "inputBlockHash"  class = "inputStandard" size = "60"></input> 
+      <label class = "containerCheckbox">
+        <input type = "checkbox" name = "verbose" id = "checkboxBlockVerbose" onchange = "window.kanban.rpc.sendReceive.getBlock();" checked = "checked" >
+        <span class = "checkMark"></span>
+        Verbose
+      </label>
+  
+  
     <!--label class = "containerRadioButton">
       <input type = "radio" name = "rpcSend" onchange = "window.kanban.rpc.sendReceive.listReceivedByAddress();" checked = "checked">
       <span class = "radioMark"></span>
@@ -141,33 +128,47 @@
   <br>
   <div class = "divControlPanelDefault">
     <!--input type = "text" id = "inputAccountName" onkeyup = "window.kanban.rpc.sendReceive.updateOmniFromInputs()" size = "6" placeholder = "account name"></input--> 
-    <input type = "text" id = "inputSendAddress" onkeyup = "window.kanban.rpc.sendReceive.updateOmniFromInputs()" size = "30" placeholder = "from address"></input> 
-    <input type = "text" id = "inputSendPrivateKey" onkeyup = "window.kanban.rpc.sendReceive.updateOmniFromInputs()" size = "50" placeholder = "private key"></input> 
-    <br>
-    <input type = "text" id = "inputTransactionIdForSending" onkeyup = "window.kanban.rpc.sendReceive.updateOmniFromInputs()" size = "53" placeholder = "txid"></input>
-    <input type = "text" id = "inputAmountForSending" onkeyup = "window.kanban.rpc.sendReceive.updateOmniFromInputs()" size = "3" placeholder = "amount"></input>
-    <input type = "text" id = "inputSendIndexValueOut" onkeyup = "window.kanban.rpc.sendReceive.updateOmniFromInputs()" size = "3" placeholder = "vout index"></input><br>
+    <input type = "text" class = "inputStandard" id = "inputSendAddress" onkeyup = "window.kanban.rpc.sendReceive.updateOmniFromInputs()" size = "30" placeholder = "from address"></input> 
+    <button class = "buttonStandard" onclick = "window.kanban.rpc.sendReceive.dumpPrivateKey();"><b style = "color:red">Private key</b></button>
+    <input type = "text" class = "inputStandard" id = "inputSendPrivateKey" onkeyup = "window.kanban.rpc.sendReceive.updateOmniFromInputs()" size = "50" placeholder = "private key"></input> 
+  </div> 
+  <br>
+  <div class = "divControlPanelDefault">
+    <input type = "text" class = "inputStandard" id = "inputSendTransactionId" onkeyup = "window.kanban.rpc.sendReceive.updateOmniFromInputs()" size = "53" placeholder = "txid"></input>
+    <input type = "text" class = "inputStandard" id = "inputSendInputRawTransaction" size = "8" placeholder = "raw"></input>
+    <button class = "buttonStandard" onclick = "window.kanban.rpc.sendReceive.interpretTransaction();">Transaction</button>
+  </div>  <br>
+  <div class = "divControlPanelDefault">
+    <div id = "divTransactionsOutputButtons"></div>
+  </div><br>
+  <div class = "divControlPanelDefault">
+    <input type = "text" class = "inputStandard" id = "inputSendAmount" onkeyup = "window.kanban.rpc.sendReceive.updateOmniFromInputs()" size = "3" placeholder = "amount"></input>
+    <input type = "text" class = "inputStandard" id = "inputSendIndexValueOut" onkeyup = "window.kanban.rpc.sendReceive.updateOmniFromInputs()" size = "3" placeholder = "vout index"></input><br>
     <label class = "containerCheckbox">
       <input type = "checkbox" name = "verbose" id = "checkboxSyncronizeOmni" onchange = "window.kanban.rpc.blocks.getBlock();" checked = "checked" >
       <span class = "checkMark"></span>
       &#8645;Synchronize omni
     </label><br>
-
-    <textarea id = "inputSendRawTransaction" rows = "2" cols = "100" placeholder = "raw send transaction"></textarea><br>
-    <textarea class = "inputOmni" type = "text" id = "inputOmniForSending" onkeyup = "window.kanban.rpc.sendReceive.updateInputsFromOmni()" rows = "6" cols = "100" placeholder = "omni input"></textarea>
-
+    <textarea class = "inputOmni textAreaStandard" type = "text" id = "inputOmniForSending" onkeyup = "window.kanban.rpc.sendReceive.updateInputsFromOmni()" rows = "6" cols = "100" placeholder = "omni input"></textarea>
+    <br>
     <!--input type = "text" id = "inputPrivateKeyForSending" size = "30" placeholder = "private key"></input--> 
-    <br><br>
     <!--button class = "buttonStandard" onclick = "window.kanban.rpc.sendReceive.getAccountAddress();">Create account</button-->
-    <b>Browser:</b><button class = "buttonStandard" onclick = "window.kanban.rpc.sendReceive.generateTX1kOutputs()">gen tx 1k outs</button> <button class = "buttonStandard" onclick = "window.kanban.rpc.sendReceive.generate1kTransactions()">gen 1k tx</button> 
-    <b>Node: </b>
-    <button class = "buttonStandard" onclick = "window.kanban.rpc.sendReceive.dumpPrivateKey();"><b style = "color:red">Private key</b></button>
+    <textarea class = "textAreaStandard" id = "inputSendComposedRawTransaction" rows = "2" cols = "100" placeholder = "raw send transaction"></textarea>
     <button class = "buttonStandard" onclick = "window.kanban.rpc.sendReceive.sendTxidToAddress();">Send</button>
   </div><!--divControlPanelDefault-->
   <br>
   <div class = "divControlPanelDefault">
     <div id = "divSendReceiveOutputButtons"></div>
-  </div><!--divControlPanelDefault-->    
+  </div><!--divControlPanelDefault-->
+  <br>
+  <div class = "divControlPanelDefault">
+    <b>Browser:</b><button class = "buttonStandard" onclick = "window.kanban.rpc.sendReceive.generateTX1kOutputs()">gen tx 1k outs</button> <button class = "buttonStandard" onclick = "window.kanban.rpc.sendReceive.generate1kTransactions()">gen 1k tx</button> 
+  </div>
+  <br>
+  <div class = "divControlPanelDefault">
+    <div id = "divSendReceiveOutputButtonsTest"></div>
+  </div><!--divControlPanelDefault-->
+     
 </div><!--pageSend-->
 
 <div class = "divMainPage" id = "pageMine">
@@ -225,42 +226,6 @@
     <div id = "divKanbanRPCOutputNetwork"></div>
   </div>
 </div>
-<div class = "divMainPage" id = "pageTXInfo">
-  <div class = "divControlPanelDefault">
-    <!--button class = "buttonStandard" onclick = "window.kanban.computationalEngineCalls.synchronizeUnspentTransactions()">Synchronize</button>
-    &nbsp;&nbsp;&nbsp;     
-    -->
-    <label class = "containerRadioButton">
-      <input type = "radio" name = "rpcCallTxInfo" onchange = "window.kanban.rpc.transactions.getTXoutSetInfo();" checked = "checked">
-      <span class = "radioMark"></span>
-      TX set info
-    </label>
-    &nbsp;&nbsp;&nbsp;
-    <label class = "containerRadioButton">
-      <input type = "radio" name = "rpcCallTxInfo" onchange = "window.kanban.rpc.transactions.getListUnspent();">
-      <span class = "radioMark"></span>
-      List unspent
-    </label>
-    &nbsp;&nbsp;&nbsp;
-    <label class = "containerRadioButton">
-      <input type = "radio" name = "rpcCallTxInfo" onchange = "window.kanban.rpc.transactions.listTransactions();">
-      <span class = "radioMark"></span>
-      Recent transactions
-    </label>
-    <!--input type = "text" id = "inputNumberOfTransactions" size = "3" placeholder = "#txos"></input--> 
-  </div><br>
-  <div class = "divControlPanelDefault">
-    <div id = "divKanbanRPCOutputTXInfo"></div>
-  </div><br>
-  <div class = "divControlPanelDefault">
-    <button class = "buttonStandard" onclick = "window.kanban.rpc.transactions.interpretTransaction();">Transaction</button>
-    <input type = "text" id = "inputTransactionId" size = "8" placeholder = "txid or raw"></input>
-
-  </div><br>
-  <div class = "divControlPanelDefault">
-    <div id = "divTransactionsOutputButtons"></div>
-  </div>  
-</div> <!--pageTXInfo-->
 <div class = "divMainPage" id = "pageTestGPU">
   <div class = "divControlPanelDefault">
     <table class = "tableTestComputationEngine">
@@ -319,8 +284,6 @@
     <div><button class = "buttonSelectPage" onclick = "window.kanban.thePage.selectPage('network');">Network</button></div>
     <div><button class = "buttonSelectPage" onclick = "window.kanban.thePage.selectPage('send');">Send</button></div>
     <div><button class = "buttonSelectPage" onclick = "window.kanban.thePage.selectPage('mine');">Mine</button></div>
-    <div><button class = "buttonSelectPage" onclick = "window.kanban.thePage.selectPage('blockInfo');">Blocks</button></div>
-    <div><button class = "buttonSelectPage" onclick = "window.kanban.thePage.selectPage('txInfo');">Transactions</button></div>
     <!--div><button class = "buttonSelectPage" onclick = "window.kanban.thePage.selectPage('testGPU');">Test GPU</button> </div-->
   </div>
 </div><!--divMenu-->

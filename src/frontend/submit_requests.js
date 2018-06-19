@@ -32,7 +32,7 @@ function getToggleButton(buttonInfo) {
   result += `<button class = "buttonProgress" `;
   result += `onclick = "window.kanban.submitRequests.buttonProgressClick(this);">`;
   result += `<span>${buttonInfo.label}</span><b>${buttonArrow}</b></button><span class = "timerSpan"></span>`;
-  result += `<br><span class="spanRESTDeveloperInfo" style = "display:${addressDisplayStyleString}">${buttonInfo.content}</span>`;
+  result += `&nbsp;&nbsp;&nbsp;&nbsp;<span class="spanRESTDeveloperInfo" style = "display:${addressDisplayStyleString}">${buttonInfo.content}</span>`;
   return result;
 }
 
@@ -41,6 +41,34 @@ function getToggleButtonPausePolling(buttonInfo) {
     onclick="if (this.nextSibling.nextSibling.style.display === 'none')
     {this.nextSibling.nextSibling.style.display = ''; this.childNodes[1].innerHTML = '&#9660;'; window.kanban.computationalEngineCalls.clearPollId();} else {
     this.nextSibling.nextSibling.style.display = 'none'; this.childNodes[1].innerHTML = '&#9668;';window.kanban.computationalEngineCalls.pollServerDoStart(${buttonInfo.output});}"><span>${buttonInfo.label}</span><b>&#9668;</b></button><br><span class="spanRESTDeveloperInfo" style="display:none">${buttonInfo.content}</span>`;
+}
+
+function deleteParent(id) {
+  document.getElementById(id).parentElement.innerHTML = "";
+}
+
+function removeUpdateHighlight(id) {
+  var theElement = document.getElementById(id);
+  theElement.classList.remove("updatedRecently");
+
+}
+
+function updateValue(id, content) {
+  var theElement = document.getElementById(id);
+  theElement.value = content;
+  theElement.classList.add("updatedRecently");
+  setTimeout(removeUpdateHighlight.bind(null, id), 1000);
+}
+
+function updateInnerHtml(id, content) {
+  var theElement = document.getElementById(id);
+  if (theElement.tagName === "INPUT") {
+    theElement.value = content;
+  } else {
+    theElement.innerHTML = content;
+  }
+  theElement.classList.add("updatedRecently");
+  setTimeout(removeUpdateHighlight.bind(null, id), 1000);
 }
 
 function recordProgressDone(progress) {
@@ -130,5 +158,8 @@ module.exports = {
   submitGET,
   buttonProgressClick,
   getToggleButton,
-  getToggleButtonPausePolling
+  getToggleButtonPausePolling,
+  deleteParent,
+  updateInnerHtml,
+  updateValue
 }

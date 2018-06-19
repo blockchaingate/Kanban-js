@@ -1,8 +1,6 @@
 "use strict";
 const rpcCallsGeneral = require('./fabcoin_rpc_general');
-const rpcCallsBlocks = require('./fabcoin_rpc_blocks');
 const rpcCallsNetwork = require('./fabcoin_rpc_network');
-const rpcCallsTransactions = require('./fabcoin_rpc_transactions');
 const rpcCallsSendReceive = require('./fabcoin_rpc_send_receive');
 const rpcCallsMine = require('./fabcoin_rpc_mine');
 const fabcoinInitialization = require('./fabcoin_initialization');
@@ -13,7 +11,7 @@ const myNodes = require('./my_nodes')
 function Page() {
   this.fabcoinNetworkRadioIds = {};
   for (var netLabel in pathnames.networkData) {
-    this.fabcoinNetworkRadioIds[netLabel] = ids.defaults.radioBoxesNetwork[netLabel];
+    this.fabcoinNetworkRadioIds[netLabel] = ids.defaults.radioButtonsNetwork[netLabel];
   }
   this.currentNetworkName = pathnames.networkData.testNetNoDNS.name;
   this.pages = {
@@ -33,6 +31,7 @@ function Page() {
       ids: {
         page: ids.defaults.pageSend
       },
+      verbosity: "0",
       updateFunction: rpcCallsSendReceive.updateSendReceivePage
     },
     mine: {
@@ -40,19 +39,6 @@ function Page() {
         page: ids.defaults.pageMine
       },
       updateFunction: rpcCallsMine.updateMiningPage
-    },
-    blockInfo: {
-      ids: {
-        page: ids.defaults.pageBlockInfo
-      },
-      verbosity: "0",
-      updateFunction: rpcCallsBlocks.updateBlockInfoPage,
-    },
-    txInfo: {
-      ids: {
-        page: ids.defaults.pageTXInfo
-      },
-      updateFunction: rpcCallsTransactions.updateTXInfoPage
     },
     network: {
       ids: {
