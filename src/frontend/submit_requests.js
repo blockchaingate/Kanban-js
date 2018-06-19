@@ -47,17 +47,24 @@ function deleteParent(id) {
   document.getElementById(id).parentElement.innerHTML = "";
 }
 
-function removeUpdateHighlight(id) {
+function removeUpdateHighlight(id, highlightName) {
   var theElement = document.getElementById(id);
-  theElement.classList.remove("updatedRecently");
+  theElement.classList.remove(highlightName);
+}
 
+function highlightError(id) {
+  var theElement = document.getElementById(id);
+  var highlightName = "inputErrorRecently";
+  theElement.classList.add(highlightName);
+  setTimeout(removeUpdateHighlight.bind(null, id, highlightName), 1000);
 }
 
 function updateValue(id, content) {
   var theElement = document.getElementById(id);
+  var highlightName = "updatedRecently";
   theElement.value = content;
-  theElement.classList.add("updatedRecently");
-  setTimeout(removeUpdateHighlight.bind(null, id), 1000);
+  theElement.classList.add(highlightName);
+  setTimeout(removeUpdateHighlight.bind(null, id, highlightName), 1000);
 }
 
 function updateInnerHtml(id, content) {
@@ -67,8 +74,9 @@ function updateInnerHtml(id, content) {
   } else {
     theElement.innerHTML = content;
   }
-  theElement.classList.add("updatedRecently");
-  setTimeout(removeUpdateHighlight.bind(null, id), 1000);
+  var highlightName = "updatedRecently";
+  theElement.classList.add(highlightName);
+  setTimeout(removeUpdateHighlight.bind(null, id, highlightName), 1000);
 }
 
 function recordProgressDone(progress) {
@@ -161,5 +169,6 @@ module.exports = {
   getToggleButtonPausePolling,
   deleteParent,
   updateInnerHtml,
-  updateValue
+  updateValue,
+  highlightError
 }

@@ -12,12 +12,68 @@ const miscellaneous = require('../miscellaneous');
 const encodingBasic = require('../encodings_basic');
 const rpcGeneral = require('./fabcoin_rpc_general');
 
+function setAddress(input) {
+  submitRequests.updateValue(ids.defaults.inputSendAddress, input);
+}
+
+function setTransactionId(input) {
+  submitRequests.updateValue(ids.defaults.inputSendTransactionId, input);
+}
+
+function hexShortenerForDisplay(input){
+  return `${input.substr(0, 4)}...${input.substr(input.length - 4, 4)}`;
+}
+
+
+function setBlockHash(input) {
+  submitRequests.updateInnerHtml(ids.defaults.inputBlockHash, input);
+  getBlock();
+}
+
+var optionsForStandardSendReceive = {
+  transformers: {
+    address : {
+      name: setAddress.name,
+      transformer: hexShortenerForDisplay
+    },
+    tx: {
+      name: setTransactionId.name,
+      transformer: hexShortenerForDisplay
+    },
+    blockhash: {
+      name: setBlockHash.name,
+      transformer: hexShortenerForDisplay
+    },
+    previousBlock: {
+      name: setBlockHash.name,
+      transformer: hexShortenerForDisplay
+    },
+    previousblockhash: {
+      name: setBlockHash.name,
+      transformer: hexShortenerForDisplay
+    },
+    nextblockhash: {
+      name: setBlockHash.name,
+      transformer: hexShortenerForDisplay
+    },
+    hash: {
+      name: setBlockHash.name,
+      transformer: hexShortenerForDisplay
+    }
+  }
+}
+
+var moduleFullName = "window.kanban.rpc.sendReceive";
+for (var label in optionsForStandardSendReceive.transformers) {
+  optionsForStandardSendReceive.transformers[label].name = `${moduleFullName}.${optionsForStandardSendReceive.transformers[label].name}`;
+}
+
 function callbackStandardSendReceive(input, outputComponent) {
-  jsonToHtml.writeJSONtoDOMComponent(input, outputComponent);
+  jsonToHtml.writeJSONtoDOMComponent(input, outputComponent, optionsForStandardSendReceive);
 }
 
 function callbackTransactionFetch(input, outputComponent) {
-  jsonToHtml.writeJSONtoDOMComponent(input, outputComponent);
+  jsonToHtml.writeJSONtoDOMComponent(input, outputComponent, optionsForStandardSendReceive);
   try {
     var parsed = JSON.parse(input);
     if (parsed.hex !== undefined && parsed.hex !== null) {
@@ -60,7 +116,7 @@ function getPrivateKey() {
 }
 
 function getOmniForSending() {
-  return document.getElementById(ids.defaults.inputOmniForSending).value;
+  return document.getElementById(ids.defaults.inputSendOmni).value;
 }
 
 function getBlockHash() {
@@ -176,7 +232,7 @@ function updateOmniFromInputs() {
       numObjects ++;
     }
   }
-  //document.getElementById(ids.defaults.inputOmniForSending).value = JSON.stringify(resultObject);
+  //document.getElementById(ids.defaults.inputSendOmni).value = JSON.stringify(resultObject);
   var resultString = "";
   var indexCurrent = 0;
   for (label in resultObject) {
@@ -186,17 +242,19 @@ function updateOmniFromInputs() {
     }
     indexCurrent ++;
   }
-  submitRequests.updateInnerHtml(ids.defaults.inputOmniForSending, resultString);
+  submitRequests.updateInnerHtml(ids.defaults.inputSendOmni, resultString);
   updateComposedRawTransactionFromOmni();
 }
 
 function generate1kTransactions() {
-  document.getElementById(ids.defaults.checkboxSyncronizeOmni).checked = false;
   (new TransactionTester()).generate1kTransactions();
   console.log("Got to here");
 }
 
 function TransactionTester() {
+  if (!this.hasNonEmptyInputs()) {
+    return;
+  }
   this.timeStartSigning = null;
   this.progressStringTXadd = "";
   this.transactionId = getTransactionIdToSend();
@@ -224,14 +282,34 @@ function TransactionTester() {
   this.theKey = ECKey.fromWIF(this.thePrivateKeyString, this.theNetwork);
 }
 
+TransactionTester.prototype.hasNonEmptyInputs = function() {
+  var idsToCheck = {};
+  idsToCheck[ids.defaults.inputSendIndexValueOut] = true;
+  idsToCheck[ids.defaults.inputSendPrivateKey] = true;
+  idsToCheck[ids.defaults.inputSendAmount] = true;
+  idsToCheck[ids.defaults.inputSendAddress]  = true;
+  idsToCheck[ids.defaults.inputSendTransactionId] = true;
+  var isGood = true;
+  for (var label in idsToCheck) {
+    if (hasEmptyValue(label)) {
+      submitRequests.highlightError(label);
+      isGood = false;
+    }
+  }
+  return isGood;
+}
+
 TransactionTester.prototype.generate1kTransactions = function() {
+  if (!this.hasNonEmptyInputs) {
+    return;
+  }
   this.callbackLargeTransactionGenerated = this.generate1kTransactionsPart2.bind(this);
   this.generateTX1kOutputs();
 }
 
 TransactionTester.prototype.generate1kTransactionsPart2 = function () {
   this.progressSign.timeStart = (new Date()).getTime();
-  this.tranactionsSmall = Array.prototype.fill(null,0, this.numOutputs);
+  this.tranactionsSmall = Array.prototype.fill(null, 0, this.numOutputs);
   this.amountInEachOutputLargeTX = this.amountInEachOutputSmallTX - 100;
   if (this.amountInEachOutputLargeTX < 1) {
     this.amountInEachOutputLargeTX = 100;
@@ -285,7 +363,9 @@ TransactionTester.prototype.generateTX1kOutputsPart2 = function (outputIndex) {
 }
 
 TransactionTester.prototype.generateTX1kOutputs = function() {
-  document.getElementById(ids.defaults.checkboxSyncronizeOmni).checked = false;
+  if (!this.hasNonEmptyInputs()) {
+    return;
+  }
   this.amountInEachOutputLargeTX = (this.amountTotal - 200) / this.numOutputs;
   this.resultString += `About to compose a transaction with <b>${this.numOutputs}</b> outputs worth <b>${this.amountInEachOutputLargeTX}</b> lius each. `;
   this.resultString += `<br>Sender's private key: <b>${this.thePrivateKeyString}</b>.`;
@@ -315,7 +395,7 @@ function updateComposedRawTransactionFromOmni() {
   ) {
     return;
   }
-  var theOmni = document.getElementById(ids.defaults.inputOmniForSending);
+  var theOmni = document.getElementById(ids.defaults.inputSendOmni);
   try {
     submitRequests.updateInnerHtml(ids.defaults.inputSendComposedRawTransaction, buildSendTransaction().tx.toHex());
   } catch (e) {
@@ -435,9 +515,9 @@ function listTransactions() {
 function callbackGetBlock(inputHex, outputComponent) {
   if (globals.mainPage().pages.send.verbosity === "0") {
     var theBlock = Block.fromHex(inputHex);
-    jsonToHtml.writeJSONtoDOMComponent(theBlock.toHumanReadableHex(), outputComponent);
+    jsonToHtml.writeJSONtoDOMComponent(theBlock.toHumanReadableHex(), outputComponent, optionsForStandardSendReceive);
   } else {
-    jsonToHtml.writeJSONtoDOMComponent(inputHex, outputComponent);
+    jsonToHtml.writeJSONtoDOMComponent(inputHex, outputComponent, optionsForStandardSendReceive);
     try {
       var parsedBlock = JSON.parse(inputHex);
       if (parsedBlock.height !== undefined && parsedBlock.height !== null) {
@@ -470,9 +550,9 @@ function getBlock() {
   });
 }
 
-function getBestBlockHashCallback(inputHex, outputComponent) {
+function callbackGetBestBlockHash(inputHex, outputComponent) {
   submitRequests.updateInnerHtml(ids.defaults.inputBlockHash, inputHex);
-  jsonToHtml.writeJSONtoDOMComponent(inputHex, outputComponent);
+  jsonToHtml.writeJSONtoDOMComponent(inputHex, outputComponent, optionsForStandardSendReceive);
 }
 
 function getBestBlockHash() {
@@ -493,7 +573,7 @@ function getBestBlockHash() {
     url: theURL,
     progress: globals.spanProgress(),
     result : getOutputSendReceiveRadio(),
-    callback: getBestBlockHashCallback
+    callback: callbackGetBestBlockHash
   });
 }
 
@@ -502,6 +582,9 @@ function updateSendReceivePage() {
 }
 
 module.exports = {
+  setAddress, 
+  setTransactionId,
+  setBlockHash,
   getBlock,
   getBestBlockHash,
   getTXoutSetInfo,

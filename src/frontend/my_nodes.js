@@ -273,7 +273,7 @@ MyNodesContainer.prototype.sshNodeToOneRemoteMachineFabcoindStart = function(cur
 MyNodesContainer.prototype.toHTMLWithDebug = function () {
   var result = "";
   result += this.toHTML();
-  result += jsonToHtml.getHtmlFromArrayOfObjects(this.nodesRaw);
+  result += jsonToHtml.getHtmlFromArrayOfObjects(this.nodesRaw, {});
   return result;
 }
 

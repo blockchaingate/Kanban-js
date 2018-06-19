@@ -2,35 +2,89 @@
 const escapeHtml = require('escape-html');
 const submitRequests = require('./submit_requests');
 
-function writeJSONtoDOMComponent(inputJSON, theDomComponent) {
+function writeJSONtoDOMComponent(inputJSON, theDomComponent, options) {
   if (typeof theDomComponent === "string") {
     theDomComponent = document.getElementById(theDomComponent);
   }
-  var outputHTML = getHtmlFromArrayOfObjects(inputJSON);
+  var outputHTML = getHtmlFromArrayOfObjects(inputJSON, options);
   theDomComponent.innerHTML = outputHTML;
 }
 
-function getTableHorizontallyLaidFromJSON(input) {
-  if (typeof input === "string") {
+var totalClickableEntries = 0;
+
+function getClickableEntry (input, transformers, ambientLabel) {
+  if (transformers === undefined || transformers === null) {
+    return input;
+  } 
+  if (!(ambientLabel in transformers)) {
     return input;
   }
-  if (typeof input === "number") {
-    return input;
+  totalClickableEntries ++;
+  var result = "";
+  var theFunction = transformers[ambientLabel];
+  result += `<button class = "buttonRPCInput" onclick = "${theFunction.name}('${input}')">`;
+  if (theFunction.transformer !== undefined && theFunction.transformer !== null) {
+    result += theFunction.transformer(input);
+  } else {
+    result += input;
   }
-  if (typeof input === "boolean") {
-    return input;
-  }  
+  result += "</button>";
+  return result;
+}
+
+function getTableHorizontallyLaidFromJSON(input, transformers, ambientLabel) {
+  if (
+    typeof input === "string" || 
+    typeof input === "number" ||
+    typeof input === "boolean"
+  ) {
+    return getClickableEntry(input, transformers, ambientLabel);
+  }
   if (typeof input === "object") {
     var result = "";
     result += "<table class='tableJSON'>";
     for (item in input){
-      result += `<tr><td>${item}</td><td>${getTableHorizontallyLaidFromJSON(input[item])}</td></tr>`; 
+      result += `<tr><td>${item}</td><td>${getTableHorizontallyLaidFromJSON(input[item], transformers, ambientLabel)}</td></tr>`; 
     }
     result += "</table>";
     return result;
   }
   
   return typeof input;
+}
+
+var keyWeights = {
+  height: 1000,
+  hash: 100,
+  tx: 50,
+  blockhash: 40,
+  previousblockhash: 30,
+  previousBlock: 30,
+  nextblockhash: 29,
+  confirmations: 10
+};
+
+function getLabelWeight(label) {
+  if (label in keyWeights) {
+    return keyWeights[label];
+  }
+  return - 1;
+}
+
+function labelComparisonOperator(left, right) {
+  if (getLabelWeight(left) > getLabelWeight(right)) {
+    return - 1;
+  }
+  if (getLabelWeight(left) < getLabelWeight(right)) {
+    return 1;
+  }
+  if (left < right) {
+    return - 1;
+  }  
+  if (left > right) {
+    return 1;
+  }
+  return 0;
 }
 
 function getLabelsRows(input) {
@@ -44,7 +98,7 @@ function getLabelsRows(input) {
       labelFinder[label] = true;
     }
   }
-  result.labels = Object.keys(labelFinder).sort();
+  result.labels = Object.keys(labelFinder).sort(labelComparisonOperator);
   for (var counterRow = 0; counterRow < input.length; counterRow ++) {
     var currentInputItem = input[counterRow];
     result.rows.push([]);
@@ -62,7 +116,13 @@ function getLabelsRows(input) {
 }
 
 var numberCallsGetHtmlFromArrayOfObjects = 0;
-function getHtmlFromArrayOfObjects(input, doIncludeTogglePolling, outputPolling) {
+function getHtmlFromArrayOfObjects(input, options) {
+  var doIncludeTogglePolling = false; 
+  var outputPolling = null; 
+  if (options.polling !== undefined && options.polling !== null) {
+    doIncludeTogglePolling = options.polling.doPoll;
+    outputPolling = options.polling.output;
+  }
   var inputJSON = input;
   if (typeof inputJSON === "string") {
     inputJSON = input.replace(/[\r\n]/g, " "); 
@@ -98,7 +158,7 @@ function getHtmlFromArrayOfObjects(input, doIncludeTogglePolling, outputPolling)
     for (var counterRow = 0; counterRow < labelsRows.rows.length; counterRow ++) {
       result += "<tr>";
       for (var counterColumn = 0; counterColumn < labelsRows.labels.length; counterColumn ++) {
-        result += `<td>${getTableHorizontallyLaidFromJSON(labelsRows.rows[counterRow][counterColumn])}</td>`;
+        result += `<td>${getTableHorizontallyLaidFromJSON(labelsRows.rows[counterRow][counterColumn], options.transformers, labelsRows.labels[counterColumn])}</td>`;
       }
       result += "</tr>";
     }

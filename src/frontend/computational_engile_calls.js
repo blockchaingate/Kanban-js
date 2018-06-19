@@ -80,7 +80,13 @@ function doPollServerCallback(inputText, output) {
     console.log(`${e}`);
     return;
   }
-  resultHtml += jsonToHtml.getHtmlFromArrayOfObjects(jobs.ongoing, true, outputId);
+  resultHtml += jsonToHtml.getHtmlFromArrayOfObjects(
+    jobs.ongoing, {
+      polling: {
+        doPoll: true,
+        output: outputId
+      }
+  });
   outputElement.innerHTML = resultHtml;
 }
 

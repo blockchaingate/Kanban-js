@@ -149,7 +149,7 @@
       <span class = "checkMark"></span>
       &#8645;Synchronize omni
     </label><br>
-    <textarea class = "inputOmni textAreaStandard" type = "text" id = "inputOmniForSending" onkeyup = "window.kanban.rpc.sendReceive.updateInputsFromOmni()" rows = "6" cols = "100" placeholder = "omni input"></textarea>
+    <textarea class = "inputOmni textAreaStandard" type = "text" id = "inputSendOmni" onkeyup = "window.kanban.rpc.sendReceive.updateInputsFromOmni()" rows = "6" cols = "100" placeholder = "omni input"></textarea>
     <br>
     <!--input type = "text" id = "inputPrivateKeyForSending" size = "30" placeholder = "private key"></input--> 
     <!--button class = "buttonStandard" onclick = "window.kanban.rpc.sendReceive.getAccountAddress();">Create account</button-->
@@ -162,7 +162,8 @@
   </div><!--divControlPanelDefault-->
   <br>
   <div class = "divControlPanelDefault">
-    <b>Browser:</b><button class = "buttonStandard" onclick = "window.kanban.rpc.sendReceive.generateTX1kOutputs()">gen tx 1k outs</button> <button class = "buttonStandard" onclick = "window.kanban.rpc.sendReceive.generate1kTransactions()">gen 1k tx</button> 
+    <textarea class = "inputOmni textAreaStandard" type = "text" id = "inputSendOmniForBulkOperations" onkeyup = "window.kanban.rpc.sendReceive.updateInputsFromOmni()" rows = "6" cols = "100" placeholder = "bulk omni input"></textarea>
+    <button class = "buttonStandard" onclick = "window.kanban.rpc.sendReceive.generateTX1kOutputs()">gen tx 1k outs</button> <button class = "buttonStandard" onclick = "window.kanban.rpc.sendReceive.generate1kTransactions()">gen 1k tx</button> 
   </div>
   <br>
   <div class = "divControlPanelDefault">
@@ -191,10 +192,10 @@
   </div><!--divControlPanelDefault-->
   <br>
   <div class = "divControlPanelDefault">
-      <button class = "buttonStandard" onclick = "window.kanban.rpc.mine.generateToAddress();">generate blocks</button> 
-      <input type = "text" id = "inputNumberOfBlocks" size = "3" value = "105"></input> 
-      <input type = "text" id = "inputMaxNumberOfTries" size = "8" value = "10000000"></input> 
-      <input type = "text" id = "inputMiningAddress" size = "8"></input> 
+    <button class = "buttonStandard" onclick = "window.kanban.rpc.mine.generateToAddress();">generate blocks</button> 
+    <input type = "text" id = "inputNumberOfBlocks" size = "3" value = "105"></input> 
+    <input type = "text" id = "inputMaxNumberOfTries" size = "8" value = "10000000"></input> 
+    <input type = "text" id = "inputMiningAddress" size = "8"></input> 
   </div>
   <br>
   <div class = "divControlPanelDefault">

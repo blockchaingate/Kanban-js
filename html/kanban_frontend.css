@@ -223,6 +223,24 @@ img.imgFabLogo{
   background: pink;
 }
 
+.inputErrorRecently {
+  transition: all 2s;
+  background: pink;
+}
+
+button.buttonRPCInput {
+  background: none;
+  outline: none;
+  border: none;
+  border-radius: 2px;
+  background-color: #f3f3f3;
+  cursor: pointer;
+  transition: 2s all;
+}
+button.buttonRPCInput:hover{
+  background-color: lightcyan;
+}
+
 .updatedRecently {
   transition: all 1s;
   background: lightcyan;

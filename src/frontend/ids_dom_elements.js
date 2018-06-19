@@ -23,7 +23,7 @@ var defaults = {
   inputSendInputRawTransaction: "inputSendInputRawTransaction",
 
   inputSendAmount: "inputSendAmount",
-  inputOmniForSending: "inputOmniForSending",
+  inputSendOmni: "inputSendOmni",
   inputNumberOfTransactions: "inputNumberOfTransactions",
   inputSendPrivateKey: "inputSendPrivateKey",
   inputSendIndexValueOut: "inputSendIndexValueOut",
