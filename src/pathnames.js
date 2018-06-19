@@ -642,12 +642,19 @@ for (var counterAllowed = 0; counterAllowed < allowedCharsInRPCArgumentsArray.le
   allowedCharsInRPCArgumentsObject[allowedCharsInRPCArgumentsArray[counterAllowed]] = true;
 }
 
+var rpcArgumentsAllowedToBeLong = {
+  rawTransaction: true
+}
+
 function isValidRPCArgumentInTermsOfCharacters(label, input, errors) {
   if (typeof input !== "string") {
     errors.push(`Input with label ${label} must be a string. `);
     return false;
   }
   if (input.length > 1000) {
+    if (label in rpcArgumentsAllowedToBeLong) {
+      return true;
+    }
     errors.push(`Input with label ${label} of length ${input.length} is too long. `);
     return false;
   }

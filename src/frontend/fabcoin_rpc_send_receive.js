@@ -7,6 +7,7 @@ const globals = require('./globals');
 const TransactionBuilder = require('../bitcoinjs_src/transaction_builder');
 const ECKey = require('../bitcoinjs_src/ecpair')
 const jsonic = require('jsonic');
+const miscellaneous = require('../miscellaneous');
 
 function sendReceiveCallbackStandard(input, outputComponent) {
   jsonToHtml.writeJSONtoDOMComponent(input, outputComponent);
@@ -176,51 +177,41 @@ function generate1kTransactions() {
 }
 
 function TransactionTester() {
-  this.timeStart = (new Date()).getTime();
   this.timeStartSigning = null;
-  this.resultString = "";
   this.progressStringTXadd = "";
   this.transactionId = getTransactionIdToSend();
   this.address = getAddressInputValue();
   this.amountTotal = getAmountForSending();
   this.numOutputs = 1000;
+  this.progressAdd = new miscellaneous.SpeedReport ({
+    name: "Add outputs",
+    total: this.numOutputs
+  });
   this.theNetwork = globals.mainPage().getCurrentTransactionProtocolLabel();
-  this.numOutputsGenerated = 0;
-  this.numOutputsSigned = 0;
   this.theTransaction = new TransactionBuilder(this.theNetwork);
   this.voutIndex = getSendIndexValueOut();
   this.thePrivateKeyString = getPrivateKey();
   this.theKey = ECKey.fromWIF(this.thePrivateKeyString, this.theNetwork);
-
 }
 
-TransactionTester.prototype.toStringProgressTXAdd = function () {
-  this.progressStringTXadd = "";
-  var elapsedTime = (new Date()).getTime() - this.timeStart;
-  var speed = this.numOutputsGenerated / elapsedTime * 1000; 
-  this.progressStringTXadd += `Added ${this.numOutputsGenerated} outputs out of ${this.numOutputs} in ${elapsedTime} ms. `;
-  this.progressStringTXadd += `<br>Speed: ${speed.toFixed(1)} per second. `;
-  return this.progressStringTXadd;
+TransactionTester.prototype.toStringProgress = function () {
+  return `${this.progressAdd.toString()}`;
 }
 
-TransactionTester.prototype.generateTX1kOutputsPart3 = function(outputIndex) {
-  this.theTransaction.sign(outputIndex, this.theKey);
-  this.numOutputsSigned ++;
-  if (this.numOutputsSigned >= this.numOutputs) {
-
-  }
+TransactionTester.prototype.generateTX1kOutputsPart3 = function() {
+  this.theTransaction.sign(0, this.theKey);
+  document.getElementById(ids.defaults.inputSendRawTransaction).value = this.theTransaction.tx.toHex();
 }
 
 TransactionTester.prototype.generateTX1kOutputsPart2 = function (outputIndex) {
-  this.numOutputsGenerated ++;
+  this.progressAdd.soFarProcessed ++;
   this.theTransaction.addOutput(this.address, this.amountInEachOutput);
-  if (this.numOutputsGenerated % 10 === 0) {
-    document.getElementById(ids.defaults.outputSendReceiveButtons).innerHTML = this.toStringProgress() + "<br>" + this.resultString;
+  if (this.progressAdd.soFarProcessed % 10 === 0) {
+    this.progressAdd.timeProgress = (new Date()).getTime();
+    document.getElementById(ids.defaults.outputSendReceiveButtons).innerHTML = this.toStringProgress();
   }
-  if (this.numOutputsGenerated === this.numOutputs) {
-    for (var counterSigned = 0; counterSigned < this.numOutputs; counterSigned ++) {
-      setTimeout(this.generateTX1kOutputsPart3.bind(this, counterSigned), 0);
-    }
+  if (this.progressAdd.soFarProcessed === this.numOutputs) {
+    this.generateTX1kOutputsPart3();
   }
 }
 

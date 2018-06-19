@@ -88,9 +88,9 @@ function interpretTransaction() {
 
 function decodeRawTransaction(rawTransactionHexEncoded) {
   submitRequests.submitGET({
-    url: pathnames.getURLfromRPCLabel(pathnames.rpcCalls.rawTransaction.rpcCall, {
+    url: pathnames.getURLfromRPCLabel(pathnames.rpcCalls.decodeRawTransaction.rpcCall, {
       net: globals.mainPage().getRPCNetworkOption(),
-      txid: rawTransactionHexEncoded
+      rawTransaction: rawTransactionHexEncoded
     }),
     progress: globals.spanProgress(),
     result : getOutputTXInfoDivButtons(),
