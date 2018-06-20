@@ -12,8 +12,8 @@ function updateNetworkPage() {
   RPCGeneral.updatePageFromRadioButtonsByName("rpcCallNetwork");
 }
 
-function getNetworkInfoCallBack(input, outputComponent) {
-  jsonToHtml.writeJSONtoDOMComponent(input, outputComponent);
+function callbackGetNetworkInfo(input, outputComponent) {
+  jsonToHtml.writeJSONtoDOMComponent(input, outputComponent, {});
 }
 
 function getPeerInfo() {
@@ -24,7 +24,7 @@ function getPeerInfo() {
     url: theURL,
     progress: globals.spanProgress(),
     result : ids.defaults.outputRPCNetwork,
-    callback: getNetworkInfoCallBack
+    callback: callbackGetNetworkInfo
   });
 }
 
@@ -35,7 +35,7 @@ function getNetworkInfo() {
     }),
     progress: globals.spanProgress(),
     result : ids.defaults.outputRPCNetwork,
-    callback: getNetworkInfoCallBack
+    callback: callbackGetNetworkInfo
   });
 }
 
@@ -46,7 +46,7 @@ function getNetTotals() {
     }),
     progress: globals.spanProgress(),
     result : ids.defaults.outputRPCNetwork,
-    callback: getNetworkInfoCallBack
+    callback: callbackGetNetworkInfo
   });
 }
 

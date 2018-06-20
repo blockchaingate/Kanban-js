@@ -7,7 +7,7 @@ const globals = require('./globals');
 const RPCGeneral = require('./fabcoin_rpc_general');
 
 function callbackMineStandard(input, outputComponent) {
-  jsonToHtml.writeJSONtoDOMComponent(input, outputComponent);
+  jsonToHtml.writeJSONtoDOMComponent(input, outputComponent, {});
 }
 
 function getOutputMiningRadio() {

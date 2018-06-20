@@ -38,7 +38,7 @@ var defaults = {
   outputMyNodes: "divMyNodesOutput",
   outputSendReceiveRadio: "divSendReceiveOutputRadio",
   outputSendReceiveButtons: "divSendReceiveOutputButtons",
-  outputSendReceiveTest: "divSendReceiveOutputButtonsTest",
+  outputSendReceiveBulkOutputButtons: "divSendReceiveBulkOutputButtons",
   outputMineRadio: "divMineRadioOutput",
   outputMineButtons: "divMineButtonsOutput",
   outputFabcoinInitialization: "divFabcoinInitialization",

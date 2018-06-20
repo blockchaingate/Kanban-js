@@ -48,6 +48,8 @@ function getClickableEntry (input, transformers, ambientLabel, parentLabel, gran
   return result;
 }
 
+var totalEntriesToDisplayAtEnds = 4;
+
 function getTableHorizontallyLaidFromJSON(input, transformers, ambientLabel, parentLabel, grandParentLabel) {
   if (
     typeof input === "string" || 
@@ -59,8 +61,19 @@ function getTableHorizontallyLaidFromJSON(input, transformers, ambientLabel, par
   if (typeof input === "object") {
     var result = "";
     result += "<table class='tableJSON'>";
-    for (item in input){
-      result += `<tr><td>${item}</td><td>${getTableHorizontallyLaidFromJSON(input[item], transformers, ambientLabel, item, parentLabel)}</td></tr>`; 
+    var arrayLength = 0;
+    if (Array.isArray(input)) {
+      arrayLength = input.length;
+    } 
+    var numSoFar = 0;
+    for (item in input) {
+      numSoFar ++;
+      if (arrayLength == 0 || numSoFar <= totalEntriesToDisplayAtEnds || numSoFar > arrayLength - totalEntriesToDisplayAtEnds) {
+        result += `<tr><td>${item}</td><td>${getTableHorizontallyLaidFromJSON(input[item], transformers, ambientLabel, item, parentLabel)}</td></tr>`; 
+      }
+      if (arrayLength > 0 && numSoFar === totalEntriesToDisplayAtEnds && totalEntriesToDisplayAtEnds * 2 < arrayLength) {
+        result += "<tr><td>...</td></tr>";
+      }
     }
     result += "</table>";
     return result;
@@ -161,6 +174,8 @@ function getHtmlFromArrayOfObjects(input, options) {
   var theId = `clearButton${numberCallsGetHtmlFromArrayOfObjects}`;
   var clearButton = `<button id = '${theId}' class = "buttonProgress" onclick = "window.kanban.submitRequests.deleteParent(this.id);">clear</button>`;
   var result = "";
+  result += rawButton;
+  result += clearButton;
   if (typeof inputJSON === "object" && !Array.isArray(inputJSON)) {
     inputJSON = [inputJSON];
   }
@@ -183,8 +198,6 @@ function getHtmlFromArrayOfObjects(input, options) {
   } else {
     result += inputJSON + "<br>";
   }
-  result += rawButton;
-  result += clearButton;
 
   return result;
 }

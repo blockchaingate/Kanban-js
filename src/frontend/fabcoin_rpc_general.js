@@ -53,7 +53,7 @@ function setRegtest() {
 }
 
 function listAccountsCallback(input, outputComponent) {
-  jsonToHtml.writeJSONtoDOMComponent(input, outputComponent);
+  jsonToHtml.writeJSONtoDOMComponent(input, outputComponent, {});
 }
 
 function updatePageFromRadioButtonsByName(desiredRadioButtonName) {

@@ -39,7 +39,7 @@ function rpcCall(request, response, desiredCommand) {
   }
   var theCommand = `${pathnames.pathname.fabcoinCli}`;
   console.log(`Executing rpc command: ${theCommand}.`.blue);
-  console.log(`Arguments: ${theArguments}.`.green);
+  console.log(`Arguments: ${JSON.stringify(theArguments)}.`.green);
   if (theArguments.length > 10 || theArguments.length === undefined) {
     response.writeHead(200);
     return response.end(`Got ${theArguments.length} arguments: too many or too few. `);

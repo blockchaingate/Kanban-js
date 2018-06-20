@@ -144,7 +144,7 @@
   <div class = "divControlPanelDefault">
     <input type = "text" class = "inputStandard" id = "inputSendAmount" onkeyup = "window.kanban.rpc.sendReceive.updateOmniFromInputs()" size = "5" placeholder = "amount"></input>
     <input type = "text" class = "inputStandard" id = "inputSendIndexValueOut" onkeyup = "window.kanban.rpc.sendReceive.updateOmniFromInputs()" size = "3" placeholder = "vout index"></input>
-    <input type = "text" class = "inputStandard" id = "inputSendFee" onkeyup = "window.kanban.rpc.sendReceive.updateOmniFromInputs()" size = "3" placeholder = "fee" value= "1000"></input>
+    <input type = "text" class = "inputStandard" id = "inputSendFee" onkeyup = "window.kanban.rpc.sendReceive.updateOmniFromInputs()" size = "3" placeholder = "fee" value = "1000"></input>
     <br>
     <label class = "containerCheckbox">
       <input type = "checkbox" name = "verbose" id = "checkboxSyncronizeOmni" onchange = "window.kanban.rpc.blocks.getBlock();" checked = "checked" >
@@ -167,11 +167,11 @@
     <textarea class = "inputOmni textAreaStandard" type = "text" id = "inputSendRawBulkTransaction" onkeyup = "window.kanban.rpc.sendReceive.updateInputsFromOmni()" rows = "6" cols = "100" placeholder = "bulk omni input"></textarea>
     <button class = "buttonStandard" onclick = "window.kanban.rpc.sendReceive.generateTX1kOutputs()">gen tx 1k outs</button> 
     <button class = "buttonStandard" onclick = "window.kanban.rpc.sendReceive.generate1kTransactions()">gen 1k tx</button> 
-    <button class = "buttonStandard" onclick = "window.kanban.rpc.sendReceive.sendRawBulkTransaction()">Send</button> 
+    <button class = "buttonStandard" onclick = "window.kanban.rpc.sendReceive.sendRawBulkTransactions()">Send</button> 
   </div>
   <br>
   <div class = "divControlPanelDefault">
-    <div id = "divSendReceiveOutputButtonsTest"></div>
+    <div id = "divSendReceiveBulkOutputButtons"></div>
   </div><!--divControlPanelDefault-->
      
 </div><!--pageSend-->

@@ -14,8 +14,8 @@ function getOutputFabcoinInitialization() {
   return document.getElementById(ids.defaults.outputFabcoinInitialization);
 }
 
-function fabcoinInitializationCallback(input, outputComponent) {
-  jsonToHtml.writeJSONtoDOMComponent(input, outputComponent);
+function callbackFabcoinInitialization(input, outputComponent) {
+  jsonToHtml.writeJSONtoDOMComponent(input, outputComponent, {});
 }
 
 function updateFabcoinInitializationPage() {
@@ -32,7 +32,7 @@ function killAllFabcoinDaemons() {
     url: theURL,
     progress: getSpanProgress(),
     result : getOutputFabcoinInitialization(),
-    callback: fabcoinInitializationCallback    
+    callback: callbackFabcoinInitialization    
   });
 }
 
@@ -51,7 +51,7 @@ function startFabcoinDaemon(useMining) {
     url: theURL,
     progress: getSpanProgress(),
     result : getOutputFabcoinInitialization(),
-    callback: fabcoinInitializationCallback    
+    callback: callbackFabcoinInitialization    
   });
 }
 
@@ -61,7 +61,7 @@ function gitPullNode() {
     url: theURL,
     progress: getSpanProgress(),
     result : getOutputFabcoinInitialization(),
-    callback: fabcoinInitializationCallback    
+    callback: callbackFabcoinInitialization    
   });  
 }
 
@@ -71,7 +71,7 @@ function gitPullFabcoin() {
     url: theURL,
     progress: getSpanProgress(),
     result : getOutputFabcoinInitialization(),
-    callback: fabcoinInitializationCallback    
+    callback: callbackFabcoinInitialization    
   });  
 }
 
@@ -81,7 +81,7 @@ function makeFabcoin() {
     url: theURL,
     progress: getSpanProgress(),
     result : getOutputFabcoinInitialization(),
-    callback: fabcoinInitializationCallback    
+    callback: callbackFabcoinInitialization    
   });  
 }
 
@@ -95,7 +95,7 @@ function deleteFabcoinConfiguration() {
     url: theURL,
     progress: getSpanProgress(),
     result : getOutputFabcoinInitialization(),
-    callback: fabcoinInitializationCallback    
+    callback: callbackFabcoinInitialization    
   });  
 }
 

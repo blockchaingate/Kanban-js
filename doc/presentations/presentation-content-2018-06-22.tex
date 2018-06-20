@@ -1,0 +1,21 @@
+\section{Changes fabcoin}
+\begin{frame}[fragile]
+\frametitle{Changes to fabcoin (C++)}
+\begin{itemize}
+\item Introduced \verb|Params::coinBaseMaturity|.
+\begin{itemize}
+\item If positive, overrides \verb|COINBASE_MATURITY|, ignored otherwise. 
+\item Set to positive only for \verb|regtest| and \verb|testNetNoDNS|.
+\item \verb|COINBASE_MATURITY|: min coin depth after which coin can be spent.
+\end{itemize}
+\item \verb|EvalScript|: opt. arg.: \verb|std::stringstream* extraErrorStream|
+\begin{itemize}
+	\item If zero: ignored. No performance penalty.
+	\item Default: zero. No need to refactor.
+	\item If non-zero, provides additional debug messages.
+	\item Non-zero only for \verb|regtest| and \verb|testNetNoDNS|, governed by \verb|Params::fAllowExtraErrorStream|.
+\end{itemize}
+	
+\end{itemize}
+
+\end{frame}

@@ -25,6 +25,10 @@ function setTransactionId(input) {
   updateOmniFromInputs(); 
 }
 
+function setNothing() {
+
+}
+
 function hexShortenerForDisplay(input){
   return `${input.substr(0, 4)}...${input.substr(input.length - 4, 4)}`;
 }
@@ -51,6 +55,10 @@ var optionsForStandardSendReceive = {
       transformer: hexShortenerForDisplay
     },
     tx: {
+      name: setTransactionId.name,
+      transformer: hexShortenerForDisplay
+    },
+    txid: {
       name: setTransactionId.name,
       transformer: hexShortenerForDisplay
     },
@@ -134,12 +142,20 @@ function getOutputTXInfoDivButtons() {
   return document.getElementById(ids.defaults.outputTransactionsButtons);
 }
 
+function getOutputSendBulkButtons() {
+  return document.getElementById(ids.defaults.outputSendReceiveBulkOutputButtons);
+}
+
 function getAddressInputValue() {
   return document.getElementById(ids.defaults.inputSendAddress).value;
 }
 
-function getAmountForSending() {
+function getAmountBeforeFees() {
   return parseInt(document.getElementById(ids.defaults.inputSendAmount).value);
+}
+
+function getAmountAfterFees() {
+  return getAmountBeforeFees() - getFeeInteger();
 }
 
 function getSendIndexValueOut() {
@@ -170,8 +186,12 @@ function getTransactionIdToSend() {
   return document.getElementById(ids.defaults.inputSendTransactionId).value;
 }
 
-function getFee() {
+function getFeeString() {
   return document.getElementById(ids.defaults.inputSendFee).value;
+}
+
+function getFeeInteger() {
+  return parseInt(getFeeString());
 }
 
 function listAccounts() {
@@ -228,7 +248,7 @@ function getAccountAddress() {
 function buildSendTransaction() {
   var transactionId = getTransactionIdToSend();
   var address = getAddressInputValue();
-  var amount = getAmountForSending();
+  var amount = getAmountAfterFees();
   var theNetwork = globals.mainPage().getCurrentTransactionProtocolLabel();
   var theTransaction = new TransactionBuilder(theNetwork);
   var voutIndex = getSendIndexValueOut();
@@ -236,12 +256,30 @@ function buildSendTransaction() {
   theTransaction.addInput(transactionId, voutIndex);
   theTransaction.addOutput(address, amount);
   var theKey = ECKey.fromWIF(thePrivateKeyString, theNetwork);
-  theTransaction.sign(0, theKey);
+  try {
+    theTransaction.sign(0, theKey);
+  } catch (e) {
+    console.log(`Error signing transaction ${e}.`);
+  }
   return theTransaction;
 }
 
-function sendRawBulkTransaction() {
-  console.log("DEBUG: sendRawBulkTransaction");
+function sendRawBulkTransactions() {
+  var rawTransactionsHexEncodedString = `[${document.getElementById(ids.defaults.inputSendRawBulkTransaction).value}]`;
+  var rawTransactions = jsonic(rawTransactionsHexEncodedString);
+  if (!Array.isArray(rawTransactions)) {
+    rawTransactions = [rawTransactions];
+  }
+  var theURL = pathnames.getURLfromRPCLabel(pathnames.rpcCalls.sendBulkRawTransactions.rpcCall, {
+    net: globals.mainPage().getRPCNetworkOption(),
+    rawTransactions: rawTransactions.join(",")
+  });
+  submitRequests.submitGET({
+    url: theURL,
+    progress: globals.spanProgress(),
+    result : getOutputSendBulkButtons(),
+    callback: callbackSendTransaction
+  }); 
 }
 
 function callbackSendTransaction(input, output) {
@@ -315,12 +353,16 @@ function TransactionTester() {
   this.progressStringTXadd = "";
   this.transactionId = getTransactionIdToSend();
   this.address = getAddressInputValue();
-  this.amountTotal = getAmountForSending();
+  this.amountTotal = getAmountBeforeFees();
   this.amountInEachOutputLargeTX = 0;
   this.amountInEachOutputSmallTX = 0;
   this.numOutputs = 1000;
-  this.feeLargeTX = getFee();
-  this.feeSmallTX = getFee();
+  this.feeLargeTX = getFeeInteger();
+  if (this.numOutputs < 20) {
+    this.feeSmallTX = this.feeLargeTX;
+  } else {
+    this.feeSmallTX = Math.floor(getFeeInteger() * this.numOutputs / 20);
+  }
   this.progressAdd = new miscellaneous.SpeedReport({
     name: "Add outputs",
     total: this.numOutputs
@@ -333,7 +375,8 @@ function TransactionTester() {
   this.resultString = "";
   this.callbackLargeTransactionGenerated = null;
   this.theNetwork = globals.mainPage().getCurrentTransactionProtocolLabel();
-  this.transactionLarge = new TransactionBuilder(this.theNetwork);
+  this.transactionBuilderLarge = new TransactionBuilder(this.theNetwork);
+  this.transactionLarge = null;
   this.transactionsSmall = [];
   this.voutIndex = getSendIndexValueOut();
   this.thePrivateKeyString = getPrivateKey();
@@ -369,9 +412,9 @@ TransactionTester.prototype.generate1kTransactionsPart2 = function () {
   this.progressSign.timeStart = (new Date()).getTime();
   this.transactionsSmall = [];
   this.transactionsSmall.fill(null, 0, this.numOutputs);
-  this.amountInEachOutputLargeTX = this.amountInEachOutputSmallTX - this.feeSmallTX;
-  if (this.amountInEachOutputLargeTX < 1) {
-    this.amountInEachOutputLargeTX = 100;
+  this.amountInEachOutputSmallTX = this.amountInEachOutputLargeTX - this.feeSmallTX;
+  if (this.amountInEachOutputSmallTX < 1) {
+    this.amountInEachOutputSmallTX = 100;
   }
   for (var counterSign = 0; counterSign < this.numOutputs; counterSign ++) {
     setTimeout(this.generate1kTransactionsSignOneTransaction.bind(this, counterSign), 0);
@@ -379,11 +422,12 @@ TransactionTester.prototype.generate1kTransactionsPart2 = function () {
 }
 
 TransactionTester.prototype.generate1kTransactionsSignOneTransaction = function (indexTransaction) {
-  this.transactionsSmall[indexTransaction] = new TransactionBuilder(this.theNetwork);
-  var currentInId = this.transactionLarge.tx.getId();
-  this.transactionsSmall[indexTransaction].addInput(currentInId, indexTransaction);
-  this.transactionsSmall[indexTransaction].addOutput(this.address, this.amountInEachOutputLargeTX);
-  this.transactionsSmall[indexTransaction].sign(0, this.theKey);
+  var transactionBuilder = new TransactionBuilder(this.theNetwork);
+  var currentInId = this.transactionLarge.getId();
+  transactionBuilder.addInput(currentInId, indexTransaction);
+  transactionBuilder.addOutput(this.address, this.amountInEachOutputSmallTX);
+  transactionBuilder.sign(0, this.theKey);
+  this.transactionsSmall[indexTransaction] = transactionBuilder.build(); 
   this.progressSign.soFarProcessed ++;
   if (this.progressSign.soFarProcessed % 10 === 0) {
     this.progressSign.timeProgress = (new Date()).getTime();
@@ -397,9 +441,9 @@ TransactionTester.prototype.generate1kTransactionsSignOneTransaction = function 
 TransactionTester.prototype.generate1kTransactionsFinish = function() {
   var hexList = [];
   hexList.fill(null, 0, this.transactionsSmall.length + 1);
-  hexList[0] = this.transactionLarge.tx.toHex();
+  hexList[0] = this.transactionLarge.toHex();
   for (var counterTransactions = 0; counterTransactions < this.transactionsSmall.length; counterTransactions ++) {
-    hexList[counterTransactions + 1] = this.transactionsSmall[counterTransactions].tx.toHex();
+    hexList[counterTransactions + 1] = this.transactionsSmall[counterTransactions].toHex();
   }
   submitRequests.updateValue(ids.defaults.inputSendRawBulkTransaction, `[${hexList.join(", ")}]`);
 }
@@ -415,8 +459,10 @@ TransactionTester.prototype.toStringProgress = function () {
 }
 
 TransactionTester.prototype.generateTX1kOutputsPart3 = function() {
-  this.transactionLarge.sign(0, this.theKey);
-  submitRequests.updateValue(ids.defaults.inputSendRawBulkTransaction, this.transactionLarge.tx.toHex());
+  this.transactionBuilderLarge.sign(0, this.theKey);
+  this.transactionLarge = this.transactionBuilderLarge.build();
+  submitRequests.updateValue(ids.defaults.inputSendRawBulkTransaction, this.transactionLarge.toHex());
+  console.log(`Generated tx with id: ${this.transactionLarge.getId()} and hash: ${this.transactionLarge.toHex()}`);
   if (this.callbackLargeTransactionGenerated !== null && this.callbackLargeTransactionGenerated !== undefined) {
     this.callbackLargeTransactionGenerated();
   }
@@ -424,7 +470,7 @@ TransactionTester.prototype.generateTX1kOutputsPart3 = function() {
 
 TransactionTester.prototype.generateTX1kOutputsPart2 = function (outputIndex) {
   this.progressAdd.soFarProcessed ++;
-  this.transactionLarge.addOutput(this.address, this.amountInEachOutputLargeTX);
+  this.transactionBuilderLarge.addOutput(this.address, this.amountInEachOutputLargeTX);
   if (this.progressAdd.soFarProcessed % 10 === 0) {
     this.progressAdd.timeProgress = (new Date()).getTime();
     document.getElementById(ids.defaults.outputSendReceiveButtons).innerHTML = this.toStringProgress();
@@ -439,11 +485,11 @@ TransactionTester.prototype.generateTX1kOutputs = function() {
     return;
   }
   this.amountInEachOutputLargeTX = (this.amountTotal - this.feeLargeTX) / this.numOutputs;
-  this.resultString += `About to compose a transaction with <b>${this.numOutputs}</b> outputs worth <b>${this.amountInEachOutputLargeTX}</b> lius each. `;
+  this.resultString += `About to compose a transaction with input amount: <b>${this.amountTotal}</b>, fee: ${this.feeLargeTX} and <b>${this.numOutputs}</b> outputs worth <b>${this.amountInEachOutputLargeTX}</b> lius each. `;
   this.resultString += `<br>Sender's private key: <b>${this.thePrivateKeyString}</b>.`;
   this.resultString += `<br>All <b>${this.numOutputs}</b> outputs are sent to a single beneficiary: <b>${this.address}</b>.`;
   document.getElementById(ids.defaults.outputSendReceiveButtons).innerHTML = this.resultString;
-  this.transactionLarge.addInput(this.transactionId, this.voutIndex);
+  this.transactionBuilderLarge.addInput(this.transactionId, this.voutIndex);
   for (var counterTransaction = 0; counterTransaction < this.numOutputs; counterTransaction ++) {
     setTimeout(this.generateTX1kOutputsPart2.bind(this, counterTransaction), 0);
   }
@@ -469,7 +515,7 @@ function updateComposedRawTransactionFromOmni() {
   }
   try {
     var theTransaction = buildSendTransaction();
-    submitRequests.updateValue(ids.defaults.inputSendRawNonBulkTransaction, theTransaction.tx.toHex());
+    submitRequests.updateValue(ids.defaults.inputSendRawNonBulkTransaction, theTransaction.build().toHex());
   } catch (e) {
     console.log(e);
   }
@@ -661,6 +707,7 @@ module.exports = {
   setTransactionId,
   setBlockHash,
   setValue,
+  setNothing,
   getBlock,
   getBestBlockHash,
   getTXoutSetInfo,
@@ -678,6 +725,6 @@ module.exports = {
   listAccounts,
   getAccountAddress,
   sendTxidToAddress,
-  sendRawBulkTransaction,
+  sendRawBulkTransactions,
   dumpPrivateKey
 }

@@ -457,6 +457,19 @@ var rpcCalls = {
       net: null
     },
     cli: ["net", "command", "rawTransaction"]
+  }, 
+  sendBulkRawTransactions: {
+    rpcCall: "sendBulkRawTransactions",
+    mandatoryFixedArguments: {
+      command: "sendbulkrawtransactions"
+    },
+    mandatoryModifiableArguments: {
+      rawTransactions: null
+    },
+    allowedArgumentValues: {
+      net: null
+    },
+    cli: ["net", "command", "rawTransactions"]
   }
 }
 
@@ -587,8 +600,8 @@ function getURLfromRPCLabel(theRPClabel, theArguments) {
   }
   for (var label in theArguments) {
     if (typeof theArguments[label] !== "string") {
-      console.log(`Bad value ${theArguments[label]} for label ${label} in rpc arguments. `);
-      continue; // <- label not valid for this RPC call
+      console.log(`Warning: non-string value ${theArguments[label]} for label ${label} in rpc arguments. Is this expected? `);
+      //continue; // <- label not valid for this RPC call
     }
     theRequest[label] = theArguments[label];
   }
@@ -655,26 +668,69 @@ for (var counterAllowed = 0; counterAllowed < allowedCharsInRPCArgumentsArray.le
   allowedCharsInRPCArgumentsObject[allowedCharsInRPCArgumentsArray[counterAllowed]] = true;
 }
 
+/*var rpcArgumentsRquiredToBeArrays = {
+  rawTransactions: true
+};
+*/
 var rpcArgumentsAllowedToBeLong = {
-  rawTransaction: true
+  rawTransaction: true,
+  rawTransactions: true
 }
 
-function isValidRPCArgumentInTermsOfCharacters(label, input, errors) {
+var rpcArgumentsAllowedSpecialCharacters = {
+  ",": {
+    rawTransactions: true
+  }
+}
+
+function isValidRPCArgumentBasicChecks(label, input, errors, recursionDepth) {
+/*  if (label in rpcArgumentsRquiredToBeArrays) {
+    if (!Array.isArray(input)) {
+      errors.push(`Input with label ${label} required to be an array. `);
+      return false;  
+    }
+    if (input.length > 1000000) {
+      errors.push(`Input label ${label} of length: ${input.length} is too long (max 1 million). `);
+      return false;
+    }
+    if (recursionDepth === undefined) {
+      recursionDepth = 0;
+    }
+    if (recursionDepth > 1000) {
+      errors.push(`Input label ${label} too deeply nested. `);
+      return false;
+    }
+    for (var counterInput = 0; counterInput < input.length; counterInput ++) {
+      if (!isValidRPCArgumentBasicChecks(`${label}.${counterInput}`, input[counterInput], errors, recursionDepth + 1)) {
+        return false;
+      }
+    }
+    return true;
+  }*/
   if (typeof input !== "string") {
     errors.push(`Input with label ${label} must be a string. `);
     return false;
   }
-  if (input.length > 1000) {
+  var maxLength = 1000;
+  if (input.length > maxLength) {
     if (label in rpcArgumentsAllowedToBeLong) {
       return true;
     }
-    errors.push(`Input with label ${label} of length ${input.length} is too long. `);
+    errors.push(`Input with label ${label} of length ${input.length} is too long (max ${maxLength}). `);
     return false;
   }
   for (var counterInput = 0; counterInput < input.length; counterInput ++) {
     if (!(input[counterInput] in allowedCharsInRPCArgumentsObject)) {
-      errors.push(`Input with label ${label} contains the forbidden character ${input[counterInput]} at position ${counterInput}.`);
-      return false;
+      var isBad = true;
+      if (input[counterInput] in rpcArgumentsAllowedSpecialCharacters) {
+        if (label in rpcArgumentsAllowedSpecialCharacters[input[counterInput]]) {
+          isBad = false;
+        }
+      }      
+      if (isBad) {
+        errors.push(`Input with label ${label} contains the forbidden character ${input[counterInput]} at position ${counterInput}.`);
+        return false;
+      }
     }
   }
   return true;
@@ -686,6 +742,7 @@ function getRPCcallArguments(theRPCLabel, additionalArguments, errors) {
     errors.push(`Uknown or non-implemented rpc command: ${theRPCLabel}.`);
     return null;
   }
+  console.log(`Additional arguments: ${JSON.stringify(additionalArguments)}`);
   var theRPCCall = rpcCalls[theRPCLabel];
   var theRPCcli = theRPCCall.cli;
   var mandatoryFixedArguments = theRPCCall.mandatoryFixedArguments;
@@ -728,10 +785,15 @@ function getRPCcallArguments(theRPCLabel, additionalArguments, errors) {
     if (!isAllowedRPCCallArgument(theRPCCall, currentLabel, currentValueCandidate, errors)) {
       return null;
     }
-    if (!isValidRPCArgumentInTermsOfCharacters(currentLabel, currentValueCandidate, errors)) {
+    if (!isValidRPCArgumentBasicChecks(currentLabel, currentValueCandidate, errors)) {
       return null;
     }
-    result.push(currentValueCandidate);
+    console.log(`DEBUG: value: ${JSON.stringify(currentValueCandidate)} looks ok. `);
+    if (Array.isArray(currentValueCandidate)) {
+      result.push(JSON.stringify(currentValueCandidate));
+    } else {
+      result.push(currentValueCandidate);
+    }
   }
   return result;
 }
