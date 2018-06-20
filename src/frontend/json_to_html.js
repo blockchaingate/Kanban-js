@@ -22,11 +22,16 @@ function getClickableEntry (input, transformers, ambientLabel, parentLabel, gran
   var shouldHighlight = true;
   var hasGrandParent = false;
   var theTransformer = transformers[ambientLabel];
-  if (theTransformer.parentLabel !== null && theTransformer.parentLabel !== undefined) {
-    if (parentLabel !== theTransformer.parentLabel) {
-      shouldHighlight = false;
-    } else {
+  var additionalLabel = parentLabel;
+  if (theTransformer.parentLabels !== null && theTransformer.parentLabels !== undefined) {
+    if (!isNaN(additionalLabel)) {
+      additionalLabel = "$number";
+    }
+    if (additionalLabel in theTransformer.parentLabels) {
       hasGrandParent = true;
+      theTransformer = theTransformer.parentLabels[additionalLabel];
+    } else {
+      shouldHighlight = false;
     }
   }
   if (!shouldHighlight) {
@@ -34,11 +39,12 @@ function getClickableEntry (input, transformers, ambientLabel, parentLabel, gran
   }
   totalClickableEntries ++;
   var result = "";
-  result += `<button class = "buttonRPCInput" onclick = "${theTransformer.name}('${input}'`;
+  result += `<button class = "buttonRPCInput" onclick = "${theTransformer.handlerName}(this);"`;
+  result += ` content = "${input}"`;
   if (hasGrandParent) {
-    result += `, '${grandParentLabel}'`;
+    result += ` grandParentLabel= "${grandParentLabel}"`;
   }
-  result += `)">`;
+  result += `>`;
   if (theTransformer.transformer !== undefined && theTransformer.transformer !== null) {
     result += theTransformer.transformer(input);
   } else {

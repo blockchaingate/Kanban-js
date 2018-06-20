@@ -13,16 +13,32 @@ const encodingBasic = require('../encodings_basic');
 const rpcGeneral = require('./fabcoin_rpc_general');
 const bigInteger = require('big-integer');
 
-function setAddress(input) {
-  submitRequests.updateValue(ids.defaults.inputSendAddress, input);
+function setAddress(container) {
+  submitRequests.updateValue(ids.defaults.inputSendAddress, container.getAttribute("content"));
   submitRequests.updateValue(ids.defaults.inputSendPrivateKey, "");
   updateOmniFromInputs();
 }
 
-function setTransactionId(input) {
-  submitRequests.updateValue(ids.defaults.inputSendTransactionId, input);
+function setTransactionId(container) {
+  submitRequests.updateValue(ids.defaults.inputSendTransactionId, container.getAttribute("content"));
   submitRequests.updateValue(ids.defaults.inputSendInputRawTransaction, "");
   updateOmniFromInputs(); 
+}
+
+function revealLongNoParent(container) {
+  console.log(container);
+}
+
+function revealLongWithParent(container) {
+  if (container.nextElementSibling === null) {
+    var parent = container.parentNode;
+    var newSpan = document.createElement("span");
+    newSpan.innerHTML = container.getAttribute("content");
+    parent.insertBefore(newSpan, container.nextElementSibling);
+  } else  {
+    container.nextElementSibling.remove();
+  }
+
 }
 
 function setNothing() {
@@ -33,13 +49,19 @@ function hexShortenerForDisplay(input){
   return `${input.substr(0, 4)}...${input.substr(input.length - 4, 4)}`;
 }
 
-function setBlockHash(input) {
-  submitRequests.updateValue(ids.defaults.inputBlockHash, input);
+function setBlockHash(container) {
+  submitRequests.updateValue(ids.defaults.inputBlockHash, container.getAttribute("content"));
   getBlock();
 }
 
+function setValueFromContainer(container) {
+  var inputValue = container.getAttribute("content");
+  var inputVout = container.getAttribute("grandParentLabel");
+  setValue(inputValue, inputVout, false);
+}
+
 function setValue(inputValue, inputVout, dontUpdateOmni) {
-  var valueInLius = bigInteger(inputValue).times(100000000).toString();
+  var valueInLius = bigInteger(inputValue * 100000000).toString();
   submitRequests.updateValue(ids.defaults.inputSendAmount, valueInLius);
   submitRequests.updateValue(ids.defaults.inputSendIndexValueOut, inputVout);
   if (dontUpdateOmni) {
@@ -51,48 +73,97 @@ function setValue(inputValue, inputVout, dontUpdateOmni) {
 var optionsForStandardSendReceive = {
   transformers: {
     address : {
-      name: setAddress.name,
+      handlerName: setAddress.name,
       transformer: hexShortenerForDisplay
     },
     tx: {
-      name: setTransactionId.name,
+      handlerName: setTransactionId.name,
       transformer: hexShortenerForDisplay
     },
     txid: {
-      name: setTransactionId.name,
+      handlerName: setTransactionId.name,
       transformer: hexShortenerForDisplay
     },
+    txids: {
+      parentLabels: {
+        "$number" : {
+          handlerName: setTransactionId.name,
+          transformer: hexShortenerForDisplay
+        }
+      }
+    },
+    details: {
+      parentLabels: {
+        address : {
+          handlerName: setAddress.name,
+          transformer: hexShortenerForDisplay
+        }
+      }
+    },
     blockhash: {
-      name: setBlockHash.name,
+      handlerName: setBlockHash.name,
       transformer: hexShortenerForDisplay
     },
     previousBlock: {
-      name: setBlockHash.name,
+      handlerName: setBlockHash.name,
       transformer: hexShortenerForDisplay
     },
     previousblockhash: {
-      name: setBlockHash.name,
+      handlerName: setBlockHash.name,
       transformer: hexShortenerForDisplay
     },
     nextblockhash: {
-      name: setBlockHash.name,
+      handlerName: setBlockHash.name,
       transformer: hexShortenerForDisplay
     },
     hash: {
-      name: setBlockHash.name,
+      handlerName: setBlockHash.name,
+      transformer: hexShortenerForDisplay
+    },
+    vin: {
+      parentLabels: {
+        asm: {
+          handlerName: revealLongWithParent.name,
+          transformer: hexShortenerForDisplay
+        }, 
+        hex: {
+          handlerName: revealLongWithParent.name,
+          transformer: hexShortenerForDisplay
+        }
+      }
+    },
+    hex: {
+      handlerName: revealLongNoParent.name,
       transformer: hexShortenerForDisplay
     },
     vout: {
-      parentLabel: "value",
-      name: setValue.name
+      parentLabels: {
+        value: {
+          handlerName: setValueFromContainer.name
+        },
+        "$number": {
+          handlerName: setAddress.name,
+          transformer: hexShortenerForDisplay
+        }
+      }
     }
   }
 }
 
 var moduleFullName = "window.kanban.rpc.sendReceive";
-for (var label in optionsForStandardSendReceive.transformers) {
-  optionsForStandardSendReceive.transformers[label].name = `${moduleFullName}.${optionsForStandardSendReceive.transformers[label].name}`;
+function attachModuleFullNameToHandlerNames(transformers) {
+  for (var label in transformers) {
+    if ("handlerName" in transformers[label]) {
+      transformers[label].handlerName = `${moduleFullName}.${transformers[label].handlerName}`;
+    }
+    if (transformers[label].parentLabels !== undefined && transformers[label].parentLabels !== null) {
+      attachModuleFullNameToHandlerNames(transformers[label].parentLabels);
+    }
+  }
+  
 }
+
+attachModuleFullNameToHandlerNames(optionsForStandardSendReceive.transformers);
 
 function callbackStandardSendReceive(input, outputComponent) {
   jsonToHtml.writeJSONtoDOMComponent(input, outputComponent, optionsForStandardSendReceive);
@@ -706,8 +777,10 @@ module.exports = {
   setAddress, 
   setTransactionId,
   setBlockHash,
-  setValue,
+  setValueFromContainer,
   setNothing,
+  revealLongWithParent,
+  revealLongNoParent,
   getBlock,
   getBestBlockHash,
   getTXoutSetInfo,
