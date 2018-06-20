@@ -228,6 +228,11 @@ img.imgFabLogo{
   background: pink;
 }
 
+.inputUsedAsInput {
+  transition: all 2s; 
+  background-color: lightgreen;
+}
+
 button.buttonRPCInput {
   background: none;
   outline: none;

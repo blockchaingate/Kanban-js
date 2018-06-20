@@ -12,19 +12,35 @@ function writeJSONtoDOMComponent(inputJSON, theDomComponent, options) {
 
 var totalClickableEntries = 0;
 
-function getClickableEntry (input, transformers, ambientLabel) {
+function getClickableEntry (input, transformers, ambientLabel, parentLabel, grandParentLabel) {
   if (transformers === undefined || transformers === null) {
     return input;
   } 
   if (!(ambientLabel in transformers)) {
     return input;
   }
+  var shouldHighlight = true;
+  var hasGrandParent = false;
+  var theTransformer = transformers[ambientLabel];
+  if (theTransformer.parentLabel !== null && theTransformer.parentLabel !== undefined) {
+    if (parentLabel !== theTransformer.parentLabel) {
+      shouldHighlight = false;
+    } else {
+      hasGrandParent = true;
+    }
+  }
+  if (!shouldHighlight) {
+    return input;
+  }
   totalClickableEntries ++;
   var result = "";
-  var theFunction = transformers[ambientLabel];
-  result += `<button class = "buttonRPCInput" onclick = "${theFunction.name}('${input}')">`;
-  if (theFunction.transformer !== undefined && theFunction.transformer !== null) {
-    result += theFunction.transformer(input);
+  result += `<button class = "buttonRPCInput" onclick = "${theTransformer.name}('${input}'`;
+  if (hasGrandParent) {
+    result += `, '${grandParentLabel}'`;
+  }
+  result += `)">`;
+  if (theTransformer.transformer !== undefined && theTransformer.transformer !== null) {
+    result += theTransformer.transformer(input);
   } else {
     result += input;
   }
@@ -32,19 +48,19 @@ function getClickableEntry (input, transformers, ambientLabel) {
   return result;
 }
 
-function getTableHorizontallyLaidFromJSON(input, transformers, ambientLabel) {
+function getTableHorizontallyLaidFromJSON(input, transformers, ambientLabel, parentLabel, grandParentLabel) {
   if (
     typeof input === "string" || 
     typeof input === "number" ||
     typeof input === "boolean"
   ) {
-    return getClickableEntry(input, transformers, ambientLabel);
+    return getClickableEntry(input, transformers, ambientLabel, parentLabel, grandParentLabel);
   }
   if (typeof input === "object") {
     var result = "";
     result += "<table class='tableJSON'>";
     for (item in input){
-      result += `<tr><td>${item}</td><td>${getTableHorizontallyLaidFromJSON(input[item], transformers, ambientLabel)}</td></tr>`; 
+      result += `<tr><td>${item}</td><td>${getTableHorizontallyLaidFromJSON(input[item], transformers, ambientLabel, item, parentLabel)}</td></tr>`; 
     }
     result += "</table>";
     return result;
@@ -158,7 +174,7 @@ function getHtmlFromArrayOfObjects(input, options) {
     for (var counterRow = 0; counterRow < labelsRows.rows.length; counterRow ++) {
       result += "<tr>";
       for (var counterColumn = 0; counterColumn < labelsRows.labels.length; counterColumn ++) {
-        result += `<td>${getTableHorizontallyLaidFromJSON(labelsRows.rows[counterRow][counterColumn], options.transformers, labelsRows.labels[counterColumn])}</td>`;
+        result += `<td>${getTableHorizontallyLaidFromJSON(labelsRows.rows[counterRow][counterColumn], options.transformers, labelsRows.labels[counterColumn], labelsRows.labels[counterColumn])}</td>`;
       }
       result += "</tr>";
     }

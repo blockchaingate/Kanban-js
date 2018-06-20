@@ -11,6 +11,7 @@ const jsonic = require('jsonic');
 const miscellaneous = require('../miscellaneous');
 const encodingBasic = require('../encodings_basic');
 const rpcGeneral = require('./fabcoin_rpc_general');
+const bigInteger = require('big-integer');
 
 function setAddress(input) {
   submitRequests.updateValue(ids.defaults.inputSendAddress, input);
@@ -29,8 +30,18 @@ function hexShortenerForDisplay(input){
 }
 
 function setBlockHash(input) {
-  submitRequests.updateInnerHtml(ids.defaults.inputBlockHash, input);
+  submitRequests.updateValue(ids.defaults.inputBlockHash, input);
   getBlock();
+}
+
+function setValue(inputValue, inputVout, dontUpdateOmni) {
+  var valueInLius = bigInteger(inputValue).times(100000000).toString();
+  submitRequests.updateValue(ids.defaults.inputSendAmount, valueInLius);
+  submitRequests.updateValue(ids.defaults.inputSendIndexValueOut, inputVout);
+  if (dontUpdateOmni) {
+    return;
+  }
+  updateOmniFromInputs();
 }
 
 var optionsForStandardSendReceive = {
@@ -62,6 +73,10 @@ var optionsForStandardSendReceive = {
     hash: {
       name: setBlockHash.name,
       transformer: hexShortenerForDisplay
+    },
+    vout: {
+      parentLabel: "value",
+      name: setValue.name
     }
   }
 }
@@ -79,11 +94,27 @@ function callbackTransactionFetch(input, outputComponent) {
   jsonToHtml.writeJSONtoDOMComponent(input, outputComponent, optionsForStandardSendReceive);
   try {
     var parsed = JSON.parse(input);
+    var doUpdateOmni = false;
     if (parsed.hex !== undefined && parsed.hex !== null) {
       submitRequests.updateInnerHtml(ids.defaults.inputSendInputRawTransaction, parsed.hex);
     } 
     if (parsed.txid !== undefined && parsed.txid !== null) {
       submitRequests.updateInnerHtml(ids.defaults.inputSendTransactionId, parsed.txid);
+      doUpdateOmni = true;
+    }
+    var vout = null;
+    var value = null;
+    try {
+      vout = 0;
+      value = parsed.vout[vout].value;
+    } catch (e) {
+      vout = null;
+      value = null;
+    }
+    if (vout !== null) {
+      setValue(value, vout, true);
+    }
+    if (doUpdateOmni) {
       updateOmniFromInputs();
     }
   } catch (e) {
@@ -137,6 +168,10 @@ function getTransactionRawInput() {
 
 function getTransactionIdToSend() {
   return document.getElementById(ids.defaults.inputSendTransactionId).value;
+}
+
+function getFee() {
+  return document.getElementById(ids.defaults.inputSendFee).value;
 }
 
 function listAccounts() {
@@ -205,17 +240,34 @@ function buildSendTransaction() {
   return theTransaction;
 }
 
-function sendTxidToAddress() {
+function sendRawBulkTransaction() {
+  console.log("DEBUG: sendRawBulkTransaction");
+}
 
-  console.log(`Debug: transaction: ${buildSendTransaction().tx.toHex()}`);
+function callbackSendTransaction(input, output) {
+  jsonToHtml.writeJSONtoDOMComponent(input, output, optionsForStandardSendReceive);
+}
+
+function sendTxidToAddress() {
+  var rawTransactionHexEncoded = document.getElementById(ids.defaults.inputSendRawNonBulkTransaction).value;
+  submitRequests.submitGET({
+    url: pathnames.getURLfromRPCLabel(pathnames.rpcCalls.sendRawTransaction.rpcCall, {
+      net: globals.mainPage().getRPCNetworkOption(),
+      rawTransaction: rawTransactionHexEncoded
+    }),
+    progress: globals.spanProgress(),
+    result : getOutputSendReceiveButtons(),
+    callback: callbackSendTransaction
+  }); 
 }
 
 var pairsToUpdateLabelToId = {
   "address" : ids.defaults.inputSendAddress,
   "privateKey": ids.defaults.inputSendPrivateKey,
-  "amount": ids.defaults.inputSendAmount,
+  "amountBeforeFee": ids.defaults.inputSendAmount,
   "txid": ids.defaults.inputSendTransactionId,
-  "vout": ids.defaults.inputSendIndexValueOut
+  "vout": ids.defaults.inputSendIndexValueOut,
+  "fee": ids.defaults.inputSendFee
 }
 
 var pairsToUpdateIdsToLabels = {};
@@ -267,7 +319,9 @@ function TransactionTester() {
   this.amountInEachOutputLargeTX = 0;
   this.amountInEachOutputSmallTX = 0;
   this.numOutputs = 1000;
-  this.progressAdd = new miscellaneous.SpeedReport ({
+  this.feeLargeTX = getFee();
+  this.feeSmallTX = getFee();
+  this.progressAdd = new miscellaneous.SpeedReport({
     name: "Add outputs",
     total: this.numOutputs
   });
@@ -315,7 +369,7 @@ TransactionTester.prototype.generate1kTransactionsPart2 = function () {
   this.progressSign.timeStart = (new Date()).getTime();
   this.transactionsSmall = [];
   this.transactionsSmall.fill(null, 0, this.numOutputs);
-  this.amountInEachOutputLargeTX = this.amountInEachOutputSmallTX - 100;
+  this.amountInEachOutputLargeTX = this.amountInEachOutputSmallTX - this.feeSmallTX;
   if (this.amountInEachOutputLargeTX < 1) {
     this.amountInEachOutputLargeTX = 100;
   }
@@ -384,7 +438,7 @@ TransactionTester.prototype.generateTX1kOutputs = function() {
   if (!this.hasNonEmptyInputs()) {
     return;
   }
-  this.amountInEachOutputLargeTX = (this.amountTotal - 200) / this.numOutputs;
+  this.amountInEachOutputLargeTX = (this.amountTotal - this.feeLargeTX) / this.numOutputs;
   this.resultString += `About to compose a transaction with <b>${this.numOutputs}</b> outputs worth <b>${this.amountInEachOutputLargeTX}</b> lius each. `;
   this.resultString += `<br>Sender's private key: <b>${this.thePrivateKeyString}</b>.`;
   this.resultString += `<br>All <b>${this.numOutputs}</b> outputs are sent to a single beneficiary: <b>${this.address}</b>.`;
@@ -453,10 +507,12 @@ function updateInputsFromOmni() {
 function interpretTransaction() {
   var rawTransaction = getTransactionRawInput().trim();
   var transactionId = getTransactionIdToSend().trim();
-  if (transactionId === null || transactionId === "" && rawTransaction.length > 0) {
+  if (rawTransaction.length > 0) {
+    submitRequests.highlightInput(ids.defaults.inputSendInputRawTransaction);
     return decodeRawTransaction(rawTransaction);
   }
-  if (transactionId.length > 0) {
+  if ((rawTransaction === null || rawTransaction === "") && transactionId.length > 0) {
+    submitRequests.highlightInput(ids.defaults.inputSendTransactionId);
     submitRequests.updateValue(ids.defaults.inputSendInputRawTransaction, "");
     return getTransaction(transactionId);
   }
@@ -604,6 +660,7 @@ module.exports = {
   setAddress, 
   setTransactionId,
   setBlockHash,
+  setValue,
   getBlock,
   getBestBlockHash,
   getTXoutSetInfo,
@@ -621,5 +678,6 @@ module.exports = {
   listAccounts,
   getAccountAddress,
   sendTxidToAddress,
+  sendRawBulkTransaction,
   dumpPrivateKey
 }

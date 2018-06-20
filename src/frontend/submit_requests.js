@@ -59,6 +59,13 @@ function highlightError(id) {
   setTimeout(removeUpdateHighlight.bind(null, id, highlightName), 1000);
 }
 
+function highlightInput(id) {
+  var theElement = document.getElementById(id);
+  var highlightName = "inputUsedAsInput";
+  theElement.classList.add(highlightName);
+  setTimeout(removeUpdateHighlight.bind(null, id, highlightName), 1000);
+}
+
 function updateValue(id, content) {
   var theElement = document.getElementById(id);
   if (theElement.value === content) {
@@ -173,5 +180,6 @@ module.exports = {
   deleteParent,
   updateInnerHtml,
   updateValue,
+  highlightInput,
   highlightError
 }

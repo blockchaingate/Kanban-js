@@ -19,7 +19,7 @@ var defaults = {
   inputBlockHash: "inputBlockHash",
   inputBestBlockIndex: "inputBestBlockIndex",
   inputSendTransactionId: "inputSendTransactionId",
-
+  inputSendFee: "inputSendFee",
   inputSendOmni: "inputSendOmni",
   inputSendInputRawTransaction: "inputSendInputRawTransaction",
   inputSendRawNonBulkTransaction: "inputSendRawNonBulkTransaction",

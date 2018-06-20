@@ -444,6 +444,19 @@ var rpcCalls = {
       net: null
     },
     cli: ["net", "command"]
+  }, 
+  sendRawTransaction: {
+    rpcCall: "sendRawTransaction",
+    mandatoryFixedArguments: {
+      command: "sendrawtransaction"
+    },
+    mandatoryModifiableArguments: {
+      rawTransaction: null
+    },
+    allowedArgumentValues: {
+      net: null
+    },
+    cli: ["net", "command", "rawTransaction"]
   }
 }
 
