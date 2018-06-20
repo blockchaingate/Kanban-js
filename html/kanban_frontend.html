@@ -153,7 +153,7 @@
     <br>
     <!--input type = "text" id = "inputPrivateKeyForSending" size = "30" placeholder = "private key"></input--> 
     <!--button class = "buttonStandard" onclick = "window.kanban.rpc.sendReceive.getAccountAddress();">Create account</button-->
-    <textarea class = "textAreaStandard" id = "inputSendComposedRawTransaction" rows = "2" cols = "100" placeholder = "raw send transaction"></textarea>
+    <textarea class = "textAreaStandard" id = "inputSendRawNonBulkTransaction" rows = "2" cols = "100" placeholder = "raw send transaction"></textarea>
     <button class = "buttonStandard" onclick = "window.kanban.rpc.sendReceive.sendTxidToAddress();">Send</button>
   </div><!--divControlPanelDefault-->
   <br>
@@ -162,7 +162,7 @@
   </div><!--divControlPanelDefault-->
   <br>
   <div class = "divControlPanelDefault">
-    <textarea class = "inputOmni textAreaStandard" type = "text" id = "inputSendOmniForBulkOperations" onkeyup = "window.kanban.rpc.sendReceive.updateInputsFromOmni()" rows = "6" cols = "100" placeholder = "bulk omni input"></textarea>
+    <textarea class = "inputOmni textAreaStandard" type = "text" id = "inputSendRawBulkTransaction" onkeyup = "window.kanban.rpc.sendReceive.updateInputsFromOmni()" rows = "6" cols = "100" placeholder = "bulk omni input"></textarea>
     <button class = "buttonStandard" onclick = "window.kanban.rpc.sendReceive.generateTX1kOutputs()">gen tx 1k outs</button> <button class = "buttonStandard" onclick = "window.kanban.rpc.sendReceive.generate1kTransactions()">gen 1k tx</button> 
   </div>
   <br>

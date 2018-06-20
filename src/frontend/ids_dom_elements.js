@@ -19,11 +19,13 @@ var defaults = {
   inputBlockHash: "inputBlockHash",
   inputBestBlockIndex: "inputBestBlockIndex",
   inputSendTransactionId: "inputSendTransactionId",
-  inputSendComposedRawTransaction: "inputSendComposedRawTransaction",
+
+  inputSendOmni: "inputSendOmni",
   inputSendInputRawTransaction: "inputSendInputRawTransaction",
+  inputSendRawNonBulkTransaction: "inputSendRawNonBulkTransaction",
+  inputSendRawBulkTransaction: "inputSendRawBulkTransaction",
 
   inputSendAmount: "inputSendAmount",
-  inputSendOmni: "inputSendOmni",
   inputNumberOfTransactions: "inputNumberOfTransactions",
   inputSendPrivateKey: "inputSendPrivateKey",
   inputSendIndexValueOut: "inputSendIndexValueOut",

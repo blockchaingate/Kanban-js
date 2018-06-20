@@ -14,16 +14,19 @@ const rpcGeneral = require('./fabcoin_rpc_general');
 
 function setAddress(input) {
   submitRequests.updateValue(ids.defaults.inputSendAddress, input);
+  submitRequests.updateValue(ids.defaults.inputSendPrivateKey, "");
+  updateOmniFromInputs();
 }
 
 function setTransactionId(input) {
   submitRequests.updateValue(ids.defaults.inputSendTransactionId, input);
+  submitRequests.updateValue(ids.defaults.inputSendInputRawTransaction, "");
+  updateOmniFromInputs(); 
 }
 
 function hexShortenerForDisplay(input){
   return `${input.substr(0, 4)}...${input.substr(input.length - 4, 4)}`;
 }
-
 
 function setBlockHash(input) {
   submitRequests.updateInnerHtml(ids.defaults.inputBlockHash, input);
@@ -78,9 +81,10 @@ function callbackTransactionFetch(input, outputComponent) {
     var parsed = JSON.parse(input);
     if (parsed.hex !== undefined && parsed.hex !== null) {
       submitRequests.updateInnerHtml(ids.defaults.inputSendInputRawTransaction, parsed.hex);
-    }
+    } 
     if (parsed.txid !== undefined && parsed.txid !== null) {
       submitRequests.updateInnerHtml(ids.defaults.inputSendTransactionId, parsed.txid);
+      updateOmniFromInputs();
     }
   } catch (e) {
     console.log(`Error while interpreting transaction. ${e}`);
@@ -242,7 +246,7 @@ function updateOmniFromInputs() {
     }
     indexCurrent ++;
   }
-  submitRequests.updateInnerHtml(ids.defaults.inputSendOmni, resultString);
+  submitRequests.updateValue(ids.defaults.inputSendOmni, resultString);
   updateComposedRawTransactionFromOmni();
 }
 
@@ -276,7 +280,7 @@ function TransactionTester() {
   this.callbackLargeTransactionGenerated = null;
   this.theNetwork = globals.mainPage().getCurrentTransactionProtocolLabel();
   this.transactionLarge = new TransactionBuilder(this.theNetwork);
-  this.tranactionsSmall = [];
+  this.transactionsSmall = [];
   this.voutIndex = getSendIndexValueOut();
   this.thePrivateKeyString = getPrivateKey();
   this.theKey = ECKey.fromWIF(this.thePrivateKeyString, this.theNetwork);
@@ -309,7 +313,8 @@ TransactionTester.prototype.generate1kTransactions = function() {
 
 TransactionTester.prototype.generate1kTransactionsPart2 = function () {
   this.progressSign.timeStart = (new Date()).getTime();
-  this.tranactionsSmall = Array.prototype.fill(null, 0, this.numOutputs);
+  this.transactionsSmall = [];
+  this.transactionsSmall.fill(null, 0, this.numOutputs);
   this.amountInEachOutputLargeTX = this.amountInEachOutputSmallTX - 100;
   if (this.amountInEachOutputLargeTX < 1) {
     this.amountInEachOutputLargeTX = 100;
@@ -320,16 +325,29 @@ TransactionTester.prototype.generate1kTransactionsPart2 = function () {
 }
 
 TransactionTester.prototype.generate1kTransactionsSignOneTransaction = function (indexTransaction) {
-  this.tranactionsSmall[indexTransaction] = new TransactionBuilder(this.theNetwork);
+  this.transactionsSmall[indexTransaction] = new TransactionBuilder(this.theNetwork);
   var currentInId = this.transactionLarge.tx.getId();
-  this.tranactionsSmall[indexTransaction].addInput(currentInId, indexTransaction);
-  this.tranactionsSmall[indexTransaction].addOutput(this.address, this.amountInEachOutputLargeTX);
-  this.tranactionsSmall[indexTransaction].sign(0, this.theKey);
+  this.transactionsSmall[indexTransaction].addInput(currentInId, indexTransaction);
+  this.transactionsSmall[indexTransaction].addOutput(this.address, this.amountInEachOutputLargeTX);
+  this.transactionsSmall[indexTransaction].sign(0, this.theKey);
   this.progressSign.soFarProcessed ++;
   if (this.progressSign.soFarProcessed % 10 === 0) {
     this.progressSign.timeProgress = (new Date()).getTime();
     document.getElementById(ids.defaults.outputSendReceiveButtons).innerHTML = this.toStringProgress();
   }
+  if (this.progressSign.soFarProcessed >= this.numOutputs) {
+    this.generate1kTransactionsFinish();
+  }
+}
+
+TransactionTester.prototype.generate1kTransactionsFinish = function() {
+  var hexList = [];
+  hexList.fill(null, 0, this.transactionsSmall.length + 1);
+  hexList[0] = this.transactionLarge.tx.toHex();
+  for (var counterTransactions = 0; counterTransactions < this.transactionsSmall.length; counterTransactions ++) {
+    hexList[counterTransactions + 1] = this.transactionsSmall[counterTransactions].tx.toHex();
+  }
+  submitRequests.updateValue(ids.defaults.inputSendRawBulkTransaction, `[${hexList.join(", ")}]`);
 }
 
 TransactionTester.prototype.toStringProgress = function () {
@@ -344,7 +362,7 @@ TransactionTester.prototype.toStringProgress = function () {
 
 TransactionTester.prototype.generateTX1kOutputsPart3 = function() {
   this.transactionLarge.sign(0, this.theKey);
-  document.getElementById(ids.defaults.inputSendComposedRawTransaction).value = this.transactionLarge.tx.toHex();
+  submitRequests.updateValue(ids.defaults.inputSendRawBulkTransaction, this.transactionLarge.tx.toHex());
   if (this.callbackLargeTransactionGenerated !== null && this.callbackLargeTransactionGenerated !== undefined) {
     this.callbackLargeTransactionGenerated();
   }
@@ -395,9 +413,9 @@ function updateComposedRawTransactionFromOmni() {
   ) {
     return;
   }
-  var theOmni = document.getElementById(ids.defaults.inputSendOmni);
   try {
-    submitRequests.updateInnerHtml(ids.defaults.inputSendComposedRawTransaction, buildSendTransaction().tx.toHex());
+    var theTransaction = buildSendTransaction();
+    submitRequests.updateValue(ids.defaults.inputSendRawNonBulkTransaction, theTransaction.tx.toHex());
   } catch (e) {
     console.log(e);
   }
@@ -418,9 +436,10 @@ function updateInputsFromOmni() {
       if (parsed[label] === undefined || parsed[label] === null) {
         continue;
       }
-      submitRequests.updateInnerHtml(pairsToUpdateLabelToId[label], parsed[label]);
+      submitRequests.updateValue(pairsToUpdateLabelToId[label], parsed[label]);
     }
     updateComposedRawTransactionFromOmni();
+    var theOmni = document.getElementById(ids.defaults.inputSendOmni);
     if (!isGood) {
       theOmni.classList.add("inputOmniWithError");
     } else {
@@ -438,7 +457,7 @@ function interpretTransaction() {
     return decodeRawTransaction(rawTransaction);
   }
   if (transactionId.length > 0) {
-    submitRequests.updateInnerHtml(ids.defaults.inputSendComposedRawTransaction, "");
+    submitRequests.updateValue(ids.defaults.inputSendInputRawTransaction, "");
     return getTransaction(transactionId);
   }
 }

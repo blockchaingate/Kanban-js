@@ -61,6 +61,9 @@ function highlightError(id) {
 
 function updateValue(id, content) {
   var theElement = document.getElementById(id);
+  if (theElement.value === content) {
+    return;
+  }
   var highlightName = "updatedRecently";
   theElement.value = content;
   theElement.classList.add(highlightName);
