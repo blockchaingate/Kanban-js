@@ -25,6 +25,28 @@ function getMemoryInfo() {
   });  
 }
 
+function getInfo() {
+  submitRequests.submitGET({
+    url: pathnames.getURLfromRPCLabel(pathnames.rpcCalls.getInfo.rpcCall, {
+      net: globals.mainPage().getRPCNetworkOption(),
+    }),
+    progress: globals.spanProgress(),
+    result : getOutputProfilingStandard(),
+    callback: callbackProfilingStandard
+  });  
+}
+
+function getPerformanceProfile() {
+  submitRequests.submitGET({
+    url: pathnames.getURLfromRPCLabel(pathnames.rpcCalls.getPerformanceProfile.rpcCall, {
+      net: globals.mainPage().getRPCNetworkOption(),
+    }),
+    progress: globals.spanProgress(),
+    result : getOutputProfilingStandard(),
+    callback: callbackProfilingStandard
+  });  
+}
+
 function updateProfilingPage() {
   RPCGeneral.updatePageFromRadioButtonsByName(ids.defaults.radioGroups.rpcProfiling);
 
@@ -33,4 +55,6 @@ function updateProfilingPage() {
 module.exports = {
   updateProfilingPage,
   getMemoryInfo,
+  getInfo,
+  getPerformanceProfile
 }

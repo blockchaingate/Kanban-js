@@ -323,6 +323,26 @@ var rpcCalls = {
     },
     cli: ["net", "command"]
   },
+  getPerformanceProfile: {
+    rpcCall: "getPerformanceProfile", //must be same as rpc label, used for autocomplete
+    mandatoryFixedArguments: { //<- values give defaults, null for none
+      command: "getperformanceprofile",
+    },
+    allowedArgumentValues: {
+      net: null
+    },
+    cli: ["net", "command"]
+  },
+  getInfo: {
+    rpcCall: "getInfo", //must be same as rpc label, used for autocomplete
+    mandatoryFixedArguments: { //<- values give defaults, null for none
+      command: "getinfo",
+    },
+    allowedArgumentValues: {
+      net: null
+    },
+    cli: ["net", "command"]
+  },
   generateToAddress: {
     rpcCall: "generateToAddress", //must be same as rpc label, used for autocomplete
     mandatoryFixedArguments: { //<- values give defaults, null for none
