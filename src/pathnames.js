@@ -303,10 +303,20 @@ var rpcCalls = {
     },
     cli: ["net", "command"]
   },
-  getGenerate: {
-    rpcCall: "getGenerate", //must be same as rpc label, used for autocomplete
+  getMiningInfo: {
+    rpcCall: "getMiningInfo", //must be same as rpc label, used for autocomplete
     mandatoryFixedArguments: { //<- values give defaults, null for none
-      command: "getgenerate",
+      command: "getmininginfo",
+    },
+    allowedArgumentValues: {
+      net: null
+    },
+    cli: ["net", "command"]
+  },
+  getMemoryInfo: {
+    rpcCall: "getMemoryInfo", //must be same as rpc label, used for autocomplete
+    mandatoryFixedArguments: { //<- values give defaults, null for none
+      command: "getmemoryinfo",
     },
     allowedArgumentValues: {
       net: null

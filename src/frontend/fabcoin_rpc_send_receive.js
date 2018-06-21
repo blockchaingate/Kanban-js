@@ -159,8 +159,7 @@ function attachModuleFullNameToHandlerNames(transformers) {
     if (transformers[label].parentLabels !== undefined && transformers[label].parentLabels !== null) {
       attachModuleFullNameToHandlerNames(transformers[label].parentLabels);
     }
-  }
-  
+  }  
 }
 
 attachModuleFullNameToHandlerNames(optionsForStandardSendReceive.transformers);
@@ -770,7 +769,7 @@ function getBestBlockHash() {
 }
 
 function updateSendReceivePage() {
-  rpcGeneral.updatePageFromRadioButtonsByName("rpcSend");
+  rpcGeneral.updatePageFromRadioButtonsByName(ids.defaults.radioGroups.rpcSend);
 }
 
 module.exports = {

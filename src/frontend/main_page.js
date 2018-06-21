@@ -3,6 +3,7 @@ const rpcCallsGeneral = require('./fabcoin_rpc_general');
 const rpcCallsNetwork = require('./fabcoin_rpc_network');
 const rpcCallsSendReceive = require('./fabcoin_rpc_send_receive');
 const rpcCallsMine = require('./fabcoin_rpc_mine');
+const rpcCallsProfiling = require('./fabcoin_rpc_profiling');
 const fabcoinInitialization = require('./fabcoin_initialization');
 const ids = require('./ids_dom_elements');
 const pathnames = require('../pathnames');
@@ -51,6 +52,12 @@ function Page() {
         page: ids.defaults.pageTestGPU
       },
       updateFunction: null
+    },
+    profiling: {
+      ids: {
+        page: ids.defaults.pageProfiling
+      },
+      updateFunction: rpcCallsProfiling.updateProfilingPage
     }
   }
   this.currentPageLabel = null;

@@ -231,6 +231,22 @@
     <div id = "divKanbanRPCOutputNetwork"></div>
   </div>
 </div>
+
+<div class = "divMainPage" id = "pageProfiling">
+  <div class = "divControlPanelDefault">
+    <label class = "containerRadioButton">
+      <input type = "radio" name = "rpcProfiling" onchange = "window.kanban.rpc.profiling.getMemoryInfo();" checked = "checked">
+      <span class = "radioMark"></span>
+      Memory info
+    </label>
+    &nbsp;&nbsp;&nbsp;
+  </div><!--divControlPanelDefault-->
+  <br>
+  <div class = "divControlPanelDefault">
+    <div id = "divOutputProfiling"></div>
+  </div><!--divControlPanelDefault-->  
+</div>
+
 <div class = "divMainPage" id = "pageTestGPU">
   <div class = "divControlPanelDefault">
     <table class = "tableTestComputationEngine">
@@ -289,6 +305,7 @@
     <div><button class = "buttonSelectPage" onclick = "window.kanban.thePage.selectPage('network');">Network</button></div>
     <div><button class = "buttonSelectPage" onclick = "window.kanban.thePage.selectPage('send');">Send</button></div>
     <div><button class = "buttonSelectPage" onclick = "window.kanban.thePage.selectPage('mine');">Mine</button></div>
+    <div><button class = "buttonSelectPage" onclick = "window.kanban.thePage.selectPage('profiling');">Profiling</button></div>
     <!--div><button class = "buttonSelectPage" onclick = "window.kanban.thePage.selectPage('testGPU');">Test GPU</button> </div-->
   </div>
 </div><!--divMenu-->

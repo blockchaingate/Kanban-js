@@ -58,8 +58,7 @@ function generateToAddress() {
 }
 
 function updateMiningPage() {
-  console.log("DEBUG: here i am");
-  getMiningInfo();
+  RPCGeneral.updatePageFromRadioButtonsByName(ids.defaults.radioGroups.rpcMine);
 }
 
 module.exports = {

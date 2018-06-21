@@ -8,6 +8,7 @@ var defaults = {
   pageMyNodes: "pageMyNodes",
   pageSend: "pageSend",
   pageMine: "pageMine",
+  pageProfiling: "pageProfiling",
   pageFabcoinInitialization: "pageFabcoinInitialization",
   progressReport: "spanProgressReport",
   spanPingColumnHeader: "spanPingColumnHeader",
@@ -42,6 +43,13 @@ var defaults = {
   outputMineRadio: "divMineRadioOutput",
   outputMineButtons: "divMineButtonsOutput",
   outputFabcoinInitialization: "divFabcoinInitialization",
+  outputProfiling: "divOutputProfiling",
+  radioGroups: {
+    rpcCallNetwork: "rpcCallNetwork",
+    rpcProfiling: "rpcProfiling",
+    rpcMine: "rpcMine",
+    rpcSend: "rpcSend"
+  },
   radioButtonsSend: {
     bestBlock: "radioBestBlockHash",
     blockInfo: "radioButtonBlockInfo"

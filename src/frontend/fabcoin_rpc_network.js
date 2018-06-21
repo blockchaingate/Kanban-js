@@ -9,7 +9,7 @@ const RPCGeneral = require('./fabcoin_rpc_general');
 
 
 function updateNetworkPage() {
-  RPCGeneral.updatePageFromRadioButtonsByName("rpcCallNetwork");
+  RPCGeneral.updatePageFromRadioButtonsByName(ids.defaults.radioGroups.rpcCallNetwork);
 }
 
 function callbackGetNetworkInfo(input, outputComponent) {
