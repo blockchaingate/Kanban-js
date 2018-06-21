@@ -340,12 +340,13 @@ function sendRawBulkTransactions() {
   if (!Array.isArray(rawTransactions)) {
     rawTransactions = [rawTransactions];
   }
-  var theURL = pathnames.getURLfromRPCLabel(pathnames.rpcCalls.sendBulkRawTransactions.rpcCall, {
+  var messageBody = pathnames.getPOSTBodyfromRPCLabel(pathnames.rpcCalls.sendBulkRawTransactions.rpcCall, {
     net: globals.mainPage().getRPCNetworkOption(),
     rawTransactions: rawTransactions.join(",")
   });
-  submitRequests.submitGET({
-    url: theURL,
+  submitRequests.submitPOST({
+    url: pathnames.url.known.rpc,
+    messageBody: messageBody,
     progress: globals.spanProgress(),
     result : getOutputSendBulkButtons(),
     callback: callbackSendTransaction
@@ -412,7 +413,6 @@ function updateOmniFromInputs() {
 
 function generate1kTransactions() {
   (new TransactionTester()).generate1kTransactions();
-  console.log("Got to here");
 }
 
 function TransactionTester() {
@@ -532,7 +532,7 @@ TransactionTester.prototype.generateTX1kOutputsPart3 = function() {
   this.transactionBuilderLarge.sign(0, this.theKey);
   this.transactionLarge = this.transactionBuilderLarge.build();
   submitRequests.updateValue(ids.defaults.inputSendRawBulkTransaction, this.transactionLarge.toHex());
-  console.log(`Generated tx with id: ${this.transactionLarge.getId()} and hash: ${this.transactionLarge.toHex()}`);
+  //console.log(`Generated tx with id: ${this.transactionLarge.getId()} and hash: ${this.transactionLarge.toHex()}`);
   if (this.callbackLargeTransactionGenerated !== null && this.callbackLargeTransactionGenerated !== undefined) {
     this.callbackLargeTransactionGenerated();
   }

@@ -37,28 +37,15 @@ function getInfo() {
 }
 
 function getPerformanceProfile() {
-  var urlForPOST = pathnames.url.known.rpc;
-  var messageBodyForPOST = pathnames.getPOSTBodyfromRPCLabel(pathnames.rpcCalls.getPerformanceProfile.rpcCall, {
-    net: globals.mainPage().getRPCNetworkOption()
+  var urlForGET = pathnames.getURLfromRPCLabel(pathnames.rpcCalls.getPerformanceProfile.rpcCall, {
+    net: globals.mainPage().getRPCNetworkOption(),
   });
-  submitRequests.submitPOST({
-    url: urlForPOST,
-    messageBody: messageBodyForPOST,
+   submitRequests.submitGET({
+    url: urlForGET,
     progress: globals.spanProgress(),
     result : getOutputProfilingStandard(),
     callback: callbackProfilingStandard
   });  
-
-  //var urlForGET = pathnames.getURLfromRPCLabel(pathnames.rpcCalls.getPerformanceProfile.rpcCall, {
-  //  net: globals.mainPage().getRPCNetworkOption(),
-  //});
-  
-  //submitRequests.submitGET({
-  //  url: urlForGET,
-  //  progress: globals.spanProgress(),
-  //  result : getOutputProfilingStandard(),
-  //  callback: callbackProfilingStandard
-  //});  
 }
 
 function updateProfilingPage() {

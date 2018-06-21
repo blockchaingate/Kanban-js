@@ -119,11 +119,11 @@ function handleRPCGET(request, response) {
   var parsedURL = null;
   try {
     parsedURL = url.parse(request.url);
-    return handleRPCURLEncodedInput(request, response, parsedURL.query);
   } catch (e) {
     response.writeHead(400);
     return response.end(`Bad RPC request: ${e}`);
   }
+  return handleRPCURLEncodedInput(request, response, parsedURL.query);
 }
 
 function handleRPCURLEncodedInput(request, response, urlEncodedInput) {

@@ -136,34 +136,41 @@ var networkData = {
     name: "regtest", //<-same as label, for autocomplete
     rpcOption: "-regtest",
     folder: "regtest/",
+    rpcPort: 18443,
     security: 1,
     logFileLink: null,
-    transactionProtocolLabel: "testnet"
+    transactionProtocolLabel: "testnet",
+    auth: null
   },
   testNetNoDNS: {
     name: "testNetNoDNS", //<-same as label, for autocomplete
     rpcOption: "-testnetnodns",
     folder: "testnet_no_dns/",
+    rpcPort: 23117,
     security: 10,
     logFileLink: url.known.logFileTestNetNoDNS,
-    transactionProtocolLabel: "testnet"
-  
+    transactionProtocolLabel: "testnet",
+    auth: null  
   },
   testNet: {
     name: "testNet", //<-same as label, for autocomplete
     rpcOption: "-testnet",
     folder: "testnet3/",
+    rpcPort: 18332,
     security: 100,
     logFileLink: url.known.logFileTestNet,
-    transactionProtocolLabel: "testnet"
+    transactionProtocolLabel: "testnet",
+    auth: null
   },
   mainNet: { 
     name: "mainNet", //<-same as label, for autocomplete
     rpcOption: "-mainnet",
     folder: "./",
+    rpcPort: 8667,
     security: 1000,
     logFileLink: url.known.logFileMainNet,
-    transactionProtocolLabel: "bitcoin"  
+    transactionProtocolLabel: "bitcoin",
+    auth: null
   }
 };
 
@@ -770,13 +777,44 @@ function isValidRPCArgumentBasicChecks(label, input, errors, recursionDepth) {
   return true;
 }
 
-function getRPCcallArguments(theRPCLabel, additionalArguments, errors) {
-  var result = [];
+function getRPCJSON(theRPCLabel, additionalArguments, inputId, errors) {
   if (!(theRPCLabel in rpcCalls)) {
     errors.push(`Uknown or non-implemented rpc command: ${theRPCLabel}.`);
     return null;
   }
-  console.log(`Additional arguments: ${JSON.stringify(additionalArguments)}`);
+  var netName = networkData.mainNet.name;
+  var portComputed = networkData.mainNet.rpcPort;
+  if ("net" in additionalArguments) {
+    var netOption = additionalArguments.net;
+    if (netOption in networkNameByRPCNetworkOption) {
+      netName = networkNameByRPCNetworkOption[netOption]; 
+      portComputed = networkData[netName].rpcPort;
+    }
+  }
+  var result = { 
+    request: {
+      id: inputId,
+      method: rpcCalls[theRPCLabel].mandatoryFixedArguments.command,
+      params: []
+    },
+    port: portComputed,
+    network: netName
+  }
+  var excludeArguments = {
+    "net": true,
+    "command": true
+  }
+  if (!getRPCcallArguments(theRPCLabel, additionalArguments, errors, result.request.params, excludeArguments)) {
+    return null;
+  }
+  return result;
+}
+
+function getRPCcallCommon(theRPCLabel, additionalArguments, errors, outputArray, excludeFromOutput) {
+  if (!Array.isArray(outputArray)) {
+    console.log("Fatal error: called getRPCcallCommon with outputArray not of type array. ");
+    assert(false);
+  }
   var theRPCCall = rpcCalls[theRPCLabel];
   var theRPCcli = theRPCCall.cli;
   var mandatoryFixedArguments = theRPCCall.mandatoryFixedArguments;
@@ -785,8 +823,11 @@ function getRPCcallArguments(theRPCLabel, additionalArguments, errors) {
 
   for (var counterCommand = 0; counterCommand < theRPCcli.length; counterCommand ++) {
     var currentLabel = theRPCcli[counterCommand];
+    if (currentLabel in excludeFromOutput) {
+      continue;
+    }
     if (currentLabel in mandatoryFixedArguments) {
-      result.push(mandatoryFixedArguments[currentLabel]);
+      outputArray.push(mandatoryFixedArguments[currentLabel]);
       continue;
     }
     var currentValueCandidate = null;
@@ -812,22 +853,34 @@ function getRPCcallArguments(theRPCLabel, additionalArguments, errors) {
     if (currentValueCandidate === null) {
       if (isMandatory) {
         errors.push(`Could not extract mandatory variable with label ${currentLabel} in rpc call labeled ${theRPCLabel}.`);
-        return null;
+        return false;
       }
       continue;
     }
     if (!isAllowedRPCCallArgument(theRPCCall, currentLabel, currentValueCandidate, errors)) {
-      return null;
+      return false;
     }
     if (!isValidRPCArgumentBasicChecks(currentLabel, currentValueCandidate, errors)) {
-      return null;
+      return false;
     }
     console.log(`DEBUG: value: ${JSON.stringify(currentValueCandidate)} looks ok. `);
     if (Array.isArray(currentValueCandidate)) {
-      result.push(JSON.stringify(currentValueCandidate));
+      outputArray.push(JSON.stringify(currentValueCandidate));
     } else {
-      result.push(currentValueCandidate);
+      outputArray.push(currentValueCandidate);
     }
+  }
+  return true;
+}
+
+function getRPCcallArguments(theRPCLabel, additionalArguments, errors) {
+  var result = [];
+  if (!(theRPCLabel in rpcCalls)) {
+    errors.push(`Uknown or non-implemented rpc command: ${theRPCLabel}.`);
+    return null;
+  }
+  if (!getRPCcallCommon(theRPCLabel, additionalArguments, errors, result, {})) {
+    return null;
   }
   return result;
 }
@@ -936,6 +989,7 @@ module.exports = {
   fabcoinInitialization,
   myNodesCommand,
   ///////////////
+  getRPCJSON,
   getNetworkDataFromRPCNetworkOption,
   getURLfromRPCLabel,
   getPOSTBodyfromRPCLabel,

@@ -31,6 +31,21 @@ function initializeFolders() {
   }
 }
 
+function initializeAuthenticationCookie(networkName, callback){
+  var desiredCookieFileName = `${pathnames.pathsComputedAtRunTime.fabcoinConfigurationFolder}/${pathnames.networkData[networkName].folder}.cookie`;
+  console.log(`desired cookie file name: ${desiredCookieFileName}`);
+  if (fs.readFile(desiredCookieFileName, function(error, data){
+    if (error) {
+      console.log(`Error reading authentication cookie for network: ` + `${networkName}`.red + ` ${error}`.yellow);
+    } else {
+      pathnames.networkData[networkName].auth = data;      
+    }
+    console.log(`Read authentication cookie ` + `${data}`.red + ` for network ` + `${networkName}`.blue);
+    callback();
+  }));
+}
+
 module.exports = {
-  initializeFolders
+  initializeFolders, 
+  initializeAuthenticationCookie
 }

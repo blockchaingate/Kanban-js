@@ -3,9 +3,127 @@ const childProcess = require('child_process');
 const colors = require('colors');
 const pathnames = require('./pathnames');
 const escapeHtml = require('escape-html');
+const http = require('http');
+const initializeFabcoinFolders = require('./initialize_fabcoin_folders');
 
 var numberRequestsRunning = 0;
 var maxRequestsRunning = 4;
+var maxLengthForCliCall = 3; //<- messages below this length will be called using fabcoin-cli, larger messages via rpc json post. 
+var totalRequests = 0;
+
+
+function useFabCoinCli(request, response, theCommand, theArguments) {
+  var finalData = "";
+  try {
+
+    var child = childProcess.spawn(
+      theCommand, 
+      theArguments
+    );
+    child.stdout.on('data', function(data) {
+      console.log(data.toString());
+      finalData += data.toString();
+    });
+    child.stderr.on('data', function(data) {
+      console.log(data.toString());
+      finalData += data.toString();
+    });
+    child.on('exit', function(code) {
+      console.log(`RPC call exited with code: ${code}`.green);
+      numberRequestsRunning --;
+      if (code === 0) {
+        response.writeHead(200);
+        response.end(finalData);
+      } else {
+        response.writeHead(200);
+        response.end(`{"error": "${finalData}"}`);
+      }
+    });
+  } catch (e) {
+    response.writeHead(500);
+    numberRequestsRunning --;
+    response.end(`Eror spawning fabcoin-cli process. ${escapeHtml(e)}. `);
+    console.log(`Eror spawning process fabcoin-cli. ${e}`);
+  }
+}
+
+function useRPCport(request, response, theCallLabel, desiredCommand) {
+  //snippets taken from/inspired by:
+  //https://github.com/freewil/node-bitcoin/blob/master/lib/jsonrpc.js 
+  var errors = [];
+  var RPCRequestObject = pathnames.getRPCJSON(theCallLabel, desiredCommand, `${(new Date()).getTime()}_${totalRequests}`, errors);
+  if (RPCRequestObject === null) {
+    response.writeHead(200);
+    return response.end (`Error processing your request. ${errors[0]}`);
+  }
+  if (pathnames.networkData[RPCRequestObject.network].auth !== null) {
+    return useRPCportPartTwo(request, response, RPCRequestObject, pathnames.networkData[RPCRequestObject.network].auth);
+  }
+  initializeFabcoinFolders.initializeAuthenticationCookie(
+    RPCRequestObject.network, 
+    useRPCportPartTwo.bind(null, request, response, RPCRequestObject)
+  );
+}
+
+function useRPCportPartTwo(request, response, RPCRequestObject) {
+  var requestStringified = JSON.stringify(RPCRequestObject.request);
+  var authentication = pathnames.networkData[RPCRequestObject.network].auth;
+  var requestOptions = {
+    host: '127.0.0.1',
+    port: RPCRequestObject.port,
+    method: 'POST',
+    path: '/',
+    headers: {
+      'Host': 'localhost',
+      'Content-Length': requestStringified.length
+    },
+    auth: authentication    
+    //agent: false,
+    //rejectUnauthorized: this.opts.ssl && this.opts.sslStrict !== false
+  };
+  //console.log ("DEBUG: options for request: " + JSON.stringify(requestOptions));
+  //console.log ("DEBUG: and the request: " + requestStringified);
+
+  var theHTTPrequest = http.request(requestOptions);
+
+  try {
+    console.log("DEBUG: got to here");
+    theHTTPrequest.on('error', function(theError) {
+      response.writeHead(500);
+      numberRequestsRunning --;
+      response.end(`Eror during commmunication with rpc server. ${theError}. `);
+      console.log(`Eror during commmunication with rpc server. ${theError}. `);
+    }); 
+    theHTTPrequest.on('response', function(theHTTPresponse) {
+      var finalData = "";
+      console.log("DEBUG: got response!")
+      theHTTPresponse.on ('data', function (chunk) {
+        finalData += chunk;
+        console.log(`DEBUG: got data chunk: ${chunk}`)
+      });
+      theHTTPresponse.on('error', function(yetAnotherError){
+        response.writeHead(500);
+        numberRequestsRunning --;
+        response.end(`Eror during commmunication with rpc server. ${yetAnotherError}. `);
+        console.log(`Eror during commmunication with rpc server. ${yetAnotherError}. `);  
+      });
+      theHTTPresponse.on('end', function(){
+        numberRequestsRunning --;
+        console.log(`DEBUG: about to respond with status code: ${theHTTPresponse.statusCode}. `)
+        response.writeHead(theHTTPresponse.statusCode);
+        response.end(finalData);
+      });
+    });
+    console.log("DEBUG: got to before end.");
+    theHTTPrequest.end(requestStringified);
+  } catch (e) {
+    response.writeHead(500);
+    numberRequestsRunning --;
+    response.end(`Eror spawning fabcoin-cli process. ${escapeHtml(e)}. `);
+    console.log(`Eror spawning process fabcoin-cli. ${e}`);
+  }
+
+}
 
 function rpcCall(request, response, desiredCommand) {
   numberRequestsRunning ++;
@@ -25,6 +143,14 @@ function rpcCall(request, response, desiredCommand) {
     numberRequestsRunning --;
     return response.end(`RPC call label ${theCallLabel} not found. `);    
   }
+  var totalCommandLength = 0;
+  for (var label in desiredCommand) {
+    totalCommandLength += desiredCommand[label].length;
+  }
+  if (totalCommandLength > maxLengthForCliCall) {
+    return useRPCport(request, response, theCallLabel, desiredCommand);
+  }
+  
   var errors = [];
   var theArguments = pathnames.getRPCcallArguments(theCallLabel, desiredCommand, errors);
   if (theArguments === null) {
@@ -51,36 +177,8 @@ function rpcCall(request, response, desiredCommand) {
       response.writeHead(200);
       return response.end(`Command ${theArguments[counterArguments]} not allowed except on -regtest and -testnetnodns`);
     }
-  } 
-  var finalData = "";
-  try {
-    var child = childProcess.spawn(theCommand, theArguments);
-    child.stdout.on('data', function(data) {
-      console.log(data.toString());
-      finalData += data.toString();
-    });
-    child.stderr.on('data', function(data) {
-      console.log(data.toString());
-      finalData += data.toString();
-    });
-    child.on('exit', function(code) {
-      console.log(`RPC call exited with code: ${code}`.green);
-      numberRequestsRunning --;
-      if (code === 0) {
-        response.writeHead(200);
-        response.end(finalData);
-      } else {
-        response.writeHead(200);
-        response.end(`{"error": "${finalData}"}`);
-      }
-    });
-  } catch (e) {
-    response.writeHead(500);
-    numberRequestsRunning --;
-    response.end(`Eror: ${escapeHtml(e)}. `);
-    console.log(`Error: ${e}`);
   }
-  return;
+  useFabCoinCli(request, response, theCommand, theArguments);
 }
 
 module.exports = {
