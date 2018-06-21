@@ -92,16 +92,49 @@ function handleFabcoinInitialization(request, response) {
 }
 
 function handleRPC(request, response) {
+  if (request.method === "POST") {
+    return handleRPCPOST(request, response);
+  }
+  if (request.method === "GET") {
+    return handleRPCGET(request, response);
+  }
+  response.writeHead(400);
+  response.end(`Uknown/unhandled request method: ${request.method}`);
+}
+
+function handleRPCPOST(request, response) {
+  let body = [];
+  request.on('error', (err) => {
+    response.writeHead(400);
+    response.end(`Error during message body retrieval. ${err}`);
+  }).on('data', (chunk) => {
+    body.push(chunk);
+  }).on('end', () => {
+    body = Buffer.concat(body).toString();
+    return handleRPCURLEncodedInput(request, response, body);
+  });
+}
+
+function handleRPCGET(request, response) {
   var parsedURL = null;
-  var query = null;
-  var queryCommand = null;
   try {
     parsedURL = url.parse(request.url);
-    query = queryString.parse(parsedURL.query);
-    queryCommand = JSON.parse(query.command);
+    return handleRPCURLEncodedInput(request, response, parsedURL.query);
   } catch (e) {
     response.writeHead(400);
     return response.end(`Bad RPC request: ${e}`);
+  }
+}
+
+function handleRPCURLEncodedInput(request, response, urlEncodedInput) {
+  var query = null;
+  var queryCommand = null;
+  try {
+    query = queryString.parse(urlEncodedInput);
+    queryCommand = JSON.parse(query.command);
+  } catch (e) {
+    response.writeHead(400);
+    return response.end(`Bad RPC input. ${e}`);
   }
   return fabCli.rpcCall(request, response, queryCommand);
 }

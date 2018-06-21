@@ -3,7 +3,7 @@
 <link rel = "stylesheet" type = "text/css" href = "/kanban_frontend.css">
 <body onload = "window.kanban.thePage.initialize();">
 <div class = "divPageAndMenu">
-<div class = "divControlPanelDefault" style = "width: 87%; max-height: 20px;">
+<div class = "divControlPanelDefault divControlPanelNetwork">
   <label class = "containerRadioButton">
     <input id = "radioBoxSetRegtest" type = "radio" name = "net" onchange = "window.kanban.rpc.general.setRegtest();">
     <span class = "radioMark"></span>
@@ -249,7 +249,7 @@
     <label class = "containerRadioButton">
       <input type = "radio" name = "rpcProfiling" onchange = "window.kanban.rpc.profiling.getPerformanceProfile();">
       <span class = "radioMark"></span>
-      General info
+      Profile
     </label>
     &nbsp;&nbsp;&nbsp;
   </div><!--divControlPanelDefault-->

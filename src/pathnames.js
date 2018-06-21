@@ -620,7 +620,7 @@ function getURLfromComputationalEngineCall(theComputationalEngineCallLabel, addi
   return `${url.known.node}?command=${encodeURIComponent(JSON.stringify(theRequest))}`;
 }
 
-function getURLfromRPCLabel(theRPClabel, theArguments) {
+function getPOSTBodyfromRPCLabel(theRPClabel, theArguments) {
   var theRequest = {};
   var theRPCCall = rpcCalls[theRPClabel];
   theRequest[rpcCall] = theRPClabel;
@@ -635,7 +635,11 @@ function getURLfromRPCLabel(theRPClabel, theArguments) {
     }
     theRequest[label] = theArguments[label];
   }
-  return `${url.known.rpc}?command=${encodeURIComponent(JSON.stringify(theRequest))}`;
+  return `command=${encodeURIComponent(JSON.stringify(theRequest))}`;
+}
+
+function getURLfromRPCLabel(theRPClabel, theArguments) {
+  return `${url.known.rpc}?${getPOSTBodyfromRPCLabel(theRPClabel, theArguments)}`;
 }
 
 function getRPCNet(theArguments) {
@@ -934,6 +938,7 @@ module.exports = {
   ///////////////
   getNetworkDataFromRPCNetworkOption,
   getURLfromRPCLabel,
+  getPOSTBodyfromRPCLabel,
   getURLfromComputationalEngineCall,
   getURLFromMyNodesCall,
   getURLFromFabcoinInitialization,

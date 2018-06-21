@@ -17,7 +17,8 @@ function updatePages() {
     fabcoinInitialization: true,
     send: true,
     myNodes: true,
-    mine: true
+    mine: true,
+    profiling: true
   };
   if (currentLabel in pagesToUpdate) {
     var currentPage = globals.mainPage().pages[currentLabel];

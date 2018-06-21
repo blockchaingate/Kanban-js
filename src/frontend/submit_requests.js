@@ -104,14 +104,22 @@ function recordProgressDone(progress) {
   theButton.childNodes[0].innerHTML = `<b style='color:green'>Received</b>`;
 }
 
-function recordProgressStarted(progress, address, startTime) {
+function recordProgressStarted(progress, address, startTime, isPOST) {
   if (progress === null || progress === undefined) {
     return;
   }
   if (typeof progress === "string") {
     progress = document.getElementById(progress);
   }
-  addressHTML = `<a href="${address}" target = "_blank">${unescape(address)}</a>`;
+  if (isPOST === undefined || isPOST === null) {
+    isPOST = false;
+  }
+  var addressHTML;
+  if (!isPOST){
+    addressHTML = `<a href="${address}" target = "_blank">${unescape(address)}</a>`;
+  } else {
+    addressHTML = address;
+  }
   progress.setAttribute("startTime", startTime.toFixed());
   progress.innerHTML = getToggleButton({
     content: addressHTML, 
@@ -158,7 +166,7 @@ function submitGET(inputObject) {
   var result = inputObject.result;
   var callback = inputObject.callback;
   var xhr = new XMLHttpRequest();
-  recordProgressStarted(progress, theAddress, (new Date()).getTime());
+  recordProgressStarted(progress, theAddress, (new Date()).getTime(), false);
   xhr.open('GET', theAddress, true);
   xhr.setRequestHeader('Accept', 'text/html');
   xhr.onload = function () {
@@ -172,8 +180,38 @@ function submitGET(inputObject) {
   xhr.send();
 }
 
+/**
+ * Same as submitGET but uses POST instead.
+ * In addition to the inputs of submitGET, this call all expects:
+ *
+ * inputObject.messageBody: content of the message to send.
+ */
+function submitPOST(inputObject) {
+  var theAddress = inputObject.url;
+  var progress = inputObject.progress;
+  var result = inputObject.result;
+  var callback = inputObject.callback;
+  var xhr = new XMLHttpRequest();
+  var progressMessage = `${theAddress} POST ${inputObject.messageBody}`;
+  recordProgressStarted(progress, progressMessage, (new Date()).getTime(), true);
+
+  xhr.open("POST", theAddress, true);
+  xhr.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
+
+  xhr.onload = function () {
+    recordProgressDone(progress);
+    if (callback !== undefined && callback !== null) {
+      callback(xhr.responseText, result);
+    } else { 
+      recordResult(xhr.responseText, result);
+    }
+  };
+  xhr.send(inputObject.messageBody);
+}
+
 module.exports = {
   submitGET,
+  submitPOST,
   buttonProgressClick,
   getToggleButton,
   getToggleButtonPausePolling,

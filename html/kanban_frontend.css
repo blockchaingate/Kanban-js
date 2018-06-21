@@ -36,9 +36,16 @@ div.divMenuCollapsed{
   overflow: hidden;
 }
 
+div.divControlPanelNetwork{
+  width: 87%; 
+  max-height: 20px;
+  position: fixed;
+}
+
+
 div.divControlPanelDefault{
-  margin: 10px;
-  padding: 10px;
+  margin: 6px;
+  padding: 6px;
   transition: all 3s;
   border: 1px solid black;
   display: inline-block;
@@ -55,6 +62,8 @@ div.divMenuButtonPanel div{
 div.divMainPage{
   overflow: auto;
   width: 90%;
+  top: 50px;
+  position: absolute;
 /*  height: 90%;*/
 }
 
@@ -107,7 +116,7 @@ button.buttonProgress {
   background: none;
   transition: 2s all;
   border-radius: 2px;
-  margin-top: 5px;
+  margin-top: 0px;
 }
 
 button.buttonProgress:hover {
