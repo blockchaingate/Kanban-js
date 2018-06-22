@@ -287,7 +287,7 @@ function getReceivedByAddress() {
 }
 
 function callbackDumpPrivateKey(input, output){
-  submitRequests.updateInnerHtml(ids.defaults.inputSendPrivateKey, input);
+  submitRequests.updateInnerHtml(ids.defaults.inputSendPrivateKey, miscellaneous.removeQuotes(input));
   updateOmniFromInputs();
 }
 
@@ -760,7 +760,7 @@ function getBestBlockHash() {
   var index = getBestBlockIndex().value;
   try {
     if (index !== "") {
-      index = Number();
+      index = Number(index);
     }
   } catch (e) {
     index = getBestBlockIndex().value;
