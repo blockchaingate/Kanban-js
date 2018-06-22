@@ -5,6 +5,7 @@ const ids = require('./ids_dom_elements');
 const jsonToHtml = require('./json_to_html');
 const globals = require('./globals');
 const RPCGeneral = require('./fabcoin_rpc_general');
+const miscellaneous = require('../miscellaneous');
 
 function callbackMineStandard(input, outputComponent) {
   jsonToHtml.writeJSONtoDOMComponent(input, outputComponent, {});
@@ -41,9 +42,9 @@ function getGenerate() {
 }
 
 function generateToAddress() {
-  var numberOfBlocks = document.getElementById(ids.defaults.inputNumberOfBlocks).value;
+  var numberOfBlocks = miscellaneous.convertToIntegerIfPossible(document.getElementById(ids.defaults.inputNumberOfBlocks).value);
+  var maxTries = miscellaneous.convertToIntegerIfPossible(document.getElementById(ids.defaults.inputMaxNumberOfTries).value);
   var address = document.getElementById(ids.defaults.inputMiningAddress).value;
-  var maxTries = document.getElementById(ids.defaults.inputMaxNumberOfTries).value;
   submitRequests.submitGET({
     url: pathnames.getURLfromRPCLabel(pathnames.rpcCalls.generateToAddress.rpcCall, {
       net: globals.mainPage().getRPCNetworkOption(),

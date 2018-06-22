@@ -427,11 +427,11 @@ function TransactionTester() {
   this.amountInEachOutputLargeTX = 0;
   this.amountInEachOutputSmallTX = 0;
   this.numOutputs = 1000;
-  this.feeLargeTX = getFeeInteger();
+  this.feeSmallTX = getFeeInteger();
   if (this.numOutputs < 20) {
-    this.feeSmallTX = this.feeLargeTX;
+    this.feeLargeTX = this.feeSmallTX;
   } else {
-    this.feeSmallTX = Math.floor(getFeeInteger() * this.numOutputs / 20);
+    this.feeLargeTX = Math.floor(this.feeSmallTX * this.numOutputs / 20);
   }
   this.progressAdd = new miscellaneous.SpeedReport({
     name: "Add outputs",
@@ -757,14 +757,7 @@ function callbackGetBestBlockHash(inputHex, outputComponent) {
 
 function getBestBlockHash() {
   document.getElementById(ids.defaults.radioButtonsSend.bestBlock).checked = true;
-  var index = getBestBlockIndex().value;
-  try {
-    if (index !== "") {
-      index = Number(index);
-    }
-  } catch (e) {
-    index = getBestBlockIndex().value;
-  }
+  var index = miscellaneous.convertToIntegerIfPossible(getBestBlockIndex().value);
   var theURL = "";
   if (index === null || index === undefined || index === "") {
     theURL = pathnames.getURLfromRPCLabel(pathnames.rpcCalls.getBestBlockHash.rpcCall, {

@@ -28,6 +28,18 @@ function removeQuotes(input) {
   return input;
 }
 
+function convertToIntegerIfPossible(input) {
+  if (input === "") {
+    return input;
+  }
+  try {
+    var result = parseInt(input);
+    return result;
+  } catch (e) {
+    return input;
+  }
+}
+
 function SpeedReport (input) {
   this.name = input.name;
   this.total = input.total;
@@ -58,5 +70,6 @@ SpeedReport.prototype.toString = function () {
 module.exports = {
   shortenString,
   SpeedReport, 
-  removeQuotes
+  removeQuotes,
+  convertToIntegerIfPossible
 }
