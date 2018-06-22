@@ -44,10 +44,10 @@
 \item RAII performance profiler.
 \begin{verbatim}
 void first(...) {
-    FunctionProfile profileThis("functionToProfile");
+    FunctionProfile profileThis("first");
     //useful work }
 void second(...) {
-    FunctionProfile profileThis("functionToProfile");
+    FunctionProfile profileThis("second");
     //useful work
     first(); }
 \end{verbatim}
@@ -76,9 +76,9 @@ f-n& \# calls & run time& run time excl. subordinates \\\hline
 \[
 25 \stackrel{tx_0}{\mapsto} \left\{\begin{array}{lll}
 0.025 & \stackrel{tx_1}{\mapsto}& 0.0245 \\
-0.025 & \stackrel{tx_1}{\mapsto}& 0.0245\\
+0.025 & \stackrel{tx_2}{\mapsto}& 0.0245\\
 \vdots\\
-0.025 & \stackrel{tx_1}{\mapsto}& 0.0245
+0.025 & \stackrel{tx_{1000}}{\mapsto}& 0.0245
 \end{array} \right.
 \]
 \item Numerous changes in user interface.
