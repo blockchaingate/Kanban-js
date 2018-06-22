@@ -1,6 +1,7 @@
-\section{Changes fabcoin}
+\section{C++ work (fabcoind)}
+\subsection{coinBaseMaturity, EvalScript}
 \begin{frame}[fragile]
-\frametitle{Changes to fabcoin (C++)}
+\frametitle{Changes to fabcoin (C++): coinBaseMaturity, EvalScript}
 \begin{itemize}
 \item Introduced \verb|Params::coinBaseMaturity|.
 \begin{itemize}
@@ -15,7 +16,80 @@
 	\item If non-zero, provides additional debug messages.
 	\item Non-zero only for \verb|regtest| and \verb|testNetNoDNS|, governed by \verb|Params::fAllowExtraErrorStream|.
 \end{itemize}
-	
 \end{itemize}
 
+\end{frame}
+
+\subsection{New RPC calls}
+\begin{frame}[fragile]
+\frametitle{Changes to fabcoin (C++): new RPC calls}
+\begin{itemize}
+\item Introduced: \verb|sendbulkrawtransactions|. 
+\begin{itemize}
+\item Like \verb|sendrawtransaction| but with comma-separated transactions.
+\item Rationale: can send $1000$ transactions with a single HTTP post.
+\end{itemize}
+\item Introduced: \verb|getperformanceprofile|.
+\begin{itemize}
+\item Returns a performance profile. 
+\item Already detailed, to be made far more so.
+\end{itemize}
+\end{itemize}
+
+\end{frame}
+\subsection{getperformanceprofile}
+\begin{frame}[fragile]
+\frametitle{getperformance profile implementation}
+\begin{itemize}
+\item RAII performance profiler.
+\begin{verbatim}
+void first(...) {
+    FunctionProfile profileThis("functionToProfile");
+    //useful work }
+void second(...) {
+    FunctionProfile profileThis("functionToProfile");
+    //useful work
+    first(); }
+\end{verbatim}
+\item Distinguishes between different call stacks. 
+\item In above: statistics collected for: \verb|first|, \verb|second|, \verb|second->first| (first called from inside second). Sample output:
+\begin{tabular}{|r|r|r|r|}\hline
+f-n& \# calls & run time& run time excl. subordinates \\\hline
+\verb|first| & 10& 10 ms & 10 ms\\\hline
+\verb|second| & 5& 20 ms& 15 ms\\\hline
+\verb|second->first|& 5& 5 ms & 5 ms\\\hline
+\end{tabular}
+\item To be greatly expanded.
+\end{itemize}
+\end{frame}
+
+\section{Node.js work}
+\begin{frame}[fragile]
+\frametitle{Node.js work}
+\begin{itemize}
+\item Implemented \verb|POST| calls on RPC ports
+\begin{itemize}
+\item All nets: \verb|regtest|, \verb|testnetnodns|, \verb|testnet|, \verb|mainnet|). 
+\item Rationale: \verb|child.spawn| breaks large inputs $600$kb with fabcoin-cli.
+\end{itemize}
+\item Towards profiling: generated $1$ large transaction and $1000$ small transactions.
+\[
+25 \stackrel{tx_0}{\mapsto} \left\{\begin{array}{lll}
+0.025 & \stackrel{tx_1}{\mapsto}& 0.0245 \\
+0.025 & \stackrel{tx_1}{\mapsto}& 0.0245\\
+\vdots\\
+0.025 & \stackrel{tx_1}{\mapsto}& 0.0245
+\end{array} \right.
+\]
+\item Numerous changes in user interface.
+\item To do: make transaction go through (violates fabcoin protections).
+\end{itemize}
+
+\end{frame}
+
+\begin{frame}
+\frametitle{To do}
+\begin{itemize}
+\item Finish profiling of large transactions.
+\end{itemize}
 \end{frame}
