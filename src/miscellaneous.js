@@ -15,6 +15,19 @@ function shortenString(input, desiredMaxSize) {
   return `${input.slice(0, numEndChars)}...(${numOmittedChars} out of ${input.length} omitted)...${input.slice(input.length-numEndChars, input.length)}`; 
 }
 
+function removeQuotes(input) {
+  if (typeof input !== "string") {
+    return input;
+  }
+  if (input.startsWith('"')) {
+    input = input.slice(1);
+  }
+  if (input.endsWith('"')) {
+    input = input.slice(0, input.length - 1);
+  }
+  return input;
+}
+
 function SpeedReport (input) {
   this.name = input.name;
   this.total = input.total;
@@ -44,5 +57,6 @@ SpeedReport.prototype.toString = function () {
 
 module.exports = {
   shortenString,
-  SpeedReport
+  SpeedReport, 
+  removeQuotes
 }

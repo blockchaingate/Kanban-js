@@ -185,7 +185,21 @@ function getHtmlFromArrayOfObjects(input, options) {
   if (typeof inputJSON === "object" && !Array.isArray(inputJSON)) {
     inputJSON = [inputJSON];
   }
+  var shouldLayoutAsArrayOfObjects = false; 
   if (Array.isArray(inputJSON)) {
+    if (inputJSON.length > 0) {
+      if (typeof inputJSON[0] === "object") {
+        shouldLayoutAsArrayOfObjects = true; 
+      }
+    }
+  }
+  var shouldLayoutAsArrayTable = false;
+  if (!shouldLayoutAsArrayOfObjects) {
+    if (Array.isArray(inputJSON)) {
+      shouldLayoutAsArrayTable = true;
+    }
+  }
+  if (shouldLayoutAsArrayOfObjects) {
     var labelsRows = getLabelsRows(inputJSON);
     result += "<table class='tableJSON'>";
     result += "<tr>";
@@ -201,6 +215,8 @@ function getHtmlFromArrayOfObjects(input, options) {
     }
     result += "</tr>";
     result += "</table>";
+  } else if (shouldLayoutAsArrayTable) {
+    result += getTableHorizontallyLaidFromJSON(inputJSON, options.transformers, "", "", "");
   } else {
     result += inputJSON + "<br>";
   }

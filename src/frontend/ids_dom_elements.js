@@ -56,6 +56,7 @@ var defaults = {
   },
   checkboxBlockVerbose: "checkboxBlockVerbose",
   checkboxSyncronizeOmni: "checkboxSyncronizeOmni",
+  checkboxForcePOST: "checkboxForcePOST",
   radioButtonsNetwork: {
     regtest: "radioBoxSetRegtest",
     testNetNoDNS: "radioBoxSetTestnetNoDNS",

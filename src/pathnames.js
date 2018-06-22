@@ -188,6 +188,8 @@ function getNetworkDataFromRPCNetworkOption(RPCNetworkOption) {
 }
 
 var rpcCall = "rpcCall";
+
+var forceRPCPOST = "forceRPCPOST";
 /**
  * Use null for mandatory variables.
  * Use "" for optional variables.
@@ -292,8 +294,8 @@ var rpcCalls = {
       command: "listreceivedbyaddress",
     },
     mandatoryModifiableArguments: { //<- values give defaults, null for none
-      minimumConfirmations: '0',
-      includeEmpty: 'true'
+      minimumConfirmations: 0,
+      includeEmpty: true
     },
     allowedArgumentValues: {
       net: null
@@ -310,10 +312,10 @@ var rpcCalls = {
     },
     cli: ["net", "command"]
   },
-  getMiningInfo: {
-    rpcCall: "getMiningInfo", //must be same as rpc label, used for autocomplete
+  getGenerate: {
+    rpcCall: "getGenerate", //must be same as rpc label, used for autocomplete
     mandatoryFixedArguments: { //<- values give defaults, null for none
-      command: "getmininginfo",
+      command: "getgenerate",
     },
     allowedArgumentValues: {
       net: null
@@ -356,9 +358,9 @@ var rpcCalls = {
       command: "generatetoaddress",
     },
     mandatoryModifiableArguments: {
-      numberOfBlocks: "100", 
+      numberOfBlocks: 100, 
       address: null,
-      maxTries: "100000000",
+      maxTries: 1000000,
     },
     allowedArgumentValues: {
       net: null
@@ -637,10 +639,16 @@ function getPOSTBodyfromRPCLabel(theRPClabel, theArguments) {
   }
   for (var label in theArguments) {
     if (typeof theArguments[label] !== "string") {
-      console.log(`Warning: non-string value ${theArguments[label]} for label ${label} in rpc arguments. Is this expected? `);
+      //console.log(`Warning: non-string value ${theArguments[label]} for label ${label} in rpc arguments. Is this expected? `);
       //continue; // <- label not valid for this RPC call
     }
     theRequest[label] = theArguments[label];
+  }
+  theRequest.forceRPCPOST = false;
+  if (window !== null && window !== undefined) {
+    if (window.kanban.rpc[forceRPCPOST]) {
+      theRequest[forceRPCPOST] = true;
+    }
   }
   return `command=${encodeURIComponent(JSON.stringify(theRequest))}`;
 }
@@ -749,8 +757,9 @@ function isValidRPCArgumentBasicChecks(label, input, errors, recursionDepth) {
     return true;
   }*/
   if (typeof input !== "string") {
-    errors.push(`Input with label ${label} must be a string. `);
-    return false;
+    return true;
+    //errors.push(`Input with label ${label} must be a string. `);
+    //return false;
   }
   var maxLength = 1000;
   if (input.length > maxLength) {
@@ -804,7 +813,7 @@ function getRPCJSON(theRPCLabel, additionalArguments, inputId, errors) {
     "net": true,
     "command": true
   }
-  if (!getRPCcallArguments(theRPCLabel, additionalArguments, errors, result.request.params, excludeArguments)) {
+  if (!getRPCcallCommon(theRPCLabel, additionalArguments, errors, result.request.params, excludeArguments)) {
     return null;
   }
   return result;
@@ -863,7 +872,7 @@ function getRPCcallCommon(theRPCLabel, additionalArguments, errors, outputArray,
     if (!isValidRPCArgumentBasicChecks(currentLabel, currentValueCandidate, errors)) {
       return false;
     }
-    console.log(`DEBUG: value: ${JSON.stringify(currentValueCandidate)} looks ok. `);
+    //console.log(`DEBUG: value: ${JSON.stringify(currentValueCandidate)} looks ok. `);
     if (Array.isArray(currentValueCandidate)) {
       outputArray.push(JSON.stringify(currentValueCandidate));
     } else {
@@ -983,7 +992,8 @@ module.exports = {
   fabcoinInitializationProcedures,
   myNodesCommands,
   ///////////////
-  //label for the various type of command:
+  //label for the various type of commands:
+  forceRPCPOST,
   rpcCall,
   computationalEngineCall,
   fabcoinInitialization,

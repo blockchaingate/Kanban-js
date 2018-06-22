@@ -8,7 +8,7 @@ const initializeFabcoinFolders = require('./initialize_fabcoin_folders');
 
 var numberRequestsRunning = 0;
 var maxRequestsRunning = 4;
-var maxLengthForCliCall = 3; //<- messages below this length will be called using fabcoin-cli, larger messages via rpc json post. 
+var maxLengthForCliCall = 2048; //<- messages below this length will be called using fabcoin-cli, larger messages via rpc json post. 
 var totalRequests = 0;
 
 
@@ -82,12 +82,13 @@ function useRPCportPartTwo(request, response, RPCRequestObject) {
     //rejectUnauthorized: this.opts.ssl && this.opts.sslStrict !== false
   };
   //console.log ("DEBUG: options for request: " + JSON.stringify(requestOptions));
-  //console.log ("DEBUG: and the request: " + requestStringified);
+  console.log ("DEBUG: and the request: " + requestStringified);
+  console.log ("DEBUG: request object: " + JSON.stringify(RPCRequestObject));
 
   var theHTTPrequest = http.request(requestOptions);
 
   try {
-    console.log("DEBUG: got to here");
+    //console.log("DEBUG: got to here");
     theHTTPrequest.on('error', function(theError) {
       response.writeHead(500);
       numberRequestsRunning --;
@@ -96,25 +97,41 @@ function useRPCportPartTwo(request, response, RPCRequestObject) {
     }); 
     theHTTPrequest.on('response', function(theHTTPresponse) {
       var finalData = "";
-      console.log("DEBUG: got response!")
+      //console.log("DEBUG: got response!")
       theHTTPresponse.on ('data', function (chunk) {
         finalData += chunk;
-        console.log(`DEBUG: got data chunk: ${chunk}`)
+        //console.log(`DEBUG: got data chunk: ${chunk}`)
       });
       theHTTPresponse.on('error', function(yetAnotherError){
         response.writeHead(500);
         numberRequestsRunning --;
         response.end(`Eror during commmunication with rpc server. ${yetAnotherError}. `);
-        console.log(`Eror during commmunication with rpc server. ${yetAnotherError}. `);  
+        //console.log(`Eror during commmunication with rpc server. ${yetAnotherError}. `);  
       });
-      theHTTPresponse.on('end', function(){
+      theHTTPresponse.on('end', function() {
         numberRequestsRunning --;
-        console.log(`DEBUG: about to respond with status code: ${theHTTPresponse.statusCode}. `)
-        response.writeHead(theHTTPresponse.statusCode);
-        response.end(finalData);
+        //console.log(`DEBUG: about to respond with status code: ${theHTTPresponse.statusCode}. `)
+        if (theHTTPresponse.statusCode !== 200) {
+          response.writeHead(theHTTPresponse.statusCode);
+          return response.end(finalData);
+        }
+        try {
+          //console.log("DEBUG: Parsing: " + finalData + " typeof final data: " + (typeof finalData));
+          var dataParsed = JSON.parse(finalData);
+          if (dataParsed.error !== null && dataParsed.error !== "" && dataParsed.error !== undefined) {
+            //console.log("DEBUG: Data parsed error:" + dataParsed.error);
+            response.writeHead(200);
+            return response.end(dataParsed.error);
+          }
+          response.writeHead(200);
+          return response.end(JSON.stringify(dataParsed.result));
+        } catch (errorParsing) {
+          response.writeHead(500);
+          return response.end(`Error parsing fabcoind's output: ${errorParsing}.`);
+        }
       });
     });
-    console.log("DEBUG: got to before end.");
+    //console.log("DEBUG: got to before end.");
     theHTTPrequest.end(requestStringified);
   } catch (e) {
     response.writeHead(500);
@@ -147,7 +164,11 @@ function rpcCall(request, response, desiredCommand) {
   for (var label in desiredCommand) {
     totalCommandLength += desiredCommand[label].length;
   }
-  if (totalCommandLength > maxLengthForCliCall) {
+  var userWantsToUsePOST = false;
+  if (desiredCommand[pathnames.forceRPCPOST] === true) {
+    userWantsToUsePOST = true;
+  }
+  if (totalCommandLength > maxLengthForCliCall || userWantsToUsePOST) {
     return useRPCport(request, response, theCallLabel, desiredCommand);
   }
   

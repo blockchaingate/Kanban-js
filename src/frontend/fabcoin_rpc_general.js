@@ -53,6 +53,11 @@ function setRegtest() {
   setNet(pathnames.networkData.regtest.name);
 }
 
+function setForcePOST() {
+  window.kanban.rpc.forceRPCPOST = document.getElementById(ids.defaults.checkboxForcePOST).checked;
+  updatePages();
+}
+
 function listAccountsCallback(input, outputComponent) {
   jsonToHtml.writeJSONtoDOMComponent(input, outputComponent, {});
 }
@@ -70,6 +75,7 @@ function updatePageFromRadioButtonsByName(desiredRadioButtonName) {
 }
 
 module.exports = {
+  setForcePOST,
   setRegtest,
   setTestNetNoDNS,
   setTestNet,

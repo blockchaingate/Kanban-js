@@ -704,9 +704,16 @@ function listTransactions() {
 }
 
 function callbackGetBlock(inputHex, outputComponent) {
-  if (globals.mainPage().pages.send.verbosity === "0") {
-    var theBlock = Block.fromHex(inputHex);
-    jsonToHtml.writeJSONtoDOMComponent(theBlock.toHumanReadableHex(), outputComponent, optionsForStandardSendReceive);
+  inputHex = miscellaneous.removeQuotes(inputHex);
+  if (globals.mainPage().pages.send.verbosity === 0) {
+    var theBlock;
+    try {
+      theBlock = Block.fromHex(inputHex);
+      jsonToHtml.writeJSONtoDOMComponent(theBlock.toHumanReadableHex(), outputComponent, optionsForStandardSendReceive);
+    } catch (e) {
+      theBlock = `Error parsing block: ${inputHex}. `;
+      jsonToHtml.writeJSONtoDOMComponent(theBlock, outputComponent, optionsForStandardSendReceive);
+    }
   } else {
     jsonToHtml.writeJSONtoDOMComponent(inputHex, outputComponent, optionsForStandardSendReceive);
     try {
@@ -721,9 +728,10 @@ function callbackGetBlock(inputHex, outputComponent) {
 }
 
 function getBlock() {
-  globals.mainPage().pages.send.verbosity = "0";
+  //var forceRPC = window.kanban.rpc[pathnames.forceRPCPOST];
+  globals.mainPage().pages.send.verbosity = 0;
   if (document.getElementById(ids.defaults.checkboxBlockVerbose).checked) {
-    globals.mainPage().pages.send.verbosity = "1";  
+    globals.mainPage().pages.send.verbosity = 1;// forceRPC ? "1" : "1";  
   }
   document.getElementById(ids.defaults.radioButtonsSend.blockInfo).checked = true;
   var theURL = pathnames.getURLfromRPCLabel(
@@ -742,6 +750,7 @@ function getBlock() {
 }
 
 function callbackGetBestBlockHash(inputHex, outputComponent) {
+  inputHex = miscellaneous.removeQuotes(inputHex);
   submitRequests.updateInnerHtml(ids.defaults.inputBlockHash, inputHex);
   jsonToHtml.writeJSONtoDOMComponent(inputHex, outputComponent, optionsForStandardSendReceive);
 }
@@ -749,6 +758,13 @@ function callbackGetBestBlockHash(inputHex, outputComponent) {
 function getBestBlockHash() {
   document.getElementById(ids.defaults.radioButtonsSend.bestBlock).checked = true;
   var index = getBestBlockIndex().value;
+  try {
+    if (index !== "") {
+      index = Number();
+    }
+  } catch (e) {
+    index = getBestBlockIndex().value;
+  }
   var theURL = "";
   if (index === null || index === undefined || index === "") {
     theURL = pathnames.getURLfromRPCLabel(pathnames.rpcCalls.getBestBlockHash.rpcCall, {

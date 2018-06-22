@@ -12,3 +12,4 @@ window.kanban.submitRequests = require('./submit_requests');
 window.kanban.ids = require('./ids_dom_elements');
 window.kanban.myNodes = require('./my_nodes');
 window.kanban.allMyNodes = null;
+window.kanban.rpc.forceRPCPOST = false;

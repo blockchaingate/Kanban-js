@@ -31,10 +31,10 @@ function initializeFolders() {
   }
 }
 
-function initializeAuthenticationCookie(networkName, callback){
+function initializeAuthenticationCookie(networkName, callback) {
   var desiredCookieFileName = `${pathnames.pathsComputedAtRunTime.fabcoinConfigurationFolder}/${pathnames.networkData[networkName].folder}.cookie`;
   console.log(`desired cookie file name: ${desiredCookieFileName}`);
-  if (fs.readFile(desiredCookieFileName, function(error, data){
+  if (fs.readFile(desiredCookieFileName, function(error, data) {
     if (error) {
       console.log(`Error reading authentication cookie for network: ` + `${networkName}`.red + ` ${error}`.yellow);
     } else {
