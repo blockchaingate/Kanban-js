@@ -69,12 +69,12 @@ f-n& \# calls & run time& run time excl. subordinates \\\hline
 \begin{itemize}
 \item Implemented \verb|POST| calls on RPC ports
 \begin{itemize}
-\item All nets: \verb|regtest|, \verb|testnetnodns|, \verb|testnet|, \verb|mainnet|). 
+\item All nets: \verb|regtest|, \verb|testnetnodns|, \verb|testnet|, \verb|mainnet|. 
 \item Rationale: \verb|child.spawn| breaks large inputs $600$kb with fabcoin-cli.
 \end{itemize}
 \item Towards profiling: generated $1$ large transaction and $1000$ small transactions.
 \[
-25 \stackrel{tx_0}{\mapsto} \left\{\begin{array}{lll}
+25 \stackrel{tx_0}{\mapsto} \left\{\begin{array}{lcl}
 0.025 & \stackrel{tx_1}{\mapsto}& 0.0245 \\
 0.025 & \stackrel{tx_2}{\mapsto}& 0.0245\\
 \vdots\\
@@ -82,7 +82,7 @@ f-n& \# calls & run time& run time excl. subordinates \\\hline
 \end{array} \right.
 \]
 \item Numerous changes in user interface.
-\item To do: make transaction go through (violates fabcoin protections).
+\item To do: make transaction go through: large transaction breaks ``too long chain in mempool''.
 \end{itemize}
 
 \end{frame}
@@ -91,5 +91,7 @@ f-n& \# calls & run time& run time excl. subordinates \\\hline
 \frametitle{To do}
 \begin{itemize}
 \item Finish profiling of large transactions.
+\item Profile network.
+
 \end{itemize}
 \end{frame}
