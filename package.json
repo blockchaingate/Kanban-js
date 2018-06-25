@@ -2,13 +2,13 @@
   "name": "kanban",
   "version": "0.0.1",
   "description": "FAB coin's kanban system.",
-  "main": "src/app.js",
+  "main": "src-vanilla/app.js",
   "scripts": {
-    "serve": "node src/app.js",
-    "develop": "nodemon src/app.js",
-    "daemon": "node src/daemon.js",
-    "daemonStart": "node src/daemon.js start",
-    "daemonStop": "node src/daemon.js stop",
+    "serve": "node src-vanilla/app.js",
+    "develop": "nodemon src-vanilla/app.js",
+    "daemon": "node src-vanilla/daemon.js",
+    "daemonStart": "node src-vanilla/daemon.js start",
+    "daemonStop": "node src-vanilla/daemon.js stop",
     "test": "node lib/unit.js"
   },
   "repository": {
