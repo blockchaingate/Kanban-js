@@ -82,8 +82,8 @@ function useRPCportPartTwo(request, response, RPCRequestObject) {
     //rejectUnauthorized: this.opts.ssl && this.opts.sslStrict !== false
   };
   //console.log ("DEBUG: options for request: " + JSON.stringify(requestOptions));
-  console.log ("DEBUG: and the request: " + requestStringified);
-  console.log ("DEBUG: request object: " + JSON.stringify(RPCRequestObject));
+  //console.log ("DEBUG: and the request: " + requestStringified);
+  //console.log ("DEBUG: request object: " + JSON.stringify(RPCRequestObject));
 
   var theHTTPrequest = http.request(requestOptions);
 
