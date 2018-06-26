@@ -68,6 +68,7 @@ result += `<td>
 <button class = "buttonStandard" onclick = "window.kanban.allMyNodes.sshNodeToOneRemoteMachineNodeRestart('${this.name}')">restart</button>
 <button class = "buttonStandard" onclick = "window.kanban.allMyNodes.sshNodeToOneRemoteMachineKillallFabcoind('${this.name}')">kill fab</button>
 <button class = "buttonStandard" onclick = "window.kanban.allMyNodes.sshNodeToOneRemoteMachineDeleteFabcoinConfiguration('${this.name}')">del .fabcoin</button>
+<button class = "buttonStandard" onclick = "window.kanban.allMyNodes.sshNodeToOneRemoteMachineGitPullMakeFab('${this.name}')">make fab</button>
 <button class = "buttonStandard" onclick = "window.kanban.allMyNodes.sshNodeToOneRemoteMachineFabcoindStart('${this.name}')">start fab</button>
 </td>`;
   result += `<td>
@@ -181,6 +182,12 @@ MyNodesContainer.prototype.sshNodeToAllRemoteMachineDeleteFabcoinConfiguration =
     this.sshNodeToOneRemoteMachineDeleteFabcoinConfiguration(currentNodeLabel);
   }
 }
+ 
+MyNodesContainer.prototype.sshNodeToAllRemoteMachineGitPullMakeFab = function () {
+  for (var currentNodeLabel in this.myNodes) {
+    this.sshNodeToOneRemoteMachineDeleteFabcoinConfiguration(currentNodeLabel);
+  }
+}
 
 MyNodesContainer.prototype.browserToOneRemoteNodePing = function(currentNodeLabel) {
   var currentNode = this.myNodes[currentNodeLabel];
@@ -258,6 +265,22 @@ MyNodesContainer.prototype.sshNodeToOneRemoteMachineFabcoindStart = function(cur
   var currentNode = this.myNodes[currentNodeLabel];
   currentNode.timeStart.sshNodeToRemoteMachine = (new Date()).getTime();
   var theURL = pathnames.getURLFromMyNodesCall(pathnames.myNodesCommands.sshNodeToOneRemoteMachineStartFabcoind.myNodesCommand, {
+    machineName: currentNodeLabel,
+    net: globals.mainPage().getRPCNetworkOption()
+  });
+  //console.log(theURL);
+  submitRequests.submitGET({
+    url: theURL,
+    progress: currentNode.getSpanNodeToRemoteMachineProgressId(),
+    result : currentNode.getSpanNodeToRemoteMachineResultId(),
+    callback: callbackWriteNodeToRemoteResult        
+  });
+}
+
+MyNodesContainer.prototype.sshNodeToOneRemoteMachineGitPullMakeFab = function(currentNodeLabel) {
+  var currentNode = this.myNodes[currentNodeLabel];
+  currentNode.timeStart.sshNodeToRemoteMachine = (new Date()).getTime();
+  var theURL = pathnames.getURLFromMyNodesCall(pathnames.myNodesCommands.sshNodeToOneRemoteMachineGitPullMakeFab.myNodesCommand, {
     machineName: currentNodeLabel,
     net: globals.mainPage().getRPCNetworkOption()
   });

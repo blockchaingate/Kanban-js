@@ -604,7 +604,13 @@ var myNodesCommands = {
       machineName: null,
       net: null
     }    
-  }
+  },
+  sshNodeToOneRemoteMachineGitPullMakeFab: {
+    myNodesCommand: "sshNodeToOneRemoteMachineGitPullMakeFab",
+    cli: {
+      machineName: null
+    }    
+  },
 }
 
 function getURLfromComputationalEngineCall(theComputationalEngineCallLabel, additionalArguments) {

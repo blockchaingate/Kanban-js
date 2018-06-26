@@ -153,7 +153,6 @@ function sshNodeToOneRemoteMachineNodeRestart(request, response, desiredCommand)
 
 function sshNodeToOneRemoteMachineStartFabcoind(request, response, desiredCommand) {
   var theNet = desiredCommand.net;
-  console.log(`DEBUG: Desired command net: ${theNet}`);
   readSecretsAdminConfiguration(sshNodeToRemoteMachineExecuteCommands.bind(
     null, desiredCommand.machineName, `cd Kanban/fabcoin/src\n./fabcoind ${theNet} --daemon`, response
   ));
@@ -165,11 +164,18 @@ function sshNodeToOneRemoteMachineDeleteFabcoinConfiguration(request, response, 
   ));
 }
 
+function sshNodeToOneRemoteMachineGitPullMakeFab(request, response, desiredCommand) {
+  readSecretsAdminConfiguration(sshNodeToRemoteMachineExecuteCommands.bind(
+    null, desiredCommand.machineName, `cd Kanban/fabcoin\ngit pull\nmake -j4`, response
+  ));
+}
+
 module.exports = {
   fetchNodeInfo,
   sshNodeToOneRemoteMachineGitPull,
   sshNodeToOneRemoteMachineKillallFabcoind,
   sshNodeToOneRemoteMachineNodeRestart,
   sshNodeToOneRemoteMachineStartFabcoind,
-  sshNodeToOneRemoteMachineDeleteFabcoinConfiguration
+  sshNodeToOneRemoteMachineDeleteFabcoinConfiguration,
+  sshNodeToOneRemoteMachineGitPullMakeFab
 }

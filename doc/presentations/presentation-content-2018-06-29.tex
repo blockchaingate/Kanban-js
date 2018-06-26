@@ -11,6 +11,15 @@
 	\item Overridden in turn by command line argument 
 	
 \end{itemize}
+
+\item Introduced \verb|Profiling::fAllowProfiling|, new fabcoind options: \verb|-profilingon|, \verb|profilingoff|. 
+\begin{itemize}
+	\item If false, no profiling code is executed (immediate return all f-n calls).
+	\item Turned off by \verb|-profilingoff|, turned on by \verb|-profilingoff|.
+	\item If neither \verb|-profilingoff|, \verb|-profilingoff| given, turned on for \verb|regtest|, \verb|testNetNoDNS|,
+	off for \verb|mainNet|, \verb|testNet|.
+\end{itemize}
+
 \end{itemize}
 
 \end{frame}
