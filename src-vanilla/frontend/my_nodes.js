@@ -23,6 +23,10 @@ function MyNode(inputName, inputParsed) {
   };
 }
 
+MyNode.prototype.getURLBrowserToOneRemote = function (inputURI) {
+  return `https://${this.ipAddress}:${pathnames.ports.https}${inputURI}`;
+}
+
 MyNode.prototype.getURLPingBrowserToNode = function () {
   return `https://${this.ipAddress}:${pathnames.ports.https}${pathnames.url.known.ping}`;
 }
@@ -57,6 +61,7 @@ testnet log
 </a></td>`;
   result += `<td>
 <button class = "buttonStandard" onclick = "window.kanban.allMyNodes.browserToOneRemoteNodePing('${this.name}')">ping</button>
+<button class = "buttonStandard" onclick = "window.kanban.allMyNodes.browserToOneRemoteNodeMempoolArrivalTimes('${this.name}')">mempool times</button>
 </td>
 `;
 result += `<td>
@@ -123,6 +128,16 @@ MyNodesContainer.prototype.toHTML = function () {
   return result;
 }
 
+function callbackBrowserToRemoteMempoolArrivalTimes(input, output) {
+  var allMyNodes = window.kanban.allMyNodes;
+  var currentNode = allMyNodes.myNodes[allMyNodes.myNodesBrowserToRemoteResult[output]];
+  var outputSpan = document.getElementById(output);
+  jsonToHtml.writeJSONtoDOMComponent(input,outputSpan, {});
+  //console.log(`${currentNode.name}: ${currentNode.ipAddress} `);
+  //console.log("DEBUG input: " + input);
+  //console.log("DEBUG output: " + output);
+}
+
 function callbackWriteBrowserToRemoteResult(input, output) {
   var allMyNodes = window.kanban.allMyNodes;
   var currentNode = allMyNodes.myNodes[allMyNodes.myNodesBrowserToRemoteResult[output]];
@@ -145,6 +160,12 @@ function callbackWriteNodeToRemoteResult(input, output) {
   //console.log(`${currentNode.name}: ${currentNode.ipAddress} `);
   //console.log("DEBUG input: " + input);
   //console.log("DEBUG output: " + output);
+}
+
+MyNodesContainer.prototype.browserToAllRemoteMempoolArrivalTimes = function () {
+  for (var currentNodeLabel in this.myNodes) {
+    this.browserToOneRemoteNodeMempoolArrivalTimes(currentNodeLabel);
+  }
 }
 
 MyNodesContainer.prototype.browserToAllRemoteNodePing = function () {
@@ -187,6 +208,22 @@ MyNodesContainer.prototype.sshNodeToAllRemoteMachineGitPullMakeFab = function ()
   for (var currentNodeLabel in this.myNodes) {
     this.sshNodeToOneRemoteMachineDeleteFabcoinConfiguration(currentNodeLabel);
   }
+}
+
+MyNodesContainer.prototype.browserToOneRemoteNodeMempoolArrivalTimes = function(currentNodeLabel) {
+  var currentNode = this.myNodes[currentNodeLabel];
+  currentNode.timeStart.pingBrowserToNode = (new Date()).getTime();
+  var uri = pathnames.getURLfromRPCLabel(pathnames.rpcCalls.getMemoryPoolArrivalTimes.rpcCall, {
+    net: globals.mainPage().getRPCNetworkOption(),
+  });
+
+  submitRequests.submitGET({
+    url: currentNode.getURLBrowserToOneRemote(uri),
+    progress: currentNode.getSpanBrowserToRemoteProgressId(),
+    result : currentNode.getSpanBrowserToRemoteResultId(),
+    callback: callbackBrowserToRemoteMempoolArrivalTimes    
+  });
+
 }
 
 MyNodesContainer.prototype.browserToOneRemoteNodePing = function(currentNodeLabel) {

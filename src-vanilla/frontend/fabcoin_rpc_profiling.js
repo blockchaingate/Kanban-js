@@ -78,7 +78,7 @@ function showStatistics(inputLabel) {
     data: {
         labels: finalLabels,
         datasets: [{
-            label: 'run time',
+            label: 'run time \u03BCs',
             data: data,
             backgroundColor: colors,
             borderColor: colorBorders,
@@ -169,6 +169,18 @@ function getPerformanceProfile() {
   });  
 }
 
+function getMemoryPoolArrivalTimes() {
+  var urlForGET = pathnames.getURLfromRPCLabel(pathnames.rpcCalls.getMemoryPoolArrivalTimes.rpcCall, {
+    net: globals.mainPage().getRPCNetworkOption(),
+  });
+   submitRequests.submitGET({
+    url: urlForGET,
+    progress: globals.spanProgress(),
+    result : getOutputProfilingStandard(),
+    callback: callbackProfilingStandard
+  });  
+}
+
 function updateProfilingPage() {
   RPCGeneral.updatePageFromRadioButtonsByName(ids.defaults.radioGroups.rpcProfiling);
 }
@@ -178,5 +190,6 @@ module.exports = {
   showStatistics,
   getMemoryInfo,
   getInfo,
-  getPerformanceProfile
+  getPerformanceProfile,
+  getMemoryPoolArrivalTimes
 }

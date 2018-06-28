@@ -332,8 +332,18 @@ var rpcCalls = {
     },
     cli: ["net", "command"]
   },
+  getMemoryPoolArrivalTimes: {
+    rpcCall: "getMemoryPoolArrivalTimes", //must be same as rpc label, used for autocomplete
+    mandatoryFixedArguments: { //<- values give defaults, null for none
+      command: "getmemorypoolarrivaltimes",
+    },
+    allowedArgumentValues: {
+      net: null
+    },
+    cli: ["net", "command"]
+  },
   getPerformanceProfile: {
-    rpcCall: "getPerformanceProfile", //must be same as rpc label, used for autocomplete
+    rpcCall: "get", //must be same as rpc label, used for autocomplete
     mandatoryFixedArguments: { //<- values give defaults, null for none
       command: "getperformanceprofile",
     },
