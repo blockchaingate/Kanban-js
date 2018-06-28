@@ -206,7 +206,7 @@ MyNodesContainer.prototype.sshNodeToAllRemoteMachineDeleteFabcoinConfiguration =
  
 MyNodesContainer.prototype.sshNodeToAllRemoteMachineGitPullMakeFab = function () {
   for (var currentNodeLabel in this.myNodes) {
-    this.sshNodeToOneRemoteMachineDeleteFabcoinConfiguration(currentNodeLabel);
+    this.sshNodeToOneRemoteMachineGitPullMakeFab(currentNodeLabel);
   }
 }
 
