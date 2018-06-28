@@ -154,7 +154,7 @@ function sshNodeToOneRemoteMachineNodeRestart(request, response, desiredCommand)
 function sshNodeToOneRemoteMachineStartFabcoind(request, response, desiredCommand) {
   var theNet = desiredCommand.net;
   readSecretsAdminConfiguration(sshNodeToRemoteMachineExecuteCommands.bind(
-    null, desiredCommand.machineName, `cd Kanban/fabcoin/src\n./fabcoind ${theNet} --daemon`, response
+    null, desiredCommand.machineName, `cd Kanban/fabcoin/src\n./fabcoind ${theNet} --daemon -profilingon`, response
   ));
 }
 

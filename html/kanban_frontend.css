@@ -128,7 +128,11 @@ error{
   color: red;
 }
 
-table.tableJSON{
+table.tableProfiling td{
+  text-align: right;
+}
+
+table.tableJSON {
   border-collapse: collapse;
   border: 1px black solid;
 }

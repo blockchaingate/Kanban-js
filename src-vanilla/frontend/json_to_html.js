@@ -151,6 +151,13 @@ function getLabelsRows(input) {
 }
 
 var numberCallsGetHtmlFromArrayOfObjects = 0;
+function getClearParentButton() {
+  numberCallsGetHtmlFromArrayOfObjects ++;
+  var theId = `clearButton${numberCallsGetHtmlFromArrayOfObjects}`;
+  return `<button id = '${theId}' class = "buttonProgress" onclick = "window.kanban.submitRequests.deleteParent(this.id);">clear</button>`;
+
+}
+
 function getHtmlFromArrayOfObjects(input, options) {
   var doIncludeTogglePolling = false; 
   var outputPolling = null; 
@@ -176,9 +183,7 @@ function getHtmlFromArrayOfObjects(input, options) {
   } else {
     rawButton = submitRequests.getToggleButton({label: "raw", content: JSON.stringify(input)});
   }
-  numberCallsGetHtmlFromArrayOfObjects ++;
-  var theId = `clearButton${numberCallsGetHtmlFromArrayOfObjects}`;
-  var clearButton = `<button id = '${theId}' class = "buttonProgress" onclick = "window.kanban.submitRequests.deleteParent(this.id);">clear</button>`;
+  var clearButton = getClearParentButton();
   var result = "";
   result += rawButton;
   result += clearButton;
@@ -226,5 +231,6 @@ function getHtmlFromArrayOfObjects(input, options) {
 
 module.exports = {
   writeJSONtoDOMComponent,
-  getHtmlFromArrayOfObjects
+  getHtmlFromArrayOfObjects,
+  getClearParentButton
 }
