@@ -99,7 +99,7 @@ MyNode.prototype.generateMemoryPoolArrivalTimeChart = function(outputComponent) 
     data: {
         labels: labels,
         datasets: [{
-            label: 'mempool arrival times \u03BCs',
+            label: 'mempool arrival times ms',
             data: data,
             backgroundColor: colors,
             borderColor: colorBorders,
