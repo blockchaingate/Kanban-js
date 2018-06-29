@@ -36,7 +36,7 @@
 \item Generating run-time histograms profiled function calls. 
 \item Histogram buckets labeled by function execution times.
 \item Each histogram bucket contains the number of function calls with the given execution time.
-\item Example: bucket labeled $(5,15] \mu s$ contains all function calls that had a run-time between $5$ and $15$ $\mu s$.
+\item Example: bucket labeled $(5,15]$ $\mu s$ contains all function calls that had a run-time between $5$ and $15$ $\mu s$.
 \item Histograms have \verb|Statistic::desiredNumberOfHistogramBucketsMinusOne = 100| buckets.
 \item The bucket sizes are chosen after an initial sample of runs.
 \item No histograms before initial sample run.
@@ -52,6 +52,18 @@
 \item Off by default for \verb|mainNet|, \verb|testNet|.
 \item Recording statistics with arrival times (in ms) of the most recent \verb|Profiling::nMaxNumberTxsToAccount=20000| transactions.
 \item No obvious security risk, however considered insecure until deeper thought has been given.
+\item Used 3 nodes: laptop, London server, Mumbai server.
+\item On laptop: transaction:
+\[
+25 \stackrel{tx_0}{\mapsto} \left\{\begin{array}{lcl}
+0.025 & \stackrel{tx_1}{\mapsto}& 0.0245 \\
+0.025 & \stackrel{tx_2}{\mapsto}& 0.0245\\
+\vdots\\
+0.025 & \stackrel{tx_{1000}}{\mapsto}& 0.0245
+\end{array} \right.
+\]
+\item Timed the $1001$ txid mempool arrivals.
+
 \end{itemize}
 \end{frame}
 

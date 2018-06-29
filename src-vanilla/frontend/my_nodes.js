@@ -157,6 +157,7 @@ testnet log
   result += `<td>
 <button class = "buttonStandard" onclick = "window.kanban.allMyNodes.browserToOneRemoteNodePing('${this.name}')">ping</button>
 <button class = "buttonStandard" onclick = "window.kanban.allMyNodes.browserToOneRemoteNodeMempoolArrivalTimes('${this.name}')">mempool times</button>
+<button class = "buttonStandard" onclick = "window.kanban.allMyNodes.browserToOneRemoteNodeMiningInfo('${this.name}')">mine info</button>
 </td>
 `;
 result += `<td>
@@ -266,6 +267,12 @@ function callbackWriteNodeToRemoteResult(input, output) {
   //console.log("DEBUG output: " + output);
 }
 
+MyNodesContainer.prototype.browserToAllRemoteMiningInfo = function () {
+  for (var currentNodeLabel in this.myNodes) {
+    this.browserToOneRemoteNodeMiningInfo(currentNodeLabel);
+  }
+}
+
 MyNodesContainer.prototype.browserToAllRemoteMempoolArrivalTimes = function () {
   for (var currentNodeLabel in this.myNodes) {
     this.browserToOneRemoteNodeMempoolArrivalTimes(currentNodeLabel);
@@ -326,6 +333,22 @@ MyNodesContainer.prototype.browserToOneRemoteNodeMempoolArrivalTimes = function(
     progress: currentNode.getSpanBrowserToRemoteProgressId(),
     result : currentNode.getSpanBrowserToRemoteResultId(),
     callback: callbackBrowserToRemoteMempoolArrivalTimes    
+  });
+
+}
+
+MyNodesContainer.prototype.browserToOneRemoteNodeMiningInfo = function(currentNodeLabel) {
+  var currentNode = this.myNodes[currentNodeLabel];
+  currentNode.timeStart.pingBrowserToNode = (new Date()).getTime();
+  var uri = pathnames.getURLfromRPCLabel(pathnames.rpcCalls.getMiningInfo.rpcCall, {
+    net: globals.mainPage().getRPCNetworkOption(),
+  });
+
+  submitRequests.submitGET({
+    url: currentNode.getURLBrowserToOneRemote(uri),
+    progress: currentNode.getSpanBrowserToRemoteProgressId(),
+    result : currentNode.getSpanBrowserToRemoteResultId(),
+    callback: callbackWriteBrowserToRemoteResult    
   });
 
 }
