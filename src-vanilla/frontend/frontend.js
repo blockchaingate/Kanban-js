@@ -13,6 +13,7 @@ window.kanban.ids = require('./ids_dom_elements');
 window.kanban.myNodes = require('./my_nodes');
 window.kanban.allMyNodes = null;
 window.kanban.profiling = {};
+window.kanban.profiling.memoryPoolArrivalTimes = null;
 window.kanban.profiling.statistics = {};
 
 window.kanban.rpc.forceRPCPOST = false;

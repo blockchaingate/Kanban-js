@@ -8,6 +8,15 @@ const RPCGeneral = require('./fabcoin_rpc_general');
 const escapeHTML = require('escape-html');
 const chartJS = require('chart.js');
 
+function callbackMemoryPoolArrivals(input, outputComponent) {
+  try {
+    window.kanban.profiling.memoryPoolArrivalTimes = JSON.parse(input);
+  } catch (e) {
+    console.log(`Error while parsing memory pool arrivals. ${e}`);
+  }
+  jsonToHtml.writeJSONtoDOMComponent(input, outputComponent, {});
+}
+
 function callbackProfilingStandard(input, outputComponent) {
   jsonToHtml.writeJSONtoDOMComponent(input, outputComponent, {});
 }
@@ -177,7 +186,7 @@ function getMemoryPoolArrivalTimes() {
     url: urlForGET,
     progress: globals.spanProgress(),
     result : getOutputProfilingStandard(),
-    callback: callbackProfilingStandard
+    callback: callbackMemoryPoolArrivals
   });  
 }
 

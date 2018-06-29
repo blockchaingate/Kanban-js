@@ -169,7 +169,7 @@ function rpcCall(request, response, desiredCommand) {
     userWantsToUsePOST = true;
   }
   if (pathnames.rpcCalls[theCallLabel].easyAccessControlOrigin === true) {
-    console.log("Setting header ...");
+    //console.log("Setting header ...");
     response.setHeader('Access-Control-Allow-Origin', '*');
   }
   if (totalCommandLength > maxLengthForCliCall || userWantsToUsePOST) {

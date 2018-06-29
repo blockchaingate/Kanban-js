@@ -117,7 +117,7 @@ function sshNodeToRemoteMachineExecuteCommands(machineName, theCommand, response
 
 function sshNodeToOneRemoteMachineGitPull(request, response, desiredCommand) {
   readSecretsAdminConfiguration(sshNodeToRemoteMachineExecuteCommands.bind(
-    null, desiredCommand.machineName, "cd Kanban\ngit pull\nnpm install\ncd fabcoin\ngit pull", response
+    null, desiredCommand.machineName, "cd Kanban\ngit reset HEAD --hard\ngit pull\nnpm install\ncd fabcoin\ngit pull", response
   ));
 }
 

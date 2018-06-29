@@ -6,6 +6,7 @@ const jsonToHtml = require('./json_to_html');
 //const Block = require('../bitcoinjs_src/block');
 const globals = require('./globals');
 const miscellaneous = require('../miscellaneous');
+const chartJS = require('chart.js');
 
 function MyNode(inputName, inputParsed) {
   this.name = inputName;
@@ -21,6 +22,100 @@ function MyNode(inputName, inputParsed) {
     pingBrowserToNode: null,
     sshNodeToRemoteMachine: null
   };
+  this.memoryPoolArrivalTimes = null;
+  this.chartMemoryPoolArrivalTimes = null;
+  this.chartId = "";
+}
+
+MyNode.prototype.generateMemoryPoolArrivalTimeChart = function(outputComponent) {
+  if (typeof outputComponent === "string") {
+    outputComponent = document.getElementById(outputComponent);
+  }
+  var localArrivalTimes = window.kanban.profiling.memoryPoolArrivalTimes.arrivals;
+  var commonArrivalTimes = [];
+  var numArrivalsLocalOnly = 0;
+  var numArrivalsRemoteOnly = 0;
+  for (var label in this.memoryPoolArrivalTimes) {
+    if (label in localArrivalTimes) {
+      commonArrivalTimes.push(this.memoryPoolArrivalTimes[label] - localArrivalTimes[label])
+    } else  {
+      numArrivalsRemoteOnly ++;
+    }
+  }
+  for (var label in localArrivalTimes) {
+    if (!(label in this.memoryPoolArrivalTimes)) {
+      numArrivalsLocalOnly ++;
+    }
+  }
+  if (this.chartMemoryPoolArrivalTimes !== null) {
+    this.chartMemoryPoolArrivalTimes.destroy();
+  }
+  this.chartId = `ChartArrivalTimes${this.ipAddress}`;
+
+  var result = `<span style= 'display:inline-block; height:400px; width:400px;'><canvas id="${this.chartId}"> </canvas></span>`;
+  result += `<br>Num arrivals local only: ${numArrivalsLocalOnly} <br>`;
+  result += `<br>Num arrivals remote only: ${numArrivalsRemoteOnly}`;
+  result += `<br>common arrivals: ${commonArrivalTimes.join(", ")}`;
+  outputComponent.innerHTML = result;
+
+  var numBuckets = 50;
+  var data = new Array(numBuckets ).fill(0);
+  var labels = new Array(numBuckets).fill("");;
+  //data[0] = numArrivalsRemoteOnly;
+  //labels[0] = "remote only";
+  //data[numBuckets + 1] = numArrivalsLocalOnly;
+  //labels[numBuckets + 1] = "local only";
+  var max = 0; 
+  var min = 0;
+  for (var counter = 0; counter < commonArrivalTimes.length; counter ++ ) {
+    max = Math.max(max, commonArrivalTimes[counter]);
+    min = Math.min(min, commonArrivalTimes[counter]);
+  }
+  var intervalLength = max - min;
+  var bucketLength = intervalLength / numBuckets;
+  for (var counter = 0; counter < numBuckets; counter ++) {
+    var midPoint = Math.round( min + (counter + 0.5) * bucketLength);
+    labels[counter ] = ` ${midPoint}`;
+  }
+  for (var counter = 0; counter < commonArrivalTimes.length; counter ++ ) {
+    var currentDelay = commonArrivalTimes[counter];
+    var bucketIndex = Math.floor( (currentDelay - min) / bucketLength);
+    if (bucketIndex < 0) {
+      bucketIndex = 0;
+    }
+    if (bucketIndex >= numBuckets) {
+      bucketIndex = numBuckets - 1;
+    }
+    data[bucketIndex ] ++;
+  }
+
+  var theChart = document.getElementById(this.chartId);
+  var ctx = theChart.getContext('2d'); 
+  var colors = new Array(commonArrivalTimes.length).fill('lightskyblue', 0, commonArrivalTimes.length);
+  var colorBorders = new Array(commonArrivalTimes.length).fill('skyblue', 0, commonArrivalTimes.length);
+
+  this.chartMemoryPoolArrivalTimes = new Chart(ctx, {
+    type: 'bar',
+    data: {
+        labels: labels,
+        datasets: [{
+            label: 'mempool arrival times \u03BCs',
+            data: data,
+            backgroundColor: colors,
+            borderColor: colorBorders,
+            borderWidth: 1
+        }]
+    },
+    options: {
+        scales: {
+            yAxes: [{
+                ticks: {
+                    beginAtZero:true
+                }
+            }]
+        }
+    }
+  });
 }
 
 MyNode.prototype.getURLBrowserToOneRemote = function (inputURI) {
@@ -132,7 +227,16 @@ function callbackBrowserToRemoteMempoolArrivalTimes(input, output) {
   var allMyNodes = window.kanban.allMyNodes;
   var currentNode = allMyNodes.myNodes[allMyNodes.myNodesBrowserToRemoteResult[output]];
   var outputSpan = document.getElementById(output);
-  jsonToHtml.writeJSONtoDOMComponent(input,outputSpan, {});
+  if (window.kanban.profiling.memoryPoolArrivalTimes === null) {
+    jsonToHtml.writeJSONtoDOMComponent(input, outputSpan, {});
+    return;
+  }
+  try {
+    currentNode.memoryPoolArrivalTimes = JSON.parse(input).arrivals;
+    currentNode.generateMemoryPoolArrivalTimeChart(output);
+  } catch (e) {
+    jsonToHtml.writeJSONtoDOMComponent(`Failed to interpret memory pool arrival times. ${e}`, outputSpan, {});
+  }
   //console.log(`${currentNode.name}: ${currentNode.ipAddress} `);
   //console.log("DEBUG input: " + input);
   //console.log("DEBUG output: " + output);

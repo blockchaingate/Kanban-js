@@ -344,7 +344,7 @@ var rpcCalls = {
     easyAccessControlOrigin: true
   },
   getPerformanceProfile: {
-    rpcCall: "get", //must be same as rpc label, used for autocomplete
+    rpcCall: "getPerformanceProfile", //must be same as rpc label, used for autocomplete
     mandatoryFixedArguments: { //<- values give defaults, null for none
       command: "getperformanceprofile",
     },
