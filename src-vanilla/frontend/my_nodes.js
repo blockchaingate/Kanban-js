@@ -247,6 +247,13 @@ function callbackWriteBrowserToRemoteResult(input, output) {
   var allMyNodes = window.kanban.allMyNodes;
   var currentNode = allMyNodes.myNodes[allMyNodes.myNodesBrowserToRemoteResult[output]];
   var outputSpan = document.getElementById(output);
+  jsonToHtml.writeJSONtoDOMComponent(input, outputSpan, {});
+}
+
+function callbackWriteBrowserRemotePingResult(input, output) {
+  var allMyNodes = window.kanban.allMyNodes;
+  var currentNode = allMyNodes.myNodes[allMyNodes.myNodesBrowserToRemoteResult[output]];
+  var outputSpan = document.getElementById(output);
   currentNode.timeEnd.pingBrowserToNode = (new Date()).getTime(); 
   var timeElapsed = currentNode.timeEnd.pingBrowserToNode - currentNode.timeStart.pingBrowserToNode;
   outputSpan.innerHTML = `${timeElapsed.toFixed(2)} ms`;
@@ -360,7 +367,7 @@ MyNodesContainer.prototype.browserToOneRemoteNodePing = function(currentNodeLabe
     url: currentNode.getURLPingBrowserToNode(),
     progress: currentNode.getSpanBrowserToRemoteProgressId(),
     result : currentNode.getSpanBrowserToRemoteResultId(),
-    callback: callbackWriteBrowserToRemoteResult        
+    callback: callbackWriteBrowserRemotePingResult        
   });
 }
 
