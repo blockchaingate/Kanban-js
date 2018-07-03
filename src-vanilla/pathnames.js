@@ -310,7 +310,8 @@ var rpcCalls = {
     allowedArgumentValues: {
       net: null
     },
-    cli: ["net", "command"]
+    cli: ["net", "command"],
+    easyAccessControlOrigin: true
   },
   getGenerate: {
     rpcCall: "getGenerate", //must be same as rpc label, used for autocomplete

@@ -116,10 +116,10 @@ function useRPCportPartTwo(request, response, RPCRequestObject) {
           return response.end(finalData);
         }
         try {
-          console.log("DEBUG: Parsing: " + finalData + " typeof final data: " + (typeof finalData));
+          //console.log("DEBUG: Parsing: " + finalData + " typeof final data: " + (typeof finalData));
           var dataParsed = JSON.parse(finalData);
           if (dataParsed.error !== null && dataParsed.error !== "" && dataParsed.error !== undefined) {
-            console.log("DEBUG: Data parsed error:" + dataParsed.error);
+            //console.log("DEBUG: Data parsed error:" + dataParsed.error);
             response.writeHead(200);
             return response.end(dataParsed.error);
           }

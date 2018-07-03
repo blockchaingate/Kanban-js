@@ -157,6 +157,7 @@ testnet log
   result += `<td>
 <button class = "buttonStandard" onclick = "window.kanban.allMyNodes.browserToOneRemoteNodePing('${this.name}')">ping</button>
 <button class = "buttonStandard" onclick = "window.kanban.allMyNodes.browserToOneRemoteNodeMempoolArrivalTimes('${this.name}')">mempool times</button>
+<button class = "buttonStandard" onclick = "window.kanban.allMyNodes.browserToOneRemoteNodeMiningInfo('${this.name}')">mine info</button>
 </td>
 `;
 result += `<td>
@@ -246,6 +247,13 @@ function callbackWriteBrowserToRemoteResult(input, output) {
   var allMyNodes = window.kanban.allMyNodes;
   var currentNode = allMyNodes.myNodes[allMyNodes.myNodesBrowserToRemoteResult[output]];
   var outputSpan = document.getElementById(output);
+  jsonToHtml.writeJSONtoDOMComponent(input, outputSpan, {});
+}
+
+function callbackWriteBrowserRemotePingResult(input, output) {
+  var allMyNodes = window.kanban.allMyNodes;
+  var currentNode = allMyNodes.myNodes[allMyNodes.myNodesBrowserToRemoteResult[output]];
+  var outputSpan = document.getElementById(output);
   currentNode.timeEnd.pingBrowserToNode = (new Date()).getTime(); 
   var timeElapsed = currentNode.timeEnd.pingBrowserToNode - currentNode.timeStart.pingBrowserToNode;
   outputSpan.innerHTML = `${timeElapsed.toFixed(2)} ms`;
@@ -264,6 +272,12 @@ function callbackWriteNodeToRemoteResult(input, output) {
   //console.log(`${currentNode.name}: ${currentNode.ipAddress} `);
   //console.log("DEBUG input: " + input);
   //console.log("DEBUG output: " + output);
+}
+
+MyNodesContainer.prototype.browserToAllRemoteMiningInfo = function () {
+  for (var currentNodeLabel in this.myNodes) {
+    this.browserToOneRemoteNodeMiningInfo(currentNodeLabel);
+  }
 }
 
 MyNodesContainer.prototype.browserToAllRemoteMempoolArrivalTimes = function () {
@@ -330,6 +344,22 @@ MyNodesContainer.prototype.browserToOneRemoteNodeMempoolArrivalTimes = function(
 
 }
 
+MyNodesContainer.prototype.browserToOneRemoteNodeMiningInfo = function(currentNodeLabel) {
+  var currentNode = this.myNodes[currentNodeLabel];
+  currentNode.timeStart.pingBrowserToNode = (new Date()).getTime();
+  var uri = pathnames.getURLfromRPCLabel(pathnames.rpcCalls.getMiningInfo.rpcCall, {
+    net: globals.mainPage().getRPCNetworkOption(),
+  });
+
+  submitRequests.submitGET({
+    url: currentNode.getURLBrowserToOneRemote(uri),
+    progress: currentNode.getSpanBrowserToRemoteProgressId(),
+    result : currentNode.getSpanBrowserToRemoteResultId(),
+    callback: callbackWriteBrowserToRemoteResult    
+  });
+
+}
+
 MyNodesContainer.prototype.browserToOneRemoteNodePing = function(currentNodeLabel) {
   var currentNode = this.myNodes[currentNodeLabel];
   currentNode.timeStart.pingBrowserToNode = (new Date()).getTime();
@@ -337,7 +367,7 @@ MyNodesContainer.prototype.browserToOneRemoteNodePing = function(currentNodeLabe
     url: currentNode.getURLPingBrowserToNode(),
     progress: currentNode.getSpanBrowserToRemoteProgressId(),
     result : currentNode.getSpanBrowserToRemoteResultId(),
-    callback: callbackWriteBrowserToRemoteResult        
+    callback: callbackWriteBrowserRemotePingResult        
   });
 }
 
