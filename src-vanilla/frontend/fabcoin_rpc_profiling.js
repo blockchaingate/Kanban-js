@@ -65,7 +65,7 @@ function showStatistics(inputLabel) {
   var theChart = document.getElementById("chartProfiling");
   var ctx = theChart.getContext('2d'); 
   var inputDescriptions = stats.runTime.histogram.bucketDescriptions;
-  var content = stats.runTime.histogram.content;
+  var content = stats.runTime.histogram.histogramContent;
   var finalLabels = [];
   var data = [];
   for (var indexBucket in inputDescriptions) {
@@ -121,15 +121,15 @@ function getGraphsTable(inputParseD) {
     } else {
       result += `<td>${escapeHTML(label)}</td>`;
     }
-    var numSamples = currentStats.runTime.numSamples;
-    result += `<td>${numSamples}</td>`;
-    var averageRunTime = currentStats.runTime.total;
-    averageRunTime /= numSamples;
+    var numberOfSamples = currentStats.runTime.numberOfSamples;
+    result += `<td>${numberOfSamples}</td>`;
+    var averageRunTime = currentStats.runTime.totalRunTime;
+    averageRunTime /= numberOfSamples;
     averageRunTime = averageRunTime.toFixed(0);
     result += `<td>${averageRunTime} &#956;s</td>`;
     if (currentStats.runTimeSubordinates != undefined && currentStats.runTimeSubordinates !== null) {
       var averageRunTimeExcludingSubordinates = currentStats.runTimeExcludingSubordinatesInMicroseconds;
-      averageRunTimeExcludingSubordinates /= numSamples;
+      averageRunTimeExcludingSubordinates /= numberOfSamples;
       averageRunTimeExcludingSubordinates = averageRunTimeExcludingSubordinates.toFixed(0);
       result += `<td>${averageRunTimeExcludingSubordinates} &#956;s</td>`;
     }

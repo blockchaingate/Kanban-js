@@ -1,0 +1,47 @@
+\documentclass{article}
+%\usepackage{authblk}
+\usepackage{amssymb, amsmath}
+\usepackage{hyperref}
+\usepackage{verbatim}
+\usepackage{multirow}
+\usepackage{xcolor}
+\usepackage{footnote}
+\makesavenoteenv{tabular}
+
+\addtolength{\hoffset}{-3.5cm}
+\addtolength{\textwidth}{6.8cm}
+\addtolength{\voffset}{-3cm}
+\addtolength{\textheight}{6cm}
+
+\newcommand{\NotImplementedYet}{\textbf{\color{orange}NI}}
+\newcommand{\NotRanDueToDriverIssues}{\textbf{\color{orange}ND}}
+\newcommand{\NotCorrect}{\textbf{\color{red}NC}}
+\newcommand{\NotBuilding}{\textbf{\color{red}NB}}
+
+%\author[1]{Todor Milev}
+%\affil[1]{FA Enterprise System}
+\title{
+Performance profiling \\
+for FAB coin
+}
+\author{Todor Milev\footnote{FA Enterprise System}\\ todor@fa.biz}
+\newcommand{\secpTwoFiveSixKone}{{\bf secp256k1}}
+\renewcommand{\mod}{{~\bf mod~}}
+\begin{document}
+\maketitle
+\section{Introduction}
+In this text, we describe several performance profiling tests we carried out for FAB coin. Our tests investigated the performance of both individual FAB nodes as well as the performance of a tiny network isolated from testNet. Our network had $3$ machines located in $3$ different continents. Should we decide it is worth the effort, we can deploy our testing network on more nodes; our setup was designed to be scalable and could allow use of an arbitrary number of machines.
+
+Not all performance characteristics of Fabcoin can be improved without modifying the design philosophy of the underlying system. For example, the average block mining time is 75 seconds by design, independent of the technical quality of the underlying code. The most important performance characteristics that can be improved without changing the design of Fabcoin are those of data management, networking and cryptography performance. 
+
+Our preliminary tests show that - at least in our small testing environment - the data management and cryptography performance meets and significantly exceeds the current needs of running a Fabcoin node. We do not expect that performance improvements in these two areas would significantly improve the speed of the whole system. However, we found that for the particular large memory pool transactions we tested, the network performance could be significantly improved. We were not able to establish whether the performance limitations of the network were so by design (e.g., network traffic throttling) or were caused by technical decisions in the fabcoind executable.
+
+1. 
+
+In order to carry out our timing tests, we prepared performance profile framework which can be maintained for future use, additional profiling, and performance regression testing. The testing framework also works on mainNet, so we can use it to monitor the performance of select machines. The framework has not passed a security audit, so should we choose to monitor machines on mainNet, this should only happen in nodes that neither mine nor store private keys.
+
+On our network of 3 machines
+
+\bibliographystyle{plain}
+\bibliography{../bibliography}
+\end{document}
