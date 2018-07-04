@@ -7,6 +7,7 @@ const globals = require('./globals');
 const RPCGeneral = require('./fabcoin_rpc_general');
 const escapeHTML = require('escape-html');
 const chartJS = require('chart.js');
+const miscellaneous = require('../miscellaneous')
 
 function callbackMemoryPoolArrivals(input, outputComponent) {
   try {
@@ -82,12 +83,13 @@ function showStatistics(inputLabel) {
   }
   var colors = new Array(data.length).fill('lightskyblue', 0, data.length);
   var colorBorders = new Array(data.length).fill('skyblue', 0, data.length);
+  var inputLabelDecoded = miscellaneous.shortenString(decodeURIComponent(inputLabel), 50, false);
   window.kanban.profiling.chart = new Chart(ctx, {
     type: 'bar',
     data: {
         labels: finalLabels,
         datasets: [{
-            label: 'run time \u03BCs',
+            label: `${inputLabelDecoded} performance`,
             data: data,
             backgroundColor: colors,
             borderColor: colorBorders,
@@ -95,15 +97,24 @@ function showStatistics(inputLabel) {
         }]
     },
     options: {
-        scales: {
-            yAxes: [{
-                ticks: {
-                    beginAtZero:true
-                }
-            }]
+      scales: {
+        yAxes: [{
+          ticks: {
+              beginAtZero:true
+          },
+          scaleLabel: {
+            display: true,
+            labelString: '# calls'
+          }
+      }],
+      xAxes: [{
+        scaleLabel: {
+          display: true,
+          labelString: 'run time \u03BCs'
         }
+      }]
     }
-  });
+  }});
 }
 
 function getGraphsTable(inputParseD) {
@@ -144,6 +155,15 @@ function callbackGetPerformanceProfilePartTwo(input, outputDOM) {
   var result = "";
   result += submitRequests.getToggleButtonPausePolling({label: "raw", content: JSON.stringify(input)});
   result += jsonToHtml.getClearParentButton();
+
+  var runTime = 0; 
+  var timeStarts = inputParsed.timePastStarts;
+  var timeSamplings = inputParsed.timePastSamplings;
+  for (var counterStarts = 0; counterStarts < timeStarts.length; counterStarts ++ ) {
+    runTime += timeSamplings[counterStarts] - timeStarts[counterStarts];
+  }
+  result += `<br>Profiling recorded over ${miscellaneous.getDurationReadableFromMilliseconds(runTime)} with ${timeStarts.length - 1} system restarts. `;
+  result += `Stats persist accross restarts.`
   result += "<table><tr><td>";
   result += getGraphsTable(inputParsed);
   result += "</td><td>";

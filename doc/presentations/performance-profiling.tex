@@ -30,17 +30,30 @@ for FAB coin
 \begin{document}
 \maketitle
 \section{Introduction}
-In this text, we describe several performance profiling tests we carried out for FAB coin. Our tests investigated the performance of both individual FAB nodes as well as the performance of a tiny network isolated from testNet. Our network had $3$ machines located in $3$ different continents. Should we decide it is worth the effort, we can deploy our testing network on more nodes; our setup was designed to be scalable and could allow use of an arbitrary number of machines.
-
 Not all performance characteristics of Fabcoin can be improved without modifying the design philosophy of the underlying system. For example, the average block mining time is 75 seconds by design, independent of the technical quality of the underlying code. The most important performance characteristics that can be improved without changing the design of Fabcoin are those of data management, networking and cryptography performance. 
 
-Our preliminary tests show that - at least in our small testing environment - the data management and cryptography performance meets and significantly exceeds the current needs of running a Fabcoin node. We do not expect that performance improvements in these two areas would significantly improve the speed of the whole system. However, we found that for the particular large memory pool transactions we tested, the network performance could be significantly improved. We were not able to establish whether the performance limitations of the network were so by design (e.g., network traffic throttling) or were caused by technical decisions in the fabcoind executable.
 
-1. 
+In this text, we describe several performance profiling tests we carried out for FAB coin. Our tests investigated the performance of individual FAB nodes on testNetNoDNS (an isolated self-contained tiny network), the performance of the tiny network testNetNoDNS as a whole, and finally the performance of individual nodes on mainNet. At the time of writing, testNetNoDNS had $3$ machines located in $3$ different continents. Should we decide it is worth the effort, we can deploy testNetNoDNS on more nodes; our setup can easily scale to an arbitrary number of machines.
 
-In order to carry out our timing tests, we prepared performance profile framework which can be maintained for future use, additional profiling, and performance regression testing. The testing framework also works on mainNet, so we can use it to monitor the performance of select machines. The framework has not passed a security audit, so should we choose to monitor machines on mainNet, this should only happen in nodes that neither mine nor store private keys.
+Our preliminary tests show that - at least in our small testing environment - the data management and cryptography performance meets and significantly exceeds the current needs of running a Fabcoin node. We do not expect that performance improvements in these two areas would significantly improve the speed of the whole system. However, we found that for the particular large memory pool transactions we tested, the network performance could be significantly improved. We have not yet investigated whether the performance limitations of the network were so by design (e.g., network traffic throttling) or were inadvertently caused by technical decisions in the fabcoind executable.
 
-On our network of 3 machines
+We plan on running our performance profiling system continuously to gather long term statistics and to hunt for performance regression bugs. Our performance profiling framework was designed to be expandable and maintainable, and we expect to add more statistics in the future. 
+
+\subsection{Performance data gathered}
+We profiled our network using two different scenarios. 
+
+In the first scenario, we generated a large amount of transactions in the mempool on testNetNoDNS and tracked their propagation from the user interface to the local machine and from the local machine to the entire testNetNoDNS. More precisely, we generated one large transaction that split one input into $1000$ outputs, and then we generated 1000 small transactions, each transferring the output generated in the first transaction. In \eqref{eqThe1kTransaction}, the first transaction is denoted by $tx_0$ and the small transaction by $tx_{1},\dots, tx_{1000}$. All transactions were carried to and from one single address, and the initial coin source was a coinbase transaction.
+\begin{equation}\label{eqThe1kTransaction}
+25 \stackrel{tx_0}{\mapsto} \left\{\begin{array}{lcl}
+0.025 & \stackrel{tx_1}{\mapsto}& 0.0245 \\
+0.025 & \stackrel{tx_2}{\mapsto}& 0.0245\\
+\vdots\\
+0.025 & \stackrel{tx_{1000}}{\mapsto}& 0.0245
+\end{array} \right.
+\end{equation}
+In the second scenario, we simply monitored the performance of individual non-mining nodes. Our mainNet nodes are non-user facing, so while they are compiled with wallet support, they did not perform any wallet actions.
+
+
 
 \bibliographystyle{plain}
 \bibliography{../bibliography}
