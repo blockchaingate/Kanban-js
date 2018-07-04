@@ -7,7 +7,8 @@ const globals = require('./globals');
 const RPCGeneral = require('./fabcoin_rpc_general');
 const escapeHTML = require('escape-html');
 const chartJS = require('chart.js');
-const miscellaneous = require('../miscellaneous')
+const miscellaneous = require('../miscellaneous');
+const jsZip = require("jszip");
 
 function callbackMemoryPoolArrivals(input, outputComponent) {
   try {
@@ -59,12 +60,21 @@ function getThreadTable(inputParsed) {
 }
 
 function showStatistics(inputLabel) {
-  var stats = window.kanban.profiling.statistics[inputLabel];
   if (window.kanban.profiling.chart !== undefined) {
     window.kanban.profiling.chart.destroy();
   }
-  var theChart = document.getElementById("chartProfiling");
-  var ctx = theChart.getContext('2d'); 
+  var theChartCanvas = document.getElementById("chartProfiling");
+  var drawingContext = theChartCanvas.getContext('2d'); 
+  window.kanban.profiling.chart = createChart(inputLabel, drawingContext);
+  var downloadHtml = "";
+  downloadHtml += `<a href = "#download${inputLabel}" download="chartPerformance${inputLabel}.png" `; 
+  downloadHtml += ` onclick = "window.kanban.rpc.profiling.downloadChart(this, '${inputLabel}');" >download</a>`;
+  var downloadSpan = document.getElementById("spanDownloadChart");
+  downloadSpan.innerHTML = downloadHtml;
+}
+
+function createChart(inputLabel, drawingContext) {
+  var stats = window.kanban.profiling.statistics[inputLabel];
   var inputDescriptions = stats.runTime.histogram.bucketDescriptions;
   var content = stats.runTime.histogram.histogramContent;
   var finalLabels = [];
@@ -84,7 +94,7 @@ function showStatistics(inputLabel) {
   var colors = new Array(data.length).fill('lightskyblue', 0, data.length);
   var colorBorders = new Array(data.length).fill('skyblue', 0, data.length);
   var inputLabelDecoded = miscellaneous.shortenString(decodeURIComponent(inputLabel), 50, false);
-  window.kanban.profiling.chart = new Chart(ctx, {
+  return new Chart(drawingContext, {
     type: 'bar',
     data: {
         labels: finalLabels,
@@ -117,6 +127,51 @@ function showStatistics(inputLabel) {
   }});
 }
 
+function downloadChart(theLink, label) {
+  var theChart = window.kanban.profiling.chart;
+  var theDataURL = theChart.toBase64Image('image/png');
+  //var dataBase64 = theDataURL.slice(22);
+  
+  //console.log("DEBUG: theDataURL: " + theDataURL);
+  //console.log("DEBUG: dataBase64: " + dataBase64);
+  theLink.setAttribute("href", theDataURL);
+}
+
+function prepareDownloadAllCharts() {
+  var zipper = new jsZip();
+  zipper.file("texoutput.tex", "here i am");
+  var theChartCanvas = document.getElementById("chartProfiling");
+  var drawingContext = theChartCanvas.getContext('2d'); 
+  var currentChart = null;
+  var stats = window.kanban.profiling.statistics;
+  for (var label in stats) {
+    if (currentChart !== null) {
+      currentChart.destroy();
+      currentChart = null;
+    }
+    var currentStat = stats[label];
+    console.log(`Preparing chart for ${label}`);
+    if (currentStat.runTime.histogram === undefined || currentStat.runTime.histogram === null) {
+      continue;
+    }
+    currentChart = createChart(label, drawingContext);
+    currentChart.render({duration: 0, lazy: false});
+    var theDataURL = currentChart.toBase64Image('image/png');
+    var dataBase64 = theDataURL.slice(22);
+    var imageFileName = `images/chart${label}.png`;
+    zipper.file(imageFileName, dataBase64, {base64: true});
+  }
+
+  zipper.generateAsync({type: "base64"}).then(function(theData) {
+    console.log("DEBUG: zipped data: " + theData);
+    var zippedDataURL = `data:application/zip;base64,${theData}`;
+    var theLink = document.getElementById("linkDownloadAll");
+    theLink.style.visibility = "";
+    theLink.href = zippedDataURL;  
+  });
+
+}
+
 function getGraphsTable(inputParseD) {
   var result = "";
   var stats = window.kanban.profiling.statistics;
@@ -147,6 +202,10 @@ function getGraphsTable(inputParseD) {
     result += "</tr>";
   }
   result += "</table>";
+  var downloadHtml = "";   
+  downloadHtml += "<button onclick = 'window.kanban.rpc.profiling.prepareDownloadAllCharts()'>Prepare download</button>";
+  downloadHtml += `<br><a href = "#downloadAllCharts" download="chartPerformance.zip" id = "linkDownloadAll" style='visibility:hidden'>download all</a>`;
+  result += downloadHtml;
   return result;
 }
 
@@ -167,7 +226,7 @@ function callbackGetPerformanceProfilePartTwo(input, outputDOM) {
   result += "<table><tr><td>";
   result += getGraphsTable(inputParsed);
   result += "</td><td>";
-  result += "<span style= 'display:inline-block; height:400px; width:400px;'><canvas id = 'chartProfiling' style = 'height: 400px; width: 400px;'></canvas></span>";
+  result += "<span style= 'display:inline-block; height:400px; width:400px;'><canvas id = 'chartProfiling' style = 'height: 400px; width: 400px;'></canvas></span><br><span id='spanDownloadChart'></span>";
   result += "</td></tr></table>";
   result += getThreadTable(inputParsed);
   //result += jsonToHtml.getHtmlFromArrayOfObjects(input, {});
@@ -216,6 +275,8 @@ function updateProfilingPage() {
 
 module.exports = {
   updateProfilingPage,
+  downloadChart,
+  prepareDownloadAllCharts,
   showStatistics,
   getMemoryInfo,
   getInfo,

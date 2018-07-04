@@ -33,6 +33,7 @@
     "daemonize2": "^0.4.2",
     "escape-html": "^1.0.3",
     "jsonic": "^0.3.0",
+    "jszip": "^3.1.5",
     "mime-types": "^2.1.18",
     "nodemon": "^1.17.5",
     "nooocl": "^0.12.5",
