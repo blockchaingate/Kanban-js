@@ -30,12 +30,16 @@ for FAB coin
 \begin{document}
 \maketitle
 \section{Introduction}
-Not all performance characteristics of Fabcoin can be improved without modifying the design philosophy of the underlying system. For example, the average block mining time is 75 seconds by design, independent of the technical quality of the underlying code. The most important performance characteristics that can be improved without changing the design of Fabcoin are those of data management, networking and cryptography performance. 
+In this text, we describe several performance profiling tests we carried out for FAB coin. 
+
+In the present text, we focus on those performance characteristics that can be improved without changing the architecture of FAB coin.
+%Not all performance characteristics of our system can be improved without modifying its architecture. 
+The most important such characteristics are those of data management, networking and cryptography performance. Besides those, there are further performance characteristics that are not subject to immediate optimization without redesigning the system. For example, the average block mining time is 75 seconds by design: mining difficulty increases automatically to adjust for code improvements and network size increase. Those characteristics of the system are intimately tied to other properties such as the system's security and decentralization, and therefore cannot be improved by technical improvements of the code alone. We delegate further discussion of the architecture of FAB coin to other texts.
 
 
-In this text, we describe several performance profiling tests we carried out for FAB coin. Our tests investigated the performance of individual FAB nodes on testNetNoDNS (an isolated self-contained tiny network), the performance of the tiny network testNetNoDNS as a whole, and finally the performance of individual nodes on mainNet. At the time of writing, testNetNoDNS had $3$ machines located in $3$ different continents. Should we decide it is worth the effort, we can deploy testNetNoDNS on more nodes; our setup can easily scale to an arbitrary number of machines.
+Our tests investigated the performance of individual FAB nodes on testNetNoDNS (an isolated self-contained tiny network), the performance of the tiny network testNetNoDNS as a whole, and finally the performance of individual nodes on mainNet. At the time of writing, testNetNoDNS has $3$ machines located on $3$ different continents. Should we decide it is worth the effort, we can deploy testNetNoDNS on more nodes; our setup can easily scale to an arbitrary number of machines.
 
-Our preliminary tests show that - at least in our small testing environment - the data management and cryptography performance meets and significantly exceeds the current needs of running a Fabcoin node. We do not expect that performance improvements in these two areas would significantly improve the speed of the whole system. However, we found that for the particular large memory pool transactions we tested, the network performance could be significantly improved. We have not yet investigated whether the performance limitations of the network were so by design (e.g., network traffic throttling) or were inadvertently caused by technical decisions in the fabcoind executable.
+Our preliminary tests show that - at least in our small testing environment - the data management and cryptography performance meets and significantly exceeds the current needs of a Fabcoin node. We do not expect that performance improvements in these two areas would significantly improve the speed of the whole system. However, we found that for the particular large memory pool transactions we tested, the network performance could be significantly improved. We have not yet investigated whether the performance limitations of the network were so by design (e.g., network traffic throttling) or were inadvertently caused by technical decisions in the fabcoind executable.
 
 We plan on running our performance profiling system continuously to gather long term statistics and to hunt for performance regression bugs. Our performance profiling framework was designed to be expandable and maintainable, and we expect to add more statistics in the future. 
 
@@ -53,6 +57,8 @@ In the first scenario, we generated a large amount of transactions in the mempoo
 \end{equation}
 In the second scenario, we simply monitored the performance of individual non-mining nodes. Our mainNet nodes are non-user facing, so while they are compiled with wallet support, they did not perform any wallet actions.
 
+\section{Results}
+\subsection{Memory pool propagation speed}
 
 
 \bibliographystyle{plain}
