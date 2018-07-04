@@ -595,7 +595,8 @@ var myNodesCommands = {
   sshNodeToOneRemoteMachineDeleteFabcoinConfiguration: {
     myNodesCommand: "sshNodeToOneRemoteMachineDeleteFabcoinConfiguration",
     cli: {
-      machineName: null
+      machineName: null,
+      net: null
     }
   },
   sshNodeToOneRemoteMachineKillallFabcoind: {

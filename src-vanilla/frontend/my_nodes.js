@@ -391,7 +391,8 @@ MyNodesContainer.prototype.sshNodeToOneRemoteMachineKillallFabcoind = function(c
   var currentNode = this.myNodes[currentNodeLabel];
   currentNode.timeStart.sshNodeToRemoteMachine = (new Date()).getTime();
   var theURL = pathnames.getURLFromMyNodesCall(pathnames.myNodesCommands.sshNodeToOneRemoteMachineKillallFabcoind.myNodesCommand, {
-    machineName: currentNodeLabel
+    machineName: currentNodeLabel,
+    net: globals.mainPage().getRPCNetworkOption()
   });
   console.log("DEBUG: the url: " + theURL);
   submitRequests.submitGET({
@@ -406,7 +407,8 @@ MyNodesContainer.prototype.sshNodeToOneRemoteMachineDeleteFabcoinConfiguration =
   var currentNode = this.myNodes[currentNodeLabel];
   currentNode.timeStart.sshNodeToRemoteMachine = (new Date()).getTime();
   var theURL = pathnames.getURLFromMyNodesCall(pathnames.myNodesCommands.sshNodeToOneRemoteMachineDeleteFabcoinConfiguration.myNodesCommand, {
-    machineName: currentNodeLabel
+    machineName: currentNodeLabel,
+    net: globals.mainPage().getRPCNetworkOption()
   });
   console.log("DEBUG: the url: " + theURL);
   submitRequests.submitGET({

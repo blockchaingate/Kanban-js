@@ -159,8 +159,14 @@ function sshNodeToOneRemoteMachineStartFabcoind(request, response, desiredComman
 }
 
 function sshNodeToOneRemoteMachineDeleteFabcoinConfiguration(request, response, desiredCommand) {
+  var theFolder = "";
+  var theNet = pathnames.getNetworkDataFromRPCNetworkOption(desiredCommand.net);
+  if (theNet !== null && theNet !== undefined) {
+    theFolder = theNet.folder;
+  } 
+  console.log(`About to wipe folder: ${theFolder}` );
   readSecretsAdminConfiguration(sshNodeToRemoteMachineExecuteCommands.bind(
-    null, desiredCommand.machineName, `rm -r .fabcoin/`, response
+    null, desiredCommand.machineName, `rm -r .fabcoin/${theFolder}`, response
   ));
 }
 
