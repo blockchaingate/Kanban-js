@@ -15,5 +15,6 @@ window.kanban.allMyNodes = null;
 window.kanban.profiling = {};
 window.kanban.profiling.memoryPoolArrivalTimes = null;
 window.kanban.profiling.statistics = {};
+window.kanban.profiling.statDetails = {};
 
 window.kanban.rpc.forceRPCPOST = false;

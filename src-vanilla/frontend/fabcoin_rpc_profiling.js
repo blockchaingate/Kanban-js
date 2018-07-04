@@ -139,19 +139,34 @@ function downloadChart(theLink, label) {
 
 function prepareDownloadAllCharts() {
   var zipper = new jsZip();
-  zipper.file("texoutput.tex", "here i am");
   var theChartCanvas = document.getElementById("chartProfiling");
   var drawingContext = theChartCanvas.getContext('2d'); 
   var currentChart = null;
   var stats = window.kanban.profiling.statistics;
+  var statDetails = window.kanban.profiling.statDetails;
+  var theLatexFile = "";
+  theLatexFile += "\\documentclass{article}\n\\usepackage{graphicx}\n";
+  theLatexFile += "\\usepackage{array}\n\\newcolumntype{P}[1]{>{\\hspace{0pt}}p{#1}}\n";
+  theLatexFile += "\\begin{document}\n\n";
+  theLatexFile += `${statDetails.totalFabcoinRunTimeString}\n\n`;
+  theLatexFile += "\\begin{tabular}{P{5cm}|r|r|r}\nFunction&\\# calls& Avg.run time $\\mu$s& Run time excl. subord. \\\\\\hline\n";
+
+  var theChartLatex = "";
   for (var label in stats) {
     if (currentChart !== null) {
       currentChart.destroy();
       currentChart = null;
     }
-    var currentStat = stats[label];
-    console.log(`Preparing chart for ${label}`);
-    if (currentStat.runTime.histogram === undefined || currentStat.runTime.histogram === null) {
+    var currentStats = stats[label];
+    var labelDecoded = decodeURIComponent(label);
+    labelDecoded = labelDecoded.split("::").join(" :: "); //<- just like replace but works with all occurrences
+    labelDecoded = labelDecoded.split("->").join(" $\\to$ "); //<- just like replace but works with all occurrences
+    theLatexFile += `${labelDecoded}& ${currentStats.runTime.numberOfSamples}& ${currentStats.averageRunTime}&`;
+    if (currentStats.runTimeSubordinates !== null && currentStats.runTimeSubordinates !== undefined) {
+      theLatexFile += currentStats.averageRunTimeExcludingSubordinates;
+    }
+    theLatexFile += "\\\\\\hline\n";
+    if (currentStats.runTime.histogram === undefined || currentStats.runTime.histogram === null) {
       continue;
     }
     currentChart = createChart(label, drawingContext);
@@ -159,8 +174,15 @@ function prepareDownloadAllCharts() {
     var theDataURL = currentChart.toBase64Image('image/png');
     var dataBase64 = theDataURL.slice(22);
     var imageFileName = `images/chart${label}.png`;
+    imageFileName = imageFileName.split("%").join("_"); //<- latex doesn't like % so we replace them by underscores.
+    theChartLatex += `\n\\includegraphics[width=5cm]{${imageFileName}}`;
     zipper.file(imageFileName, dataBase64, {base64: true});
   }
+  theLatexFile += "\\end{tabular}\n"
+  theLatexFile += theChartLatex;
+
+  theLatexFile += "\n\\end{document}"
+  zipper.file("texoutput.tex",theLatexFile);
 
   zipper.generateAsync({type: "base64"}).then(function(theData) {
     console.log("DEBUG: zipped data: " + theData);
@@ -189,15 +211,15 @@ function getGraphsTable(inputParseD) {
     }
     var numberOfSamples = currentStats.runTime.numberOfSamples;
     result += `<td>${numberOfSamples}</td>`;
-    var averageRunTime = currentStats.runTime.totalRunTime;
-    averageRunTime /= numberOfSamples;
-    averageRunTime = averageRunTime.toFixed(0);
-    result += `<td>${averageRunTime} &#956;s</td>`;
+    currentStats.averageRunTime = currentStats.runTime.totalRunTime;
+    currentStats.averageRunTime /= numberOfSamples;
+    currentStats.averageRunTime = currentStats.averageRunTime.toFixed(0);
+    result += `<td>${currentStats.averageRunTime} &#956;s</td>`;
     if (currentStats.runTimeSubordinates != undefined && currentStats.runTimeSubordinates !== null) {
-      var averageRunTimeExcludingSubordinates = currentStats.runTimeExcludingSubordinatesInMicroseconds;
-      averageRunTimeExcludingSubordinates /= numberOfSamples;
-      averageRunTimeExcludingSubordinates = averageRunTimeExcludingSubordinates.toFixed(0);
-      result += `<td>${averageRunTimeExcludingSubordinates} &#956;s</td>`;
+      currentStats.averageRunTimeExcludingSubordinates = currentStats.runTimeExcludingSubordinatesInMicroseconds;
+      currentStats.averageRunTimeExcludingSubordinates /= numberOfSamples;
+      currentStats.averageRunTimeExcludingSubordinates = currentStats.averageRunTimeExcludingSubordinates.toFixed(0);
+      result += `<td>${currentStats.averageRunTimeExcludingSubordinates} &#956;s</td>`;
     }
     result += "</tr>";
   }
@@ -215,14 +237,16 @@ function callbackGetPerformanceProfilePartTwo(input, outputDOM) {
   result += submitRequests.getToggleButtonPausePolling({label: "raw", content: JSON.stringify(input)});
   result += jsonToHtml.getClearParentButton();
 
-  var runTime = 0; 
+  var statDetails = window.kanban.profiling.statDetails;
+  
+  statDetails.totalFabcoinRunTime = 0; 
   var timeStarts = inputParsed.timePastStarts;
   var timeSamplings = inputParsed.timePastSamplings;
   for (var counterStarts = 0; counterStarts < timeStarts.length; counterStarts ++ ) {
-    runTime += timeSamplings[counterStarts] - timeStarts[counterStarts];
+    statDetails.totalFabcoinRunTime += timeSamplings[counterStarts] - timeStarts[counterStarts];
   }
-  result += `<br>Profiling recorded over ${miscellaneous.getDurationReadableFromMilliseconds(runTime)} with ${timeStarts.length - 1} system restarts. `;
-  result += `Stats persist accross restarts.`
+  statDetails.totalFabcoinRunTimeString = `Profiling recorded over ${miscellaneous.getDurationReadableFromMilliseconds(statDetails.totalFabcoinRunTime)} with ${timeStarts.length - 1} system restarts. Stats persist accross restarts.`;
+  result += `<br>${statDetails.totalFabcoinRunTimeString}`;
   result += "<table><tr><td>";
   result += getGraphsTable(inputParsed);
   result += "</td><td>";
