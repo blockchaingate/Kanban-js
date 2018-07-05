@@ -8,7 +8,7 @@
 class CryptoEC256k1GPU {
 public:
   //Initialize multiplication context globally
-  //Multiplication context does not change accross runs.
+  //Multiplication context does not change across runs.
   static bool initializeMultiplicationContext(GPU& theGPU);
   static bool initializeGeneratorContext(GPU& theGPU);
 

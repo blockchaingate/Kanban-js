@@ -25,6 +25,7 @@ function MyNode(inputName, inputParsed) {
   this.memoryPoolArrivalTimes = null;
   this.chartMemoryPoolArrivalTimes = null;
   this.chartId = "";
+  this.chartDownloadId = "";
 }
 
 MyNode.prototype.generateMemoryPoolArrivalTimeChart = function(outputComponent) {
@@ -50,13 +51,20 @@ MyNode.prototype.generateMemoryPoolArrivalTimeChart = function(outputComponent) 
   if (this.chartMemoryPoolArrivalTimes !== null) {
     this.chartMemoryPoolArrivalTimes.destroy();
   }
-  this.chartId = `ChartArrivalTimes${this.ipAddress}`;
+  this.chartId = `mempoolArrivals${this.ipAddress}`;
+  this.chartDownloadId = `download${this.chartId}`;
 
-  var result = `<span style= 'display:inline-block; height:400px; width:400px;'><canvas id="${this.chartId}"> </canvas></span>`;
+  var result = "";
+  result += `<br><span style= 'display:inline-block; max-height:400px; max-width:400px;'><canvas id="${this.chartId}" style='height:400px; width:400px;'> </canvas></span>`;
+  result += `<br><a href = "#download${this.chartId}" download = "${this.chartId}.png" `; 
+  result += ` onclick = "window.kanban.rpc.profiling.downloadChartFromCanvasAsPng(this, '${this.chartId}');" >download</a>`;
+
+
   result += `<br>Num arrivals local only: ${numArrivalsLocalOnly} <br>`;
   result += `<br>Num arrivals remote only: ${numArrivalsRemoteOnly}`;
   result += `<br>common arrivals: ${commonArrivalTimes.join(", ")}`;
   outputComponent.innerHTML = result;
+  var downloadSpan = document.getElementById("spanDownloadChart");
 
   var numBuckets = 50;
   var data = new Array(numBuckets ).fill(0);
@@ -97,23 +105,23 @@ MyNode.prototype.generateMemoryPoolArrivalTimeChart = function(outputComponent) 
   this.chartMemoryPoolArrivalTimes = new Chart(ctx, {
     type: 'bar',
     data: {
-        labels: labels,
-        datasets: [{
-            label: 'mempool arrival times ms',
-            data: data,
-            backgroundColor: colors,
-            borderColor: colorBorders,
-            borderWidth: 1
-        }]
+      labels: labels,
+      datasets: [{
+        label: 'mempool arrival times ms',
+        data: data,
+        backgroundColor: colors,
+        borderColor: colorBorders,
+        borderWidth: 1
+      }]
     },
     options: {
-        scales: {
-            yAxes: [{
-                ticks: {
-                    beginAtZero:true
-                }
-            }]
-        }
+      scales: {
+        yAxes: [{
+          ticks: {
+            beginAtZero:true
+          }
+        }]
+      }
     }
   });
 }
@@ -145,44 +153,43 @@ MyNode.prototype.getSpanNodeToRemoteMachineResultId = function () {
 MyNode.prototype.toHTMLasTRelement = function () {
   var result = "";
   result += "<tr>";
-  result += `<td>${this.name}</td>`
-  result += `<td>
-<a href = 'https://${this.ipAddress}:${pathnames.ports.https}' target = "_blank">https://${this.ipAddress}:${pathnames.ports.https}</a>
-</td>`;
-  result += `<td>
-<a href = 'https://${this.ipAddress}:${pathnames.ports.https}${pathnames.url.known.logFileTestNetNoDNSSession}' 
- target = "_blank">
-testnet log
-</a></td>`;
-  result += `<td>
-<button class = "buttonStandard" onclick = "window.kanban.allMyNodes.browserToOneRemoteNodePing('${this.name}')">ping</button>
-<button class = "buttonStandard" onclick = "window.kanban.allMyNodes.browserToOneRemoteNodeMempoolArrivalTimes('${this.name}')">mempool times</button>
-<button class = "buttonStandard" onclick = "window.kanban.allMyNodes.browserToOneRemoteNodeMiningInfo('${this.name}')">mine info</button>
-</td>
-`;
-result += `<td>
-<span id='${this.getSpanBrowserToRemoteProgressId()}'>?</span>
-<span id='${this.getSpanBrowserToRemoteResultId()}'></span>
-</td>`;
-  result += `<td>
-<button class = "buttonStandard" onclick = "window.kanban.allMyNodes.sshNodeToOneRemoteMachineGitPull('${this.name}')">update</button>
-<button class = "buttonStandard" onclick = "window.kanban.allMyNodes.sshNodeToOneRemoteMachineNodeRestart('${this.name}')">restart</button>
-<button class = "buttonStandard" onclick = "window.kanban.allMyNodes.sshNodeToOneRemoteMachineKillallFabcoind('${this.name}')">kill fab</button>
-<button class = "buttonStandard" onclick = "window.kanban.allMyNodes.sshNodeToOneRemoteMachineDeleteFabcoinConfiguration('${this.name}')">del .fab</button>
-<button class = "buttonStandard" onclick = "window.kanban.allMyNodes.sshNodeToOneRemoteMachineGitPullMakeFab('${this.name}')">make fab</button>
-<button class = "buttonStandard" onclick = "window.kanban.allMyNodes.sshNodeToOneRemoteMachineFabcoindStart('${this.name}')">start fab</button>
-</td>`;
-  result += `<td>
-  <span id='${this.getSpanNodeToRemoteMachineProgressId()}'></span>
-  <span id='${this.getSpanNodeToRemoteMachineResultId()}'></span>
-</td>`;
+  result += `<td>${this.name}</td>`;
+  result += `<td>;`
+  result += `<a href = 'https://${this.ipAddress}:${pathnames.ports.https}' target = "_blank">https://${this.ipAddress}:${pathnames.ports.https}</a>`;
+  result += `</td>`;
+  result += `<td>`;
+  result += `<a href = 'https://${this.ipAddress}:${pathnames.ports.https}${pathnames.url.known.logFileTestNetNoDNSSession}' `; 
+  result += `target = "_blank">`
+  result += `testnet log`;
+  result += `</a></td>`;
+  result += `<td>`;
+  result += `<button class = "buttonStandard" onclick = "window.kanban.allMyNodes.browserToOneRemoteNodePing('${this.name}')">ping</button>`;
+  result += `<button class = "buttonStandard" onclick = "window.kanban.allMyNodes.browserToOneRemoteNodeMempoolArrivalTimes('${this.name}')">mempool times</button>`;
+  result += `<button class = "buttonStandard" onclick = "window.kanban.allMyNodes.browserToOneRemoteNodeMiningInfo('${this.name}')">mine info</button>`;
+  result += `</td>`;
+  result += `<td>`;
+  result += `<span id='${this.getSpanBrowserToRemoteProgressId()}'>?</span>`;
+  result += `<span id='${this.getSpanBrowserToRemoteResultId()}'></span>`;
+  result += `</td>`;
+  result += `<td>`;
+  result += `<button class = "buttonStandard" onclick = "window.kanban.allMyNodes.sshNodeToOneRemoteMachineGitPull('${this.name}')">update</button>`;
+  result += `<button class = "buttonStandard" onclick = "window.kanban.allMyNodes.sshNodeToOneRemoteMachineNodeRestart('${this.name}')">restart</button>`;
+  result += `<button class = "buttonStandard" onclick = "window.kanban.allMyNodes.sshNodeToOneRemoteMachineKillallFabcoind('${this.name}')">kill fab</button>`;
+  result += `<button class = "buttonStandard" onclick = "window.kanban.allMyNodes.sshNodeToOneRemoteMachineDeleteFabcoinConfiguration('${this.name}')">del .fab</button>`;
+  result += `<button class = "buttonStandard" onclick = "window.kanban.allMyNodes.sshNodeToOneRemoteMachineGitPullMakeFab('${this.name}')">make fab</button>`;
+  result += `<button class = "buttonStandard" onclick = "window.kanban.allMyNodes.sshNodeToOneRemoteMachineFabcoindStart('${this.name}')">start fab</button>`;
+  result += `</td>`;
+  result += `<td>`;
+  result += `<span id='${this.getSpanNodeToRemoteMachineProgressId()}'></span>`;
+  result += `<span id='${this.getSpanNodeToRemoteMachineResultId()}'></span>`;
+  result += `</td>`;
   var sshKeyShortened = "not specified";
   if (typeof this.sshKey === "string") {
     sshKeyShortened = miscellaneous.shortenString(this.sshKey, 100);
   } else if (this.sshKeySameAs !== undefined) {
     sshKeyShortened = `Same as ${this.sshKeySameAs}`;
   }
-  result += `<td>${this.user}</td><td>${sshKeyShortened}</td>`
+  result += `<td>${this.user}</td><td>${sshKeyShortened}</td>`;
   result += "</tr>";
   return result;
 } 
@@ -205,17 +212,17 @@ function MyNodesContainer(inputJSON) {
 MyNodesContainer.prototype.toHTML = function () {
   var result = "";
   result += "<table class = 'tableJSON'>";
-  result += `<tr>
-<th>name</th>
-<th>ip address</th>
-<th>log</th>
-<th>browser &#8644; remote nodejs</th>
-<th><span id = '${ids.defaults.SpanBrowserToRemoteColumnHeader}'>result</span></th>
-<th>node local &#8644; remote machine</th>
-<th><span>result</span></th>
-<th>user</th>
-<th>ssh key</th>
-</tr>`;
+  result += `<tr>`;
+  result += `<th>name</th>`;
+  result += `<th>ip address</th>`;
+  result += `<th>log</th>`;
+  result += `<th>browser &#8644; remote nodejs</th>`;
+  result += `<th><span id = '${ids.defaults.SpanBrowserToRemoteColumnHeader}'>result</span></th>`;
+  result += `<th>node local &#8644; remote machine</th>`;
+  result += `<th><span>result</span></th>`;
+  result += `<th>user</th>`;
+  result += `<th>ssh key</th>`;
+  result += `</tr>`;
   for (var counterNode = 0; counterNode < this.nodeNamesOrdered.length; counterNode ++) {
     var currentNode = this.myNodes[this.nodeNamesOrdered[counterNode]];
     result += currentNode.toHTMLasTRelement();

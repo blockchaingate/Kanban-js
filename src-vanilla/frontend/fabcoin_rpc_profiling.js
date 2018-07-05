@@ -68,7 +68,7 @@ function showStatistics(inputLabel) {
   window.kanban.profiling.chart = createChart(inputLabel, drawingContext);
   var downloadHtml = "";
   downloadHtml += `<a href = "#download${inputLabel}" download="chartPerformance${inputLabel}.png" `; 
-  downloadHtml += ` onclick = "window.kanban.rpc.profiling.downloadChart(this, '${inputLabel}');" >download</a>`;
+  downloadHtml += ` onclick = "window.kanban.rpc.profiling.downloadChartDefaultSetHref(this);" >download</a>`;
   var downloadSpan = document.getElementById("spanDownloadChart");
   downloadSpan.innerHTML = downloadHtml;
 }
@@ -127,13 +127,20 @@ function createChart(inputLabel, drawingContext) {
   }});
 }
 
-function downloadChart(theLink, label) {
-  var theChart = window.kanban.profiling.chart;
+function downloadChartAsPngSetHref(theLink, theChart) {
   var theDataURL = theChart.toBase64Image('image/png');
-  //var dataBase64 = theDataURL.slice(22);
-  
-  //console.log("DEBUG: theDataURL: " + theDataURL);
-  //console.log("DEBUG: dataBase64: " + dataBase64);
+  theLink.setAttribute("href", theDataURL);
+}
+
+function downloadChartDefaultSetHref(theLink) {
+  return downloadChartAsPng(theLink, window.kanban.profiling.chart);
+}
+
+function downloadChartFromCanvasAsPng(theLink, canvas) {
+  if (typeof canvas === "string") {
+    canvas = document.getElementById(canvas);
+  }
+  var theDataURL = canvas.toDataURL('image/png');
   theLink.setAttribute("href", theDataURL);
 }
 
@@ -245,12 +252,12 @@ function callbackGetPerformanceProfilePartTwo(input, outputDOM) {
   for (var counterStarts = 0; counterStarts < timeStarts.length; counterStarts ++ ) {
     statDetails.totalFabcoinRunTime += timeSamplings[counterStarts] - timeStarts[counterStarts];
   }
-  statDetails.totalFabcoinRunTimeString = `Profiling recorded over ${miscellaneous.getDurationReadableFromMilliseconds(statDetails.totalFabcoinRunTime)} with ${timeStarts.length - 1} system restarts. Stats persist accross restarts.`;
+  statDetails.totalFabcoinRunTimeString = `Profiling recorded over ${miscellaneous.getDurationReadableFromMilliseconds(statDetails.totalFabcoinRunTime)} with ${timeStarts.length - 1} system restarts. Stats persist across restarts.`;
   result += `<br>${statDetails.totalFabcoinRunTimeString}`;
   result += "<table><tr><td>";
   result += getGraphsTable(inputParsed);
   result += "</td><td>";
-  result += "<span style= 'display:inline-block; height:400px; width:400px;'><canvas id = 'chartProfiling' style = 'height: 400px; width: 400px;'></canvas></span><br><span id='spanDownloadChart'></span>";
+  result += "<span style= 'display:inline-block; max-height:400px; max-width:400px;'><canvas id = 'chartProfiling' style='height:400px; width:400px;'></canvas></span><br><span id='spanDownloadChart'></span>";
   result += "</td></tr></table>";
   result += getThreadTable(inputParsed);
   //result += jsonToHtml.getHtmlFromArrayOfObjects(input, {});
@@ -299,7 +306,9 @@ function updateProfilingPage() {
 
 module.exports = {
   updateProfilingPage,
-  downloadChart,
+  downloadChartDefaultSetHref,
+  downloadChartAsPngSetHref,
+  downloadChartFromCanvasAsPng,
   prepareDownloadAllCharts,
   showStatistics,
   getMemoryInfo,

@@ -513,19 +513,19 @@ unsigned int sizeof_uint();
 unsigned int sizeof_secp256k1_ge_storage();
 unsigned int sizeof_char64();
 
-// Reads generator context. PORTABLE: can be called accross GPU<->CPU.
+// Reads generator context. PORTABLE: can be called across GPU<->CPU.
 void memoryPool_read_generatorContext_PORTABLE(
   __global secp256k1_ecmult_gen_context* outputGeneratorContext,
   __global const unsigned char* memoryPool
 );
 
-// Reads multiplication context. PORTABLE: can be called accross GPU<->CPU.
+// Reads multiplication context. PORTABLE: can be called across GPU<->CPU.
 void memoryPool_read_multiplicationContext_PORTABLE(
   __global secp256k1_ecmult_context* outputMultiplicationContext,
   __global const unsigned char* memoryPool
 );
 
-//Reads the generator context pointer. NOT PORTABLE: must NOT be called accross GPU<->CPU.
+//Reads the generator context pointer. NOT PORTABLE: must NOT be called across GPU<->CPU.
 __global secp256k1_ecmult_gen_context* memoryPool_read_generatorContextPointer_NON_PORTABLE(
   __global const unsigned char* memoryPool
 );

@@ -1,0 +1,55 @@
+\documentclass{article}
+\usepackage{graphicx}
+\usepackage{array}
+\newcolumntype{P}[1]{>{\hspace{0pt}}p{#1}}
+\begin{document}
+
+Profiling recorded over 19 h, 29 min with 3 system restarts. Stats persist accross restarts.
+
+\begin{tabular}{P{5cm}|r|r|r}
+Function&\# calls& Avg.run time $\mu$s& Run time excl. subord. \\\hline
+PeerLogicValidation :: ProcessMessages $\to$ ProcessGetData& 142& 1377&\\\hline
+PeerLogicValidation :: ProcessMessages $\to$ ProcessMessage $\to$ ProcessGetData& 4373& 1664&\\\hline
+PeerLogicValidation :: ProcessMessages $\to$ ProcessMessage $\to$ PeerLogicValidation :: UpdatedBlockTip& 112092& 1&\\\hline
+getperformanceprofile& 12& 5961&\\\hline
+CDBIterator :: Next& 335594& 2&\\\hline
+PeerLogicValidation :: ProcessMessages $\to$ ProcessMessage $\to$ RelayAddress& 802& 5&\\\hline
+LoadMempool& 4& 172&\\\hline
+getmemoryinfo& 13& 170&\\\hline
+PeerLogicValidation :: ProcessMessages $\to$ ProcessMessage $\to$ UpdateBlockAvailability& 1828& 1&\\\hline
+UpdateTip& 8& 61&\\\hline
+getmemorypoolarrivaltimes& 6& 5&\\\hline
+PeerLogicValidation :: ProcessMessages $\to$ ProcessMessage& 150415& 3675&2459\\\hline
+PeerLogicValidation :: ProcessMessages $\to$ ProcessMessage $\to$ ProcessMessage $\to$ PeerLogicValidation :: UpdatedBlockTip& 564& 3&\\\hline
+PeerLogicValidation :: ProcessMessages $\to$ ProcessMessage $\to$ AcceptToMemoryPoolWithTime $\to$ AcceptToMemoryPoolWorker& 365& 6489&\\\hline
+PeerLogicValidation :: ProcessMessages $\to$ ProcessMessage $\to$ ProcessHeadersMessage $\to$ UpdateBlockAvailability& 7476& 1&\\\hline
+PeerLogicValidation :: ProcessMessages& 8037331& 69&1\\\hline
+PeerLogicValidation :: ProcessMessages $\to$ ProcessMessage $\to$ ProcessHeadersMessage& 7479& 22253&22252\\\hline
+PeerLogicValidation :: SendMessages& 8037328& 10&9\\\hline
+PeerLogicValidation :: UpdatedBlockTip& 8& 1&\\\hline
+PeerLogicValidation :: SendMessages $\to$ FindNextBlocksToDownload& 7998299& 1&\\\hline
+PeerLogicValidation :: ProcessMessages $\to$ ProcessMessage $\to$ AcceptToMemoryPoolWithTime& 365& 6591&102\\\hline
+PeerLogicValidation :: ProcessMessages $\to$ ProcessMessage $\to$ UpdateTip& 112092& 49&\\\hline
+PeerLogicValidation :: ProcessMessages $\to$ ProcessMessage $\to$ ProcessMessage& 564& 2044&1895\\\hline
+PeerLogicValidation :: ProcessMessages $\to$ ProcessMessage $\to$ ProcessMessage $\to$ UpdateTip& 564& 145&\\\hline
+getinfo& 2& 411&\\\hline
+\end{tabular}
+
+\includegraphics[width=5cm]{images/chartPeerLogicValidation_3A_3AProcessMessages-_3EProcessMessage-_3EProcessGetData.png}
+\includegraphics[width=5cm]{images/chartPeerLogicValidation_3A_3AProcessMessages-_3EProcessMessage-_3EPeerLogicValidation_3A_3AUpdatedBlockTip.png}
+\includegraphics[width=5cm]{images/chartCDBIterator_3A_3ANext.png}
+\includegraphics[width=5cm]{images/chartPeerLogicValidation_3A_3AProcessMessages-_3EProcessMessage-_3ERelayAddress.png}
+\includegraphics[width=5cm]{images/chartPeerLogicValidation_3A_3AProcessMessages-_3EProcessMessage-_3EUpdateBlockAvailability.png}
+\includegraphics[width=5cm]{images/chartPeerLogicValidation_3A_3AProcessMessages-_3EProcessMessage.png}
+\includegraphics[width=5cm]{images/chartPeerLogicValidation_3A_3AProcessMessages-_3EProcessMessage-_3EProcessMessage-_3EPeerLogicValidation_3A_3AUpdatedBlockTip.png}
+\includegraphics[width=5cm]{images/chartPeerLogicValidation_3A_3AProcessMessages-_3EProcessMessage-_3EAcceptToMemoryPoolWithTime-_3EAcceptToMemoryPoolWorker.png}
+\includegraphics[width=5cm]{images/chartPeerLogicValidation_3A_3AProcessMessages-_3EProcessMessage-_3EProcessHeadersMessage-_3EUpdateBlockAvailability.png}
+\includegraphics[width=5cm]{images/chartPeerLogicValidation_3A_3AProcessMessages.png}
+\includegraphics[width=5cm]{images/chartPeerLogicValidation_3A_3AProcessMessages-_3EProcessMessage-_3EProcessHeadersMessage.png}
+\includegraphics[width=5cm]{images/chartPeerLogicValidation_3A_3ASendMessages.png}
+\includegraphics[width=5cm]{images/chartPeerLogicValidation_3A_3ASendMessages-_3EFindNextBlocksToDownload.png}
+\includegraphics[width=5cm]{images/chartPeerLogicValidation_3A_3AProcessMessages-_3EProcessMessage-_3EAcceptToMemoryPoolWithTime.png}
+\includegraphics[width=5cm]{images/chartPeerLogicValidation_3A_3AProcessMessages-_3EProcessMessage-_3EUpdateTip.png}
+\includegraphics[width=5cm]{images/chartPeerLogicValidation_3A_3AProcessMessages-_3EProcessMessage-_3EProcessMessage.png}
+\includegraphics[width=5cm]{images/chartPeerLogicValidation_3A_3AProcessMessages-_3EProcessMessage-_3EProcessMessage-_3EUpdateTip.png}
+\end{document}

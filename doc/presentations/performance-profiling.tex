@@ -5,7 +5,10 @@
 \usepackage{verbatim}
 \usepackage{multirow}
 \usepackage{xcolor}
+\usepackage{graphicx}
 \usepackage{footnote}
+\usepackage{array}
+\usepackage{longtable}
 \makesavenoteenv{tabular}
 
 \addtolength{\hoffset}{-3.5cm}
@@ -17,6 +20,8 @@
 \newcommand{\NotRanDueToDriverIssues}{\textbf{\color{orange}ND}}
 \newcommand{\NotCorrect}{\textbf{\color{red}NC}}
 \newcommand{\NotBuilding}{\textbf{\color{red}NB}}
+\newcolumntype{P}[1]{>{\hspace{0pt}}p{#1}}
+
 
 %\author[1]{Todor Milev}
 %\affil[1]{FA Enterprise System}
@@ -57,8 +62,209 @@ In the first scenario, we generated a large amount of transactions in the mempoo
 \end{equation}
 In the second scenario, we simply monitored the performance of individual non-mining nodes. Our mainNet nodes are non-user facing, so while they are compiled with wallet support, they did not perform any wallet actions.
 
+\section{Setup}
+
+We ran our tests on $3$ machines: a workstation in our local office in Markham, ON, Canada, and two AWS instances - one in London, UK and one in Mumbai, India. 
+
+The ping times from the Canada machine to the London machine fluctuated about $200$ ms, with more than $1$ s for the first ping. The ping times from the Canada machine to the Mumbai machine fluctuated about $350$ ms, with more than $1$ s for the first ping. 
+
+All machines ran our node.js server \url{https://github.com/blockchaingate/Kanban-js} as well as our modified fabcoind executable \url{https://github.com/tmilev/fabcoin} (our modifications amounted to more than 50 commits). 
+\subsection{testNetNoDNS setup}
+In order to carry out our experiments, we created a new fabcoind network, testNetNoDNS, while keeping the other three networks regtest, testNet and mainNet intact. On testNetNoDNS DNS peer discovery was disabled (similar to regtest and unlike testNet), however fixed-ip peers were pre-seeded (unlike regtest and similar to testNet). In this way, testNetNoDNS is an intermediate between regtest and testNet. We made a number of other modifications to testNetDNS to make our testing easier, including the following. 
+
+\begin{itemize}
+\item We changed the mining equihash parameters to $N=48$, $K=5$, allowing for sub-second mining of the first block. As the block mining difficulty takes time to adjust to the mining speed, we were able to mine the first $200$ blocks under a minute after each system reset.
+\item We eased up the coinbase maturity restrictions: coinbase (coins obtained by mining) could be spend only after $100$ blocks.
+\item We eased up the restrictions on memory pool chained transactions. Memory pool transactions that depend previous transactions that are still in the memory pool are restricted both by depth (number of linked transactions) and by byte size.
+\end{itemize}
+
+Many of the modified parameters were hard-coded in fabcoin (for example, the coinbase maturity constants); we refactored the fabcoind code as needed in order to keep the defaults for testNet and mainNet intact.
+
+\subsection{Profiling code}
+We profiled our code using a RAII (resource allocation is initialization) C++ technique which allowed us to track the performance of individual functions. The performance profiling was on an opt-in basis, achieved by adding a single line of code to the body of each profiled function. In this way, we were able to control the number of times our profiling code ran, ensuring our profiling does not slow down the system considerably. In the case of profiling that did not call other profiled functions, our profiling code incurred a time penalty of one mutex lock and one system clock call, which can safely be considered negligible when timing run times in the microseconds range. In the case of profiling nested functions, the profiling code run times were included in the statistics, worsening the reported performance of the outer functions. We have not yet investigated how significant is this effect. For simplicity, in the rest of this text we assume that the profiling code run times are negligible for all functions whose run times were in the milliseconds range. 
+
+Nested function calls were accounted separately. Consider the following example.
+
+\noindent\hfil\begin{minipage}{5cm}
+\begin{verbatim}
+void first()
+{ 
+  FunctionProfile profileThis("first");
+  /* do useful work */  
+}
+void second()
+{ 
+  FunctionProfile profileThis("second");
+  /* do useful work */  
+  if (condition)
+    first();
+}
+\end{verbatim}
+\end{minipage}\hfil
+
+In the code above, calling the function \verb|second| will cause the run time of \verb|second| and, when condition holds, the run time of \verb|second->first| to be recorded. At the same time, calling \verb|first| separately will cause the run time of \verb|first| to be directly recorded; here, we account \verb|second->first| and \verb|first| as different entries.
+
+\subsection{Memory pool propagation speed}
+Transaction arrival times to the memory pool were recorded the first time  \verb|AcceptToMemoryPoolWithTime| returned with \verb|true| for the given txid. All times were measured in POSIX time. We are assuming the clocks of all our machines are synchronized.
+
 \section{Results}
 \subsection{Memory pool propagation speed}
+On the machine on which the transactions were submitted (located in Markham, Canada), the total run time of the routine \verb|AcceptToMemoryPool| for the $1001$ transactions given in \eqref{eqThe1kTransaction} fluctuated around $400$ milliseconds ($397$ milliseconds in our latest experiment). We find this speed to be satisfactory.
+
+However, the speeds with which the transactions were received in our London and Mumbai machines were considerably worse. Tables \ref{tableArrivalTimesToLondon} and \ref{tableArrivalTimesToMumbai} show histograms of the arrival times - on the horizontal axis we have indicated the arrival delay in milliseconds (split into $50$ buckets of width about $1$ second each) and on the vertical axis we have indicated the number of txids that have arrived within the given time range.
+\begin{table}
+	\begin{center}
+	\includegraphics[width = 7cm]{./images/mempoolArrivals18_130_88_126.png}
+	\end{center}
+	\caption{\label{tableArrivalTimesToLondon} Arrival delays in milliseconds Canada $ \to$ UK}
+\end{table}
+
+\begin{table}
+	\begin{center}
+		\includegraphics[width = 7cm]{./images/mempoolArrivals13_232_20_11.png}
+	\end{center}
+	\caption{\label{tableArrivalTimesToMumbai} Arrival delays in milliseconds Canada $ \to$ India}
+\end{table}
+
+For both machines, it took between $50$ and $60$ seconds for all transactions to arrive. Compared to about $400$ milliseconds needed for the transactions to be accepted to the first machine, this comprises a significant delay. The arrival times appear to be grouped into ``packets'' of size between $20$ to $40$ 
+transactions. It seems that this behavior is intentional and may be due to internal throttling of the network. Further investigation is required, however it is clear that with this performance we cannot propagate $1000$ transactions per second. Our conclusion here is that Kanban cannot rely on the fabcoin's networking stack ``out of the box'' as that was not designed to meet our performance goals. 
+
+\subsection{Performance monitoring on mainNet}
+In the following tables, we present our results from monitoring mainNet over about 19 hours from our London and Mumbai machines. The first column of the two profiling tables shows the name of the function we profiled. Nesting of profiled functions is indicated by the $ \to $ arrow. The second column shows how many times did the function run over the course of our profiling. The third column shows the average run time of the function in microseconds. Please bear in mind that nested function calls incur a small performance penalty from the profiling code. For functions that call other profiled functions themselves, the fourth column indicates the run time of the function excluding the time of the profiled subroutines.
+
+
+\subsubsection{Commentary}
+Our histograms are centered as follows. First, we gather statistics without collecting histogram samples. Once we have averaged over a given number of runs (hand-coded for each function, defaults to $100$), we center our histogram using the average and choose the histogram so it has $50$ or less buckets on each side of the average. 
+ 
+On both machines, the functions \verb|AcceptToMemoryPoolWorker| (and all of its callers) has a spike in run time that lies outside of the range of the histogram, causing all data to accumulate in the last bin of the histogram.
+
+
+\subsubsection{London machine}
+The profiling was recorded over 19 h, 29 min with 3 system restarts. Stats persist across restarts.
+\begin{table}
+\begin{longtable}{P{8cm}|r|r|r}
+	Function&\# calls& Avg.run time $\mu$s& Run time excl. subord. \\\hline
+	PeerLogicValidation :: ProcessMessages $\to$ ProcessGetData& 142& 1377&\\\hline
+	PeerLogicValidation :: ProcessMessages $\to$ ProcessMessage $\to$ ProcessGetData& 4373& 1664&\\\hline
+	PeerLogicValidation :: ProcessMessages $\to$ ProcessMessage $\to$ PeerLogicValidation :: UpdatedBlockTip& 112092& 1&\\\hline
+	getperformanceprofile& 12& 5961&\\\hline
+	CDBIterator :: Next& 335594& 2&\\\hline
+	PeerLogicValidation :: ProcessMessages $\to$ ProcessMessage $\to$ RelayAddress& 802& 5&\\\hline
+	LoadMempool& 4& 172&\\\hline
+	getmemoryinfo& 13& 170&\\\hline
+	PeerLogicValidation :: ProcessMessages $\to$ ProcessMessage $\to$ UpdateBlockAvailability& 1828& 1&\\\hline
+	UpdateTip& 8& 61&\\\hline
+	getmemorypoolarrivaltimes& 6& 5&\\\hline
+	PeerLogicValidation :: ProcessMessages $\to$ ProcessMessage& 150415& 3675&2459\\\hline
+	PeerLogicValidation :: ProcessMessages $\to$ ProcessMessage $\to$ ProcessMessage $\to$ PeerLogicValidation :: UpdatedBlockTip& 564& 3&\\\hline
+	PeerLogicValidation :: ProcessMessages $\to$ ProcessMessage $\to$ AcceptToMemoryPoolWithTime $\to$ AcceptToMemoryPoolWorker& 365& 6489&\\\hline
+	PeerLogicValidation :: ProcessMessages $\to$ ProcessMessage $\to$ ProcessHeadersMessage $\to$ UpdateBlockAvailability& 7476& 1&\\\hline
+	PeerLogicValidation :: ProcessMessages& 8037331& 69&1\\\hline
+	PeerLogicValidation :: ProcessMessages $\to$ ProcessMessage $\to$ ProcessHeadersMessage& 7479& 22253&22252\\\hline
+	PeerLogicValidation :: SendMessages& 8037328& 10&9\\\hline
+	PeerLogicValidation :: UpdatedBlockTip& 8& 1&\\\hline
+	PeerLogicValidation :: SendMessages $\to$ FindNextBlocksToDownload& 7998299& 1&\\\hline
+	PeerLogicValidation :: ProcessMessages $\to$ ProcessMessage $\to$ AcceptToMemoryPoolWithTime& 365& 6591&102\\\hline
+	PeerLogicValidation :: ProcessMessages $\to$ ProcessMessage $\to$ UpdateTip& 112092& 49&\\\hline
+	PeerLogicValidation :: ProcessMessages $\to$ ProcessMessage $\to$ ProcessMessage& 564& 2044&1895\\\hline
+	PeerLogicValidation :: ProcessMessages $\to$ ProcessMessage $\to$ ProcessMessage $\to$ UpdateTip& 564& 145&\\\hline
+	getinfo& 2& 411&\\\hline
+\end{longtable}
+
+\caption{\label{tableProfilingLondon} Performance profile, London machine}
+\end{table}
+
+\includegraphics[width=7cm]{images/london/chartPeerLogicValidation_3A_3AProcessMessages-_3EProcessMessage-_3EProcessGetData.png}
+\includegraphics[width=7cm]{images/london/chartPeerLogicValidation_3A_3AProcessMessages-_3EProcessMessage-_3EPeerLogicValidation_3A_3AUpdatedBlockTip.png}
+
+\includegraphics[width=7cm]{images/london/chartCDBIterator_3A_3ANext.png}
+\includegraphics[width=7cm]{images/london/chartPeerLogicValidation_3A_3AProcessMessages-_3EProcessMessage-_3ERelayAddress.png}
+
+\includegraphics[width=7cm]{images/london/chartPeerLogicValidation_3A_3AProcessMessages-_3EProcessMessage-_3EUpdateBlockAvailability.png}
+\includegraphics[width=7cm]{images/london/chartPeerLogicValidation_3A_3AProcessMessages-_3EProcessMessage.png}
+
+\includegraphics[width=7cm]{images/london/chartPeerLogicValidation_3A_3AProcessMessages-_3EProcessMessage-_3EProcessMessage-_3EPeerLogicValidation_3A_3AUpdatedBlockTip.png}
+\includegraphics[width=7cm]{images/london/chartPeerLogicValidation_3A_3AProcessMessages-_3EProcessMessage-_3EAcceptToMemoryPoolWithTime-_3EAcceptToMemoryPoolWorker.png}
+
+\includegraphics[width=7cm]{images/london/chartPeerLogicValidation_3A_3AProcessMessages-_3EProcessMessage-_3EProcessHeadersMessage-_3EUpdateBlockAvailability.png}
+\includegraphics[width=7cm]{images/london/chartPeerLogicValidation_3A_3AProcessMessages.png}
+
+\includegraphics[width=7cm]{images/london/chartPeerLogicValidation_3A_3AProcessMessages-_3EProcessMessage-_3EProcessHeadersMessage.png}
+\includegraphics[width=7cm]{images/london/chartPeerLogicValidation_3A_3ASendMessages.png}
+
+\includegraphics[width=7cm]{images/london/chartPeerLogicValidation_3A_3ASendMessages-_3EFindNextBlocksToDownload.png}
+\includegraphics[width=7cm]{images/london/chartPeerLogicValidation_3A_3AProcessMessages-_3EProcessMessage-_3EAcceptToMemoryPoolWithTime.png}
+
+\includegraphics[width=7cm]{images/london/chartPeerLogicValidation_3A_3AProcessMessages-_3EProcessMessage-_3EUpdateTip.png}
+\includegraphics[width=7cm]{images/london/chartPeerLogicValidation_3A_3AProcessMessages-_3EProcessMessage-_3EProcessMessage.png}
+
+\includegraphics[width=7cm]{images/london/chartPeerLogicValidation_3A_3AProcessMessages-_3EProcessMessage-_3EProcessMessage-_3EUpdateTip.png}
+
+
+
+
+\subsection{Mumbai machine}
+
+
+
+Profiling recorded over 19 h, 29 min with 3 system restarts. Stats persist accross restarts.
+
+\begin{longtable}{P{8cm}|r|r|r}
+	Function&\# calls& Avg.run time $\mu$s& Run time excl. subord. \\\hline
+	getinfo& 1& 873&\\\hline
+	getmemoryinfo& 3& 213&\\\hline
+	getperformanceprofile& 3& 5961&\\\hline
+	CDBIterator :: Next& 335594& 2&\\\hline
+	UpdateTip& 25& 53&\\\hline
+	PeerLogicValidation :: SendMessages $\to$ FindNextBlocksToDownload& 12033249& 1&\\\hline
+	PeerLogicValidation :: UpdatedBlockTip& 25& 1&\\\hline
+	PeerLogicValidation :: ProcessMessages $\to$ ProcessMessage $\to$ AcceptToMemoryPoolWithTime& 366& 6621&100\\\hline
+	PeerLogicValidation :: ProcessMessages $\to$ ProcessMessage $\to$ ProcessHeadersMessage $\to$ UpdateBlockAvailability& 9604& 1&\\\hline
+	PeerLogicValidation :: ProcessMessages& 12086593& 48&0\\\hline
+	LoadMempool& 4& 204&\\\hline
+	PeerLogicValidation :: ProcessMessages $\to$ ProcessMessage& 169438& 3397&2246\\\hline
+	PeerLogicValidation :: SendMessages& 12086591& 10&9\\\hline
+	PeerLogicValidation :: ProcessMessages $\to$ ProcessMessage $\to$ ProcessHeadersMessage& 9605& 17436&17435\\\hline
+	PeerLogicValidation :: ProcessMessages $\to$ ProcessMessage $\to$ ProcessMessage $\to$ PeerLogicValidation :: UpdatedBlockTip& 748& 5&\\\hline
+	PeerLogicValidation :: ProcessMessages $\to$ ProcessMessage $\to$ AcceptToMemoryPoolWithTime $\to$ AcceptToMemoryPoolWorker& 366& 6522&\\\hline
+	PeerLogicValidation :: ProcessMessages $\to$ ProcessMessage $\to$ UpdateBlockAvailability& 1777& 1&\\\hline
+	PeerLogicValidation :: ProcessMessages $\to$ ProcessGetData& 197& 1461&\\\hline
+	PeerLogicValidation :: ProcessMessages $\to$ ProcessMessage $\to$ ProcessGetData& 10808& 1597&\\\hline
+	PeerLogicValidation :: ProcessMessages $\to$ ProcessMessage $\to$ PeerLogicValidation :: UpdatedBlockTip& 111856& 1&\\\hline
+	PeerLogicValidation :: ProcessMessages $\to$ ProcessMessage $\to$ RelayAddress& 1230& 6&\\\hline
+	PeerLogicValidation :: ProcessMessages $\to$ ProcessMessage $\to$ UpdateTip& 111856& 56&\\\hline
+	PeerLogicValidation :: ProcessMessages $\to$ ProcessMessage $\to$ ProcessMessage& 748& 2138&1980\\\hline
+	PeerLogicValidation :: ProcessMessages $\to$ ProcessMessage $\to$ ProcessMessage $\to$ UpdateTip& 748& 154&\\\hline
+	PeerLogicValidation :: ProcessMessages $\to$ ProcessMessage $\to$ SendBlockTransactions& 1& 56&\\\hline
+\end{longtable}
+
+
+\includegraphics[width=7cm]{images/mumbai/chartCDBIterator_3A_3ANext.png}
+\includegraphics[width=7cm]{images/mumbai/chartPeerLogicValidation_3A_3ASendMessages-_3EFindNextBlocksToDownload.png}
+
+\includegraphics[width=7cm]{images/mumbai/chartPeerLogicValidation_3A_3AProcessMessages-_3EProcessMessage-_3EAcceptToMemoryPoolWithTime.png}
+\includegraphics[width=7cm]{images/mumbai/chartPeerLogicValidation_3A_3AProcessMessages-_3EProcessMessage-_3EProcessHeadersMessage-_3EUpdateBlockAvailability.png}
+
+\includegraphics[width=7cm]{images/mumbai/chartPeerLogicValidation_3A_3AProcessMessages.png}
+\includegraphics[width=7cm]{images/mumbai/chartPeerLogicValidation_3A_3AProcessMessages-_3EProcessMessage.png}
+
+\includegraphics[width=7cm]{images/mumbai/chartPeerLogicValidation_3A_3ASendMessages.png}
+\includegraphics[width=7cm]{images/mumbai/chartPeerLogicValidation_3A_3AProcessMessages-_3EProcessMessage-_3EProcessHeadersMessage.png}
+
+\includegraphics[width=7cm]{images/mumbai/chartPeerLogicValidation_3A_3AProcessMessages-_3EProcessMessage-_3EProcessMessage-_3EPeerLogicValidation_3A_3AUpdatedBlockTip.png}
+\includegraphics[width=7cm]{images/mumbai/chartPeerLogicValidation_3A_3AProcessMessages-_3EProcessMessage-_3EAcceptToMemoryPoolWithTime-_3EAcceptToMemoryPoolWorker.png}
+
+\includegraphics[width=7cm]{images/mumbai/chartPeerLogicValidation_3A_3AProcessMessages-_3EProcessMessage-_3EUpdateBlockAvailability.png}
+\includegraphics[width=7cm]{images/mumbai/chartPeerLogicValidation_3A_3AProcessMessages-_3EProcessGetData.png}
+
+\includegraphics[width=7cm]{images/mumbai/chartPeerLogicValidation_3A_3AProcessMessages-_3EProcessMessage-_3EProcessGetData.png}
+\includegraphics[width=7cm]{images/mumbai/chartPeerLogicValidation_3A_3AProcessMessages-_3EProcessMessage-_3EPeerLogicValidation_3A_3AUpdatedBlockTip.png}
+
+\includegraphics[width=7cm]{images/mumbai/chartPeerLogicValidation_3A_3AProcessMessages-_3EProcessMessage-_3ERelayAddress.png}
+\includegraphics[width=7cm]{images/mumbai/chartPeerLogicValidation_3A_3AProcessMessages-_3EProcessMessage-_3EUpdateTip.png}
+
+\includegraphics[width=7cm]{images/mumbai/chartPeerLogicValidation_3A_3AProcessMessages-_3EProcessMessage-_3EProcessMessage.png}
+\includegraphics[width=7cm]{images/mumbai/chartPeerLogicValidation_3A_3AProcessMessages-_3EProcessMessage-_3EProcessMessage-_3EUpdateTip.png}
 
 
 \bibliographystyle{plain}
