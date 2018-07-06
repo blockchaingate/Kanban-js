@@ -129,7 +129,7 @@ However, the speeds with which the transactions were received in our London and 
 For both machines, it took between $50$ and $60$ seconds for all transactions to arrive. Compared to about $400$ milliseconds needed for the transactions to be accepted to the first machine, this comprises a significant delay. The arrival times appear to be grouped into ``packets'' of size between $20$ to about $60$ transactions. It seems that this behavior is intentional and may be due to internal throttling of the network. Further investigation is required, however it is clear that with this performance we cannot propagate $1000$ transactions per second. Our conclusion here is that Kanban cannot rely on the fabcoin's networking stack ``out of the box'' as that was not designed to meet our performance goals. 
 
 
-\subsection{Performance monitoring on testNetNoDNS}
+\subsection{Performance monitoring on testNetNoDNS}\label{secPerformanceMonitoringTestNetNoDNS}
 In Table \ref{tablePerformanceLocalTestNetNoDNS}, we present the performance profile on testNetNoDNS on the machine that generated the $1001$ transactions. These statistics give us the best estimate of the performance of the memory pool in isolation of the network stack. More precisely, the function \verb|AcceptToMemoryPoolWithTime| gives us the best measure of the total running time of the database working in tandem with the cryptography stack and general transaction validation. On average, \verb|AcceptToMemoryPoolWithTime| takes $436$ microseconds to run, amounting to about more than 2200 transactions per second. It appears that this speed is satisfactory and exceeds the speed of the networking stack considerably. It also appears that this speed is sufficient to meet the current design goals of Kanban.  
 
 We note that the performance of \verb|AcceptToMemoryPoolWithTime| on testNetNoDNS appears to be consistent with the performance on mainNet, however at the moment our mainNet sample is much smaller so we consider the data from testNetNoDNS to be a closer reflection of reality.
@@ -212,18 +212,24 @@ In the following tables, we present our results from monitoring mainNet over abo
 
 
 \subsubsection{Commentary}
-Our statistics appear to show that the data management aspects - database access speeds and RAM memory management - are not a significant bottleneck for our system at the moment. For example, the \verb|UpdadeTip| function (executed when updating the leading block), takes 52 microseconds to run on average, and the 
+Our statistics appear to show that the data management aspects - database access speeds and RAM memory management - are not a significant bottleneck for our system at the moment. For example, the \verb|UpdadeTip| function (executed when updating the leading block), takes 52 microseconds to run on average.
 
-Our statistics also show that the cryptography scatk is not a bottleneck either. For example the function \verb|VerifyScript|, which does the script verification and the cryptographic checks, has average run speed of about ranging from $160$ to about $180$ microseconds. This amounts to more than $5500$ transactions per second, which is two orders of magnitude large than the throughput of the network.
+Our statistics also show that the cryptography stack is not a bottleneck either. For example the function \verb|VerifyScript|, which does the script verification and the cryptographic checks, has average run speed of about ranging from $160$ to about $180$ microseconds. This amounts to more than $5500$ transactions per second, which is two orders of magnitude large than the throughput of the network.
+
+
+Our statistics also show that the cryptography stack and the database stack work in tandem together with a sufficient performance, confirming the observations from Section \ref{secPerformanceMonitoringTestNetNoDNS}.
+
+Finally our statistics show that the networking stack has significant room for improvement. The network stack of fabcoin, in its present form, does meet the requirements of our Kanban project.
 
 
 
+\subsubsection{Commentary on the right-corner spike of some graphs}
 On both machines, the functions \verb|AcceptToMemoryPoolWorker| (and all of its callers) has a spike in run time that lies outside of the range of the histogram, causing all data to accumulate in the last bin of the histogram. 
 
 Our histograms are centered as follows. First, we gather statistics without collecting histogram samples. Once we have averaged over a given number of runs (hand-coded for each function, defaults to $100$), we center our histogram using the average and choose the histogram so it has $50$ or less buckets on each side of the average. Evidently this strategy does not record well the performance of  \verb|AcceptToMemoryPoolWorker|; more work is required to gather more accurate statistics. Since this function has (on both the London and Mumbai machines) an average run time of some $6.5$ ms and is not called very frequently (several hundred times per day at the time of writing), investigating the matter does not appear to be of very high priority. 
 
 
-The functions \verb|VerifyScript|, and to a lesser degree, \verb|SendMessages| showed similar out-of ordinary spikes of the run times. The comments from the preceding paragraph apply to them as well; further investigation of the matter may be needed, but is not necessary in the short term.
+The functions \verb|VerifyScript|, and to a lesser degree, \verb|SendMessages| showed similar out-of ordinary spikes in their histograms. The comments from the preceding paragraph apply to them as well; further investigation of the matter may be needed, but is not necessary in the short term.
 
 \subsubsection{London machine}
 Table  \ref{tablePerformanceLondon} shows the average running times of the profiled functions and Table \ref{graphsHistogramsLondon} shows their histograms.
