@@ -4,53 +4,49 @@
 \newcolumntype{P}[1]{>{\hspace{0pt}}p{#1}}
 \begin{document}
 
-Profiling recorded over 19 h, 29 min with 3 system restarts. Stats persist accross restarts.
+Profiling recorded over 1 h, 2 min with 2 system restarts. Stats persist across restarts.
 
 \begin{tabular}{P{5cm}|r|r|r}
 Function&\# calls& Avg.run time $\mu$s& Run time excl. subord. \\\hline
-getinfo& 1& 873&\\\hline
-getmemoryinfo& 3& 213&\\\hline
-getperformanceprofile& 3& 5961&\\\hline
-CDBIterator :: Next& 335594& 2&\\\hline
-UpdateTip& 25& 53&\\\hline
-PeerLogicValidation :: SendMessages $\to$ FindNextBlocksToDownload& 12033249& 1&\\\hline
-PeerLogicValidation :: UpdatedBlockTip& 25& 1&\\\hline
-PeerLogicValidation :: ProcessMessages $\to$ ProcessMessage $\to$ AcceptToMemoryPoolWithTime& 366& 6621&100\\\hline
-PeerLogicValidation :: ProcessMessages $\to$ ProcessMessage $\to$ ProcessHeadersMessage $\to$ UpdateBlockAvailability& 9604& 1&\\\hline
-PeerLogicValidation :: ProcessMessages& 12086593& 48&0\\\hline
-LoadMempool& 4& 204&\\\hline
-PeerLogicValidation :: ProcessMessages $\to$ ProcessMessage& 169438& 3397&2246\\\hline
-PeerLogicValidation :: SendMessages& 12086591& 10&9\\\hline
-PeerLogicValidation :: ProcessMessages $\to$ ProcessMessage $\to$ ProcessHeadersMessage& 9605& 17436&17435\\\hline
-PeerLogicValidation :: ProcessMessages $\to$ ProcessMessage $\to$ ProcessMessage $\to$ PeerLogicValidation :: UpdatedBlockTip& 748& 5&\\\hline
-PeerLogicValidation :: ProcessMessages $\to$ ProcessMessage $\to$ AcceptToMemoryPoolWithTime $\to$ AcceptToMemoryPoolWorker& 366& 6522&\\\hline
-PeerLogicValidation :: ProcessMessages $\to$ ProcessMessage $\to$ UpdateBlockAvailability& 1777& 1&\\\hline
-PeerLogicValidation :: ProcessMessages $\to$ ProcessGetData& 197& 1461&\\\hline
-PeerLogicValidation :: ProcessMessages $\to$ ProcessMessage $\to$ ProcessGetData& 10808& 1597&\\\hline
-PeerLogicValidation :: ProcessMessages $\to$ ProcessMessage $\to$ PeerLogicValidation :: UpdatedBlockTip& 111856& 1&\\\hline
-PeerLogicValidation :: ProcessMessages $\to$ ProcessMessage $\to$ RelayAddress& 1230& 6&\\\hline
-PeerLogicValidation :: ProcessMessages $\to$ ProcessMessage $\to$ UpdateTip& 111856& 56&\\\hline
-PeerLogicValidation :: ProcessMessages $\to$ ProcessMessage $\to$ ProcessMessage& 748& 2138&1980\\\hline
-PeerLogicValidation :: ProcessMessages $\to$ ProcessMessage $\to$ ProcessMessage $\to$ UpdateTip& 748& 154&\\\hline
-PeerLogicValidation :: ProcessMessages $\to$ ProcessMessage $\to$ SendBlockTransactions& 1& 56&\\\hline
+PeerLogicValidation :: ProcessMessages $\to$ ProcessMessage $\to$ AcceptToMemoryPoolWithTime $\to$ AcceptToMemoryPoolWorker $\to$ VerifyScript& 42& 73&\\\hline
+PeerLogicValidation :: ProcessMessages $\to$ ProcessMessage $\to$ AcceptToMemoryPoolWithTime $\to$ AcceptToMemoryPoolWorker& 11& 438&160\\\hline
+PeerLogicValidation :: ProcessMessages $\to$ ProcessMessage $\to$ AcceptToMemoryPoolWithTime& 11& 447&10\\\hline
+UpdateTip& 4& 87&\\\hline
+PeerLogicValidation :: ProcessMessages $\to$ ProcessMessage $\to$ UpdateBlockAvailability& 248& 2&\\\hline
+PeerLogicValidation :: ProcessMessages $\to$ ProcessMessage& 114906& 4773&3204\\\hline
+PeerLogicValidation :: ProcessMessages $\to$ ProcessMessage $\to$ ProcessMessage $\to$ PeerLogicValidation :: UpdatedBlockTip& 41& 5&\\\hline
+PeerLogicValidation :: ProcessMessages $\to$ ProcessMessage $\to$ RelayAddress& 11& 6&\\\hline
+CDBIterator :: Next& 192908& 3&\\\hline
+getperformanceprofile& 3& 3642&\\\hline
+PeerLogicValidation :: ProcessMessages $\to$ ProcessMessage $\to$ VerifyScript& 47696& 170&\\\hline
+VerifyScript& 43476& 177&\\\hline
+PeerLogicValidation :: ProcessMessages $\to$ ProcessMessage $\to$ ProcessHeadersMessage $\to$ UpdateBlockAvailability& 695& 2&\\\hline
+PeerLogicValidation :: ProcessMessages& 470499& 1169&3\\\hline
+PeerLogicValidation :: SendMessages $\to$ FindNextBlocksToDownload& 441304& 10&\\\hline
+PeerLogicValidation :: UpdatedBlockTip& 4& 2&\\\hline
+PeerLogicValidation :: ProcessMessages $\to$ ProcessMessage $\to$ ProcessHeadersMessage& 695& 238504&238502\\\hline
+PeerLogicValidation :: SendMessages& 470499& 25&15\\\hline
+getmemoryinfo& 6& 243&\\\hline
+LoadMempool& 3& 45&\\\hline
+PeerLogicValidation :: ProcessMessages $\to$ ProcessMessage $\to$ UpdateTip& 112602& 52&\\\hline
+PeerLogicValidation :: ProcessMessages $\to$ ProcessMessage $\to$ ProcessMessage& 41& 1985&1809\\\hline
+PeerLogicValidation :: ProcessMessages $\to$ ProcessMessage $\to$ ProcessMessage $\to$ UpdateTip& 41& 171&\\\hline
+PeerLogicValidation :: ProcessMessages $\to$ ProcessGetData& 15& 1380&\\\hline
+PeerLogicValidation :: ProcessMessages $\to$ ProcessMessage $\to$ PeerLogicValidation :: UpdatedBlockTip& 112601& 1&\\\hline
+PeerLogicValidation :: ProcessMessages $\to$ ProcessMessage $\to$ ProcessGetData& 306& 1062&\\\hline
 \end{tabular}
 
+\includegraphics[width=5cm]{images/chartPeerLogicValidation_3A_3AProcessMessages-_3EProcessMessage-_3EUpdateBlockAvailability.png}
+\includegraphics[width=5cm]{images/chartPeerLogicValidation_3A_3AProcessMessages-_3EProcessMessage.png}
+\includegraphics[width=5cm]{images/chartPeerLogicValidation_3A_3AProcessMessages-_3EProcessMessage-_3EProcessMessage-_3EPeerLogicValidation_3A_3AUpdatedBlockTip.png}
 \includegraphics[width=5cm]{images/chartCDBIterator_3A_3ANext.png}
-\includegraphics[width=5cm]{images/chartPeerLogicValidation_3A_3ASendMessages-_3EFindNextBlocksToDownload.png}
-\includegraphics[width=5cm]{images/chartPeerLogicValidation_3A_3AProcessMessages-_3EProcessMessage-_3EAcceptToMemoryPoolWithTime.png}
+\includegraphics[width=5cm]{images/chartPeerLogicValidation_3A_3AProcessMessages-_3EProcessMessage-_3EVerifyScript.png}
+\includegraphics[width=5cm]{images/chartVerifyScript.png}
 \includegraphics[width=5cm]{images/chartPeerLogicValidation_3A_3AProcessMessages-_3EProcessMessage-_3EProcessHeadersMessage-_3EUpdateBlockAvailability.png}
 \includegraphics[width=5cm]{images/chartPeerLogicValidation_3A_3AProcessMessages.png}
-\includegraphics[width=5cm]{images/chartPeerLogicValidation_3A_3AProcessMessages-_3EProcessMessage.png}
-\includegraphics[width=5cm]{images/chartPeerLogicValidation_3A_3ASendMessages.png}
+\includegraphics[width=5cm]{images/chartPeerLogicValidation_3A_3ASendMessages-_3EFindNextBlocksToDownload.png}
 \includegraphics[width=5cm]{images/chartPeerLogicValidation_3A_3AProcessMessages-_3EProcessMessage-_3EProcessHeadersMessage.png}
-\includegraphics[width=5cm]{images/chartPeerLogicValidation_3A_3AProcessMessages-_3EProcessMessage-_3EProcessMessage-_3EPeerLogicValidation_3A_3AUpdatedBlockTip.png}
-\includegraphics[width=5cm]{images/chartPeerLogicValidation_3A_3AProcessMessages-_3EProcessMessage-_3EAcceptToMemoryPoolWithTime-_3EAcceptToMemoryPoolWorker.png}
-\includegraphics[width=5cm]{images/chartPeerLogicValidation_3A_3AProcessMessages-_3EProcessMessage-_3EUpdateBlockAvailability.png}
-\includegraphics[width=5cm]{images/chartPeerLogicValidation_3A_3AProcessMessages-_3EProcessGetData.png}
-\includegraphics[width=5cm]{images/chartPeerLogicValidation_3A_3AProcessMessages-_3EProcessMessage-_3EProcessGetData.png}
-\includegraphics[width=5cm]{images/chartPeerLogicValidation_3A_3AProcessMessages-_3EProcessMessage-_3EPeerLogicValidation_3A_3AUpdatedBlockTip.png}
-\includegraphics[width=5cm]{images/chartPeerLogicValidation_3A_3AProcessMessages-_3EProcessMessage-_3ERelayAddress.png}
+\includegraphics[width=5cm]{images/chartPeerLogicValidation_3A_3ASendMessages.png}
 \includegraphics[width=5cm]{images/chartPeerLogicValidation_3A_3AProcessMessages-_3EProcessMessage-_3EUpdateTip.png}
-\includegraphics[width=5cm]{images/chartPeerLogicValidation_3A_3AProcessMessages-_3EProcessMessage-_3EProcessMessage.png}
-\includegraphics[width=5cm]{images/chartPeerLogicValidation_3A_3AProcessMessages-_3EProcessMessage-_3EProcessMessage-_3EUpdateTip.png}
+\includegraphics[width=5cm]{images/chartPeerLogicValidation_3A_3AProcessMessages-_3EProcessMessage-_3EPeerLogicValidation_3A_3AUpdatedBlockTip.png}
 \end{document}

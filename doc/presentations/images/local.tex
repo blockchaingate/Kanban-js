@@ -1,0 +1,62 @@
+\documentclass{article}
+\usepackage{graphicx}
+\usepackage{array}
+\newcolumntype{P}[1]{>{\hspace{0pt}}p{#1}}
+\begin{document}
+
+Profiling recorded over 33 min, 34 s with 0 system restarts. Stats persist across restarts.
+
+\begin{tabular}{P{5cm}|r|r|r}
+Function&\# calls& Avg.run time $\mu$s& Run time excl. subord. \\\hline
+getmemorypoolarrivaltimes& 6& 2302&\\\hline
+sendBulkRawTransactions $\to$ sendOneRawTransaction $\to$ AcceptToMemoryPoolWithTime $\to$ AcceptToMemoryPoolWorker $\to$ VerifyScript& 2002& 75&\\\hline
+sendBulkRawTransactions $\to$ sendOneRawTransaction& 1001& 436&24\\\hline
+getperformanceprofile& 4& 10867&\\\hline
+sendBulkRawTransactions& 1& 444469&8464\\\hline
+dumpprivkey& 2& 47&\\\hline
+decoderawtransaction& 1& 155&\\\hline
+gettransaction& 1& 209&\\\hline
+getblockhash& 1& 10&\\\hline
+getbestblockhash& 1& 7&\\\hline
+sendBulkRawTransactions $\to$ sendOneRawTransaction $\to$ AcceptToMemoryPoolWithTime& 1001& 412&7\\\hline
+PeerLogicValidation :: ProcessMessages $\to$ ProcessMessage $\to$ ProcessHeadersMessage $\to$ UpdateBlockAvailability& 2& 3&\\\hline
+PeerLogicValidation :: ProcessMessages $\to$ ProcessMessage $\to$ ProcessHeadersMessage& 2& 27&24\\\hline
+PeerLogicValidation :: ProcessMessages $\to$ ProcessMessage $\to$ RelayAddress& 1& 12&\\\hline
+PeerLogicValidation :: ProcessMessages $\to$ ProcessGetData& 15& 94&\\\hline
+PeerLogicValidation :: ProcessMessages $\to$ ProcessMessage $\to$ ProcessGetData& 246& 288&\\\hline
+getnetworkinfo& 1& 76&\\\hline
+sendBulkRawTransactions $\to$ sendOneRawTransaction $\to$ AcceptToMemoryPoolWithTime $\to$ AcceptToMemoryPoolWorker& 1001& 405&255\\\hline
+getmininginfo& 8& 55&\\\hline
+getinfo& 2& 17223&\\\hline
+UpdateTip& 1& 116&\\\hline
+getmemoryinfo& 2& 336&\\\hline
+PeerLogicValidation :: SendMessages& 37117& 30&29\\\hline
+PeerLogicValidation :: UpdatedBlockTip& 1& 5&\\\hline
+PeerLogicValidation :: ProcessMessages $\to$ ProcessMessage& 341& 253&45\\\hline
+generatetoaddress& 2& 23712088&267294\\\hline
+PeerLogicValidation :: SendMessages $\to$ FindNextBlocksToDownload& 36910& 2&\\\hline
+PeerLogicValidation :: ProcessMessages& 37117& 6&3\\\hline
+generatetoaddress $\to$ Equihash :: BasicSolve& 84689& 553&\\\hline
+getpeerinfo& 2& 103&\\\hline
+LoadMempool& 1& 66&\\\hline
+listreceivedbyaddress& 3& 63&\\\hline
+generatetoaddress $\to$ UpdateTip& 210& 85&\\\hline
+getblock& 2& 196&\\\hline
+generatetoaddress $\to$ BlockAssembler :: CreateNewBlock& 210& 169&\\\hline
+generatetoaddress $\to$ PeerLogicValidation :: UpdatedBlockTip& 210& 7&\\\hline
+\end{tabular}
+
+\includegraphics[width=5cm]{images/chartsendBulkRawTransactions-_3EsendOneRawTransaction-_3EAcceptToMemoryPoolWithTime-_3EAcceptToMemoryPoolWorker-_3EVerifyScript.png}
+\includegraphics[width=5cm]{images/chartsendBulkRawTransactions-_3EsendOneRawTransaction.png}
+\includegraphics[width=5cm]{images/chartsendBulkRawTransactions-_3EsendOneRawTransaction-_3EAcceptToMemoryPoolWithTime.png}
+\includegraphics[width=5cm]{images/chartsendBulkRawTransactions-_3EsendOneRawTransaction-_3EAcceptToMemoryPoolWithTime-_3EAcceptToMemoryPoolWorker.png}
+\includegraphics[width=5cm]{images/chartPeerLogicValidation_3A_3ASendMessages.png}
+\includegraphics[width=5cm]{images/chartPeerLogicValidation_3A_3AProcessMessages-_3EProcessMessage.png}
+\includegraphics[width=5cm]{images/chartgeneratetoaddress.png}
+\includegraphics[width=5cm]{images/chartPeerLogicValidation_3A_3ASendMessages-_3EFindNextBlocksToDownload.png}
+\includegraphics[width=5cm]{images/chartPeerLogicValidation_3A_3AProcessMessages.png}
+\includegraphics[width=5cm]{images/chartgeneratetoaddress-_3EEquihash_3A_3ABasicSolve.png}
+\includegraphics[width=5cm]{images/chartgeneratetoaddress-_3EUpdateTip.png}
+\includegraphics[width=5cm]{images/chartgeneratetoaddress-_3EBlockAssembler_3A_3ACreateNewBlock.png}
+\includegraphics[width=5cm]{images/chartgeneratetoaddress-_3EPeerLogicValidation_3A_3AUpdatedBlockTip.png}
+\end{document}
