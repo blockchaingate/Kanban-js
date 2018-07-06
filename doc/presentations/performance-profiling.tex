@@ -37,9 +37,9 @@ for FAB coin
 \section{Introduction}
 In this text, we describe several performance profiling tests we carried out for FAB coin. 
 
-In the present text, we focus on those performance characteristics that can be improved without changing the architecture of FAB coin.
+We focus on those performance characteristics that can be improved without changing the architecture of FAB coin.
 %Not all performance characteristics of our system can be improved without modifying its architecture. 
-The most important such characteristics are those of data management, networking and cryptography performance. Besides those, there are further performance characteristics that are not subject to immediate optimization without redesigning the system. For example, the average block mining time is 75 seconds by design: mining difficulty increases automatically to adjust for code improvements and network size increase. Those characteristics of the system are intimately tied to other properties such as the system's security and decentralization, and therefore cannot be improved by technical improvements of the code alone. We delegate further discussion of the architecture of FAB coin to other texts.
+The most important such characteristics are those of data management, networking and cryptography performance. Besides those, there are further performance characteristics that are not subject to immediate optimization without redesigning the system. For example, the average block mining time is 75 seconds by design: mining difficulty increases automatically to adjust for code improvements and network size increase. Those characteristics of the system are intimately tied to other properties such as the system's security and decentralization, and therefore cannot be improved by technical improvements alone. We delegate further discussion of the architecture of FAB coin to other texts.
 
 
 Our tests investigated the performance of individual FAB nodes on testNetNoDNS (an isolated self-contained tiny network), the performance of the tiny network testNetNoDNS as a whole, and finally the performance of individual nodes on mainNet. At the time of writing, testNetNoDNS has $3$ machines located on $3$ different continents. Should we decide it is worth the effort, we can deploy testNetNoDNS on more nodes; our setup can easily scale to an arbitrary number of machines.
@@ -208,7 +208,7 @@ We note that the performance of \verb|AcceptToMemoryPoolWithTime| on testNetNoDN
 \end{table}
 
 \subsection{Performance monitoring on mainNet}
-In the following tables, we present our results from monitoring mainNet over about 19 hours from our London and Mumbai machines. The first column of the two profiling tables shows the name of the function we profiled. Nesting of profiled functions is indicated by the $ \to $ arrow. The second column shows how many times did the function run over the course of our profiling. The third column shows the average run time of the function in microseconds. Please bear in mind that nested function calls incur a small performance penalty from the profiling code. For functions that call other profiled functions themselves, the fourth column indicates the run time of the function excluding the time of the profiled subroutines.
+In the following tables, we present our results from monitoring mainNet over about 1 hour from our London and Mumbai machines. The first column of the two profiling tables shows the name of the function we profiled. Nesting of profiled functions is indicated by the $ \to $ arrow. The second column shows how many times did the function run over the course of our profiling. The third column shows the average run time of the function in microseconds. Please bear in mind that nested function calls incur a small performance penalty from the profiling code. For functions that call other profiled functions themselves, the fourth column indicates the run time of the function excluding the time of the profiled subroutines.
 
 
 \subsubsection{Commentary}
@@ -217,9 +217,9 @@ Our statistics appear to show that the data management aspects - database access
 Our statistics also show that the cryptography stack is not a bottleneck either. For example the function \verb|VerifyScript|, which does the script verification and the cryptographic checks, has average run speed of about ranging from $160$ to about $180$ microseconds. This amounts to more than $5500$ transactions per second, which is two orders of magnitude large than the throughput of the network.
 
 
-Our statistics also show that the cryptography stack and the database stack work in tandem together with a sufficient performance, confirming the observations from Section \ref{secPerformanceMonitoringTestNetNoDNS}.
+Our statistics also show that the cryptography stack and the database stack working in tandem are fast enough for our purposes, confirming the observations from Section \ref{secPerformanceMonitoringTestNetNoDNS}.
 
-Finally our statistics show that the networking stack has significant room for improvement. The network stack of fabcoin, in its present form, does meet the requirements of our Kanban project.
+Finally our statistics show that the networking stack has significant room for improvement. The network stack of fabcoin, in its present form, does not meet the requirements of the Kanban project.
 
 
 
