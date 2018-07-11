@@ -65,4 +65,33 @@ PlotPoint (leftPoint, blue)+
 PlotPoint (rightPoint, purple)
 ;
  
+
+
+
+%%%%%
+%%%%%
+%Group law for an arbitrary elliptic curve
+
+x_C = t x_A + (1-t)x_B;
+y_C = t y_A + (1-t)y_B;
+y_A^2 = x_A^3+ a x_A +b;
+y_B^2 = x_B^3+ a x_B +b;
+
+Curve =Polynomialize(  y_C^2- x_C^3 - a x_C - b); 
+CurveDivT= MakeExpression MakeRationalFunction( Curve /t);
+powersOfT = CoefficientsPowersOf(t, CurveDivT);
+constant =  powersOfT_1;
+middle = powersOfT_2;
+leading =  powersOfT_3;
+solutionT = constant / leading;
+anotherSolution = -middle / leading -1;
+
+xNew =MakeExpression MakeRationalFunction( x_A solutionT + (1-solutionT) x_B); 
+yNew =- MakeExpression MakeRationalFunction( y_A solutionT + (1-solutionT) y_B); 
+(
+x_A = xA; y_A = yA; x_B = xB; y_B = yB; 
+SuffixNotationForPostScript( xNew))_5 ;
+(
+x_A = xA; y_A = yA; x_B = xB; y_B = yB; 
+SuffixNotationForPostScript( yNew))_5 ;
  

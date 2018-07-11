@@ -1,0 +1,79 @@
+\documentclass{article}
+\usepackage{amsmath}
+\usepackage{amssymb}
+
+\usepackage{hyperref}
+\title{Exercise in aggregate signatures}
+\author{Todor Milev}
+
+\begin{document}
+\maketitle 
+Aggregate signatures are one of the core technologies used by Fabcoin's Kanban system. Aggregate signatures have been proposed as early as 1995 in \cite{Horster1995} - an overview of the subject can be found, for example, in \cite{cryptoeprint:SimpleSchnorrMultisignatures}. Recently, aggregate signatures have been proposed as an optimization for Bitcoin's network. Besides Fabcoin, a number of crypto-currencies have put aggregate signatures in the core of their technology. In the present text we discuss one such scheme recently implemented by the Zilliqa crypto-currency and then propose an exercise on the topic. 
+
+The purpose of an aggregate signature is to have a message $m$ be signed by multiple entities. The signatories combine their public keys to a single aggregate one with the same size as a regular public key. Likewise, the signatories aggregate their signature to one of regular size. The entire process happens under the assumption that the entities do not trust one another and do not share any secrets. The resulting aggregate signature achieves the same goal as would be achieved by having each of the individual signatures for $m$ of every signatory, but is far shorter. To see why this optimization is significant consider the task of having $1000$ nodes sign a small message $m$ - say $90$ bytes. A standard ECDSA signature is $65$ bytes. This means that all $1000$ signatures would take $1000\cdot 65$ bytes - much more than a single aggregate signature. 
+
+
+Our exercise is expected to be completed ``by hand'' with the help of online cryptography tools or tools provided by FAB coin. Here, ``by hand'' means that individual cryptographic operations are expected to be carried via online tools/ready software with intermediate results recorded (copy+paste) in a resulting homework paper. The resulting homework paper is expected to have explanations and notation written by the student using proper academic language and references. The exercise can be expanded to a larger project by requesting an exposition of the theory behind aggregate signatures. The exercise can be further (significantly) expanded by requesting that the students carry out part (or all) of the computations using their own code (which will be evaluated), rather than using online tools.
+
+\section{The exercise}
+The Zilliqa aggregate signature scheme can be roughly described (omitting some technicalities) as follows. After each step, we give an exercise to be carried out by the student. The exercises roughly requests that the student simulate (on paper) the steps of the aggregate signature for $1$ aggregator and $3$ signer nodes. 
+
+The student is expected to properly cite all tools (online or otherwise) used to carry out the intermediate computations in the exercise.
+
+
+\subsection{Preparation step} 
+In this step, the signers prove their identities to a special node called an aggregator.
+\begin{itemize}
+\item Select a special node called an aggregator.
+\item Each signer: one-time send public key to aggregator.
+\item Aggregator: send back challenge message to be signed.
+\item Each signer: send signed challenge back.
+\item Aggregator: verify the signers' signatures. 
+\end{itemize}
+
+\subsubsection{Proposed exercise}
+\begin{itemize}
+\item The student prepares a challenge message and presents its encoding in a standard format (hex, base64, $\dots$).
+\item The student generates $3$ public-secret key pairs corresponding to three signer nodes. Encodings  of the three pairs are presented.
+\item The student generates $3$ signatures for the challenge message. Encoded results are presented.
+\item[Optional] The student presents intermediate computations in the verification of the $3$ signatures.
+\end{itemize}
+
+\subsection{Signature aggregation}
+In this step, the aggregator node composes an aggregate signature. The student should skip all steps related to networking and assume that all messages send between the nodes arrive without error. 
+
+\begin{itemize}
+\item Each signer: choose random $\mathrm{nonce}_i$, compute $q_i = g^{\mathrm{nonce}_i}$. Here, we assume $g$ is the generator of the elliptic curve $y^2=x^3+7$ over $\mathbb Z/p\mathbb Z$ with $p = 2^{256}- 2^{32}-977$ - i.e., curve secp256k1, the standard curve used in Fabcoin and Bitcoin. 
+\item Each signer: send $q_i$ to aggregator.  
+\item Aggregator: compute $ \mathrm{Pub} =\prod_{i} \mathrm{pub}_i =\mathrm{pub}_1\cdot \dots \cdot \mathrm{pub}_n $. 
+\item Aggregator: compute $ Q = \prod_i q_i$.
+\item Aggregator: compute  $\mathrm{challenge} = H(Q, \mathrm{Pub}, \mathrm{digest})$.
+\item Aggregator: send $\mathrm{challenge},\mathrm{Pub}, \mathrm{digest}$ to signers.
+\item Each signer: verify $\mathrm{challenge} = H(Q, \mathrm {Pub}, \mathrm{digest}) $.
+\item Each signer: compute $\mathrm{solution}_i = {\mathrm{nonce}_i - \mathrm{challenge} \cdot \mathrm{secret}_i} $
+\item Each signer: send $\mathrm{solution}_i$ to aggregator.
+\item Aggregator: compute $\mathrm{solution} = \sum_i \mathrm{solution}_i $.
+\item Aggregator: final signature: $(\mathrm{challenge}, \mathrm{solution})$.
+
+\end{itemize}
+
+\subsection{Proposed exercise}
+\begin{itemize}
+\item The student presents hex encodings of the generator $g$ of secp256k1, of $p = 2^{256}- 2^{32}-977$ and of the order (number of elements) of secp256k1.
+\item The student selects $\mathrm{nonce}_1, \mathrm{nonce}_2,\mathrm{nonce}_3$. Encodings are presented.
+
+\item The students computes the $q_i$'s. Encodings are presented.
+\item The student computes $Q$. Encoding is presented.
+\item The students computes $\mathrm{challenge}$ and presents its encoding.
+\item The student computes each $\mathrm{solution}_i$ and presents encodings.
+\item The student computes the final signature and presents its encoding.
+\end{itemize}
+
+
+\subsection{Aggregate signature verification}
+[To be written].
+
+\bibliographystyle{plain}
+\bibliography{../bibliography}
+
+\end{document}
