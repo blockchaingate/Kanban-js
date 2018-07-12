@@ -1,0 +1,45 @@
+\newcommand*\circled[1]{\tikz[baseline=(char.base)]{
+		\node[shape=circle,draw,inner sep=1pt] (char) {\tiny #1};}}
+
+\begin{frame}
+\begin{itemize}
+	\item Intended use case: aggregate signature for each transaction, completed within 0-5 seconds after initiation. Sample networking:
+	
+	\hfil\hfil$
+	\xymatrix{ 
+		& &
+		\textrm{kb}_1
+		&\textrm{kb}_2 \\
+		&\mathrm{kb}_8 &&&\textrm{kb}_3\\
+		\mathrm{wallet} 
+		\ar@/^0.5pc/@{->}[r]^{\circled{1}}  
+		\ar@/_0.5pc/@{<-}[r]_{\circled{6}}  &
+		\mathrm{kb}_7 
+		\ar@/^0.5pc/@{=>}[u]_{\dots} 
+		\ar@/_0.5pc/@{<=}[u] 
+		\ar@/^0.5pc/@{=>}[uur]_{\dots}%^{\circled{2}, \circled{4}}_{\circled{3}, \circled{5}} 
+		\ar@/_0.5pc/@{<=}[uur]
+		\ar@/^0.5pc/@{=>}[uurr]_{\dots}%^{\circled{2}, \circled{4}}_{\circled{3}, \circled{5}} 
+		\ar@/_0.5pc/@{<=}[uurr]_{\dots}%^{\circled{2}, \circled{4}}_{\circled{3}, \circled{5}} 
+		\ar@/^0.5pc/@{=>}[rrru]_{\dots}
+		\ar@/_0.5pc/@{<=}[rrru]
+		\ar@/^0.5pc/@{=>}[rrr]^(.65){\circled{2}, \circled{4}} 
+		\ar@/_0.5pc/@{<=}[rrr]_(.65){\circled{3}, \circled{5}}
+		\ar@/^0.5pc/@{=>}[rrd]_{\dots}%^{\circled{2}, \circled{4}}_{\circled{3}, \circled{5}} 
+		\ar@/_0.5pc/@{<=}[rrd]_{\dots}%^{\circled{2}, \circled{4}}_{\circled{3}, \circled{5}} 
+		\ar@/^0.5pc/@{=>}[rd]_{\dots}%^{\circled{2}, \circled{4}}_{\circled{3}, \circled{5}} 
+		\ar@/_0.5pc/@{<=}[rd]_{\dots}%^{\circled{2}, \circled{4}}_{\circled{3}, \circled{5}} 
+		&&&\textrm{kb}_4\\
+		& &\textrm{kb}_6&\textrm{kb}_5 \\
+	}
+	$
+	\begin{itemize}
+		\item \circled{1} Wallet sends transaction ``$A$ sends $B$ amount, signed by $A$''. Node $\mathrm{kb}_1$ is designates itself as an aggregator.
+		\item \circled{2} Aggregator starts protocol, requesting the $q_i$'s
+		\item \circled{3} Signers report their $q_i$'s, proving they are online.
+		\item \circled{4} Aggregator sends challenges out.
+		\item \circled{5} Signers reply with solutions to their challenges.
+		\item \circled{6} Aggregator reports signature to wallet.
+	\end{itemize}
+\end{itemize}
+\end{frame}

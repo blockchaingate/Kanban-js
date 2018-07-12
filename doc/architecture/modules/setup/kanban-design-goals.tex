@@ -1,0 +1,16 @@
+\begin{frame}
+\frametitle{Design goals for the Kanban protocol}
+The slide(s) list some of the design goals considered; will be udpated.
+
+\begin{enumerate}
+\item KB's inherit authority from the foundation blockchain (POW).
+\item \label{itemKanbanIsFunctionOfFoundationChain} Except state between blocks, Kanban network's state aims to be function of longest foundation chain. 
+\item Data not directly in foundation chain: store error check (hash) in the found. chain. If no hash collisions, consistent with preceding.
+\begin{itemize}
+	\item EVM state can be used for storage.
+	\item A heavy-weight storage engine (callable by EVM) could be designed to reduce EVM state.
+\end{itemize}
+\item Should Kanban networking be reverted (longest chain overtake), all transaction chains approved by Kanban that do not involve reverted coinbases/incentives should be recoverable.
+
+\end{enumerate}
+\end{frame}
