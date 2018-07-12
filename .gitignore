@@ -35,3 +35,5 @@ build/Makefile
 #flood the repo with changes. 
 #Will be commented out when time comes to deploy.
 html/kanban_frontend_browserified.js
+
+*.run.xml

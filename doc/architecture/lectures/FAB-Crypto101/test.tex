@@ -1,0 +1,110 @@
+\documentclass%
+%[handout]
+{beamer}
+% % % % % % % %
+% % % % % % % %
+% % % % % % % %
+%IMPORTANT
+%compiles with
+%pdflatex -shell-escape
+%IMPORTANT
+% % % % % % % %
+% % % % % % % %
+% % % % % % % %
+\mode<presentation>
+{
+\useinnertheme{rounded}
+\useoutertheme{infolines}
+\usecolortheme{orchid}
+\usecolortheme{whale}
+}
+
+\usepackage[english]{babel}
+\usepackage[latin1]{inputenc}
+\usepackage{times}
+\usepackage[T1]{fontenc}
+\input{../example-templates}
+\input{../pstricks-commands}
+
+\usepackage{auto-pst-pdf}
+\usepackage{pst-plot}
+%\usepackage{pstricks-add}
+
+% Or whatever. Note that the encoding and the font should match. If T1
+% does not look nice, try deleting the line with the fontenc.
+
+
+\graphicspath{{../../modules/}}
+
+\newtheoremstyle{partialproof}{3pt}{3pt}{}{}{}{.}{.5em}{}
+\theoremstyle{partialproof} \newtheorem{partialproof}[theorem]{Proof.}
+%\DeclareMathOperator{\diff}{d}
+\setbeamertemplate{navigation symbols}{}
+
+\includeonlylecture{1}
+
+\newcommand{\lect}[3]{
+  \date{#1}
+  \lecture[#1]{#2}{#3}
+}
+
+\setbeamertemplate{footline}
+{
+  \leavevmode%
+  \hbox{%
+  \begin{beamercolorbox}[wd=.333333\paperwidth,ht=2.25ex,dp=1ex,center]{author in head/foot}%
+    \usebeamerfont{author in head/foot}\insertshortauthor
+  \end{beamercolorbox}%
+  \begin{beamercolorbox}[wd=.333333\paperwidth,ht=2.25ex,dp=1ex,center]{title in head/foot}%
+    \usebeamerfont{title in head/foot}\insertshorttitle
+  \end{beamercolorbox}%
+  \begin{beamercolorbox}[wd=.333333\paperwidth,ht=2.25ex,dp=1ex,center]{date in head/foot}%
+    \usebeamerfont{date in head/foot}\insertshortdate{}
+  \end{beamercolorbox}}%
+  \vskip0pt%
+}
+
+% If you have a file called "university-logo-filename.xxx", where xxx
+% is a graphic format that can be processed by latex or pdflatex,
+% resp., then you can add a logo as follows:
+
+%\pgfdeclareimage[height=0.8cm]{logo}{bluelogo}
+%\logo{\pgfuseimage{logo}}
+\renewcommand{\Arcsin}{\arcsin}
+\renewcommand{\Arccos}{\arccos}
+\renewcommand{\Arctan}{\arctan}
+\renewcommand{\Arccot}{\text{arccot\hspace{0.03cm}}}
+\renewcommand{\Arcsec}{\text{arcsec\hspace{0.03cm}}}
+\renewcommand{\Arccsc}{\text{arccsc\hspace{0.03cm}}}
+
+
+
+\begin{document}
+
+\AtBeginLecture{%
+
+\title[\insertlecture]{FreeCalc}
+\subtitle{\insertlecture}
+\author[FreeCalc]{}
+\institute[UMass Boston]{University of Massachusetts Boston}
+\date{\insertshortlecture}
+\begin{frame}
+  \titlepage
+\end{frame}
+}%
+
+% begin lecture
+\lect{\today}{Sample}{1}{
+\input{../../modules/integration-multivariable-variable-change/volume-of-ball}
+\input{../../modules/integration-multivariable-variable-change/volume-of-ellipsoid}
+%\input{../../modules/integration-surface-integrals/induced-orientation-boundary-curve-example-hemisphere}
+%\input{../../modules/integration-surface-integrals/flux}
+%\input{../../modules/integration-surface-integrals/divergence}
+%\input{../../modules/integration-surface-integrals/flux-and-divergence}
+%\input{../../modules/integration-surface-integrals/flux-computation}
+%\input{../../modules/integration-surface-integrals/flux-example-1}
+%\input{../../modules/integration-surface-integrals/flux-example-2}
+%\input{../../modules/integration-surface-integrals/divergence-theorem}
+%\input{../../modules/integration-surface-integrals/divergence-theorem-example-1}
+}
+\end{document}
