@@ -11,7 +11,7 @@
 %[handout]%
 {beamer}
 %IMPORTANT: the following line selects the current lecture. Change number to select a different lecture.
-\newcommand{\currentLecture}{2}
+\newcommand{\currentLecture}{1}
 \newcommand{\semester}{Summer 2018}
 \input{../../../freecalc/lectures/example-templates}
 \input{../../../freecalc/lectures/pstricks-commands}
@@ -125,13 +125,13 @@ FA Enterprise System, Inc.
 \lect{\semester}{Fabcoin Crypto 101: Lecture 1}{1}{
 %DesiredLectureName: ECDSA
 \section{Groups}
-\input{../../../freecalc/modules/crypto-digital-signature-algorithm/modular-arithmetic-review}
+%\input{../../../freecalc/modules/crypto-digital-signature-algorithm/modular-arithmetic-review}
 
-\input{../../../freecalc/modules/crypto-digital-signature-algorithm/abelian-group-definition}
-\input{../../../freecalc/modules/crypto-digital-signature-algorithm/elliptic-curves}
+%\input{../../../freecalc/modules/crypto-digital-signature-algorithm/abelian-group-definition}
+%\input{../../../freecalc/modules/crypto-digital-signature-algorithm/elliptic-curves}
 
-\input{../../../freecalc/modules/crypto-digital-signature-algorithm/elliptic-curve-group-law-definition-geometric}
-\input{../../../freecalc/modules/crypto-digital-signature-algorithm/elliptic-curve-group-law-justification-promise}
+%\input{../../../freecalc/modules/crypto-digital-signature-algorithm/elliptic-curve-group-law-definition-geometric}
+%\input{../../../freecalc/modules/crypto-digital-signature-algorithm/elliptic-curve-group-law-justification-promise}
 \input{../../../freecalc/modules/crypto-digital-signature-algorithm/elliptic-curve-group-law-algebraic-derivation}
 
 }
@@ -143,9 +143,11 @@ FA Enterprise System, Inc.
 \subsection{Digital signature algorithm (DSA)}
 %\input{../../../freecalc/modules/crypto-digital-signature-algorithm/digital-signature-algorithm-generalized}
 \subsection{Schnorr aggregate signatures}
-%\input{../../../freecalc/modules/crypto-digital-signature-algorithm/schnorr-signature-generalized}
+\input{../../../freecalc/modules/crypto-digital-signature-algorithm/schnorr-signature-generalized}
+
+\input{../../../freecalc/modules/crypto-digital-signature-algorithm/schnorr-signature-generalized-example-1}
 \subsection{Schnorr aggregate signature - Zilliqa}
-\input{../../../freecalc/modules/crypto-digital-signature-algorithm/schnorr-based-multisignatures-notation}
+%\input{../../../freecalc/modules/crypto-digital-signature-algorithm/schnorr-based-multisignatures-notation}
 
 \input{../../../freecalc/modules/crypto-digital-signature-algorithm/schnorr-multisignature-zilliqa-non-pbft}
 \subsection{Schnorr aggregate signature - [1, MPSW]}
