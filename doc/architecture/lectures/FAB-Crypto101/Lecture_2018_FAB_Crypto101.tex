@@ -121,43 +121,39 @@ FA Enterprise System, Inc.
 }
 
 \begin{document}
-% begin lecture
-\lect{\semester}{Fabcoin Crypto 101: Lecture 1}{1}{
+\lect{\semester}{Fabcoin Crypto 101: Lecture 1}{1}{%
 %DesiredLectureName: ECDSA
 \section{Groups}
 %\input{../../../freecalc/modules/crypto-digital-signature-algorithm/modular-arithmetic-review}
-
 %\input{../../../freecalc/modules/crypto-digital-signature-algorithm/abelian-group-definition}
 %\input{../../../freecalc/modules/crypto-digital-signature-algorithm/elliptic-curves}
-
 %\input{../../../freecalc/modules/crypto-digital-signature-algorithm/elliptic-curve-group-law-definition-geometric}
-%\input{../../../freecalc/modules/crypto-digital-signature-algorithm/elliptic-curve-group-law-justification-promise}
-\input{../../../freecalc/modules/crypto-digital-signature-algorithm/elliptic-curve-group-law-algebraic-derivation}
 
-}
+\input{../../../freecalc/modules/crypto-digital-signature-algorithm/elliptic-curve-group-law-justification-promise}
+%\input{../../../freecalc/modules/crypto-digital-signature-algorithm/elliptic-curve-group-law-algebraic-derivation}
+%\input{../../../freecalc/modules/crypto-digital-signature-algorithm/elliptic-curve-group-law-example-1}
+}%
 
 \lect{\semester}{Fabcoin Crypto 101: PBFT consensus}{2}{
-
-
 \section{Signature algorithms}
 \subsection{Digital signature algorithm (DSA)}
-%\input{../../../freecalc/modules/crypto-digital-signature-algorithm/digital-signature-algorithm-generalized}
+\input{../../../freecalc/modules/crypto-digital-signature-algorithm/digital-signature-algorithm-generalized}
 \subsection{Schnorr aggregate signatures}
 \input{../../../freecalc/modules/crypto-digital-signature-algorithm/schnorr-signature-generalized}
 
 \input{../../../freecalc/modules/crypto-digital-signature-algorithm/schnorr-signature-generalized-example-1}
 \subsection{Schnorr aggregate signature - Zilliqa}
-%\input{../../../freecalc/modules/crypto-digital-signature-algorithm/schnorr-based-multisignatures-notation}
+\input{../../../freecalc/modules/crypto-digital-signature-algorithm/schnorr-based-multisignatures-notation}
 
 \input{../../../freecalc/modules/crypto-digital-signature-algorithm/schnorr-multisignature-zilliqa-non-pbft}
 \subsection{Schnorr aggregate signature - [1, MPSW]}
-%\input{../../../freecalc/modules/crypto-digital-signature-algorithm/schnorr-multisignature-simple-with-application-to-bitcoin}
+\input{../../../freecalc/modules/crypto-digital-signature-algorithm/schnorr-multisignature-simple-with-application-to-bitcoin}
 
 \IfFileExists{../../../architecture/modules/networking/kanban-pbft-transaction}{
-%\input{../../../architecture/modules/networking/kanban-pbft-transaction}
-%\input{../../../architecture/modules/setup/kanban-design-goals}
-%\input{../../../architecture/modules/setup/kanban-fabcoin-interface}
-%\input{../../../architecture/modules/setup/kanban-fabcoin-interface-format}
+\input{../../../architecture/modules/networking/kanban-pbft-transaction}
+\input{../../../architecture/modules/setup/kanban-design-goals}
+\input{../../../architecture/modules/setup/kanban-fabcoin-interface}
+\input{../../../architecture/modules/setup/kanban-fabcoin-interface-format}
 }{}
 
 \begin{frame}[t, allowframebreaks]
