@@ -13,6 +13,7 @@ var path = {
   secretsAdmin: `${__dirname}/../secrets_admin`,
   HTML: `${__dirname}/../html`,
   fabcoin: `${__dirname}/../fabcoin`,
+  kanbanProofOfConcept: `${__dirname}/../kanban-poc`,
   fabcoinSrc: `${__dirname}/../fabcoin/src`,
   openCLDriverBuildPath: `${__dirname}/../build`,
   fabcoinConfigurationFolder: null
@@ -551,6 +552,11 @@ var fabcoinInitializationProcedures = {
     command: "killall",
     cli: ["fabcoind"]
   },
+  killAllKanbans: {
+    fabcoinInitialization: "killAllKanbans",
+    command: "killall",
+    cli: ["fabcoind"]
+  },
   gitPullNode: {
     fabcoinInitialization: "gitPullNode",
     command: "git",
@@ -561,6 +567,12 @@ var fabcoinInitializationProcedures = {
     fabcoinInitialization: "gitPullFabcoin",
     command: "git",
     path: path.fabcoin,
+    cli: ["pull"]
+  },
+  gitPullKanban: {
+    fabcoinInitialization: "gitPullKanban",
+    command: "git",
+    path: path.kanbanProofOfConcept,
     cli: ["pull"]
   },
   makeFabcoin: {

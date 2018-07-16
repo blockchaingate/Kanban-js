@@ -36,6 +36,16 @@ function killAllFabcoinDaemons() {
   });
 }
 
+function killAllKanbanDaemons() {
+  var theURL = pathnames.getURLFromFabcoinInitialization(pathnames.fabcoinInitializationProcedures.killAllKanbans.fabcoinInitialization);
+  submitRequests.submitGET({
+    url: theURL,
+    progress: getSpanProgress(),
+    result : getOutputFabcoinInitialization(),
+    callback: callbackFabcoinInitialization    
+  });
+}
+
 function startFabcoinDaemon(useMining) {
   var mineString = "";
   if (useMining) {
@@ -57,6 +67,16 @@ function startFabcoinDaemon(useMining) {
 
 function gitPullNode() {
   var theURL = pathnames.getURLFromFabcoinInitialization(pathnames.fabcoinInitializationProcedures.gitPullNode.fabcoinInitialization);
+  submitRequests.submitGET({
+    url: theURL,
+    progress: getSpanProgress(),
+    result : getOutputFabcoinInitialization(),
+    callback: callbackFabcoinInitialization    
+  });  
+}
+
+function gitPullKanban() {
+  var theURL = pathnames.getURLFromFabcoinInitialization(pathnames.fabcoinInitializationProcedures.gitPullKanban.fabcoinInitialization);
   submitRequests.submitGET({
     url: theURL,
     progress: getSpanProgress(),
@@ -104,6 +124,7 @@ module.exports = {
   killAllFabcoinDaemons,
   gitPullNode,
   gitPullFabcoin,
+  gitPullKanban,
   makeFabcoin,
   deleteFabcoinConfiguration,
   updateFabcoinInitializationPage

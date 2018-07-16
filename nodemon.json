@@ -1,4 +1,4 @@
 {
-  "ignore": ["./html", "./fabcoin", "./.vscode", "./.git", "./node_modules", "./build", "./opencl", "./doc"]
+  "ignore": ["./html", "./fabcoin", "./.vscode", "./.git", "./node_modules", "./build", "./opencl", "./doc", "./kanban-poc"]
 }
 
