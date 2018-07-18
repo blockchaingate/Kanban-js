@@ -15,7 +15,8 @@ var defaults = {
   spanPingColumnHeader: "spanPingColumnHeader",
   kanbanPlusPlus: {
     inputAddressDefault: "inputAddressDefault",
-    inputPrivateKeyDefault: "inputPrivateKeyDefault"
+    inputPrivateKeyDefault: "inputPrivateKeyDefault",
+    inputPublicKeyDefault: "inputPublicKeyDefault"
   },
   inputNumberOfBlocks: "inputNumberOfBlocks",
   inputMaxNumberOfTries: "inputMaxNumberOfTries",

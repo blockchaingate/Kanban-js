@@ -46,6 +46,21 @@ function killAllKanbanDaemons() {
   });
 }
 
+function startKanban() {
+  var dataDir = `${pathnames.pathsComputedAtRunTime.kanbanProofOfConcentConfigurationFolder}/`;
+  var theURL = pathnames.getURLFromFabcoinInitialization(
+    pathnames.fabcoinInitializationProcedures.startKanban.fabcoinInitialization, {
+      net: globals.mainPage().getRPCKanbanNetworkOption()
+    }
+  );
+  submitRequests.submitGET({
+    url: theURL,
+    progress: getSpanProgress(),
+    result : getOutputFabcoinInitialization(),
+    callback: callbackFabcoinInitialization    
+  });
+}
+
 function startFabcoinDaemon(useMining) {
   var mineString = "";
   if (useMining) {
@@ -121,11 +136,12 @@ function deleteFabcoinConfiguration() {
 
 module.exports = {
   startFabcoinDaemon,
+  startKanban,
   killAllFabcoinDaemons,
   gitPullNode,
   gitPullFabcoin,
   gitPullKanban,
   makeFabcoin,
   deleteFabcoinConfiguration,
-  updateFabcoinInitializationPage
+  updateFabcoinInitializationPage,
 }

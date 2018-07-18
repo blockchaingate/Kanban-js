@@ -35,8 +35,16 @@ function getAddressInputValue() {
   return document.getElementById(ids.defaults.kanbanPlusPlus.inputAddressDefault).value;
 }
 
+function getPrivateKeyInputValue() {
+  return document.getElementById(ids.defaults.kanbanPlusPlus.inputPrivateKeyDefault).value;
+}
+
 function callbackDumpPrivateKey(input, output) {
   submitRequests.updateInnerHtml(ids.defaults.kanbanPlusPlus.inputPrivateKeyDefault, miscellaneous.removeQuotes(input));
+}
+
+function callbackPublicKeyFromPrivate(input, output) {
+  submitRequests.updateInnerHtml(ids.defaults.kanbanPlusPlus.inputPublicKeyDefault, miscellaneous.removeQuotes(input));
 }
 
 function dumpPrivateKey() {
@@ -79,11 +87,26 @@ function getReceivedByAddress() {
   });  
 }
 
+function testPublicKeyFromPrivate() {
+  submitRequests.submitGET({
+    url: pathnames.getURLfromRPCLabel(
+      pathnames.rpcCallsKanban.testPublicKeyGeneration.rpcCall, {
+        net: globals.mainPage().getRPCKanbanNetworkOption(),
+        privateKey: getPrivateKeyInputValue()
+      }, 
+      true
+    ),
+    progress: globals.spanProgress(),
+    result : ids.defaults.outputKanbanPlusPlusGeneral,
+    callback: callbackPublicKeyFromPrivate
+  });  
+}
+
 function setNet(netName) {
   var thePage = globals.mainPage();
   thePage.currentKanbanNetworkName = netName;
   thePage.storePageSettings(); 
-  var radioId = thePage.fabcoinNetworkRadioIds[netName];
+  var radioId = thePage.kanbanNetworkRadioIds[netName];
   document.getElementById(radioId).checked = true;
   updateKanbanPlusPlus();
 }
@@ -102,5 +125,6 @@ module.exports = {
   setTestKanban,
   setMainKanban,
   setAddress,
-  dumpPrivateKey
+  dumpPrivateKey,
+  testPublicKeyFromPrivate
 }

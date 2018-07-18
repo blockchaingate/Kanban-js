@@ -23,6 +23,7 @@ function initializeFolders() {
     }
     if (fs.existsSync(currentPathKanban)) {
       pathnames.path.kanbanProofOfConcentConfigurationFolder = path.normalize(currentPathKanban);
+      pathnames.fabcoinInitializationProcedures.startKanban.cli[0][1] = `-datadir=${pathnames.path.kanbanProofOfConcentConfigurationFolder}`;
       //var networkDataKanban = pathnames.networkDataKanban;
       console.log(`Using Kanban++ configuration folder: ${pathnames.path.kanbanProofOfConcentConfigurationFolder}`.blue);
     }

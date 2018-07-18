@@ -41,7 +41,8 @@ var pathname = {
   frontEndCSS: `${path.HTML}/kanban_frontend.css`,
   fabcoind: `${path.fabcoinSrc}/fabcoind`,
   fabcoinCli: `${path.fabcoinSrc}/fabcoin-cli`,
-  fabcoinCliKanban: `${path.kanbanProofOfConceptSRC}/fabcoin-cli`,
+  kanbanCli: `${path.kanbanProofOfConceptSRC}/fabcoin-cli`,
+  kanband: `${path.kanbanProofOfConceptSRC}/fabcoind`,
   openCLDriverExecutable: `${path.openCLDriverBuildPath}/kanban-gpu`
 };
 
@@ -260,6 +261,22 @@ var rpcCallsKanban = {
     },
     address: "",
     cli: ["net", "command", "address"]
+  },
+  testPublicKeyGeneration: {
+    rpcCall: "testPublicKeyGeneration", //must be same as rpc label, used for autocomplete
+    mandatoryFixedArguments: { //<- values give defaults, null for none
+      command: "testpublickeygeneration",
+    },
+    mandatoryModifiableArguments: { //<- values give defaults, null for none
+      privateKey: null
+    },
+    allowedArgumentValues: {
+      net: [ //<- restricted network access!
+        networkDataKanban.testKanban.rpcOption
+      ]
+    },
+    address: "",
+    cli: ["net", "command", "privateKey"]
   }
 }
 
@@ -605,6 +622,21 @@ var fabcoinInitializationProcedures = {
     },
     cli: [ ["net", networkRPCOption.testNetNoDNS], ["mine", ""], "-daemon"] //when the argument is an array, the second is the default
   },
+  startKanban: {
+    fabcoinInitialization: "startKanban", //must be same as label, used for autocomplete
+    command: pathname.kanband,
+    allowedArgumentValues: {
+      net: [networkDataKanban.testKanban.rpcOption, networkDataKanban.mainKanban.rpcOption],
+    },
+    cli: [ 
+      ["dataDir", null], //<- please keep this option first, it is referred to in initialize_fabcoin_folders
+      ["net", networkRPCOption.testNetNoDNS], 
+      "-gen", 
+      "-printtoconsole", 
+      "-logips", 
+      "-daemon"      
+    ] //when the argument is an array, the second is the default
+  },
   killAll: {
     fabcoinInitialization: "killAll",
     command: "killall",
@@ -751,7 +783,7 @@ function getURLfromRPCLabel(theRPClabel, theArguments, isKanban) {
   if (isKanban === true) {
     entryPoint = url.known.kanbanRPC;
   }
-  return `${entryPoint}?${getPOSTBodyfromRPCLabel(theRPClabel, theArguments)}`;
+  return `${entryPoint}?${getPOSTBodyfromRPCLabel(theRPClabel, theArguments, isKanban)}`;
 }
 
 function getRPCNet(theArguments) {

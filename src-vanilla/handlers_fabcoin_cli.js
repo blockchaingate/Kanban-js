@@ -161,7 +161,11 @@ function rpcCall(request, response, desiredCommand, isKanban) {
     return response.end(`Request is missing the ${pathnames.rpcCall} entry. `);        
   }
   var theCallLabel = desiredCommand[pathnames.rpcCall];
-  if (!(theCallLabel in pathnames.rpcCalls)) {
+  var callCollection = pathnames.rpcCalls;
+  if (isKanban) {
+    callCollection = pathnames.rpcCallsKanban;
+  }
+  if (!(theCallLabel in callCollection)) {
     response.writeHead(400);
     numberRequestsRunning --;
     return response.end(`RPC call label ${theCallLabel} not found. `);    
@@ -174,7 +178,7 @@ function rpcCall(request, response, desiredCommand, isKanban) {
   if (desiredCommand[pathnames.forceRPCPOST] === true) {
     userWantsToUsePOST = true;
   }
-  if (pathnames.rpcCalls[theCallLabel].easyAccessControlOrigin === true) {
+  if (callCollection[theCallLabel].easyAccessControlOrigin === true) {
     //console.log("Setting header ...");
     response.setHeader('Access-Control-Allow-Origin', '*');
   }
@@ -195,7 +199,7 @@ function rpcCall(request, response, desiredCommand, isKanban) {
   }
   var theCommand = `${pathnames.pathname.fabcoinCli}`;
   if (isKanban) {
-    theCommand = `${pathnames.pathname.fabcoinCliKanban}`
+    theCommand = `${pathnames.pathname.kanbanCli}`
   }
   console.log(`Executing rpc command: ${theCommand}.`.blue);
   console.log(`Arguments: ${JSON.stringify(theArguments)}.`.green);
