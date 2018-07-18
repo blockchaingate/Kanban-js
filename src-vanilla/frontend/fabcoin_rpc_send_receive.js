@@ -9,7 +9,7 @@ const ECKey = require('../bitcoinjs_src/ecpair');
 const Block = require('../bitcoinjs_src/block');
 const jsonic = require('jsonic');
 const miscellaneous = require('../miscellaneous');
-const encodingBasic = require('../encodings_basic');
+const miscellaneousFrontEnd = require('./miscellaneous_frontend');
 const rpcGeneral = require('./fabcoin_rpc_general');
 const bigInteger = require('big-integer');
 
@@ -45,10 +45,6 @@ function setNothing() {
 
 }
 
-function hexShortenerForDisplay(input){
-  return `${input.substr(0, 4)}...${input.substr(input.length - 4, 4)}`;
-}
-
 function setBlockHash(container) {
   submitRequests.updateValue(ids.defaults.inputBlockHash, container.getAttribute("content"));
   getBlock();
@@ -74,21 +70,21 @@ var optionsForStandardSendReceive = {
   transformers: {
     address : {
       handlerName: setAddress.name,
-      transformer: hexShortenerForDisplay
+      transformer: miscellaneous.hexShortenerForDisplay
     },
     tx: {
       handlerName: setTransactionId.name,
-      transformer: hexShortenerForDisplay
+      transformer: miscellaneous.hexShortenerForDisplay
     },
     txid: {
       handlerName: setTransactionId.name,
-      transformer: hexShortenerForDisplay
+      transformer: miscellaneous.hexShortenerForDisplay
     },
     txids: {
       parentLabels: {
         "$number" : {
           handlerName: setTransactionId.name,
-          transformer: hexShortenerForDisplay
+          transformer: miscellaneous.hexShortenerForDisplay
         }
       }
     },
@@ -96,45 +92,45 @@ var optionsForStandardSendReceive = {
       parentLabels: {
         address : {
           handlerName: setAddress.name,
-          transformer: hexShortenerForDisplay
+          transformer: miscellaneous.hexShortenerForDisplay
         }
       }
     },
     blockhash: {
       handlerName: setBlockHash.name,
-      transformer: hexShortenerForDisplay
+      transformer: miscellaneous.hexShortenerForDisplay
     },
     previousBlock: {
       handlerName: setBlockHash.name,
-      transformer: hexShortenerForDisplay
+      transformer: miscellaneous.hexShortenerForDisplay
     },
     previousblockhash: {
       handlerName: setBlockHash.name,
-      transformer: hexShortenerForDisplay
+      transformer: miscellaneous.hexShortenerForDisplay
     },
     nextblockhash: {
       handlerName: setBlockHash.name,
-      transformer: hexShortenerForDisplay
+      transformer: miscellaneous.hexShortenerForDisplay
     },
     hash: {
       handlerName: setBlockHash.name,
-      transformer: hexShortenerForDisplay
+      transformer: miscellaneous.hexShortenerForDisplay
     },
     vin: {
       parentLabels: {
         asm: {
           handlerName: revealLongWithParent.name,
-          transformer: hexShortenerForDisplay
+          transformer: miscellaneous.hexShortenerForDisplay
         }, 
         hex: {
           handlerName: revealLongWithParent.name,
-          transformer: hexShortenerForDisplay
+          transformer: miscellaneous.hexShortenerForDisplay
         }
       }
     },
     hex: {
       handlerName: revealLongNoParent.name,
-      transformer: hexShortenerForDisplay
+      transformer: miscellaneous.hexShortenerForDisplay
     },
     vout: {
       parentLabels: {
@@ -143,26 +139,14 @@ var optionsForStandardSendReceive = {
         },
         "$number": {
           handlerName: setAddress.name,
-          transformer: hexShortenerForDisplay
+          transformer: miscellaneous.hexShortenerForDisplay
         }
       }
     }
   }
 }
 
-var moduleFullName = "window.kanban.rpc.sendReceive";
-function attachModuleFullNameToHandlerNames(transformers) {
-  for (var label in transformers) {
-    if ("handlerName" in transformers[label]) {
-      transformers[label].handlerName = `${moduleFullName}.${transformers[label].handlerName}`;
-    }
-    if (transformers[label].parentLabels !== undefined && transformers[label].parentLabels !== null) {
-      attachModuleFullNameToHandlerNames(transformers[label].parentLabels);
-    }
-  }  
-}
-
-attachModuleFullNameToHandlerNames(optionsForStandardSendReceive.transformers);
+miscellaneousFrontEnd.attachModuleFullNameToHandlerNames(optionsForStandardSendReceive.transformers, "window.kanban.rpc.sendReceive");
 
 function callbackStandardSendReceive(input, outputComponent) {
   jsonToHtml.writeJSONtoDOMComponent(input, outputComponent, optionsForStandardSendReceive);

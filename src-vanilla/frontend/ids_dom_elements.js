@@ -13,6 +13,10 @@ var defaults = {
   pageKanbanPlusPlus: "pageKanbanPlusPlus",
   progressReport: "spanProgressReport",
   spanPingColumnHeader: "spanPingColumnHeader",
+  kanbanPlusPlus: {
+    inputAddressDefault: "inputAddressDefault",
+    inputPrivateKeyDefault: "inputPrivateKeyDefault"
+  },
   inputNumberOfBlocks: "inputNumberOfBlocks",
   inputMaxNumberOfTries: "inputMaxNumberOfTries",
   inputMiningAddress: "inputMiningAddress",
@@ -68,7 +72,7 @@ var defaults = {
   },
   radioButtonsNetworkKanban: {
     testKanban: "radioBoxSetTestKanban",
-    mainNetKanban: "radioBoxSetMainNetKanban"
+    mainKanban: "radioBoxSetMainKanban"
   }
 
 };

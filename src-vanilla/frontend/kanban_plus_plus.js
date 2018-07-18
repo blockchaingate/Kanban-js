@@ -6,11 +6,51 @@ const jsonToHtml = require('./json_to_html');
 //const Block = require('../bitcoinjs_src/block');
 const globals = require('./globals');
 const miscellaneous = require('../miscellaneous');
-const chartJS = require('chart.js');
+const miscellaneousFrontEnd = require('./miscellaneous_frontend');
+
+function setAddress(container) {
+  submitRequests.updateValue(ids.defaults.kanbanPlusPlus.inputAddressDefault, container.getAttribute("content"));
+  submitRequests.updateValue(ids.defaults.kanbanPlusPlus.inputPrivateKeyDefault, "");
+}
+
+var optionsForKanbanPlusPlusGeneralStandard = {
+  transformers: {
+    address : {
+      handlerName: setAddress.name,
+      transformer: miscellaneous.hexShortenerForDisplay
+    }
+  }
+}
+
+miscellaneousFrontEnd.attachModuleFullNameToHandlerNames(
+  optionsForKanbanPlusPlusGeneralStandard.transformers, 
+  "window.kanban.kanbanPlusPlus.general"
+);
 
 function callbackKanbanPlusPlusGeneralStandard(input, output){
-  jsonToHtml.writeJSONtoDOMComponent(input, output, {});
+  jsonToHtml.writeJSONtoDOMComponent(input, output, optionsForKanbanPlusPlusGeneralStandard);
 }
+
+function getAddressInputValue() {
+  return document.getElementById(ids.defaults.kanbanPlusPlus.inputAddressDefault).value;
+}
+
+function callbackDumpPrivateKey(input, output) {
+  submitRequests.updateInnerHtml(ids.defaults.kanbanPlusPlus.inputPrivateKeyDefault, miscellaneous.removeQuotes(input));
+}
+
+function dumpPrivateKey() {
+  submitRequests.submitGET({
+    url: pathnames.getURLfromRPCLabel(pathnames.rpcCallsKanban.dumpPrivateKey.rpcCall, {
+      net: globals.mainPage().getRPCKanbanNetworkOption(),
+      address: getAddressInputValue()
+    }, true),
+    progress: globals.spanProgress(),
+    result : document.getElementById(ids.defaults.inputSendPrivateKey),
+    callback: callbackDumpPrivateKey
+  });  
+}
+
 
 function updatePageFromRadioButtonsByName(desiredRadioButtonName) {
   var theRadioButtons = document.getElementsByName(desiredRadioButtonName);
@@ -48,8 +88,8 @@ function setNet(netName) {
   updateKanbanPlusPlus();
 }
 
-function setMainNet() {
-  setNet(pathnames.networkDataKanban.mainNetKanban.name);
+function setMainKanban() {
+  setNet(pathnames.networkDataKanban.mainKanban.name);
 }
 
 function setTestKanban() {
@@ -60,5 +100,7 @@ module.exports = {
   updateKanbanPlusPlus,
   getReceivedByAddress,
   setTestKanban,
-  setMainNet
+  setMainKanban,
+  setAddress,
+  dumpPrivateKey
 }

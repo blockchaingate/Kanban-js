@@ -34,6 +34,9 @@ function getDurationReadableFromDaysHoursAndMinutes(inputDays, inputHours, input
   return `${inputDays} d, ${inputHours} h, ${inputMinutes} min`;
 }
 
+function hexShortenerForDisplay(input){
+  return `${input.substr(0, 4)}...${input.substr(input.length - 4, 4)}`;
+}
 
 function shortenString(input, desiredMaxSize, includeNumOmitted) {
   if (input === "") {
@@ -109,6 +112,7 @@ SpeedReport.prototype.toString = function () {
 }
 
 module.exports = {
+  hexShortenerForDisplay,
   getDurationReadableFromSeconds,
   getDurationReadableFromMilliseconds,
   shortenString,

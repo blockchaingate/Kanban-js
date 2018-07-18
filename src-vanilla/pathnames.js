@@ -186,8 +186,8 @@ var networkDataKanban = {
     rpcPort: 10007,
     rpcOption: "-testkanban",
   },
-  mainNetKanban: {
-    name: "mainNetKanban",
+  mainKanban: {
+    name: "mainKanban",
     rpcOption: "-mainnet",
   }
 };
