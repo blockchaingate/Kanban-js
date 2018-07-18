@@ -65,13 +65,16 @@ function handleRequests(request, response) {
     return handleMyNodesCall(request, response);
   }
   if (parsedURL.pathname === pathnames.url.known.rpc) {
-    return handleRPC(request, response);
+    return handleRPC(request, response, false);
+  }
+  if (parsedURL.pathname === pathnames.url.known.kanbanRPC) {
+    return handleRPC(request, response, true);
   }
   if (parsedURL.pathname === pathnames.url.known.computationEngine) {
     return handleComputationalEngineCall(request, response);
   }
   
-  //console.log(`DEBUG: The url is pt 5: ${request.url}`.red);
+  console.log(`DEBUG: The parsed url pathname is: ${parsedURL.pathname}`.red);
   response.writeHead(200);
   response.end(`Uknown request ${escapeHtml(request.url)}`);
 }
@@ -91,18 +94,21 @@ function handleFabcoinInitialization(request, response) {
   return fabcoinInitialization.fabcoinInitialize(request, response, queryCommand);
 }
 
-function handleRPC(request, response) {
+function handleRPC(request, response, isKanban) {
+  if (isKanban) {
+    console.log(`DEBUG: handling Kanban request`.cyan);
+  }
   if (request.method === "POST") {
-    return handleRPCPOST(request, response);
+    return handleRPCPOST(request, response, isKanban);
   }
   if (request.method === "GET") {
-    return handleRPCGET(request, response);
+    return handleRPCGET(request, response, isKanban);
   }
   response.writeHead(400);
   response.end(`Uknown/unhandled request method: ${request.method}`);
 }
 
-function handleRPCPOST(request, response) {
+function handleRPCPOST(request, response, isKanban) {
   let body = [];
   request.on('error', (err) => {
     response.writeHead(400);
@@ -111,11 +117,11 @@ function handleRPCPOST(request, response) {
     body.push(chunk);
   }).on('end', () => {
     body = Buffer.concat(body).toString();
-    return handleRPCURLEncodedInput(request, response, body);
+    return handleRPCURLEncodedInput(request, response, body, isKanban);
   });
 }
 
-function handleRPCGET(request, response) {
+function handleRPCGET(request, response, isKanban) {
   var parsedURL = null;
   try {
     parsedURL = url.parse(request.url);
@@ -123,10 +129,10 @@ function handleRPCGET(request, response) {
     response.writeHead(400);
     return response.end(`Bad RPC request: ${e}`);
   }
-  return handleRPCURLEncodedInput(request, response, parsedURL.query);
+  return handleRPCURLEncodedInput(request, response, parsedURL.query, isKanban);
 }
 
-function handleRPCURLEncodedInput(request, response, urlEncodedInput) {
+function handleRPCURLEncodedInput(request, response, urlEncodedInput, isKanban) {
   var query = null;
   var queryCommand = null;
   try {
@@ -136,7 +142,7 @@ function handleRPCURLEncodedInput(request, response, urlEncodedInput) {
     response.writeHead(400);
     return response.end(`Bad RPC input. ${e}`);
   }
-  return fabCli.rpcCall(request, response, queryCommand);
+  return fabCli.rpcCall(request, response, queryCommand, isKanban);
 }
 
 function handleComputationalEngineCall(request, response) {

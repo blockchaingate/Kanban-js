@@ -47,11 +47,17 @@ function useFabCoinCli(request, response, theCommand, theArguments) {
   }
 }
 
-function useRPCport(request, response, theCallLabel, desiredCommand) {
+function useRPCport(request, response, theCallLabel, desiredCommand, isKanban) {
   //snippets taken from/inspired by:
   //https://github.com/freewil/node-bitcoin/blob/master/lib/jsonrpc.js 
   var errors = [];
-  var RPCRequestObject = pathnames.getRPCJSON(theCallLabel, desiredCommand, `${(new Date()).getTime()}_${totalRequests}`, errors);
+  var RPCRequestObject = pathnames.getRPCJSON(
+    theCallLabel, 
+    desiredCommand, 
+    `${(new Date()).getTime()}_${totalRequests}`, 
+    errors, pathnames.rpcCalls,
+    isKanban
+  );
   if (RPCRequestObject === null) {
     response.writeHead(200);
     return response.end (`Error processing your request. ${errors[0]}`);
@@ -142,7 +148,7 @@ function useRPCportPartTwo(request, response, RPCRequestObject) {
 
 }
 
-function rpcCall(request, response, desiredCommand) {
+function rpcCall(request, response, desiredCommand, isKanban) {
   numberRequestsRunning ++;
   if (numberRequestsRunning > maxRequestsRunning) {
     response.writeHead(500);
@@ -173,11 +179,10 @@ function rpcCall(request, response, desiredCommand) {
     response.setHeader('Access-Control-Allow-Origin', '*');
   }
   if (totalCommandLength > maxLengthForCliCall || userWantsToUsePOST) {
-    return useRPCport(request, response, theCallLabel, desiredCommand);
+    return useRPCport(request, response, theCallLabel, desiredCommand, isKanban);
   }
-  
   var errors = [];
-  var theArguments = pathnames.getRPCcallArguments(theCallLabel, desiredCommand, errors);
+  var theArguments = pathnames.getRPCcallArguments(theCallLabel, desiredCommand, errors, isKanban);
   if (theArguments === null) {
     response.writeHead(400);
     numberRequestsRunning --;
@@ -189,6 +194,9 @@ function rpcCall(request, response, desiredCommand) {
     return;
   }
   var theCommand = `${pathnames.pathname.fabcoinCli}`;
+  if (isKanban) {
+    theCommand = `${pathnames.pathname.fabcoinCliKanban}`
+  }
   console.log(`Executing rpc command: ${theCommand}.`.blue);
   console.log(`Arguments: ${JSON.stringify(theArguments)}.`.green);
   if (theArguments.length > 10 || theArguments.length === undefined) {

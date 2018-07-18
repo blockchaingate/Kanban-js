@@ -33,9 +33,22 @@
     <span class = "checkMark"></span>
     Force POST
   </label>
+  &nbsp;||&nbsp;
+  <label class = "containerRadioButton">
+    <input id = "radioBoxSetTestKanban" type = "radio" name = "netKanban" onchange = "window.kanban.kanbanPlusPlus.general.setTestKanban();">
+    <span class = "radioMark"></span>
+    TestKanban
+  </label>
+  &nbsp;&nbsp;&nbsp;
+  <label class = "containerRadioButton">
+    <input id = "radioBoxSetMainNetKanban" type = "radio" name = "netKanban" onchange = "window.kanban.kanbanPlusPlus.general.setMainNet();">
+    <span class = "radioMark"></span>
+    MainNet
+  </label>
+  &nbsp;||&nbsp;
+  <span id = "spanProgressReport" class = "spanProgressReport"> </span>
 
   
-  <span id = "spanProgressReport" class = "spanProgressReport"> </span>
 </div>
 <div class = "divMainPage" id = "pageFabcoinInitialization">
   <div class = "divControlPanelDefault">
@@ -95,6 +108,20 @@
   </div><!--divMyNodesOutput-->
   </div><!--divControlPanelDefault-->
 </div> <!--pageMyNodes-->
+<div class = "divMainPage" id = "pageKanbanPlusPlus">
+  <div class = "divControlPanelDefault">
+    <label class = "containerRadioButton">
+      <input type = "radio" name = "kanbanPlusPlusGeneral" onchange = "window.kanban.kanbanPlusPlus.general.getReceivedByAddress();" checked = "checked">
+      <span class = "radioMark"></span>
+      Received
+    </label>
+    &nbsp;&nbsp;&nbsp;    
+  </div><!--divControlPanelDefault-->
+  <br>
+  <div class = "divControlPanelDefault">
+    <div id = "divKanbanPlusPlusOutput"></div>
+  </div><!--divControlPanelDefault-->
+</div>
 <div class = "divMainPage" id = "pageSend">
   <div class = "divControlPanelDefault">
     <label class = "containerRadioButton">
@@ -333,6 +360,8 @@
   <div class = "divMenuButtonPanel">
     <div><button class = "buttonSelectPage" onclick = "window.kanban.thePage.selectPage('fabcoinInitialization');">Start</button></div>
     <div><button class = "buttonSelectPage" onclick = "window.kanban.thePage.selectPage('myNodes');">My nodes</button></div>
+    <div><button class = "buttonSelectPage" onclick = "window.kanban.thePage.selectPage('kanbanPlusPlus');">Kanban++</button></div>
+
     <div><button class = "buttonSelectPage" onclick = "window.kanban.thePage.selectPage('network');">Network</button></div>
     <div><button class = "buttonSelectPage" onclick = "window.kanban.thePage.selectPage('send');">Send</button></div>
     <div><button class = "buttonSelectPage" onclick = "window.kanban.thePage.selectPage('mine');">Mine</button></div>

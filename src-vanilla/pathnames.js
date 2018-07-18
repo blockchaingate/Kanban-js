@@ -13,10 +13,12 @@ var path = {
   secretsAdmin: `${__dirname}/../secrets_admin`,
   HTML: `${__dirname}/../html`,
   fabcoin: `${__dirname}/../fabcoin`,
-  kanbanProofOfConcept: `${__dirname}/../kanban-poc`,
   fabcoinSrc: `${__dirname}/../fabcoin/src`,
+  kanbanProofOfConcept: `${__dirname}/../kanban-poc`,
+  kanbanProofOfConceptSRC: `${__dirname}/../kanban-poc/src`,
   openCLDriverBuildPath: `${__dirname}/../build`,
-  fabcoinConfigurationFolder: null
+  fabcoinConfigurationFolder: null,
+  kanbanProofOfConcentConfigurationFolder: null
 };
 for (var label in path) {
   //console.log(`Debug: path ${path[label]} `);
@@ -39,6 +41,7 @@ var pathname = {
   frontEndCSS: `${path.HTML}/kanban_frontend.css`,
   fabcoind: `${path.fabcoinSrc}/fabcoind`,
   fabcoinCli: `${path.fabcoinSrc}/fabcoin-cli`,
+  fabcoinCliKanban: `${path.kanbanProofOfConceptSRC}/fabcoin-cli`,
   openCLDriverExecutable: `${path.openCLDriverBuildPath}/kanban-gpu`
 };
 
@@ -57,6 +60,7 @@ var url = {
     frontEndHTML: "/kanban_frontend.html",
     frontEndCSS: "/kanban_frontend.css",
     rpc: "/rpc",
+    kanbanRPC: "/kanbanRPC",
     computationEngine: "/computation_engine",
     fabcoinInitialization: "/fabcoin_initialization",
     myNodesCommand: "/my_nodes",
@@ -175,6 +179,19 @@ var networkData = {
   }
 };
 
+var networkDataKanban = {
+  testKanban : {
+    name: "testKanban",
+    folder: "testkanban/",
+    rpcPort: 10007,
+    rpcOption: "-testkanban",
+  },
+  mainNetKanban: {
+    name: "mainNetKanban",
+    rpcOption: "-mainnet",
+  }
+};
+
 var networkSecurityByRPCOption = {}; //<- for convenience
 var networkRPCOption = {}; //<- for convenience
 var networkNameByRPCNetworkOption = {}; //<- for convenience
@@ -204,6 +221,46 @@ var allowedArgumentValuesDefaults = {
     networkData.testNet.rpcOption,
     networkData.mainNet.rpcOption
   ]
+}
+
+var allowedArgumentValuesKanbanDefaults = {
+  net: [
+    networkDataKanban.testKanban.rpcOption, 
+    networkData.mainNet.rpcOption
+  ]
+}
+
+var rpcCallsKanban = {
+  listReceivedByAddress: {
+    rpcCall: "listReceivedByAddress", //must be same as rpc label, used for autocomplete
+    mandatoryFixedArguments: { //<- values give defaults, null for none
+      command: "listreceivedbyaddress",
+    },
+    mandatoryModifiableArguments: { //<- values give defaults, null for none
+      minimumConfirmations: 0,
+      includeEmpty: true
+    },
+    allowedArgumentValues: {
+      net: null
+    },
+    cli: ["net", "command", "minimumConfirmations", "includeEmpty"]
+  },
+  dumpPrivateKey: {
+    rpcCall: "dumpPrivateKey", //must be same as rpc label, used for autocomplete
+    mandatoryFixedArguments: { //<- values give defaults, null for none
+      command: "dumpprivkey",
+    },
+    mandatoryModifiableArguments: { //<- values give defaults, null for none
+      address: null
+    },
+    allowedArgumentValues: {
+      net: [ //<- restricted network access!
+        networkDataKanban.testKanban.rpcOption
+      ]
+    },
+    address: "",
+    cli: ["net", "command", "address"]
+  }
 }
 
 var rpcCalls = {
@@ -531,7 +588,8 @@ rpcCallsBannedUnlessSecurityRelaxed[rpcCalls.dumpPrivateKey.command] = true;
 var fabcoinInitialization = "fabcoinInitialization";
 
 var pathsComputedAtRunTime = {
-  fabcoinConfigurationFolder: null
+  fabcoinConfigurationFolder: null,
+  kanbanProofOfConcentConfigurationFolder: null
 }
 
 //To be documented on request. Please email me/tell me in person if you want 
@@ -660,9 +718,13 @@ function getURLfromComputationalEngineCall(theComputationalEngineCallLabel, addi
   return `${url.known.node}?command=${encodeURIComponent(JSON.stringify(theRequest))}`;
 }
 
-function getPOSTBodyfromRPCLabel(theRPClabel, theArguments) {
+function getPOSTBodyfromRPCLabel(theRPClabel, theArguments, isKanban) {
   var theRequest = {};
-  var theRPCCall = rpcCalls[theRPClabel];
+  var callCollection = rpcCalls;
+  if (isKanban) {
+    callCollection = rpcCallsKanban
+  }
+  var theRPCCall = callCollection[theRPClabel];
   theRequest[rpcCall] = theRPClabel;
   theRequest["command"] = theRPCCall.command;
   if (theArguments === undefined) {
@@ -684,8 +746,12 @@ function getPOSTBodyfromRPCLabel(theRPClabel, theArguments) {
   return `command=${encodeURIComponent(JSON.stringify(theRequest))}`;
 }
 
-function getURLfromRPCLabel(theRPClabel, theArguments) {
-  return `${url.known.rpc}?${getPOSTBodyfromRPCLabel(theRPClabel, theArguments)}`;
+function getURLfromRPCLabel(theRPClabel, theArguments, isKanban) {
+  var entryPoint = url.known.rpc;
+  if (isKanban === true) {
+    entryPoint = url.known.kanbanRPC;
+  }
+  return `${entryPoint}?${getPOSTBodyfromRPCLabel(theRPClabel, theArguments)}`;
 }
 
 function getRPCNet(theArguments) {
@@ -721,14 +787,18 @@ function hasRelaxedNetworkSecurity(networkRPCOption) {
   return networkSecurityByRPCOption[networkRPCOption] < networkData.testNet.security;
 }
 
-function isAllowedRPCCallArgument(theRPCCall, argumentLabel, argumentValue, errors) {
+function isAllowedRPCCallArgument(theRPCCall, argumentLabel, argumentValue, errors, isKanban) {
   var allowedArgumentValues = theRPCCall.allowedArgumentValues;
   if (!(argumentLabel in allowedArgumentValues)) {
     return true;
   }
   var currentAllowedValues = allowedArgumentValues[argumentLabel];
   if (currentAllowedValues === null) {
-    currentAllowedValues = allowedArgumentValuesDefaults[argumentLabel];
+    var defaults = allowedArgumentValuesDefaults;
+    if (isKanban) {
+      defaults = allowedArgumentValuesKanbanDefaults;
+    }
+    currentAllowedValues = defaults[argumentLabel];
   }
   for (var counterAllowed = 0; counterAllowed < currentAllowedValues.length; counterAllowed ++) {
     if (argumentValue === currentAllowedValues[counterAllowed]) {
@@ -736,8 +806,8 @@ function isAllowedRPCCallArgument(theRPCCall, argumentLabel, argumentValue, erro
     }
   }
   errors.push( 
-    `Variable <b>${argumentLabel}</b> not allowed to take on value <b>${argumentValue}</b> in command <b>${theRPCCall.rpcCall}</b>.
-    The allowed values are ${currentAllowedValues.join(', ')}. `
+    `Variable <b>${argumentLabel}</b> not allowed to take on value <b>${argumentValue}</b> in command <b>${theRPCCall.rpcCall}</b>. ` +
+    `The allowed values are ${currentAllowedValues.join(', ')}.`
   );
   return false;
 }
@@ -817,8 +887,12 @@ function isValidRPCArgumentBasicChecks(label, input, errors, recursionDepth) {
   return true;
 }
 
-function getRPCJSON(theRPCLabel, additionalArguments, inputId, errors) {
-  if (!(theRPCLabel in rpcCalls)) {
+function getRPCJSON(theRPCLabel, additionalArguments, inputId, errors, isKanban) {
+  var callCollection = rpcCalls;
+  if (isKanban) {
+    callCollection = rpcCallsKanban;
+  }
+  if (!(theRPCLabel in callCollection)) {
     errors.push(`Uknown or non-implemented rpc command: ${theRPCLabel}.`);
     return null;
   }
@@ -834,7 +908,7 @@ function getRPCJSON(theRPCLabel, additionalArguments, inputId, errors) {
   var result = { 
     request: {
       id: inputId,
-      method: rpcCalls[theRPCLabel].mandatoryFixedArguments.command,
+      method: callCollection[theRPCLabel].mandatoryFixedArguments.command,
       params: []
     },
     port: portComputed,
@@ -844,18 +918,22 @@ function getRPCJSON(theRPCLabel, additionalArguments, inputId, errors) {
     "net": true,
     "command": true
   }
-  if (!getRPCcallCommon(theRPCLabel, additionalArguments, errors, result.request.params, excludeArguments)) {
+  if (!getRPCcallCommon(theRPCLabel, additionalArguments, errors, result.request.params, excludeArguments, isKanban)) {
     return null;
   }
   return result;
 }
 
-function getRPCcallCommon(theRPCLabel, additionalArguments, errors, outputArray, excludeFromOutput) {
+function getRPCcallCommon(theRPCLabel, additionalArguments, errors, outputArray, excludeFromOutput, isKanban) {
   if (!Array.isArray(outputArray)) {
     console.log("Fatal error: called getRPCcallCommon with outputArray not of type array. ");
     assert(false);
   }
-  var theRPCCall = rpcCalls[theRPCLabel];
+  var callCollection = rpcCalls;
+  if (isKanban) {
+    callCollection = rpcCallsKanban;
+  }
+  var theRPCCall = callCollection[theRPCLabel];
   var theRPCcli = theRPCCall.cli;
   var mandatoryFixedArguments = theRPCCall.mandatoryFixedArguments;
   var mandatoryModifiableArguments = theRPCCall.mandatoryModifiableArguments;
@@ -897,7 +975,7 @@ function getRPCcallCommon(theRPCLabel, additionalArguments, errors, outputArray,
       }
       continue;
     }
-    if (!isAllowedRPCCallArgument(theRPCCall, currentLabel, currentValueCandidate, errors)) {
+    if (!isAllowedRPCCallArgument(theRPCCall, currentLabel, currentValueCandidate, errors, isKanban)) {
       return false;
     }
     if (!isValidRPCArgumentBasicChecks(currentLabel, currentValueCandidate, errors)) {
@@ -913,19 +991,24 @@ function getRPCcallCommon(theRPCLabel, additionalArguments, errors, outputArray,
   return true;
 }
 
-function getRPCcallArguments(theRPCLabel, additionalArguments, errors) {
+function getRPCcallArguments(theRPCLabel, additionalArguments, errors, isKanban) {
   var result = [];
-  if (!(theRPCLabel in rpcCalls)) {
+  var callCollection = rpcCalls;
+  if (isKanban) {
+    callCollection = rpcCallsKanban;
+    result.push(`-datadir=${pathsComputedAtRunTime.kanbanProofOfConcentConfigurationFolder}/`);
+  }
+  if (!(theRPCLabel in callCollection)) {
     errors.push(`Uknown or non-implemented rpc command: ${theRPCLabel}.`);
     return null;
   }
-  if (!getRPCcallCommon(theRPCLabel, additionalArguments, errors, result, {})) {
+  if (!getRPCcallCommon(theRPCLabel, additionalArguments, errors, result, {}, isKanban)) {
     return null;
   }
   return result;
 }
 
-function isAllowedArgumentForFabInitialization(theInitCall, theLabel, theValue, errors) {
+function isAllowedArgumentForFabInitialization(theInitCall, theLabel, theValue, errors, callCollection) {
   if (theInitCall.allowedArgumentValues === undefined) {
     return true;
   }
@@ -1014,9 +1097,11 @@ module.exports = {
   url,
   computationalEngineCallStatuses,
   networkData,
+  networkDataKanban,
   hasRelaxedNetworkSecurity,
   ///////////////
   //information on the various calls:
+  rpcCallsKanban,
   rpcCalls,
   rpcCallsBannedUnlessSecurityRelaxed,
   computationalEngineCalls,

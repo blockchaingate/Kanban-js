@@ -10,6 +10,7 @@ var defaults = {
   pageMine: "pageMine",
   pageProfiling: "pageProfiling",
   pageFabcoinInitialization: "pageFabcoinInitialization",
+  pageKanbanPlusPlus: "pageKanbanPlusPlus",
   progressReport: "spanProgressReport",
   spanPingColumnHeader: "spanPingColumnHeader",
   inputNumberOfBlocks: "inputNumberOfBlocks",
@@ -44,11 +45,13 @@ var defaults = {
   outputMineButtons: "divMineButtonsOutput",
   outputFabcoinInitialization: "divFabcoinInitialization",
   outputProfiling: "divOutputProfiling",
+  outputKanbanPlusPlusGeneral: "divKanbanPlusPlusOutput",
   radioGroups: {
     rpcCallNetwork: "rpcCallNetwork",
     rpcProfiling: "rpcProfiling",
     rpcMine: "rpcMine",
-    rpcSend: "rpcSend"
+    rpcSend: "rpcSend",
+    kanbanPlusPlusGeneral: "kanbanPlusPlusGeneral" 
   },
   radioButtonsSend: {
     bestBlock: "radioBestBlockHash",
@@ -62,7 +65,12 @@ var defaults = {
     testNetNoDNS: "radioBoxSetTestnetNoDNS",
     testNet: "radioBoxSetTestnet",
     mainNet: "radioBoxSetMainnet"
+  },
+  radioButtonsNetworkKanban: {
+    testKanban: "radioBoxSetTestKanban",
+    mainNetKanban: "radioBoxSetMainNetKanban"
   }
+
 };
 
 module.exports = {

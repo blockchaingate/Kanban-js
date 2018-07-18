@@ -7,14 +7,21 @@ const rpcCallsProfiling = require('./fabcoin_rpc_profiling');
 const fabcoinInitialization = require('./fabcoin_initialization');
 const ids = require('./ids_dom_elements');
 const pathnames = require('../pathnames');
-const myNodes = require('./my_nodes')
+const myNodes = require('./my_nodes');
+const kanbanPlusPlus = require('./kanban_plus_plus');
 
 function Page() {
   this.fabcoinNetworkRadioIds = {};
   for (var netLabel in pathnames.networkData) {
     this.fabcoinNetworkRadioIds[netLabel] = ids.defaults.radioButtonsNetwork[netLabel];
   }
+  this.kanbanNetworkRadioIds = {};
+  for (var netLabel in pathnames.networkDataKanban) {
+    this.kanbanNetworkRadioIds[netLabel] = ids.defaults.radioButtonsNetworkKanban[netLabel];
+  }
+
   this.currentNetworkName = pathnames.networkData.testNetNoDNS.name;
+  this.currentKanbanNetworkName = pathnames.networkDataKanban.testKanban.name;
   this.pages = {
     fabcoinInitialization: {
       ids: {
@@ -28,6 +35,13 @@ function Page() {
       },
       updateFunction: myNodes.updateMyNodes
     },
+    kanbanPlusPlus: {
+      ids: {
+        page: ids.defaults.pageKanbanPlusPlus
+      },
+      updateFunction: myNodes.updateMyNodes
+    },
+
     send: {
       ids: {
         page: ids.defaults.pageSend
@@ -104,6 +118,10 @@ Page.prototype.getCurrentTransactionProtocolLabel = function () {
 
 Page.prototype.getRPCNetworkOption = function () {
   return pathnames.networkData[this.currentNetworkName].rpcOption;
+}
+
+Page.prototype.getRPCKanbanNetworkOption = function () {
+  return pathnames.networkDataKanban[this.currentKanbanNetworkName].rpcOption;
 }
 
 Page.prototype.loadPageSettings = function() {
