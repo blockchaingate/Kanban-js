@@ -16,7 +16,9 @@ var defaults = {
   kanbanPlusPlus: {
     inputAddressDefault: "inputAddressDefault",
     inputPrivateKeyDefault: "inputPrivateKeyDefault",
-    inputPublicKeyDefault: "inputPublicKeyDefault"
+    inputPublicKeyDefault: "inputPublicKeyDefault",
+    inputMessageToSha3: "inputMessageToSha3",
+    inputOutputSha3DigestDefault: "inputOutputSha3DigestDefault"
   },
   inputNumberOfBlocks: "inputNumberOfBlocks",
   inputMaxNumberOfTries: "inputMaxNumberOfTries",

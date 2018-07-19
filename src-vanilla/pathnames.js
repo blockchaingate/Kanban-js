@@ -277,7 +277,23 @@ var rpcCallsKanban = {
     },
     address: "",
     cli: ["net", "command", "privateKey"]
-  }
+  },
+  testSha3: {
+    rpcCall: "testSha3", //must be same as rpc label, used for autocomplete
+    mandatoryFixedArguments: { //<- values give defaults, null for none
+      command: "testshathree",
+    },
+    mandatoryModifiableArguments: { //<- values give defaults, null for none
+      message: null
+    },
+    allowedArgumentValues: {
+      net: [ //<- restricted network access!
+        networkDataKanban.testKanban.rpcOption
+      ]
+    },
+    address: "",
+    cli: ["net", "command", "message"]
+  },
 }
 
 var rpcCalls = {

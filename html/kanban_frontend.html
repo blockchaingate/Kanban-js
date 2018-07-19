@@ -127,17 +127,25 @@
   </div><!--divControlPanelDefault-->
   <br>
   <div class = "divControlPanelDefault">
-  <table><tr>
+  <table>
+    <tr><td>
+      <input type = "text" class = "inputStandard" id = "inputMessageToSha3" onkeyup = "" size = "30" placeholder = "message to sha3"></input>
+    </td><td>
+      <button class = "buttonStandard" onclick = "window.kanban.kanbanPlusPlus.general.testSha3();"><b>Sha3 (256)&rarr;</b></button>
+    </td><td>
+      <input type = "text" class = "inputStandard" id = "inputOutputSha3DigestDefault" onkeyup = "" size = "50" placeholder = "result sha3 digest"></input> 
+    </td></tr>
+    <tr>
     <td>
     <table>
     <tr>
     <td>
-    <input type = "text" class = "inputStandard" id = "inputAddressDefault" onkeyup = "" size = "30" placeholder = "fab address"></input>
+      <input type = "text" class = "inputStandard" id = "inputAddressDefault" onkeyup = "" size = "30" placeholder = "fab address"></input>
     </td>
     </tr>
     <tr>
     <td>
-    <input type = "text" class = "inputStandard" id = "inputPublicKeyDefault" onkeyup = "" size = "30" placeholder = "pub key"></input>
+    <input type = "text" class = "inputStandard" id = "inputPublicKey" onkeyup = "" size = "30" placeholder = "pub key"></input>
     </td>
     </tr>
     </table>

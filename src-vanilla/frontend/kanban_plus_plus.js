@@ -39,11 +39,19 @@ function getPrivateKeyInputValue() {
   return document.getElementById(ids.defaults.kanbanPlusPlus.inputPrivateKeyDefault).value;
 }
 
+function getMessageValue() {
+  return document.getElementById(ids.defaults.kanbanPlusPlus.inputMessageToSha3).value;
+}
+
 function callbackDumpPrivateKey(input, output) {
   submitRequests.updateInnerHtml(ids.defaults.kanbanPlusPlus.inputPrivateKeyDefault, miscellaneous.removeQuotes(input));
 }
 
 function callbackPublicKeyFromPrivate(input, output) {
+  submitRequests.updateInnerHtml(ids.defaults.kanbanPlusPlus.inputPublicKeyDefault, miscellaneous.removeQuotes(input));
+}
+
+function callbackSha3(input, output) {
   submitRequests.updateInnerHtml(ids.defaults.kanbanPlusPlus.inputPublicKeyDefault, miscellaneous.removeQuotes(input));
 }
 
@@ -59,6 +67,17 @@ function dumpPrivateKey() {
   });  
 }
 
+function testSha3 () {
+  submitRequests.submitGET({
+    url: pathnames.getURLfromRPCLabel(pathnames.rpcCallsKanban.testSha3.rpcCall, {
+      net: globals.mainPage().getRPCKanbanNetworkOption(),
+      message: getMessageValue()
+    }, true),
+    progress: globals.spanProgress(),
+    result : document.getElementById(ids.defaults.inputOutputSha3DigestDefault),
+    callback: callbackSha3
+  });  
+}
 
 function updatePageFromRadioButtonsByName(desiredRadioButtonName) {
   var theRadioButtons = document.getElementsByName(desiredRadioButtonName);
@@ -126,5 +145,6 @@ module.exports = {
   setMainKanban,
   setAddress,
   dumpPrivateKey,
-  testPublicKeyFromPrivate
+  testPublicKeyFromPrivate,
+  testSha3
 }
