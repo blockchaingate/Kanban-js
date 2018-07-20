@@ -127,40 +127,54 @@
   </div><!--divControlPanelDefault-->
   <br>
   <div class = "divControlPanelDefault">
-  <table>
-    <tr><td>
-      <input type = "text" class = "inputStandard" id = "inputMessageToSha3" onkeyup = "" size = "30" placeholder = "message to sha3"></input>
-    </td><td>
-      <button class = "buttonStandard" onclick = "window.kanban.kanbanPlusPlus.general.testSha3();"><b>Sha3 (256)&rarr;</b></button>
-    </td><td>
-      <input type = "text" class = "inputStandard" id = "inputOutputSha3DigestDefault" onkeyup = "" size = "50" placeholder = "result sha3 digest"></input> 
-    </td></tr>
-    <tr>
+  <table class = "tableKanbanPlusPlusTest">
+  <tr>
     <td>
     <table>
-    <tr>
-    <td>
-      <input type = "text" class = "inputStandard" id = "inputAddressDefault" onkeyup = "" size = "30" placeholder = "fab address"></input>
-    </td>
-    </tr>
-    <tr>
-    <td>
-    <input type = "text" class = "inputStandard" id = "inputPublicKey" onkeyup = "" size = "30" placeholder = "pub key"></input>
-    </td>
-    </tr>
+    <tr><td>
+      <input type = "text" class = "inputStandard" id = "inputMessageToSha3" onkeyup = "" size = "30" placeholder = "message"></input>
+    </td></tr>
+    <tr><td>
+        <input type = "text" class = "inputStandard" id = "inputPrivateKeyDefault" onkeyup = "" size = "50" placeholder = "private key(s)"></input> 
+      </td></tr>  
+    <tr><td>
+      <input type = "text" class = "inputStandard" id = "inputNoncesDefault" onkeyup = "" size = "50" placeholder = "nonce(s)"></input> 
+    </td></tr>  
     </table>
     </td>
     <td>
     <table>
-      <tr><td><button class = "buttonStandard" onclick = "window.kanban.kanbanPlusPlus.general.dumpPrivateKey();"><b style = "color:red">Private key&rarr;</b></button></td></tr>
-      <tr><td><button class = "buttonStandard" onclick = "window.kanban.kanbanPlusPlus.general.testPublicKeyFromPrivate();"><b style = "color:red">&larr;Public key</b></button></td></tr>
+      <tr><td><button class = "buttonStandard" onclick = "window.kanban.kanbanPlusPlus.general.testSha3();"><b>Sha3 256&rarr;</b></button></td></tr>
+      <tr><td><button class = "buttonStandard" onclick = "window.kanban.kanbanPlusPlus.general.dumpPrivateKey();"><b style = "color:red">&larr;Private key</b></button></td></tr>
+      <tr><td><button class = "buttonStandard" onclick = "window.kanban.kanbanPlusPlus.general.testPublicKeyFromPrivate();"><b>Public key&rarr;</b></button></td></tr>
+      <tr><td><button class = "buttonStandard" onclick = "window.kanban.kanbanPlusPlus.general.testSchnorrSignature();"><b>Signature&darr;</b></button></td></tr>
+      <tr><td><button class = "buttonStandard" onclick = "window.kanban.kanbanPlusPlus.general.testCommitments();"><b>Commit&rarr;</b></button></td></tr>
+      <tr><td><button class = "buttonStandard" onclick = "window.kanban.kanbanPlusPlus.general.();"><b>Commit&rarr;</b></button></td></tr>
+      <tr><td><button class = "buttonStandard" onclick = "window.kanban.kanbanPlusPlus.general.();"><b>Challenge&rarr;</b></button></td></tr>
+      <tr><td><button class = "buttonStandard" onclick = "window.kanban.kanbanPlusPlus.general.();"><b>&larr;Solution</b></button></td></tr>
+
+      <tr><td><button class = "buttonStandard" onclick = "window.kanban.kanbanPlusPlus.general.();"><b>Aggregate sign&darr;</b></button></td></tr>
     </table>
     </td>
     <td>   
-    <input type = "text" class = "inputStandard" id = "inputPrivateKeyDefault" onkeyup = "" size = "50" placeholder = "private key"></input> 
+    <table>
+    <tr><td>
+      <input type = "text" class = "inputStandard" id = "inputOutputSha3DigestDefault" onkeyup = "" size = "50" placeholder = "result sha3 digest"></input> 
+    </td></tr>  
+    <tr><td>
+      <input type = "text" class = "inputStandard" id = "inputAddressDefault" onkeyup = "" size = "30" placeholder = "fab address"></input>
+    </td></tr>
+    <tr><td>
+      <input type = "text" class = "inputStandard" id = "inputPublicKey" onkeyup = "" size = "30" placeholder = "pub key"></input>
+    </td></tr>
+    </table>
     </td>
   </tr></table>
-  </div> 
+  <div class = "divControlPanelDefault">
+      <div id = "divKanbanPlusPlusOutputSecond"></div>
+    </div><!--divControlPanelDefault-->
+  
+</div> 
 
 </div>
 <div class = "divMainPage" id = "pageSend">

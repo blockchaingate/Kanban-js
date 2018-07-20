@@ -1,0 +1,33 @@
+\begin{frame}
+\frametitle{Kanban prototype progress}
+This week:
+\begin{itemize}
+	\item Collaboration with Jason on kanban-poc. Initial fork: fabcoin core.
+	\item C++: setup test rpc calls.
+	\item C++: Ported Sha3 to kanban-poc.
+	\item Created classes for Schnorr signatures. 
+	\item Node.js: setup input/output for debugging.
+\end{itemize}
+\end{frame}
+
+\begin{frame}
+\frametitle{Kanban prototype: short-term to-do list}
+For next week:
+\begin{itemize}
+	\item Cryptographic aggregate Schnorr signature without networking.
+	\begin{itemize}
+		\item Simulate the signatories on one machine.
+		\item Implement the following.
+		\begin{itemize}
+		\item Complete single schnorr signature, verification.
+		\item Aggregate signature step 1: compute commitment.
+		\item Aggregate signature step 2: compute challenge.
+		\item Aggregate signature step 3: compute solution.
+		\item Aggregate signature step 4: aggregate solution.
+		\end{itemize}
+		\item Node.js: Create test rpc calls for each of the above.
+		\item Node.js: create user interface for testing the above.
+	\end{itemize}
+\end{itemize}
+
+\end{frame}

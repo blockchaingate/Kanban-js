@@ -31,6 +31,10 @@ function callbackKanbanPlusPlusGeneralStandard(input, output){
   jsonToHtml.writeJSONtoDOMComponent(input, output, optionsForKanbanPlusPlusGeneralStandard);
 }
 
+function callbackKanbanPlusPlusGeneralCrypto(input, output){
+  jsonToHtml.writeJSONtoDOMComponent(input, output, optionsForKanbanPlusPlusGeneralStandard);
+}
+
 function getAddressInputValue() {
   return document.getElementById(ids.defaults.kanbanPlusPlus.inputAddressDefault).value;
 }
@@ -43,6 +47,10 @@ function getMessageValue() {
   return document.getElementById(ids.defaults.kanbanPlusPlus.inputMessageToSha3).value;
 }
 
+function getNonceValue() {
+  return document.getElementById(ids.defaults.kanbanPlusPlus.inputNoncesDefault).value;
+}
+
 function callbackDumpPrivateKey(input, output) {
   submitRequests.updateInnerHtml(ids.defaults.kanbanPlusPlus.inputPrivateKeyDefault, miscellaneous.removeQuotes(input));
 }
@@ -52,7 +60,7 @@ function callbackPublicKeyFromPrivate(input, output) {
 }
 
 function callbackSha3(input, output) {
-  submitRequests.updateInnerHtml(ids.defaults.kanbanPlusPlus.inputPublicKeyDefault, miscellaneous.removeQuotes(input));
+  submitRequests.updateInnerHtml(ids.defaults.kanbanPlusPlus.inputOutputSha3DigestDefault, miscellaneous.removeQuotes(input));
 }
 
 function dumpPrivateKey() {
@@ -79,6 +87,20 @@ function testSha3 () {
   });  
 }
 
+function testSchnorrSignature() {
+  submitRequests.submitGET({
+    url: pathnames.getURLfromRPCLabel(pathnames.rpcCallsKanban.testSchnorrSignature.rpcCall, {
+      net: globals.mainPage().getRPCKanbanNetworkOption(),
+      privateKey: getPrivateKeyInputValue(),
+      message: getMessageValue(),
+      nonce: getNonceValue()
+    }, true),
+    progress: globals.spanProgress(),
+    result : document.getElementById(ids.defaults.kanbanPlusPlus.outputKanbanPlusPlusSecond),
+    callback: callbackKanbanPlusPlusGeneralCrypto
+  });  
+}
+
 function updatePageFromRadioButtonsByName(desiredRadioButtonName) {
   var theRadioButtons = document.getElementsByName(desiredRadioButtonName);
   for (var counterRadioButtons = 0; counterRadioButtons < theRadioButtons.length; counterRadioButtons ++) {
@@ -101,7 +123,7 @@ function getReceivedByAddress() {
       net: globals.mainPage().getRPCKanbanNetworkOption(),
     }, true),
     progress: globals.spanProgress(),
-    result : ids.defaults.outputKanbanPlusPlusGeneral,
+    result : ids.defaults.kanbanPlusPlus.outputKanbanPlusPlusGeneral,
     callback: callbackKanbanPlusPlusGeneralStandard
   });  
 }
@@ -116,7 +138,7 @@ function testPublicKeyFromPrivate() {
       true
     ),
     progress: globals.spanProgress(),
-    result : ids.defaults.outputKanbanPlusPlusGeneral,
+    result : ids.defaults.kanbanPlusPlus.outputKanbanPlusPlusGeneral,
     callback: callbackPublicKeyFromPrivate
   });  
 }
@@ -146,5 +168,6 @@ module.exports = {
   setAddress,
   dumpPrivateKey,
   testPublicKeyFromPrivate,
-  testSha3
+  testSha3,
+  testSchnorrSignature
 }

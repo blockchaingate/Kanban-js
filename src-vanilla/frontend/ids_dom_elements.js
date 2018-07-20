@@ -18,7 +18,10 @@ var defaults = {
     inputPrivateKeyDefault: "inputPrivateKeyDefault",
     inputPublicKeyDefault: "inputPublicKeyDefault",
     inputMessageToSha3: "inputMessageToSha3",
-    inputOutputSha3DigestDefault: "inputOutputSha3DigestDefault"
+    inputOutputSha3DigestDefault: "inputOutputSha3DigestDefault",
+    inputNoncesDefault: "inputNoncesDefault",
+    outputKanbanPlusPlusGeneral: "divKanbanPlusPlusOutput",
+    outputKanbanPlusPlusSecond: "divKanbanPlusPlusOutputSecond"
   },
   inputNumberOfBlocks: "inputNumberOfBlocks",
   inputMaxNumberOfTries: "inputMaxNumberOfTries",
@@ -52,7 +55,6 @@ var defaults = {
   outputMineButtons: "divMineButtonsOutput",
   outputFabcoinInitialization: "divFabcoinInitialization",
   outputProfiling: "divOutputProfiling",
-  outputKanbanPlusPlusGeneral: "divKanbanPlusPlusOutput",
   radioGroups: {
     rpcCallNetwork: "rpcCallNetwork",
     rpcProfiling: "rpcProfiling",
