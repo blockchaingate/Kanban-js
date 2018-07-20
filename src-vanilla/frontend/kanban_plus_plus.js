@@ -56,7 +56,13 @@ function callbackDumpPrivateKey(input, output) {
 }
 
 function callbackPublicKeyFromPrivate(input, output) {
-  submitRequests.updateInnerHtml(ids.defaults.kanbanPlusPlus.inputPublicKeyDefault, miscellaneous.removeQuotes(input));
+  var result;
+  try {
+    result = JSON.parse(input).result;
+  } catch (e) {
+    result = miscellaneous.removeQuotes(input);
+  }
+  submitRequests.updateInnerHtml(ids.defaults.kanbanPlusPlus.inputPublicKeyDefault, result);
 }
 
 function callbackSha3(input, output) {
