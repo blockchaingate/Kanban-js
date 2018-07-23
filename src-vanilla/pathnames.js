@@ -314,6 +314,24 @@ var rpcCallsKanban = {
     address: "",
     cli: ["net", "command", "privateKey", "message", "nonce"]
   },
+  testSchnorrSignatureVerify: {
+    rpcCall: "testSchnorrSignatureVerify", //must be same as rpc label, used for autocomplete
+    mandatoryFixedArguments: { //<- values give defaults, null for none
+      command: "testschnorrverification",
+    },
+    mandatoryModifiableArguments: { //<- values give defaults, null for none
+      signature: null,
+      publicKey: null,
+      message: null
+    },
+    allowedArgumentValues: {
+      net: [ //<- restricted network access!
+        networkDataKanban.testKanban.rpcOption
+      ]
+    },
+    address: "",
+    cli: ["net", "command", "signature", "publicKey", "message"]
+  },
 }
 
 var rpcCalls = {

@@ -20,6 +20,7 @@ var defaults = {
     inputMessageToSha3: "inputMessageToSha3",
     inputOutputSha3DigestDefault: "inputOutputSha3DigestDefault",
     inputNoncesDefault: "inputNoncesDefault",
+    inputSignatureDefault: "inputSignatureDefault",
     outputKanbanPlusPlusGeneral: "divKanbanPlusPlusOutput",
     outputKanbanPlusPlusSecond: "divKanbanPlusPlusOutputSecond"
   },

@@ -13,10 +13,26 @@ function setAddress(container) {
   submitRequests.updateValue(ids.defaults.kanbanPlusPlus.inputPrivateKeyDefault, "");
 }
 
+function setSignature(container) {
+  submitRequests.updateValue(ids.defaults.kanbanPlusPlus.inputSignatureDefault, container.getAttribute("content"));
+}
+
+function setNonce(container) {
+  submitRequests.updateValue(ids.defaults.kanbanPlusPlus.inputNoncesDefault, container.getAttribute("content"));
+}
+
 var optionsForKanbanPlusPlusGeneralStandard = {
   transformers: {
     address : {
       handlerName: setAddress.name,
+      transformer: miscellaneous.hexShortenerForDisplay
+    },
+    signatureBase58: {
+      handlerName: setSignature.name,
+      transformer: miscellaneous.hexShortenerForDisplay
+    },
+    nonceBase58: {
+      handlerName: setNonce.name,
       transformer: miscellaneous.hexShortenerForDisplay
     }
   }
@@ -43,12 +59,37 @@ function getPrivateKeyInputValue() {
   return document.getElementById(ids.defaults.kanbanPlusPlus.inputPrivateKeyDefault).value;
 }
 
+function getSignatureValue() {
+  return document.getElementById(ids.defaults.kanbanPlusPlus.inputSignatureDefault).value;
+}
+
+function getPublicKeyValue() {
+  return document.getElementById(ids.defaults.kanbanPlusPlus.inputSignatureDefault).value;
+}
+
 function getMessageValue() {
   return document.getElementById(ids.defaults.kanbanPlusPlus.inputMessageToSha3).value;
 }
 
 function getNonceValue() {
   return document.getElementById(ids.defaults.kanbanPlusPlus.inputNoncesDefault).value;
+}
+
+function hasEmptyValue(id) {
+  return document.getElementById(id).value === null || document.getElementById(id).value === "";
+}
+
+function highlightRedIfEmpty(idsToCheck) {
+  var isGood = true;
+  for (var counterIds = 0; counterIds < idsToCheck.length; counterIds ++) {
+    if (hasEmptyValue(idsToCheck[counterIds])) {
+      submitRequests.highlightError(idsToCheck[counterIds]);
+      isGood = false;
+    } else {
+      submitRequests.highlightInput(idsToCheck[counterIds]);
+    }
+  }
+  return isGood;
 }
 
 function callbackDumpPrivateKey(input, output) {
@@ -70,6 +111,9 @@ function callbackSha3(input, output) {
 }
 
 function dumpPrivateKey() {
+  highlightRedIfEmpty([
+    ids.defaults.kanbanPlusPlus.inputAddressDefault
+  ]);
   submitRequests.submitGET({
     url: pathnames.getURLfromRPCLabel(pathnames.rpcCallsKanban.dumpPrivateKey.rpcCall, {
       net: globals.mainPage().getRPCKanbanNetworkOption(),
@@ -82,6 +126,9 @@ function dumpPrivateKey() {
 }
 
 function testSha3 () {
+  highlightRedIfEmpty([
+    ids.defaults.kanbanPlusPlus.inputMessageToSha3
+  ]);
   submitRequests.submitGET({
     url: pathnames.getURLfromRPCLabel(pathnames.rpcCallsKanban.testSha3.rpcCall, {
       net: globals.mainPage().getRPCKanbanNetworkOption(),
@@ -93,7 +140,26 @@ function testSha3 () {
   });  
 }
 
+function testSchnorrSignatureVerify() {
+  submitRequests.submitGET({
+    url: pathnames.getURLfromRPCLabel(pathnames.rpcCallsKanban.testSchnorrSignatureVerify.rpcCall, {
+      net: globals.mainPage().getRPCKanbanNetworkOption(),
+      signature: getSignatureValue(),
+      publicKey: getPublicKeyValue(),
+      message: getMessageValue(),
+    }, true),
+    progress: globals.spanProgress(),
+    result : document.getElementById(ids.defaults.kanbanPlusPlus.outputKanbanPlusPlusSecond),
+    callback: callbackKanbanPlusPlusGeneralCrypto
+  });  
+}
+
 function testSchnorrSignature() {
+  highlightRedIfEmpty([
+    ids.defaults.kanbanPlusPlus.inputPrivateKeyDefault, 
+    ids.defaults.kanbanPlusPlus.inputMessageToSha3,
+    ids.defaults.kanbanPlusPlus.inputNoncesDefault
+  ]);
   submitRequests.submitGET({
     url: pathnames.getURLfromRPCLabel(pathnames.rpcCallsKanban.testSchnorrSignature.rpcCall, {
       net: globals.mainPage().getRPCKanbanNetworkOption(),
@@ -135,6 +201,7 @@ function getReceivedByAddress() {
 }
 
 function testPublicKeyFromPrivate() {
+  highlightRedIfEmpty([ids.defaults.kanbanPlusPlus.inputPrivateKeyDefault]);
   submitRequests.submitGET({
     url: pathnames.getURLfromRPCLabel(
       pathnames.rpcCallsKanban.testPublicKeyGeneration.rpcCall, {
@@ -172,8 +239,11 @@ module.exports = {
   setTestKanban,
   setMainKanban,
   setAddress,
+  setNonce,
+  setSignature,
   dumpPrivateKey,
   testPublicKeyFromPrivate,
   testSha3,
-  testSchnorrSignature
+  testSchnorrSignature,
+  testSchnorrSignatureVerify
 }
