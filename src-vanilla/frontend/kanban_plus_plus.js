@@ -43,6 +43,19 @@ miscellaneousFrontEnd.attachModuleFullNameToHandlerNames(
   "window.kanban.kanbanPlusPlus.general"
 );
 
+function callbackKanbanPlusPlusSignatureVerification(input, output){
+  jsonToHtml.writeJSONtoDOMComponent(input, output, optionsForKanbanPlusPlusGeneralStandard);
+  if (typeof output === "string") {
+    output = document.getElementById(output);
+  }
+  var inputParsed = JSON.parse(input);
+  if (inputParsed.result === 1) {
+    output.innerHTML = "<b style='color:green'>Verified</b><br>" + output.innerHTML;
+  } else {
+    output.innerHTML = "<b style='color:red'>Failed</b><br>" + output.innerHTML;
+  }
+}
+
 function callbackKanbanPlusPlusGeneralStandard(input, output){
   jsonToHtml.writeJSONtoDOMComponent(input, output, optionsForKanbanPlusPlusGeneralStandard);
 }
@@ -155,7 +168,7 @@ function testSchnorrSignatureVerify() {
     }, true),
     progress: globals.spanProgress(),
     result : document.getElementById(ids.defaults.kanbanPlusPlus.outputKanbanPlusPlusSecond),
-    callback: callbackKanbanPlusPlusGeneralCrypto
+    callback: callbackKanbanPlusPlusSignatureVerification
   });  
 }
 
