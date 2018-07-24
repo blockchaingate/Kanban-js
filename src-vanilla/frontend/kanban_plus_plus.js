@@ -31,7 +31,7 @@ var optionsForKanbanPlusPlusGeneralStandard = {
       handlerName: setSignature.name,
       transformer: miscellaneous.hexShortenerForDisplay
     },
-    nonceBase58: {
+    nonceBase58Check: {
       handlerName: setNonce.name,
       transformer: miscellaneous.hexShortenerForDisplay
     }
@@ -64,7 +64,7 @@ function getSignatureValue() {
 }
 
 function getPublicKeyValue() {
-  return document.getElementById(ids.defaults.kanbanPlusPlus.inputSignatureDefault).value;
+  return document.getElementById(ids.defaults.kanbanPlusPlus.inputPublicKeyDefault).value;
 }
 
 function getMessageValue() {
@@ -141,6 +141,11 @@ function testSha3 () {
 }
 
 function testSchnorrSignatureVerify() {
+  highlightRedIfEmpty([
+    ids.defaults.kanbanPlusPlus.inputSignatureDefault,
+    ids.defaults.kanbanPlusPlus.inputPublicKeyDefault,
+    ids.defaults.kanbanPlusPlus.inputMessageToSha3
+  ]);
   submitRequests.submitGET({
     url: pathnames.getURLfromRPCLabel(pathnames.rpcCallsKanban.testSchnorrSignatureVerify.rpcCall, {
       net: globals.mainPage().getRPCKanbanNetworkOption(),
