@@ -278,6 +278,25 @@ var rpcCallsKanban = {
     address: "",
     cli: ["net", "command", "privateKey"]
   },
+  testAggregateSignatureCommitment: {
+    rpcCall: "testAggregateSignatureCommitment", //must be same as rpc label, used for autocomplete
+    mandatoryFixedArguments: { //<- values give defaults, null for none
+      command: "testaggregatesignaturecommitment",
+    },
+    mandatoryModifiableArguments: { //<- values give defaults, null for none
+      privateKeys: null
+    },
+    optionalModifiableArguments: {
+      nonces: null
+    },
+    allowedArgumentValues: {
+      net: [ //<- restricted network access!
+        networkDataKanban.testKanban.rpcOption
+      ]
+    },
+    address: "",
+    cli: ["net", "command", "privateKeys", "nonces"]
+  },
   testSha3: {
     rpcCall: "testSha3", //must be same as rpc label, used for autocomplete
     mandatoryFixedArguments: { //<- values give defaults, null for none
@@ -898,7 +917,7 @@ function isAllowedRPCCallArgument(theRPCCall, argumentLabel, argumentValue, erro
   return false;
 }
 
-var allowedCharsInRPCArgumentsArray = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ-1234567890";
+var allowedCharsInRPCArgumentsArray = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890+/_=-,";
 var allowedCharsInRPCArgumentsObject = {};
 for (var counterAllowed = 0; counterAllowed < allowedCharsInRPCArgumentsArray.length; counterAllowed ++) {
   allowedCharsInRPCArgumentsObject[allowedCharsInRPCArgumentsArray[counterAllowed]] = true;
@@ -911,12 +930,6 @@ for (var counterAllowed = 0; counterAllowed < allowedCharsInRPCArgumentsArray.le
 var rpcArgumentsAllowedToBeLong = {
   rawTransaction: true,
   rawTransactions: true
-}
-
-var rpcArgumentsAllowedSpecialCharacters = {
-  ",": {
-    rawTransactions: true
-  }
 }
 
 function isValidRPCArgumentBasicChecks(label, input, errors, recursionDepth) {
@@ -958,16 +971,7 @@ function isValidRPCArgumentBasicChecks(label, input, errors, recursionDepth) {
   }
   for (var counterInput = 0; counterInput < input.length; counterInput ++) {
     if (!(input[counterInput] in allowedCharsInRPCArgumentsObject)) {
-      var isBad = true;
-      if (input[counterInput] in rpcArgumentsAllowedSpecialCharacters) {
-        if (label in rpcArgumentsAllowedSpecialCharacters[input[counterInput]]) {
-          isBad = false;
-        }
-      }      
-      if (isBad) {
-        errors.push(`Input with label ${label} contains the forbidden character ${input[counterInput]} at position ${counterInput}.`);
-        return false;
-      }
+      errors.push(`Input with label ${label} contains the forbidden character ${input[counterInput]} at position ${counterInput}.`);
     }
   }
   return true;

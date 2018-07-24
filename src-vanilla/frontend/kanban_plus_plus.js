@@ -72,6 +72,14 @@ function getPrivateKeyInputValue() {
   return document.getElementById(ids.defaults.kanbanPlusPlus.inputPrivateKeyDefault).value;
 }
 
+function getPrivateKeysBase64() {
+  return Buffer.from(getPrivateKeyInputValue()).toString('base64');
+}
+
+function getNoncesBase64() {
+  return Buffer.from(getNonceValue()).toString('base64');
+}
+
 function getSignatureValue() {
   return document.getElementById(ids.defaults.kanbanPlusPlus.inputSignatureDefault).value;
 }
@@ -82,6 +90,10 @@ function getPublicKeyValue() {
 
 function getMessageValue() {
   return document.getElementById(ids.defaults.kanbanPlusPlus.inputMessageToSha3).value;
+}
+
+function getMessageBase64() {
+  return Buffer.from(getMessageValue()).toString('base64');
 }
 
 function getNonceValue() {
@@ -145,7 +157,7 @@ function testSha3 () {
   submitRequests.submitGET({
     url: pathnames.getURLfromRPCLabel(pathnames.rpcCallsKanban.testSha3.rpcCall, {
       net: globals.mainPage().getRPCKanbanNetworkOption(),
-      message: getMessageValue()
+      message: getMessageBase64()
     }, true),
     progress: globals.spanProgress(),
     result : document.getElementById(ids.defaults.inputOutputSha3DigestDefault),
@@ -164,7 +176,7 @@ function testSchnorrSignatureVerify() {
       net: globals.mainPage().getRPCKanbanNetworkOption(),
       signature: getSignatureValue(),
       publicKey: getPublicKeyValue(),
-      message: getMessageValue(),
+      message: getMessageBase64(),
     }, true),
     progress: globals.spanProgress(),
     result : document.getElementById(ids.defaults.kanbanPlusPlus.outputKanbanPlusPlusSecond),
@@ -182,7 +194,7 @@ function testSchnorrSignature() {
     url: pathnames.getURLfromRPCLabel(pathnames.rpcCallsKanban.testSchnorrSignature.rpcCall, {
       net: globals.mainPage().getRPCKanbanNetworkOption(),
       privateKey: getPrivateKeyInputValue(),
-      message: getMessageValue(),
+      message: getMessageBase64(),
       nonce: getNonceValue()
     }, true),
     progress: globals.spanProgress(),
@@ -216,6 +228,26 @@ function getReceivedByAddress() {
     result : ids.defaults.kanbanPlusPlus.outputKanbanPlusPlusGeneral,
     callback: callbackKanbanPlusPlusGeneralStandard
   });  
+}
+
+function testCommitAggregateSignature() {
+  highlightRedIfEmpty([
+    ids.defaults.kanbanPlusPlus.inputPrivateKeyDefault,
+    ids.defaults.kanbanPlusPlus.inputNoncesDefault
+  ]);
+  submitRequests.submitGET({
+    url: pathnames.getURLfromRPCLabel(
+      pathnames.rpcCallsKanban.testAggregateSignatureCommitment.rpcCall, {
+        net: globals.mainPage().getRPCKanbanNetworkOption(),
+        privateKeys: getPrivateKeysBase64(),
+        nonces: getNoncesBase64()
+      }, 
+      true
+    ),
+    progress: globals.spanProgress(),
+    result : ids.defaults.kanbanPlusPlus.outputKanbanPlusPlusSecond,
+    callback: callbackKanbanPlusPlusGeneralStandard
+  });    
 }
 
 function testPublicKeyFromPrivate() {
@@ -263,5 +295,6 @@ module.exports = {
   testPublicKeyFromPrivate,
   testSha3,
   testSchnorrSignature,
-  testSchnorrSignatureVerify
+  testSchnorrSignatureVerify,
+  testCommitAggregateSignature
 }
