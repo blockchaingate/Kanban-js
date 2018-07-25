@@ -88,6 +88,14 @@ function getPublicKeyValue() {
   return document.getElementById(ids.defaults.kanbanPlusPlus.inputPublicKeyDefault).value;
 }
 
+function getPublicKeysBase64() {
+  return Buffer.from(getPublicKeyValue()).toString('base64');
+}
+
+function getCommitmentsBase64() {
+  return Buffer.from(document.getElementById(ids.defaults.kanbanPlusPlus.inputAggregateSignatureCommitments).value).toString('base64');
+}
+
 function getMessageValue() {
   return document.getElementById(ids.defaults.kanbanPlusPlus.inputMessageToSha3).value;
 }
@@ -243,6 +251,20 @@ function callbackKanbanPlusPlusAggregateSignatureInitialize(input, output) {
   submitRequests.updateValue(ids.defaults.kanbanPlusPlus.inputPublicKeyDefault, publicKeys.join(", "));
 }
 
+function callbackKanbanPlusPlusAggregateSignatureCommit(input, output) {
+  jsonToHtml.writeJSONtoDOMComponent(input, output, optionsForKanbanPlusPlusGeneralStandard);
+  var inputParsed = JSON.parse(input);
+  var nonces = [];
+  var commitments = [];
+  for (var counterKeyPairs = 0; counterKeyPairs < inputParsed.signers.length; counterKeyPairs ++) {
+    var currentSigner = inputParsed.signers[counterKeyPairs]; 
+    nonces.push(currentSigner.myNonceBase58Check);
+    commitments.push(currentSigner.commitmentHexCompressedWithLength);
+  }
+  submitRequests.updateValue(ids.defaults.kanbanPlusPlus.inputNoncesDefault, nonces.join(", "));
+  submitRequests.updateValue(ids.defaults.kanbanPlusPlus.inputAggregateSignatureCommitments, commitments.join(", "));
+}
+
 function testAggregateSignatureInitialize() {
   highlightRedIfEmpty([
     ids.defaults.kanbanPlusPlus.inputPrivateKeyDefault
@@ -261,6 +283,26 @@ function testAggregateSignatureInitialize() {
   });    
 }
 
+function testAggregateSignatureChallenge() {
+  highlightRedIfEmpty([
+    ids.defaults.kanbanPlusPlus.inputPublicKeyDefault,
+    ids.defaults.kanbanPlusPlus.inputAggregateSignatureCommitments
+  ]);
+  submitRequests.submitGET({
+    url: pathnames.getURLfromRPCLabel(
+      pathnames.rpcCallsKanban.testAggregateSignatureChallenge.rpcCall, {
+        net: globals.mainPage().getRPCKanbanNetworkOption(),
+        publicKeys: getPublicKeysBase64(),
+        commitments: getCommitmentsBase64()
+      }, 
+      true
+    ),
+    progress: globals.spanProgress(),
+    result : ids.defaults.kanbanPlusPlus.outputKanbanPlusPlusSecond,
+    callback: callbackKanbanPlusPlusSignatureVerification
+  });    
+
+}
 
 function testAggregateSignatureCommit() {
   highlightRedIfEmpty([
@@ -278,7 +320,7 @@ function testAggregateSignatureCommit() {
     ),
     progress: globals.spanProgress(),
     result : ids.defaults.kanbanPlusPlus.outputKanbanPlusPlusSecond,
-    callback: callbackKanbanPlusPlusGeneralStandard
+    callback: callbackKanbanPlusPlusAggregateSignatureCommit
   });    
 }
 
@@ -330,4 +372,5 @@ module.exports = {
   testSchnorrSignatureVerify,
   testAggregateSignatureInitialize,
   testAggregateSignatureCommit,
+  testAggregateSignatureChallenge
 }

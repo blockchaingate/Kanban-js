@@ -21,8 +21,9 @@ var defaults = {
     inputOutputSha3DigestDefault: "inputOutputSha3DigestDefault",
     inputNoncesDefault: "inputNoncesDefault",
     inputSignatureDefault: "inputSignatureDefault",
+    inputAggregateSignatureCommitments: "inputAggregateSignatureCommitments",
     outputKanbanPlusPlusGeneral: "divKanbanPlusPlusOutput",
-    outputKanbanPlusPlusSecond: "divKanbanPlusPlusOutputSecond"
+    outputKanbanPlusPlusSecond: "divKanbanPlusPlusOutputSecond",
   },
   inputNumberOfBlocks: "inputNumberOfBlocks",
   inputMaxNumberOfTries: "inputMaxNumberOfTries",
