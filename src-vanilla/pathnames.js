@@ -321,16 +321,13 @@ var rpcCallsKanban = {
     mandatoryModifiableArguments: { //<- values give defaults, null for none
       commitments: null
     },
-    optionalModifiableArguments: {
-      publicKeys: null
-    },
     allowedArgumentValues: {
       net: [ //<- restricted network access!
         networkDataKanban.testKanban.rpcOption
       ]
     },
     address: "",
-    cli: ["net", "command", "commitments", "publicKeys"]
+    cli: ["net", "command", "commitments"]
   },
   testSha3: {
     rpcCall: "testSha3", //must be same as rpc label, used for autocomplete

@@ -95,6 +95,14 @@ button.buttonSelectPage:hover{
   background-color: lightskyblue;
 }
 
+button.buttonStandardLight{
+  border: 0;
+  background-color: azure;
+  transition: 2s all;
+  border-radius: 2px;
+  padding: 5px;
+}
+
 button.buttonStandard{
   border: 0;
   background-color: lightblue;
@@ -108,6 +116,10 @@ button.buttonStandardSelected{
 }
 
 button.buttonStandard:hover{
+  background-color: lightskyblue;
+}
+
+button.buttonStandardLight:hover{
   background-color: lightskyblue;
 }
 

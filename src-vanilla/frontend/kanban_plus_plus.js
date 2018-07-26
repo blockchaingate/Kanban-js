@@ -245,7 +245,7 @@ function callbackKanbanPlusPlusAggregateSignatureInitialize(input, output) {
   var publicKeys = [];
   for (var counterKeyPairs = 0; counterKeyPairs < inputParsed.signers.length; counterKeyPairs ++) {
     privateKeys.push(inputParsed.signers[counterKeyPairs].privatekeyBase58Check);
-    publicKeys.push(inputParsed.signers[counterKeyPairs].publicKeyHexCompressedWithLength);
+    publicKeys.push(inputParsed.signers[counterKeyPairs].myPublicKey);
   }
   submitRequests.updateValue(ids.defaults.kanbanPlusPlus.inputPrivateKeyDefault, privateKeys.join(", "));
   submitRequests.updateValue(ids.defaults.kanbanPlusPlus.inputPublicKeyDefault, publicKeys.join(", "));
@@ -263,6 +263,10 @@ function callbackKanbanPlusPlusAggregateSignatureCommit(input, output) {
   }
   submitRequests.updateValue(ids.defaults.kanbanPlusPlus.inputNoncesDefault, nonces.join(", "));
   submitRequests.updateValue(ids.defaults.kanbanPlusPlus.inputAggregateSignatureCommitments, commitments.join(", "));
+}
+
+function callbackKanbanPlusPlusAggregateSignatureChallenge(input, output) {
+  jsonToHtml.writeJSONtoDOMComponent(input, output, optionsForKanbanPlusPlusGeneralStandard);
 }
 
 function testAggregateSignatureInitialize() {
@@ -283,6 +287,13 @@ function testAggregateSignatureInitialize() {
   });    
 }
 
+function testAggregateSignatureClear() {
+  submitRequests.updateInnerHtml(ids.defaults.kanbanPlusPlus.inputPrivateKeyDefault, "5");
+  submitRequests.updateInnerHtml(ids.defaults.kanbanPlusPlus.inputNoncesDefault, "");
+  submitRequests.updateInnerHtml(ids.defaults.kanbanPlusPlus.inputPublicKeyDefault, "");
+  submitRequests.updateInnerHtml(ids.defaults.kanbanPlusPlus.inputAggregateSignatureCommitments, "");
+}
+
 function testAggregateSignatureChallenge() {
   highlightRedIfEmpty([
     ids.defaults.kanbanPlusPlus.inputPublicKeyDefault,
@@ -292,14 +303,13 @@ function testAggregateSignatureChallenge() {
     url: pathnames.getURLfromRPCLabel(
       pathnames.rpcCallsKanban.testAggregateSignatureChallenge.rpcCall, {
         net: globals.mainPage().getRPCKanbanNetworkOption(),
-        publicKeys: getPublicKeysBase64(),
         commitments: getCommitmentsBase64()
       }, 
       true
     ),
     progress: globals.spanProgress(),
     result : ids.defaults.kanbanPlusPlus.outputKanbanPlusPlusSecond,
-    callback: callbackKanbanPlusPlusSignatureVerification
+    callback: callbackKanbanPlusPlusAggregateSignatureChallenge
   });    
 
 }
@@ -372,5 +382,6 @@ module.exports = {
   testSchnorrSignatureVerify,
   testAggregateSignatureInitialize,
   testAggregateSignatureCommit,
-  testAggregateSignatureChallenge
+  testAggregateSignatureChallenge,
+  testAggregateSignatureClear
 }
