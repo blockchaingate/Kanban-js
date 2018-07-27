@@ -28,7 +28,8 @@ var defaults = {
     inputAggregateSignatureChallenge: "inputAggregateSignatureChallenge",
     inputAggregateSignatureAggregatePubkey: "inputAggregateSignatureAggregatePubkey",
     inputAggregateSignatureAggregateCommitment: "inputAggregateSignatureAggregateCommitment",
-    inputAggregateSignaturesSolutions: "inputAggregateSignaturesSolutions"
+    inputAggregateSignaturesSolutions: "inputAggregateSignaturesSolutions",
+    inputAggregateSignaturesTheAggregation: "inputAggregateSignaturesTheAggregation"
   },
   inputNumberOfBlocks: "inputNumberOfBlocks",
   inputMaxNumberOfTries: "inputMaxNumberOfTries",

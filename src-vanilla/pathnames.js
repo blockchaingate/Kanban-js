@@ -364,6 +364,25 @@ var rpcCallsKanban = {
     address: "",
     cli: ["net", "command", "solutions"]
   },
+  testAggregateSignatureVerification: {
+    rpcCall: "testAggregateSignatureVerification", //must be same as rpc label, used for autocomplete
+    mandatoryFixedArguments: { //<- values give defaults, null for none
+      command: "testaggregatesignatureverification",
+    },
+    mandatoryModifiableArguments: { //<- values give defaults, null for none
+      signature: null,
+      commitedSignersBitmap: null,
+      publicKeys: null,
+      message: null
+    },
+    allowedArgumentValues: {
+      net: [ //<- restricted network access!
+        networkDataKanban.testKanban.rpcOption
+      ]
+    },
+    address: "",
+    cli: ["net", "command", "signature", "commitedSignersBitmap", "publicKeys", "message"]
+  },
   testSha3: {
     rpcCall: "testSha3", //must be same as rpc label, used for autocomplete
     mandatoryFixedArguments: { //<- values give defaults, null for none
