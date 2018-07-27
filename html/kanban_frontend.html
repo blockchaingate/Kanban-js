@@ -140,8 +140,8 @@
         <tr><td><button class = "buttonStandard" style = "width: 100px" onclick = "window.kanban.kanbanPlusPlus.general.testAggregateSignatureInitialize();"><b>Initialize</b></button></td></tr>
         <tr><td><button class = "buttonStandard" style = "width: 100px" onclick = "window.kanban.kanbanPlusPlus.general.testAggregateSignatureCommit();"><b>Commit</b></button></td></tr>
         <tr><td><button class = "buttonStandard" style = "width: 100px" onclick = "window.kanban.kanbanPlusPlus.general.testAggregateSignatureChallenge();"><b>Challenge</b></button></td></tr>
-        <tr><td><button class = "buttonStandard" style = "width: 100px" onclick = "window.kanban.kanbanPlusPlus.general.();"><b>Solution</b></button></td></tr>
-        <tr><td><button class = "buttonStandard" style = "width: 100px" onclick = "window.kanban.kanbanPlusPlus.general.();"><b>Aggregate</b></button></td></tr>
+        <tr><td><button class = "buttonStandard" style = "width: 100px" onclick = "window.kanban.kanbanPlusPlus.general.testAggregateSignatureSolutions();"><b>Solutions</b></button></td></tr>
+        <tr><td><button class = "buttonStandard" style = "width: 100px" onclick = "window.kanban.kanbanPlusPlus.general.testAggregateSignatureAggregateSolutions();"><b>Aggregate</b></button></td></tr>
       </table>
       </td>
       <td>
@@ -150,10 +150,15 @@
     <input type = "text" class = "inputStandard" id = "inputNoncesDefault" onkeyup = "" size = "90" placeholder = "nonce(s)"></input><br><br>
     <input type = "text" class = "inputStandard" id = "inputSignatureDefault" onkeyup = "" size = "90" placeholder = "signature"></input><br><br>
     <input type = "text" class = "inputStandard" id = "inputAggregateSignatureCommitments" onkeyup = "" size = "90" placeholder = "commitments"></input><br><br>
-    <br>
+
+    <input type = "text" class = "inputStandard" id = "inputAggregateSignatureCommitedSignersBitmap" onkeyup = "" size = "90" placeholder = "commited signers bitmap"></input><br><br>
+    <input type = "text" class = "inputStandard" id = "inputAggregateSignatureChallenge" onkeyup = "" size = "90" placeholder = "challenge"></input><br><br>
+    <input type = "text" class = "inputStandard" id = "inputAggregateSignatureAggregateCommitment" onkeyup = "" size = "90" placeholder = "aggregate commitment"></input><br><br>
+    <input type = "text" class = "inputStandard" id = "inputAggregateSignatureAggregatePubkey" onkeyup = "" size = "90" placeholder = "aggregate public key"></input><br><br>
+    <input type = "text" class = "inputStandard" id = "inputPublicKeyDefault" onkeyup = "" size = "90" placeholder = "pub key(s)"></input><br><br>
+    <input type = "text" class = "inputStandard" id = "inputAggregateSignaturesSolutions" onkeyup = "" size = "90" placeholder = "solutions"></input><br><br>
     <input type = "text" class = "inputStandard" id = "inputOutputSha3DigestDefault" onkeyup = "" size = "90" placeholder = "result sha3 digest"></input><br><br>
     <input type = "text" class = "inputStandard" id = "inputAddressDefault" onkeyup = "" size = "90" placeholder = "fab address"></input><br><br>
-    <input type = "text" class = "inputStandard" id = "inputPublicKeyDefault" onkeyup = "" size = "90" placeholder = "pub key(s)"></input>
   </td>
   </tr></table>
   </div> <!--divControlPanelDefault-->

@@ -24,6 +24,11 @@ var defaults = {
     inputAggregateSignatureCommitments: "inputAggregateSignatureCommitments",
     outputKanbanPlusPlusGeneral: "divKanbanPlusPlusOutput",
     outputKanbanPlusPlusSecond: "divKanbanPlusPlusOutputSecond",
+    inputAggregateSignatureCommitedSignersBitmap: "inputAggregateSignatureCommitedSignersBitmap",
+    inputAggregateSignatureChallenge: "inputAggregateSignatureChallenge",
+    inputAggregateSignatureAggregatePubkey: "inputAggregateSignatureAggregatePubkey",
+    inputAggregateSignatureAggregateCommitment: "inputAggregateSignatureAggregateCommitment",
+    inputAggregateSignaturesSolutions: "inputAggregateSignaturesSolutions"
   },
   inputNumberOfBlocks: "inputNumberOfBlocks",
   inputMaxNumberOfTries: "inputMaxNumberOfTries",
