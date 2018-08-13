@@ -244,6 +244,11 @@ img.imgFabLogo{
   transition: all 2s;
 }
 
+.inputCrypto {
+  transition: all 2s;
+  margin: 5px;
+}
+
 .inputOmni {
   transition: all 2s;
 }

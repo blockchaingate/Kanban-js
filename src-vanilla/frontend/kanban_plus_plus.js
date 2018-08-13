@@ -10,15 +10,15 @@ const miscellaneousFrontEnd = require('./miscellaneous_frontend');
 
 function setAddress(container) {
   submitRequests.updateValue(ids.defaults.kanbanPlusPlus.inputAddressDefault, container.getAttribute("content"));
-  submitRequests.updateValue(ids.defaults.kanbanPlusPlus.inputPrivateKeyDefault, "");
+  submitRequests.updateValue(ids.defaults.kanbanPlusPlus.inputSchnorrSignature.privateKey, "");
 }
 
-function setSignature(container) {
-  submitRequests.updateValue(ids.defaults.kanbanPlusPlus.inputSignatureDefault, container.getAttribute("content"));
+function setSignatureSchnorr(container) {
+  submitRequests.updateValue(ids.defaults.kanbanPlusPlus.inputSchnorrSignature.signature, container.getAttribute("content"));
 }
 
-function setNonce(container) {
-  submitRequests.updateValue(ids.defaults.kanbanPlusPlus.inputNoncesDefault, container.getAttribute("content"));
+function setNonceSchnorr(container) {
+  submitRequests.updateValue(ids.defaults.kanbanPlusPlus.inputSchnorrSignature.nonce, container.getAttribute("content"));
 }
 
 var optionsForKanbanPlusPlusGeneralStandard = {
@@ -27,12 +27,12 @@ var optionsForKanbanPlusPlusGeneralStandard = {
       handlerName: setAddress.name,
       transformer: miscellaneous.hexShortenerForDisplay
     },
-    signatureBase58: {
-      handlerName: setSignature.name,
+    signatureSchnorrBase58: {
+      handlerName: setSignatureSchnorr.name,
       transformer: miscellaneous.hexShortenerForDisplay
     },
-    nonceBase58Check: {
-      handlerName: setNonce.name,
+    nonceSchnorrBase58Check: {
+      handlerName: setNonceSchnorr.name,
       transformer: miscellaneous.hexShortenerForDisplay
     }
   }
@@ -68,32 +68,32 @@ function getAddressInputValue() {
   return document.getElementById(ids.defaults.kanbanPlusPlus.inputAddressDefault).value;
 }
 
-function getPrivateKeyInputValue() {
-  return document.getElementById(ids.defaults.kanbanPlusPlus.inputPrivateKeyDefault).value;
+function getPrivateKeySchnorr() {
+  return document.getElementById(ids.defaults.kanbanPlusPlus.inputSchnorrSignature.privateKey).value;
 }
 
-function getPrivateKeysBase64() {
-  return Buffer.from(getPrivateKeyInputValue()).toString('base64');
+function getNonceAggreagateValue() {
+  return document.getElementById(ids.defaults.kanbanPlusPlus.inputAggregateSignature.nonces)
 }
 
-function getNoncesBase64() {
-  return Buffer.from(getNonceValue()).toString('base64');
+function getNoncesAggregateBase64() {
+  return Buffer.from(getNonceAggreagateValue()).toString('base64');
 }
 
 function getSolutionsBase64() {
-  return Buffer.from(document.getElementById(ids.defaults.kanbanPlusPlus.inputAggregateSignaturesSolutions).value).toString('base64');
+  return Buffer.from(document.getElementById(ids.defaults.kanbanPlusPlus.inputAggregateSignature.solutions).value).toString('base64');
 }
 
-function getSignatureValue() {
-  return document.getElementById(ids.defaults.kanbanPlusPlus.inputSignatureDefault).value;
+function getSignatureSchnorrValue() {
+  return document.getElementById(ids.defaults.kanbanPlusPlus.inputSchnorrSignature.signature).value;
 }
 
 function getAggregateSignatureValue() {
   return document.getElementById(ids.defaults.kanbanPlusPlus.inputAggregateSignaturesTheAggregation).value;
 }
 
-function getPublicKeyValue() {
-  return document.getElementById(ids.defaults.kanbanPlusPlus.inputPublicKeyDefault).value;
+function getPublicKeySchnorrValue() {
+  return document.getElementById(ids.defaults.kanbanPlusPlus.inputSchnorrSignature.publicKey).value;
 }
 
 function getPublicKeysBase64() {
@@ -120,16 +120,16 @@ function getAggregateCommitment() {
   return document.getElementById(ids.defaults.kanbanPlusPlus.inputAggregateSignatureAggregateCommitment).value;
 }
 
-function getMessageValue() {
-  return document.getElementById(ids.defaults.kanbanPlusPlus.inputMessageToSha3).value;
+function getSchnorrMessageValue() {
+  return document.getElementById(ids.defaults.kanbanPlusPlus.inputSchnorrSignature.messageToSha3).value;
 }
 
-function getMessageBase64() {
-  return Buffer.from(getMessageValue()).toString('base64');
+function getSchnorrMessageBase64() {
+  return Buffer.from(getSchnorrMessageValue()).toString('base64');
 }
 
-function getNonceValue() {
-  return document.getElementById(ids.defaults.kanbanPlusPlus.inputNoncesDefault).value;
+function getNonceValueSchnorr() {
+  return document.getElementById(ids.defaults.kanbanPlusPlus.inputSchnorrSignature.nonce).value;
 }
 
 function hasEmptyValue(id) {
@@ -150,7 +150,7 @@ function highlightRedIfEmpty(idsToCheck) {
 }
 
 function callbackDumpPrivateKey(input, output) {
-  submitRequests.updateInnerHtml(ids.defaults.kanbanPlusPlus.inputPrivateKeyDefault, miscellaneous.removeQuotes(input));
+  submitRequests.updateInnerHtml(ids.defaults.kanbanPlusPlus.inputSchnorrSignature.privateKey, miscellaneous.removeQuotes(input));
 }
 
 function callbackPublicKeyFromPrivate(input, output) {
@@ -160,11 +160,11 @@ function callbackPublicKeyFromPrivate(input, output) {
   } catch (e) {
     result = miscellaneous.removeQuotes(input);
   }
-  submitRequests.updateInnerHtml(ids.defaults.kanbanPlusPlus.inputPublicKeyDefault, result);
+  submitRequests.updateInnerHtml(ids.defaults.kanbanPlusPlus.inputSchnorrSignature.publicKey, result);
 }
 
 function callbackSha3(input, output) {
-  submitRequests.updateInnerHtml(ids.defaults.kanbanPlusPlus.inputOutputSha3DigestDefault, miscellaneous.removeQuotes(input));
+  submitRequests.updateInnerHtml(ids.defaults.kanbanPlusPlus.inputSchnorrSignature.outputSha3DigestDefault, miscellaneous.removeQuotes(input));
 }
 
 function dumpPrivateKey() {
@@ -184,31 +184,31 @@ function dumpPrivateKey() {
 
 function testSha3() {
   highlightRedIfEmpty([
-    ids.defaults.kanbanPlusPlus.inputMessageToSha3
+    ids.defaults.kanbanPlusPlus.inputSchnorrSignature.messageToSha3
   ]);
   submitRequests.submitGET({
     url: pathnames.getURLfromRPCLabel(pathnames.rpcCallsKanban.testSha3.rpcCall, {
       net: globals.mainPage().getRPCKanbanNetworkOption(),
-      message: getMessageBase64()
+      message: getSchnorrMessageBase64()
     }, true),
     progress: globals.spanProgress(),
-    result : document.getElementById(ids.defaults.inputOutputSha3DigestDefault),
+    result : document.getElementById(ids.defaults.kanbanPlusPlus.inputSchnorrSignature.messageToSha3),
     callback: callbackSha3
   });  
 }
 
 function testSchnorrSignatureVerify() {
   highlightRedIfEmpty([
-    ids.defaults.kanbanPlusPlus.inputSignatureDefault,
-    ids.defaults.kanbanPlusPlus.inputPublicKeyDefault,
-    ids.defaults.kanbanPlusPlus.inputMessageToSha3
+    ids.defaults.kanbanPlusPlus.inputSchnorrSignature.signature,
+    ids.defaults.kanbanPlusPlus.inputSchnorrSignature.publicKey,
+    ids.defaults.kanbanPlusPlus.inputSchnorrSignature.messageToSha3
   ]);
   submitRequests.submitGET({
     url: pathnames.getURLfromRPCLabel(pathnames.rpcCallsKanban.testSchnorrSignatureVerify.rpcCall, {
       net: globals.mainPage().getRPCKanbanNetworkOption(),
-      signature: getSignatureValue(),
-      publicKey: getPublicKeyValue(),
-      message: getMessageBase64(),
+      signature: getSignatureSchnorrValue(),
+      publicKey: getPublicKeySchnorrValue(),
+      message: getSchnorrMessageBase64(),
     }, true),
     progress: globals.spanProgress(),
     result : document.getElementById(ids.defaults.kanbanPlusPlus.outputKanbanPlusPlusSecond),
@@ -218,20 +218,20 @@ function testSchnorrSignatureVerify() {
 
 function testSchnorrSignature() {
   highlightRedIfEmpty([
-    ids.defaults.kanbanPlusPlus.inputPrivateKeyDefault, 
-    ids.defaults.kanbanPlusPlus.inputMessageToSha3,
-    ids.defaults.kanbanPlusPlus.inputNoncesDefault
+    ids.defaults.kanbanPlusPlus.inputSchnorrSignature.privateKey, 
+    ids.defaults.kanbanPlusPlus.inputSchnorrSignature.messageToSha3,
+    ids.defaults.kanbanPlusPlus.inputSchnorrSignature.nonce
   ]);
   submitRequests.submitGET({
     url: pathnames.getURLfromRPCLabel(pathnames.rpcCallsKanban.testSchnorrSignature.rpcCall, {
       net: globals.mainPage().getRPCKanbanNetworkOption(),
-      privateKey: getPrivateKeyInputValue(),
-      message: getMessageBase64(),
-      nonce: getNonceValue()
+      privateKey: getPrivateKeySchnorr(),
+      message: getSchnorrMessageBase64(),
+      nonce: getNonceValueSchnorr()
     }, true),
     progress: globals.spanProgress(),
     result : document.getElementById(ids.defaults.kanbanPlusPlus.outputKanbanPlusPlusSecond),
-    callback: callbackKanbanPlusPlusGeneralCrypto
+    callback: callbackSchnorrSign
   });  
 }
 
@@ -262,6 +262,13 @@ function getReceivedByAddress() {
   });  
 }
 
+function callbackSchnorrSign(input, output) {
+  jsonToHtml.writeJSONtoDOMComponent(input, output, optionsForKanbanPlusPlusGeneralStandard);
+  var inputParsed = JSON.parse(input);
+  submitRequests.updateInnerHtml(ids.defaults.kanbanPlusPlus.inputSchnorrSignature.signature, inputParsed.signatureSchnorrBase58);
+  submitRequests.updateInnerHtml(ids.defaults.kanbanPlusPlus.inputSchnorrSignature.nonce, inputParsed.nonceSchnorrBase58Check);  
+}
+
 function callbackKanbanPlusPlusAggregateSignatureInitialize(input, output) {
   jsonToHtml.writeJSONtoDOMComponent(input, output, optionsForKanbanPlusPlusGeneralStandard);
   var inputParsed = JSON.parse(input);
@@ -271,7 +278,7 @@ function callbackKanbanPlusPlusAggregateSignatureInitialize(input, output) {
     privateKeys.push(inputParsed.signers[counterKeyPairs].privatekeyBase58Check);
     publicKeys.push(inputParsed.signers[counterKeyPairs].myPublicKey);
   }
-  submitRequests.updateValue(ids.defaults.kanbanPlusPlus.inputPrivateKeyDefault, privateKeys.join(", "));
+  submitRequests.updateValue(ids.defaults.kanbanPlusPlus.inputAggregateSignature.privateKeys, privateKeys.join(", "));
   submitRequests.updateValue(ids.defaults.kanbanPlusPlus.inputPublicKeyDefault, publicKeys.join(", "));
 }
 
@@ -306,7 +313,7 @@ function callbackKanbanPlusPlusAggregateSignatureSolutions(input, output) {
     var currentSigner = inputParsed.signers[counterKeyPairs]; 
     solutions.push(currentSigner.mySolution);
   }
-  submitRequests.updateValue(ids.defaults.kanbanPlusPlus.inputAggregateSignaturesSolutions, solutions.join(", "));
+  submitRequests.updateValue(ids.defaults.kanbanPlusPlus.inputAggregateSignature.solutions, solutions.join(", "));
 }
 
 function callbackKanbanPlusPlusAggregateFinalSolution(input, output) {
@@ -322,13 +329,13 @@ function callbackKanbanPlusPlusAggregateVerification(input, output) {
 
 function testAggregateSignatureInitialize() {
   highlightRedIfEmpty([
-    ids.defaults.kanbanPlusPlus.inputPrivateKeyDefault
+    ids.defaults.kanbanPlusPlus.inputAggregateSignature.privateKeys
   ]);
   submitRequests.submitGET({
     url: pathnames.getURLfromRPCLabel(
       pathnames.rpcCallsKanban.testAggregateSignatureInitialize.rpcCall, {
         net: globals.mainPage().getRPCKanbanNetworkOption(),
-        privateKeys: getPrivateKeyInputValue()
+        privateKeys: getPrivateKeysAggregateSignatureInputValue()
       }, 
       true
     ),
@@ -339,7 +346,8 @@ function testAggregateSignatureInitialize() {
 }
 
 function testAggregateSignatureClear() {
-  submitRequests.updateInnerHtml(ids.defaults.kanbanPlusPlus.inputPrivateKeyDefault, "5");
+  submitRequests.updateInnerHtml(ids.defaults.kanbanPlusPlus.inputNumberOfPrivateKeysToGenerate, "5");
+  submitRequests.updateInnerHtml(ids.defaults.kanbanPlusPlus.inputAggregateSignature.privateKeys, "");
   submitRequests.updateInnerHtml(ids.defaults.kanbanPlusPlus.inputNoncesDefault, "");
   submitRequests.updateInnerHtml(ids.defaults.kanbanPlusPlus.inputPublicKeyDefault, "");
   submitRequests.updateInnerHtml(ids.defaults.kanbanPlusPlus.inputAggregateSignatureCommitments, "");
@@ -415,7 +423,7 @@ function testAggregateSignatureVerify() {
 
 function testAggregateSignatureAggregateSolutions() {
   highlightRedIfEmpty([
-    ids.defaults.kanbanPlusPlus.inputAggregateSignaturesSolutions
+    ids.defaults.kanbanPlusPlus.inputAggregateSignature.solutions
   ]);
   submitRequests.submitGET({
     url: pathnames.getURLfromRPCLabel(
@@ -433,7 +441,7 @@ function testAggregateSignatureAggregateSolutions() {
 
 function testAggregateSignatureCommit() {
   highlightRedIfEmpty([
-    ids.defaults.kanbanPlusPlus.inputPrivateKeyDefault,
+    ids.defaults.kanbanPlusPlus.inputAggregateSignature.privateKeys,
     ids.defaults.kanbanPlusPlus.inputNoncesDefault
   ]);
   submitRequests.submitGET({
@@ -441,7 +449,7 @@ function testAggregateSignatureCommit() {
       pathnames.rpcCallsKanban.testAggregateSignatureCommitment.rpcCall, {
         net: globals.mainPage().getRPCKanbanNetworkOption(),
         message: getMessageBase64(),
-        nonces: getNoncesBase64(),
+        nonces: getNoncesAggregateBase64(),
       }, 
       true
     ),
@@ -452,12 +460,12 @@ function testAggregateSignatureCommit() {
 }
 
 function testPublicKeyFromPrivate() {
-  highlightRedIfEmpty([ids.defaults.kanbanPlusPlus.inputPrivateKeyDefault]);
+  highlightRedIfEmpty([ids.defaults.kanbanPlusPlus.inputSchnorrSignature.privateKey]);
   submitRequests.submitGET({
     url: pathnames.getURLfromRPCLabel(
       pathnames.rpcCallsKanban.testPublicKeyGeneration.rpcCall, {
         net: globals.mainPage().getRPCKanbanNetworkOption(),
-        privateKey: getPrivateKeyInputValue()
+        privateKey: getPrivateKeySchnorr()
       }, 
       true
     ),
@@ -490,8 +498,8 @@ module.exports = {
   setTestKanban,
   setMainKanban,
   setAddress,
-  setNonce,
-  setSignature,
+  setNonceSchnorr,
+  setSignatureSchnorr,
   dumpPrivateKey,
   testPublicKeyFromPrivate,
   testSha3,
