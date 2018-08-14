@@ -284,7 +284,7 @@ var rpcCallsKanban = {
       command: "testaggregatesignatureinitialize",
     },
     mandatoryModifiableArguments: { //<- values give defaults, null for none
-      privateKeys: null,
+      numberOfPrivateKeysToGenerate: null,
     },
     allowedArgumentValues: {
       net: [ //<- restricted network access!
@@ -292,7 +292,7 @@ var rpcCallsKanban = {
       ]
     },
     address: "",
-    cli: ["net", "command", "privateKeys"]
+    cli: ["net", "command", "numberOfPrivateKeysToGenerate"]
   },
   testAggregateSignatureCommitment: {
     rpcCall: "testAggregateSignatureCommitment", //must be same as rpc label, used for autocomplete
@@ -336,7 +336,7 @@ var rpcCallsKanban = {
     },
     mandatoryModifiableArguments: { //<- values give defaults, null for none
       commitedSignersBitmap: null,
-      challege: null,
+      challenge: null,
       aggregatedCommitment: null, 
       aggregatedPublicKey: null
     },
@@ -346,7 +346,7 @@ var rpcCallsKanban = {
       ]
     },
     address: "",
-    cli: ["net", "command", "commitedSignersBitmap", "challege", "aggregatedCommitment", "aggregatedPublicKey"]
+    cli: ["net", "command", "commitedSignersBitmap", "challenge", "aggregatedCommitment", "aggregatedPublicKey"]
   },
   testAggregateSignatureAggregation: {
     rpcCall: "testAggregateSignatureAggregation", //must be same as rpc label, used for autocomplete

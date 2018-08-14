@@ -23,9 +23,11 @@ var defaults = {
       signature: "inputSignatureDefault",
     },
     inputAggregateSignature: {
+      message: "inputAggregateSignatureMessage",
       commitments: "inputAggregateSignatureCommitments",
       numberOfPrivateKeysToGenerate: "inputAggregateSignatureNumberOfPrivateKeysToGenerate",
       privateKeys: "inputAggregateSignaturePrivateKeys",
+      publicKeys: "inputAggregateSignaturePublicKeys",
       commitedSignersBitmap: "inputAggregateSignatureCommitedSignersBitmap",
       challenge: "inputAggregateSignatureChallenge",
       aggregatePubkey: "inputAggregateSignatureAggregatePubkey",    

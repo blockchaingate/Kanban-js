@@ -72,8 +72,20 @@ function getPrivateKeySchnorr() {
   return document.getElementById(ids.defaults.kanbanPlusPlus.inputSchnorrSignature.privateKey).value;
 }
 
+function getPrivateKeysAggregateSignatureNumberOfKeysValue() {
+  return document.getElementById(ids.defaults.kanbanPlusPlus.inputAggregateSignature.numberOfPrivateKeysToGenerate).value;
+}
+
+function getPrivateKeysAggregateSignatureInputValue() {
+  return document.getElementById(ids.defaults.kanbanPlusPlus.inputAggregateSignature.privateKeys).value;
+}
+
+function getPrivateKeysAggregateSignatureInputBase64() {
+  return Buffer.from(getPrivateKeysAggregateSignatureInputValue()).toString('base64');
+}
+
 function getNonceAggreagateValue() {
-  return document.getElementById(ids.defaults.kanbanPlusPlus.inputAggregateSignature.nonces)
+  return document.getElementById(ids.defaults.kanbanPlusPlus.inputAggregateSignature.nonces).value;
 }
 
 function getNoncesAggregateBase64() {
@@ -89,7 +101,7 @@ function getSignatureSchnorrValue() {
 }
 
 function getAggregateSignatureValue() {
-  return document.getElementById(ids.defaults.kanbanPlusPlus.inputAggregateSignaturesTheAggregation).value;
+  return document.getElementById(ids.defaults.kanbanPlusPlus.inputAggregateSignature.theAggregation).value;
 }
 
 function getPublicKeySchnorrValue() {
@@ -101,23 +113,23 @@ function getPublicKeysBase64() {
 }
 
 function getCommitmentsBase64() {
-  return Buffer.from(document.getElementById(ids.defaults.kanbanPlusPlus.inputAggregateSignatureCommitments).value).toString('base64');
+  return Buffer.from(document.getElementById(ids.defaults.kanbanPlusPlus.inputAggregateSignature.commitments).value).toString('base64');
 }
 
 function getCommitedSignersBitmap() {
-  return document.getElementById(ids.defaults.kanbanPlusPlus.inputAggregateSignatureCommitedSignersBitmap).value;
+  return document.getElementById(ids.defaults.kanbanPlusPlus.inputAggregateSignature.commitedSignersBitmap).value;
 }
 
 function getChallenge() {
-  return document.getElementById(ids.defaults.kanbanPlusPlus.inputAggregateSignatureChallenge).value;
+  return document.getElementById(ids.defaults.kanbanPlusPlus.inputAggregateSignature.challenge).value;
 }
 
 function getAggregatePublicKey() {
-  return document.getElementById(ids.defaults.kanbanPlusPlus.inputAggregateSignatureAggregatePubkey).value;
+  return document.getElementById(ids.defaults.kanbanPlusPlus.inputAggregateSignature.aggregatePubkey).value;
 }
 
 function getAggregateCommitment() {
-  return document.getElementById(ids.defaults.kanbanPlusPlus.inputAggregateSignatureAggregateCommitment).value;
+  return document.getElementById(ids.defaults.kanbanPlusPlus.inputAggregateSignature.aggregateCommitment).value;
 }
 
 function getSchnorrMessageValue() {
@@ -126,6 +138,10 @@ function getSchnorrMessageValue() {
 
 function getSchnorrMessageBase64() {
   return Buffer.from(getSchnorrMessageValue()).toString('base64');
+}
+
+function getAggregateSignatureMessageBase64() {
+  return Buffer.from(document.getElementById(ids.defaults.kanbanPlusPlus.inputAggregateSignature.message).value).toString('base64');
 }
 
 function getNonceValueSchnorr() {
@@ -279,7 +295,7 @@ function callbackKanbanPlusPlusAggregateSignatureInitialize(input, output) {
     publicKeys.push(inputParsed.signers[counterKeyPairs].myPublicKey);
   }
   submitRequests.updateValue(ids.defaults.kanbanPlusPlus.inputAggregateSignature.privateKeys, privateKeys.join(", "));
-  submitRequests.updateValue(ids.defaults.kanbanPlusPlus.inputPublicKeyDefault, publicKeys.join(", "));
+  submitRequests.updateValue(ids.defaults.kanbanPlusPlus.inputAggregateSignature.publicKeys, publicKeys.join(", "));
 }
 
 function callbackKanbanPlusPlusAggregateSignatureCommit(input, output) {
@@ -292,17 +308,17 @@ function callbackKanbanPlusPlusAggregateSignatureCommit(input, output) {
     nonces.push(currentSigner.myNonceBase58Check);
     commitments.push(currentSigner.commitmentHexCompressedWithLength);
   }
-  submitRequests.updateValue(ids.defaults.kanbanPlusPlus.inputNoncesDefault, nonces.join(", "));
-  submitRequests.updateValue(ids.defaults.kanbanPlusPlus.inputAggregateSignatureCommitments, commitments.join(", "));
+  submitRequests.updateValue(ids.defaults.kanbanPlusPlus.inputAggregateSignature.nonces, nonces.join(", "));
+  submitRequests.updateValue(ids.defaults.kanbanPlusPlus.inputAggregateSignature.commitments, commitments.join(", "));
 }
 
 function callbackKanbanPlusPlusAggregateSignatureChallenge(input, output) {
   jsonToHtml.writeJSONtoDOMComponent(input, output, optionsForKanbanPlusPlusGeneralStandard);
   var inputParsed = JSON.parse(input);
-  submitRequests.updateValue(ids.defaults.kanbanPlusPlus.inputAggregateSignatureChallenge, inputParsed.aggregator.challenge);
-  submitRequests.updateValue(ids.defaults.kanbanPlusPlus.inputAggregateSignatureAggregatePubkey, inputParsed.aggregator.aggregatePublicKey);
-  submitRequests.updateValue(ids.defaults.kanbanPlusPlus.inputAggregateSignatureCommitedSignersBitmap, inputParsed.aggregator.commitedSignersBitmap);
-  submitRequests.updateValue(ids.defaults.kanbanPlusPlus.inputAggregateSignatureAggregateCommitment, inputParsed.aggregator.aggregateCommitment);
+  submitRequests.updateValue(ids.defaults.kanbanPlusPlus.inputAggregateSignature.challenge, inputParsed.aggregator.challenge);
+  submitRequests.updateValue(ids.defaults.kanbanPlusPlus.inputAggregateSignature.aggregatePubkey, inputParsed.aggregator.aggregatePublicKey);
+  submitRequests.updateValue(ids.defaults.kanbanPlusPlus.inputAggregateSignature.commitedSignersBitmap, inputParsed.aggregator.commitedSignersBitmap);
+  submitRequests.updateValue(ids.defaults.kanbanPlusPlus.inputAggregateSignature.aggregateCommitment, inputParsed.aggregator.aggregateCommitment);
 }
 
 function callbackKanbanPlusPlusAggregateSignatureSolutions(input, output) {
@@ -319,7 +335,7 @@ function callbackKanbanPlusPlusAggregateSignatureSolutions(input, output) {
 function callbackKanbanPlusPlusAggregateFinalSolution(input, output) {
   jsonToHtml.writeJSONtoDOMComponent(input, output, optionsForKanbanPlusPlusGeneralStandard);
   var inputParsed = JSON.parse(input);
-  submitRequests.updateValue(ids.defaults.kanbanPlusPlus.inputAggregateSignaturesTheAggregation, inputParsed.aggregator.signatureNoBitmap);
+  submitRequests.updateValue(ids.defaults.kanbanPlusPlus.inputAggregateSignature.theAggregation, inputParsed.aggregator.signatureNoBitmap);
 }
 
 function callbackKanbanPlusPlusAggregateVerification(input, output) {
@@ -328,37 +344,38 @@ function callbackKanbanPlusPlusAggregateVerification(input, output) {
 }
 
 function testAggregateSignatureInitialize() {
+  
   highlightRedIfEmpty([
-    ids.defaults.kanbanPlusPlus.inputAggregateSignature.privateKeys
+    ids.defaults.kanbanPlusPlus.inputAggregateSignature.numberOfPrivateKeysToGenerate
   ]);
   submitRequests.submitGET({
     url: pathnames.getURLfromRPCLabel(
       pathnames.rpcCallsKanban.testAggregateSignatureInitialize.rpcCall, {
         net: globals.mainPage().getRPCKanbanNetworkOption(),
-        privateKeys: getPrivateKeysAggregateSignatureInputValue()
+        numberOfPrivateKeysToGenerate: getPrivateKeysAggregateSignatureNumberOfKeysValue()
       }, 
       true
     ),
     progress: globals.spanProgress(),
-    result : ids.defaults.kanbanPlusPlus.outputKanbanPlusPlusSecond,
+    result : ids.defaults.kanbanPlusPlus.divKanbanPlusPlusOutputThird,
     callback: callbackKanbanPlusPlusAggregateSignatureInitialize
   });    
 }
 
 function testAggregateSignatureClear() {
-  submitRequests.updateInnerHtml(ids.defaults.kanbanPlusPlus.inputNumberOfPrivateKeysToGenerate, "5");
+  submitRequests.updateInnerHtml(ids.defaults.kanbanPlusPlus.inputAggregateSignature.numberOfPrivateKeysToGenerate, "5");
   submitRequests.updateInnerHtml(ids.defaults.kanbanPlusPlus.inputAggregateSignature.privateKeys, "");
-  submitRequests.updateInnerHtml(ids.defaults.kanbanPlusPlus.inputNoncesDefault, "");
-  submitRequests.updateInnerHtml(ids.defaults.kanbanPlusPlus.inputPublicKeyDefault, "");
-  submitRequests.updateInnerHtml(ids.defaults.kanbanPlusPlus.inputAggregateSignatureCommitments, "");
-  submitRequests.updateInnerHtml(ids.defaults.kanbanPlusPlus.inputAggregateSignatureAggregatePubkey, "");
-  submitRequests.updateInnerHtml(ids.defaults.kanbanPlusPlus.inputAggregateSignatureChallenge, "");
+  submitRequests.updateInnerHtml(ids.defaults.kanbanPlusPlus.inputAggregateSignature.nonces, "");
+  submitRequests.updateInnerHtml(ids.defaults.kanbanPlusPlus.inputAggregateSignature.publicKeys, "");
+  submitRequests.updateInnerHtml(ids.defaults.kanbanPlusPlus.inputAggregateSignature.commitments, "");
+  submitRequests.updateInnerHtml(ids.defaults.kanbanPlusPlus.inputAggregateSignature.aggregatePubkey, "");
+  submitRequests.updateInnerHtml(ids.defaults.kanbanPlusPlus.inputAggregateSignature.challenge, "");
 }
 
 function testAggregateSignatureChallenge() {
   highlightRedIfEmpty([
-    ids.defaults.kanbanPlusPlus.inputPublicKeyDefault,
-    ids.defaults.kanbanPlusPlus.inputAggregateSignatureCommitments
+    ids.defaults.kanbanPlusPlus.inputAggregateSignature.publicKeys,
+    ids.defaults.kanbanPlusPlus.inputAggregateSignature.commitments
   ]);
   submitRequests.submitGET({
     url: pathnames.getURLfromRPCLabel(
@@ -369,7 +386,7 @@ function testAggregateSignatureChallenge() {
       true
     ),
     progress: globals.spanProgress(),
-    result : ids.defaults.kanbanPlusPlus.outputKanbanPlusPlusSecond,
+    result : ids.defaults.kanbanPlusPlus.divKanbanPlusPlusOutputThird,
     callback: callbackKanbanPlusPlusAggregateSignatureChallenge
   });    
 
@@ -377,7 +394,7 @@ function testAggregateSignatureChallenge() {
 
 function testAggregateSignatureSolutions() {
   highlightRedIfEmpty([
-    ids.defaults.kanbanPlusPlus.inputAggregateSignatureChallenge
+    ids.defaults.kanbanPlusPlus.inputAggregateSignature.challenge
   ]);
 
   submitRequests.submitGET({
@@ -385,24 +402,24 @@ function testAggregateSignatureSolutions() {
       pathnames.rpcCallsKanban.testAggregateSignatureSolutions.rpcCall, {
         net: globals.mainPage().getRPCKanbanNetworkOption(),
         commitedSignersBitmap: getCommitedSignersBitmap(),
-        challege: getChallenge(),
+        challenge: getChallenge(),
         aggregatedCommitment: getAggregateCommitment(),
         aggregatedPublicKey: getAggregatePublicKey()
       }, 
       true
     ),
     progress: globals.spanProgress(),
-    result : ids.defaults.kanbanPlusPlus.outputKanbanPlusPlusSecond,
+    result : ids.defaults.kanbanPlusPlus.divKanbanPlusPlusOutputThird,
     callback: callbackKanbanPlusPlusAggregateSignatureSolutions
   });    
 }
 
 function testAggregateSignatureVerify() {
   highlightRedIfEmpty([
-    ids.defaults.kanbanPlusPlus.inputAggregateSignaturesTheAggregation,
-    ids.defaults.kanbanPlusPlus.inputAggregateSignatureCommitedSignersBitmap,
-    ids.defaults.kanbanPlusPlus.inputPublicKeyDefault,
-    ids.defaults.kanbanPlusPlus.inputMessageToSha3
+    ids.defaults.kanbanPlusPlus.inputAggregateSignature.theAggregation,
+    ids.defaults.kanbanPlusPlus.inputAggregateSignature.commitedSignersBitmap,
+    ids.defaults.kanbanPlusPlus.inputAggregateSignature.publicKeys,
+    ids.defaults.kanbanPlusPlus.inputAggregateSignature.message
   ]);
   submitRequests.submitGET({
     url: pathnames.getURLfromRPCLabel(
@@ -411,12 +428,12 @@ function testAggregateSignatureVerify() {
         signature: getAggregateSignatureValue(),
         commitedSignersBitmap: getCommitedSignersBitmap(),
         publicKeys: getPublicKeysBase64(),
-        message: getMessageBase64()
+        message: getAggregateSignatureMessageBase64()
       }, 
       true 
     ),
     progress: globals.spanProgress(),
-    result : ids.defaults.kanbanPlusPlus.outputKanbanPlusPlusSecond,
+    result : ids.defaults.kanbanPlusPlus.divKanbanPlusPlusOutputThird,
     callback: callbackKanbanPlusPlusAggregateVerification
   });    
 }
@@ -434,7 +451,7 @@ function testAggregateSignatureAggregateSolutions() {
       true
     ),
     progress: globals.spanProgress(),
-    result : ids.defaults.kanbanPlusPlus.outputKanbanPlusPlusSecond,
+    result : ids.defaults.kanbanPlusPlus.divKanbanPlusPlusOutputThird,
     callback: callbackKanbanPlusPlusAggregateFinalSolution
   });    
 }
@@ -442,19 +459,19 @@ function testAggregateSignatureAggregateSolutions() {
 function testAggregateSignatureCommit() {
   highlightRedIfEmpty([
     ids.defaults.kanbanPlusPlus.inputAggregateSignature.privateKeys,
-    ids.defaults.kanbanPlusPlus.inputNoncesDefault
+    ids.defaults.kanbanPlusPlus.inputAggregateSignature.nonces
   ]);
   submitRequests.submitGET({
     url: pathnames.getURLfromRPCLabel(
       pathnames.rpcCallsKanban.testAggregateSignatureCommitment.rpcCall, {
         net: globals.mainPage().getRPCKanbanNetworkOption(),
-        message: getMessageBase64(),
+        message: getAggregateSignatureMessageBase64(),
         nonces: getNoncesAggregateBase64(),
       }, 
       true
     ),
     progress: globals.spanProgress(),
-    result : ids.defaults.kanbanPlusPlus.outputKanbanPlusPlusSecond,
+    result : ids.defaults.kanbanPlusPlus.divKanbanPlusPlusOutputThird,
     callback: callbackKanbanPlusPlusAggregateSignatureCommit
   });    
 }
