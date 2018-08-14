@@ -108,8 +108,12 @@ function getPublicKeySchnorrValue() {
   return document.getElementById(ids.defaults.kanbanPlusPlus.inputSchnorrSignature.publicKey).value;
 }
 
-function getPublicKeysBase64() {
-  return Buffer.from(getPublicKeyValue()).toString('base64');
+function getAggregateSignaturePublicKeysValue() {
+  return document.getElementById(ids.defaults.kanbanPlusPlus.inputAggregateSignature.publicKeys).value;
+}
+
+function getAggregateSignaturePublicKeysBase64() {
+  return Buffer.from(getAggregateSignaturePublicKeysValue()).toString('base64');
 }
 
 function getCommitmentsBase64() {
@@ -341,6 +345,14 @@ function callbackKanbanPlusPlusAggregateFinalSolution(input, output) {
 function callbackKanbanPlusPlusAggregateVerification(input, output) {
   jsonToHtml.writeJSONtoDOMComponent(input, output, optionsForKanbanPlusPlusGeneralStandard);
   var inputParsed = JSON.parse(input);
+  if (typeof output === "string") {
+    output = document.getElementById(output);
+  }
+  if (inputParsed.result === "1" || inputParsed.result === 1) {
+    output.innerHTML = "<b style='color:green'>Verified</b><br>" + output.innerHTML;
+  } else {
+    output.innerHTML = "<b style='color:red'>Failed</b><br>" + output.innerHTML;
+  }
 }
 
 function testAggregateSignatureInitialize() {
@@ -427,7 +439,7 @@ function testAggregateSignatureVerify() {
         net: globals.mainPage().getRPCKanbanNetworkOption(),
         signature: getAggregateSignatureValue(),
         commitedSignersBitmap: getCommitedSignersBitmap(),
-        publicKeys: getPublicKeysBase64(),
+        publicKeys: getAggregateSignaturePublicKeysBase64(),
         message: getAggregateSignatureMessageBase64()
       }, 
       true 
