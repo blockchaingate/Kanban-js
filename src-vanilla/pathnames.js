@@ -319,7 +319,8 @@ var rpcCallsKanban = {
       command: "testaggregatesignaturechallenge",
     },
     mandatoryModifiableArguments: { //<- values give defaults, null for none
-      commitments: null
+      committedSignersBitmap: null,
+      commitments: null,
     },
     allowedArgumentValues: {
       net: [ //<- restricted network access!

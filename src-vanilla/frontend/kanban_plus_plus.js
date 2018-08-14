@@ -121,7 +121,7 @@ function getCommitmentsBase64() {
 }
 
 function getCommittedSignersBitmap() {
-  return document.getElementById(ids.defaults.kanbanPlusPlus.inputAggregateSignature.committedSignersBitmap).value;
+  return document.getElementById(ids.defaults.kanbanPlusPlus.inputAggregateSignature.committedSignersBitmap).value.toString();
 }
 
 function getChallenge() {
@@ -380,19 +380,21 @@ function testAggregateSignatureClear() {
   submitRequests.updateInnerHtml(ids.defaults.kanbanPlusPlus.inputAggregateSignature.nonces, "");
   submitRequests.updateInnerHtml(ids.defaults.kanbanPlusPlus.inputAggregateSignature.publicKeys, "");
   submitRequests.updateInnerHtml(ids.defaults.kanbanPlusPlus.inputAggregateSignature.commitments, "");
+  submitRequests.updateInnerHtml(ids.defaults.kanbanPlusPlus.inputAggregateSignature.committedSignersBitmap, "11111");
   submitRequests.updateInnerHtml(ids.defaults.kanbanPlusPlus.inputAggregateSignature.aggregatePubkey, "");
   submitRequests.updateInnerHtml(ids.defaults.kanbanPlusPlus.inputAggregateSignature.challenge, "");
 }
 
 function testAggregateSignatureChallenge() {
   highlightRedIfEmpty([
-    ids.defaults.kanbanPlusPlus.inputAggregateSignature.publicKeys,
-    ids.defaults.kanbanPlusPlus.inputAggregateSignature.commitments
+    ids.defaults.kanbanPlusPlus.inputAggregateSignature.committedSignersBitmap,
+    ids.defaults.kanbanPlusPlus.inputAggregateSignature.commitments,
   ]);
   submitRequests.submitGET({
     url: pathnames.getURLfromRPCLabel(
       pathnames.rpcCallsKanban.testAggregateSignatureChallenge.rpcCall, {
         net: globals.mainPage().getRPCKanbanNetworkOption(),
+        committedSignersBitmap: getCommittedSignersBitmap(),
         commitments: getCommitmentsBase64()
       }, 
       true
