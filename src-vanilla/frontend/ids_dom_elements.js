@@ -28,7 +28,7 @@ var defaults = {
       numberOfPrivateKeysToGenerate: "inputAggregateSignatureNumberOfPrivateKeysToGenerate",
       privateKeys: "inputAggregateSignaturePrivateKeys",
       publicKeys: "inputAggregateSignaturePublicKeys",
-      commitedSignersBitmap: "inputAggregateSignatureCommitedSignersBitmap",
+      committedSignersBitmap: "inputAggregateSignatureCommittedSignersBitmap",
       challenge: "inputAggregateSignatureChallenge",
       aggregatePubkey: "inputAggregateSignatureAggregatePubkey",    
       aggregateCommitment: "inputAggregateSignatureAggregateCommitment",

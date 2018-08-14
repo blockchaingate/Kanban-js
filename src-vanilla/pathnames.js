@@ -327,7 +327,7 @@ var rpcCallsKanban = {
       ]
     },
     address: "",
-    cli: ["net", "command", "commitments"]
+    cli: ["net", "command", "committedSignersBitmap", "commitments"]
   },
   testAggregateSignatureSolutions: {
     rpcCall: "testAggregateSignatureSolutions", //must be same as rpc label, used for autocomplete
@@ -335,7 +335,7 @@ var rpcCallsKanban = {
       command: "testaggregatesignaturesolutions",
     },
     mandatoryModifiableArguments: { //<- values give defaults, null for none
-      commitedSignersBitmap: null,
+      committedSignersBitmap: null,
       challenge: null,
       aggregatedCommitment: null, 
       aggregatedPublicKey: null
@@ -346,7 +346,7 @@ var rpcCallsKanban = {
       ]
     },
     address: "",
-    cli: ["net", "command", "commitedSignersBitmap", "challenge", "aggregatedCommitment", "aggregatedPublicKey"]
+    cli: ["net", "command", "committedSignersBitmap", "challenge", "aggregatedCommitment", "aggregatedPublicKey"]
   },
   testAggregateSignatureAggregation: {
     rpcCall: "testAggregateSignatureAggregation", //must be same as rpc label, used for autocomplete
@@ -371,7 +371,7 @@ var rpcCallsKanban = {
     },
     mandatoryModifiableArguments: { //<- values give defaults, null for none
       signature: null,
-      commitedSignersBitmap: null,
+      committedSignersBitmap: null,
       publicKeys: null,
       message: null
     },
@@ -381,7 +381,7 @@ var rpcCallsKanban = {
       ]
     },
     address: "",
-    cli: ["net", "command", "signature", "commitedSignersBitmap", "publicKeys", "message"]
+    cli: ["net", "command", "signature", "committedSignersBitmap", "publicKeys", "message"]
   },
   testSha3: {
     rpcCall: "testSha3", //must be same as rpc label, used for autocomplete

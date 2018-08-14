@@ -120,8 +120,8 @@ function getCommitmentsBase64() {
   return Buffer.from(document.getElementById(ids.defaults.kanbanPlusPlus.inputAggregateSignature.commitments).value).toString('base64');
 }
 
-function getCommitedSignersBitmap() {
-  return document.getElementById(ids.defaults.kanbanPlusPlus.inputAggregateSignature.commitedSignersBitmap).value;
+function getCommittedSignersBitmap() {
+  return document.getElementById(ids.defaults.kanbanPlusPlus.inputAggregateSignature.committedSignersBitmap).value;
 }
 
 function getChallenge() {
@@ -321,7 +321,7 @@ function callbackKanbanPlusPlusAggregateSignatureChallenge(input, output) {
   var inputParsed = JSON.parse(input);
   submitRequests.updateValue(ids.defaults.kanbanPlusPlus.inputAggregateSignature.challenge, inputParsed.aggregator.challenge);
   submitRequests.updateValue(ids.defaults.kanbanPlusPlus.inputAggregateSignature.aggregatePubkey, inputParsed.aggregator.aggregatePublicKey);
-  submitRequests.updateValue(ids.defaults.kanbanPlusPlus.inputAggregateSignature.commitedSignersBitmap, inputParsed.aggregator.commitedSignersBitmap);
+  submitRequests.updateValue(ids.defaults.kanbanPlusPlus.inputAggregateSignature.committedSignersBitmap, inputParsed.aggregator.committedSignersBitmap);
   submitRequests.updateValue(ids.defaults.kanbanPlusPlus.inputAggregateSignature.aggregateCommitment, inputParsed.aggregator.aggregateCommitment);
 }
 
@@ -413,7 +413,7 @@ function testAggregateSignatureSolutions() {
     url: pathnames.getURLfromRPCLabel(
       pathnames.rpcCallsKanban.testAggregateSignatureSolutions.rpcCall, {
         net: globals.mainPage().getRPCKanbanNetworkOption(),
-        commitedSignersBitmap: getCommitedSignersBitmap(),
+        committedSignersBitmap: getCommittedSignersBitmap(),
         challenge: getChallenge(),
         aggregatedCommitment: getAggregateCommitment(),
         aggregatedPublicKey: getAggregatePublicKey()
@@ -429,7 +429,7 @@ function testAggregateSignatureSolutions() {
 function testAggregateSignatureVerify() {
   highlightRedIfEmpty([
     ids.defaults.kanbanPlusPlus.inputAggregateSignature.theAggregation,
-    ids.defaults.kanbanPlusPlus.inputAggregateSignature.commitedSignersBitmap,
+    ids.defaults.kanbanPlusPlus.inputAggregateSignature.committedSignersBitmap,
     ids.defaults.kanbanPlusPlus.inputAggregateSignature.publicKeys,
     ids.defaults.kanbanPlusPlus.inputAggregateSignature.message
   ]);
@@ -438,7 +438,7 @@ function testAggregateSignatureVerify() {
       pathnames.rpcCallsKanban.testAggregateSignatureVerification.rpcCall, {
         net: globals.mainPage().getRPCKanbanNetworkOption(),
         signature: getAggregateSignatureValue(),
-        commitedSignersBitmap: getCommitedSignersBitmap(),
+        committedSignersBitmap: getCommittedSignersBitmap(),
         publicKeys: getAggregateSignaturePublicKeysBase64(),
         message: getAggregateSignatureMessageBase64()
       }, 
