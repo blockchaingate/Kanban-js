@@ -10,9 +10,10 @@ const miscellaneousFrontEnd = require('./miscellaneous_frontend');
 
 function TestKanbanGO() {
   var inputsSchnorr = ids.defaults.kanbanGO.inputSchnorr;
+  var theRPCCalls = pathnames.rpcCallsKanbanGO;
   this.theFunctions  = {
     testSha3 : {
-      rpcCall: pathnames.rpcCallsKanbanGO.testSha3,
+      rpcCall: theRPCCalls.testSha3.rpcCall,
       inputs: {
         message: inputsSchnorr.message
       }
@@ -40,8 +41,8 @@ TestKanbanGO.prototype.run = function(functionLabel) {
   var theURL = `${pathnames.url.known.goKanbanRPC}`;
   var currentCallback = callbackKanbanGOStandard;
   var currentResult = ids.defaults.kanbanGO.outputSchnorr;
-  var currentProgress = global.spanProgress();
-  var usePOST = window.kanebn.rpc.forceRPCPOST;
+  var currentProgress = globals.spanProgress();
+  var usePOST = window.kanban.rpc.forceRPCPOST;
   if (!usePOST) {
     if (messageBody.length > 1000) {
       usePOST = true;
@@ -65,7 +66,6 @@ TestKanbanGO.prototype.run = function(functionLabel) {
     });
   }
 }
-
 
 var testFunctions = new TestKanbanGO();
 

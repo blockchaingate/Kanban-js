@@ -15,7 +15,6 @@ var totalRequests = 0;
 function useFabCoinCli(request, response, theCommand, theArguments) {
   var finalData = "";
   try {
-
     var child = childProcess.spawn(
       theCommand, 
       theArguments
@@ -145,7 +144,6 @@ function useRPCportPartTwo(request, response, RPCRequestObject) {
     response.end(`Eror spawning fabcoin-cli process. ${escapeHtml(e)}. `);
     console.log(`Eror spawning process fabcoin-cli. ${e}`);
   }
-
 }
 
 function rpcCall(request, response, desiredCommand, isKanban) {

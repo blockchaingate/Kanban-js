@@ -76,9 +76,8 @@ function handleRequests(request, response) {
   }
   if (parsedURL.pathname === pathnames.url.known.computationEngine) {
     return handleComputationalEngineCall(request, response);
-  }
-  
-  console.log(`DEBUG: The parsed url pathname is: ${parsedURL.pathname}`.red);
+  }  
+  //console.log(`DEBUG: The parsed url pathname is: ${parsedURL.pathname}`.red);
   response.writeHead(200);
   response.end(`Uknown request ${escapeHtml(request.url)}`);
 }
