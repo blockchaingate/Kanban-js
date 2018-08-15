@@ -62,6 +62,7 @@ var url = {
     frontEndCSS: "/kanban_frontend.css",
     rpc: "/rpc",
     kanbanRPC: "/kanbanRPC",
+    goKanbanRPC: "/goKanbanRPC",
     computationEngine: "/computation_engine",
     fabcoinInitialization: "/fabcoin_initialization",
     myNodesCommand: "/my_nodes",
@@ -215,6 +216,23 @@ var forceRPCPOST = "forceRPCPOST";
  * The cli argument gives the order of the commands.
  */
 
+var rpcCallsKanbanGO = {
+  testSha3: {
+    rpcCall: "testSha3", //must be same as rpc label, used for autocomplete
+    mandatoryFixedArguments: { //<- values give defaults, null for none
+    },
+    mandatoryModifiableArguments: { //<- values give defaults, null for none
+      message: null
+    },
+    optionalModifiableArguments: {
+    },
+    allowedArgumentValues: {
+    },
+    address: "",
+    cli: ["message"]
+  }
+};
+
 var allowedArgumentValuesDefaults = {
   net: [
     networkData.regtest.rpcOption, 
@@ -222,14 +240,14 @@ var allowedArgumentValuesDefaults = {
     networkData.testNet.rpcOption,
     networkData.mainNet.rpcOption
   ]
-}
+};
 
 var allowedArgumentValuesKanbanDefaults = {
   net: [
     networkDataKanban.testKanban.rpcOption, 
     networkData.mainNet.rpcOption
   ]
-}
+};
 
 var rpcCallsKanban = {
   listReceivedByAddress: {
@@ -438,7 +456,7 @@ var rpcCallsKanban = {
     address: "",
     cli: ["net", "command", "signature", "publicKey", "message"]
   },
-}
+};
 
 var rpcCalls = {
   getBlock: {
@@ -757,7 +775,7 @@ var rpcCalls = {
     },
     cli: ["net", "command", "rawTransactions"]
   }
-}
+};
 
 var rpcCallsBannedUnlessSecurityRelaxed = {};
 rpcCallsBannedUnlessSecurityRelaxed[rpcCalls.dumpPrivateKey.command] = true;
@@ -767,7 +785,7 @@ var fabcoinInitialization = "fabcoinInitialization";
 var pathsComputedAtRunTime = {
   fabcoinConfigurationFolder: null,
   kanbanProofOfConcentConfigurationFolder: null
-}
+};
 
 //To be documented on request. Please email me/tell me in person if you want 
 //me to document the structure below.
@@ -840,7 +858,7 @@ var fabcoinInitializationProcedures = {
     },
     cli: ["-r", ["folder", networkData.testNetNoDNS.folder]]
   }
-}
+};
 
 var myNodesCommand = "myNodesCommand";
 
@@ -886,7 +904,7 @@ var myNodesCommands = {
       machineName: null
     }    
   },
-}
+};
 
 function getURLfromComputationalEngineCall(theComputationalEngineCallLabel, additionalArguments) {
   var theComputationalEngineCall = computationalEngineCalls[theComputationalEngineCallLabel];
@@ -936,6 +954,18 @@ function getPOSTBodyfromRPCLabel(theRPClabel, theArguments, isKanban) {
     }
   }
   return `command=${encodeURIComponent(JSON.stringify(theRequest))}`;
+}
+
+function getPOSTBodyFromKanbanGORPCLabel(theRPCLabel, theArguments) {
+  var theRequest = {};
+  theRequest[rpcCall] = theRPCLabel;
+  if (theArguments === undefined) {
+    theArguments = {};
+  }
+  for (var label in theArguments) {
+    theRequest[label] = theArguments[label];
+  }
+  return `${encodeURIComponent(JSON.stringify(theRequest))}`;
 }
 
 function getURLfromRPCLabel(theRPClabel, theArguments, isKanban) {
@@ -1017,7 +1047,7 @@ for (var counterAllowed = 0; counterAllowed < allowedCharsInRPCArgumentsArray.le
 var rpcArgumentsAllowedToBeLong = {
   rawTransaction: true,
   rawTransactions: true
-}
+};
 
 function isValidRPCArgumentBasicChecks(label, input, errors, recursionDepth) {
 /*  if (label in rpcArgumentsRquiredToBeArrays) {
@@ -1278,6 +1308,7 @@ module.exports = {
   hasRelaxedNetworkSecurity,
   ///////////////
   //information on the various calls:
+  rpcCallsKanbanGO,
   rpcCallsKanban,
   rpcCalls,
   rpcCallsBannedUnlessSecurityRelaxed,
@@ -1296,6 +1327,7 @@ module.exports = {
   getNetworkDataFromRPCNetworkOption,
   getURLfromRPCLabel,
   getPOSTBodyfromRPCLabel,
+  getPOSTBodyFromKanbanGORPCLabel,
   getURLfromComputationalEngineCall,
   getURLFromMyNodesCall,
   getURLFromFabcoinInitialization,

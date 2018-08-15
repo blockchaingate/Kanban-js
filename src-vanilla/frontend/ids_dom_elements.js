@@ -11,8 +11,20 @@ var defaults = {
   pageProfiling: "pageProfiling",
   pageFabcoinInitialization: "pageFabcoinInitialization",
   pageKanbanPlusPlus: "pageKanbanPlusPlus",
+  pageKanbanGO: "pageKanbanGO",
   progressReport: "spanProgressReport",
   spanPingColumnHeader: "spanPingColumnHeader",
+  kanbanGO: {
+    inputSchnorr: {
+      message: "inputKBGOSchnorrMessage",
+      privateKey: "inputKBGOSchnorrPrivateKey",
+      nonce: "inputKBGOSchnorrNonce",
+      publicKey: "inputKBGOSchnorrPublicKey",
+      signature: "inputKBGOSchnorrSignature",
+      sha3digest: "inputKBGOSchnorrSha3Digest"
+    },
+    outputSchnorr: "divOutputKBGOSchnorr"
+  },
   kanbanPlusPlus: {
     inputSchnorrSignature: {
       publicKey: "inputPublicKeyDefault",

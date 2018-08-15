@@ -9,6 +9,7 @@ const fabCli = require('./handlers_fabcoin_cli');
 const fabcoinInitialization = require('./handlers_fabcoin_initialization');
 const handlersComputationalEngine = require('./handlers_computational_engine');
 const handlersMyNodes = require('./handlers_my_nodes');
+const handlersKanbanGo = require('./handlers_kanban_go');
 
 function handleRequestsHTTP(request, response) {
   if (request.url in pathnames.url.synonyms) {
@@ -70,6 +71,9 @@ function handleRequests(request, response) {
   if (parsedURL.pathname === pathnames.url.known.kanbanRPC) {
     return handleRPC(request, response, true);
   }
+  if (parsedURL.pathname === pathnames.url.known.goKanbanRPC) {
+    return handlersKanbanGo.handleRequest(request, response);
+  }
   if (parsedURL.pathname === pathnames.url.known.computationEngine) {
     return handleComputationalEngineCall(request, response);
   }
@@ -95,9 +99,9 @@ function handleFabcoinInitialization(request, response) {
 }
 
 function handleRPC(request, response, isKanban) {
-  if (isKanban) {
-    console.log(`DEBUG: handling Kanban request`.cyan);
-  }
+  //if (isKanban) {
+  //  console.log(`DEBUG: handling Kanban request`.cyan);
+  //}
   if (request.method === "POST") {
     return handleRPCPOST(request, response, isKanban);
   }

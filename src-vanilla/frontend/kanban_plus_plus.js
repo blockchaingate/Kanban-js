@@ -402,8 +402,7 @@ function testAggregateSignatureChallenge() {
     progress: globals.spanProgress(),
     result : ids.defaults.kanbanPlusPlus.divKanbanPlusPlusOutputThird,
     callback: callbackKanbanPlusPlusAggregateSignatureChallenge
-  });    
-
+  });
 }
 
 function testAggregateSignatureSolutions() {

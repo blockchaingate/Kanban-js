@@ -1,23 +1,32 @@
-window.kanban = {};
-window.kanban.thePage = require('./main_page').getPage();
-window.kanban.rpc = {};
-window.kanban.rpc.general = require('./fabcoin_rpc_general');
-window.kanban.rpc.network = require('./fabcoin_rpc_network');
-window.kanban.rpc.sendReceive = require('./fabcoin_rpc_send_receive');
-window.kanban.rpc.mine = require('./fabcoin_rpc_mine');
-window.kanban.rpc.profiling = require('./fabcoin_rpc_profiling');
-window.kanban.rpc.profiling = require('./fabcoin_rpc_profiling');
-window.kanban.kanbanPlusPlus = {};
-window.kanban.kanbanPlusPlus.general = require('./kanban_plus_plus');
-window.kanban.fabcoinInitialization = require('./fabcoin_initialization');
-window.kanban.computationalEngineCalls = require('./computational_engine_calls');
-window.kanban.submitRequests = require('./submit_requests');
-window.kanban.ids = require('./ids_dom_elements');
-window.kanban.myNodes = require('./my_nodes');
-window.kanban.allMyNodes = null;
-window.kanban.profiling = {};
-window.kanban.profiling.memoryPoolArrivalTimes = null;
-window.kanban.profiling.statistics = {};
-window.kanban.profiling.statDetails = {};
+window.kanban = {
+  thePage: null,
+  rpc: {
+    general: require('./fabcoin_rpc_general'),
+    network: require('./fabcoin_rpc_network'),
+    sendReceive: require('./fabcoin_rpc_send_receive'),
+    mine: require('./fabcoin_rpc_mine'),
+    profiling: require('./fabcoin_rpc_profiling'),
+    profiling: require('./fabcoin_rpc_profiling'),
+    forceRPCPOST: false
+  },
+  kanbanPlusPlus: {
+    general: require('./kanban_plus_plus')
+  },
+  kanbanGO: {
+    general: require('./kanban_go')
+  },
+  fabcoinInitialization: require('./fabcoin_initialization'),
+  computationalEngineCalls: null,
+  submitRequests: require('./submit_requests'),
+  ids: require('./ids_dom_elements'),
+  myNodes: require('./my_nodes'),
+  allMyNodes: null,
+  profiling: {
+    memoryPoolArrivalTimes: null,
+    statistics: {},
+    statDetails: {}
+  }
+};
 
-window.kanban.rpc.forceRPCPOST = false;
+window.kanban.thePage = require('./main_page').getPage(); // <- function call uses window.kanban
+window.kanban.computationalEngineCalls = require('./computational_engine_calls'); // <- module loading uses window.kanban
