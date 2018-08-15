@@ -30,6 +30,8 @@ test/kanban_gpu/debug/
 *.pid
 build/Makefile
 
+go/bin
+
 #this auto-generated file should really be in the repo,
 #adding to gitignore in order to not 
 #flood the repo with changes. 

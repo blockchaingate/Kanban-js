@@ -1,0 +1,81 @@
+sudo apt-get update
+sudo apt-get -y upgrade
+
+
+#update go version as necessary
+sudo curl -O https://storage.googleapis.com/golang/go1.10.1.linux-amd64.tar.gz
+
+#move to local
+
+sudo tar -xvf go1.10.1.linux-amd64.tar.gz
+sudo mv go /usr/local
+
+sudo nano ~/.profile
+
+#Paste to the bottom of the file 
+#export PATH=$PATH:/usr/local/go/bin
+#export GOPATH=/home/todor/work/kanban/go
+
+#Create dir for go files, must be where kanban sources are.
+#replace work with whatever you need.
+mkdir $HOME/work
+
+
+source ~/.profile
+
+mkdir -p src/github.com/blockchaingate
+
+mkdir bin
+mkdir pkg
+
+cd src/github.com/blockchaingate 
+
+#change git@github.com:azraeljack as appropriate
+git clone git@github.com:azraeljack/kanban-go.git
+
+cd kanban-go
+
+make all
+
+#To run:
+
+cd build/bin/
+
+./puppeth
+#when prompted enter 
+#pbft
+#Select configure new genesis
+#follow prompts using common sense.
+#You will need to know your account number.
+#To get that, open new console, then navigate to the bin folder:
+cd go/src/github.com/blockchaingate/kanban-go/build/bin
+#then run geth
+./geth  --datadir "~/.kanban-go" --networkid "211" --port "44444" --identity "node4" --verbosity 100 --rpcport 4444 --syncmode "full" --nodiscover --mine --rpc --rpcaddr "0.0.0.0"  --rpccorsdomain "*" --metrics --kanbanstats "node4:bb98a0b6442386d0cdf8a31b267892c1@localhost:3000" account new
+#Look for "Creatubg consensus engine node_addr
+
+#After you have configured new genesis, 
+#please do manage existing genesis->export genesis configuration
+#output dir will be the same as the executable dir
+
+#different datadir expected for different nodes
+#can run multiple nodes provided that different datadir is given
+#bb98a0b6442386d0cdf8a31b267892c1 is an authentication secret needed
+#to view semi-sensitive information 
+
+###############
+###############
+#FIRST RUN ONLY, removes the database
+#Purpose: removes the database but not your private key.
+#Hence the account you got in the previous steps will remain the same.
+/geth  --datadir "~/.kanban-go" --networkid "211" --port "44444" --identity "node4" --rpcport 4444 --syncmode "full" --nodiscover --mine --rpc --rpcaddr "0.0.0.0"  --rpccorsdomain "*" --metrics --kanbanstats "node4:bb98a0b6442386d0cdf8a31b267892c1@localhost:3000" removedb
+
+#FIRST RUN ONLY, initializes the genesis block.
+./geth  --datadir "~/.kanban-go" --networkid "211" --port "44444" --identity "node4" --rpcport 4444 --syncmode "full" --nodiscover --mine --rpc --rpcaddr "0.0.0.0"  --rpccorsdomain "*" --metrics --kanbanstats "node4:bb98a0b6442386d0cdf8a31b267892c1@localhost:3000" init pbft.json
+
+#######################
+####To run:
+
+./geth  --datadir "~/.kanban-go" --networkid "211" --port "44444" --identity "node4" --rpcport 4444 --syncmode "full" --nodiscover --mine --rpc --rpcaddr "0.0.0.0"  --rpccorsdomain "*" --metrics --kanbanstats "node4:bb98a0b6442386d0cdf8a31b267892c1@localhost:3000"
+
+./geth attach http://localhost:4444
+
