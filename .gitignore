@@ -31,6 +31,7 @@ test/kanban_gpu/debug/
 build/Makefile
 
 go/bin
+go/src/golang.org
 
 #this auto-generated file should really be in the repo,
 #adding to gitignore in order to not 

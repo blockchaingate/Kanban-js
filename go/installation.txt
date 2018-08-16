@@ -79,3 +79,11 @@ cd go/src/github.com/blockchaingate/kanban-go/build/bin
 
 ./geth attach http://localhost:4444
 
+
+
+
+
+###############optional for visual studio code:
+
+go get -u golang.org/x/lint/golint
+

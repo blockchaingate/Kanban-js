@@ -210,28 +210,6 @@ function getNetworkDataFromRPCNetworkOption(RPCNetworkOption) {
 var rpcCall = "rpcCall";
 
 var forceRPCPOST = "forceRPCPOST";
-/**
- * Use null for mandatory variables.
- * Use "" for optional variables.
- * The cli argument gives the order of the commands.
- */
-
-var rpcCallsKanbanGO = {
-  testSha3: {
-    rpcCall: "testSha3", //must be same as rpc label, used for autocomplete
-    mandatoryFixedArguments: { //<- values give defaults, null for none
-    },
-    mandatoryModifiableArguments: { //<- values give defaults, null for none
-      message: null
-    },
-    optionalModifiableArguments: {
-    },
-    allowedArgumentValues: {
-    },
-    address: "",
-    cli: ["message"]
-  }
-};
 
 var allowedArgumentValuesDefaults = {
   net: [
@@ -1308,7 +1286,6 @@ module.exports = {
   hasRelaxedNetworkSecurity,
   ///////////////
   //information on the various calls:
-  rpcCallsKanbanGO,
   rpcCallsKanban,
   rpcCalls,
   rpcCallsBannedUnlessSecurityRelaxed,

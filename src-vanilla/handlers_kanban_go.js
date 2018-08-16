@@ -3,6 +3,7 @@ const url  = require('url');
 const queryString = require('querystring');
 const http = require('http');
 const pathnames = require('./pathnames');
+const kanbanGO = require('./resources_kanban_go');
 
 function handleRequest(request, response) {
   if (request.method === "POST") {
@@ -56,11 +57,12 @@ var numberRequestsRunning = 0;
 var maxRequestsRunning = 4;
 
 function getRPCRequestJSON(rpcCallLabel, queryCommand, errors) {
+  var theRPCCall = kanbanGO.rpcCalls[rpcCallLabel];
   var result = {
     jsonrpc: "2.0",
-    method:"web3_clientVersion",
+    method: theRPCCall.method,
     params: [],
-    id: 67
+    id : (new Date()).getTime() //<- not guaranteed to be unique
   };
   return result;
 }
@@ -78,7 +80,7 @@ function handleRPCArguments(request, response, queryCommand) {
     return response.end(`Request is missing the ${pathnames.rpcCall} entry. `);        
   }
   var theCallLabel = queryCommand[pathnames.rpcCall];
-  var callCollection = pathnames.rpcCallsKanbanGO;
+  var callCollection = kanbanGO.rpcCalls;
   if (!(theCallLabel in callCollection)) {
     response.writeHead(400);
     numberRequestsRunning --;
@@ -103,7 +105,8 @@ function handleRPCArguments(request, response, queryCommand) {
     path: '/',
     headers: {
       'Host': 'localhost',
-      'Content-Length': requestStringified.length
+      'Content-Length': requestStringified.length,
+      'Content-Type': 'application/json'
     },
     //auth: "bb98a0b6442386d0cdf8a31b267892c1"    
     //agent: false,
@@ -155,7 +158,7 @@ function handleRPCArguments(request, response, queryCommand) {
           return response.end(JSON.stringify(dataParsed.result));
         } catch (errorParsing) {
           response.writeHead(500);
-          return response.end(`Error parsing fabcoind's output: ${errorParsing}.`);
+          return response.end(`Error parsing kanbanGO's output: ${finalData}. Error message: ${errorParsing}. `);
         }
       });
     });
