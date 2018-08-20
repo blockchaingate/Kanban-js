@@ -11,7 +11,7 @@ const miscellaneousFrontEnd = require('./miscellaneous_frontend');
 const kanbanGO = require('../resources_kanban_go');
 
 function TestKanbanGO() {
-  var inputsSchnorr = ids.defaults.kanbanGO.inputSchnorr;
+  var inputSchnorr = ids.defaults.kanbanGO.inputSchnorr;
   this.theFunctions  = {
     testSha3 : {
       rpcCall: kanbanGO.rpcCalls.testSha3.rpcCall, 
@@ -22,10 +22,23 @@ function TestKanbanGO() {
       //If that default is not an rpc call, an error will 
       //conveniently be thrown to let you know of the matter.
       inputs: {
-        message: inputsSchnorr.message
+        message: inputSchnorr.message
       }
     },
     versionGO: {
+    },
+    testPrivateKeyGeneration: {
+      outputs: {
+        privateKeyBase58: inputSchnorr.privateKey
+      }
+    },
+    testPublicKeyFromPrivate: {
+      inputs: {
+        privateKey: inputSchnorr.message
+      },
+      outputs: {
+        publicKeyHex: inputSchnorr.publicKey
+      }
     }
   };
   this.correctFunctions();
@@ -45,8 +58,17 @@ TestKanbanGO.prototype.correctFunctions = function() {
 
 var optionsForKanbanGOStandard = {};
 
-function callbackKanbanGOStandard(input, output) {
+TestKanbanGO.prototype.callbackStandard = function(functionLabel, input, output) {
+  console.log("DEBUG fun label: " + functionLabel)
   jsonToHtml.writeJSONtoDOMComponent(input, output, optionsForKanbanGOStandard);
+  var theFunction = this.theFunctions[functionLabel];
+  if (theFunction.outputs === null || theFunction.outputs === undefined) {
+    return;
+  }
+  var parsedInput = JSON.parse(input);
+  for (var label in theFunction.outputs) {
+    submitRequests.updateValue(theFunction.outputs[label], parsedInput[label]);
+  }
 }
 
 TestKanbanGO.prototype.run = function(functionLabel) {
@@ -61,7 +83,6 @@ TestKanbanGO.prototype.run = function(functionLabel) {
   }
   var messageBody = pathnames.getPOSTBodyFromKanbanGORPCLabel(theFunction.rpcCall, theArguments);
   var theURL = `${pathnames.url.known.goKanbanRPC}`;
-  var currentCallback = callbackKanbanGOStandard;
   var currentResult = ids.defaults.kanbanGO.outputSchnorr;
   var currentProgress = globals.spanProgress();
   var usePOST = window.kanban.rpc.forceRPCPOST;
@@ -75,7 +96,7 @@ TestKanbanGO.prototype.run = function(functionLabel) {
       url: theURL,
       messageBody: messageBody,
       progress: currentProgress,
-      callback: currentCallback,
+      callback: this.callbackStandard.bind(this, functionLabel),
       result: currentResult
     });
   } else {
@@ -83,7 +104,7 @@ TestKanbanGO.prototype.run = function(functionLabel) {
     submitRequests.submitGET({
       url: theURL,
       progress: currentProgress,
-      callback: currentCallback,
+      callback: this.callbackStandard.bind(this, functionLabel),
       result: currentResult
     });
   }
@@ -92,6 +113,5 @@ TestKanbanGO.prototype.run = function(functionLabel) {
 var testFunctions = new TestKanbanGO();
 
 module.exports = {
-  testFunctions,
-  callbackKanbanGOStandard
+  testFunctions
 }

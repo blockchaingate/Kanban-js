@@ -57,11 +57,37 @@ var numberRequestsRunning = 0;
 var maxRequestsRunning = 4;
 
 function getRPCRequestJSON(rpcCallLabel, queryCommand, errors) {
-  var theRPCCall = kanbanGO.rpcCalls[rpcCallLabel];
+  var currentRPCCall = kanbanGO.rpcCalls[rpcCallLabel];
+  var currentParameters = [];
+  for (var counterCommands = 0; counterCommands < currentRPCCall.parameters.length; counterCommands ++) {
+    var currentParameterName = currentRPCCall.parameters[counterCommands];
+    if (currentParameterName in queryCommand) {
+      currentParameters.push(queryCommand[currentParameterName]);
+      continue;
+    }
+    if (currentRPCCall.optionalModifiableArguments !== undefined && currentRPCCall.optionalModifiableArguments !== null) {
+      var currentDefault = currentRPCCall.optionalModifiableArguments[currentParameterName];
+      if (currentDefault !== undefined && currentDefault !== null) {
+        currentParameters.push(currentDefault);
+        continue;
+      }
+    }
+    if (currentRPCCall.mandatoryModifiableArguments !== undefined && currentRPCCall.mandatoryModifiableArguments !== null) {
+      if (currentParameterName in currentRPCCall.mandatoryModifiableArguments) {
+        errors.push(`Missing parameter ${currentParameterName} in method ${rpcCallLabel}.`);
+        return {};
+      }
+      var currentDefault = currentRPCCall.optionalModifiableArguments[currentParameterName];
+      if (currentDefault !== null && currentDefault !== undefined) {
+        currentParameters.push(currentDefault);
+        continue;
+      }
+    }
+  }
   var result = {
     jsonrpc: "2.0",
-    method: theRPCCall.method,
-    params: [],
+    method: currentRPCCall.method,
+    params: currentParameters,
     id : (new Date()).getTime() //<- not guaranteed to be unique
   };
   return result;
@@ -98,6 +124,10 @@ function handleRPCArguments(request, response, queryCommand) {
     return response.end(JSON.stringify({error: errors[0]}));
   }
   var requestStringified = JSON.stringify(theRequestJSON);
+  return handleRPCArgumentsPartTwo(request, response, requestStringified);
+}
+
+function handleRPCArgumentsPartTwo(request, response, requestStringified) {
   var requestOptions = {
     host: '127.0.0.1',
     port: 4444,
@@ -113,7 +143,7 @@ function handleRPCArguments(request, response, queryCommand) {
     //rejectUnauthorized: this.opts.ssl && this.opts.sslStrict !== false
   };
   //console.log ("DEBUG: options for request: " + JSON.stringify(requestOptions));
-  //console.log ("DEBUG: and the request: " + requestStringified);
+  console.log (`DEBUG: about to submit request: ${requestStringified}`.green);
   //console.log ("DEBUG: request object: " + JSON.stringify(RPCRequestObject));
 
   var theHTTPrequest = http.request(requestOptions);
@@ -141,13 +171,13 @@ function handleRPCArguments(request, response, queryCommand) {
       });
       theHTTPresponse.on('end', function() {
         numberRequestsRunning --;
-        console.log(`DEBUG: about to respond with status code: ${theHTTPresponse.statusCode}. Final data: ${finalData}`);
+        //console.log(`DEBUG: about to respond with status code: ${theHTTPresponse.statusCode}. Final data: ${finalData}`);
         if (theHTTPresponse.statusCode !== 200) {
           response.writeHead(theHTTPresponse.statusCode);
           return response.end(finalData);
         }
         try {
-          console.log("DEBUG: Parsing: " + finalData + " typeof final data: " + (typeof finalData));
+          //console.log("DEBUG: Parsing: " + finalData + " typeof final data: " + (typeof finalData));
           var dataParsed = JSON.parse(finalData);
           if (dataParsed.error !== null && dataParsed.error !== "" && dataParsed.error !== undefined) {
             //console.log("DEBUG: Data parsed error:" + dataParsed.error);

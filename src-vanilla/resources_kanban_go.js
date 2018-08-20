@@ -2,9 +2,14 @@
 const pathnames = require('./pathnames');
 
 var rpcCalls = {
+  //The method names of the ethereum calls are composed like this:
+  //1. Take the function name, say, TestSha3. 
+  //2. Lowercase the first letter, say, testSha3.
+  //3. Prefix the name with the module name, say, kanban_testSha3.
+
   testSha3: {
     rpcCall: "testSha3", //must be same as rpc label, used for autocomplete
-    method: "testSha3", //<- name of go's RPC method 
+    method: "kanban_testSha3", //<- name of go's RPC method 
     mandatoryFixedArguments: { //<- values give defaults, null for none
     },
     mandatoryModifiableArguments: { //<- values give defaults, null for none
@@ -15,7 +20,36 @@ var rpcCalls = {
     allowedArgumentValues: {
     },
     address: "",
-    cli: ["message"]
+    parameters: ["message"]
+  },
+  testPrivateKeyGeneration: {
+    rpcCall: "testPrivateKeyGeneration", //must be same as rpc label, used for autocomplete
+    method: "kanban_testPrivateKeyGeneration", //<- name of go's RPC method 
+    mandatoryFixedArguments: { //<- values give defaults, null for none
+    },
+    mandatoryModifiableArguments: { //<- values give defaults, null for none
+    },
+    optionalModifiableArguments: {
+    },
+    allowedArgumentValues: {
+    },
+    address: "",
+    parameters: []
+  },
+  testPublicKeyFromPrivate: {
+    rpcCall: "testPublicKeyFromPrivate", //must be same as rpc label, used for autocomplete
+    method: "kanban_testPublicKeyFromPrivate", //<- name of go's RPC method 
+    mandatoryFixedArguments: { //<- values give defaults, null for none
+      privateKey: null
+    },
+    mandatoryModifiableArguments: { //<- values give defaults, null for none
+    },
+    optionalModifiableArguments: {
+    },
+    allowedArgumentValues: {
+    },
+    address: "",
+    parameters: ["privateKey"]
   },
   versionGO: {
     rpcCall: "versionGO", //must be same as rpc label, used for autocomplete
@@ -29,7 +63,7 @@ var rpcCalls = {
     allowedArgumentValues: {
     },
     address: "",
-    cli: []
+    parameters: []
   }
 };
 
