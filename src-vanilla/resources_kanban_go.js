@@ -40,9 +40,9 @@ var rpcCalls = {
     rpcCall: "testPublicKeyFromPrivate", //must be same as rpc label, used for autocomplete
     method: "kanban_testPublicKeyFromPrivate", //<- name of go's RPC method 
     mandatoryFixedArguments: { //<- values give defaults, null for none
-      privateKey: null
     },
     mandatoryModifiableArguments: { //<- values give defaults, null for none
+      privateKey: null
     },
     optionalModifiableArguments: {
     },

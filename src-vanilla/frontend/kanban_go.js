@@ -34,7 +34,7 @@ function TestKanbanGO() {
     },
     testPublicKeyFromPrivate: {
       inputs: {
-        privateKey: inputSchnorr.message
+        privateKey: inputSchnorr.privateKey
       },
       outputs: {
         publicKeyHex: inputSchnorr.publicKey
