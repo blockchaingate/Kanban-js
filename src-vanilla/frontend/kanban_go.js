@@ -29,7 +29,7 @@ function TestKanbanGO() {
     },
     testPrivateKeyGeneration: {
       outputs: {
-        privateKeyBase58: inputSchnorr.privateKey
+        privateKeyBase58Check: inputSchnorr.privateKey
       }
     },
     testPublicKeyFromPrivate: {
