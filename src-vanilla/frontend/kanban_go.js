@@ -39,6 +39,17 @@ function TestKanbanGO() {
       outputs: {
         publicKeyHex: inputSchnorr.publicKey
       }
+    },
+    testSchnorrSignature: {
+      inputs: {
+        privateKey: inputSchnorr.privateKey
+      },
+      inputsBase64: {
+        messageBase64: inputSchnorr.message
+      },
+      outputs: {
+        signatureBase58: inputSchnorr.signature
+      }
     }
   };
   this.correctFunctions();
@@ -80,6 +91,13 @@ TestKanbanGO.prototype.run = function(functionLabel) {
   var currentInputs = theFunction.inputs;
   for (var inputLabel in currentInputs) {
     theArguments[inputLabel] = document.getElementById(currentInputs[inputLabel]).value;
+  }
+  var currentInputsBase64 = theFunction.inputsBase64;
+  if (currentInputsBase64 !== null && currentInputsBase64 !== undefined) {
+    for (var inputLabel in currentInputsBase64) {
+      var theValue =  document.getElementById(currentInputsBase64[inputLabel]).value;
+      theArguments[inputLabel] = Buffer.from(theValue).toString('base64');
+    }
   }
   var messageBody = pathnames.getPOSTBodyFromKanbanGORPCLabel(theFunction.rpcCall, theArguments);
   var theURL = `${pathnames.url.known.goKanbanRPC}`;

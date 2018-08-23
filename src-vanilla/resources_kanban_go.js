@@ -51,6 +51,22 @@ var rpcCalls = {
     address: "",
     parameters: ["privateKey"]
   },
+  testSchnorrSignature: {
+    rpcCall: "testSchnorrSignature", //must be same as rpc label, used for autocomplete
+    method: "kanban_testSchnorrSignature", //<- name of go's RPC method 
+    mandatoryFixedArguments: { //<- values give defaults, null for none
+    },
+    mandatoryModifiableArguments: { //<- values give defaults, null for none
+      privateKey: null,
+      messageBase64: null
+    },
+    optionalModifiableArguments: {
+    },
+    allowedArgumentValues: {
+    },
+    address: "",
+    parameters: ["privateKey", "messageBase64"]
+  },
   versionGO: {
     rpcCall: "versionGO", //must be same as rpc label, used for autocomplete
     method: "web3_clientVersion",
