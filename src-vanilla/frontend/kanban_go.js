@@ -50,7 +50,20 @@ function TestKanbanGO() {
       outputs: {
         signatureBase58: inputSchnorr.signature
       }
-    }
+    },
+    testSchnorrVerification: {
+      inputs: {
+        publicKey: inputSchnorr.publicKey,
+        signature: inputSchnorr.signature
+      },
+      inputsBase64: {
+        messageBase64: inputSchnorr.message
+      },
+      outputs: {
+        signatureBase58: inputSchnorr.signature
+      }
+    },
+    
   };
   this.correctFunctions();
 }
