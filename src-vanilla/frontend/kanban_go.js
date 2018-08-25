@@ -58,9 +58,6 @@ function TestKanbanGO() {
       },
       inputsBase64: {
         messageBase64: inputSchnorr.message
-      },
-      outputs: {
-        signatureBase58: inputSchnorr.signature
       }
     },
     
