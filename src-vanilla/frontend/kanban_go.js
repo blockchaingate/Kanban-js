@@ -92,6 +92,21 @@ TestKanbanGO.prototype.callbackStandard = function(functionLabel, input, output)
   }
 }
 
+TestKanbanGO.prototype.testClear = function() {
+  var inputAggregate = ids.defaults.kanbanGO.inputAggregateSignature;
+  submitRequests.updateValue(inputAggregate.numberOfPrivateKeysToGenerate, '5');
+  submitRequests.updateValue(inputAggregate.privateKeys, '');
+  submitRequests.updateValue(inputAggregate.nonces, '');
+  submitRequests.updateValue(inputAggregate.publicKeys, '');
+  submitRequests.updateValue(inputAggregate.committedSignersBitmap, '01111');
+  submitRequests.updateValue(inputAggregate.commitments, '');
+  submitRequests.updateValue(inputAggregate.challenge, '');
+  submitRequests.updateValue(inputAggregate.aggregateCommitment, '');
+  submitRequests.updateValue(inputAggregate.aggregatePublickey, '');
+  submitRequests.updateValue(inputAggregate.solutions, '');
+  submitRequests.updateValue(inputAggregate.aggregateSignature, '');
+}
+
 TestKanbanGO.prototype.run = function(functionLabel) {
   var theFunction = this.theFunctions[functionLabel];
   if (theFunction === null || theFunction === undefined) {

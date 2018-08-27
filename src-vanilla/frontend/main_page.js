@@ -88,7 +88,37 @@ Page.prototype.initialize = function() {
   this.loadPageSettings();
   var currentRadioId = this.fabcoinNetworkRadioIds[this.currentNetworkName];
   document.getElementById(currentRadioId).checked = true;
+  this.initializeInputPlaceholders();
   this.initializeCurrentPage();
+}
+
+Page.prototype.initializeInputPlaceholder = function (idInput) {
+  var oldInput = document.getElementById(idInput);
+  var theInput = oldInput.cloneNode();
+  var theParent = oldInput.parentElement;
+  var groupContainer = document.createElement("SPAN");
+  var label = document.createElement("LABEL");
+  label.textContent = theInput.placeholder;
+  label.className = "form-control-placeholder";
+  groupContainer.className = "form-group";
+  theInput.classList.add("form-control");
+  groupContainer.appendChild(theInput);
+  groupContainer.appendChild(label);
+  theParent.replaceChild(groupContainer, oldInput);
+}
+
+Page.prototype.initializeInputPlaceholders = function() {
+  var collectionsToPlaceholderify = [
+    ids.defaults.kanbanGO.inputSchnorr,
+    ids.defaults.kanbanGO.inputAggregateSignature,
+    ids.defaults.kanbanPlusPlus.inputSchnorrSignature,
+    ids.defaults.kanbanPlusPlus.inputAggregateSignature
+  ]
+  for (var collectionCounter = 0; collectionCounter < collectionsToPlaceholderify.length; collectionCounter ++) {
+    for (var label in collectionsToPlaceholderify[collectionCounter]) {
+      this.initializeInputPlaceholder(collectionsToPlaceholderify[collectionCounter][label]);
+    }
+  }
 }
 
 Page.prototype.initializeCurrentPage = function() {

@@ -23,6 +23,21 @@ var defaults = {
       signature: "inputKBGOSchnorrSignature",
       sha3digest: "inputKBGOSchnorrSha3Digest"
     },
+    inputAggregateSignature: {
+      message: "inputKBGOMessage",
+      numberOfPrivateKeysToGenerate: "inputKBGONumberOfPrivateKeysToGenerate",
+      privateKeys: "inputKBGOPrivateKeys",
+      nonces: "inputKBGONonces",
+      publicKeys: "inputKBGOPublicKeys",
+      committedSignersBitmap: "inputKBGOCommittedSignersBitmap",
+      commitments: "inputKBGOCommitments",
+      challenge: "inputKBGOChallenge",
+      aggregatePublickey: "inputKBGOAggregatePublicKey",
+      aggregateCommitment: "inputKBGOAggregateCommitment",
+      solutions: "inputKBGOSolutions",
+      aggregateSignature: "inputKBGOAggregateSignature",
+    },
+    outputAggregate: "divOutputKBGOAggregate",
     outputSchnorr: "divOutputKBGOSchnorr"
   },
   kanbanPlusPlus: {
