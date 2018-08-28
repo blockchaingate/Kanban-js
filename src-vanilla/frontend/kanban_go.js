@@ -58,11 +58,29 @@ function TestKanbanGO() {
       },
       inputsBase64: {
         messageBase64: inputSchnorr.message
-      }
+      }, 
+      callback: this.callbackSchnorrVerification
     },
     
   };
   this.correctFunctions();
+}
+
+TestKanbanGO.prototype.callbackSchnorrVerification = function(functionLabel, input, output) {
+  this.callbackStandard(functionLabel, input, output);
+  var outputRaw = jsonToHtml.getHtmlFromArrayOfObjects(input, optionsForKanbanGOStandard);
+  var parsedInput = JSON.parse(input);
+  if (parsedInput.result !== undefined) {
+    if (parsedInput.result === true || parsedInput.result === "true") {
+      outputRaw = "<b style = 'color:green'>Verified</b><br>" + outputRaw;
+    } else {
+      outputRaw = "<b style = 'color:red'>Failed</b><br>" + outputRaw;
+    }
+  }
+  if (typeof output === "string") {
+    output = document.getElementById(output);
+  }
+  output.innerHTML = outputRaw;
 }
 
 TestKanbanGO.prototype.correctFunctions = function() {  
@@ -80,7 +98,6 @@ TestKanbanGO.prototype.correctFunctions = function() {
 var optionsForKanbanGOStandard = {};
 
 TestKanbanGO.prototype.callbackStandard = function(functionLabel, input, output) {
-  console.log("DEBUG fun label: " + functionLabel)
   jsonToHtml.writeJSONtoDOMComponent(input, output, optionsForKanbanGOStandard);
   var theFunction = this.theFunctions[functionLabel];
   if (theFunction.outputs === null || theFunction.outputs === undefined) {
@@ -134,12 +151,18 @@ TestKanbanGO.prototype.run = function(functionLabel) {
       usePOST = true;
     }
   }
+  var callbackCurrent = this.callbackStandard;
+  if (theFunction.callback !== undefined && theFunction.callback !== null) {
+    callbackCurrent = theFunction.callback;
+  }  
+  callbackCurrent = callbackCurrent.bind(this, functionLabel);
+
   if (usePOST) {
     submitRequests.submitPOST({
       url: theURL,
       messageBody: messageBody,
       progress: currentProgress,
-      callback: this.callbackStandard.bind(this, functionLabel),
+      callback: callbackCurrent,
       result: currentResult
     });
   } else {
@@ -147,7 +170,7 @@ TestKanbanGO.prototype.run = function(functionLabel) {
     submitRequests.submitGET({
       url: theURL,
       progress: currentProgress,
-      callback: this.callbackStandard.bind(this, functionLabel),
+      callback: callbackCurrent,
       result: currentResult
     });
   }

@@ -48,7 +48,6 @@ function Page() {
       },
       updateFunction: null
     },
-
     send: {
       ids: {
         page: ids.defaults.pageSend

@@ -42,7 +42,6 @@ div.divControlPanelNetwork{
   position: fixed;
 }
 
-
 div.divControlPanelDefault{
   margin: 6px;
   padding: 6px;
@@ -353,9 +352,6 @@ table.tableTestKanban td, th{
   margin: 5px
 }
 
-
-
-
 .form-group {
   position: relative;
 }
@@ -368,8 +364,8 @@ table.tableTestKanban td, th{
   left: 2px; 
 }
 
-.form-control:not(:placeholder-shown) + .form-control-placeholder  {
-  font-size: 50%;
+.form-control:not(:placeholder-shown) + .form-control-placeholder {
+  font-size: 68%;
   transform: translate3d(0, -100%, 0);
   opacity: 1;
 }
