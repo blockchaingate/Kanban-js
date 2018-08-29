@@ -31,14 +31,13 @@ var defaults = {
       publicKeys: "inputKBGOPublicKeys",
       committedSignersBitmap: "inputKBGOCommittedSignersBitmap",
       commitments: "inputKBGOCommitments",
-      challenge: "inputKBGOChallenge",
+      digest: "inputKBGODigest",
       aggregatePublickey: "inputKBGOAggregatePublicKey",
       aggregateCommitment: "inputKBGOAggregateCommitment",
       solutions: "inputKBGOSolutions",
       aggregateSignature: "inputKBGOAggregateSignature",
     },
-    outputAggregate: "divOutputKBGOAggregate",
-    outputSchnorr: "divOutputKBGOSchnorr"
+    outputKBGOTest: "divOutputKBGOTest"
   },
   kanbanPlusPlus: {
     inputSchnorrSignature: {

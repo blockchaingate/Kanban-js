@@ -224,10 +224,6 @@
   </div><!--divControlPanelDefault-->
   <br>
   <div class = "divControlPanelDefault">
-    <div id = "divOutputKBGOSchnorr" style = "font-family:'Courier New', Courier, monospace" ></div>
-  </div><!--divControlPanelDefault-->
-  <br>
-  <div class = "divControlPanelDefault">
     <table class = "tableKanbanPlusPlusTest">
     <tr>
     <td>
@@ -235,12 +231,12 @@
         <tr><td style = "text-align: center; border-bottom: 1px solid black; font-size: x-small;"><span>aggregate</span></td></tr>
         <tr><td><button class = "buttonStandardLight" style = "width: 100px" onclick = "window.kanban.kanbanGO.general.testFunctions.run('');"><b>Example</b></button></td></tr>
         <tr><td><button class = "buttonStandardLight" style = "width: 100px" onclick = "window.kanban.kanbanGO.general.testFunctions.testClear();"><b>Clear</b></button></td></tr>
-        <tr><td><button class = "buttonStandard" style = "width: 100px" onclick = "window.kanban.kanbanGO.general.testFunctions.run('');"><b>Initialize</b></button></td></tr>
-        <tr><td><button class = "buttonStandard" style = "width: 100px" onclick = "window.kanban.kanbanGO.general.testFunctions.run('');"><b>Commit</b></button></td></tr>
-        <tr><td><button class = "buttonStandard" style = "width: 100px" onclick = "window.kanban.kanbanGO.general.testFunctions.run('');"><b>Challenge</b></button></td></tr>
-        <tr><td><button class = "buttonStandard" style = "width: 100px" onclick = "window.kanban.kanbanGO.general.testFunctions.run('');"><b>Solutions</b></button></td></tr>
-        <tr><td><button class = "buttonStandard" style = "width: 100px" onclick = "window.kanban.kanbanGO.general.testFunctions.run('');"><b>Aggregate</b></button></td></tr>
-        <tr><td><button class = "buttonStandard" style = "width: 100px" onclick = "window.kanban.kanbanGO.general.testFunctions.run('');"><b>Verify</b></button></td></tr>
+        <tr><td><button class = "buttonStandard" style = "width: 100px" onclick = "window.kanban.kanbanGO.general.testFunctions.run('testAggregateInitialize');"><b>Initialize</b></button></td></tr>
+        <tr><td><button class = "buttonStandard" style = "width: 100px" onclick = "window.kanban.kanbanGO.general.testFunctions.run('testAggregateCommitment');"><b>Commit</b></button></td></tr>
+        <tr><td><button class = "buttonStandard" style = "width: 100px" onclick = "window.kanban.kanbanGO.general.testFunctions.run('testAggregateChallenge');"><b>Challenge</b></button></td></tr>
+        <tr><td><button class = "buttonStandard" style = "width: 100px" onclick = "window.kanban.kanbanGO.general.testFunctions.run('testAggregateSolutions');"><b>Solutions</b></button></td></tr>
+        <tr><td><button class = "buttonStandard" style = "width: 100px" onclick = "window.kanban.kanbanGO.general.testFunctions.run('testAggregateSignature');"><b>Aggregate</b></button></td></tr>
+        <tr><td><button class = "buttonStandard" style = "width: 100px" onclick = "window.kanban.kanbanGO.general.testFunctions.run('testAggregateVerification');"><b>Verify</b></button></td></tr>
       </table>
     </td>
     <td>
@@ -251,8 +247,8 @@
       <input type = "text" class = "inputCrypto" id = "inputKBGOPublicKeys" size = "90" placeholder = "public keys"></input><br>
       <input type = "text" class = "inputCrypto" id = "inputKBGOCommittedSignersBitmap" size = "90" placeholder = "committed signers bitmap"></input><br>
       <input type = "text" class = "inputCrypto" id = "inputKBGOCommitments" size = "90" placeholder = "commitments"></input><br>
-      <input type = "text" class = "inputCrypto" id = "inputKBGOChallenge" size = "90" placeholder = "challenge"></input><br>
-      <input type = "text" class = "inputCrypto" id = "inputKBGOAggregatePublicKey" size = "90" placeholder = "aggregate commitment"></input><br>
+      <input type = "text" class = "inputCrypto" id = "inputKBGODigest" size = "90" placeholder = "digest"></input><br>
+      <input type = "text" class = "inputCrypto" id = "inputKBGOAggregatePublicKey" size = "90" placeholder = "challenge/aggregate commitment"></input><br>
       <input type = "text" class = "inputCrypto" id = "inputKBGOAggregateCommitment" size = "90" placeholder = "aggregate public key"></input><br>
       <input type = "text" class = "inputCrypto" id = "inputKBGOSolutions" size = "90" placeholder = "solutions"></input><br>
       <input type = "text" class = "inputCrypto" id = "inputKBGOAggregateSignature" size = "90" placeholder = "aggregate signature"></input><br>
@@ -261,8 +257,8 @@
     </div> <!--divControlPanelDefault-->
   <br>
   <div class = "divControlPanelDefault">
-    <div id = "divOutputKBGOAggregate" style = "font-family:'Courier New', Courier, monospace" ></div>
-  </div><!--divControlPanelDefault-->
+    <div id = "divOutputKBGOTest" style = "font-family:'Courier New', Courier, monospace" ></div>
+  </div><!--divControlPanelDefault-->  
 </div>
 
 <div class = "divMainPage" id = "pageSend">

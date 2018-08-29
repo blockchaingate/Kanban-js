@@ -12,6 +12,7 @@ const kanbanGO = require('../resources_kanban_go');
 
 function TestKanbanGO() {
   var inputSchnorr = ids.defaults.kanbanGO.inputSchnorr;
+  var inputAggregate = ids.defaults.kanbanGO.inputAggregateSignature;
   this.theFunctions  = {
     testSha3 : {
       rpcCall: kanbanGO.rpcCalls.testSha3.rpcCall, 
@@ -58,10 +59,69 @@ function TestKanbanGO() {
       },
       inputsBase64: {
         messageBase64: inputSchnorr.message
-      }, 
+      },
       callback: this.callbackSchnorrVerification
     },
-    
+    testAggregateInitialize: {
+      inputs: {
+        numberOfPrivateKeysToGenerate: inputAggregate.numberOfPrivateKeysToGenerate
+      },
+      callback: this.callbackAggregateInitialization
+    },
+    testAggregateCommitment: {
+      inputsBase64: {
+        messageBase64: inputAggregate.message
+      },
+      callback: this.callbackAggregateCommitment
+    },
+    testAggregateChallenge: {
+      inputs: {        
+        committedSigners: inputAggregate.committedSignersBitmap
+      },
+      inputsBase64: {
+        commitmentsBase64: inputAggregate.commitments,
+      },
+      outputs: {
+        aggregator: {
+          aggregateCommitment: inputAggregate.aggregateCommitment,
+          aggregatePublicKey: inputAggregate.aggregatePublickey,
+          messageDigest: inputAggregate.digest
+        }
+      }
+    },
+    testAggregateSolutions: {
+      inputs: {
+        committedSigners: inputAggregate.committedSignersBitmap,
+        digest: inputAggregate.digest,
+        aggregateCommitment: inputAggregate.aggregateCommitment,
+        aggregatePublicKey: inputAggregate.aggregatePublickey
+      },
+      callback: this.callbackAggregateSolutions
+    },
+    testAggregateSignature: {
+      inputs: {
+        committedSigners: inputAggregate.committedSignersBitmap,
+      },
+      inputsBase64: {
+        solutionsBase64: inputAggregate.solutions,
+      },
+      outputs: {
+        aggregator: {
+          signatureNoBitmap: inputAggregate.aggregateSignature
+        }
+      }
+    },
+    testAggregateVerification: {
+      inputsBase64: {
+        messageBase64: inputAggregate.message
+      },
+      inputs: {
+        signature: inputAggregate.aggregateSignature,
+        commitedSigners: inputAggregate.committedSignersBitmap,
+        allPublicKeys: inputAggregate.publicKeys        
+      },
+      callback: this.callbackAggregateSignature
+    },
   };
   this.correctFunctions();
 }
@@ -83,19 +143,67 @@ TestKanbanGO.prototype.callbackSchnorrVerification = function(functionLabel, inp
   output.innerHTML = outputRaw;
 }
 
+function getSignerField(input, label) {
+  var parsedInput = JSON.parse(input);
+  var result = [];
+  if (parsedInput.signers === null || parsedInput.signers === undefined) {
+    return result;
+  }
+  for (var i = 0; i < parsedInput.signers.length; i ++) {
+    var incoming = parsedInput.signers[i][label];
+    if (incoming === "" || incoming === null || incoming === undefined) {
+      incoming = "(ignored)";
+    }
+    result.push(incoming);
+  }
+  return result;
+}
+
+TestKanbanGO.prototype.callbackAggregateSolutions = function(functionLabel, input, output) {
+  this.callbackStandard(functionLabel, input, output);
+  var solutions = getSignerField(input, "mySolution");
+  submitRequests.updateValue(ids.defaults.kanbanGO.inputAggregateSignature.solutions, solutions.join(", "));
+}
+
+TestKanbanGO.prototype.callbackAggregateInitialization = function(functionLabel, input, output) {
+  this.callbackStandard(functionLabel, input, output);
+  var privateKeys = getSignerField(input, "privateKeyBase58");
+  var publicKeys = getSignerField(input, "myPublicKey");
+  submitRequests.updateValue(ids.defaults.kanbanGO.inputAggregateSignature.privateKeys, privateKeys.join(", "));
+  submitRequests.updateValue(ids.defaults.kanbanGO.inputAggregateSignature.publicKeys, publicKeys.join(", "));
+}
+
+TestKanbanGO.prototype.callbackAggregateCommitment = function(functionLabel, input, output) {
+  this.callbackStandard(functionLabel, input, output);
+  var commitments = getSignerField(input, "commitmentHexCompressed");
+  var nonces = getSignerField(input, "myNonceBase58");
+  submitRequests.updateValue(ids.defaults.kanbanGO.inputAggregateSignature.commitments, commitments.join(", "));
+  submitRequests.updateValue(ids.defaults.kanbanGO.inputAggregateSignature.nonces, nonces.join(", "));
+}
+
 TestKanbanGO.prototype.correctFunctions = function() {  
   for (var label in this.theFunctions) {
     var currentCall = this.theFunctions[label];
     if (currentCall.rpcCall === null || currentCall.rpcCall === undefined) {
       currentCall.rpcCall = label; 
       if (label !== kanbanGO.rpcCalls[label].rpcCall) {
-        throw(`Fatal error: kanbanGO rpc label ${label} doesn't equal the expecte value ${kanbanGO.rpcCalls[label].rpcCall}.`);
+        throw(`Fatal error: kanbanGO rpc label ${label} doesn't equal the expected value ${kanbanGO.rpcCalls[label].rpcCall}.`);
       }
     }
   }
 }
 
 var optionsForKanbanGOStandard = {};
+
+TestKanbanGO.prototype.updateFields = function(parsedInput, outputs) {
+  for (var label in outputs) {
+    if (typeof outputs[label] === "string") {
+      submitRequests.updateValue(outputs[label], parsedInput[label]);
+    } else {
+      this.updateFields(parsedInput[label], outputs[label]);
+    }
+  }
+}
 
 TestKanbanGO.prototype.callbackStandard = function(functionLabel, input, output) {
   jsonToHtml.writeJSONtoDOMComponent(input, output, optionsForKanbanGOStandard);
@@ -104,9 +212,7 @@ TestKanbanGO.prototype.callbackStandard = function(functionLabel, input, output)
     return;
   }
   var parsedInput = JSON.parse(input);
-  for (var label in theFunction.outputs) {
-    submitRequests.updateValue(theFunction.outputs[label], parsedInput[label]);
-  }
+  this.updateFields(parsedInput, theFunction.outputs);
 }
 
 TestKanbanGO.prototype.testClear = function() {
@@ -117,7 +223,7 @@ TestKanbanGO.prototype.testClear = function() {
   submitRequests.updateValue(inputAggregate.publicKeys, '');
   submitRequests.updateValue(inputAggregate.committedSignersBitmap, '01111');
   submitRequests.updateValue(inputAggregate.commitments, '');
-  submitRequests.updateValue(inputAggregate.challenge, '');
+  submitRequests.updateValue(inputAggregate.digest, '');
   submitRequests.updateValue(inputAggregate.aggregateCommitment, '');
   submitRequests.updateValue(inputAggregate.aggregatePublickey, '');
   submitRequests.updateValue(inputAggregate.solutions, '');
@@ -143,7 +249,7 @@ TestKanbanGO.prototype.run = function(functionLabel) {
   }
   var messageBody = pathnames.getPOSTBodyFromKanbanGORPCLabel(theFunction.rpcCall, theArguments);
   var theURL = `${pathnames.url.known.goKanbanRPC}`;
-  var currentResult = ids.defaults.kanbanGO.outputSchnorr;
+  var currentResult = ids.defaults.kanbanGO.outputKBGOTest;
   var currentProgress = globals.spanProgress();
   var usePOST = window.kanban.rpc.forceRPCPOST;
   if (!usePOST) {
@@ -156,7 +262,6 @@ TestKanbanGO.prototype.run = function(functionLabel) {
     callbackCurrent = theFunction.callback;
   }  
   callbackCurrent = callbackCurrent.bind(this, functionLabel);
-
   if (usePOST) {
     submitRequests.submitPOST({
       url: theURL,

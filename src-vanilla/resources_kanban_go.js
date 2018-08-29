@@ -84,6 +84,104 @@ var rpcCalls = {
     address: "",
     parameters: ["signature", "publicKey", "messageBase64"]
   },
+  testAggregateInitialize: {
+    rpcCall: "testAggregateInitialize", //must be same as rpc label, used for autocomplete
+    method: "kanban_testAggregateInitialize", //<- name of go's RPC method 
+    mandatoryFixedArguments: { //<- values give defaults, null for none
+    },
+    mandatoryModifiableArguments: { //<- values give defaults, null for none
+      numberOfPrivateKeysToGenerate: null
+    },
+    optionalModifiableArguments: {
+    },
+    allowedArgumentValues: {
+    },
+    address: "",
+    parameters: ["numberOfPrivateKeysToGenerate"]    
+  },
+  testAggregateCommitment: {
+    rpcCall: "testAggregateCommitment", //must be same as rpc label, used for autocomplete
+    method: "kanban_testAggregateCommitment", //<- name of go's RPC method 
+    mandatoryFixedArguments: { //<- values give defaults, null for none
+    },
+    mandatoryModifiableArguments: { //<- values give defaults, null for none
+      messageBase64: null
+    },
+    optionalModifiableArguments: {
+    },
+    allowedArgumentValues: {
+    },
+    address: "",
+    parameters: ["messageBase64"]    
+  },
+  testAggregateChallenge: {
+    rpcCall: "testAggregateChallenge", //must be same as rpc label, used for autocomplete
+    method: "kanban_testAggregateChallenge", //<- name of go's RPC method 
+    mandatoryFixedArguments: { //<- values give defaults, null for none
+    },
+    mandatoryModifiableArguments: { //<- values give defaults, null for none
+      commitmentsBase64: null,
+      committedSigners: null
+    },
+    optionalModifiableArguments: {
+    },
+    allowedArgumentValues: {
+    },
+    address: "",
+    parameters: ["commitmentsBase64", "committedSigners"]    
+  },
+  testAggregateSolutions: {
+    rpcCall: "testAggregateSolutions", //must be same as rpc label, used for autocomplete
+    method: "kanban_testAggregateSolutions", //<- name of go's RPC method 
+    mandatoryFixedArguments: { //<- values give defaults, null for none
+    },
+    mandatoryModifiableArguments: { //<- values give defaults, null for none
+      committedSigners: null,
+      digest: null,
+      aggregateCommitment: null,
+      aggregatePublicKey: null
+    },
+    optionalModifiableArguments: {
+    },
+    allowedArgumentValues: {
+    },
+    address: "",
+    parameters: ["committedSigners", "digest", "aggregateCommitment", "aggregatePublicKey"]    
+  },
+  testAggregateSignature: {
+    rpcCall: "testAggregateSignature", //must be same as rpc label, used for autocomplete
+    method: "kanban_testAggregateSignature", //<- name of go's RPC method 
+    mandatoryFixedArguments: { //<- values give defaults, null for none
+    },
+    mandatoryModifiableArguments: { //<- values give defaults, null for none
+      committedSigners: null,
+      solutionsBase64: null,
+    },
+    optionalModifiableArguments: {
+    },
+    allowedArgumentValues: {
+    },
+    address: "",
+    parameters: ["committedSigners", "solutionsBase64"]    
+  },
+  testAggregateVerification: {
+    rpcCall: "testAggregateVerification", //must be same as rpc label, used for autocomplete
+    method: "kanban_testAggregateVerification", //<- name of go's RPC method 
+    mandatoryFixedArguments: { //<- values give defaults, null for none
+    },
+    mandatoryModifiableArguments: { //<- values give defaults, null for none
+      signature: null,
+      committedSigners: null,
+      allPublicKeys: null,
+      messageBase64: null,
+    },
+    optionalModifiableArguments: {
+    },
+    allowedArgumentValues: {
+    },
+    address: "",
+    parameters: ["signature", "committedSigners", "allPublicKeys", "messageBase64"]    
+  },
   versionGO: {
     rpcCall: "versionGO", //must be same as rpc label, used for autocomplete
     method: "web3_clientVersion",
@@ -97,7 +195,7 @@ var rpcCalls = {
     },
     address: "",
     parameters: []
-  }
+  },
 };
 
 module.exports = {
