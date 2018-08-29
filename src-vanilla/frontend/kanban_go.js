@@ -113,14 +113,14 @@ function TestKanbanGO() {
     },
     testAggregateVerification: {
       inputsBase64: {
-        messageBase64: inputAggregate.message
+        messageBase64: inputAggregate.message,
+        allPublicKeysBase64: inputAggregate.publicKeys,
       },
       inputs: {
         signature: inputAggregate.aggregateSignature,
-        commitedSigners: inputAggregate.committedSignersBitmap,
-        allPublicKeys: inputAggregate.publicKeys        
+        committedSigners: inputAggregate.committedSignersBitmap,
       },
-      callback: this.callbackAggregateSignature
+      callback: this.callbackAggregateVerification
     },
   };
   this.correctFunctions();
@@ -157,6 +157,27 @@ function getSignerField(input, label) {
     result.push(incoming);
   }
   return result;
+}
+
+TestKanbanGO.prototype.callbackAggregateVerification = function(functionLabel, input, output) {
+  var resultHtml = jsonToHtml.getHtmlFromArrayOfObjects(input, optionsForKanbanGOStandard);
+  var parsedInput = JSON.parse(input);
+  if (parsedInput.result) {
+    resultHtml = `<b style = 'color:green'>Verified</b><br>${resultHtml}`;
+  } else {
+    var reason = "";
+    if (parsedInput.reason !== undefined) {
+      reason += `<br><b>Reason:</b> ${parsedInput.reason}`;
+    }
+    if (parsedInput.error !== undefined) {
+      reason += `<br><b>Error:</b> ${parsedInput.error}`;
+    }
+    resultHtml = `<b style = 'color:red'>Failed</b>. ${reason}<br>${resultHtml}`;
+  }
+  if (typeof output === "string") {
+    output = document.getElementById(output);
+  }
+  output.innerHTML = resultHtml;
 }
 
 TestKanbanGO.prototype.callbackAggregateSolutions = function(functionLabel, input, output) {

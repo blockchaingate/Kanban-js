@@ -172,7 +172,7 @@ var rpcCalls = {
     mandatoryModifiableArguments: { //<- values give defaults, null for none
       signature: null,
       committedSigners: null,
-      allPublicKeys: null,
+      allPublicKeysBase64: null,
       messageBase64: null,
     },
     optionalModifiableArguments: {
@@ -180,7 +180,7 @@ var rpcCalls = {
     allowedArgumentValues: {
     },
     address: "",
-    parameters: ["signature", "committedSigners", "allPublicKeys", "messageBase64"]    
+    parameters: ["signature", "committedSigners", "allPublicKeysBase64", "messageBase64"]    
   },
   versionGO: {
     rpcCall: "versionGO", //must be same as rpc label, used for autocomplete
