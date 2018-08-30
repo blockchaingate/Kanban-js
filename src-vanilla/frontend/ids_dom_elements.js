@@ -55,7 +55,7 @@ var defaults = {
       privateKeys: "inputAggregateSignaturePrivateKeys",
       publicKeys: "inputAggregateSignaturePublicKeys",
       committedSignersBitmap: "inputAggregateSignatureCommittedSignersBitmap",
-      challenge: "inputAggregateSignatureChallenge",
+      messageDigest: "inputAggregateSignatureMessageDigest",
       aggregatePubkey: "inputAggregateSignatureAggregatePubkey",    
       aggregateCommitment: "inputAggregateSignatureAggregateCommitment",
       solutions: "inputAggregateSignaturesSolutions",

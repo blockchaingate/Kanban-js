@@ -333,7 +333,7 @@ var rpcCallsKanban = {
     },
     mandatoryModifiableArguments: { //<- values give defaults, null for none
       committedSignersBitmap: null,
-      challenge: null,
+      messageDigest: null,
       aggregatedCommitment: null, 
       aggregatedPublicKey: null
     },
@@ -343,7 +343,7 @@ var rpcCallsKanban = {
       ]
     },
     address: "",
-    cli: ["net", "command", "committedSignersBitmap", "challenge", "aggregatedCommitment", "aggregatedPublicKey"]
+    cli: ["net", "command", "committedSignersBitmap", "messageDigest", "aggregatedCommitment", "aggregatedPublicKey"]
   },
   testAggregateSignatureAggregation: {
     rpcCall: "testAggregateSignatureAggregation", //must be same as rpc label, used for autocomplete
