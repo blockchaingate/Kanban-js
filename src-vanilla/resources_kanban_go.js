@@ -198,7 +198,20 @@ var rpcCalls = {
   },
 };
 
+function getPOSTBodyFromKanbanGORPCLabel(theRPCLabel, theArguments) {
+  var theRequest = {};
+  theRequest[rpcCall] = theRPCLabel;
+  if (theArguments === undefined) {
+    theArguments = {};
+  }
+  for (var label in theArguments) {
+    theRequest[label] = theArguments[label];
+  }
+  return `${encodeURIComponent(JSON.stringify(theRequest))}`;
+}
+
 module.exports = {
-  rpcCalls
+  rpcCalls,
+  getPOSTBodyFromKanbanGORPCLabel
 }
 

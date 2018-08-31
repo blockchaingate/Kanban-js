@@ -1,14 +1,12 @@
 "use strict";
-const submitRequests = require('./submit_requests');
-const pathnames = require('../pathnames');
+const submitRequests = require('../submit_requests');
+const pathnames = require('../../pathnames');
 
-const ids = require('./ids_dom_elements');
-const jsonToHtml = require('./json_to_html');
+const ids = require('../ids_dom_elements');
+const jsonToHtml = require('../json_to_html');
 //const Block = require('../bitcoinjs_src/block');
-const globals = require('./globals');
-const miscellaneous = require('../miscellaneous');
-const miscellaneousFrontEnd = require('./miscellaneous_frontend');
-const kanbanGO = require('../resources_kanban_go');
+const globals = require('../globals');
+const kanbanGO = require('../../resources_kanban_go');
 
 function TestKanbanGO() {
   var inputSchnorr = ids.defaults.kanbanGO.inputSchnorr;
@@ -248,7 +246,7 @@ TestKanbanGO.prototype.run = function(functionLabel) {
       theArguments[inputLabel] = Buffer.from(theValue).toString('base64');
     }
   }
-  var messageBody = pathnames.getPOSTBodyFromKanbanGORPCLabel(theFunction.rpcCall, theArguments);
+  var messageBody = kanbanGO.getPOSTBodyFromKanbanGORPCLabel(theFunction.rpcCall, theArguments);
   var theURL = `${pathnames.url.known.goKanbanRPC}`;
   var currentResult = ids.defaults.kanbanGO.outputKBGOTest;
   var currentProgress = globals.spanProgress();

@@ -53,29 +53,36 @@
     <table> 
     <tr>
     <td>node</td>
-    <td><button class = "buttonStandard" onclick = "window.kanban.fabcoinInitialization.gitPullNode();">update</button></td>
+    <td><button class = "buttonStandard" onclick = "window.kanban.initialization.fabcoin.gitPullNode();">update</button></td>
     </tr>
     <tr>
     <td>fabcoin all nets</td>
     <td>
-    <button class = "buttonStandard" onclick = "window.kanban.fabcoinInitialization.killAllFabcoinDaemons();">kill fab &amp; kb</button>
+    <button class = "buttonStandard" onclick = "window.kanban.initialization.fabcoin.killAllFabcoinDaemons();">kill fab &amp; kb</button>
     </td>
     </tr>
     <tr>
-      <td>kanban</td> 
+      <td>kanbanGO</td> 
       <td>
-        <button class = "buttonStandard" onclick = "window.kanban.fabcoinInitialization.gitPullKanban();">update</button>
-        <button class = "buttonStandard" onclick = "window.kanban.fabcoinInitialization.startKanban();">start kb</button>
+        <button class = "buttonStandard" onclick = "window.kanban.kanbanGO.initialization.initializer.run('createNodes');">create nodes</button>
       </td>
-      </tr>
+    </tr>
+
+    <tr>
+      <td>kanban++</td> 
+      <td>
+        <button class = "buttonStandard" onclick = "window.kanban.initialization.fabcoin.gitPullKanban();">update</button>
+        <button class = "buttonStandard" onclick = "window.kanban.initialization.fabcoin.startKanban();">start kb</button>
+      </td>
+    </tr>
     <tr>
     <td>fabcoind</td> 
     <td>
-    <button class = "buttonStandard" onclick = "window.kanban.fabcoinInitialization.gitPullFabcoin();">update</button>
-    <button class = "buttonStandard" onclick = "window.kanban.fabcoinInitialization.deleteFabcoinConfiguration();">del .fab</button>
-    <button class = "buttonStandard" onclick = "window.kanban.fabcoinInitialization.startFabcoinDaemon(false);">start fab</button>
-    <!--button class = "buttonStandard" onclick = "window.kanban.fabcoinInitialization.startFabcoinDaemon(true);">start fab mining</button-->
-    <button class = "buttonStandard" onclick = "window.kanban.fabcoinInitialization.makeFabcoin();">make fab</button>
+    <button class = "buttonStandard" onclick = "window.kanban.initialization.fabcoin.gitPullFabcoin();">update</button>
+    <button class = "buttonStandard" onclick = "window.kanban.initialization.fabcoin.deleteFabcoinConfiguration();">del .fab</button>
+    <button class = "buttonStandard" onclick = "window.kanban.initialization.fabcoin.startFabcoinDaemon(false);">start fab</button>
+    <!--button class = "buttonStandard" onclick = "window.kanban.initialization.fabcoin.startFabcoinDaemon(true);">start fab mining</button-->
+    <button class = "buttonStandard" onclick = "window.kanban.initialization.fabcoin.makeFabcoin();">make fab</button>
     &nbsp;
     <a href = "/logFileTestNetNoDNS" target = "_blank" id = "linkLogFileFabcoin">Log file </a>
     &nbsp;
@@ -203,13 +210,13 @@
   <tr>
   <td>
     <table>
-      <tr><td><button class = "buttonStandard" style = "width: 100px" onclick = "window.kanban.kanbanGO.general.testFunctions.run('versionGO');"><b>Version</b></button></td></tr>
+      <tr><td><button class = "buttonStandard" style = "width: 100px" onclick = "window.kanban.kanbanGO.crypto.testFunctions.run('versionGO');"><b>Version</b></button></td></tr>
       <tr><td style = "text-align: center; border-bottom: 1px solid black; font-size: x-small;"><span>Schnorr</span></td></tr>
-      <tr><td><button class = "buttonStandard" style = "width: 100px" onclick = "window.kanban.kanbanGO.general.testFunctions.run('testSha3')"><b>Sha3 256</b></button></td></tr>
-      <tr><td><button class = "buttonStandard" style = "width: 100px" onclick = "window.kanban.kanbanGO.general.testFunctions.run('testPrivateKeyGeneration');"><b style = "color:red">Private key</b></button></td></tr>
-      <tr><td><button class = "buttonStandard" style = "width: 100px" onclick = "window.kanban.kanbanGO.general.testFunctions.run('testPublicKeyFromPrivate');"><b>Public key</b></button></td></tr>
-      <tr><td><button class = "buttonStandard" style = "width: 100px" onclick = "window.kanban.kanbanGO.general.testFunctions.run('testSchnorrSignature');"><b>Signature</b></button></td></tr>
-      <tr><td><button class = "buttonStandard" style = "width: 100px" onclick = "window.kanban.kanbanGO.general.testFunctions.run('testSchnorrVerification');"><b>Verify</b></button></td></tr>
+      <tr><td><button class = "buttonStandard" style = "width: 100px" onclick = "window.kanban.kanbanGO.crypto.testFunctions.run('testSha3')"><b>Sha3 256</b></button></td></tr>
+      <tr><td><button class = "buttonStandard" style = "width: 100px" onclick = "window.kanban.kanbanGO.crypto.testFunctions.run('testPrivateKeyGeneration');"><b style = "color:red">Private key</b></button></td></tr>
+      <tr><td><button class = "buttonStandard" style = "width: 100px" onclick = "window.kanban.kanbanGO.crypto.testFunctions.run('testPublicKeyFromPrivate');"><b>Public key</b></button></td></tr>
+      <tr><td><button class = "buttonStandard" style = "width: 100px" onclick = "window.kanban.kanbanGO.crypto.testFunctions.run('testSchnorrSignature');"><b>Signature</b></button></td></tr>
+      <tr><td><button class = "buttonStandard" style = "width: 100px" onclick = "window.kanban.kanbanGO.crypto.testFunctions.run('testSchnorrVerification');"><b>Verify</b></button></td></tr>
     </table>
   </td>
   <td>
@@ -229,14 +236,14 @@
     <td>
       <table>
         <tr><td style = "text-align: center; border-bottom: 1px solid black; font-size: x-small;"><span>aggregate</span></td></tr>
-        <tr><td><button class = "buttonStandardLight" style = "width: 100px" onclick = "window.kanban.kanbanGO.general.testFunctions.run('');"><b>Example</b></button></td></tr>
-        <tr><td><button class = "buttonStandardLight" style = "width: 100px" onclick = "window.kanban.kanbanGO.general.testFunctions.testClear();"><b>Clear</b></button></td></tr>
-        <tr><td><button class = "buttonStandard" style = "width: 100px" onclick = "window.kanban.kanbanGO.general.testFunctions.run('testAggregateInitialize');"><b>Initialize</b></button></td></tr>
-        <tr><td><button class = "buttonStandard" style = "width: 100px" onclick = "window.kanban.kanbanGO.general.testFunctions.run('testAggregateCommitment');"><b>Commit</b></button></td></tr>
-        <tr><td><button class = "buttonStandard" style = "width: 100px" onclick = "window.kanban.kanbanGO.general.testFunctions.run('testAggregateChallenge');"><b>Challenge</b></button></td></tr>
-        <tr><td><button class = "buttonStandard" style = "width: 100px" onclick = "window.kanban.kanbanGO.general.testFunctions.run('testAggregateSolutions');"><b>Solutions</b></button></td></tr>
-        <tr><td><button class = "buttonStandard" style = "width: 100px" onclick = "window.kanban.kanbanGO.general.testFunctions.run('testAggregateSignature');"><b>Aggregate</b></button></td></tr>
-        <tr><td><button class = "buttonStandard" style = "width: 100px" onclick = "window.kanban.kanbanGO.general.testFunctions.run('testAggregateVerification');"><b>Verify</b></button></td></tr>
+        <tr><td><button class = "buttonStandardLight" style = "width: 100px" onclick = "window.kanban.kanbanGO.crypto.testFunctions.run('');"><b>Example</b></button></td></tr>
+        <tr><td><button class = "buttonStandardLight" style = "width: 100px" onclick = "window.kanban.kanbanGO.crypto.testFunctions.testClear();"><b>Clear</b></button></td></tr>
+        <tr><td><button class = "buttonStandard" style = "width: 100px" onclick = "window.kanban.kanbanGO.crypto.testFunctions.run('testAggregateInitialize');"><b>Initialize</b></button></td></tr>
+        <tr><td><button class = "buttonStandard" style = "width: 100px" onclick = "window.kanban.kanbanGO.crypto.testFunctions.run('testAggregateCommitment');"><b>Commit</b></button></td></tr>
+        <tr><td><button class = "buttonStandard" style = "width: 100px" onclick = "window.kanban.kanbanGO.crypto.testFunctions.run('testAggregateChallenge');"><b>Challenge</b></button></td></tr>
+        <tr><td><button class = "buttonStandard" style = "width: 100px" onclick = "window.kanban.kanbanGO.crypto.testFunctions.run('testAggregateSolutions');"><b>Solutions</b></button></td></tr>
+        <tr><td><button class = "buttonStandard" style = "width: 100px" onclick = "window.kanban.kanbanGO.crypto.testFunctions.run('testAggregateSignature');"><b>Aggregate</b></button></td></tr>
+        <tr><td><button class = "buttonStandard" style = "width: 100px" onclick = "window.kanban.kanbanGO.crypto.testFunctions.run('testAggregateVerification');"><b>Verify</b></button></td></tr>
       </table>
     </td>
     <td>

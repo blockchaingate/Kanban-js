@@ -6,16 +6,18 @@ window.kanban = {
     sendReceive: require('./fabcoin_rpc_send_receive'),
     mine: require('./fabcoin_rpc_mine'),
     profiling: require('./fabcoin_rpc_profiling'),
-    profiling: require('./fabcoin_rpc_profiling'),
     forceRPCPOST: false
   },
   kanbanPlusPlus: {
     general: require('./kanban_plus_plus')
   },
   kanbanGO: {
-    general: require('./kanban_go')
+    crypto: require('./kanbango/crypto'),
+    initialization: require('./kanbango/initialization')
   },
-  fabcoinInitialization: require('./fabcoin_initialization'),
+  initialization: {
+    fabcoin: require('./fabcoin_initialization'),
+  },
   computationalEngineCalls: null,
   submitRequests: require('./submit_requests'),
   ids: require('./ids_dom_elements'),

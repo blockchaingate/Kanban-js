@@ -8,8 +8,6 @@ const fabcoinInitialization = require('./fabcoin_initialization');
 const ids = require('./ids_dom_elements');
 const pathnames = require('../pathnames');
 const myNodes = require('./my_nodes');
-const kanbanPlusPlus = require('./kanban_plus_plus');
-const kanbanGO = require('./kanban_go');
 
 function Page() {
   this.fabcoinNetworkRadioIds = {};

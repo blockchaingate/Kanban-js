@@ -65,6 +65,7 @@ var url = {
     goKanbanRPC: "/goKanbanRPC",
     computationEngine: "/computation_engine",
     fabcoinInitialization: "/fabcoin_initialization",
+    kanbanInitialization: "/go_kanban_initialization",
     myNodesCommand: "/my_nodes",
     logFileTestNetNoDNS: "/logFileTestNetNoDNS",
     logFileTestNetNoDNSSession: "/logFileTestNetNoDNSSession",
@@ -934,18 +935,6 @@ function getPOSTBodyfromRPCLabel(theRPClabel, theArguments, isKanban) {
   return `command=${encodeURIComponent(JSON.stringify(theRequest))}`;
 }
 
-function getPOSTBodyFromKanbanGORPCLabel(theRPCLabel, theArguments) {
-  var theRequest = {};
-  theRequest[rpcCall] = theRPCLabel;
-  if (theArguments === undefined) {
-    theArguments = {};
-  }
-  for (var label in theArguments) {
-    theRequest[label] = theArguments[label];
-  }
-  return `${encodeURIComponent(JSON.stringify(theRequest))}`;
-}
-
 function getURLfromRPCLabel(theRPClabel, theArguments, isKanban) {
   var entryPoint = url.known.rpc;
   if (isKanban === true) {
@@ -1214,7 +1203,7 @@ function isAllowedArgumentForFabInitialization(theInitCall, theLabel, theValue, 
 }
 
 function getFabcoinInitializationCallArguments(theCallLabel, additionalArguments, errors) {
-  console.log("DEBUG: extracting additional arguments from: " + JSON.stringify(additionalArguments));
+  //console.log("DEBUG: extracting additional arguments from: " + JSON.stringify(additionalArguments));
   var result = [];
   if (!(theCallLabel in fabcoinInitializationProcedures)) {
     errors.push(`Uknown or non-implemented rpc command: ${theCallLabel}.`);
@@ -1304,7 +1293,6 @@ module.exports = {
   getNetworkDataFromRPCNetworkOption,
   getURLfromRPCLabel,
   getPOSTBodyfromRPCLabel,
-  getPOSTBodyFromKanbanGORPCLabel,
   getURLfromComputationalEngineCall,
   getURLFromMyNodesCall,
   getURLFromFabcoinInitialization,
