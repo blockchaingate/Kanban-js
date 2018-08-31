@@ -60,7 +60,7 @@ function TestKanbanGO() {
       inputsBase64: {
         messageBase64: inputSchnorr.message
       },
-      callback: this.callbackSchnorrVerification
+      callback: this.callbackStandard
     },
     testAggregateInitialize: {
       inputs: {
@@ -120,27 +120,10 @@ function TestKanbanGO() {
         signature: inputAggregate.aggregateSignature,
         committedSigners: inputAggregate.committedSignersBitmap,
       },
-      callback: this.callbackAggregateVerification
+      callback: this.callbackStandard
     },
   };
   this.correctFunctions();
-}
-
-TestKanbanGO.prototype.callbackSchnorrVerification = function(functionLabel, input, output) {
-  this.callbackStandard(functionLabel, input, output);
-  var outputRaw = jsonToHtml.getHtmlFromArrayOfObjects(input, optionsForKanbanGOStandard);
-  var parsedInput = JSON.parse(input);
-  if (parsedInput.result !== undefined) {
-    if (parsedInput.result === true || parsedInput.result === "true") {
-      outputRaw = "<b style = 'color:green'>Verified</b><br>" + outputRaw;
-    } else {
-      outputRaw = "<b style = 'color:red'>Failed</b><br>" + outputRaw;
-    }
-  }
-  if (typeof output === "string") {
-    output = document.getElementById(output);
-  }
-  output.innerHTML = outputRaw;
 }
 
 function getSignerField(input, label) {
@@ -157,27 +140,6 @@ function getSignerField(input, label) {
     result.push(incoming);
   }
   return result;
-}
-
-TestKanbanGO.prototype.callbackAggregateVerification = function(functionLabel, input, output) {
-  var resultHtml = jsonToHtml.getHtmlFromArrayOfObjects(input, optionsForKanbanGOStandard);
-  var parsedInput = JSON.parse(input);
-  if (parsedInput.result) {
-    resultHtml = `<b style = 'color:green'>Verified</b><br>${resultHtml}`;
-  } else {
-    var reason = "";
-    if (parsedInput.reason !== undefined) {
-      reason += `<br><b>Reason:</b> ${parsedInput.reason}`;
-    }
-    if (parsedInput.error !== undefined) {
-      reason += `<br><b>Error:</b> ${parsedInput.error}`;
-    }
-    resultHtml = `<b style = 'color:red'>Failed</b>. ${reason}<br>${resultHtml}`;
-  }
-  if (typeof output === "string") {
-    output = document.getElementById(output);
-  }
-  output.innerHTML = resultHtml;
 }
 
 TestKanbanGO.prototype.callbackAggregateSolutions = function(functionLabel, input, output) {
@@ -217,6 +179,9 @@ TestKanbanGO.prototype.correctFunctions = function() {
 var optionsForKanbanGOStandard = {};
 
 TestKanbanGO.prototype.updateFields = function(parsedInput, outputs) {
+  if (parsedInput === undefined) {
+    return;
+  }
   for (var label in outputs) {
     if (typeof outputs[label] === "string") {
       submitRequests.updateValue(outputs[label], parsedInput[label]);
@@ -227,12 +192,27 @@ TestKanbanGO.prototype.updateFields = function(parsedInput, outputs) {
 }
 
 TestKanbanGO.prototype.callbackStandard = function(functionLabel, input, output) {
-  jsonToHtml.writeJSONtoDOMComponent(input, output, optionsForKanbanGOStandard);
+  var resultHTML = jsonToHtml.getHtmlFromArrayOfObjects(input, optionsForKanbanGOStandard);
   var theFunction = this.theFunctions[functionLabel];
+  var parsedInput = JSON.parse(input);
+  if (typeof output === "string") {
+    output = document.getElementById(output);
+  }
+  var header = "";
+  if (parsedInput.resultHTML !== null && parsedInput.resultHTML !== undefined) {
+    header += parsedInput.resultHTML + "<br>"; 
+  }
+  if (parsedInput.error !== null && parsedInput.error !== undefined) {
+    header += `<b>Error:</b> <span style='color:red'>${parsedInput.error}</span><br>`;
+  }
+  if (parsedInput.reason !== null && parsedInput.reason !== undefined) {
+    header += parsedInput.reason + "<br>";
+  }
+  resultHTML = header + resultHTML;
+  output.innerHTML = resultHTML;
   if (theFunction.outputs === null || theFunction.outputs === undefined) {
     return;
   }
-  var parsedInput = JSON.parse(input);
   this.updateFields(parsedInput, theFunction.outputs);
 }
 
