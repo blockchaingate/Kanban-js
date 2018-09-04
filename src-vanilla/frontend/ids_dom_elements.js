@@ -37,6 +37,10 @@ var defaults = {
       solutions: "inputKBGOSolutions",
       aggregateSignature: "inputKBGOAggregateSignature",
     },
+    inputInitialization: {
+      numberOfNodes: "inputNumberOfGethNodes"
+    },
+    outputInitialization: "divFabcoinInitialization",
     outputKBGOTest: "divOutputKBGOTest"
   },
   kanbanPlusPlus: {

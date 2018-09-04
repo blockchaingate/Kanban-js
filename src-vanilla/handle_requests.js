@@ -76,7 +76,7 @@ function handleRequests(request, response) {
     return handlersKanbanGo.handleRequest(request, response);
   }
   if (parsedURL.pathname === pathnames.url.known.kanbanInitialization) {
-    return handlersKanbanGoInitialization.handleRequest(request, response);
+    return handlersKanbanGoInitialization.kanbanGoInitializerBackend.handleRequest(request, response);
   }
   if (parsedURL.pathname === pathnames.url.known.computationEngine) {
     return handleComputationalEngineCall(request, response);

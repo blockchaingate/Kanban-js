@@ -200,7 +200,7 @@ var rpcCalls = {
 
 function getPOSTBodyFromKanbanGORPCLabel(theRPCLabel, theArguments) {
   var theRequest = {};
-  theRequest[rpcCall] = theRPCLabel;
+  theRequest[pathnames.rpcCall] = theRPCLabel;
   if (theArguments === undefined) {
     theArguments = {};
   }

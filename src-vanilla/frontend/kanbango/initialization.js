@@ -1,32 +1,51 @@
 "use strict";
 
-const KanbanGo = require('../../resources_kanban_go_initialization');
+const kanbanGoInitialization = require('../../resources_kanban_go_initialization');
+const kanbanGo = require('../../resources_kanban_go');
 const ids = require('../ids_dom_elements');
-const pathnames = require('../../pathnames');
+const jsonToHtml = require("../json_to_html");
+const pathnames = require("../../pathnames");
+const globals = require('../globals');
+const submitRequests = require('../submit_requests');
 
 function KanbanGoInitializer() {
   this.idOutput = ids.defaults.outputFabcoinInitialization;
+  var inputInitialization = ids.defaults.kanbanGO.inputInitialization;
+  this.theFunctions = {
+    createNodes: {
+      rpcCall: kanbanGoInitialization.rpcCalls.createNodes.rpcCall,
+      inputs: {
+        numberOfNodes: inputInitialization.numberOfNodes
+      }
+    }
+  };
+}
+
+var optionsForKanbanGOStandard = {};
+
+KanbanGoInitializer.prototype.callbackStandard = function(functionLabel, input, output) {
+  jsonToHtml.writeJSONtoDOMComponent(input, output, optionsForKanbanGOStandard);
 }
 
 KanbanGoInitializer.prototype.run = function(functionLabel) {
-  console.log(`DEBUG: running ${functionLabel}. `);
-  var theFunction = KanbanGo.rpcCalls[functionLabel];  
+  //console.log(`DEBUG: running ${functionLabel}. `);
+  var functionFrontend = this.theFunctions[functionLabel]
   var theArguments = {};
 
-  var currentInputs = theFunction.inputs;
+  var currentInputs = functionFrontend.inputs;
   for (var inputLabel in currentInputs) {
     theArguments[inputLabel] = document.getElementById(currentInputs[inputLabel]).value;
   }
-  var currentInputsBase64 = theFunction.inputsBase64;
+  var currentInputsBase64 = functionFrontend.inputsBase64;
   if (currentInputsBase64 !== null && currentInputsBase64 !== undefined) {
     for (var inputLabel in currentInputsBase64) {
       var theValue =  document.getElementById(currentInputsBase64[inputLabel]).value;
       theArguments[inputLabel] = Buffer.from(theValue).toString('base64');
     }
   }
-  var messageBody = pathnames.getPOSTBodyFromKanbanGORPCLabel(theFunction.rpcCall, theArguments);
+  var messageBody = kanbanGo.getPOSTBodyFromKanbanGORPCLabel(functionFrontend.rpcCall, theArguments);
   var theURL = `${pathnames.url.known.kanbanInitialization}`;
-  var currentResult = ids.defaults.kanbanGO.outputKBGOTest;
+  var currentResult = ids.defaults.kanbanGO.outputInitialization;
   var currentProgress = globals.spanProgress();
   var usePOST = window.kanban.rpc.forceRPCPOST;
   if (!usePOST) {
@@ -35,8 +54,8 @@ KanbanGoInitializer.prototype.run = function(functionLabel) {
     }
   }
   var callbackCurrent = this.callbackStandard;
-  if (theFunction.callback !== undefined && theFunction.callback !== null) {
-    callbackCurrent = theFunction.callback;
+  if (functionFrontend.callback !== undefined && functionFrontend.callback !== null) {
+    callbackCurrent = functionFrontend.callback;
   }  
   callbackCurrent = callbackCurrent.bind(this, functionLabel);
   if (usePOST) {

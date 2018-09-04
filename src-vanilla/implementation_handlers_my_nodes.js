@@ -4,44 +4,13 @@ const assert = require('assert')
 const childProcess = require('child_process');
 const globals = require('./globals');
 const fs = require('fs');
+const configuration = require('./configuration').configuration;
 
 var SSHClient = require('ssh2').Client;
 
-var configurationSecretsAdminContent = null;
-
-function readSecretsAdminConfiguration(callbackFunction) {
-  if (configurationSecretsAdminContent !== null) {
-    if (callbackFunction !== undefined && callbackFunction !== null) {
-      return callbackFunction();
-    }
-    return;
-  }
-  fs.readFile(pathnames.pathname.configurationSecretsAdmin, function (error, data) {
-    if (error) {
-      configurationSecretsAdminContent = {};
-      configurationSecretsAdminContent.error = `Failed to read configuration file ${pathnames.pathname.configurationSecretsAdmin} with error: ${error}. `;
-      return;
-    }
-    try {
-      configurationSecretsAdminContent = JSON.parse(data);
-    } catch (e) {
-      configurationSecretsAdminContent = {};
-      configurationSecretsAdminContent.error = `I was able to read ${pathnames.pathname.configurationSecretsAdmin} but could not parse it. Error: ${error}. `;
-    }
-
-    if (callbackFunction !== undefined && callbackFunction !== null) {
-      return callbackFunction();
-    }
-  });
-}
-
-function fetchNodeInfoPartTwo(request, response, desiredCommand) {
-  response.writeHead(200);
-  response.end(JSON.stringify(configurationSecretsAdminContent));
-}
-
 function fetchNodeInfo(request, response, desiredCommand) {
-  readSecretsAdminConfiguration(fetchNodeInfoPartTwo.bind(null, request, response, desiredCommand));
+  response.writeHead(200);
+  response.end(`{"myNodes": ${configuration.myNodes}}` );
 }
 
 function sshNodeToRemoteMachinePartFour(machineName, stdoutSoFar, response) {
@@ -54,18 +23,18 @@ function getSSHKeyFromMachine(theMachine) {
     return theMachine.sshKey;
   }
   if (theMachine.sshKeySameAs !== undefined) {
-    return configurationSecretsAdminContent.myNodes[theMachine.sshKeySameAs].sshKey;
+    return configuration.myNodes[theMachine.sshKeySameAs].sshKey;
   }
 }
 
 function sshNodeToRemoteMachineExecuteCommands(machineName, theCommand, response) {
-  if (!(machineName in configurationSecretsAdminContent.myNodes)) {
+  if (!(machineName in configuration.myNodes)) {
     response.writeHead(200);
     response.end(`Machine name: ${machineName} not found. `);
     return;
   }
   try {
-    var theMachine = configurationSecretsAdminContent.myNodes[machineName];
+    var theMachine = configuration.myNodes[machineName];
     var theConnection = new SSHClient();
     theConnection.on('ready', function() {
       response.writeHead(200);
@@ -116,15 +85,19 @@ function sshNodeToRemoteMachineExecuteCommands(machineName, theCommand, response
 }
 
 function sshNodeToOneRemoteMachineGitPull(request, response, desiredCommand) {
-  readSecretsAdminConfiguration(sshNodeToRemoteMachineExecuteCommands.bind(
-    null, desiredCommand.machineName, "cd Kanban\ngit reset HEAD --hard\ngit pull\nnpm install\ncd fabcoin\ngit pull", response
-  ));
+  sshNodeToRemoteMachineExecuteCommands(
+    desiredCommand.machineName, 
+    "cd Kanban\ngit reset HEAD --hard\ngit pull\nnpm install\ncd fabcoin\ngit pull", 
+    response
+  );
 }
 
 function sshNodeToOneRemoteMachineKillallFabcoind(request, response, desiredCommand) {
-  readSecretsAdminConfiguration(sshNodeToRemoteMachineExecuteCommands.bind(
-    null, desiredCommand.machineName, "killall fabcoind", response
-  ));
+  sshNodeToRemoteMachineExecuteCommands(
+    desiredCommand.machineName, 
+    "killall fabcoind", 
+    response
+  );
 }
 
 function sshNodeToOneRemoteMachineNodeRestart(request, response, desiredCommand) {
@@ -143,19 +116,20 @@ function sshNodeToOneRemoteMachineNodeRestart(request, response, desiredCommand)
   //
   //`cd Kanban\nnpm run daemonStop\nkillall node\nlsof -i tcp:${pathnames.ports.https} | awk 'NR!=1 {print $2}' | xargs kill\nnpm run daemonStart`
   //
-  readSecretsAdminConfiguration(sshNodeToRemoteMachineExecuteCommands.bind(
-    null, 
+  sshNodeToRemoteMachineExecuteCommands(
     desiredCommand.machineName, 
     `cd Kanban\nnpm run daemonStop\nnpm run daemonStart`, 
     response
-  ));
+  );
 }
 
 function sshNodeToOneRemoteMachineStartFabcoind(request, response, desiredCommand) {
   var theNet = desiredCommand.net;
-  readSecretsAdminConfiguration(sshNodeToRemoteMachineExecuteCommands.bind(
-    null, desiredCommand.machineName, `cd Kanban/fabcoin/src\n./fabcoind ${theNet} --daemon -profilingon`, response
-  ));
+  sshNodeToRemoteMachineExecuteCommands(
+    desiredCommand.machineName, 
+    `cd Kanban/fabcoin/src\n./fabcoind ${theNet} --daemon -profilingon`, 
+    response
+  );
 }
 
 function sshNodeToOneRemoteMachineDeleteFabcoinConfiguration(request, response, desiredCommand) {
@@ -165,15 +139,17 @@ function sshNodeToOneRemoteMachineDeleteFabcoinConfiguration(request, response, 
     theFolder = theNet.folder;
   } 
   console.log(`About to wipe folder: ${theFolder}` );
-  readSecretsAdminConfiguration(sshNodeToRemoteMachineExecuteCommands.bind(
-    null, desiredCommand.machineName, `rm -r .fabcoin/${theFolder}`, response
-  ));
+  sshNodeToRemoteMachineExecuteCommands(
+    desiredCommand.machineName, `rm -r .fabcoin/${theFolder}`, response
+  );
 }
 
 function sshNodeToOneRemoteMachineGitPullMakeFab(request, response, desiredCommand) {
-  readSecretsAdminConfiguration(sshNodeToRemoteMachineExecuteCommands.bind(
-    null, desiredCommand.machineName, `cd Kanban/fabcoin\ngit pull\nmake -j4`, response
-  ));
+  sshNodeToRemoteMachineExecuteCommands(
+    desiredCommand.machineName, 
+    `cd Kanban/fabcoin\ngit pull\nmake -j4`, 
+    response
+  );
 }
 
 module.exports = {

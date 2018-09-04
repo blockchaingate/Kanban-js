@@ -10,18 +10,18 @@ var maxRequestsRunning = 4;
 function fabcoinInitialize(request, response, desiredCommand) {
   numberRequestsRunning ++;
   if (numberRequestsRunning > maxRequestsRunning) {
-    response.writeHead(500);
+    response.writeHead(200);
     numberRequestsRunning --;
     return response.end(`Too many (${numberRequestsRunning}) requests running, maximum allowed: ${maxRequestsRunning}`);
   }
   if (desiredCommand[pathnames.fabcoinInitialization] === undefined) {
-    response.writeHead(400);
+    response.writeHead(200);
     numberRequestsRunning --;
     return response.end(`Request is missing the ${pathnames.fabcoinInitialization} entry. `);        
   }
   var theCallLabel = desiredCommand[pathnames.fabcoinInitialization];
   if (!(theCallLabel in pathnames.fabcoinInitializationProcedures)){
-    response.writeHead(400);
+    response.writeHead(200);
     numberRequestsRunning --;
     return response.end(`Fabcoin initialization call label ${theCallLabel} not found. `);    
   }

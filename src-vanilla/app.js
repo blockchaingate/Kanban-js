@@ -9,6 +9,7 @@ const pathnames = require('./pathnames');
 const https = require('https');
 const http = require('http');
 const colors = require('colors');
+const configuration = require('./configuration');
 
 require('./initialize_opencl_driver').initializeOpenCLDriver();
 //<- Creates and starts the openCL driver.
