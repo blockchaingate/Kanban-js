@@ -9,16 +9,59 @@ const path = require('path');
 const configuration = require('./configuration').configuration;
 
 
+function NodeKanbanGo(inputId) {
+  this.id = inputId;
+  this.notes = "";
+}
+
+NodeKanbanGo.prototype.runNodeFromNodeNumber = function(response) {
+  var lockFile = `${kanbanGoInitializerBackend.paths.dataDir}/node${this.id}/geth/LOCK`;
+  fs.unlink(lockFile, this.runNodeFromNodeNumberPartTwo.bind(this, response));
+}
+
+NodeKanbanGo.prototype.runNodeFromNodeNumberPartTwo = function(response, error) {
+  if (error !== null && error !== undefined) {
+    this.notes += error;
+    console.log(`Error while running geth node ${this.id}. ${error} `.red);
+  }
+  var theOptions = {
+    cwd: kanbanGoInitializerBackend.paths.gethPath,
+    env: process.env
+  };
+  var theDir = `${kanbanGoInitializerBackend.paths.dataDir}/node${this.id}`;
+  var thePort = this.id + 40107;
+  var theRPCPort = this.id + 4007;
+  var theArguments = [
+    "--datadir",
+    theDir,
+    "--networkid",
+    "211",
+    "--port",
+    thePort.toString(),
+    "--rpcport",
+    theRPCPort.toString()
+  ];
+  var command = kanbanGoInitializerBackend.paths.geth;
+  kanbanGoInitializerBackend.runShell(command, theArguments, theOptions, this.id);
+  kanbanGoInitializerBackend.numberOfStartedNodes ++;
+  kanbanGoInitializerBackend.runNodesFinish(response);
+}
+
 function KanbanGoInitializerBackend() {
+  this.numberRequestsRunning = 0;
+  this.maxRequestsRunning = 4;
   this.handlers = {
-    createNodes: {
+    runNodes: {
 
     }
   };
   this.paths = {
     geth: null,
+    gethPath: null,
     dataDir: null
   };
+  this.nodes = [];
+  this.numberOfStartedNodes = 0;
   this.computePaths();
 }
 
@@ -54,9 +97,6 @@ KanbanGoInitializerBackend.prototype.handleRPCURLEncodedInput = function(request
   return this.handleRPCArguments(request, response, queryCommand);
 }
 
-var numberRequestsRunning = 0;
-var maxRequestsRunning = 4;
-
 KanbanGoInitializerBackend.prototype.computePaths = function() {
   if (this.paths.geth !== null) {
     callback();
@@ -77,6 +117,7 @@ KanbanGoInitializerBackend.prototype.computePaths = function() {
       var currentPathGeth = currentPath + "geth";
       if (fs.existsSync(currentPathGeth)) {
         this.paths.geth = currentPathGeth;
+        this.paths.gethPath = currentPath;
       }
     }
     if (this.paths.dataDir === null) {
@@ -104,20 +145,76 @@ KanbanGoInitializerBackend.prototype.computePaths = function() {
   }
 }
 
-KanbanGoInitializerBackend.prototype.createNodes = function(response, queryCommand) {
+KanbanGoInitializerBackend.prototype.runNodesFinish = function(response) {
+  if (this.numberOfStartedNodes < this.nodes.length) {
+    return;
+  }
+  var result = {};
+  result.result = `Spawned ${this.nodes.length} nodes.`
+  var nodeNotes = [];
+  for (var counterNodes = 0; counterNodes < this.nodes.length; counterNodes ++) {
+    if (this.nodes[counterNodes].notes !== "") {
+      nodeNotes[counterNodes] = this.nodes[counterNodes].notes;
+    }
+  }
+  if (nodeNotes.length > 0) {
+    result.notes = nodeNotes;
+  }
+  response.writeHead(200);
+  response.end(JSON.stringify(result));
+}
+
+KanbanGoInitializerBackend.prototype.runNodes = function(response, queryCommand) {
+  var candidateNumberOfNodes = Number(queryCommand.numberOfNodes);
+  var maxNumberOfNodes = 100;
+  if (candidateNumberOfNodes > maxNumberOfNodes || candidateNumberOfNodes < 1) {
+    response.writeHead(400);
+    response.end(`Bad number of nodes: ${candidateNumberOfNodes}. I expected a number between 1 and ${maxNumberOfNodes}.`);
+    return;
+  }
+  if (this.nodes.length > 0) {
+    this.numberRequestsRunning --;
+    response.writeHead(200);
+    response.end(`${this.nodes.length} nodes already spanned. Restart the server if you want a new number of nodes. `);
+    return;
+  }
+  for (var counterNode = 0; counterNode < candidateNumberOfNodes; counterNode ++) {
+    this.nodes.push( new NodeKanbanGo(counterNode));
+  }
+  for (var counterNode = 0; counterNode < this.nodes.length; counterNode ++) {
+    this.nodes[counterNode].runNodeFromNodeNumber(response);
+  }
+}
+
+KanbanGoInitializerBackend.prototype.runShell = function(command, theArguments, theOptions, id) {
+  //console.log(`DEBUG: Running ` +`${command}`.green);
+  //console.log(`DEBUG: Arguments: ` + `[${theArguments.join(", ")}]`.blue);
+  var child = childProcess.spawn(command, theArguments, theOptions);
+  child.stdout.on('data', function(data) {
+    console.log(`[shell ${id}]` + data.toString());
+  });
+  child.stderr.on('data', function(data) {
+    console.log(`[shell ${id}] ` + data.toString());
+  });
+  child.on('error', function(data) {
+    console.log(`[shell ${id}] ` + data.toString());
+  });
+  child.on('exit', function(code) {
+    console.log(`Geth ${id} exited with code: ${code}`.green);
+  });
 }
 
 KanbanGoInitializerBackend.prototype.handleRPCArguments = function(request, response, queryCommand) {
-  numberRequestsRunning ++;
-  if (numberRequestsRunning > maxRequestsRunning) {
+  this.numberRequestsRunning ++;
+  if (this.numberRequestsRunning > this.maxRequestsRunning) {
     response.writeHead(500);
-    numberRequestsRunning --;
-    return response.end(`Too many (${numberRequestsRunning}) requests running, maximum allowed: ${maxRequestsRunning}. `);
+    this.numberRequestsRunning --;
+    return response.end(`Too many (${this.numberRequestsRunning}) requests running, maximum allowed: ${this.maxRequestsRunning}. `);
   }
   var theCallLabel = queryCommand[pathnames.rpcCall];
   if (!(theCallLabel in kanbanGOInitialization.rpcCalls)) {
     response.writeHead(400);
-    numberRequestsRunning --;
+    this.numberRequestsRunning --;
     return response.end(`KanbanGO initialization call label ${theCallLabel} not found. `);    
   }
   if (!(theCallLabel in this.handlers)) {
@@ -133,67 +230,12 @@ KanbanGoInitializerBackend.prototype.handleRPCArguments = function(request, resp
     response.writeHead(500);
     return response.end(`{"error": "Server error: handler ${theCallLabel}"} declared but no implementation found. `);
   }
-  return currentFunction.bind(this)(response, queryCommand);
-/*  var theCommand = `${theCall.command}`;
-  const defaultOptions = {
-    cwd: undefined,
-    env: process.env
-  };
-  console.log(`Executing fabcoin initialization command: ${theCommand}.`.blue);
-  console.log(`Arguments: [${theArguments.join(", ")}].`.green);
-  if (theCall.path !== undefined && theCall.path !== null && theCall.path !== "") {
-    if (theCall.path in pathnames.pathsComputedAtRunTime) {
-      console.log(`Path substitution: ${theCall.path} is replaced by: ${pathnames.pathsComputedAtRunTime[theCall.path]}`);
-      theCall.path = pathnames.pathsComputedAtRunTime[theCall.path];
-    }
-    defaultOptions.cwd = theCall.path;
-    console.log(`Command will start from: ${defaultOptions.cwd}`.yellow);
-  }
-  var finalData = "";
-  var sentResponse = false;
   try {
-    var child = childProcess.spawn(theCommand, theArguments, defaultOptions);
-    child.stdout.on('data', function(data) {
-      console.log(data.toString());
-      finalData += data.toString();
-    });
-    child.stderr.on('data', function(data) {
-      console.log(data.toString());
-      finalData += data.toString();
-    });
-    child.on('error', function(data) {
-      console.log(data.toString());
-      numberRequestsRunning --;
-      if (!sentResponse) {
-        sentResponse = true;
-        response.writeHead(200);
-        response.end(`{"error": "${data}", "data": "${finalData}"}`);
-      }
-    });
-    child.on('exit', function(code) {
-      console.log(`Fabcoin initialization exited with code: ${code}`.green);
-      numberRequestsRunning --;
-      if (code === 0) {
-        response.writeHead(200);
-        if (finalData === "") {
-          finalData = `Nothing to output: most likely your command was executed correctly.`;
-        }
-        response.end(finalData);
-      } else {
-        if (!sentResponse) {
-          sentResponse = true;
-          response.writeHead(200);
-          response.end(`{"error": "${finalData}"}`);
-        }
-      }
-    });
+    return currentFunction.bind(this)(response, queryCommand);
   } catch (e) {
     response.writeHead(500);
-    numberRequestsRunning --;
-    response.end(`Eror: ${e}. `);
-    console.log(`Error: ${e}`);
+    return response.end(`Server error: ${e}`);
   }
-  return;*/
 }
 
 var kanbanGoInitializerBackend = new KanbanGoInitializerBackend();

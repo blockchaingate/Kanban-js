@@ -12,8 +12,8 @@ function KanbanGoInitializer() {
   this.idOutput = ids.defaults.outputFabcoinInitialization;
   var inputInitialization = ids.defaults.kanbanGO.inputInitialization;
   this.theFunctions = {
-    createNodes: {
-      rpcCall: kanbanGoInitialization.rpcCalls.createNodes.rpcCall,
+    runNodes: {
+      rpcCall: kanbanGoInitialization.rpcCalls.runNodes.rpcCall,
       inputs: {
         numberOfNodes: inputInitialization.numberOfNodes
       }

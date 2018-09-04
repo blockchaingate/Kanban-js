@@ -2,8 +2,8 @@
 const pathnames = require('./pathnames');
 
 var rpcCalls = {
-  createNodes: {
-    rpcCall: "createNodes",
+  runNodes: {
+    rpcCall: "runNodes",
     mandatoryFixedArguments: { //<- values give defaults, null for none
     },
     mandatoryModifiableArguments: { //<- values give defaults, null for none
