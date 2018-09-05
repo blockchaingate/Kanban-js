@@ -34,15 +34,20 @@ function Page() {
       },
       updateFunction: myNodes.updateMyNodes
     },
+    kanbanJS: {
+      ids: {
+        page: ids.defaults.pages.kanbanJS
+      }
+    },
     kanbanPlusPlus: {
       ids: {
-        page: ids.defaults.pageKanbanPlusPlus
+        page: ids.defaults.pages.kanbanPlusPlus
       },
       updateFunction: null
     },
     kanbanGO: {
       ids: {
-        page: ids.defaults.pageKanbanGO
+        page: ids.defaults.pages.kanbanGO
       },
       updateFunction: null
     },
@@ -109,7 +114,8 @@ Page.prototype.initializeInputPlaceholders = function() {
     ids.defaults.kanbanGO.inputSchnorr,
     ids.defaults.kanbanGO.inputAggregateSignature,
     ids.defaults.kanbanPlusPlus.inputSchnorrSignature,
-    ids.defaults.kanbanPlusPlus.inputAggregateSignature
+    ids.defaults.kanbanPlusPlus.inputAggregateSignature,
+    ids.defaults.kanbanJS.inputSchnorr
   ]
   for (var collectionCounter = 0; collectionCounter < collectionsToPlaceholderify.length; collectionCounter ++) {
     for (var label in collectionsToPlaceholderify[collectionCounter]) {

@@ -10,10 +10,21 @@ var defaults = {
   pageMine: "pageMine",
   pageProfiling: "pageProfiling",
   pageFabcoinInitialization: "pageFabcoinInitialization",
-  pageKanbanPlusPlus: "pageKanbanPlusPlus",
-  pageKanbanGO: "pageKanbanGO",
+  pages: {
+    kanbanJS: "pageKanbanJS",
+    kanbanPlusPlus: "pageKanbanPlusPlus",
+    kanbanGO: "pageKanbanGO",
+  },
   progressReport: "spanProgressReport",
   spanPingColumnHeader: "spanPingColumnHeader",
+  kanbanJS: {
+    inputSchnorr: {
+      message: "inputKBJSMessage",
+      privateKey: "inputKBJSPrivateKey",
+      publicKey: "inputKBJSPublicKey"
+    },
+    outputKBJSCrypto: "divOutputKBJSCryptoTest"
+  },
   kanbanGO: {
     inputSchnorr: {
       message: "inputKBGOSchnorrMessage",

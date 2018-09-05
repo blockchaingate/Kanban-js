@@ -7,6 +7,7 @@ const childProcess = require("child_process");
 const fs = require('fs');
 const path = require('path');
 const configuration = require('./configuration').configuration;
+const cryptoKanban = require('./crypto/crypto_kanban');
 
 
 function NodeKanbanGo(inputId) {

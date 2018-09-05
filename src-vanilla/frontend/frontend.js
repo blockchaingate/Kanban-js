@@ -8,6 +8,9 @@ window.kanban = {
     profiling: require('./fabcoin_rpc_profiling'),
     forceRPCPOST: false
   },
+  kanbanJS: {
+    crypto: require('./kanbanjs/crypto')
+  },
   kanbanPlusPlus: {
     general: require('./kanban_plus_plus')
   },
