@@ -79,7 +79,7 @@ CurvePoint.prototype.toBytes = function() {
   if (this.point === null) {
     return "(uninitialized)";
   }
-  return this.point.encodeCompressed();
+  return Buffer.from(this.point.encodeCompressed());
 }
 
 CurvePoint.prototype.toHex = function() {
@@ -87,6 +87,20 @@ CurvePoint.prototype.toHex = function() {
     return "(uninitialized)";
   }
   return Buffer.from(this.point.encodeCompressed()).toString('hex');
+}
+
+CurvePoint.prototype.toBase58 = function() {
+  if (this.point === null) {
+    return "(uninitialized)";
+  }
+  return encodingPoint.toBase58(this.toBytes())
+}
+
+CurvePoint.prototype.toBase58Check = function() {
+  if (this.point === null) {
+    return "(uninitialized)";
+  }
+  return encodingPoint.toBase58Check(this.toBytes())
 }
 
 CurvePoint.prototype.fromHex = function(input) {

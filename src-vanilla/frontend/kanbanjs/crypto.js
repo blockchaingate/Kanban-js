@@ -4,7 +4,7 @@ const submitRequests = require('../submit_requests');
 const ids = require('../ids_dom_elements');
 const jsonToHtml = require('../json_to_html');
 const cryptoKanban = require('../../crypto/crypto_kanban');
-const encodings = require('../../crypto/encodings').encodings;
+const encodingDefault = require('../../crypto/encodings').encodingDefault;
 
 function TestKanbanJS() {
   var inputSchnorr = ids.defaults.kanbanJS.inputSchnorr;
@@ -148,11 +148,11 @@ TestKanbanJS.prototype.testFABAddress = function(theArguments) {
   var result = {};
   result.input = theArguments;
   var publicKey = new cryptoKanban.CurvePoint();
-  publicKey.fromHex(theArguments.publicKeyHex);
+  publicKey.fromArbitrary(theArguments.publicKeyHex);
   var theBytes = publicKey.computeFABAddressBytes();
-  result.FABAddressBase58 = encodings.toBase58(theBytes);
-  result.FABAddressBase58Check = encodings.toBase58Check(theBytes);
-  result.FABAddressHex = encodings.toHex(theBytes);
+  result.FABAddressBase58 = encodingDefault.toBase58(theBytes);
+  result.FABAddressBase58Check = encodingDefault.toBase58Check(theBytes);
+  result.FABAddressHex = encodingDefault.toHex(theBytes);
   return result;
 }
 
