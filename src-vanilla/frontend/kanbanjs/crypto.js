@@ -4,6 +4,7 @@ const submitRequests = require('../submit_requests');
 const ids = require('../ids_dom_elements');
 const jsonToHtml = require('../json_to_html');
 const cryptoKanban = require('../../crypto/crypto_kanban');
+const encodings = require('../../crypto/encodings').encodings;
 
 function TestKanbanJS() {
   var inputSchnorr = ids.defaults.kanbanJS.inputSchnorr;
@@ -40,6 +41,16 @@ function TestKanbanJS() {
     testPrivateKeyGeneration: {
       outputs: {
         privateKeyHex: inputSchnorr.privateKey
+      }
+    },
+    testFABAddress: {
+      inputs: {
+        publicKeyHex: inputSchnorr.publicKey
+      }
+    },
+    testEthereumAddress: {
+      inputs: {
+        publicKeyHex: inputSchnorr.publicKey
       }
     }
   };
@@ -105,7 +116,8 @@ TestKanbanJS.prototype.testKeccak = function(theArguments) {
 TestKanbanJS.prototype.testPublicKeyFromPrivate = function(theArguments) {
   var result = {};
   result.input = theArguments;
-  var curveExponent = new cryptoKanban.CurveExponent(Buffer.from(theArguments.privateKey, 'hex'));
+  var curveExponent = new cryptoKanban.CurveExponent();
+  curveExponent.fromArbitrary(theArguments.privateKey);
   if (!curveExponent.isInitialized()) {
     result.error = "Exponent generation failed. ";
     return result;
@@ -120,6 +132,27 @@ TestKanbanJS.prototype.testPrivateKeyGeneration = function(theArguments) {
   var curveExponent = new cryptoKanban.CurveExponent();
   curveExponent.generateAtRandom();
   result.privateKeyHex = curveExponent.toHex();
+  return result;
+}
+
+TestKanbanJS.prototype.testEthereumAddress = function(theArguments) {
+  var result = {};
+  result.input = theArguments;
+  var publicKey = new cryptoKanban.CurvePoint();
+  publicKey.fromHex(theArguments.publicKeyHex);
+  result.ethereumAddress = publicKey.computeEthereumAddressHex();
+  return result;
+}
+
+TestKanbanJS.prototype.testFABAddress = function(theArguments) {
+  var result = {};
+  result.input = theArguments;
+  var publicKey = new cryptoKanban.CurvePoint();
+  publicKey.fromHex(theArguments.publicKeyHex);
+  var theBytes = publicKey.computeFABAddressBytes();
+  result.FABAddressBase58 = encodings.toBase58(theBytes);
+  result.FABAddressBase58Check = encodings.toBase58Check(theBytes);
+  result.FABAddressHex = encodings.toHex(theBytes);
   return result;
 }
 

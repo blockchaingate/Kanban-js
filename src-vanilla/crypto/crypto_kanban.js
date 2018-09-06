@@ -2,9 +2,58 @@
 
 const Elliptic = require('elliptic');
 const EllipticKeyPair = require('elliptic/lib/elliptic/ec/key');
-const hasherSha3 = require('js-sha3');
-const Ripemd160 = require('ripemd160');
+const hashes = require('./hashes').hashes;
+const encodings = require('./encodings');
 
+var encodingPoint = new encodings.Encoding({
+  name: "point_secp256k1",
+  allowedRawLengths: {
+    33: true,
+    65: true,
+  },
+  allowedHexLengths: {
+    66: true,
+    130: true,
+  },
+  allowedHexCheckLengths: {
+    74: true,
+    138: true,
+  },
+  allowedBase58Lengths: {
+    44: true,
+		45: true,
+  },
+  allowedBase58CheckLengths: {
+		50: true,
+  }
+});
+
+var encodingExponent = new encodings.Encoding({
+  name: "exponent_secp256k1",
+  allowedRawLengths: {
+    32: true,
+    33: true,
+    34: true,
+  },
+  allowedHexLengths: {
+    64: true,
+    66: true,
+    68: true,
+  },
+  allowedHexCheckLengths: {
+    72: true,
+    74: true,
+    76: true,
+  },
+  allowedBase58Lengths: {
+    45: true,
+		46: true,
+		47: true,
+  },
+  allowedBase58CheckLengths: {
+		52: true,
+  }
+});
 
 var secp256k1 = new Elliptic.ec('secp256k1');
 
@@ -15,58 +64,125 @@ function CurveExponent(inputBytesOptional) {
   }
 } 
 
-function CurvePoint() { 
+function CurvePoint() {
   this.point = null;
 } 
 
 CurveExponent.prototype.generateAtRandom = function() {
-  this.scalar = secp256k1.genKeyPair();
+  this.scalar = secp256k1.genKeyPair().priv;
 }
 
-CurvePoint.prototype.exponentiateMe = function (theCurveExponent) {
-  this.point = this.point.mul(theCurveExponent.scalar);
+CurvePoint.prototype.exponentiateMe = function(theCurveExponent) {
 }
 
-CurvePoint.prototype.toBytes = function () {
+CurvePoint.prototype.toBytes = function() {
   if (this.point === null) {
     return "(uninitialized)";
   }
   return this.point.encodeCompressed();
 }
 
-CurvePoint.prototype.toHex = function () {
+CurvePoint.prototype.toHex = function() {
   if (this.point === null) {
     return "(uninitialized)";
   }
   return Buffer.from(this.point.encodeCompressed()).toString('hex');
 }
 
+CurvePoint.prototype.fromHex = function(input) {
+  this.fromBytes(Buffer.from(input, "hex"));
+}
+
+CurvePoint.prototype.fromBytes = function(input) {
+  var thePair = new EllipticKeyPair(secp256k1, {
+    pub: input
+  }); 
+  this.point = thePair.pub;
+}
+
+CurvePoint.prototype.fromArbitrary = function(input) {
+  var bytes = encodingPoint.fromArbitrary(input);
+  if (bytes === null) {
+    throw `Failed to convert ${input} to curve point. `;
+  }
+  return this.fromBytes(bytes);
+}
+
+CurvePoint.prototype.computeEthereumAddressBytes = function() {
+  if (this.point === null) {
+    throw "Uninitialized curve point";
+  }
+  var theKeccak = hashes.keccak_256(this.toBytes());
+  return theKeccak.slice(12);
+}
+
+CurvePoint.prototype.computeEthereumAddressHex = function() {
+  if (this.point === null) {
+    throw "Uninitialized curve point";
+  }
+  var ethereumBytes = this.computeEthereumAddressBytes(); 
+  var result = Buffer.from(ethereumBytes).toString('hex');
+  return result;
+}
+
+CurvePoint.prototype.computeFABAddressBytes = function() {
+  if (this.point === null) {
+    throw "Uninitialized curve point";
+  }
+  var shaedBytes = hashes.sha256(this.toBytes());
+  var ripemd160Bytes = hashes.ripemd160(shaedBytes);
+  return ripemd160Bytes;
+}
+
+CurvePoint.prototype.computeFABAddressHex = function() {
+  if (this.point === null) {
+    throw "Uninitialized curve point";
+  }
+  var ethereumBytes = this.computeFABAddressBytes(); 
+  var result = Buffer.from(ethereumBytes).toString('hex');
+  return result;
+}
+
 CurveExponent.prototype.fromBytes = function(input) {
-  this.scalar = new EllipticKeyPair(
+  if (input.length === 33 || input.length === 34) {
+    input = input.slice(1, 33);
+  }
+  var keyPair = new EllipticKeyPair(
     secp256k1, {
       priv: Buffer.from(input).toString('hex')
     }
   );
+  this.scalar = keyPair.priv;
+}
+
+CurveExponent.prototype.fromArbitrary = function(input) {
+  var bytes = encodingExponent.fromArbitrary(input);
+  if (bytes === null) {
+    throw `Failed to convert ${input} to curve exponent. `;
+  }
+  return this.fromBytes(bytes);
 }
 
 CurveExponent.prototype.toBytes = function() {
+  return Buffer.from(this.scalar.toString(16, 2), "hex");
 }
 
 CurveExponent.prototype.toHex = function() {
   if (this.scalar === null) {
     return "(null)";
   }
-  if (this.scalar.priv === null) {
-    return "(uninitialized)";
+  return this.toBytes().toString('hex');
+}
+
+CurveExponent.prototype.toBase58 = function() {
+  if (this.scalar === null) {
+    return "(null)";
   }
-  return this.scalar.getPrivate('hex');
+  return encodings.encodingDefault.toBase58(this.toBytes());
 }
 
 CurveExponent.prototype.isInitialized = function() {
   if (this.scalar === null) {
-    return false;
-  }
-  if (this.scalar.priv === null) {
     return false;
   }
   return true;
@@ -76,53 +192,12 @@ CurveExponent.prototype.getExponent = function() {
   if (!this.isInitialized()) {
     throw "Attempt to exponentiate non-initialized curve point. ";
   }
-  var result = new CurvePoint();
-  
-  result.point = this.scalar.ec.g.mul(this.scalar.priv);
+  var result = new CurvePoint();  
+  result.point = secp256k1.g.mul(this.scalar);
   return result;
 }
 
-
-//Wrapper around library: js-sha3 
-function Hashers() {
-}
-
-Hashers.prototype.sha3_256_ToHex = function(input) {
-  return hasherSha3.sha3_256(input);
-}
-
-Hashers.prototype.sha3_256 = function(input) {
-  var hasher = hasherSha3.sha3_256.create();
-  hasher.update(input);
-  return hasher.arrayBuffer()
-}
-
-Hashers.prototype.keccak_ToHex = function(input) {
-  return hasherSha3.keccak256(input);
-}
-
-Hashers.prototype.keccak_256 = function(input) {
-  var hasher = hasherSha3.keccak256.create();
-  hasher.update(input);
-  return hasher.arrayBuffer()
-}
-
-Hashers.prototype.ripemd160 = function (input) {
-  var hasher = new Ripemd160();
-  hasher.update(input);
-  return hasher.digest();
-}
-
-Hashers.prototype.ripemd160_ToHex = function (input) {
-  var hasher = new Ripemd160();
-  hasher.update(input);
-  return hasher.digest('hex');
-}
-
-var hashes = new Hashers();  
-
 module.exports = {
-  hashes,
   secp256k1,
   CurveExponent,
   CurvePoint
