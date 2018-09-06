@@ -20,7 +20,7 @@ function CurvePoint() {
 } 
 
 CurveExponent.prototype.generateAtRandom = function() {
-  this.scalar = Elliptic.genKeyPair();
+  this.scalar = secp256k1.genKeyPair();
 }
 
 CurvePoint.prototype.exponentiateMe = function (theCurveExponent) {
@@ -28,10 +28,16 @@ CurvePoint.prototype.exponentiateMe = function (theCurveExponent) {
 }
 
 CurvePoint.prototype.toBytes = function () {
+  if (this.point === null) {
+    return "(uninitialized)";
+  }
   return this.point.encodeCompressed();
 }
 
 CurvePoint.prototype.toHex = function () {
+  if (this.point === null) {
+    return "(uninitialized)";
+  }
   return Buffer.from(this.point.encodeCompressed()).toString('hex');
 }
 
@@ -47,10 +53,29 @@ CurveExponent.prototype.toBytes = function() {
 }
 
 CurveExponent.prototype.toHex = function() {
+  if (this.scalar === null) {
+    return "(null)";
+  }
+  if (this.scalar.priv === null) {
+    return "(uninitialized)";
+  }
   return this.scalar.getPrivate('hex');
 }
 
+CurveExponent.prototype.isInitialized = function() {
+  if (this.scalar === null) {
+    return false;
+  }
+  if (this.scalar.priv === null) {
+    return false;
+  }
+  return true;
+}
+
 CurveExponent.prototype.getExponent = function() {
+  if (!this.isInitialized()) {
+    throw "Attempt to exponentiate non-initialized curve point. ";
+  }
   var result = new CurvePoint();
   
   result.point = this.scalar.ec.g.mul(this.scalar.priv);

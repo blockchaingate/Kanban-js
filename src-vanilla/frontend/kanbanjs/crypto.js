@@ -32,6 +32,14 @@ function TestKanbanJS() {
     testPublicKeyFromPrivate: {
       inputs: {
         privateKey: inputSchnorr.privateKey
+      },
+      outputs: {
+        publicKeyHex: inputSchnorr.publicKey
+      }
+    },
+    testPrivateKeyGeneration: {
+      outputs: {
+        privateKeyHex: inputSchnorr.privateKey
       }
     }
   };
@@ -52,8 +60,22 @@ TestKanbanJS.prototype.updateFields = function(parsedInput, outputs) {
   }
 }
 
-TestKanbanJS.prototype.callbackStandard = function(input) {
-  jsonToHtml.writeJSONtoDOMComponent(input, ids.defaults.kanbanJS.outputKBJSCrypto, optionsForKanbanJSStandard);
+TestKanbanJS.prototype.callbackStandard = function(functionLabel, input) {
+  var resultHTML = jsonToHtml.getHtmlFromArrayOfObjects(input, optionsForKanbanJSStandard);
+  var header = "";
+  if (input.resultHTML !== null && input.resultHTML !== undefined) {
+    header += input.resultHTML + "<br>"; 
+  }
+  if (input.error !== null && input.error !== undefined) {
+    header += `<b>Error:</b> <span style='color:red'>${input.error}</span><br>`;
+  }
+  if (input.reason !== null && input.reason !== undefined) {
+    header += input.reason + "<br>";
+  }
+  resultHTML = header + resultHTML;
+  document.getElementById(ids.defaults.kanbanJS.outputKBJSCrypto).innerHTML = resultHTML;
+  var currentFunction = this.theFunctions[functionLabel];
+  this.updateFields(input, currentFunction.outputs);
 }
 
 TestKanbanJS.prototype.testSha3 = function(theArguments) {
@@ -84,8 +106,20 @@ TestKanbanJS.prototype.testPublicKeyFromPrivate = function(theArguments) {
   var result = {};
   result.input = theArguments;
   var curveExponent = new cryptoKanban.CurveExponent(Buffer.from(theArguments.privateKey, 'hex'));
+  if (!curveExponent.isInitialized()) {
+    result.error = "Exponent generation failed. ";
+    return result;
+  }
   result.privateKeyHexRecoded = curveExponent.toHex();
   result.publicKeyHex = curveExponent.getExponent().toHex();
+  return result;
+}
+
+TestKanbanJS.prototype.testPrivateKeyGeneration = function(theArguments) {
+  var result = {};
+  var curveExponent = new cryptoKanban.CurveExponent();
+  curveExponent.generateAtRandom();
+  result.privateKeyHex = curveExponent.toHex();
   return result;
 }
 
@@ -107,7 +141,7 @@ TestKanbanJS.prototype.run = function(functionLabel) {
     }
   }
   var result = this[functionLabel](theArguments);
-  this.callbackStandard(result)
+  this.callbackStandard(functionLabel, result)
 }
 
 var testFunctions = new TestKanbanJS();

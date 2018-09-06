@@ -192,26 +192,29 @@ TestKanbanGO.prototype.updateFields = function(parsedInput, outputs) {
 TestKanbanGO.prototype.callbackStandard = function(functionLabel, input, output) {
   var resultHTML = jsonToHtml.getHtmlFromArrayOfObjects(input, optionsForKanbanGOStandard);
   var theFunction = this.theFunctions[functionLabel];
-  var parsedInput = JSON.parse(input);
+  var header = "";
   if (typeof output === "string") {
     output = document.getElementById(output);
   }
-  var header = "";
-  if (parsedInput.resultHTML !== null && parsedInput.resultHTML !== undefined) {
-    header += parsedInput.resultHTML + "<br>"; 
-  }
-  if (parsedInput.error !== null && parsedInput.error !== undefined) {
-    header += `<b>Error:</b> <span style='color:red'>${parsedInput.error}</span><br>`;
-  }
-  if (parsedInput.reason !== null && parsedInput.reason !== undefined) {
-    header += parsedInput.reason + "<br>";
+  try {
+    var parsedInput = JSON.parse(input);
+    if (parsedInput.resultHTML !== null && parsedInput.resultHTML !== undefined) {
+      header += parsedInput.resultHTML + "<br>"; 
+    }
+    if (parsedInput.error !== null && parsedInput.error !== undefined) {
+      header += `<b>Error:</b> <span style='color:red'>${parsedInput.error}</span><br>`;
+    }
+    if (parsedInput.reason !== null && parsedInput.reason !== undefined) {
+      header += parsedInput.reason + "<br>";
+    }
+    if (theFunction.outputs !== null && theFunction.outputs !== undefined) {
+      this.updateFields(parsedInput, theFunction.outputs);
+    }
+  } catch (e) {
+    header = `<b>Error:</b> ${e}<br>`;
   }
   resultHTML = header + resultHTML;
   output.innerHTML = resultHTML;
-  if (theFunction.outputs === null || theFunction.outputs === undefined) {
-    return;
-  }
-  this.updateFields(parsedInput, theFunction.outputs);
 }
 
 TestKanbanGO.prototype.testClear = function() {

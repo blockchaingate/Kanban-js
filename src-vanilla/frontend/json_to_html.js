@@ -187,6 +187,7 @@ function getHtmlFromArrayOfObjects(input, options) {
   var result = "";
   result += rawButton;
   result += clearButton;
+  result += "<br>";
   if (typeof inputJSON === "object" && !Array.isArray(inputJSON)) {
     inputJSON = [inputJSON];
   }

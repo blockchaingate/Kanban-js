@@ -150,7 +150,7 @@
     <input type = "text" class = "inputCrypto" id = "inputAddressDefault" size = "90" placeholder = "fab address"></input><br>
     <input type = "text" class = "inputCrypto" id = "inputPrivateKeySchnorrDefault" size = "90" placeholder = "private key Schnorr"></input><br>
     <input type = "text" class = "inputCrypto" id = "inputNoncesDefault" size = "90" placeholder = "nonce"></input><br>
-    <input type = "text" class = "inputCrypto" id = "inputPublicKeyDefault" size = "90" placeholder = "pub key"></input><br>
+    <input type = "text" class = "inputCrypto" id = "inputPublicKeyDefault" size = "90" placeholder = "public key"></input><br>
     <input type = "text" class = "inputCrypto" id = "inputSignatureDefault" size = "90" placeholder = "signature"></input><br>
     <input type = "text" class = "inputCrypto" id = "inputOutputSha3DigestDefault" size = "90" placeholder = "result sha3 digest"></input>
   </td>
@@ -218,7 +218,7 @@
     <input type = "text" class = "inputCrypto" id = "inputKBGOSchnorrMessage" size = "90" placeholder = "message"></input><br>
     <input type = "text" class = "inputCrypto" id = "inputKBGOSchnorrPrivateKey" size = "90" placeholder = "private key Schnorr"></input><br>
     <input type = "text" class = "inputCrypto" id = "inputKBGOSchnorrNonce" size = "90" placeholder = "nonce"></input><br>
-    <input type = "text" class = "inputCrypto" id = "inputKBGOSchnorrPublicKey" size = "90" placeholder = "pub key"></input><br>
+    <input type = "text" class = "inputCrypto" id = "inputKBGOSchnorrPublicKey" size = "90" placeholder = "public key"></input><br>
     <input type = "text" class = "inputCrypto" id = "inputKBGOSchnorrSignature" size = "90" placeholder = "signature"></input><br>
     <input type = "text" class = "inputCrypto" id = "inputKBGOSchnorrSha3Digest" size = "90" placeholder = "result sha3 digest"></input>
   </td>
@@ -274,6 +274,7 @@
       <tr><td><button class = "buttonStandard" style = "width: 100px" onclick = "window.kanban.kanbanJS.crypto.testFunctions.run('testKeccak')"><b>Keccak</b></button></td></tr>
       <tr><td><button class = "buttonStandard" style = "width: 100px" onclick = "window.kanban.kanbanJS.crypto.testFunctions.run('testRipemd160')"><b>Ripemd 160</b></button></td></tr>
       <tr><td style = "text-align: center; border-bottom: 1px solid black; font-size: x-small;"><span>Schnorr</span></td></tr>
+      <tr><td><button class = "buttonStandard" style = "width: 100px" onclick = "window.kanban.kanbanJS.crypto.testFunctions.run('testPrivateKeyGeneration')"><b style = 'color: red'>Private key</b></button></td></tr>
       <tr><td><button class = "buttonStandard" style = "width: 100px" onclick = "window.kanban.kanbanJS.crypto.testFunctions.run('testPublicKeyFromPrivate')"><b>Public key</b></button></td></tr>
     </table>
   </td>
@@ -289,8 +290,6 @@
     <div id = "divOutputKBJSCryptoTest" style = "font-family:'Courier New', Courier, monospace" ></div>
   </div><!--divControlPanelDefault-->  
 </div>
-
-
 
 <div class = "divMainPage" id = "pageSend">
   <div class = "divControlPanelDefault">
