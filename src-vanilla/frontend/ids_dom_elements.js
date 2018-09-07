@@ -50,10 +50,11 @@ var defaults = {
       aggregateSignature: "inputKBGOAggregateSignature",
     },
     inputInitialization: {
-      numberOfNodes: "inputNumberOfGethNodes"
+      numberOfNodes: "inputKBGONumberOfGethNodes"
     },
     outputInitialization: "divFabcoinInitialization",
-    outputKBGOTest: "divOutputKBGOTest"
+    outputKBGOTest: "divOutputKBGOTest",
+    outputKanbanInitialization: "divOutputMyLocalKanbanNodes"
   },
   kanbanPlusPlus: {
     inputSchnorrSignature: {

@@ -6,9 +6,11 @@ const pathnames = require('./pathnames');
 const childProcess = require("child_process");
 const fs = require('fs');
 const path = require('path');
-const configuration = require('./configuration');
-const cryptoKanban = require('./crypto/crypto_kanban');
+require('colors');
 
+function getInitializer() {
+  return global.kanban.kanbanGOInitializer;
+}
 
 function NodeKanbanGo(inputId) {
   this.id = inputId;
@@ -16,7 +18,7 @@ function NodeKanbanGo(inputId) {
 }
 
 NodeKanbanGo.prototype.runNodeFromNodeNumber = function(response) {
-  var lockFile = `${kanbanGoInitializerBackend.paths.dataDir}/node${this.id}/geth/LOCK`;
+  var lockFile = `${getInitializer().paths.dataDir}/node${this.id}/geth/LOCK`;
   fs.unlink(lockFile, this.runNodeFromNodeNumberPartTwo.bind(this, response));
 }
 
@@ -25,11 +27,12 @@ NodeKanbanGo.prototype.runNodeFromNodeNumberPartTwo = function(response, error) 
     this.notes += error;
     console.log(`Error while running geth node ${this.id}. ${error} `.red);
   }
+  var initializer = getInitializer();
   var theOptions = {
-    cwd: kanbanGoInitializerBackend.paths.gethPath,
+    cwd: initializer.paths.gethPath,
     env: process.env
   };
-  var theDir = `${kanbanGoInitializerBackend.paths.dataDir}/node${this.id}`;
+  var theDir = `${initializer.paths.dataDir}/node${this.id}`;
   var thePort = this.id + 40107;
   var theRPCPort = this.id + 4007;
   var theArguments = [
@@ -42,13 +45,13 @@ NodeKanbanGo.prototype.runNodeFromNodeNumberPartTwo = function(response, error) 
     "--rpcport",
     theRPCPort.toString()
   ];
-  var command = kanbanGoInitializerBackend.paths.geth;
-  kanbanGoInitializerBackend.runShell(command, theArguments, theOptions, this.id);
-  kanbanGoInitializerBackend.numberOfStartedNodes ++;
-  kanbanGoInitializerBackend.runNodesFinish(response);
+  var command = initializer.paths.geth;
+  initializer.runShell(command, theArguments, theOptions, this.id);
+  initializer.numberOfStartedNodes ++;
+  initializer.runNodesFinish(response);
 }
 
-function KanbanGoInitializerBackend() {
+function KanbanGoInitializer() {
   this.numberRequestsRunning = 0;
   this.maxRequestsRunning = 4;
   this.handlers = {
@@ -56,6 +59,7 @@ function KanbanGoInitializerBackend() {
 
     }
   };
+  this.colors = ["yellow", "green", "blue", "cyan", "magenta"];
   this.paths = {
     geth: null,
     gethPath: null,
@@ -66,7 +70,7 @@ function KanbanGoInitializerBackend() {
   this.computePaths();
 }
 
-KanbanGoInitializerBackend.prototype.handleRequest =  function(request, response) {
+KanbanGoInitializer.prototype.handleRequest =  function(request, response) {
   if (request.method === "GET") {
     return this.handleRPCGET(request, response);
   }
@@ -74,7 +78,7 @@ KanbanGoInitializerBackend.prototype.handleRequest =  function(request, response
   return response.end(`Method not implemented: ${request.method} not implemented. `);
 }
 
-KanbanGoInitializerBackend.prototype.handleRPCGET = function(request, response) {
+KanbanGoInitializer.prototype.handleRPCGET = function(request, response) {
   var parsedURL = null;
   try {
     parsedURL = url.parse(request.url);
@@ -85,7 +89,7 @@ KanbanGoInitializerBackend.prototype.handleRPCGET = function(request, response) 
   return this.handleRPCURLEncodedInput(request, response, parsedURL.query);
 }
 
-KanbanGoInitializerBackend.prototype.handleRPCURLEncodedInput = function(request, response, messageBodyURLed) {
+KanbanGoInitializer.prototype.handleRPCURLEncodedInput = function(request, response, messageBodyURLed) {
   var query = null;
   var queryCommand = null;
   try {
@@ -98,17 +102,18 @@ KanbanGoInitializerBackend.prototype.handleRPCURLEncodedInput = function(request
   return this.handleRPCArguments(request, response, queryCommand);
 }
 
-KanbanGoInitializerBackend.prototype.computePaths = function() {
+KanbanGoInitializer.prototype.computePaths = function() {
   if (this.paths.geth !== null) {
     callback();
     return;
   }
   //console.log("DEBUG: Computing paths.");
-  var currentPath = pathnames.path.base + "/go/src/github.com/blockchaingate/kanban-go/build/bin/";
-  currentPath = path.normalize(currentPath);
+  var staringPath = pathnames.path.base + "/go/src/github.com/blockchaingate/kanban-go/build/bin/";
+  staringPath = path.normalize(staringPath);
+  var currentPath = staringPath;
   var maxNumRuns = 100;
   var numRuns = 0;
-  var kanbanDataDirName = configuration.defaultConfiguration.kanbanGO.dataDirName;
+  var kanbanDataDirName = global.kanban.configuration.kanbanGO.dataDirName;
   while (currentPath !== "/") {
     numRuns ++;
     if (numRuns > maxNumRuns) {
@@ -133,20 +138,21 @@ KanbanGoInitializerBackend.prototype.computePaths = function() {
     currentPath = path.normalize(currentPath + "../");
   }
   if (this.paths.geth === null) {
-    console.log("Could not find geth executable. Expected location: ./go/src/github.com/blockchaingate/kanban-go/build/bin/geth".red);
+    console.log(`Could not find geth executable. Searched directories along: ${staringPath}`.red);
     throw(`Could not find geth executable.`);
   } else {
     console.log(`Found geth executable:`.green + `${this.paths.geth}`.blue);
   }
   if (this.paths.dataDir === null) {
-    console.log("Could not find data directory.".red);
+    console.log(`Could not find data directory ${kanbanDataDirName}. Searched directories along: ${staringPath}`.red);
     throw(`Could not find data directory.`);
   } else {
     console.log(`Found data directory: `.green + `${this.paths.dataDir}`.blue);
   }
+  fs.readFile(`${this.paths.dataDir}/pbft.json`)
 }
 
-KanbanGoInitializerBackend.prototype.runNodesFinish = function(response) {
+KanbanGoInitializer.prototype.runNodesFinish = function(response) {
   if (this.numberOfStartedNodes < this.nodes.length) {
     return;
   }
@@ -165,7 +171,10 @@ KanbanGoInitializerBackend.prototype.runNodesFinish = function(response) {
   response.end(JSON.stringify(result));
 }
 
-KanbanGoInitializerBackend.prototype.runNodes = function(response, queryCommand) {
+KanbanGoInitializer.prototype.runNodes = function(response, queryCommand) {
+  var initializer = getInitializer();
+  console.log(`DEBUG: Got to here. ${initializer}`);
+  console.log(`DEBUG: run nodes. initializer.paths: ${initializer.paths}` );
   var candidateNumberOfNodes = Number(queryCommand.numberOfNodes);
   var maxNumberOfNodes = 100;
   if (candidateNumberOfNodes > maxNumberOfNodes || candidateNumberOfNodes < 1) {
@@ -180,32 +189,34 @@ KanbanGoInitializerBackend.prototype.runNodes = function(response, queryCommand)
     return;
   }
   for (var counterNode = 0; counterNode < candidateNumberOfNodes; counterNode ++) {
-    this.nodes.push( new NodeKanbanGo(counterNode));
+    this.nodes.push(new NodeKanbanGo(counterNode));
   }
   for (var counterNode = 0; counterNode < this.nodes.length; counterNode ++) {
     this.nodes[counterNode].runNodeFromNodeNumber(response);
   }
 }
 
-KanbanGoInitializerBackend.prototype.runShell = function(command, theArguments, theOptions, id) {
+KanbanGoInitializer.prototype.runShell = function(command, theArguments, theOptions, id) {
   //console.log(`DEBUG: Running ` +`${command}`.green);
   //console.log(`DEBUG: Arguments: ` + `[${theArguments.join(", ")}]`.blue);
   var child = childProcess.spawn(command, theArguments, theOptions);
+  var color = this.colors[id % this.colors.length];
   child.stdout.on('data', function(data) {
-    console.log(`[shell ${id}]` + data.toString());
+    console.log(`[shell ${id}] `[color] + data.toString());
   });
   child.stderr.on('data', function(data) {
-    console.log(`[shell ${id}] ` + data.toString());
+    console.log(`[shell ${id}] `[color] + data.toString());
   });
   child.on('error', function(data) {
-    console.log(`[shell ${id}] ` + data.toString());
+    console.log(`[shell ${id}] `[color] + data.toString());
   });
   child.on('exit', function(code) {
     console.log(`Geth ${id} exited with code: ${code}`.green);
   });
 }
 
-KanbanGoInitializerBackend.prototype.handleRPCArguments = function(request, response, queryCommand) {
+KanbanGoInitializer.prototype.handleRPCArguments = function(request, response, queryCommand) {
+  //console.log(`DEBUG: this.paths: ${this.paths}.`);
   this.numberRequestsRunning ++;
   if (this.numberRequestsRunning > this.maxRequestsRunning) {
     response.writeHead(500);
@@ -232,6 +243,7 @@ KanbanGoInitializerBackend.prototype.handleRPCArguments = function(request, resp
     return response.end(`{"error": "Server error: handler ${theCallLabel}"} declared but no implementation found. `);
   }
   try {
+    console.log(`DEBUG: got to here: ${this.paths}.`);
     return currentFunction.bind(this)(response, queryCommand);
   } catch (e) {
     response.writeHead(500);
@@ -239,9 +251,7 @@ KanbanGoInitializerBackend.prototype.handleRPCArguments = function(request, resp
   }
 }
 
-var defaultInitializer;
-
 module.exports = {
-  KanbanGoInitializerBackend,
-  defaultInitializer
+  KanbanGoInitializer,
+  getInitializer
 }

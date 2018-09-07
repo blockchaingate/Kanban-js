@@ -8,34 +8,45 @@
 const pathnames = require('./pathnames');
 const https = require('https');
 const http = require('http');
-const colors = require('colors');
+require('colors');
 const configuration = require('./configuration');
 const buildFrontEnd = require('./build_frontend');
 const initializeOpenCLDriver = require('./initialize_opencl_driver');
-const initializeFolders = require('./initialize_opencl_driver');
 const certificateOptions = require('./initialize_certificates');
 const handleRequests = require('./handle_requests'); 
 const kanbanGoInitialization = require('./handlers_kanban_go_initialization');
 
-configuration.defaultConfiguration = new configuration.Configuration();
+//handlers for various configurations
+global.kanban = {
+  configuration: null,
+  certificateOptions: null,
+  kanbanGOInitializer: null,
+  jobs: null,
+  openCLDriver: null
+};
+//The initialization order matters: some initializations depend on the previous ones. 
+//Most initializations depend on 
+//global.kanban.configuration
+
+//Server general configuration, read from secrets_admin/configuration.json:
+global.kanban.configuration = new configuration.Configuration();
+
+//Server ssl certificates:
+global.kanban.certificateOptions = new certificateOptions.CertificateOptions();
+
+//Compute kanban go folders:
+global.kanban.kanbanGOInitializer = new kanbanGoInitialization.KanbanGoInitializer();
+
 
 initializeOpenCLDriver.initializeOpenCLDriver();
 //<- Creates and starts the openCL driver.
 //<- At the time of writing, the driver is disabled with a hard-coded flag.
 
-initializeFolders.initializeOpenCLDriver();
-//<- Find the location of the .fabcoin configuration folder (log files, ...)
-
-certificateOptions.defaultCertificates = new certificateOptions.CertificateOptions(); 
-//<-Read/create certificates as necessary. 
 
 buildFrontEnd.buildFrontEnd();
 //<- builds the frontend javascript from source using browserify.
 
-kanbanGoInitialization.defaultInitializer = new kanbanGoInitialization.KanbanGoInitializerBackend();
-//<- must come after openCL driver loading, even if the driver is disabled.
-
-var serverHTTPS = https.createServer(certificateOptions.defaultCertificates.options, handleRequests.handleRequests);
+var serverHTTPS = https.createServer(certificateOptions.getOptions(), handleRequests.handleRequests);
 serverHTTPS.listen(pathnames.ports.https, function() {
   console.log(`Listening on https port: ${pathnames.ports.https}`.green);
 });

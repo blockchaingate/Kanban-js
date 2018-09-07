@@ -8,6 +8,10 @@
 const pathnames = require('./pathnames');
 const fs = require('fs');
 
+function getConfiguration() {
+  return global.kanban.configuration;
+}
+
 function Configuration () {
   //defaults below. The defaults are overridden by this.readSecretsAdmin();
   //which reads config.json from pathnames.path.configurationSecretsAdmin
@@ -33,8 +37,7 @@ Configuration.prototype.readSecretsAdmin = function() {
   }
 }
 
-var defaultConfiguration;
 module.exports = {
   Configuration,
-  defaultConfiguration
+  getConfiguration
 }

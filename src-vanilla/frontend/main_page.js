@@ -32,7 +32,6 @@ function Page() {
       ids: {
         page: ids.defaults.pages.kanbanMyLocalNodes
       },
-      updateFunction: myNodes.updateMyNodes
     },
     myNodes: {
       ids: {

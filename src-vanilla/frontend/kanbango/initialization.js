@@ -45,7 +45,7 @@ KanbanGoInitializer.prototype.run = function(functionLabel) {
   }
   var messageBody = kanbanGo.getPOSTBodyFromKanbanGORPCLabel(functionFrontend.rpcCall, theArguments);
   var theURL = `${pathnames.url.known.kanbanInitialization}`;
-  var currentResult = ids.defaults.kanbanGO.outputInitialization;
+  var currentResult = ids.defaults.kanbanGO.outputKanbanInitialization;
   var currentProgress = globals.spanProgress();
   var usePOST = window.kanban.rpc.forceRPCPOST;
   if (!usePOST) {
@@ -75,8 +75,6 @@ KanbanGoInitializer.prototype.run = function(functionLabel) {
       result: currentResult
     });
   }
-
-  
 }
 
 var initializer = new KanbanGoInitializer();

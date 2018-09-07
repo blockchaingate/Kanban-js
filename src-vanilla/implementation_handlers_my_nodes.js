@@ -6,7 +6,7 @@ var SSHClient = require('ssh2').Client;
 
 function fetchNodeInfo(request, response, desiredCommand) {
   response.writeHead(200);
-  response.end(`{"myNodes": ${configuration.defaultConfiguration.myNodes}}` );
+  response.end(`{"myNodes": ${configuration.getConfiguration().myNodes}}` );
 }
 
 function sshNodeToRemoteMachinePartFour(machineName, stdoutSoFar, response) {
@@ -19,18 +19,18 @@ function getSSHKeyFromMachine(theMachine) {
     return theMachine.sshKey;
   }
   if (theMachine.sshKeySameAs !== undefined) {
-    return configuration.defaultConfiguration.myNodes[theMachine.sshKeySameAs].sshKey;
+    return configuration.getConfiguration().myNodes[theMachine.sshKeySameAs].sshKey;
   }
 }
 
 function sshNodeToRemoteMachineExecuteCommands(machineName, theCommand, response) {
-  if (!(machineName in configuration.defaultConfiguration.myNodes)) {
+  if (!(machineName in configuration.getConfiguration().myNodes)) {
     response.writeHead(200);
     response.end(`Machine name: ${machineName} not found. `);
     return;
   }
   try {
-    var theMachine = configuration.defaultConfiguration.myNodes[machineName];
+    var theMachine = configuration.getConfiguration().myNodes[machineName];
     var theConnection = new SSHClient();
     theConnection.on('ready', function() {
       response.writeHead(200);
