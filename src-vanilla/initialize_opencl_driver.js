@@ -1,9 +1,3 @@
-#!/usr/bin/env node
-/**
- * Entry point for Kanban
- * 
- */
-
 "use strict";
 const jobs = require('./jobs');
 const openCLDriver = require('./open_cl_driver');

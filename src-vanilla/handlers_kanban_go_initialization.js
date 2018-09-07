@@ -6,7 +6,7 @@ const pathnames = require('./pathnames');
 const childProcess = require("child_process");
 const fs = require('fs');
 const path = require('path');
-const configuration = require('./configuration').configuration;
+const configuration = require('./configuration');
 const cryptoKanban = require('./crypto/crypto_kanban');
 
 
@@ -108,7 +108,7 @@ KanbanGoInitializerBackend.prototype.computePaths = function() {
   currentPath = path.normalize(currentPath);
   var maxNumRuns = 100;
   var numRuns = 0;
-  var kanbanDataDirName = configuration.kanbanGO.dataDirName;
+  var kanbanDataDirName = configuration.defaultConfiguration.kanbanGO.dataDirName;
   while (currentPath !== "/") {
     numRuns ++;
     if (numRuns > maxNumRuns) {
@@ -176,7 +176,7 @@ KanbanGoInitializerBackend.prototype.runNodes = function(response, queryCommand)
   if (this.nodes.length > 0) {
     this.numberRequestsRunning --;
     response.writeHead(200);
-    response.end(`${this.nodes.length} nodes already spanned. Restart the server if you want a new number of nodes. `);
+    response.end(`${this.nodes.length} nodes already spawned. Restart the server if you want a new number of nodes. `);
     return;
   }
   for (var counterNode = 0; counterNode < candidateNumberOfNodes; counterNode ++) {
@@ -239,8 +239,9 @@ KanbanGoInitializerBackend.prototype.handleRPCArguments = function(request, resp
   }
 }
 
-var kanbanGoInitializerBackend = new KanbanGoInitializerBackend();
+var defaultInitializer;
 
 module.exports = {
-  kanbanGoInitializerBackend
+  KanbanGoInitializerBackend,
+  defaultInitializer
 }

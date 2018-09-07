@@ -38,6 +38,7 @@ div.divMenuCollapsed{
 
 div.divControlPanelNetwork{
   width: 87%; 
+  bottom: 0px;
   max-height: 20px;
   position: fixed;
 }
@@ -61,7 +62,6 @@ div.divMenuButtonPanel div{
 div.divMainPage{
   overflow: auto;
   width: 90%;
-  top: 50px;
   position: absolute;
 /*  height: 90%;*/
 }

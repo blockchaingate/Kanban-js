@@ -4,7 +4,6 @@ const assert = require('assert')
 const childProcess = require('child_process');
 const openCLDriver = require('./open_cl_driver');
 const globals = require('./globals');
-var jobs = global.kanban.jobs;
 
 function computeUnspentTransactions(id) {
 
@@ -12,6 +11,7 @@ function computeUnspentTransactions(id) {
 
 function pollOngoing(request, response, desiredCommand) {
   var callIds = desiredCommand.callIds;
+  var jobs = global.kanban.jobs;
   //console.log(`Call ids so far: ${JSON.stringify(callIds)}`);
   if (!Array.isArray(callIds)) {
     callIds = [];
@@ -77,6 +77,7 @@ for (var label in pathnames.computationalEngineCalls) {
 var numSimultaneousCalls = 0;
 var maxSimultaneousCalls = 4;
 function dispatch(request, response, desiredCommand) {
+  var jobs = global.kanban.jobs;
   //console.log(`command: ${JSON.stringify(desiredCommand)}, computationalEngineCall = ${pathnames.computationalEngineCall}`);
   if (!globals.openCLDriver().enabled) {
     response.writeHead(200);

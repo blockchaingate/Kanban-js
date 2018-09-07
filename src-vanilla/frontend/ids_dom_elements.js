@@ -14,6 +14,7 @@ var defaults = {
     kanbanJS: "pageKanbanJS",
     kanbanPlusPlus: "pageKanbanPlusPlus",
     kanbanGO: "pageKanbanGO",
+    kanbanMyLocalNodes: "pageMyLocalKanbanNodes"
   },
   progressReport: "spanProgressReport",
   spanPingColumnHeader: "spanPingColumnHeader",

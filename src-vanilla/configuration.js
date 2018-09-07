@@ -12,7 +12,7 @@ function Configuration () {
   //defaults below. The defaults are overridden by this.readSecretsAdmin();
   //which reads config.json from pathnames.path.configurationSecretsAdmin
   this.kanbanGO = {
-    dataDirName: ".kanban-go"
+    dataDirName: "secrets_data_kanban_go"
   }
   this.myNodes = {};
 
@@ -33,7 +33,8 @@ Configuration.prototype.readSecretsAdmin = function() {
   }
 }
 
-var configuration = new Configuration();
+var defaultConfiguration;
 module.exports = {
-  configuration
+  Configuration,
+  defaultConfiguration
 }

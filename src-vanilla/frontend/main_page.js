@@ -28,6 +28,12 @@ function Page() {
       },
       updateFunction: fabcoinInitialization.updateFabcoinInitializationPage,      
     },
+    myLocalKanbanNodes: {
+      ids: {
+        page: ids.defaults.pages.kanbanMyLocalNodes
+      },
+      updateFunction: myNodes.updateMyNodes
+    },
     myNodes: {
       ids: {
         page: ids.defaults.pageMyNodes

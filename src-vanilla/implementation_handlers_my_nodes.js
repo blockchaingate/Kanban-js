@@ -1,16 +1,12 @@
 "use strict";
 const pathnames = require('./pathnames');
-const assert = require('assert')
-const childProcess = require('child_process');
-const globals = require('./globals');
-const fs = require('fs');
-const configuration = require('./configuration').configuration;
+const configuration = require('./configuration');
 
 var SSHClient = require('ssh2').Client;
 
 function fetchNodeInfo(request, response, desiredCommand) {
   response.writeHead(200);
-  response.end(`{"myNodes": ${configuration.myNodes}}` );
+  response.end(`{"myNodes": ${configuration.defaultConfiguration.myNodes}}` );
 }
 
 function sshNodeToRemoteMachinePartFour(machineName, stdoutSoFar, response) {
@@ -23,18 +19,18 @@ function getSSHKeyFromMachine(theMachine) {
     return theMachine.sshKey;
   }
   if (theMachine.sshKeySameAs !== undefined) {
-    return configuration.myNodes[theMachine.sshKeySameAs].sshKey;
+    return configuration.defaultConfiguration.myNodes[theMachine.sshKeySameAs].sshKey;
   }
 }
 
 function sshNodeToRemoteMachineExecuteCommands(machineName, theCommand, response) {
-  if (!(machineName in configuration.myNodes)) {
+  if (!(machineName in configuration.defaultConfiguration.myNodes)) {
     response.writeHead(200);
     response.end(`Machine name: ${machineName} not found. `);
     return;
   }
   try {
-    var theMachine = configuration.myNodes[machineName];
+    var theMachine = configuration.defaultConfiguration.myNodes[machineName];
     var theConnection = new SSHClient();
     theConnection.on('ready', function() {
       response.writeHead(200);
