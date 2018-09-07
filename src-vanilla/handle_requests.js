@@ -10,6 +10,7 @@ const fabcoinInitialization = require('./handlers_fabcoin_initialization');
 const handlersComputationalEngine = require('./handlers_computational_engine');
 const handlersMyNodes = require('./handlers_my_nodes');
 const handlersKanbanGo = require('./handlers_kanban_go');
+const handlersKanbanGoInitialization = require('./handlers_kanban_go_initialization');
 
 function handleRequestsHTTP(request, response) {
   if (request.url in pathnames.url.synonyms) {
@@ -75,7 +76,7 @@ function handleRequests(request, response) {
     return handlersKanbanGo.handleRequest(request, response);
   }
   if (parsedURL.pathname === pathnames.url.known.kanbanInitialization) {
-    return global.kanban.kanbanGOInitializer.handleRequest(request, response);
+    return handlersKanbanGoInitialization.getInitializer().handleRequest(request, response);
   }
   if (parsedURL.pathname === pathnames.url.known.computationEngine) {
     return handleComputationalEngineCall(request, response);

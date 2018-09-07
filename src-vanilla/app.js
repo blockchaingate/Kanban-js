@@ -35,6 +35,7 @@ global.kanban.configuration = new configuration.Configuration();
 global.kanban.certificateOptions = new certificateOptions.CertificateOptions();
 
 //Compute kanban go folders:
+console.log("DEBUG: got to before kanban go init");
 global.kanban.kanbanGOInitializer = new kanbanGoInitialization.KanbanGoInitializer();
 
 
