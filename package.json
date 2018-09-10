@@ -41,6 +41,7 @@
     "nodemon": "^1.17.5",
     "random-seed": "^0.3.0",
     "randomstring": "^1.1.5",
+    "rimraf": "^2.6.2",
     "ssh2": "^0.6.1"
   }
 }
