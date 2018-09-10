@@ -791,9 +791,6 @@
     },
     "00000000000000000000000000000000000000ff": {
       "balance": "0x1"
-    },
-    "REPLACE_with_ethereum_address_created_by_geth_account_new": {
-      "balance": "0x200000000000000000000000000000000000000000000000000000000000000"
     }
   },
   "number": "0x0",

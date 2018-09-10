@@ -19,10 +19,17 @@ function getInitializer() {
 
 function NodeKanbanGo(inputId) {
   this.id = inputId;
-  this.idNetwork = 211;
   this.notes = "";
   this.fileNameNodeAddress = null;
+  /**@type {string} */
+  this.ethereumAddressFileContent = null;
+  /** @type {{address: string}}*/
+  this.ethereumAddressFileParsed = null;
+  /** @type {string}*/
   this.ethereumAddress = null;
+  /** @type {string}*/
+  this.nodeAddress = null;
+  this.allAddresses = {};
   this.dataDir = `${getInitializer().paths.nodesDir}/node${this.id}`;
   this.lockFileName = `${this.dataDir}/geth/LOCK`;
   this.keyStoreFolder = `${this.dataDir}/keystore`;
@@ -42,15 +49,23 @@ NodeKanbanGo.prototype.initialize2ReadKeyStore = function(response, error) {
   fs.readdir(this.keyStoreFolder, this.initialize3SelectAddress.bind(this, response));
 }
 
+NodeKanbanGo.prototype.log = function(input) {
+  this.notes += `${input}<br>\n`;
+  var initializer = getInitializer();
+  console.log(`[Node ${this.id}]`[initializer.colors[this.id % initializer.colors.length]] + `${input}`);
+}
+
 NodeKanbanGo.prototype.initialize3SelectAddress = function(response, error, fileNames) {
   if (error !== null && error !== undefined) {
-    this.notes += `Error reading key store directory: ${this.keyStoreFolder}. ${error}<br>\n`;
+    this.log(`Error reading key store directory: ${this.keyStoreFolder}. ${error}`);
     this.flagFoldersWereInitialized = false;
+  } else {
+    this.log(`Successfully read key store directory: ${this.keyStoreFolder}`);
   }
   this.numberAttemptsToSelectAddress ++;
   if (this.numberAttemptsToSelectAddress > this.maximumAttemptsToSelectAddress) {
-    this.notes += `${this.numberAttemptsToSelectAddress} failed attempts to select address: aborting.<br>\n`;
-    getInitializer().runNodes2DoRun(response);
+    this.log(`${this.numberAttemptsToSelectAddress} failed attempts to select address: aborting.`);
+    getInitializer().runNodes2ReadConfig(response);
     return;
   }
   var hasKeys = false;
@@ -60,24 +75,35 @@ NodeKanbanGo.prototype.initialize3SelectAddress = function(response, error, file
     }
   }
   if (!hasKeys) {
+    this.log(`Found no previously generated keys. Resetting all folders and keys. `);
     this.flagFoldersWereInitialized = false;
     this.initialize5ResetFolders(response);
     return;
   }
-  this.fileNameNodeAddress = fileNames[0];
-  fs.readFile(this.fileNameNodeAddress, this.initialize4StoreKey.bind(this, response));
+  this.fileNameNodeAddress = `${this.keyStoreFolder}/${fileNames[0]}`;
+  fs.readFile(this.fileNameNodeAddress, this.initialize4ReadKey.bind(this, response));
 }
 
-NodeKanbanGo.prototype.initialize4StoreKey = function(response, error, data) {
+NodeKanbanGo.prototype.initialize4ReadKey = function(response, error, data) {
   if (error !== null && error !== undefined) {
-    this.notes += `Error reading stored key: ${this.fileNameNodeAddress}. ${error}<br>\n`;
+    this.log(`Error reading stored key: ${this.fileNameNodeAddress}. ${error}`);
     this.flagFoldersWereInitialized = false;
     this.initialize5ResetFolders(response);
     return;
   }
-  this.ethereumAddress = data;
-  getInitializer().numberOfNodesWithFinishedInitialization ++;
-  getInitializer().runNodes2DoRun(response);
+  try {
+    this.ethereumAddressFileContent = data;
+    this.ethereumAddressFileParsed = JSON.parse(this.ethereumAddressFileContent);
+    this.ethereumAddress = this.ethereumAddressFileParsed.address;
+    this.log(`Successfully read ethereum address: ${this.ethereumAddress}`);
+  } catch (e) {
+    this.log(`Error while parsing key file. ${error}. The key file content: ${data}`);
+    this.initialize5ResetFolders(response);
+    return;
+  }
+  getInitializer().numberOfInitializedFolders ++;
+  this.flagFoldersInitialized = true;
+  getInitializer().runNodes2ReadConfig(response);
 }
 
 NodeKanbanGo.prototype.initialize5ResetFolders = function(response) {
@@ -86,10 +112,11 @@ NodeKanbanGo.prototype.initialize5ResetFolders = function(response) {
 
 NodeKanbanGo.prototype.initialize6CreateFolders = function(response, error) {
   if (error !== null && error !== undefined) {
-    this.notes += `Error while deleting folder: ${this.dataDir}. ${error}<br>\n`;
+    this.log(`Error while deleting folder: ${this.dataDir}. ${error}`);
   } else {
-    this.notes += `Deleted folder: ${this.dataDir}.`;
+    this.log(`Deleted folder: ${this.dataDir}.`);
   }
+  this.log(`Proceding to create account for new node.`);
   var initializer = getInitializer(); 
   var theOptions = {
     cwd: initializer.paths.gethPath,
@@ -100,7 +127,7 @@ NodeKanbanGo.prototype.initialize6CreateFolders = function(response, error) {
     "--datadir",
     this.dataDir,
     "--networkid",
-    this.idNetwork,
+    initializer.chainId,
     "account",
     "new",
     "--password",
@@ -109,22 +136,23 @@ NodeKanbanGo.prototype.initialize6CreateFolders = function(response, error) {
   initializer.runShell(initializer.paths.geth, theArguments, theOptions, this.id, this.initialize2ReadKeyStore.bind(this, response));
 }
 
-NodeKanbanGo.prototype.run4InitializeNode = function(response) {
+NodeKanbanGo.prototype.initialize7GenesisBlock = function(response) {
   var initializer = getInitializer();
   var theOptions = {
     cwd: initializer.paths.gethPath,
     env: process.env
   };
+  this.log(`Proceding to initialize genesis. `);
   this.flagFoldersWereInitialized = false;
   var theArguments = [
     "--datadir",
     this.dataDir,
     "--networkid",
-    this.idNetwork,
+    initializer.chainId,
     "init",
-    initializer.paths.pbftConfigurationFileName
+    initializer.paths.pbftConfig
   ];
-  initializer.runShell(initializer.paths.geth, theArguments, theOptions, this.id, this.run5GenerateNodeKey.bind(this, response));
+  initializer.runShell(initializer.paths.geth, theArguments, theOptions, this.id, initializer.runNodes6DoRunNodes.bind(initializer, response));
 }
 
 NodeKanbanGo.prototype.run = function(response) {
@@ -140,7 +168,7 @@ NodeKanbanGo.prototype.run = function(response) {
     "--datadir",
     this.dataDir,
     "--networkid",
-    this.idNetwork,
+    initializer.chainId,
     "--port",
     this.port.toString(),
     "--rpcport",
@@ -156,7 +184,6 @@ NodeKanbanGo.prototype.run = function(response) {
  * @class
  */
 function KanbanGoInitializer() {
-  console.log(" DEBUG: firing up kanbango init");
   this.numberRequestsRunning = 0;
   this.maxRequestsRunning = 4;
   this.handlers = {
@@ -174,13 +201,25 @@ function KanbanGoInitializer() {
     pbftConfigSeed: null,
     pbftConfig: null
   };
+  this.chainId = 211;
   /** @type {NodeKanbanGo[]} */
   this.nodes = [];
+  /** @type {string} */
+  this.notes = "";
+  this.numberOfAttemptsToLoadPBFTConfiguration = 0;
+  this.numberOfInitializedFolders = 0;
+  this.numberOfInitializedGenesis = 0;
   this.numberOfStartedNodes = 0;
-  this.numberOfNodesWithFinishedInitialization = 0;
+  /** @type {{config:{chainId: number, pbft:{proposers: string[]}}}}*/
+  this.pbftConfigurationSeed = null;
+  /** @type {{config:{chainId: number, pbft:{proposers: string[]}}, alloc: Object}}*/
   this.pbftConfiguration = null;
   this.computePaths();
-  console.log(" DEBUG: exiting constructor of kanban initializer.");
+}
+
+KanbanGoInitializer.prototype.log = function(input) {
+  this.notes += `${input}<br>\n`;
+  console.log(`[KanbanGoInitializer] `.red + `${input}`);
 }
 
 KanbanGoInitializer.prototype.handleRequest =  function(request, response) {
@@ -217,12 +256,10 @@ KanbanGoInitializer.prototype.handleRPCURLEncodedInput = function(request, respo
 }
 
 KanbanGoInitializer.prototype.computePaths = function() {
-  console.log("DEBUG: Got to compute paths. ");
   if (this.paths.geth !== null) {
     callback();
     return;
   }
-  //console.log("DEBUG: Computing paths.");
   var staringPath = `${pathnames.path.base}/go/src/github.com/blockchaingate/kanban-go/build/bin/`;
   staringPath = path.normalize(staringPath);
   var currentPath = staringPath;
@@ -268,9 +305,8 @@ KanbanGoInitializer.prototype.computePaths = function() {
   this.paths.pbftConfigSeed = `${this.paths.dataDir}/pbft_seed.json`;
   this.paths.passwordEmptyFile = `${this.paths.dataDir}/password_empty.txt`;
   this.paths.nodesDir = `${this.paths.dataDir}/nodes`;
-  console.log("DEBUG: pbft config seed: " + this.paths.pbftConfigSeed);
   fs.readFile(this.paths.pbftConfigSeed, (err, data)=> {
-    this.pbftConfiguration = JSON.parse(data);
+    this.pbftConfigurationSeed = JSON.parse(data);
   });
 }
 
@@ -287,16 +323,16 @@ KanbanGoInitializer.prototype.runNodesFinish = function(response) {
     }
   }
   if (nodeNotes.length > 0) {
-    result.notes = nodeNotes;
+    result.nodeNotes = nodeNotes;
+  }
+  if (this.notes !== "") {
+    result.notes = this.notes;
   }
   response.writeHead(200);
   response.end(JSON.stringify(result));
 }
 
 KanbanGoInitializer.prototype.runNodes = function(response, queryCommand) {
-  console.log(`DEBUG: Got to here. This: ` + this);
-  console.log(`DEBUG: Got to here pbft paths: ${this.paths.pbftConfigurationFileName}`.cyan);
-  console.log(`DEBUG: run nodes. initializer.paths: ${this.paths}` );
   var candidateNumberOfNodes = Number(queryCommand.numberOfNodes);
   var maxNumberOfNodes = 100;
   if (candidateNumberOfNodes > maxNumberOfNodes || candidateNumberOfNodes < 1) {
@@ -318,28 +354,111 @@ KanbanGoInitializer.prototype.runNodes = function(response, queryCommand) {
   }
 }
 
-KanbanGoInitializer.prototype.runNodes2DoRun = function(response) {
-  if (this.numberOfNodesWithFinishedInitialization < this.nodes.length) {
+KanbanGoInitializer.prototype.runNodes2ReadConfig = function(response) {
+  if (this.numberOfInitializedFolders < this.nodes.length) {
     return;
   }
-  this.runNodesFinish(response);
-  return;
+  this.allAddresses = {};
   for (var counterNode = 0; counterNode < this.nodes.length; counterNode ++) {
-    if (!this.nodes[i].flagFoldersInitialized) {
+    var currentNode = this.nodes[counterNode];
+    if (!currentNode.flagFoldersInitialized) {
       var result = {};
       result.error = `Failed to initilize folders for node: ${counterNode}`;
-      result.notes = this.nodes[i].notes;
+      result.notes = currentNode.notes;
+      response.writeHead(200);
+      response.end(JSON.stringify(result));
+      return;
     }
+    this.allAddresses[currentNode.ethereumAddress] = true;
   }
-  for (var counterNode = 0; counterNode < this.nodes.length; counterNode ++) {
-    this.nodes[counterNode].run();
-  }
+  fs.readFile(this.paths.pbftConfig, this.runNodes3ParseConfigRunNodes.bind(this, response));
+}
 
+KanbanGoInitializer.prototype.runNodes3ParseConfigRunNodes = function(response, error, data) {
+  if (error !== null && error !== undefined) {
+    this.log(`Error reading config file: ${this.paths.pbftConfig}. ${error}`);
+    this.runNodes4RebuildPBFTConfiguration(response);
+    return;
+  }
+  this.log(`Successfully opened pbft.json`);
+  this.numberOfAttemptsToLoadPBFTConfiguration ++;
+  if (this.numberOfAttemptsToLoadPBFTConfiguration > 4) {
+    this.log(`Too many failed attempts to load pbft.json. `);
+    return;
+  }
+  if (this.numberOfAttemptsToLoadPBFTConfiguration > 1) {
+    this.log(`${this.numberOfAttemptsToLoadPBFTConfiguration} attempts to load pbft.json so far. `);
+  }
+  try {
+    this.pbftConfiguration = JSON.parse(data);
+    if (this.pbftConfiguration.config.pbft.proposers.length !== this.nodes.length) {
+      this.log(`File pbft.json indicates ${this.pbftConfiguration.config.pbft.proposers.length} proposers but you asked me to spin ${this.nodes.length}. Rebuilding pbft.json... `);
+      this.runNodes4RebuildPBFTConfiguration(response);
+      return;
+    }
+    if (this.pbftConfiguration.config.chainId !== this.chainId) {
+      this.log(`File pbft.json indicates chain id: ${this.pbftConfiguration.config.chainId}, but the requested chain id is: ${this.chainId}. Rebuilding pbft.json... `);
+      this.runNodes4RebuildPBFTConfiguration(response);
+      return;
+    }
+    for (var counterProposers = 0; counterProposers < this.pbftConfiguration.config.pbft.proposers.length; counterProposers ++) {
+      var currentAddress = this.pbftConfiguration.config.pbft.proposers[counterProposers];
+      if (!(currentAddress in this.allAddresses)) {
+        this.log(`Proposer ${currentAddress} from pbft.json not found among the nodes stored on disk. Rebuilding pbft.json... `);
+        this.runNodes4RebuildPBFTConfiguration(response);
+        return;
+      }
+    }
+  } catch (e) {
+    this.log( `Error reading pbft configuration. ${e}`);
+    this.runNodes4RebuildPBFTConfiguration(response);
+    return;
+  }
+  this.numberOfInitializedGenesis = this.nodes.length - 1;
+  this.runNodes6DoRunNodes(response);
+}
+
+KanbanGoInitializer.prototype.runNodes6DoRunNodes = function(response) {
+  this.numberOfInitializedGenesis ++;
+  if (this.numberOfInitializedGenesis < this.nodes.length) {
+    return;
+  }
+  console.log("Proceeding to run nodes. ");
+  for (var counterNode = 0; counterNode < this.nodes.length; counterNode ++) {
+    this.nodes[counterNode].run(response);
+  }
+}
+
+KanbanGoInitializer.prototype.runNodes4RebuildPBFTConfiguration = function(response) {
+  if (this.pbftConfigurationSeed === null || this.pbftConfigurationSeed === undefined) {
+    throw `This is not supposed to happen: seed pbft configuration is null.`;
+  }
+  this.pbftConfiguration = Object.assign({}, this.pbftConfigurationSeed);
+  this.pbftConfiguration.config.chainId = this.chainId;
+  this.pbftConfiguration.config.pbft.proposers = [];
+  for (var counterNode = 0; counterNode < this.nodes.length; counterNode ++) {
+    var currentNode = this.nodes[counterNode];
+    this.pbftConfiguration.config.pbft.proposers.push(`0x${currentNode.ethereumAddress}`);
+    this.pbftConfiguration.alloc[currentNode.ethereumAddress] = { 
+      balance: "0x20000000000000000000"
+    };
+  }
+  fs.writeFile(this.paths.pbftConfig, JSON.stringify(this.pbftConfiguration), (err) =>{
+    if (err !== null && err !== undefined) {
+      this.log(`Error writing pbft.json. ${err}`);
+      this.runNodes2ReadConfig(response);
+    }
+    this.runNodes5InitGenesis(response);
+  });
+}
+
+KanbanGoInitializer.prototype.runNodes5InitGenesis = function(response) {
+  for (var counterNode = 0; counterNode < this.nodes.length; counterNode ++) {
+    this.nodes[counterNode].initialize7GenesisBlock(response);
+  }
 }
 
 KanbanGoInitializer.prototype.runShell = function(command, theArguments, theOptions, id, callbackOnExit) {
-  //console.log(`DEBUG: Running ` +`${command}`.green);
-  //console.log(`DEBUG: Arguments: ` + `[${theArguments.join(", ")}]`.blue);
   var child = childProcess.spawn(command, theArguments, theOptions);
   var color = this.colors[id % this.colors.length];
   child.stdout.on('data', function(data) {
@@ -387,7 +506,6 @@ KanbanGoInitializer.prototype.handleRPCArguments = function(request, response, q
     return response.end(`{"error": "Server error: handler ${theCallLabel}"} declared but no implementation found. `);
   }
   try {
-    console.log(`DEBUG: got to here: ${this.paths}.`);
     return (currentFunction.bind(this))(response, queryCommand);
   } catch (e) {
     response.writeHead(500);
