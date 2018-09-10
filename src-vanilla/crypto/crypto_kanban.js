@@ -57,6 +57,11 @@ var encodingExponent = new encodings.Encoding({
 
 var secp256k1 = new Elliptic.ec('secp256k1');
 
+/**
+ * Curve exponent: used to exponentiate points on secp256k1. 
+ * Used for many purposes, including private keys and signature nonces.
+ * @param {*} inputBytesOptional 
+ */
 function CurveExponent(inputBytesOptional) { 
   this.scalar = null;
   if (inputBytesOptional !== null && inputBytesOptional !== undefined) {
@@ -80,6 +85,13 @@ CurvePoint.prototype.toBytes = function() {
     return "(uninitialized)";
   }
   return Buffer.from(this.point.encodeCompressed());
+}
+
+CurvePoint.prototype.toHexUncompressed = function() {
+  if (this.point === null) {
+    return "(uninitialized)";
+  }
+  return Buffer.from(this.point._encode(false)).toString('hex');
 }
 
 CurvePoint.prototype.toHex = function() {
@@ -172,7 +184,7 @@ CurveExponent.prototype.fromBytes = function(input) {
 CurveExponent.prototype.fromArbitrary = function(input) {
   var bytes = encodingExponent.fromArbitrary(input);
   if (bytes === null) {
-    throw `Failed to convert ${input} to curve exponent. `;
+    throw `Failed to convert ${input} to curve exponent. Bytes: ${bytes}. `;
   }
   return this.fromBytes(bytes);
 }

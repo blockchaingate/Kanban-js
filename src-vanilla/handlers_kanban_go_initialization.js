@@ -5,8 +5,10 @@ const kanbanGOInitialization = require('./resources_kanban_go_initialization');
 const pathnames = require('./pathnames');
 const childProcess = require("child_process");
 const fs = require('fs');
+const fsExtra = require('fs-extra');
 const path = require('path');
 const rimraf = require('rimraf');
+const cryptoKanban = require('./crypto/crypto_kanban');
 require('colors');
 
 /**
@@ -23,16 +25,22 @@ function NodeKanbanGo(inputId) {
   this.fileNameNodeAddress = null;
   /**@type {string} */
   this.ethereumAddressFileContent = null;
-  /** @type {{address: string}}*/
+  /** @type {{address: string}} */
   this.ethereumAddressFileParsed = null;
-  /** @type {string}*/
+  /** @type {string} */
   this.ethereumAddress = null;
-  /** @type {string}*/
-  this.nodeAddress = null;
+  this.nodePrivateKey = new cryptoKanban.CurveExponent();
+  /** @type {string} */
+  this.nodeAddressHex = null;
+  /** @type {string[]} */
+  this.nodeConnections = [];
   this.allAddresses = {};
   this.dataDir = `${getInitializer().paths.nodesDir}/node${this.id}`;
   this.lockFileName = `${this.dataDir}/geth/LOCK`;
   this.keyStoreFolder = `${this.dataDir}/keystore`;
+  this.nodeKeyDir = `${this.dataDir}/geth`;
+  this.nodeKeyFileName = `${this.nodeKeyDir}/nodekey`;
+  this.connectionsFileName = `${this.nodeKeyDir}/static-nodes.json`;
   this.port = this.id + 40107;
   this.RPCPort = this.id + 4007;
   this.flagPreviouslyInitialized = true;
@@ -52,7 +60,7 @@ NodeKanbanGo.prototype.initialize2ReadKeyStore = function(response, error) {
 NodeKanbanGo.prototype.log = function(input) {
   this.notes += `${input}<br>\n`;
   var initializer = getInitializer();
-  console.log(`[Node ${this.id}]`[initializer.colors[this.id % initializer.colors.length]] + `${input}`);
+  console.log(`[Node ${this.id}] `[initializer.colors[this.id % initializer.colors.length]] + `${input}`);
 }
 
 NodeKanbanGo.prototype.initialize3SelectAddress = function(response, error, fileNames) {
@@ -81,10 +89,10 @@ NodeKanbanGo.prototype.initialize3SelectAddress = function(response, error, file
     return;
   }
   this.fileNameNodeAddress = `${this.keyStoreFolder}/${fileNames[0]}`;
-  fs.readFile(this.fileNameNodeAddress, this.initialize4ReadKey.bind(this, response));
+  fs.readFile(this.fileNameNodeAddress, this.initialize4ReadAccountAddress.bind(this, response));
 }
 
-NodeKanbanGo.prototype.initialize4ReadKey = function(response, error, data) {
+NodeKanbanGo.prototype.initialize4ReadAccountAddress = function(response, error, data) {
   if (error !== null && error !== undefined) {
     this.log(`Error reading stored key: ${this.fileNameNodeAddress}. ${error}`);
     this.flagFoldersWereInitialized = false;
@@ -101,9 +109,20 @@ NodeKanbanGo.prototype.initialize4ReadKey = function(response, error, data) {
     this.initialize5ResetFolders(response);
     return;
   }
-  getInitializer().numberOfInitializedFolders ++;
   this.flagFoldersInitialized = true;
-  getInitializer().runNodes2ReadConfig(response);
+  fs.readFile(this.nodeKeyFileName, (err, data)=>{
+    if (err !== null && err !== undefined) {
+      this.log(`Error reading node key: ${this.nodeKeyFileName}. ${error}`);
+      this.flagFoldersWereInitialized = false;
+      this.initialize5ResetFolders(response);
+      return;
+    }
+    this.nodePrivateKey.fromArbitrary(data);
+    this.nodeAddressHex = this.nodePrivateKey.getExponent().computeEthereumAddressHex();
+    this.log(`Loaded private key from node key file: ${this.nodePrivateKey.toHex()} with corresponding ethereum address: ${this.nodeAddressHex}`);
+    getInitializer().numberOfInitializedFolders ++;
+    getInitializer().runNodes2ReadConfig(response);
+  });
 }
 
 NodeKanbanGo.prototype.initialize5ResetFolders = function(response) {
@@ -133,10 +152,32 @@ NodeKanbanGo.prototype.initialize6CreateFolders = function(response, error) {
     "--password",
     initializer.paths.passwordEmptyFile
   ];
-  initializer.runShell(initializer.paths.geth, theArguments, theOptions, this.id, this.initialize2ReadKeyStore.bind(this, response));
+  initializer.runShell(initializer.paths.geth, theArguments, theOptions, this.id, this.initialize7GenerateKey.bind(this, response));
 }
 
-NodeKanbanGo.prototype.initialize7GenesisBlock = function(response) {
+NodeKanbanGo.prototype.initialize7GenerateKey = function(response, error) {
+  this.log(`Generated acount in key store. Proceding to generate node key. `);
+  this.nodePrivateKey.generateAtRandom();
+  fsExtra.ensureDir(this.nodeKeyDir, this.initialize8WriteKey.bind(this, response));
+}
+
+NodeKanbanGo.prototype.initialize8WriteKey = function(response, errorDir) {
+  if (errorDir !== null && errorDir !== undefined) {
+    this.log(`Failed to create directory: ${this.nodeKeyDir}. ${errorDir}`);
+    this.initialize2ReadKeyStore(response, null);
+    return;
+  }
+  fs.writeFile(this.nodeKeyFileName, this.nodePrivateKey.toHex(), (errorWrite)=> {
+    if (errorWrite !== null && errorWrite !== undefined) {
+      this.log(`Error writing node private key: ${errorWrite}.`);
+    } else {
+      this.log(`Wrote node key file. `);
+    }
+    this.initialize2ReadKeyStore(response, null);
+  });
+}
+
+NodeKanbanGo.prototype.initialize9GenesisBlock = function(response) {
   var initializer = getInitializer();
   var theOptions = {
     cwd: initializer.paths.gethPath,
@@ -152,7 +193,29 @@ NodeKanbanGo.prototype.initialize7GenesisBlock = function(response) {
     "init",
     initializer.paths.pbftConfig
   ];
-  initializer.runShell(initializer.paths.geth, theArguments, theOptions, this.id, initializer.runNodes6DoRunNodes.bind(initializer, response));
+  initializer.runShell(initializer.paths.geth, theArguments, theOptions, this.id, this.initialize10WriteNodeConnections.bind(this, response));
+}
+
+NodeKanbanGo.prototype.initialize10WriteNodeConnections = function(response) {
+  var initializer = getInitializer();
+  this.nodeConnections = [];
+  var idsToConnectTo = [this.id - 1, this.id + 1];
+  for (var counterId = 0; counterId < idsToConnectTo.length; counterId ++) {
+    var currentId = idsToConnectTo[counterId];
+    if (currentId < 0 || currentId >= initializer.nodes.length) {
+      continue;
+    }
+    var publicKeyHex = initializer.nodes[currentId].nodePrivateKey.getExponent().toHexUncompressed();
+    this.nodeConnections.push(`enode:://${publicKeyHex}@[::]:20000?discport=0`);
+  }
+  this.log(`Writing connections: ${JSON.stringify(this.nodeConnections)} to file: ${this.connectionsFileName}`);
+  fs.writeFile(this.connectionsFileName, JSON.stringify(this.nodeConnections), (errorConnections)=>{
+    console.log(`DEBUG: did finally write connections`);
+    if (errorConnections !== null && errorConnections !== undefined) {
+      this.log(`Error writing node connections. ${e}`);
+    }
+    getInitializer().runNodes6DoRunNodes(response);
+  });
 }
 
 NodeKanbanGo.prototype.run = function(response) {
@@ -420,6 +483,7 @@ KanbanGoInitializer.prototype.runNodes3ParseConfigRunNodes = function(response, 
 
 KanbanGoInitializer.prototype.runNodes6DoRunNodes = function(response) {
   this.numberOfInitializedGenesis ++;
+  console.log(`DEBUG: num blocks: ${this.numberOfInitializedGenesis} out of ${this.nodes.length}`);
   if (this.numberOfInitializedGenesis < this.nodes.length) {
     return;
   }
@@ -438,7 +502,7 @@ KanbanGoInitializer.prototype.runNodes4RebuildPBFTConfiguration = function(respo
   this.pbftConfiguration.config.pbft.proposers = [];
   for (var counterNode = 0; counterNode < this.nodes.length; counterNode ++) {
     var currentNode = this.nodes[counterNode];
-    this.pbftConfiguration.config.pbft.proposers.push(`0x${currentNode.ethereumAddress}`);
+    this.pbftConfiguration.config.pbft.proposers.push(`0x${currentNode.nodeAddressHex}`);
     this.pbftConfiguration.alloc[currentNode.ethereumAddress] = { 
       balance: "0x20000000000000000000"
     };
@@ -454,7 +518,7 @@ KanbanGoInitializer.prototype.runNodes4RebuildPBFTConfiguration = function(respo
 
 KanbanGoInitializer.prototype.runNodes5InitGenesis = function(response) {
   for (var counterNode = 0; counterNode < this.nodes.length; counterNode ++) {
-    this.nodes[counterNode].initialize7GenesisBlock(response);
+    this.nodes[counterNode].initialize9GenesisBlock(response);
   }
 }
 

@@ -50,6 +50,7 @@ Encoding.prototype.fromHex = function(inputHex) {
   try {
     return Buffer.from(inputHex, "hex");
   } catch (e) {
+    console.log(`Bad input to fromHex function. ${e}`);
     return null;
   }
 }
@@ -77,12 +78,18 @@ Encoding.prototype.fromBytes = function(inputArbitraryEncoding) {
 }
 
 Encoding.prototype.fromArbitrary = function(inputArbitraryEncoding) {
+  if (typeof inputArbitraryEncoding !== "string") {
+    inputArbitraryEncoding = inputArbitraryEncoding.toString();
+  }
   if (inputArbitraryEncoding.length in this.allowedRawLengths) {
     return this.fromBytes(inputArbitraryEncoding);
   }    
   if (inputArbitraryEncoding.length in this.allowedHexLengths) {
     var converted = this.fromHex(inputArbitraryEncoding);
-    return this.fromBytes(converted);
+    //console.log(`DEBUG: from hex: converted: ${converted}`);
+    var bytes = this.fromBytes(converted);
+    //console.log(`DEBUG: from hex: bytes: ${converted.toString()}`);
+    return bytes;
   }
   if (inputArbitraryEncoding.length in this.allowedHexCheckLengths) {
     var converted = this.fromHex(inputArbitraryEncoding);
