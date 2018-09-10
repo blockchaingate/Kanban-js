@@ -32,12 +32,12 @@ function NodeKanbanGo(inputId) {
 }
 
 NodeKanbanGo.prototype.run = function(response) {
-  console.log("DEBUG: run: pbft.json: " + getInitializer().pbftConfigurationFileName);
+  console.log("DEBUG: run: pbft.json: " + getInitializer().paths.pbftConfigurationFileName);
   fs.unlink(this.lockFileName, this.run2GetKeyStoreList.bind(this, response));
 }
 
 NodeKanbanGo.prototype.run2GetKeyStoreList = function(response, error) {
-  console.log("DEBUG: run2: pbft.json: " + getInitializer().pbftConfigurationFileName);
+  console.log("DEBUG: run2: pbft.json: " + getInitializer().paths.pbftConfigurationFileName);
   if (error !== null && error !== undefined) {
     this.notes += error;
     console.log(`Error while running geth node ${this.id}. ${error} `.red);
@@ -79,14 +79,14 @@ NodeKanbanGo.prototype.run4InitializeNode = function(response) {
     env: process.env
   };
   console.log("DEBUG: initializer: " + initializer);
-  console.log("DEBUG: about to initialize: " + initializer.pbftConfigurationFileName);
+  console.log("DEBUG: about to initialize: " + initializer.paths.pbftConfigurationFileName);
   var theArguments = [
     "--datadir",
     this.dataDir,
     "--networkid",
     this.idNetwork,
     "init",
-    initializer.pbftConfigurationFileName
+    initializer.paths.pbftConfigurationFileName
   ];
   initializer.runShell(initializer.paths.geth, theArguments, theOptions, this.id, this.run5GenerateNodeKey.bind(this, response));
 }
@@ -159,15 +159,11 @@ function KanbanGoInitializer() {
     gethPath: null,
     dataDir: null,
     passwordEmptyFile: null,
+    pbftConfigurationFileName: null
   };
   this.nodes = [];
   this.numberOfStartedNodes = 0;
   this.pbftConfiguration = null;
-  this.pbftConfigurationFileName = null;
-  console.log(`DEBUG: this.pbftConfigurationFileName: ${this.pbftConfigurationFileName}`.red);
-  if (this.pbftConfigurationFileName !== undefined && this.pbftConfigurationFileName !== null) {
-    throw `Unexpected pbft config file name: ${this.pbftConfigurationFileName}`;
-  }
   this.computePaths();
   console.log(" DEBUG: exiting constructor of kanban initializer.");
 }
@@ -253,9 +249,10 @@ KanbanGoInitializer.prototype.computePaths = function() {
   } else {
     console.log(`Found data directory: `.green + `${this.paths.dataDir}`.blue);
   }
-  this.pbftConfigurationFileName = `${this.paths.dataDir}/pbft.json`;
-  console.log("DEBUG: pbft configuration file name: " + this.pbftConfigurationFileName);
-  fs.readFile(this.pbftConfigurationFileName, (err, data)=> {
+  this.paths.pbftConfigurationFileName = `${this.paths.dataDir}/pbft.json`;
+  this.paths.passwordEmptyFile = `${this.paths.dataDir}/password_empty.txt`;
+  console.log("DEBUG: pbft configuration file name: " + this.paths.pbftConfigurationFileName);
+  fs.readFile(this.paths.pbftConfigurationFileName, (err, data)=> {
     this.pbftConfiguration = JSON.parse(data);
   });
 }
@@ -281,7 +278,7 @@ KanbanGoInitializer.prototype.runNodesFinish = function(response) {
 
 KanbanGoInitializer.prototype.runNodes = function(response, queryCommand) {
   console.log(`DEBUG: Got to here. This: ` + this);
-  console.log(`DEBUG: Got to here pbft paths: ${this.pbftConfigurationFileName}`.cyan);
+  console.log(`DEBUG: Got to here pbft paths: ${this.paths.pbftConfigurationFileName}`.cyan);
   console.log(`DEBUG: run nodes. initializer.paths: ${this.paths}` );
   var candidateNumberOfNodes = Number(queryCommand.numberOfNodes);
   var maxNumberOfNodes = 100;
