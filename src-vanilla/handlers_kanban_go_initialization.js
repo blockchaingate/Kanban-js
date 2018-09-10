@@ -8,6 +8,10 @@ const fs = require('fs');
 const path = require('path');
 require('colors');
 
+/**
+ * Returns the ambient kanbanGOInitializer.
+ * @returns {KanbanGoInitializer}
+ */
 function getInitializer() {
   return global.kanban.kanbanGOInitializer;
 }
@@ -47,7 +51,7 @@ NodeKanbanGo.prototype.run3SelectAddress = function(response, error, fileNames) 
     console.log(`Error while selecting address from keystore with id: ${this.id}. ${error} `.red);
   }
   this.numberAttemptsToSelectAddress ++;
-  if (this.numberAttemptsToSelectAddress > this.numberAttemptsToSelectAddress) {
+  if (this.numberAttemptsToSelectAddress > this.maximumAttemptsToSelectAddress) {
     getInitializer().runNodesFinish(response);
     return;
   }
@@ -88,7 +92,7 @@ NodeKanbanGo.prototype.run4InitializeNode = function(response) {
 }
 
 NodeKanbanGo.prototype.run5GenerateNodeKey = function(response) {
-  var initializer = getInitializer();
+  var initializer = getInitializer(); 
   var theOptions = {
     cwd: initializer.paths.gethPath,
     env: process.env
@@ -99,7 +103,9 @@ NodeKanbanGo.prototype.run5GenerateNodeKey = function(response) {
     "--networkid",
     this.idNetwork,
     "account",
-    "new"
+    "new",
+    "--password",
+    initializer.paths.passwordEmptyFile
   ];
   initializer.runShell(initializer.paths.geth, theArguments, theOptions, this.id, this.run2GetKeyStoreList.bind(this, response));
 }
@@ -134,6 +140,10 @@ NodeKanbanGo.prototype.run7StartNode = function(response) {
   initializer.runNodesFinish(response);
 }
 
+/**
+ * All-in one initilizer for geth nodes.
+ * @class
+ */
 function KanbanGoInitializer() {
   console.log(" DEBUG: firing up kanbango init");
   this.numberRequestsRunning = 0;
@@ -147,7 +157,8 @@ function KanbanGoInitializer() {
   this.paths = {
     geth: null,
     gethPath: null,
-    dataDir: null
+    dataDir: null,
+    passwordEmptyFile: null,
   };
   this.nodes = [];
   this.numberOfStartedNodes = 0;
