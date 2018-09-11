@@ -205,11 +205,12 @@ NodeKanbanGo.prototype.initialize10WriteNodeConnections = function(response) {
     if (currentId < 0 || currentId >= initializer.nodes.length) {
       continue;
     }
-    var publicKeyHex = initializer.nodes[currentId].nodePrivateKey.getExponent().toHexUncompressed();
-    this.nodeConnections.push(`enode:://${publicKeyHex}@[::]:20000?discport=0`);
+    var publicKeyHex = initializer.nodes[currentId].nodePrivateKey.getExponent().toHexUncompressed().slice(2);
+    var thePort = initializer.nodes[currentId].port;
+    this.nodeConnections.push(`enode://${publicKeyHex}@[::]:${thePort}?discport=0`);
   }
   this.log(`Writing connections: ${JSON.stringify(this.nodeConnections)} to file: ${this.connectionsFileName}`);
-  fs.writeFile(this.connectionsFileName, JSON.stringify(this.nodeConnections), (errorConnections)=>{
+  fs.writeFile(this.connectionsFileName, JSON.stringify(this.nodeConnections), (errorConnections)=> {
     console.log(`DEBUG: did finally write connections`);
     if (errorConnections !== null && errorConnections !== undefined) {
       this.log(`Error writing node connections. ${e}`);
@@ -230,8 +231,14 @@ NodeKanbanGo.prototype.run = function(response) {
   var theArguments = [
     "--datadir",
     this.dataDir,
+    "--nodiscover",
+    "--mine",
+//    "--verbosity",
+//    100,
     "--networkid",
     initializer.chainId,
+    "--syncmode",
+    "full",
     "--port",
     this.port.toString(),
     "--rpcport",
@@ -368,7 +375,7 @@ KanbanGoInitializer.prototype.computePaths = function() {
   this.paths.pbftConfigSeed = `${this.paths.dataDir}/pbft_seed.json`;
   this.paths.passwordEmptyFile = `${this.paths.dataDir}/password_empty.txt`;
   this.paths.nodesDir = `${this.paths.dataDir}/nodes`;
-  fs.readFile(this.paths.pbftConfigSeed, (err, data)=> {
+  fs.readFile(this.paths.pbftConfigSeed, (err, data) => {
     this.pbftConfigurationSeed = JSON.parse(data);
   });
 }
@@ -523,6 +530,8 @@ KanbanGoInitializer.prototype.runNodes5InitGenesis = function(response) {
 }
 
 KanbanGoInitializer.prototype.runShell = function(command, theArguments, theOptions, id, callbackOnExit) {
+  console.log(`About to execute: ${command}`.yellow);
+  console.log(`Arguments: ${theArguments}`.green);
   var child = childProcess.spawn(command, theArguments, theOptions);
   var color = this.colors[id % this.colors.length];
   child.stdout.on('data', function(data) {

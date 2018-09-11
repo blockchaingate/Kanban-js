@@ -9,10 +9,12 @@ var encodingPoint = new encodings.Encoding({
   name: "point_secp256k1",
   allowedRawLengths: {
     33: true,
+    64: true,
     65: true,
   },
   allowedHexLengths: {
     66: true,
+    128: true,
     130: true,
   },
   allowedHexCheckLengths: {
@@ -80,6 +82,13 @@ CurveExponent.prototype.generateAtRandom = function() {
 CurvePoint.prototype.exponentiateMe = function(theCurveExponent) {
 }
 
+CurvePoint.prototype.toBytesUncompressed = function() {
+  if (this.point === null) {
+    return "(uninitialized)";
+  }
+  return Buffer.from(this.point._encode(false));
+}
+
 CurvePoint.prototype.toBytes = function() {
   if (this.point === null) {
     return "(uninitialized)";
@@ -120,6 +129,15 @@ CurvePoint.prototype.fromHex = function(input) {
 }
 
 CurvePoint.prototype.fromBytes = function(input) {
+  if (input.length === 64) {
+    var inputNew = new Uint8Array(65);
+    inputNew[0] = 4;
+    for (var counterInput = 0; counterInput < input.length; counterInput ++) {
+      inputNew[counterInput + 1] = input[counterInput]; 
+    }
+    input = inputNew;
+  }
+  console.log(`DEBUG: input: ${input} of length: ${input.length}`);
   var thePair = new EllipticKeyPair(secp256k1, {
     pub: input
   }); 
@@ -138,7 +156,9 @@ CurvePoint.prototype.computeEthereumAddressBytes = function() {
   if (this.point === null) {
     throw "Uninitialized curve point";
   }
-  var theKeccak = hashes.keccak_256(this.toBytes());
+  var addressBytes = this.toBytesUncompressed().slice(1);
+  console.log( "DEBUG: address bytes: " + addressBytes.length);
+  var theKeccak = hashes.keccak_256(addressBytes);
   return theKeccak.slice(12);
 }
 
