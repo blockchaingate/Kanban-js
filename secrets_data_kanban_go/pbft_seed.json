@@ -13,7 +13,10 @@
       "timeout": 2000,
       "proposers": [
         "REPLACE_with_ethereum_address_from_nodekey"
-      ]
+      ],
+			"proposerPublicKeys": [
+				"Replace_with_public_key_from_nodekey_in_same_order_as_proposers"
+			]
     }
   },
   "nonce": "0x0",

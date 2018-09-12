@@ -31,6 +31,8 @@ function NodeKanbanGo(inputId) {
   this.ethereumAddress = null;
   this.nodePrivateKey = new cryptoKanban.CurveExponent();
   /** @type {string} */
+  this.nodePublicKeyHex = null;
+  /** @type {string} */
   this.nodeAddressHex = null;
   /** @type {string[]} */
   this.nodeConnections = [];
@@ -118,6 +120,7 @@ NodeKanbanGo.prototype.initialize4ReadAccountAddress = function(response, error,
       return;
     }
     this.nodePrivateKey.fromArbitrary(data);
+    this.nodePublicKeyHex = this.nodePrivateKey.getExponent().toHex();
     this.nodeAddressHex = this.nodePrivateKey.getExponent().computeEthereumAddressHex();
     this.log(`Loaded private key from node key file: ${this.nodePrivateKey.toHex()} with corresponding ethereum address: ${this.nodeAddressHex}`);
     getInitializer().numberOfInitializedFolders ++;
@@ -211,7 +214,7 @@ NodeKanbanGo.prototype.initialize10WriteNodeConnections = function(response) {
   }
   this.log(`Writing connections: ${JSON.stringify(this.nodeConnections)} to file: ${this.connectionsFileName}`);
   fs.writeFile(this.connectionsFileName, JSON.stringify(this.nodeConnections), (errorConnections)=> {
-    console.log(`DEBUG: did finally write connections`);
+    //console.log(`DEBUG: did finally write connections`);
     if (errorConnections !== null && errorConnections !== undefined) {
       this.log(`Error writing node connections. ${e}`);
     }
@@ -233,8 +236,8 @@ NodeKanbanGo.prototype.run = function(response) {
     this.dataDir,
     "--nodiscover",
     "--mine",
-//    "--verbosity",
-//    100,
+    "--verbosity",
+    4,
     "--networkid",
     initializer.chainId,
     "--syncmode",
@@ -480,7 +483,7 @@ KanbanGoInitializer.prototype.runNodes3ParseConfigRunNodes = function(response, 
       }
     }
   } catch (e) {
-    this.log( `Error reading pbft configuration. ${e}`);
+    this.log(`Error reading pbft configuration. ${e}`);
     this.runNodes4RebuildPBFTConfiguration(response);
     return;
   }
@@ -490,11 +493,9 @@ KanbanGoInitializer.prototype.runNodes3ParseConfigRunNodes = function(response, 
 
 KanbanGoInitializer.prototype.runNodes6DoRunNodes = function(response) {
   this.numberOfInitializedGenesis ++;
-  console.log(`DEBUG: num blocks: ${this.numberOfInitializedGenesis} out of ${this.nodes.length}`);
   if (this.numberOfInitializedGenesis < this.nodes.length) {
     return;
   }
-  console.log("Proceeding to run nodes. ");
   for (var counterNode = 0; counterNode < this.nodes.length; counterNode ++) {
     this.nodes[counterNode].run(response);
   }
@@ -507,9 +508,11 @@ KanbanGoInitializer.prototype.runNodes4RebuildPBFTConfiguration = function(respo
   this.pbftConfiguration = Object.assign({}, this.pbftConfigurationSeed);
   this.pbftConfiguration.config.chainId = this.chainId;
   this.pbftConfiguration.config.pbft.proposers = [];
+  this.pbftConfiguration.config.pbft.proposerPublicKeys = [];
   for (var counterNode = 0; counterNode < this.nodes.length; counterNode ++) {
     var currentNode = this.nodes[counterNode];
     this.pbftConfiguration.config.pbft.proposers.push(`0x${currentNode.nodeAddressHex}`);
+    this.pbftConfiguration.config.pbft.proposerPublicKeys.push(`0x${currentNode.nodeAddressHex}`);
     this.pbftConfiguration.alloc[currentNode.ethereumAddress] = { 
       balance: "0x20000000000000000000"
     };
