@@ -1,4 +1,9 @@
+/** 
+ * @module handlersKanbanGoInitialization 
+ * @exports KanbanGoInitializer
+*/
 "use strict";
+
 const url  = require('url');
 const queryString = require('querystring');
 const kanbanGOInitialization = require('./resources_kanban_go_initialization');
@@ -268,6 +273,7 @@ function KanbanGoInitializer() {
   this.paths = {
     geth: null,
     gethPath: null,
+    gethProjectBase: null,
     dataDir: null,
     nodesDir: null,
     passwordEmptyFile: null,
@@ -374,12 +380,24 @@ KanbanGoInitializer.prototype.computePaths = function() {
   } else {
     console.log(`Found data directory: `.green + `${this.paths.dataDir}`.blue);
   }
+  this.paths.gethProjectBase = path.normalize(`${this.paths.gethPath}/../../`);
   this.paths.pbftConfig = `${this.paths.dataDir}/pbft.json`;
   this.paths.pbftConfigSeed = `${this.paths.dataDir}/pbft_seed.json`;
   this.paths.passwordEmptyFile = `${this.paths.dataDir}/password_empty.txt`;
   this.paths.nodesDir = `${this.paths.dataDir}/nodes`;
   fs.readFile(this.paths.pbftConfigSeed, (err, data) => {
     this.pbftConfigurationSeed = JSON.parse(data);
+  });
+}
+
+KanbanGoInitializer.prototype.buildGeth = function() {
+  var theOptions = {
+    cwd: this.paths.gethProjectBase,
+    env: process.env
+  };
+  this.log(`Building geth, path: ${this.paths.gethProjectBase}`);
+  this.runShell("make", [], theOptions, - 1,()=>{
+    this.log(`Geth build exit.`);
   });
 }
 
@@ -536,15 +554,21 @@ KanbanGoInitializer.prototype.runShell = function(command, theArguments, theOpti
   console.log(`About to execute: ${command}`.yellow);
   console.log(`Arguments: ${theArguments}`.green);
   var child = childProcess.spawn(command, theArguments, theOptions);
-  var color = this.colors[id % this.colors.length];
+  var shellId = "";
+  if (id >= 0) {
+    var color = this.colors[id % this.colors.length];
+    shellId = `[shell ${id}] `[color];
+  } else {
+    shellId = `[KanbanGoInitializer] `.red;
+  }
   child.stdout.on('data', function(data) {
-    console.log(`[shell ${id}] `[color] + data.toString());
+    console.log(shellId + data.toString());
   });
   child.stderr.on('data', function(data) {
-    console.log(`[shell ${id}] `[color] + data.toString());
+    console.log(shellId + data.toString());
   });
   child.on('error', function(data) {
-    console.log(`[shell ${id}] `[color] + data.toString());
+    console.log(shellId + data.toString());
   });
   child.on('exit', function(code) {
     console.log(`Geth ${id} exited with code: ${code}`.green);

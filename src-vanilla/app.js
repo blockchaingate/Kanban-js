@@ -16,10 +16,11 @@ const certificateOptions = require('./initialize_certificates');
 const handleRequests = require('./handle_requests'); 
 const kanbanGoInitialization = require('./handlers_kanban_go_initialization');
 
-//handlers for various configurations
+/**Handlers for various configurations*/
 global.kanban = {
   configuration: null,
   certificateOptions: null,
+  /**@type {module:handlersKanbanGoInitialization.KanbanGoInitializer} */ 
   kanbanGOInitializer: null,
   jobs: null,
   openCLDriver: null
@@ -29,13 +30,16 @@ global.kanban = {
 //global.kanban.configuration
 
 //Server general configuration, read from secrets_admin/configuration.json:
-global.kanban.configuration = new configuration.Configuration();
+kanban.configuration = new configuration.Configuration();
 
 //Server ssl certificates:
 global.kanban.certificateOptions = new certificateOptions.CertificateOptions();
 
 //Compute kanban go folders:
 global.kanban.kanbanGOInitializer = new kanbanGoInitialization.KanbanGoInitializer();
+
+//Build geth executable:
+global.kanban.kanbanGOInitializer.buildGeth();
 
 
 initializeOpenCLDriver.initializeOpenCLDriver();
