@@ -32,7 +32,11 @@ test/kanban_gpu/debug/
 build/Makefile
 
 go/bin
-go/src/golang.org
+go/src/github.com/golang.org
+go/src/github.com/ramya-rao-a
+go/src/github.com/rogpeppe
+go/src/github.com/sqs
+go/src/golang.org/
 go/pkg
 
 #this auto-generated file should really be in the repo,
