@@ -37,6 +37,12 @@ go/src/github.com/ramya-rao-a
 go/src/github.com/rogpeppe
 go/src/github.com/sqs
 go/src/golang.org/
+go/src/github.com/acroca/
+go/src/github.com/derekparker/
+go/src/github.com/karrick/
+go/src/github.com/mdempsky/
+go/src/github.com/pkg/
+go/src/github.com/uudashr/
 go/pkg
 
 #this auto-generated file should really be in the repo,

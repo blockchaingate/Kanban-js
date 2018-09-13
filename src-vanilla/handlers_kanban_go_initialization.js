@@ -512,7 +512,7 @@ KanbanGoInitializer.prototype.runNodes4RebuildPBFTConfiguration = function(respo
   for (var counterNode = 0; counterNode < this.nodes.length; counterNode ++) {
     var currentNode = this.nodes[counterNode];
     this.pbftConfiguration.config.pbft.proposers.push(`0x${currentNode.nodeAddressHex}`);
-    this.pbftConfiguration.config.pbft.proposerPublicKeys.push(`0x${currentNode.nodeAddressHex}`);
+    this.pbftConfiguration.config.pbft.proposerPublicKeys.push(`${currentNode.nodePublicKeyHex}`);
     this.pbftConfiguration.alloc[currentNode.ethereumAddress] = { 
       balance: "0x20000000000000000000"
     };
