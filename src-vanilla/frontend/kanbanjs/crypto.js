@@ -123,6 +123,7 @@ TestKanbanJS.prototype.testPublicKeyFromPrivate = function(theArguments) {
     return result;
   }
   result.privateKeyHexRecoded = curveExponent.toHex();
+  result.publicKeyUncompressedHex = curveExponent.getExponent().toHexUncompressed()
   result.publicKeyHex = curveExponent.getExponent().toHex();
   return result;
 }
