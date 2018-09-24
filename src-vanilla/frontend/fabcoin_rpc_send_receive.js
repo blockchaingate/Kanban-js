@@ -311,7 +311,8 @@ function buildSendTransaction() {
   theTransaction.addOutput(address, amount);
   var theKey = ECKey.fromWIF(thePrivateKeyString, theNetwork);
   try {
-    theTransaction.sign(0, theKey);
+    var output = theTransaction.sign(0, theKey);
+    console.log(output);
   } catch (e) {
     console.log(`Error signing transaction ${e}.`);
   }

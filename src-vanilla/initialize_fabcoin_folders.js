@@ -5,6 +5,7 @@ const fs = require('fs');
 
 
 function initializeFolders() {
+  //console.log("DEBUG: INITIALISING FOLDERS");
   var currentPath = pathnames.path.base + "/";
   while (currentPath !== "/") {
     var currentPathFabcoin = currentPath + ".fabcoin";
