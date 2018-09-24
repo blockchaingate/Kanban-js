@@ -23,68 +23,49 @@ function Page() {
   this.currentKanbanNetworkName = pathnames.networkDataKanban.testKanban.name;
   this.pages = {
     fabcoinInitialization: {
-      ids: {
-        page: ids.defaults.pageFabcoinInitialization
-      },
+      idPage: ids.defaults.pageFabcoinInitialization,
       updateFunction: fabcoinInitialization.updateFabcoinInitializationPage,      
     },
+    kanbanGOSendReceive:{
+      idPage: ids.defaults.pages.kanbanGOSendReceive
+    },
     myLocalKanbanNodes: {
-      ids: {
-        page: ids.defaults.pages.kanbanMyLocalNodes
-      },
+      idPage: ids.defaults.pages.kanbanMyLocalNodes
     },
     myNodes: {
-      ids: {
-        page: ids.defaults.pageMyNodes
-      },
+      idPage: ids.defaults.pageMyNodes,
       updateFunction: myNodes.updateMyNodes
     },
     kanbanJS: {
-      ids: {
-        page: ids.defaults.pages.kanbanJS
-      }
+      idPage: ids.defaults.pages.kanbanJS,
     },
     kanbanPlusPlus: {
-      ids: {
-        page: ids.defaults.pages.kanbanPlusPlus
-      },
+      idPage: ids.defaults.pages.kanbanPlusPlus,
       updateFunction: null
     },
     kanbanGO: {
-      ids: {
-        page: ids.defaults.pages.kanbanGO
-      },
+      idPage: ids.defaults.pages.kanbanGO,
       updateFunction: null
     },
     send: {
-      ids: {
-        page: ids.defaults.pageSend
-      },
+      idPage: ids.defaults.pageSend,
       verbosity: "0",
       updateFunction: rpcCallsSendReceive.updateSendReceivePage
     },
     mine: {
-      ids: {
-        page: ids.defaults.pageMine
-      },
+      idPage: ids.defaults.pageMine,
       updateFunction: rpcCallsMine.updateMiningPage
     },
     network: {
-      ids: {
-        page: ids.defaults.pageNetwork
-      },
+      idPage: ids.defaults.pageNetwork,
       updateFunction: rpcCallsNetwork.updateNetworkPage
     },
     testGPU: {
-      ids: {
-        page: ids.defaults.pageTestGPU
-      },
+      idPage: ids.defaults.pageTestGPU,
       updateFunction: null
     },
     profiling: {
-      ids: {
-        page: ids.defaults.pageProfiling
-      },
+      idPage: ids.defaults.pageProfiling,
       updateFunction: rpcCallsProfiling.updateProfilingPage
     }
   }
@@ -131,10 +112,12 @@ Page.prototype.initializeInputPlaceholders = function() {
 
 Page.prototype.initializeCurrentPage = function() {
   for (var label in this.pages) {
-    document.getElementById(this.pages[label].ids.page).style.display = "none";
+    var pageId = this.pages[label].idPage;
+    document.getElementById(pageId).style.display = "none";
   }
   if (this.currentPageLabel in this.pages) {
-    document.getElementById(this.pages[this.currentPageLabel].ids.page).style.display = "";
+    var pageId = this.pages[this.currentPageLabel].idPage;
+    document.getElementById(pageId).style.display = "";
     var currentPage = this.pages[this.currentPageLabel];
     if (currentPage.updateFunction !== null && currentPage.updateFunction !== undefined) {
       currentPage.updateFunction();

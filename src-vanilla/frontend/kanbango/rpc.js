@@ -11,6 +11,7 @@ const kanbanGO = require('../../resources_kanban_go');
 function TestKanbanGO() {
   var inputSchnorr = ids.defaults.kanbanGO.inputSchnorr;
   var inputAggregate = ids.defaults.kanbanGO.inputAggregateSignature;
+  var inputSendReceive = ids.defaults.kanbanGO.inputSendReceive;
   this.theFunctions  = {
     testSha3 : {
       rpcCall: kanbanGO.rpcCalls.testSha3.rpcCall, 
@@ -120,6 +121,12 @@ function TestKanbanGO() {
       },
       callback: this.callbackStandard
     },
+    dumpBlock: {
+      inputs: {
+        blockNumber: inputSendReceive.blockNumber
+      },
+      output: ids.defaults.kanbanGO.outputSendReceive
+    }
   };
   this.correctFunctions();
 }
@@ -252,6 +259,9 @@ TestKanbanGO.prototype.run = function(functionLabel) {
   var messageBody = kanbanGO.getPOSTBodyFromKanbanGORPCLabel(theFunction.rpcCall, theArguments);
   var theURL = `${pathnames.url.known.goKanbanRPC}`;
   var currentResult = ids.defaults.kanbanGO.outputKBGOTest;
+  if (theFunction.output !== undefined && theFunction.output !== null) {
+    currentResult = theFunction.output;
+  }
   var currentProgress = globals.spanProgress();
   var usePOST = window.kanban.rpc.forceRPCPOST;
   if (!usePOST) {

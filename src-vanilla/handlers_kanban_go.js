@@ -56,13 +56,37 @@ function handleRPCURLEncodedInput(request, response, messageBodyURLed) {
 var numberRequestsRunning = 0;
 var maxRequestsRunning = 4;
 
+function getParameterFromType(input, type) {
+  if (type === "number") {
+    return Number(input);
+  }
+  if (type === "numberHex") {
+    if (typeof input === "string") {
+      if (!input.startsWith("0x")) {
+        input = "0x" + input;
+      }
+      return input;
+    }
+  }
+  return input;
+}
+
 function getRPCRequestJSON(rpcCallLabel, queryCommand, errors) {
+  /**@type {{rpcCall: string, method: string, mandatoryFixedArguments: Object,  mandatoryModifiableArguments: Object,  optionalModifiableArguments: Object, allowedArgumentValues: Object, parameters: string[]}}*/
   var currentRPCCall = kanbanGO.rpcCalls[rpcCallLabel];
   var currentParameters = [];
   for (var counterCommands = 0; counterCommands < currentRPCCall.parameters.length; counterCommands ++) {
     var currentParameterName = currentRPCCall.parameters[counterCommands];
+    if (currentParameterName in currentRPCCall.mandatoryFixedArguments) {
+      currentParameters.push(currentRPCCall.mandatoryFixedArguments[currentParameterName]);
+      continue;
+    }
     if (currentParameterName in queryCommand) {
-      currentParameters.push(queryCommand[currentParameterName]);
+      var incomingParameter = queryCommand[currentParameterName];
+      if (currentRPCCall.types !== undefined) {
+        incomingParameter = getParameterFromType(incomingParameter, currentRPCCall.types[currentParameterName]);
+      }
+      currentParameters.push(incomingParameter);
       continue;
     }
     if (currentRPCCall.optionalModifiableArguments !== undefined && currentRPCCall.optionalModifiableArguments !== null) {
@@ -123,6 +147,7 @@ function handleRPCArguments(request, response, queryCommand) {
     response.writeHead(400);
     return response.end(JSON.stringify({error: errors[0]}));
   }
+  console.log("DEBUG: request stringified: " + JSON.stringify(theRequestJSON));
   var requestStringified = JSON.stringify(theRequestJSON);
   return handleRPCArgumentsPartTwo(request, response, requestStringified);
 }

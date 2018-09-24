@@ -172,18 +172,22 @@ var rpcCalls = {
     parameters: ["signature", "committedSigners", "allPublicKeysBase64", "messageBase64"]    
   },
   dumpBlock: {
-    rpcCall: "dump",
-    method: "web3_dump",
+    rpcCall: "dumpBlock",
+    method: "kanban_getBlockByNumber",
     mandatoryFixedArguments: { //<- values give defaults, null for none
+      verbose: true
     },
     mandatoryModifiableArguments: { //<- values give defaults, null for none
-      number: null
+      blockNumber: null
+    },
+    types: {
+      blockNumber: "numberHex"
     },
     optionalModifiableArguments: {
     },
     allowedArgumentValues: {
     },
-    parameters: []
+    parameters: ["blockNumber", "verbose"]
   },
   versionGO: {
     rpcCall: "versionGO", //must be same as rpc label, used for autocomplete

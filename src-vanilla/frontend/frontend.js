@@ -15,7 +15,7 @@ window.kanban = {
     general: require('./kanban_plus_plus')
   },
   kanbanGO: {
-    crypto: require('./kanbango/crypto'),
+    rpc: require('./kanbango/rpc'),
     initialization: require('./kanbango/initialization')
   },
   initialization: {

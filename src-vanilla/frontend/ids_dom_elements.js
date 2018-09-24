@@ -14,7 +14,8 @@ var defaults = {
     kanbanJS: "pageKanbanJS",
     kanbanPlusPlus: "pageKanbanPlusPlus",
     kanbanGO: "pageKanbanGO",
-    kanbanMyLocalNodes: "pageMyLocalKanbanNodes"
+    kanbanMyLocalNodes: "pageMyLocalKanbanNodes",
+    kanbanGOSendReceive: "pageKanbanGOSendReceive" 
   },
   progressReport: "spanProgressReport",
   spanPingColumnHeader: "spanPingColumnHeader",
@@ -49,12 +50,16 @@ var defaults = {
       solutions: "inputKBGOSolutions",
       aggregateSignature: "inputKBGOAggregateSignature",
     },
+    inputSendReceive: {
+      blockNumber: "inputKBGOBlockNumber"
+    },
     inputInitialization: {
       numberOfNodes: "inputKBGONumberOfGethNodes"
     },
     outputInitialization: "divFabcoinInitialization",
     outputKBGOTest: "divOutputKBGOTest",
-    outputKanbanInitialization: "divOutputMyLocalKanbanNodes"
+    outputKanbanInitialization: "divOutputMyLocalKanbanNodes",
+    outputSendReceive: "divOutputKBGOSendReceive"
   },
   kanbanPlusPlus: {
     inputSchnorrSignature: {
