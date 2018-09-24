@@ -33,7 +33,7 @@ Configuration.prototype.readSecretsAdminCallback = function(err, data) {
   try {
     console.log(`Configuration file read: ` + `${pathnames.pathname.configurationSecretsAdmin}`.blue);
     var contentParsed = JSON.parse(data);
-    console.log(`DEBUG: content read: ${data}`);
+    //console.log(`DEBUG: content read: ${data}`);
     for (var label in this.labelsToRead) {
       if (label in contentParsed) {
         this[label] = Object.assign({}, contentParsed[label]);

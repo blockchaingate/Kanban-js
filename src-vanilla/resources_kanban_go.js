@@ -19,7 +19,6 @@ var rpcCalls = {
     },
     allowedArgumentValues: {
     },
-    address: "",
     parameters: ["message"]
   },
   testPrivateKeyGeneration: {
@@ -33,7 +32,6 @@ var rpcCalls = {
     },
     allowedArgumentValues: {
     },
-    address: "",
     parameters: []
   },
   testPublicKeyFromPrivate: {
@@ -48,7 +46,6 @@ var rpcCalls = {
     },
     allowedArgumentValues: {
     },
-    address: "",
     parameters: ["privateKey"]
   },
   testSchnorrSignature: {
@@ -64,7 +61,6 @@ var rpcCalls = {
     },
     allowedArgumentValues: {
     },
-    address: "",
     parameters: ["privateKey", "messageBase64"]
   },
   testSchnorrVerification: {
@@ -81,7 +77,6 @@ var rpcCalls = {
     },
     allowedArgumentValues: {
     },
-    address: "",
     parameters: ["signature", "publicKey", "messageBase64"]
   },
   testAggregateInitialize: {
@@ -96,7 +91,6 @@ var rpcCalls = {
     },
     allowedArgumentValues: {
     },
-    address: "",
     parameters: ["numberOfPrivateKeysToGenerate"]    
   },
   testAggregateCommitment: {
@@ -111,7 +105,6 @@ var rpcCalls = {
     },
     allowedArgumentValues: {
     },
-    address: "",
     parameters: ["messageBase64"]    
   },
   testAggregateChallenge: {
@@ -127,7 +120,6 @@ var rpcCalls = {
     },
     allowedArgumentValues: {
     },
-    address: "",
     parameters: ["commitmentsBase64", "committedSigners"]    
   },
   testAggregateSolutions: {
@@ -145,7 +137,6 @@ var rpcCalls = {
     },
     allowedArgumentValues: {
     },
-    address: "",
     parameters: ["committedSigners", "digest", "aggregateCommitment", "aggregatePublicKey"]    
   },
   testAggregateSignature: {
@@ -161,7 +152,6 @@ var rpcCalls = {
     },
     allowedArgumentValues: {
     },
-    address: "",
     parameters: ["committedSigners", "solutionsBase64"]    
   },
   testAggregateVerification: {
@@ -179,8 +169,21 @@ var rpcCalls = {
     },
     allowedArgumentValues: {
     },
-    address: "",
     parameters: ["signature", "committedSigners", "allPublicKeysBase64", "messageBase64"]    
+  },
+  dumpBlock: {
+    rpcCall: "dump",
+    method: "web3_dump",
+    mandatoryFixedArguments: { //<- values give defaults, null for none
+    },
+    mandatoryModifiableArguments: { //<- values give defaults, null for none
+      number: null
+    },
+    optionalModifiableArguments: {
+    },
+    allowedArgumentValues: {
+    },
+    parameters: []
   },
   versionGO: {
     rpcCall: "versionGO", //must be same as rpc label, used for autocomplete
@@ -193,7 +196,6 @@ var rpcCalls = {
     },
     allowedArgumentValues: {
     },
-    address: "",
     parameters: []
   },
 };
@@ -214,4 +216,3 @@ module.exports = {
   rpcCalls,
   getPOSTBodyFromKanbanGORPCLabel
 }
-
