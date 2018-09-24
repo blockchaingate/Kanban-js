@@ -19,6 +19,7 @@ const fabcoinInitialization = require('./initialize_fabcoin_folders');
 
 /**Handlers for various configurations*/
 global.kanban = {
+  /**@type {Configuration} */
   configuration: null,
   certificateOptions: null,
   /**@type {module:handlersKanbanGoInitialization.KanbanGoInitializer} */ 
@@ -31,7 +32,7 @@ global.kanban = {
 //global.kanban.configuration
 
 //Server general configuration, read from secrets_admin/configuration.json:
-kanban.configuration = new configuration.Configuration();
+global.kanban.configuration = new configuration.Configuration();
 
 //Server ssl certificates:
 global.kanban.certificateOptions = new certificateOptions.CertificateOptions();
@@ -52,6 +53,8 @@ initializeOpenCLDriver.initializeOpenCLDriver();
 
 buildFrontEnd.buildFrontEnd();
 //<- builds the frontend javascript from source using browserify.
+
+//console.log("DEBUG: got to here");
 
 var serverHTTPS = https.createServer(certificateOptions.getOptions(), handleRequests.handleRequests);
 serverHTTPS.listen(pathnames.ports.https, function() {

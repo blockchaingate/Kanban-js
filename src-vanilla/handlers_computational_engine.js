@@ -22,7 +22,7 @@ function pollOngoing(request, response, desiredCommand) {
   //console.log(`Extracting ids from: ${JSON.stringify(callIds)}`);
   for (var counterIds = 0; counterIds < callIds.length; counterIds ++) {
     var currentId = callIds[counterIds];
-    if (currentId in jobs.ongoing){
+    if (currentId in jobs.ongoing) {
       result[currentId] = {
         status: "ongoing", 
         message: jobs.ongoing[currentId]

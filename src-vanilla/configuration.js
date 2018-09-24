@@ -15,6 +15,10 @@ function getConfiguration() {
 function Configuration () {
   //defaults below. The defaults are overridden by this.readSecretsAdmin();
   //which reads config.json from pathnames.path.configurationSecretsAdmin
+  this.labelsToRead = {
+    kanbanGO: true,
+    myNodes: true
+  }
   this.kanbanGO = {
     dataDirName: "secrets_data_kanban_go"
   }
@@ -25,16 +29,23 @@ function Configuration () {
   //<- and attaches them to the this object
 }
 
-Configuration.prototype.readSecretsAdmin = function() {
+Configuration.prototype.readSecretsAdminCallback = function(err, data) {
   try {
-    var contentRead = fs.readFileSync(pathnames.pathname.configurationSecretsAdmin);
     console.log(`Configuration file read: ` + `${pathnames.pathname.configurationSecretsAdmin}`.blue);
-    for (var label in contentRead) {
-      this[label] = contentRead[label];
+    var contentParsed = JSON.parse(data);
+    console.log(`DEBUG: content read: ${data}`);
+    for (var label in this.labelsToRead) {
+      if (label in contentParsed) {
+        this[label] = Object.assign({}, contentParsed[label]);
+      }
     }
   } catch (e) {
     console.log(`Failed to read file: ${pathnames.pathname.configurationSecretsAdmin}. `.red);
   }
+}
+
+Configuration.prototype.readSecretsAdmin = function() {
+  fs.readFile(pathnames.pathname.configurationSecretsAdmin, this.readSecretsAdminCallback.bind(this));
 }
 
 module.exports = {
