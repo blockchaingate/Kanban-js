@@ -6,7 +6,7 @@ var SSHClient = require('ssh2').Client;
 
 function fetchNodeInfo(request, response, desiredCommand) {
   response.writeHead(200);
-  response.end(`{"myNodes": ${JSON.stringify(configuration.getConfiguration().myNodes)}}` );
+  response.end(`{"myNodes": ${JSON.stringify(configuration.getConfiguration().myNodes)}}`);
 }
 
 function sshNodeToRemoteMachinePartFour(machineName, stdoutSoFar, response) {

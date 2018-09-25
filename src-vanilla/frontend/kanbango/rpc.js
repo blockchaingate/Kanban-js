@@ -7,6 +7,7 @@ const jsonToHtml = require('../json_to_html');
 //const Block = require('../bitcoinjs_src/block');
 const globals = require('../globals');
 const kanbanGO = require('../../resources_kanban_go');
+const kanbanGOInitializer = require('./initialization');
 
 function TestKanbanGO() {
   var inputSchnorr = ids.defaults.kanbanGO.inputSchnorr;
@@ -257,6 +258,12 @@ TestKanbanGO.prototype.run = function(functionLabel) {
     }
   }
   var messageBody = kanbanGO.getPOSTBodyFromKanbanGORPCLabel(theFunction.rpcCall, theArguments);
+  var currentId = kanbanGOInitializer.initializer.selectedNode;
+  var nodeObject = {
+    id: currentId
+  };
+  messageBody += `&node=${escape(JSON.stringify(nodeObject))}`;
+
   var theURL = `${pathnames.url.known.goKanbanRPC}`;
   var currentResult = ids.defaults.kanbanGO.outputKBGOTest;
   if (theFunction.output !== undefined && theFunction.output !== null) {

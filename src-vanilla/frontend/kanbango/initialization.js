@@ -95,6 +95,9 @@ KanbanGoInitializer.prototype.getNodeInformationCallback = function (functionLab
       var currentNode = new KanbanGONode();
       currentNode.init(inputParsed[counterNode]);
       console.log("DEBUG: This selected node: " + this.selectedNode + " id backend:  " + currentNode.idBackend);
+      if (this.selectedNode === "") {
+        this.selectedNode = currentNode.idBackend;
+      }
       if (this.selectedNode === currentNode.idBackend) {
         console.log("DEbug: selecting node: " + currentNode.idBackend);
         currentNode.flagSelected = true;

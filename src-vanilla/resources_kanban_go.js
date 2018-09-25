@@ -1,6 +1,10 @@
 "use strict";
 const pathnames = require('./pathnames');
 
+var urlStrings = {
+  node: "node"
+};
+
 var rpcCalls = {
   //The method names of the ethereum calls are composed like this:
   //1. Take the function name, say, TestSha3. 
@@ -217,6 +221,7 @@ function getPOSTBodyFromKanbanGORPCLabel(theRPCLabel, theArguments) {
 }
 
 module.exports = {
+  urlStrings,
   rpcCalls,
   getPOSTBodyFromKanbanGORPCLabel
 }

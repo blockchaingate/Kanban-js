@@ -261,6 +261,7 @@ NodeKanbanGo.prototype.run = function(response) {
     "--mine",
     "--verbosity",
     4,
+    "--rpc",
     "--networkid",
     initializer.chainId,
     "--syncmode",
