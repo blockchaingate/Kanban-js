@@ -8,6 +8,13 @@ const pathnames = require("../../pathnames");
 const globals = require('../globals');
 const submitRequests = require('../submit_requests');
 
+function KanbanGONode() {
+  /**@type {string} */
+  this.idDOM = "";
+  /**@type {number} */
+  this.idBackend = - 1;
+}
+
 function KanbanGoInitializer() {
   this.idOutput = ids.defaults.outputFabcoinInitialization;
   var inputInitialization = ids.defaults.kanbanGO.inputInitialization;
@@ -19,10 +26,14 @@ function KanbanGoInitializer() {
       }
     }
   };
+  /**@type {KanbanGONode[]} */
+  this.nodes = [];
+}
+
+function initSelectNodePanel() {
 }
 
 var optionsForKanbanGOStandard = {};
-
 KanbanGoInitializer.prototype.callbackStandard = function(functionLabel, input, output) {
   jsonToHtml.writeJSONtoDOMComponent(input, output, optionsForKanbanGOStandard);
 }

@@ -56,6 +56,7 @@ var defaults = {
     inputInitialization: {
       numberOfNodes: "inputKBGONumberOfGethNodes"
     },
+    nodePael: "spanKanbanGoNodeContainer",
     outputInitialization: "divFabcoinInitialization",
     outputKBGOTest: "divOutputKBGOTest",
     outputKanbanInitialization: "divOutputMyLocalKanbanNodes",
