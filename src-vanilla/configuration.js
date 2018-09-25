@@ -20,7 +20,7 @@ function Configuration () {
     myNodes: true
   }
   this.kanbanGO = {
-    gethFolder: "",
+    gethFolder: "uninitialized",
     dataDirName: "secrets_data_kanban_go"
   }
   this.myNodes = {};
