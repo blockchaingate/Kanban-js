@@ -349,22 +349,23 @@ KanbanGoInitializer.prototype.handleRPCURLEncodedInput = function(request, respo
 
 KanbanGoInitializer.prototype.computePaths = function() {
   /** @type {string} */
-  var staringPath = global.kanban.configuration.kanbanGO.gethFolder;
-  if (staringPath === undefined || staringPath === null) {
-    staringPath = "/";
+  var startingPath = global.kanban.configuration.kanbanGO.gethFolder;
+  if (startingPath === undefined || startingPath === null) {
+    startingPath = "/";
   }
   var stringToReplaceWithBaseFolder = "${nodeBaseFolder}";
-  var indexNodeDir = staringPath.indexOf(stringToReplaceWithBaseFolder);
+  var indexNodeDir = startingPath.indexOf(stringToReplaceWithBaseFolder);
   if (indexNodeDir !== - 1) {
-    staringPath = staringPath.slice(0, indexNodeDir) + pathnames.path.base + staringPath.slice(indexNodeDir + stringToReplaceWithBaseFolder.length);
+    startingPath = startingPath.slice(0, indexNodeDir) + pathnames.path.base + startingPath.slice(indexNodeDir + stringToReplaceWithBaseFolder.length);
   }
   
   pathnames.path.base;
-  staringPath = path.normalize(staringPath);
-  var currentPath = staringPath;
+  startingPath = path.normalize(startingPath);
+  var currentPath = startingPath;
   var maxNumRuns = 100;
   var numRuns = 0;
   var kanbanDataDirName = global.kanban.configuration.kanbanGO.dataDirName;
+  console.log(`DEBUG: searching for geth executable. Searched directories along: ${startingPath}`.red);
   while (currentPath !== "/") {
     numRuns ++;
     if (numRuns > maxNumRuns) {
@@ -389,13 +390,13 @@ KanbanGoInitializer.prototype.computePaths = function() {
 
 
   if (this.paths.geth === "") {
-    console.log(`Could not find geth executable. Searched directories along: ${staringPath}`.red);
+    console.log(`Could not find geth executable. Searched directories along: ${startingPath}`.red);
     throw(`Could not find geth executable.`);
   } else {
     console.log(`Found geth executable:`.green + `${this.paths.geth}`.blue);
   }
   if (this.paths.dataDir === "") {
-    console.log(`Could not find data directory ${kanbanDataDirName}. Searched directories along: ${staringPath}`.red);
+    console.log(`Could not find data directory ${kanbanDataDirName}. Searched directories along: ${startingPath}`.red);
     throw(`Could not find data directory.`);
   } else {
     console.log(`Found data directory: `.green + `${this.paths.dataDir}`.blue);
