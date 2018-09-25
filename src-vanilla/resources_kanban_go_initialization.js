@@ -1,5 +1,4 @@
 "use strict";
-const pathnames = require('./pathnames');
 
 var rpcCalls = {
   runNodes: {
@@ -7,14 +6,19 @@ var rpcCalls = {
     mandatoryFixedArguments: { //<- values give defaults, null for none
     },
     mandatoryModifiableArguments: { //<- values give defaults, null for none
-      commitmentsBase64: null,
-      committedSigners: null
+      numberOfNodes: null
+    },
+  },
+  getNodeInformation: {
+    rpcCall: "getNodeInformation",
+    mandatoryFixedArguments: { //<- values give defaults, null for none
+    },
+    mandatoryModifiableArguments: { //<- values give defaults, null for none
     },
     optionalModifiableArguments: {
     },
     allowedArgumentValues: {
-    },
-    address: ""
+    }
   }
 };
 

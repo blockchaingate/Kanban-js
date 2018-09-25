@@ -54,6 +54,10 @@ function NodeKanbanGo(inputId) {
   this.flagFoldersInitialized = false;
   this.numberAttemptsToSelectAddress = 0;
   this.maximumAttemptsToSelectAddress = 4;
+  /** @type {object} */
+  this.nodeInformation = {};
+  /** @type {object} */
+  this.nodeSensitiveInformation = {};
 }
 
 NodeKanbanGo.prototype.initializeFoldersAndKeys = function(response) {
@@ -163,14 +167,16 @@ NodeKanbanGo.prototype.initialize6CreateFolders = function(response, error) {
   initializer.runShell(initializer.paths.geth, theArguments, theOptions, this.id, this.initialize7GenerateKey.bind(this, response));
 }
 
-NodeKanbanGo.prototype.getNodeConfig = function () {
-  var result = {};
-  result.secretKey = this.nodePrivateKey.toHex();
-  result.RPCPort = this.RPCPort;
-  result.port = this.port;
-  result.myURL = this.myEnodeAddress;
-  result.myConnections = this.nodeConnections;
-  return result;
+NodeKanbanGo.prototype.computeNodeInfo = function () {
+  this.nodeInformation = {};
+  this.nodeInformation.id = this.id;
+  this.nodeInformation.RPCPort = this.RPCPort;
+  this.nodeInformation.port = this.port;
+  this.nodeInformation.myEnodeAddress = this.myEnodeAddress;
+  
+  this.nodeSensitiveInformation = Object.assign({}, this.nodeInformation);
+  this.nodeSensitiveInformation.secretKey = this.nodePrivateKey.toHex();
+  this.nodeSensitiveInformation.myConnections = this.nodeConnections;
 }
 
 NodeKanbanGo.prototype.initialize7GenerateKey = function(response, error) {
@@ -215,7 +221,7 @@ NodeKanbanGo.prototype.initialize9GenesisBlock = function(response) {
 }
 
 NodeKanbanGo.prototype.computeMyEnodeAddress = function (){
-  this.nodeConnections.push(`enode://${this.nodePublicKeyHex}@[::]:${this.port}?discport=0`);
+  this.myEnodeAddress = `enode://${this.nodePublicKeyHex}@[::]:${this.port}?discport=0`;
 }
 
 NodeKanbanGo.prototype.initialize10WriteNodeConnections = function(response) {
@@ -278,6 +284,8 @@ function KanbanGoInitializer() {
   this.maxRequestsRunning = 4;
   this.handlers = {
     runNodes: {
+    }, 
+    getNodeInformation: {
 
     }
   };
@@ -307,6 +315,8 @@ function KanbanGoInitializer() {
   /** @type {{config:{chainId: number, pbft:{proposers: string[]} }, alloc: Object}}*/
   this.pbftConfiguration = null;
   this.computePaths();
+  /**@type {object[]} */
+  this.nodeInformation = [];
 }
 
 KanbanGoInitializer.prototype.log = function(input) {
@@ -365,7 +375,7 @@ KanbanGoInitializer.prototype.computePaths = function() {
   var maxNumRuns = 100;
   var numRuns = 0;
   var kanbanDataDirName = global.kanban.configuration.kanbanGO.dataDirName;
-  console.log(`DEBUG: searching for geth executable. Searched directories along: ${startingPath}`.red);
+  //console.log(`DEBUG: searching for geth executable. Searched directories along: ${startingPath}`.red);
   while (currentPath !== "/") {
     numRuns ++;
     if (numRuns > maxNumRuns) {
@@ -443,6 +453,21 @@ KanbanGoInitializer.prototype.runNodesFinish = function(response) {
   }
   response.writeHead(200);
   response.end(JSON.stringify(result));
+}
+
+KanbanGoInitializer.prototype.computeNodeInfo = function() {
+  this.nodeInformation = [];
+  for (var counterNode = 0; counterNode < this.nodes.length; counterNode ++) {
+    this.nodes[counterNode].computeNodeInfo();
+    this.nodeInformation.push(this.nodes[counterNode].nodeInformation);
+  }
+}
+
+KanbanGoInitializer.prototype.getNodeInformation = function(response, queryCommand) {
+  this.computeNodeInfo();
+  response.writeHead(200);
+  response.end(JSON.stringify(this.nodeInformation));
+  this.numberRequestsRunning --;
 }
 
 KanbanGoInitializer.prototype.runNodes = function(response, queryCommand) {
@@ -584,7 +609,8 @@ KanbanGoInitializer.prototype.runNodes5InitGenesis = function(response) {
 KanbanGoInitializer.prototype.runNodes7WriteNodeConfig = function() {
   var nodeConfig = [];
   for (var i = 0; i < this.nodes.length; i ++) {
-    nodeConfig.push(this.nodes[i].getNodeConfig());
+    this.nodes[i].computeNodeInfo()
+    nodeConfig.push(this.nodes[i].nodeSensitiveInformation);
   }
   console.log(`Proceeding to write node config to: ${this.paths.nodesDir}`);
   fs.writeFile(this.paths.nodeConfiguration, JSON.stringify(nodeConfig, null, 2),()=>{});

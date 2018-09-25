@@ -33,7 +33,7 @@ function Configuration () {
 Configuration.prototype.readSecretsAdminCallback = function(err, data) {
   try {
     console.log(`Configuration file name: ` + `${pathnames.pathname.configurationSecretsAdmin}`.blue);
-    console.log(`DEBUG: config content: ` + `${data}`.blue);
+    //console.log(`DEBUG: config content: ` + `${data}`.blue);
     var contentParsed = JSON.parse(data);
     //console.log(`DEBUG: content read: ${data}`);
     for (var label in this.labelsToRead) {

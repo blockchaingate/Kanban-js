@@ -8,6 +8,7 @@ const fabcoinInitialization = require('./fabcoin_initialization');
 const ids = require('./ids_dom_elements');
 const pathnames = require('../pathnames');
 const myNodes = require('./my_nodes');
+const kanabanInitialization = require('./kanbango/initialization');
 
 function Page() {
   this.fabcoinNetworkRadioIds = {};
@@ -30,7 +31,8 @@ function Page() {
       idPage: ids.defaults.pages.kanbanGOSendReceive
     },
     myLocalKanbanNodes: {
-      idPage: ids.defaults.pages.kanbanMyLocalNodes
+      idPage: ids.defaults.pages.kanbanMyLocalNodes,
+      updateFunction: kanabanInitialization.initializer.getNodeInformation
     },
     myNodes: {
       idPage: ids.defaults.pageMyNodes,

@@ -9,7 +9,7 @@
     "daemon": "node src-vanilla/daemon.js",
     "daemonStart": "node src-vanilla/daemon.js start",
     "daemonStop": "node src-vanilla/daemon.js stop",
-    "test": "node lib/unit.js"
+    "test": "node src-vanilla/test.js"
   },
   "repository": {
     "type": "git",
