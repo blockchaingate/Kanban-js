@@ -9,10 +9,30 @@ const globals = require('../globals');
 const kanbanGO = require('../../resources_kanban_go');
 const kanbanGOInitializer = require('./initialization');
 
+function PendingCall () {
+  /** @type {number} */
+  this.id = - 1;
+  /** @type {number} */
+  this.numberReceived = 0;
+  /** @type {number} */
+  this.totalCalls = 0;
+  /** @type {Object} */
+  this.nodeCalls = {};
+  /**@type {TestKanbanGO} */
+  this.owner = null;
+  /**@type {string} */
+  this.functionLabel = "";
+}
+
 function TestKanbanGO() {
   var inputSchnorr = ids.defaults.kanbanGO.inputSchnorr;
   var inputAggregate = ids.defaults.kanbanGO.inputAggregateSignature;
   var inputSendReceive = ids.defaults.kanbanGO.inputSendReceive;
+  /** @type {number}*/
+  this.numberOfCalls = 0;
+  /** @type {PendingCall[]}*/
+  this.pendingCalls = {};
+
   this.theFunctions  = {
     testSha3 : {
       rpcCall: kanbanGO.rpcCalls.testSha3.rpcCall, 
@@ -127,7 +147,10 @@ function TestKanbanGO() {
         blockNumber: inputSendReceive.blockNumber
       },
       output: ids.defaults.kanbanGO.outputSendReceive
-    }
+    },
+    round: {
+      output: ids.defaults.kanbanGO.outputSendReceive
+    },
   };
   this.correctFunctions();
 }
@@ -148,22 +171,22 @@ function getSignerField(input, label) {
   return result;
 }
 
-TestKanbanGO.prototype.callbackAggregateSolutions = function(functionLabel, input, output) {
-  this.callbackStandard(functionLabel, input, output);
+TestKanbanGO.prototype.callbackAggregateSolutions = function(pendingCall, nodeId, input, output) {
+  this.callbackStandard(pendingCall, nodeId, input, output);
   var solutions = getSignerField(input, "mySolution");
   submitRequests.updateValue(ids.defaults.kanbanGO.inputAggregateSignature.solutions, solutions.join(", "));
 }
 
-TestKanbanGO.prototype.callbackAggregateInitialization = function(functionLabel, input, output) {
-  this.callbackStandard(functionLabel, input, output);
+TestKanbanGO.prototype.callbackAggregateInitialization = function(pendingCall, nodeId, input, output) {
+  this.callbackStandard(pendingCall, nodeId, input, output);
   var privateKeys = getSignerField(input, "privateKeyBase58");
   var publicKeys = getSignerField(input, "myPublicKey");
   submitRequests.updateValue(ids.defaults.kanbanGO.inputAggregateSignature.privateKeys, privateKeys.join(", "));
   submitRequests.updateValue(ids.defaults.kanbanGO.inputAggregateSignature.publicKeys, publicKeys.join(", "));
 }
 
-TestKanbanGO.prototype.callbackAggregateCommitment = function(functionLabel, input, output) {
-  this.callbackStandard(functionLabel, input, output);
+TestKanbanGO.prototype.callbackAggregateCommitment = function(pendingCall, nodeId, input, output) {
+  this.callbackStandard(pendingCall, nodeId, input, output);
   var commitments = getSignerField(input, "commitmentHexCompressed");
   var nonces = getSignerField(input, "myNonceBase58");
   submitRequests.updateValue(ids.defaults.kanbanGO.inputAggregateSignature.commitments, commitments.join(", "));
@@ -197,13 +220,27 @@ TestKanbanGO.prototype.updateFields = function(parsedInput, outputs) {
   }
 }
 
-TestKanbanGO.prototype.callbackStandard = function(functionLabel, input, output) {
-  var resultHTML = jsonToHtml.getHtmlFromArrayOfObjects(input, optionsForKanbanGOStandard);
-  var theFunction = this.theFunctions[functionLabel];
-  var header = "";
+TestKanbanGO.prototype.callbackStandard = function(/**@type {PendingCall} */ pendingCall, nodeId, input, output) {
+  pendingCall.nodeCalls[nodeId].result = input;
+  pendingCall.numberReceived ++;
+  if (pendingCall.numberReceived < pendingCall.totalCalls) {
+    console.log("DEBUG: Received some");
+    return;
+  }
+  var resultHTML = "";
+  for (var currentNodeId in pendingCall.nodeCalls) {
+    resultHTML += this.callbackStandardOneCaller(pendingCall, pendingCall[currentNodeId].result);
+  }
   if (typeof output === "string") {
     output = document.getElementById(output);
   }
+  output.innerHTML = resultHTML;
+}
+
+TestKanbanGO.prototype.callbackStandardOneCaller = function(pendingCall, input) {
+  var resultHTML = jsonToHtml.getHtmlFromArrayOfObjects(input, optionsForKanbanGOStandard);
+  var theFunction = this.theFunctions[pendingCall.functionLabel];
+  var header = "";
   try {
     var parsedInput = JSON.parse(input);
     if (parsedInput.resultHTML !== null && parsedInput.resultHTML !== undefined) {
@@ -222,7 +259,7 @@ TestKanbanGO.prototype.callbackStandard = function(functionLabel, input, output)
     header = `<b>Error:</b> ${e}<br>`;
   }
   resultHTML = header + resultHTML;
-  output.innerHTML = resultHTML;
+  return resultHTML;
 }
 
 TestKanbanGO.prototype.testClear = function() {
@@ -241,9 +278,35 @@ TestKanbanGO.prototype.testClear = function() {
 }
 
 TestKanbanGO.prototype.run = function(functionLabel) {
-  var theFunction = this.theFunctions[functionLabel];
+  var initializer = kanbanGOInitializer.initializer;
+  var currentId = initializer.selectedNode;
+  this.numberOfCalls ++;
+  var currentPendingCall = new PendingCall();
+  if (currentId !== "all") {
+    currentPendingCall.nodeCalls[currentId] = {result: null};
+  } else {
+    for (var i = 0; i < initializer.nodes.length; i ++) {
+      currentPendingCall.nodeCalls[initializer.nodes[i].idBackend] = {result: null};
+    }
+  }
+  currentPendingCall.id = this.numberOfCalls;
+  currentPendingCall.owner = this;
+  this.pendingCalls[this.numberOfCalls] = currentPendingCall;
+  currentPendingCall.run(functionLabel);
+}
+
+
+PendingCall.prototype.run = function (functionLabel) {
+  this.functionLabel = functionLabel;
+  for (var currentId in this.nodeCalls) {
+    this.runOneId(currentId);
+  }
+}
+
+PendingCall.prototype.runOneId = function (nodeId) {
+  var theFunction = this.owner.theFunctions[this.functionLabel];
   if (theFunction === null || theFunction === undefined) {
-    throw (`Unknown function call label: ${functionLabel}`);
+    throw (`Unknown function call label: ${this.functionLabel}`);
   }
   var theArguments = {};
   var currentInputs = theFunction.inputs;
@@ -258,9 +321,8 @@ TestKanbanGO.prototype.run = function(functionLabel) {
     }
   }
   var messageBody = kanbanGO.getPOSTBodyFromKanbanGORPCLabel(theFunction.rpcCall, theArguments);
-  var currentId = kanbanGOInitializer.initializer.selectedNode;
   var nodeObject = {
-    id: currentId
+    id: nodeId
   };
   messageBody += `&node=${escape(JSON.stringify(nodeObject))}`;
 
@@ -276,11 +338,11 @@ TestKanbanGO.prototype.run = function(functionLabel) {
       usePOST = true;
     }
   }
-  var callbackCurrent = this.callbackStandard;
+  var callbackCurrent = this.owner.callbackStandard;
   if (theFunction.callback !== undefined && theFunction.callback !== null) {
     callbackCurrent = theFunction.callback;
   }  
-  callbackCurrent = callbackCurrent.bind(this, functionLabel);
+  callbackCurrent = callbackCurrent.bind(this.owner, this, nodeId);
   if (usePOST) {
     submitRequests.submitPOST({
       url: theURL,

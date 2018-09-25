@@ -262,6 +262,8 @@ NodeKanbanGo.prototype.run = function(response) {
     "--verbosity",
     4,
     "--rpc",
+    "--rpcapi",
+    "db,kanban,net,web3,personal,pbft",
     "--networkid",
     initializer.chainId,
     "--syncmode",

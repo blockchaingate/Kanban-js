@@ -241,6 +241,7 @@ img.imgFabLogo{
 
 .inputStandard {
   transition: all 2s;
+  margin: 5px;
 }
 
 .inputCrypto {

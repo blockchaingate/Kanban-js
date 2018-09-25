@@ -35,7 +35,7 @@ KanbanGONode.prototype.toHTMLRadioButton = function() {
   var result = "";
   result += `&nbsp;&nbsp;&nbsp;`;
   result += `<label class = "containerRadioButton">`;
-  result += `<input type = "radio" name = "rpcSend" id = "${this.idDOM}" `
+  result += `<input type = "radio" name = "rpcKanbanGO" id = "${this.idDOM}" `;
   result += ` onchange = "window.kanban.kanbanGO.initialization.initializer.selectRadio('${this.idBackend}')" `; 
   if (this.flagSelected) {
     result += "checked";
@@ -80,6 +80,17 @@ KanbanGoInitializer.prototype.selectRadio = function (idRadio) {
 
 KanbanGoInitializer.prototype.toHTMLRadioButton = function () {
   var radioButtonHTML = "";
+  radioButtonHTML += `<label class = "containerRadioButton">`;
+  radioButtonHTML += `<input type = "radio" name = "rpcKanbanGO" id = "kanbanGoNodeSelector_all" `;
+  radioButtonHTML += ` onchange = "window.kanban.kanbanGO.initialization.initializer.selectRadio('all')" `; 
+  if (this.selectedNode === "all") {
+    radioButtonHTML += "checked";
+  }
+  radioButtonHTML += `>`;
+  radioButtonHTML += `<span class = "radioMark"></span>`;
+  radioButtonHTML += `all`;
+  radioButtonHTML += `</label>`;
+
   for (var counterNode = 0; counterNode < this.nodes.length; counterNode ++) {
     radioButtonHTML += this.nodes[counterNode].toHTMLRadioButton();
   } 
@@ -91,13 +102,13 @@ KanbanGoInitializer.prototype.getNodeInformationCallback = function (functionLab
   try {
     var inputParsed = JSON.parse(input);
     this.nodes = [];
+    if (this.selectedNode === "") {
+      this.selectedNode = "all";
+    }
     for (var counterNode = 0; counterNode < inputParsed.length; counterNode ++) {
       var currentNode = new KanbanGONode();
       currentNode.init(inputParsed[counterNode]);
       console.log("DEBUG: This selected node: " + this.selectedNode + " id backend:  " + currentNode.idBackend);
-      if (this.selectedNode === "") {
-        this.selectedNode = currentNode.idBackend;
-      }
       if (this.selectedNode === currentNode.idBackend) {
         console.log("DEbug: selecting node: " + currentNode.idBackend);
         currentNode.flagSelected = true;

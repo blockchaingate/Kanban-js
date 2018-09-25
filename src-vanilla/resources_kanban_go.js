@@ -193,6 +193,19 @@ var rpcCalls = {
     },
     parameters: ["blockNumber", "verbose"]
   },
+  round: {
+    rpcCall: "round",
+    method: "pbft_round",
+    mandatoryFixedArguments: { //<- values give defaults, null for none
+    },
+    mandatoryModifiableArguments: { //<- values give defaults, null for none
+    },
+    optionalModifiableArguments: {
+    },
+    allowedArgumentValues: {
+    },
+    parameters: []
+  },
   versionGO: {
     rpcCall: "versionGO", //must be same as rpc label, used for autocomplete
     method: "web3_clientVersion",

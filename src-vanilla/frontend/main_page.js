@@ -103,7 +103,9 @@ Page.prototype.initializeInputPlaceholders = function() {
     ids.defaults.kanbanGO.inputAggregateSignature,
     ids.defaults.kanbanPlusPlus.inputSchnorrSignature,
     ids.defaults.kanbanPlusPlus.inputAggregateSignature,
-    ids.defaults.kanbanJS.inputSchnorr
+    ids.defaults.kanbanJS.inputSchnorr,
+    ids.defaults.kanbanGO.inputSendReceive,
+    ids.defaults.kanbanGO.inputInitialization
   ]
   for (var collectionCounter = 0; collectionCounter < collectionsToPlaceholderify.length; collectionCounter ++) {
     for (var label in collectionsToPlaceholderify[collectionCounter]) {
