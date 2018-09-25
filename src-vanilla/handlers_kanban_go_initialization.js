@@ -348,7 +348,18 @@ KanbanGoInitializer.prototype.handleRPCURLEncodedInput = function(request, respo
 }
 
 KanbanGoInitializer.prototype.computePaths = function() {
-  var staringPath = `${pathnames.path.base}/go/src/github.com/blockchaingate/kanban-go/build/bin/`;
+  /** @type {string} */
+  var staringPath = global.kanban.configuration.kanbanGO.gethFolder;
+  if (staringPath === undefined || staringPath === null) {
+    staringPath = "/";
+  }
+  var stringToReplaceWithBaseFolder = "${nodeBaseFolder}";
+  var indexNodeDir = staringPath.indexOf(stringToReplaceWithBaseFolder);
+  if (indexNodeDir !== - 1) {
+    staringPath = staringPath.slice(0, indexNodeDir) + pathnames.path.base + staringPath.slice(indexNodeDir + stringToReplaceWithBaseFolder.length);
+  }
+  
+  pathnames.path.base;
   staringPath = path.normalize(staringPath);
   var currentPath = staringPath;
   var maxNumRuns = 100;
@@ -366,17 +377,17 @@ KanbanGoInitializer.prototype.computePaths = function() {
         this.paths.gethPath = currentPath;
       }
     }
-    if (this.paths.dataDir === "") {
-      var currentDataDir = currentPath + kanbanDataDirName;
-      if (fs.existsSync(currentDataDir)) {
-        this.paths.dataDir = currentDataDir;
-      }
-    }
     if (this.paths.geth !== "" && this.paths.dataDir !== "") {
       break;
     }
     currentPath = path.normalize(currentPath + "../");
   }
+  var currentDataDir = `${pathnames.path.base}/${kanbanDataDirName}`;
+  if (fs.existsSync(currentDataDir)) {
+    this.paths.dataDir = currentDataDir;
+  }
+
+
   if (this.paths.geth === "") {
     console.log(`Could not find geth executable. Searched directories along: ${staringPath}`.red);
     throw(`Could not find geth executable.`);

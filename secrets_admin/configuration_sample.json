@@ -1,4 +1,8 @@
 {
+"kanbabGO" : {
+  "dataDirName": "secrets_data_kanban_go",
+  "gethFolder": "${nodeBaseFolder}/go/src/github.com/blockchaingate/kanban-go/build/bin/"
+},
 "myNodes": [
 {
 "name": "node1",
