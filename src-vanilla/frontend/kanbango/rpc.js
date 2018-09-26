@@ -18,10 +18,12 @@ function PendingCall () {
   this.totalCalls = 0;
   /** @type {Object} */
   this.nodeCalls = {};
-  /**@type {TestKanbanGO} */
+  /** @type {TestKanbanGO} */
   this.owner = null;
-  /**@type {string} */
+  /** @type {string} */
   this.functionLabel = "";
+  /** @type {bool} */
+  this.flagShowClearButton = false;
 }
 
 function TestKanbanGO() {
@@ -221,6 +223,7 @@ TestKanbanGO.prototype.updateFields = function(parsedInput, outputs) {
 }
 
 TestKanbanGO.prototype.callbackStandard = function(/**@type {PendingCall} */ pendingCall, nodeId, input, output) {
+  console.log(`DEBUG: pendingCall id: ${pendingCall.id}, nodeId: ${nodeId}, input: ${input}`);
   pendingCall.nodeCalls[nodeId].result = input;
   pendingCall.numberReceived ++;
   if (pendingCall.numberReceived < pendingCall.totalCalls) {
@@ -228,17 +231,24 @@ TestKanbanGO.prototype.callbackStandard = function(/**@type {PendingCall} */ pen
     return;
   }
   var resultHTML = "";
+  pendingCall.flagShowClearButton = true;
   for (var currentNodeId in pendingCall.nodeCalls) {
-    resultHTML += this.callbackStandardOneCaller(pendingCall, pendingCall[currentNodeId].result);
+    resultHTML += this.callbackStandardOneCaller(pendingCall, pendingCall.nodeCalls[currentNodeId].result);
+    pendingCall.flagShowClearButton = false;
   }
   if (typeof output === "string") {
     output = document.getElementById(output);
   }
   output.innerHTML = resultHTML;
+  delete this.pendingCalls[pendingCall.id];
 }
 
-TestKanbanGO.prototype.callbackStandardOneCaller = function(pendingCall, input) {
-  var resultHTML = jsonToHtml.getHtmlFromArrayOfObjects(input, optionsForKanbanGOStandard);
+TestKanbanGO.prototype.callbackStandardOneCaller = function(/**@type {PendingCall} */ pendingCall, input) {
+  var options = Object.assign({}, optionsForKanbanGOStandard);
+  if (!pendingCall.flagShowClearButton) {
+    options.flagDontShowClearButton = true;
+  }
+  var resultHTML = jsonToHtml.getHtmlFromArrayOfObjects(input, options);
   var theFunction = this.theFunctions[pendingCall.functionLabel];
   var header = "";
   try {

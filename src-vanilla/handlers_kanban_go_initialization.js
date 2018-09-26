@@ -38,6 +38,8 @@ function NodeKanbanGo(inputId) {
   /** @type {string} */
   this.nodePublicKeyHex = null;
   /** @type {string} */
+  this.nodePublicKeyHexUncompressedNoPrefix = null;
+  /** @type {string} */
   this.nodeAddressHex = null;
   /** @type {string[]} */
   this.nodeConnections = [];
@@ -130,6 +132,7 @@ NodeKanbanGo.prototype.initialize4ReadAccountAddress = function(response, error,
     }
     this.nodePrivateKey.fromArbitrary(data);
     this.nodePublicKeyHex = this.nodePrivateKey.getExponent().toHex();
+    this.nodePublicKeyHexUncompressedNoPrefix = this.nodePrivateKey.getExponent().toHexUncompressed().slice(2);
     this.nodeAddressHex = this.nodePrivateKey.getExponent().computeEthereumAddressHex();
     this.log(`Loaded private key from node key file: ${this.nodePrivateKey.toHex()} with corresponding ethereum address: ${this.nodeAddressHex}`);
     getInitializer().numberOfInitializedFolders ++;
@@ -221,7 +224,7 @@ NodeKanbanGo.prototype.initialize9GenesisBlock = function(response) {
 }
 
 NodeKanbanGo.prototype.computeMyEnodeAddress = function (){
-  this.myEnodeAddress = `enode://${this.nodePublicKeyHex}@[::]:${this.port}?discport=0`;
+  this.myEnodeAddress = `enode://${this.nodePublicKeyHexUncompressedNoPrefix}@[::]:${this.port}?discport=0`;
 }
 
 NodeKanbanGo.prototype.initialize10WriteNodeConnections = function(response) {

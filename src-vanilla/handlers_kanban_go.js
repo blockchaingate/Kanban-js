@@ -57,7 +57,7 @@ function handleRPCURLEncodedInput(request, response, messageBodyURLed) {
 }
 
 var numberRequestsRunning = 0;
-var maxRequestsRunning = 4;
+var maxRequestsRunning = 20;
 
 function getParameterFromType(input, type) {
   if (type === "number") {
@@ -169,6 +169,7 @@ function handleRPCArguments(response, queryCommand, queryNode) {
   var theRequestJSON = getRPCRequestJSON(theCallLabel, queryCommand, errors);
   if (errors.length > 0) {
     response.writeHead(400);
+    numberRequestsRunning --;
     return response.end(JSON.stringify({error: errors[0]}));
   }
   console.log("DEBUG: request stringified: " + JSON.stringify(theRequestJSON));

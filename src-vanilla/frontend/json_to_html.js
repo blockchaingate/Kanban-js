@@ -160,6 +160,10 @@ function getClearParentButton() {
 
 function getHtmlFromArrayOfObjects(input, options) {
   var doIncludeTogglePolling = false; 
+  var doShowClearButton = true;
+  if (options.flagDontShowClearButton === true) {
+    doShowClearButton = false;
+  }
   var outputPolling = null; 
   if (options.polling !== undefined && options.polling !== null) {
     doIncludeTogglePolling = options.polling.doPoll;
@@ -178,12 +182,15 @@ function getHtmlFromArrayOfObjects(input, options) {
     }
   }
   var rawButton = "";
+  var clearButton = "";
   if (doIncludeTogglePolling === true) {
     rawButton = submitRequests.getToggleButtonPausePolling({label: "raw", content: JSON.stringify(input), output: outputPolling});
   } else {
     rawButton = submitRequests.getToggleButton({label: "raw", content: JSON.stringify(input)});
   }
-  var clearButton = getClearParentButton();
+  if (doShowClearButton) {
+    clearButton = getClearParentButton();
+  }
   var result = "";
   result += rawButton;
   result += clearButton;
