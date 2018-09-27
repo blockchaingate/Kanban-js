@@ -1,11 +1,33 @@
 "use strict";
 
+function selectText(nodeId) {
+  var node = document.getElementById(nodeId);
+  if (document.body.createTextRange) {
+      const range = document.body.createTextRange();
+      range.moveToElementText(node);
+      range.select();
+  } else if (window.getSelection) {
+      const selection = window.getSelection();
+      const range = document.createRange();
+      range.selectNodeContents(node);
+      selection.removeAllRanges();
+      selection.addRange(range);
+  } else {
+      console.warn("Could not select text in node: Unsupported browser.");
+  }
+}
+
+var numberOfRevealedContents = 0;
+
 function revealLongWithParent(container) {
   if (container.nextElementSibling === null) {
     var parent = container.parentNode;
     var newSpan = document.createElement("span");
-    newSpan.innerHTML = container.getAttribute("content");
+    numberOfRevealedContents ++;
+    var nodeId = `revealedSpan${numberOfRevealedContents}`;
+    newSpan.innerHTML = `<br> <span id = "${nodeId}">${container.getAttribute("content")}</span>`;
     parent.insertBefore(newSpan, container.nextElementSibling);
+    selectText(nodeId);
   } else  {
     container.nextElementSibling.remove();
   }

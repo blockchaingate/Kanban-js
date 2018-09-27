@@ -33,7 +33,7 @@ function revealLongWithParent(container) {
   if (container.nextElementSibling === null) {
     var parent = container.parentNode;
     var newSpan = document.createElement("span");
-    newSpan.innerHTML = container.getAttribute("content");
+    newSpan.innerHTML = "<br>" + container.getAttribute("content");
     parent.insertBefore(newSpan, container.nextElementSibling);
   } else  {
     container.nextElementSibling.remove();
