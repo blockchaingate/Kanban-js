@@ -38,6 +38,10 @@ function TestKanbanGO() {
   this.pendingCalls = {};
 
   this.theFunctions  = {
+    peerView: {
+        rpcCall: kanbanGO.rpcCalls.peerView.rpcCall,
+        output: ids.defaults.kanbanGO.outputSendReceive
+    },
     testSha3 : {
       rpcCall: kanbanGO.rpcCalls.testSha3.rpcCall, 
       //<- must equal the label of the rpc call in the kanbanGO.rpcCalls data structure.

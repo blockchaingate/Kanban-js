@@ -193,32 +193,45 @@ var rpcCalls = {
     },
     parameters: ["blockNumber", "verbose"]
   },
-  round: {
-    rpcCall: "round",
-    method: "pbft_round",
-    mandatoryFixedArguments: { //<- values give defaults, null for none
+    round: {
+        rpcCall: "round",
+        method: "pbft_round",
+        mandatoryFixedArguments: { //<- values give defaults, null for none
+        },
+        mandatoryModifiableArguments: { //<- values give defaults, null for none
+        },
+        optionalModifiableArguments: {
+        },
+        allowedArgumentValues: {
+        },
+        parameters: []
     },
-    mandatoryModifiableArguments: { //<- values give defaults, null for none
+    peerView: {
+        rpcCall: "peerView", //must be same as rpc label, used for autocomplete
+        method: "pbft_peerView", //<- method name passed to kanban-go
+        mandatoryFixedArguments: { //<- values give defaults, null for none
+        },
+        mandatoryModifiableArguments: { //<- values give defaults, null for none
+        },
+        optionalModifiableArguments: {
+        },
+        allowedArgumentValues: {
+        },
+        parameters: []
     },
-    optionalModifiableArguments: {
+    validators: {
+        rpcCall: "validators",
+        method: "pbft_validators",
+        mandatoryFixedArguments: { //<- values give defaults, null for none
+        },
+        mandatoryModifiableArguments: { //<- values give defaults, null for none
+        },
+        optionalModifiableArguments: {
+        },
+        allowedArgumentValues: {
+        },
+        parameters: []
     },
-    allowedArgumentValues: {
-    },
-    parameters: []
-  },
-  validators: {
-    rpcCall: "validators",
-    method: "pbft_validators",
-    mandatoryFixedArguments: { //<- values give defaults, null for none
-    },
-    mandatoryModifiableArguments: { //<- values give defaults, null for none
-    },
-    optionalModifiableArguments: {
-    },
-    allowedArgumentValues: {
-    },
-    parameters: []
-  },
   versionGO: {
     rpcCall: "versionGO", //must be same as rpc label, used for autocomplete
     method: "web3_clientVersion",
