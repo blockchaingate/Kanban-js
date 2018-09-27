@@ -226,6 +226,10 @@ var optionsForKanbanGOStandard = {
       handlerName: "window.kanban.miscellaneous.revealLongWithParent",
       transformer: miscellaneous.hexShortenerForDisplay
     },
+    logsBloom: {
+      handlerName: "window.kanban.miscellaneous.revealLongWithParent",
+      transformer: miscellaneous.hexShortenerForDisplay
+    }
   }
 };
 

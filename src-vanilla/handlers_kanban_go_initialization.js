@@ -60,6 +60,8 @@ function NodeKanbanGo(inputId) {
   this.nodeInformation = {};
   /** @type {object} */
   this.nodeSensitiveInformation = {};
+  /** @type {ChildProcess} */
+  this.childProcessHandle = null;
 }
 
 NodeKanbanGo.prototype.initializeFoldersAndKeys = function(response) {
@@ -276,7 +278,7 @@ NodeKanbanGo.prototype.run = function(response) {
     "--rpcport",
     this.RPCPort.toString()
   ];
-  initializer.runShell(initializer.paths.geth, theArguments, theOptions, this.id);
+  this.childProcessHandle = initializer.runShell(initializer.paths.geth, theArguments, theOptions, this.id);
   initializer.numberOfStartedNodes ++;
   initializer.runNodesFinish(response);
 }
@@ -439,6 +441,16 @@ KanbanGoInitializer.prototype.buildGeth = function() {
   });
 }
 
+KanbanGoInitializer.prototype.killChildProcesses = function() {
+  for (var counterNode = 0; counterNode < this.nodes.length; counterNode ++) {
+    var currentNode = this.nodes[counterNode];
+    console.log(`[KanbanGoInitializer] `.red + `Sending kill signal to child ${counterNode}.`)
+    if (currentNode.childProcessHandle !== null) {
+      currentNode.childProcessHandle.kill();
+    }
+  }
+}
+
 KanbanGoInitializer.prototype.runNodesFinish = function(response) {
   //if (this.numberOfStartedNodes < this.nodes.length) {
   //  return;
@@ -459,6 +471,9 @@ KanbanGoInitializer.prototype.runNodesFinish = function(response) {
   }
   response.writeHead(200);
   response.end(JSON.stringify(result));
+  process.on("beforeExit", this.killChildProcesses.bind(this));
+  process.on("SIGNINT", this.killChildProcesses.bind(this));
+  process.on("SIGTERM", this.killChildProcesses.bind(this));
 }
 
 KanbanGoInitializer.prototype.computeNodeInfo = function() {
@@ -648,6 +663,7 @@ KanbanGoInitializer.prototype.runShell = function(command, theArguments, theOpti
       callbackOnExit();
     }
   });
+  return child;
 }
 
 KanbanGoInitializer.prototype.handleRPCArguments = function(request, response, queryCommand) {
