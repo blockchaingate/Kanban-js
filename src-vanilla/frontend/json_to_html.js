@@ -16,7 +16,7 @@ function getClickableEntry (input, transformers, ambientLabel, parentLabel, gran
   if (transformers === undefined || transformers === null) {
     return input;
   } 
-  if (!(ambientLabel in transformers)) {
+  if (!(parentLabel in transformers)) {
     return input;
   }
   var shouldHighlight = true;
@@ -39,7 +39,10 @@ function getClickableEntry (input, transformers, ambientLabel, parentLabel, gran
   }
   totalClickableEntries ++;
   var result = "";
-  result += `<button class = "buttonRPCInput" onclick = "${theTransformer.handlerName}(this);"`;
+  result += `<button class = "buttonRPCInput"` 
+  if (theTransformer.handlerName !== undefined && theTransformer.handlerName !== null) {
+    result += `onclick = "${theTransformer.handlerName}(this);"`;
+  }
   result += ` content = "${input}"`;
   if (hasGrandParent) {
     result += ` grandParentLabel= "${grandParentLabel}"`;

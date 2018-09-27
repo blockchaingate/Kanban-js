@@ -1,5 +1,17 @@
 "use strict";
 
+function revealLongWithParent(container) {
+  if (container.nextElementSibling === null) {
+    var parent = container.parentNode;
+    var newSpan = document.createElement("span");
+    newSpan.innerHTML = container.getAttribute("content");
+    parent.insertBefore(newSpan, container.nextElementSibling);
+  } else  {
+    container.nextElementSibling.remove();
+  }
+
+}
+
 function attachModuleFullNameToHandlerNames(transformers, moduleFullName) {
   for (var label in transformers) {
     if ("handlerName" in transformers[label]) {
@@ -12,5 +24,6 @@ function attachModuleFullNameToHandlerNames(transformers, moduleFullName) {
 }
 
 module.exports = {
-  attachModuleFullNameToHandlerNames
+  attachModuleFullNameToHandlerNames,
+  revealLongWithParent
 }

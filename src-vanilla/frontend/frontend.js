@@ -21,6 +21,7 @@ window.kanban = {
   initialization: {
     fabcoin: require('./fabcoin_initialization'),
   },
+  miscellaneous: require('./miscellaneous_frontend'),
   computationalEngineCalls: null,
   submitRequests: require('./submit_requests'),
   ids: require('./ids_dom_elements'),

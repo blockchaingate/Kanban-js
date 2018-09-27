@@ -8,6 +8,8 @@ const jsonToHtml = require('../json_to_html');
 const globals = require('../globals');
 const kanbanGO = require('../../resources_kanban_go');
 const kanbanGOInitializer = require('./initialization');
+const miscellaneous = require('../../miscellaneous');
+const miscellaneousFrontEnd = require('../miscellaneous_frontend');
 
 function PendingCall () {
   /** @type {number} */
@@ -207,7 +209,22 @@ TestKanbanGO.prototype.correctFunctions = function() {
   }
 }
 
-var optionsForKanbanGOStandard = {};
+var optionsForKanbanGOStandard = {
+  transformers: {
+    address: {
+      handlerName: "window.kanban.miscellaneous.revealLongWithParent",
+      transformer: miscellaneous.hexShortenerForDisplay
+    },
+    publicKey: {
+      handlerName: "window.kanban.miscellaneous.revealLongWithParent",
+      transformer: miscellaneous.hexShortenerForDisplay
+    },
+    payload: {
+      handlerName: "window.kanban.miscellaneous.revealLongWithParent",
+      transformer: miscellaneous.hexShortenerForDisplay
+    },
+  }
+};
 
 TestKanbanGO.prototype.updateFields = function(parsedInput, outputs) {
   if (parsedInput === undefined) {
