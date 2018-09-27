@@ -267,6 +267,8 @@ NodeKanbanGo.prototype.run = function(response) {
     "--rpc",
     "--rpcapi",
     "db,kanban,net,web3,personal,pbft",
+    "--kanbanstats",
+    `${this.ethereumAddress}:abcd@localhost:3000`,
     "--networkid",
     initializer.chainId,
     "--syncmode",
