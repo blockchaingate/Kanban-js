@@ -155,6 +155,9 @@ function TestKanbanGO() {
     round: {
       output: ids.defaults.kanbanGO.outputSendReceive
     },
+    validators: {
+      output: ids.defaults.kanbanGO.outputSendReceive
+    },
   };
   this.correctFunctions();
 }
