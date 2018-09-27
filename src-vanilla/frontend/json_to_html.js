@@ -19,24 +19,12 @@ function getClickableEntry (input, transformers, ambientLabel, parentLabel, gran
   if (!(parentLabel in transformers)) {
     return input;
   }
-  var shouldHighlight = true;
+  //var shouldHighlight = true;
   var hasGrandParent = false;
-  var theTransformer = transformers[ambientLabel];
-  var additionalLabel = parentLabel;
-  if (theTransformer.parentLabels !== null && theTransformer.parentLabels !== undefined) {
-    if (!isNaN(additionalLabel)) {
-      additionalLabel = "$number";
-    }
-    if (additionalLabel in theTransformer.parentLabels) {
-      hasGrandParent = true;
-      theTransformer = theTransformer.parentLabels[additionalLabel];
-    } else {
-      shouldHighlight = false;
-    }
-  }
-  if (!shouldHighlight) {
-    return input;
-  }
+  var theTransformer = transformers[parentLabel];
+  //if (!shouldHighlight) {
+  //  return input;
+  //}
   totalClickableEntries ++;
   var result = "";
   result += `<button class = "buttonRPCInput"` 
