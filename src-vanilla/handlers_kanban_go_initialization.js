@@ -443,6 +443,22 @@ KanbanGoInitializer.prototype.buildGeth = function() {
   });
 }
 
+KanbanGoInitializer.prototype.killGeth = function() {
+  var theOptions = {
+    cwd: pathnames.path.base,
+    env: process.env
+  };
+  this.log(`Killing geth ... `);
+  this.runShell("killall ", ["geth"], theOptions, - 1,()=>{
+    this.log(`Geth kill command exit.`);
+  });
+}
+
+KanbanGoInitializer.prototype.killGethBuildGeth = function() {
+  this.killGeth();
+  this.buildGeth();
+}
+
 KanbanGoInitializer.prototype.killChildProcesses = function() {
   for (var counterNode = 0; counterNode < this.nodes.length; counterNode ++) {
     var currentNode = this.nodes[counterNode];

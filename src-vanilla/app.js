@@ -41,7 +41,7 @@ global.kanban.certificateOptions = new certificateOptions.CertificateOptions();
 global.kanban.kanbanGOInitializer = new kanbanGoInitialization.KanbanGoInitializer();
 
 //Build geth executable:
-global.kanban.kanbanGOInitializer.buildGeth();
+global.kanban.kanbanGOInitializer.killGethBuildGeth();
 
 //Initialize fabcoin folders:
 fabcoinInitialization.initializeFolders();
