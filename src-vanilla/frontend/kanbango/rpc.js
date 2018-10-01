@@ -39,8 +39,12 @@ function TestKanbanGO() {
 
   this.theFunctions  = {
     peerView: {
-        rpcCall: kanbanGO.rpcCalls.peerView.rpcCall,
-        output: ids.defaults.kanbanGO.outputSendReceive
+      rpcCall: kanbanGO.rpcCalls.peerView.rpcCall,
+      output: ids.defaults.kanbanGO.outputSendReceive
+    },
+    roundChangeRequests: {
+      rpcCall: kanbanGO.rpcCalls.roundChangeRequests.rpcCall,
+      output: ids.defaults.kanbanGO.outputSendReceive
     },
     testSha3 : {
       rpcCall: kanbanGO.rpcCalls.testSha3.rpcCall, 
