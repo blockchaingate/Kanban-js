@@ -60,22 +60,22 @@ function handleRequests(request, response) {
     //console.log(`The url is pt 3: ${request.url}`.red);
     return handleFile(request, response);
   }
-  if (parsedURL.pathname === pathnames.url.known.fabcoinInitializationOLD) {
+  if (parsedURL.pathname === pathnames.url.known.fabcoinOld.initialization) {
     return handleFabcoinInitializationOLD(request, response);
   }
-  if (parsedURL.pathname === pathnames.url.known.myNodesCommand) {
+  if (parsedURL.pathname === pathnames.url.known.fabcoinOld.myNodes) {
     return handleMyNodesCall(request, response);
   }
-  if (parsedURL.pathname === pathnames.url.known.rpc) {
+  if (parsedURL.pathname === pathnames.url.known.fabcoinOld.rpc) {
     return handleRPC(request, response, false);
   }
-  if (parsedURL.pathname === pathnames.url.known.kanbanRPC) {
+  if (parsedURL.pathname === pathnames.url.known.kanbanCPP.rpc) {
     return handleRPC(request, response, true);
   }
-  if (parsedURL.pathname === pathnames.url.known.goKanbanRPC) {
+  if (parsedURL.pathname === pathnames.url.known.kanbanGO.rpc) {
     return handlersKanbanGo.handleRequest(request, response);
   }
-  if (parsedURL.pathname === pathnames.url.known.kanbanInitialization) {
+  if (parsedURL.pathname === pathnames.url.known.kanbanGO.initialization) {
     return handlersKanbanGoInitialization.getInitializer().handleRequest(request, response);
   }
   if (parsedURL.pathname === pathnames.url.known.computationEngine) {
@@ -83,7 +83,7 @@ function handleRequests(request, response) {
   }  
   //console.log(`DEBUG: The parsed url pathname is: ${parsedURL.pathname}`.red);
   response.writeHead(200);
-  response.end(`Uknown request ${escapeHtml(request.url)}`);
+  response.end(`Uknown request ${request.url} with pathname: ${parsedURL.pathname}.`);
 }
 
 function handleFabcoinInitializationOLD(request, response) {

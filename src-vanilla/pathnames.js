@@ -60,13 +60,19 @@ var url = {
     frontEndBrowserifiedJS: "/kanban_frontend_browserified.js",
     frontEndHTML: "/kanban_frontend.html",
     frontEndCSS: "/kanban_frontend.css",
-    rpc: "/rpc",
-    kanbanRPC: "/kanbanRPC",
-    goKanbanRPC: "/goKanbanRPC",
+    fabcoinOld:{
+      rpc: "/fabcoinOld_rpc",
+      initialization: "/fabcoinOld_initialization",
+      myNodes: "/myNodes"
+    },
+    kanbanGO: {
+      rpc: "/kanbanGO_RPC",
+      initialization: "/kanbanGO_initialization"
+    },
+    kanbanCPP: { 
+      rpc: "/kanbanCPP_RPC"
+    },
     computationEngine: "/computation_engine",
-    fabcoinInitializationOLD: "/fabcoin_initialization",
-    kanbanInitialization: "/go_kanban_initialization",
-    myNodesCommand: "/my_nodes",
     logFileTestNetNoDNS: "/logFileTestNetNoDNS",
     logFileTestNetNoDNSSession: "/logFileTestNetNoDNSSession",
     logFileTestNet: "/logFileTestNet",

@@ -368,7 +368,7 @@ PendingCall.prototype.runOneId = function (nodeId) {
   };
   messageBody += `&node=${escape(JSON.stringify(nodeObject))}`;
 
-  var theURL = `${pathnames.url.known.goKanbanRPC}`;
+  var theURL = `${pathnames.url.known.kanbanGO.rpc}`;
   var currentResult = ids.defaults.kanbanGO.outputKBGOTest;
   if (theFunction.output !== undefined && theFunction.output !== null) {
     currentResult = theFunction.output;

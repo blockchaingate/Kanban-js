@@ -145,7 +145,7 @@ KanbanGoInitializer.prototype.run = function(functionLabel) {
     }
   }
   var messageBody = kanbanGo.getPOSTBodyFromKanbanGORPCLabel(functionFrontend.rpcCall, theArguments);
-  var theURL = `${pathnames.url.known.kanbanInitialization}`;
+  var theURL = `${pathnames.url.known.kanbanGO.initialization}`;
   var currentResult = ids.defaults.kanbanGO.outputKanbanInitialization;
   var currentProgress = globals.spanProgress();
   var usePOST = window.kanban.rpc.forceRPCPOST;

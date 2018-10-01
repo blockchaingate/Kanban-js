@@ -681,7 +681,7 @@ function getPOSTBodyfromRPCLabel(theRPClabel, theArguments, isKanban) {
 }
 
 function getURLfromRPCLabel(theRPClabel, theArguments, isKanban) {
-  var entryPoint = url.known.rpc;
+  var entryPoint = url.known.fabcoinOldRPC;
   if (isKanban === true) {
     entryPoint = url.known.kanbanRPC;
   }

@@ -330,7 +330,7 @@ function sendRawBulkTransactions() {
     rawTransactions: rawTransactions.join(",")
   });
   submitRequests.submitPOST({
-    url: pathnames.url.known.rpc,
+    url: pathnames.url.known.fabcoinOldRPC,
     messageBody: messageBody,
     progress: globals.spanProgress(),
     result : getOutputSendBulkButtons(),
