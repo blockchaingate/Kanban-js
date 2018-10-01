@@ -219,6 +219,19 @@ var rpcCalls = {
         },
         parameters: []
     },
+    roundChangeRequests: {
+        rpcCall: "roundChangeRequests", //must be same as rpc label, used for autocomplete
+        method: "pbft_roundChangeRequests", //<- method name passed to kanban-go
+        mandatoryFixedArguments: { //<- values give defaults, null for none
+        },
+        mandatoryModifiableArguments: { //<- values give defaults, null for none
+        },
+        optionalModifiableArguments: {
+        },
+        allowedArgumentValues: {
+        },
+        parameters: []
+    },
     validators: {
         rpcCall: "validators",
         method: "pbft_validators",
