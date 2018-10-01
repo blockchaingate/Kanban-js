@@ -6,7 +6,7 @@ const escapeHtml = require('escape-html');
 const queryString = require('querystring');
 const url  = require('url');
 const fabCli = require('./handlers_fabcoin_cli');
-const fabcoinInitialization = require('./handlers_fabcoin_initialization');
+const fabcoinInitializationOld = require('./handlers_fabcoin_initialization_old');
 const handlersComputationalEngine = require('./handlers_computational_engine');
 const handlersMyNodes = require('./handlers_my_nodes');
 const handlersKanbanGo = require('./handlers_kanban_go');
@@ -60,8 +60,8 @@ function handleRequests(request, response) {
     //console.log(`The url is pt 3: ${request.url}`.red);
     return handleFile(request, response);
   }
-  if (parsedURL.pathname === pathnames.url.known.fabcoinInitialization) {
-    return handleFabcoinInitialization(request, response);
+  if (parsedURL.pathname === pathnames.url.known.fabcoinInitializationOLD) {
+    return handleFabcoinInitializationOLD(request, response);
   }
   if (parsedURL.pathname === pathnames.url.known.myNodesCommand) {
     return handleMyNodesCall(request, response);
@@ -86,7 +86,7 @@ function handleRequests(request, response) {
   response.end(`Uknown request ${escapeHtml(request.url)}`);
 }
 
-function handleFabcoinInitialization(request, response) {
+function handleFabcoinInitializationOLD(request, response) {
   var parsedURL = null;
   var query = null;
   var queryCommand = null;
@@ -98,7 +98,7 @@ function handleFabcoinInitialization(request, response) {
     response.writeHead(400);
     return response.end(`Bad fab coin initialization request: ${e}`);
   }
-  return fabcoinInitialization.fabcoinInitialize(request, response, queryCommand);
+  return fabcoinInitializationOld.fabcoinInitialize(request, response, queryCommand);
 }
 
 function handleRPC(request, response, isKanban) {

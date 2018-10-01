@@ -47,7 +47,7 @@
   </div>
   <br>
   <div class = "divControlPanelDefault" id = "divOutputKBGOSendReceive" style = "font-family:'Courier New', Courier, monospace"></div><!--divFabcoinInitialization-->  
-</div>
+</div><!--pageKanbanGOSendReceive-->
 
 <div class = "divMainPage" id = "pageMyNodes">
   <div class = "divControlPanelDefault">
@@ -262,7 +262,20 @@
 
 <div class = "divMainPage" id = "pageFabcoinInitialization">
   <div class = "divControlPanelDefault">
-    <table> 
+  <table class = "tableKanbanPlusPlusTest">
+  <tr>
+  <td>
+  <table>
+    <tr><td><button class = "buttonStandard" style = "width: 100px" onclick = "window.kanban.fabcoind.initialization.initializer.startFabcoind()"><b>start fabcoind</b></button></td></tr>
+  </table>
+  </td>
+  <td>
+  <input type = "text" class = "inputCrypto" id = "inputFabcoindArguments" size = "90" value = "--regtest" placeholder = "arguments"></input><br>
+  </td>
+  </tr>
+  </table>
+
+    <!--table> 
     <tr>
     <td>node</td>
     <td><button class = "buttonStandard" onclick = "window.kanban.initialization.fabcoin.gitPullNode();">update</button></td>
@@ -286,7 +299,6 @@
     <button class = "buttonStandard" onclick = "window.kanban.initialization.fabcoin.gitPullFabcoin();">update</button>
     <button class = "buttonStandard" onclick = "window.kanban.initialization.fabcoin.deleteFabcoinConfiguration();">del .fab</button>
     <button class = "buttonStandard" onclick = "window.kanban.initialization.fabcoin.startFabcoinDaemon(false);">start fab</button>
-    <!--button class = "buttonStandard" onclick = "window.kanban.initialization.fabcoin.startFabcoinDaemon(true);">start fab mining</button-->
     <button class = "buttonStandard" onclick = "window.kanban.initialization.fabcoin.makeFabcoin();">make fab</button>
     &nbsp;
     <a href = "/logFileTestNetNoDNS" target = "_blank" id = "linkLogFileFabcoin">Log file </a>
@@ -294,7 +306,7 @@
     <a href = "/logFileTestNetNoDNSSession" target = "_blank" id = "linkLogFileFabcoin">Session log file </a>
     </td>
     </tr>
-    </table>
+    </table-->
   </div>
   <br>
   <div class = "divControlPanelDefault" id = "divFabcoinInitialization"></div><!--divFabcoinInitialization-->
@@ -570,16 +582,17 @@
     <div><button class = "buttonSelectPage" onclick = "window.kanban.thePage.selectPage('myLocalKanbanNodes');">KanbanGO start</button></div>
     <div><button class = "buttonSelectPage" onclick = "window.kanban.thePage.selectPage('kanbanGOSendReceive');">KanbanGO</button></div>
     <hr>
+    <div><button class = "buttonSelectPage" onclick = "window.kanban.thePage.selectPage('fabcoinInitialization');">fabcoin start</button></div>
+    <hr>
     <div><button class = "buttonSelectPage" onclick = "window.kanban.thePage.selectPage('kanbanGO');">CryptoGO</button></div>
     <div><button class = "buttonSelectPage" onclick = "window.kanban.thePage.selectPage('kanbanPlusPlus');">Crypto++</button></div>
     <div><button class = "buttonSelectPage" onclick = "window.kanban.thePage.selectPage('kanbanJS');">CryptoJS</button></div>
-    <hr>
-    <div><button class = "buttonSelectPage" onclick = "window.kanban.thePage.selectPage('fabcoinInitialization');">Local nodes</button></div>
-    <div><button class = "buttonSelectPage" onclick = "window.kanban.thePage.selectPage('myNodes');">My remote nodes</button></div>
+
+    <!--div><button class = "buttonSelectPage" onclick = "window.kanban.thePage.selectPage('myNodes');">My remote nodes</button></div>
     <div><button class = "buttonSelectPage" onclick = "window.kanban.thePage.selectPage('network');">Network</button></div>
     <div><button class = "buttonSelectPage" onclick = "window.kanban.thePage.selectPage('send');">Send</button></div>
     <div><button class = "buttonSelectPage" onclick = "window.kanban.thePage.selectPage('mine');">Mine</button></div>
-    <div><button class = "buttonSelectPage" onclick = "window.kanban.thePage.selectPage('profiling');">Profiling</button></div>
+    <div><button class = "buttonSelectPage" onclick = "window.kanban.thePage.selectPage('profiling');">Profiling</button></div-->
     <!--div><button class = "buttonSelectPage" onclick = "window.kanban.thePage.selectPage('testGPU');">Test GPU</button> </div-->
   </div>
 </div><!--divMenu-->
