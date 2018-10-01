@@ -297,7 +297,6 @@ function KanbanGoInitializer() {
     runNodes: {
     }, 
     getNodeInformation: {
-
     }
   };
   this.colors = ["yellow", "green", "blue", "cyan", "magenta"];
@@ -325,7 +324,6 @@ function KanbanGoInitializer() {
   this.pbftConfigurationSeed = null;
   /** @type {{config:{chainId: number, pbft:{proposers: string[]} }, alloc: Object}}*/
   this.pbftConfiguration = null;
-  this.computePaths();
   /**@type {object[]} */
   this.nodeInformation = [];
 }
@@ -374,13 +372,6 @@ KanbanGoInitializer.prototype.computePaths = function() {
   if (startingPath === undefined || startingPath === null) {
     startingPath = "/";
   }
-  var stringToReplaceWithBaseFolder = "${nodeBaseFolder}";
-  var indexNodeDir = startingPath.indexOf(stringToReplaceWithBaseFolder);
-  if (indexNodeDir !== - 1) {
-    startingPath = startingPath.slice(0, indexNodeDir) + pathnames.path.base + startingPath.slice(indexNodeDir + stringToReplaceWithBaseFolder.length);
-  }
-  
-  pathnames.path.base;
   startingPath = path.normalize(startingPath);
   var currentPath = startingPath;
   var maxNumRuns = 100;
@@ -408,8 +399,6 @@ KanbanGoInitializer.prototype.computePaths = function() {
   if (fs.existsSync(currentDataDir)) {
     this.paths.dataDir = currentDataDir;
   }
-
-
   if (this.paths.geth === "") {
     console.log(`Could not find geth executable. Searched directories along: ${startingPath}`.red);
     throw(`Could not find geth executable.`);

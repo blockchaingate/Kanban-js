@@ -1,7 +1,11 @@
 {
+"fabcoin" : {
+  "executable": "${projectBase}/fabcoin-dev-sm01/src/fabcoind/",
+  "dataDir": "${projectBase}/secrets_data_fabcoin/"
+},
 "kanbanGO" : {
   "dataDirName": "secrets_data_kanban_go",
-  "gethFolder": "${nodeBaseFolder}/go/src/github.com/blockchaingate/kanban-go/build/bin/"
+  "gethFolder": "${projectBase}/go/src/github.com/blockchaingate/kanban-go/build/bin/"
 },
 "myNodes": [
 {
