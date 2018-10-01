@@ -126,3 +126,7 @@ var myNodesCommands = {
     }    
   },
 };
+
+module.exports = {
+  myNodesCommands
+}

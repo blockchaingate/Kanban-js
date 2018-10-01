@@ -4,6 +4,9 @@ const assert = require('assert')
 const childProcess = require('child_process');
 const openCLDriver = require('./open_cl_driver');
 const globals = require('./globals');
+const resourcesOther = require('./resources_other_rpc');
+var engineCalls = resourcesOther.computationalEngineCalls;
+var engineCallStatuses = resourcesOther.computationalEngineCallStatuses; 
 
 function computeUnspentTransactions(id) {
 
@@ -31,13 +34,13 @@ function pollOngoing(request, response, desiredCommand) {
     } 
     if (currentId in jobs.recentlyFinished){
       result[currentId] = {
-        status: pathnames.computationalEngineCallStatuses.recentlyFinished,
+        status: engineCallStatuses.recentlyFinished,
         message: jobs.recentlyFinished[currentId]
       };
       continue;
     } 
     result[currentId] = {
-      status: pathnames.computationalEngineCallStatuses.notFound
+      status: engineCallStatuses.notFound
     };
   }
   response.writeHead(200);
@@ -45,21 +48,21 @@ function pollOngoing(request, response, desiredCommand) {
 }
 
 var handlersReturnImmediately = {};
-handlersReturnImmediately[pathnames.computationalEngineCalls.computeUnspentTransactions.computationalEngineCall] = computeUnspentTransactions;
-handlersReturnImmediately[pathnames.computationalEngineCalls.testGPUSha256.computationalEngineCall] = null;
-handlersReturnImmediately[pathnames.computationalEngineCalls.testBackEndSha256Multiple.computationalEngineCall] = openCLDriver.testBackEndSha256Multiple;
-handlersReturnImmediately[pathnames.computationalEngineCalls.testBackEndPipeMultiple.computationalEngineCall] = openCLDriver.testBackEndPipeMultiple;
-handlersReturnImmediately[pathnames.computationalEngineCalls.testBackEndSignMultipleMessages.computationalEngineCall] = openCLDriver.testBackEndSignMultipleMessages;
+handlersReturnImmediately[engineCalls.computeUnspentTransactions.computationalEngineCall] = computeUnspentTransactions;
+handlersReturnImmediately[engineCalls.testGPUSha256.computationalEngineCall] = null;
+handlersReturnImmediately[engineCalls.testBackEndSha256Multiple.computationalEngineCall] = openCLDriver.testBackEndSha256Multiple;
+handlersReturnImmediately[engineCalls.testBackEndPipeMultiple.computationalEngineCall] = openCLDriver.testBackEndPipeMultiple;
+handlersReturnImmediately[engineCalls.testBackEndSignMultipleMessages.computationalEngineCall] = openCLDriver.testBackEndSignMultipleMessages;
 
 var handlersReturnWhenDone = {};
-handlersReturnWhenDone[pathnames.computationalEngineCalls.pollOngoing.computationalEngineCall] = pollOngoing;
-handlersReturnWhenDone[pathnames.computationalEngineCalls.testBackEndSha256OneMessage.computationalEngineCall] = openCLDriver.testBackEndSha256OneMessage;
-handlersReturnWhenDone[pathnames.computationalEngineCalls.testBackEndPipeOneMessage.computationalEngineCall] = openCLDriver.testBackEndPipeOneMessage;
-handlersReturnWhenDone[pathnames.computationalEngineCalls.testBackEndSignOneMessage.computationalEngineCall] = openCLDriver.testBackEndSignOneMessage;
-handlersReturnWhenDone[pathnames.computationalEngineCalls.testBackEndEngineSha256.computationalEngineCall] = openCLDriver.testBackEndEngineSha256;
+handlersReturnWhenDone[engineCalls.pollOngoing.computationalEngineCall] = pollOngoing;
+handlersReturnWhenDone[engineCalls.testBackEndSha256OneMessage.computationalEngineCall] = openCLDriver.testBackEndSha256OneMessage;
+handlersReturnWhenDone[engineCalls.testBackEndPipeOneMessage.computationalEngineCall] = openCLDriver.testBackEndPipeOneMessage;
+handlersReturnWhenDone[engineCalls.testBackEndSignOneMessage.computationalEngineCall] = openCLDriver.testBackEndSignOneMessage;
+handlersReturnWhenDone[engineCalls.testBackEndEngineSha256.computationalEngineCall] = openCLDriver.testBackEndEngineSha256;
 
-for (var label in pathnames.computationalEngineCalls) {
-  var currentcomputationalEngineCall = pathnames.computationalEngineCalls[label].computationalEngineCall;
+for (var label in engineCalls) {
+  var currentcomputationalEngineCall = engineCalls[label].computationalEngineCall;
   if (
     handlersReturnImmediately[currentcomputationalEngineCall] === undefined && 
     handlersReturnWhenDone[currentcomputationalEngineCall] === undefined
@@ -88,7 +91,7 @@ function dispatch(request, response, desiredCommand) {
   var currentCommandLabel = desiredCommand[pathnames.computationalEngineCall];
   //console.log(`computationalEngineCall: ${pathnames.computationalEngineCall}, currentCommandLabel: ${JSON.stringify(currentCommandLabel)}`);
   if (typeof currentCommandLabel === "string") {
-    isGood = currentCommandLabel in pathnames.computationalEngineCalls;
+    isGood = currentCommandLabel in engineCalls;
   }
   if (!isGood) {
     response.writeHead(400);

@@ -51,3 +51,7 @@ var computationalEngineCallStatuses = {
   notFound: "Not found"
 };
 
+module.exports = {
+  computationalEngineCalls,
+  computationalEngineCallStatuses
+}
