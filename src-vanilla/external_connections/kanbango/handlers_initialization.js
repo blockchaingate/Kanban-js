@@ -6,15 +6,15 @@
 
 const url  = require('url');
 const queryString = require('querystring');
-const kanbanGOInitialization = require('./external_connections/kanbango/initialization');
-const kanbanGORPC = require('./external_connections/kanbango/rpc');
-const pathnames = require('./pathnames');
+const kanbanGOInitialization = require('./initialization');
+const kanbanGORPC = require('./rpc');
+const pathnames = require('../../pathnames');
 const childProcess = require("child_process");
 const fs = require('fs');
 const fsExtra = require('fs-extra');
 const path = require('path');
 const rimraf = require('rimraf');
-const cryptoKanban = require('./crypto/crypto_kanban');
+const cryptoKanban = require('../../crypto/crypto_kanban');
 require('colors');
 
 /**

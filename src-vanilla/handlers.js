@@ -1,16 +1,16 @@
-const pathnames = require('./pathnames');
 const fs = require('fs');
 const colors = require('colors');
 const mime = require('mime-types');
 const escapeHtml = require('escape-html');
 const queryString = require('querystring');
 const url  = require('url');
-const fabCli = require('./handlers_fabcoin_old_cli');
-const fabcoinInitializationOld = require('./handlers_fabcoin_old_initialization');
-const handlersComputationalEngine = require('./handlers_computational_engine');
-const handlersMyNodes = require('./handlers_my_nodes');
-const handlersKanbanGo = require('./handlers_kanban_go_rpc');
-const handlersKanbanGoInitialization = require('./handlers_kanban_go_initialization');
+const pathnames = require('./pathnames');
+const fabCli = require('./external_connections/fabcoin_old/rpc');
+const fabcoinInitializationOld = require('./external_connections/fabcoin_old/handlers_initialization');
+const handlersComputationalEngine = require('./external_connections/other/cpp_engine');
+const handlersMyNodes = require('./external_connections/fabcoin_old/handlers_my_nodes');
+const handlersKanbanGo = require('./external_connections/kanbango/handlers_rpc');
+const handlersKanbanGoInitialization = require('./external_connections/kanbango/handlers_initialization');
 
 function handleRequestsHTTP(request, response) {
   if (request.url in pathnames.url.synonyms) {

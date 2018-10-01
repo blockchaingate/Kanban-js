@@ -1,7 +1,7 @@
 "use strict";
-const pathnames = require('./pathnames');
-const implementation = require('./implementation_handlers_my_nodes');
-const fabcoinOldInitialization = require('./external_connections/fabcoin_old/initialization');
+const pathnames = require('../../pathnames');
+const implementation = require('../../implementation_handlers_my_nodes');
+const fabcoinOldInitialization = require('../../external_connections/fabcoin_old/initialization');
 
 var myNodeCommands = fabcoinOldInitialization.myNodesCommands;
 

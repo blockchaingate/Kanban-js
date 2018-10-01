@@ -1,10 +1,9 @@
 "use strict";
-const pathnames = require('./pathnames');
 const assert = require('assert')
-const childProcess = require('child_process');
-const openCLDriver = require('./open_cl_driver');
-const globals = require('./globals');
-const rpcOther = require('./external_connections/other/rpc');
+const pathnames = require('../../pathnames');
+const openCLDriver = require('../../open_cl_driver');
+const globals = require('../../globals');
+const rpcOther = require('../../external_connections/other/rpc');
 var engineCalls = rpcOther.computationalEngineCalls;
 var engineCallStatuses = rpcOther.computationalEngineCallStatuses; 
 

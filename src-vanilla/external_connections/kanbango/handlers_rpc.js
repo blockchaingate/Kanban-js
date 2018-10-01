@@ -2,9 +2,8 @@
 const url  = require('url');
 const queryString = require('querystring');
 const http = require('http');
-const pathnames = require('./pathnames');
-const kanbanGORPC = require('./external_connections/kanbango/rpc');
-const kanabanGoInitializer = require('./handlers_kanban_go_initialization');
+const kanbanGORPC = require('./rpc');
+const kanabanGoInitializer = require('./handlers_initialization');
 
 function handleRequest(request, response) {
   if (request.method === "POST") {

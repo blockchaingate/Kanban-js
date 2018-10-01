@@ -1,10 +1,10 @@
 "use strict";
 const childProcess = require('child_process');
 const colors = require('colors');
-const pathnames = require('./pathnames');
 const escapeHtml = require('escape-html');
 const http = require('http');
-const initializeFabcoinFolders = require('./initialize_fabcoin_old_folders');
+const pathnames = require('../../pathnames');
+const initializeFabcoinFolders = require('../../initialize_fabcoin_old_folders');
 
 var numberRequestsRunning = 0;
 var maxRequestsRunning = 4;

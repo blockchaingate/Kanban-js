@@ -13,8 +13,8 @@ const configuration = require('./configuration');
 const buildFrontEnd = require('./build_frontend');
 const initializeOpenCLDriver = require('./initialize_opencl_driver');
 const certificateOptions = require('./initialize_certificates');
-const handleRequests = require('./handle_requests'); 
-const kanbanGoInitialization = require('./handlers_kanban_go_initialization');
+const handleRequests = require('./handlers'); 
+const kanbanGoInitialization = require('./external_connections/kanbango/handlers_initialization');
 const fabcoinOLDInitialization = require('./initialize_fabcoin_old_folders');
 
 /**Handlers for various configurations*/

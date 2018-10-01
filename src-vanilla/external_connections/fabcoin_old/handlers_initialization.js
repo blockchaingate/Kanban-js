@@ -1,8 +1,8 @@
 "use strict";
 const childProcess = require('child_process');
 const colors = require('colors');
-const pathnames = require('./pathnames');
 const escapeHtml = require('escape-html');
+const pathnames = require('../../pathnames');
 
 var numberRequestsRunning = 0;
 var maxRequestsRunning = 4;
