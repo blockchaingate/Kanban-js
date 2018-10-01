@@ -1,8 +1,5 @@
 "use strict";
 
-var urlStrings = {
-  rpcCallLabel: "rpcCall"
-};
 
 var rpcCalls = {
   runNode: {
@@ -17,6 +14,5 @@ var rpcCalls = {
 }
 
 module.exports = {
-  urlStrings,
   rpcCalls
 }

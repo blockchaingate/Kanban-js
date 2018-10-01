@@ -57,7 +57,7 @@ var defaults = {
       numberOfNodes: "inputKBGONumberOfGethNodes"
     },
     nodePanel: "spanKanbanGoNodeContainer",
-    outputInitialization: "divFabcoinInitialization",
+    outputInitialization: "divFabcoinOldInitialization",
     outputKBGOTest: "divOutputKBGOTest",
     outputKanbanInitialization: "divOutputMyLocalKanbanNodes",
     outputSendReceive: "divOutputKBGOSendReceive"
@@ -89,6 +89,12 @@ var defaults = {
     outputKanbanPlusPlusGeneral: "divKanbanPlusPlusOutput",
     outputKanbanPlusPlusSecond: "divKanbanPlusPlusOutputSecond",
     divKanbanPlusPlusOutputThird: "divKanbanPlusPlusOutputThird"
+  },
+  fabcoin: {
+    inputInitialization: {
+      fabcoindArguments: "inputFabcoindArguments"
+    },
+    outputFabcoinInitialization: "divOutputFabcoinInitialization"
   },
   inputNumberOfBlocks: "inputNumberOfBlocks",
   inputMaxNumberOfTries: "inputMaxNumberOfTries",

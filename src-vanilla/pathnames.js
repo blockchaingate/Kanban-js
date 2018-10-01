@@ -60,10 +60,14 @@ var url = {
     frontEndBrowserifiedJS: "/kanban_frontend_browserified.js",
     frontEndHTML: "/kanban_frontend.html",
     frontEndCSS: "/kanban_frontend.css",
-    fabcoinOld:{
+    fabcoinOld: {
       rpc: "/fabcoinOld_rpc",
       initialization: "/fabcoinOld_initialization",
       myNodes: "/myNodes"
+    },
+    fabcoin: {
+      rpc: "/fabcoin_rpc",
+      initialization: "/fabcoin_initialization",
     },
     kanbanGO: {
       rpc: "/kanbanGO_RPC",
