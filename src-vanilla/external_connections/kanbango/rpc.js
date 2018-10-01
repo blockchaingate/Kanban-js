@@ -1,8 +1,8 @@
 "use strict";
-const pathnames = require('../../pathnames');
 
 var urlStrings = {
-  node: "node"
+  node: "node",
+  rpcCallLabel: "rpcCall"
 };
 
 var rpcCalls = {
@@ -262,7 +262,7 @@ var rpcCalls = {
 
 function getPOSTBodyFromKanbanGORPCLabel(theRPCLabel, theArguments) {
   var theRequest = {};
-  theRequest[pathnames.rpcCall] = theRPCLabel;
+  theRequest[urlStrings.rpcCallLabel] = theRPCLabel;
   if (theArguments === undefined) {
     theArguments = {};
   }

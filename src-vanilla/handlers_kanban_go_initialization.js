@@ -7,6 +7,7 @@
 const url  = require('url');
 const queryString = require('querystring');
 const kanbanGOInitialization = require('./external_connections/kanbango/initialization');
+const kanbanGORPC = require('./external_connections/kanbango/rpc');
 const pathnames = require('./pathnames');
 const childProcess = require("child_process");
 const fs = require('fs');
@@ -692,7 +693,7 @@ KanbanGoInitializer.prototype.handleRPCArguments = function(request, response, q
     this.numberRequestsRunning --;
     return response.end(`Too many (${this.numberRequestsRunning}) requests running, maximum allowed: ${this.maxRequestsRunning}. `);
   }
-  var theCallLabel = queryCommand[pathnames.rpcCall];
+  var theCallLabel = queryCommand[kanbanGORPC.urlStrings.rpcCallLabel];
   if (!(theCallLabel in kanbanGOInitialization.rpcCalls)) {
     response.writeHead(400);
     this.numberRequestsRunning --;

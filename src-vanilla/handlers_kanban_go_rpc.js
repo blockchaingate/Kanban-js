@@ -3,7 +3,7 @@ const url  = require('url');
 const queryString = require('querystring');
 const http = require('http');
 const pathnames = require('./pathnames');
-const kanbanGO = require('./external_connections/kanbango/rpc');
+const kanbanGORPC = require('./external_connections/kanbango/rpc');
 const kanabanGoInitializer = require('./handlers_kanban_go_initialization');
 
 function handleRequest(request, response) {
@@ -48,7 +48,7 @@ function handleRPCURLEncodedInput(request, response, messageBodyURLed) {
   try {
     query = queryString.parse(messageBodyURLed);
     queryCommand = JSON.parse(query.command);
-    queryNode = JSON.parse(query[kanbanGO.urlStrings.node]);    
+    queryNode = JSON.parse(query[kanbanGORPC.urlStrings.node]);    
   } catch (e) {
     response.writeHead(400);
     return response.end(`Bad RPC input. ${e}`);
@@ -76,7 +76,7 @@ function getParameterFromType(input, type) {
 
 function getRPCRequestJSON(rpcCallLabel, queryCommand, errors) {
   /**@type {{rpcCall: string, method: string, mandatoryFixedArguments: Object,  mandatoryModifiableArguments: Object,  optionalModifiableArguments: Object, allowedArgumentValues: Object, parameters: string[]}}*/
-  var currentRPCCall = kanbanGO.rpcCalls[rpcCallLabel];
+  var currentRPCCall = kanbanGORPC.rpcCalls[rpcCallLabel];
   var currentParameters = [];
   for (var counterCommands = 0; counterCommands < currentRPCCall.parameters.length; counterCommands ++) {
     var currentParameterName = currentRPCCall.parameters[counterCommands];
@@ -129,10 +129,10 @@ function handleRPCArguments(response, queryCommand, queryNode) {
   }
   var currentNode = null;
   try {
-    if (queryCommand[pathnames.rpcCall] === undefined) {
+    if (queryCommand[kanbanGORPC.urlStrings.rpcCallLabel] === undefined) {
       response.writeHead(400);
       numberRequestsRunning --;
-      return response.end(`Command is missing the ${pathnames.rpcCall} entry. `);        
+      return response.end(`Command is missing the ${kanbanGORPC.urlStrings.rpcCallLabel} entry. `);        
     }
     var currentNodeId = queryNode.id;
     if (currentNodeId === undefined || currentNodeId === null) {
@@ -153,8 +153,8 @@ function handleRPCArguments(response, queryCommand, queryNode) {
     numberRequestsRunning --;
     return response.end(`Failed to extract node id. ${e}`);        
   }
-  var theCallLabel = queryCommand[pathnames.rpcCall];
-  var callCollection = kanbanGO.rpcCalls;
+  var theCallLabel = queryCommand[kanbanGORPC.urlStrings.rpcCallLabel];
+  var callCollection = kanbanGORPC.rpcCalls;
   if (!(theCallLabel in callCollection)) {
     response.writeHead(400);
     numberRequestsRunning --;

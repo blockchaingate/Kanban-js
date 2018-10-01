@@ -75,7 +75,7 @@ KanbanGoInitializer.prototype.getNodeInformation = function () {
 
 KanbanGoInitializer.prototype.selectRadio = function (idRadio) {
   this.selectedNode = idRadio;
-  console.log(`DEBUG: set this.selectedNode to: ${idRadio} `);
+  //console.log(`DEBUG: set this.selectedNode to: ${idRadio} `);
 }
 
 KanbanGoInitializer.prototype.toHTMLRadioButton = function () {
@@ -98,7 +98,7 @@ KanbanGoInitializer.prototype.toHTMLRadioButton = function () {
 }
 
 KanbanGoInitializer.prototype.getNodeInformationCallback = function (functionLabel, input, output) {
-  console.log("DEBUG: Got back:" + input);
+  //console.log("DEBUG: Got back:" + input);
   try {
     var inputParsed = JSON.parse(input);
     this.nodes = [];
@@ -108,9 +108,9 @@ KanbanGoInitializer.prototype.getNodeInformationCallback = function (functionLab
     for (var counterNode = 0; counterNode < inputParsed.length; counterNode ++) {
       var currentNode = new KanbanGONode();
       currentNode.init(inputParsed[counterNode]);
-      console.log("DEBUG: This selected node: " + this.selectedNode + " id backend:  " + currentNode.idBackend);
+      //console.log("DEBUG: This selected node: " + this.selectedNode + " id backend:  " + currentNode.idBackend);
       if (this.selectedNode === currentNode.idBackend) {
-        console.log("DEbug: selecting node: " + currentNode.idBackend);
+        //console.log("DEbug: selecting node: " + currentNode.idBackend);
         currentNode.flagSelected = true;
       }
       this.nodes.push(currentNode);

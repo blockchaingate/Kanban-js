@@ -255,11 +255,11 @@ TestKanbanGO.prototype.updateFields = function(parsedInput, outputs) {
 }
 
 TestKanbanGO.prototype.callbackStandard = function(/**@type {PendingCall} */ pendingCall, nodeId, input, output) {
-  console.log(`DEBUG: pendingCall id: ${pendingCall.id}, nodeId: ${nodeId}, input: ${input}`);
+  //console.log(`DEBUG: pendingCall id: ${pendingCall.id}, nodeId: ${nodeId}, input: ${input}`);
   pendingCall.nodeCalls[nodeId].result = input;
   pendingCall.numberReceived ++;
   if (pendingCall.numberReceived < pendingCall.totalCalls) {
-    console.log("DEBUG: Received some");
+    //console.log("DEBUG: Received some");
     return;
   }
   var resultHTML = "";

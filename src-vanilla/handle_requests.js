@@ -9,7 +9,7 @@ const fabCli = require('./handlers_fabcoin_old_cli');
 const fabcoinInitializationOld = require('./handlers_fabcoin_old_initialization');
 const handlersComputationalEngine = require('./handlers_computational_engine');
 const handlersMyNodes = require('./handlers_my_nodes');
-const handlersKanbanGo = require('./handlers_kanban_go');
+const handlersKanbanGo = require('./handlers_kanban_go_rpc');
 const handlersKanbanGoInitialization = require('./handlers_kanban_go_initialization');
 
 function handleRequestsHTTP(request, response) {
