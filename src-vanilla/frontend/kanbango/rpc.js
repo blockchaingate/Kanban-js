@@ -6,8 +6,8 @@ const ids = require('../ids_dom_elements');
 const jsonToHtml = require('../json_to_html');
 //const Block = require('../bitcoinjs_src/block');
 const globals = require('../globals');
-const kanbanGO = require('../../resources_kanban_go');
-const kanbanGOInitializer = require('./initialization');
+const kanbanGO = require('../../external_connections/kanbango/rpc');
+const kanbanGOFrontendInitializer = require('./initialization');
 const miscellaneous = require('../../miscellaneous');
 const miscellaneousFrontEnd = require('../miscellaneous_frontend');
 
@@ -320,7 +320,7 @@ TestKanbanGO.prototype.testClear = function() {
 }
 
 TestKanbanGO.prototype.run = function(functionLabel) {
-  var initializer = kanbanGOInitializer.initializer;
+  var initializer = kanbanGOFrontendInitializer.initializer;
   var currentId = initializer.selectedNode;
   this.numberOfCalls ++;
   var currentPendingCall = new PendingCall();

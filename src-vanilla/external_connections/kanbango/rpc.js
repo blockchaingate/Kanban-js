@@ -1,5 +1,5 @@
 "use strict";
-const pathnames = require('./pathnames');
+const pathnames = require('../../pathnames');
 
 var urlStrings = {
   node: "node"

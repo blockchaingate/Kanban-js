@@ -4,7 +4,7 @@ const colors = require('colors');
 const pathnames = require('./pathnames');
 const escapeHtml = require('escape-html');
 const http = require('http');
-const initializeFabcoinFolders = require('./initialize_fabcoin_folders');
+const initializeFabcoinFolders = require('./initialize_fabcoin_old_folders');
 
 var numberRequestsRunning = 0;
 var maxRequestsRunning = 4;

@@ -6,7 +6,7 @@
 
 const url  = require('url');
 const queryString = require('querystring');
-const kanbanGOInitialization = require('./resources_kanban_go_initialization');
+const kanbanGOInitialization = require('./external_connections/kanbango/initialization');
 const pathnames = require('./pathnames');
 const childProcess = require("child_process");
 const fs = require('fs');

@@ -1,5 +1,9 @@
 "use strict";
 
+const pathnames = require('../../pathnames');
+
+var url = pathnames.url;
+
 var networkData = {
   regtest: {
     name: "regtest", //<-same as label, for autocomplete
@@ -613,13 +617,22 @@ var pathsComputedAtRunTime = {
   kanbanProofOfConcentConfigurationFolder: null
 };
 
+var networkSecurityByRPCOption = {}; //<- for convenience
+var networkRPCOption = {}; //<- for convenience
+var networkNameByRPCNetworkOption = {}; //<- for convenience
+for (var label in networkData) {
+  networkSecurityByRPCOption[networkData[label].rpcOption] = networkData[label].security;
+  networkRPCOption[label] = networkData[label].rpcOption;
+  networkNameByRPCNetworkOption[networkData[label].rpcOption] = label;
+}
+
 //To be documented on request. Please email me/tell me in person if you want 
 //me to document the structure below.
 //Not doing it right away because I am still refactoring it heavily.  
 var fabcoinInitializationProceduresOLD = {
   startFabcoind: {
     fabcoinInitialization: "startFabcoind", //must be same as label, used for autocomplete
-    command: pathname.fabcoind,
+    command: pathnames.pathname.fabcoind,
     allowedArgumentValues: {
       net: [networkRPCOption.regtest, networkRPCOption.testNetNoDNS, networkRPCOption.testNet],
       mine: ["", "-gen"]
@@ -628,7 +641,7 @@ var fabcoinInitializationProceduresOLD = {
   },
   startKanban: {
     fabcoinInitialization: "startKanban", //must be same as label, used for autocomplete
-    command: pathname.kanband,
+    command: pathnames.pathname.kanband,
     allowedArgumentValues: {
       net: [networkDataKanban.testKanban.rpcOption, networkDataKanban.mainKanban.rpcOption],
     },
@@ -654,25 +667,25 @@ var fabcoinInitializationProceduresOLD = {
   gitPullNode: {
     fabcoinInitialization: "gitPullNode",
     command: "git",
-    path: path.base,
+    path: pathnames.path.base,
     cli: ["pull"]
   },
   gitPullFabcoin: {
     fabcoinInitialization: "gitPullFabcoin",
     command: "git",
-    path: path.fabcoin,
+    path: pathnames.path.fabcoin,
     cli: ["pull"]
   },
   gitPullKanban: {
     fabcoinInitialization: "gitPullKanban",
     command: "git",
-    path: path.kanbanProofOfConcept,
+    path: pathnames.path.kanbanProofOfConcept,
     cli: ["pull"]
   },
   makeFabcoin: {
     fabcoinInitialization: "makeFabcoin",
     command: "make",
-    path: path.fabcoin,
+    path: pathnames.path.fabcoin,
     cli: []
   },
   deleteFabcoinConfiguration: {
@@ -685,15 +698,6 @@ var fabcoinInitializationProceduresOLD = {
     cli: ["-r", ["folder", networkData.testNetNoDNS.folder]]
   }
 };
-
-var networkSecurityByRPCOption = {}; //<- for convenience
-var networkRPCOption = {}; //<- for convenience
-var networkNameByRPCNetworkOption = {}; //<- for convenience
-for (var label in networkData) {
-  networkSecurityByRPCOption[networkData[label].rpcOption] = networkData[label].security;
-  networkRPCOption[label] = networkData[label].rpcOption;
-  networkNameByRPCNetworkOption[networkData[label].rpcOption] = label;
-}
 
 function getNetworkDataFromRPCNetworkOption(RPCNetworkOption) {
   return networkData[networkNameByRPCNetworkOption[RPCNetworkOption]];
@@ -994,4 +998,9 @@ function getRPCcallArguments(theRPCLabel, additionalArguments, errors, isKanban)
     return null;
   }
   return result;
+}
+
+module.exports = {
+  networkData,
+  pathsComputedAtRunTime
 }

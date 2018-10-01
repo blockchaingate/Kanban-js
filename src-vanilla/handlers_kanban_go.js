@@ -3,7 +3,7 @@ const url  = require('url');
 const queryString = require('querystring');
 const http = require('http');
 const pathnames = require('./pathnames');
-const kanbanGO = require('./resources_kanban_go');
+const kanbanGO = require('./external_connections/kanbango/rpc');
 const kanabanGoInitializer = require('./handlers_kanban_go_initialization');
 
 function handleRequest(request, response) {

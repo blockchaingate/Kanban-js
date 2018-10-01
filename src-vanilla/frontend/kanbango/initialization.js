@@ -1,7 +1,7 @@
 "use strict";
 
-const kanbanGoInitialization = require('../../resources_kanban_go_initialization');
-const kanbanGo = require('../../resources_kanban_go');
+const kanbanGoInitializationRPC = require('../../external_connections/kanbango/initialization');
+const kanbanGo = require('../../external_connections/kanbango/rpc');
 const ids = require('../ids_dom_elements');
 const jsonToHtml = require("../json_to_html");
 const pathnames = require("../../pathnames");
@@ -50,7 +50,7 @@ KanbanGONode.prototype.toHTMLRadioButton = function() {
 function KanbanGoInitializer() {
   this.idOutput = ids.defaults.outputFabcoinInitialization;
   var inputInitialization = ids.defaults.kanbanGO.inputInitialization;
-  var rpcCalls = kanbanGoInitialization.rpcCalls;
+  var rpcCalls = kanbanGoInitializationRPC.rpcCalls;
   this.theFunctions = {
     runNodes: {
       rpcCall: rpcCalls.runNodes.rpcCall,

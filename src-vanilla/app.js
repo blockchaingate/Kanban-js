@@ -15,7 +15,7 @@ const initializeOpenCLDriver = require('./initialize_opencl_driver');
 const certificateOptions = require('./initialize_certificates');
 const handleRequests = require('./handle_requests'); 
 const kanbanGoInitialization = require('./handlers_kanban_go_initialization');
-const fabcoinInitialization = require('./initialize_fabcoin_folders');
+const fabcoinOLDInitialization = require('./initialize_fabcoin_old_folders');
 
 /**Handlers for various configurations*/
 global.kanban = {
@@ -44,7 +44,7 @@ global.kanban.kanbanGOInitializer = new kanbanGoInitialization.KanbanGoInitializ
 global.kanban.kanbanGOInitializer.killGethBuildGeth();
 
 //Initialize fabcoin folders:
-fabcoinInitialization.initializeFolders();
+fabcoinOLDInitialization.initializeFolders();
 
 initializeOpenCLDriver.initializeOpenCLDriver();
 //<- Creates and starts the openCL driver.

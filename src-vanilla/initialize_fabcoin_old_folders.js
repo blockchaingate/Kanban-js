@@ -1,5 +1,7 @@
 "use strict";
 const pathnames = require('./pathnames');
+const fabcoinRPC = require('./external_connections/fabcoin_old/rpc');
+
 const path = require('path');
 const fs = require('fs');
 
@@ -12,8 +14,8 @@ function initializeFolders() {
     var currentPathKanban = currentPath + ".kanban";
     //console.log("DEBUG: trying current path: " + currentPath + ", fab path: " + currentPathFabcoin);
     if (fs.existsSync(currentPathFabcoin)) {
-      pathnames.path.fabcoinConfigurationFolder = path.normalize(currentPathFabcoin);
-      var networkData = pathnames.networkData;
+      fabcoinRPC.pathsComputedAtRunTime.fabcoinConfigurationFolder = path.normalize(currentPathFabcoin);
+      var networkData = fabcoinRPC.networkData;
       console.log(`Using fabcoin configuration folder: ${pathnames.path.fabcoinConfigurationFolder}`.green);
       pathnames.url.whiteListed[pathnames.url.known.logFileTestNetNoDNS] = `${pathnames.path.fabcoinConfigurationFolder}/${networkData.testNetNoDNS.folder}debug.log`;
       pathnames.url.whiteListed[pathnames.url.known.logFileTestNetNoDNSSession] = `${pathnames.path.fabcoinConfigurationFolder}/${networkData.testNetNoDNS.folder}debug_session.log`;

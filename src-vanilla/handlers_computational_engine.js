@@ -4,9 +4,9 @@ const assert = require('assert')
 const childProcess = require('child_process');
 const openCLDriver = require('./open_cl_driver');
 const globals = require('./globals');
-const resourcesOther = require('./resources_other_rpc');
-var engineCalls = resourcesOther.computationalEngineCalls;
-var engineCallStatuses = resourcesOther.computationalEngineCallStatuses; 
+const rpcOther = require('./external_connections/other/rpc');
+var engineCalls = rpcOther.computationalEngineCalls;
+var engineCallStatuses = rpcOther.computationalEngineCallStatuses; 
 
 function computeUnspentTransactions(id) {
 

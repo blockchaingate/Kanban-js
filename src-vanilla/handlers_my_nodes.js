@@ -1,18 +1,18 @@
 "use strict";
 const pathnames = require('./pathnames');
-const assert = require('assert')
-const childProcess = require('child_process');
-const globals = require('./globals');
 const implementation = require('./implementation_handlers_my_nodes');
+const fabcoinOldInitialization = require('./external_connections/fabcoin_old/initialization');
+
+var myNodeCommands = fabcoinOldInitialization.myNodesCommands;
 
 var handlersReturnWhenDone = {};
-handlersReturnWhenDone[pathnames.myNodesCommands.fetchNodeInfo.myNodesCommand] = implementation.fetchNodeInfo;
-handlersReturnWhenDone[pathnames.myNodesCommands.sshNodeToOneRemoteMachineGitPull.myNodesCommand] = implementation.sshNodeToOneRemoteMachineGitPull;
-handlersReturnWhenDone[pathnames.myNodesCommands.sshNodeToOneRemoteMachineKillallFabcoind.myNodesCommand] = implementation.sshNodeToOneRemoteMachineKillallFabcoind; 
-handlersReturnWhenDone[pathnames.myNodesCommands.sshNodeToOneRemoteMachineNodeRestart.myNodesCommand] = implementation.sshNodeToOneRemoteMachineNodeRestart; 
-handlersReturnWhenDone[pathnames.myNodesCommands.sshNodeToOneRemoteMachineStartFabcoind.myNodesCommand] = implementation.sshNodeToOneRemoteMachineStartFabcoind; 
-handlersReturnWhenDone[pathnames.myNodesCommands.sshNodeToOneRemoteMachineDeleteFabcoinConfiguration.myNodesCommand] = implementation.sshNodeToOneRemoteMachineDeleteFabcoinConfiguration; 
-handlersReturnWhenDone[pathnames.myNodesCommands.sshNodeToOneRemoteMachineGitPullMakeFab.myNodesCommand] = implementation.sshNodeToOneRemoteMachineGitPullMakeFab; 
+handlersReturnWhenDone[myNodeCommands.fetchNodeInfo.myNodesCommand] = implementation.fetchNodeInfo;
+handlersReturnWhenDone[myNodeCommands.sshNodeToOneRemoteMachineGitPull.myNodesCommand] = implementation.sshNodeToOneRemoteMachineGitPull;
+handlersReturnWhenDone[myNodeCommands.sshNodeToOneRemoteMachineKillallFabcoind.myNodesCommand] = implementation.sshNodeToOneRemoteMachineKillallFabcoind; 
+handlersReturnWhenDone[myNodeCommands.sshNodeToOneRemoteMachineNodeRestart.myNodesCommand] = implementation.sshNodeToOneRemoteMachineNodeRestart; 
+handlersReturnWhenDone[myNodeCommands.sshNodeToOneRemoteMachineStartFabcoind.myNodesCommand] = implementation.sshNodeToOneRemoteMachineStartFabcoind; 
+handlersReturnWhenDone[myNodeCommands.sshNodeToOneRemoteMachineDeleteFabcoinConfiguration.myNodesCommand] = implementation.sshNodeToOneRemoteMachineDeleteFabcoinConfiguration; 
+handlersReturnWhenDone[myNodeCommands.sshNodeToOneRemoteMachineGitPullMakeFab.myNodesCommand] = implementation.sshNodeToOneRemoteMachineGitPullMakeFab; 
 
 function myNodeCall(request, response, desiredCommand) {
   //console.log("DEBUG: Got to here");
@@ -23,7 +23,7 @@ function myNodeCall(request, response, desiredCommand) {
     responseJSON.error = `Input needs a valid ${pathnames.myNodesCommand} entry, the entry I understood was: ${commandLabel}`;  
     return response.end(JSON.stringify(responseJSON));
   } 
-  if (commandLabel in pathnames.myNodesCommands) {
+  if (commandLabel in myNodeCommands) {
     if (!(commandLabel in handlersReturnWhenDone)) {
       response.writeHead(200);
       responseJSON.error = `Command: ${commandLabel} is recognized but appears to not be implemented yet.`;  
