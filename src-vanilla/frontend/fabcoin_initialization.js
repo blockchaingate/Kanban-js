@@ -1,6 +1,8 @@
 "use strict";
 const submitRequests = require('./submit_requests');
 const pathnames = require('../pathnames');
+const fabcoinInitialization = require('../external_connections/fabcoin_old/initialization');
+const fabcoinRPC = require('../external_connections/fabcoin_old/rpc');
 const ids = require('./ids_dom_elements');
 const jsonToHtml = require('./json_to_html');
 //const Block = require('../bitcoinjs_src/block');
@@ -22,12 +24,15 @@ function updateFabcoinInitializationPage() {
   var currentNetwork = globals.mainPage().getCurrentNetwork();
   if (currentNetwork.logFileLink !== undefined && currentNetwork.logFileLink !== null) {
     var theLink = document.getElementById("linkLogFileFabcoin");
+    if (theLink === null) {
+      return;
+    }
     theLink.setAttribute("href", currentNetwork.logFileLink);
   }
 }
 
 function killAllFabcoinDaemons() {
-  var theURL = pathnames.getURLFromFabcoinInitialization(pathnames.fabcoinInitializationProcedures.killAll.fabcoinInitialization);
+  var theURL = fabcoinRPC.getURLFromFabcoinInitializationOLD(pathnames.fabcoinInitializationProcedures.killAll.fabcoinInitialization);
   submitRequests.submitGET({
     url: theURL,
     progress: getSpanProgress(),
@@ -37,7 +42,7 @@ function killAllFabcoinDaemons() {
 }
 
 function killAllKanbanDaemons() {
-  var theURL = pathnames.getURLFromFabcoinInitialization(pathnames.fabcoinInitializationProcedures.killAllKanbans.fabcoinInitialization);
+  var theURL = fabcoinRPC.getURLFromFabcoinInitializationOLD(pathnames.fabcoinInitializationProcedures.killAllKanbans.fabcoinInitialization);
   submitRequests.submitGET({
     url: theURL,
     progress: getSpanProgress(),
@@ -48,7 +53,7 @@ function killAllKanbanDaemons() {
 
 function startKanban() {
   var dataDir = `${pathnames.pathsComputedAtRunTime.kanbanProofOfConcentConfigurationFolder}/`;
-  var theURL = pathnames.getURLFromFabcoinInitialization(
+  var theURL = fabcoinRPC.getURLFromFabcoinInitializationOLD(
     pathnames.fabcoinInitializationProcedures.startKanban.fabcoinInitialization, {
       net: globals.mainPage().getRPCKanbanNetworkOption()
     }
@@ -66,7 +71,7 @@ function startFabcoinDaemon(useMining) {
   if (useMining) {
     mineString = "-gen";
   }
-  var theURL = pathnames.getURLFromFabcoinInitialization(
+  var theURL = fabcoinRPC.getURLFromFabcoinInitializationOLD(
     pathnames.fabcoinInitializationProcedures.startFabcoind.fabcoinInitialization, {
       mine: mineString,
       net: globals.mainPage().getRPCNetworkOption()
@@ -81,7 +86,7 @@ function startFabcoinDaemon(useMining) {
 }
 
 function gitPullNode() {
-  var theURL = pathnames.getURLFromFabcoinInitialization(pathnames.fabcoinInitializationProcedures.gitPullNode.fabcoinInitialization);
+  var theURL = fabcoinRPC.getURLFromFabcoinInitializationOLD(pathnames.fabcoinInitializationProcedures.gitPullNode.fabcoinInitialization);
   submitRequests.submitGET({
     url: theURL,
     progress: getSpanProgress(),
@@ -91,7 +96,7 @@ function gitPullNode() {
 }
 
 function gitPullKanban() {
-  var theURL = pathnames.getURLFromFabcoinInitialization(pathnames.fabcoinInitializationProcedures.gitPullKanban.fabcoinInitialization);
+  var theURL = fabcoinRPC.getURLFromFabcoinInitializationOLD(pathnames.fabcoinInitializationProcedures.gitPullKanban.fabcoinInitialization);
   submitRequests.submitGET({
     url: theURL,
     progress: getSpanProgress(),
@@ -101,7 +106,7 @@ function gitPullKanban() {
 }
 
 function gitPullFabcoin() {
-  var theURL = pathnames.getURLFromFabcoinInitialization(pathnames.fabcoinInitializationProcedures.gitPullFabcoin.fabcoinInitialization);
+  var theURL = fabcoinRPC.getURLFromFabcoinInitializationOLD(pathnames.fabcoinInitializationProcedures.gitPullFabcoin.fabcoinInitialization);
   submitRequests.submitGET({
     url: theURL,
     progress: getSpanProgress(),
@@ -111,7 +116,7 @@ function gitPullFabcoin() {
 }
 
 function makeFabcoin() {
-  var theURL = pathnames.getURLFromFabcoinInitialization(pathnames.fabcoinInitializationProcedures.makeFabcoin.fabcoinInitialization);
+  var theURL = fabcoinRPC.getURLFromFabcoinInitializationOLD(pathnames.fabcoinInitializationProcedures.makeFabcoin.fabcoinInitialization);
   submitRequests.submitGET({
     url: theURL,
     progress: getSpanProgress(),
@@ -121,7 +126,7 @@ function makeFabcoin() {
 }
 
 function deleteFabcoinConfiguration() {
-  var theURL = pathnames.getURLFromFabcoinInitialization(
+  var theURL = fabcoinRPC.getURLFromFabcoinInitializationOLD(
     pathnames.fabcoinInitializationProcedures.deleteFabcoinConfiguration.fabcoinInitialization, {
       folder: globals.mainPage().getCurrentNetwork().folder
     }

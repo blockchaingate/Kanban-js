@@ -1,5 +1,85 @@
 "use strict";
 
+const pathnames = require('../../pathnames');
+const fabcoinRPC = require('./rpc');
+
+var networkRPCOption = fabcoinRPC.networkRPCOption;
+var networkDataKanbanProofOfConcept = fabcoinRPC.networkDataKanbanProofOfConcept;
+var networkData = fabcoinRPC.networkData;
+
+//To be documented on request. Please email me/tell me in person if you want 
+//me to document the structure below.
+//Not doing it right away because I am still refactoring it heavily.  
+var fabcoinInitializationProceduresOLD = {
+  startFabcoind: {
+    fabcoinInitialization: "startFabcoind", //must be same as label, used for autocomplete
+    command: pathnames.pathname.fabcoind,
+    allowedArgumentValues: {
+      net: [networkRPCOption.regtest, networkRPCOption.testNetNoDNS, networkRPCOption.testNet],
+      mine: ["", "-gen"]
+    },
+    cli: [ ["net", networkRPCOption.testNetNoDNS], ["mine", ""], "-daemon"] //when the argument is an array, the second is the default
+  },
+  startKanban: {
+    fabcoinInitialization: "startKanban", //must be same as label, used for autocomplete
+    command: pathnames.pathname.kanband,
+    allowedArgumentValues: {
+      net: [networkDataKanbanProofOfConcept.testKanban.rpcOption, networkDataKanbanProofOfConcept.mainKanban.rpcOption],
+    },
+    cli: [ 
+      ["dataDir", null], //<- please keep this option first, it is referred to in initialize_fabcoin_folders
+      ["net", networkRPCOption.testNetNoDNS], 
+      "-gen", 
+      "-printtoconsole", 
+      "-logips", 
+      "-daemon"      
+    ] //when the argument is an array, the second is the default
+  },
+  killAll: {
+    fabcoinInitialization: "killAll",
+    command: "killall",
+    cli: ["fabcoind"]
+  },
+  killAllKanbans: {
+    fabcoinInitialization: "killAllKanbans",
+    command: "killall",
+    cli: ["fabcoind"]
+  },
+  gitPullNode: {
+    fabcoinInitialization: "gitPullNode",
+    command: "git",
+    path: pathnames.path.base,
+    cli: ["pull"]
+  },
+  gitPullFabcoin: {
+    fabcoinInitialization: "gitPullFabcoin",
+    command: "git",
+    path: pathnames.path.fabcoin,
+    cli: ["pull"]
+  },
+  gitPullKanban: {
+    fabcoinInitialization: "gitPullKanban",
+    command: "git",
+    path: pathnames.path.kanbanProofOfConcept,
+    cli: ["pull"]
+  },
+  makeFabcoin: {
+    fabcoinInitialization: "makeFabcoin",
+    command: "make",
+    path: pathnames.path.fabcoin,
+    cli: []
+  },
+  deleteFabcoinConfiguration: {
+    fabcoinInitialization: "deleteFabcoinConfiguration",
+    command: "rm",
+    path: "fabcoinConfigurationFolder", //<- looked up from pathsComputedAtRunTime
+    allowedArgumentValues: {
+      folder: [networkData.regtest.folder, networkData.testNetNoDNS.folder]
+    },
+    cli: ["-r", ["folder", networkData.testNetNoDNS.folder]]
+  }
+};
+
 function isAllowedArgumentForFabInitialization(theInitCall, theLabel, theValue, errors, callCollection) {
   if (theInitCall.allowedArgumentValues === undefined) {
     return true;
@@ -23,11 +103,11 @@ function isAllowedArgumentForFabInitialization(theInitCall, theLabel, theValue, 
 function getFabcoinInitializationOLDCallArguments(theCallLabel, additionalArguments, errors) {
   //console.log("DEBUG: extracting additional arguments from: " + JSON.stringify(additionalArguments));
   var result = [];
-  if (!(theCallLabel in fabcoinInitializationProcedures)) {
+  if (!(theCallLabel in fabcoinInitializationProceduresOLD)) {
     errors.push(`Uknown or non-implemented rpc command: ${theCallLabel}.`);
     return null;
   }
-  var theInitCall = fabcoinInitializationProcedures[theCallLabel];
+  var theInitCall = fabcoinInitializationProceduresOLD[theCallLabel];
 
   for (var counterCommand = 0; counterCommand < theInitCall.cli.length; counterCommand ++) {
     var currentArgument = theInitCall.cli[counterCommand];
@@ -128,5 +208,6 @@ var myNodesCommands = {
 };
 
 module.exports = {
-  myNodesCommands
+  myNodesCommands,
+  getURLFromFabcoinInitializationOLD
 }

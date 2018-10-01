@@ -7,21 +7,22 @@ const rpcCallsProfiling = require('./fabcoin_rpc_profiling');
 const fabcoinInitialization = require('./fabcoin_initialization');
 const ids = require('./ids_dom_elements');
 const pathnames = require('../pathnames');
+const fabcoindOldRPC = require('../external_connections/fabcoin_old/rpc');
 const myNodes = require('./my_nodes');
 const kanabanInitialization = require('./kanbango/initialization');
 
 function Page() {
   this.fabcoinNetworkRadioIds = {};
-  for (var netLabel in pathnames.networkData) {
+  for (var netLabel in fabcoindOldRPC.networkData) {
     this.fabcoinNetworkRadioIds[netLabel] = ids.defaults.radioButtonsNetwork[netLabel];
   }
   this.kanbanNetworkRadioIds = {};
-  for (var netLabel in pathnames.networkDataKanban) {
+  for (var netLabel in fabcoindOldRPC.networkDataKanban) {
     this.kanbanNetworkRadioIds[netLabel] = ids.defaults.radioButtonsNetworkKanban[netLabel];
   }
 
-  this.currentNetworkName = pathnames.networkData.testNetNoDNS.name;
-  this.currentKanbanNetworkName = pathnames.networkDataKanban.testKanban.name;
+  this.currentNetworkName = fabcoindOldRPC.networkData.testNetNoDNS.name;
+  this.currentKanbanNetworkName = fabcoindOldRPC.networkDataKanbanProofOfConcept.testKanban.name;
   this.pages = {
     fabcoinInitialization: {
       idPage: ids.defaults.pageFabcoinInitialization,
@@ -145,22 +146,22 @@ Page.prototype.storePageSettings = function() {
 }
 
 Page.prototype.getCurrentTransactionProtocolLabel = function () {
-  return pathnames.networkData[this.currentNetworkName].transactionProtocolLabel;
+  return fabcoindOldRPC.networkData[this.currentNetworkName].transactionProtocolLabel;
 }
 
 Page.prototype.getRPCNetworkOption = function () {
-  return pathnames.networkData[this.currentNetworkName].rpcOption;
+  return fabcoindOldRPC.networkData[this.currentNetworkName].rpcOption;
 }
 
 Page.prototype.getRPCKanbanNetworkOption = function () {
-  return pathnames.networkDataKanban[this.currentKanbanNetworkName].rpcOption;
+  return fabcoindOldRPC.networkDataKanban[this.currentKanbanNetworkName].rpcOption;
 }
 
 Page.prototype.loadPageSettings = function() {
   try {
     this.currentPageLabel = localStorage.getItem("currentPageLabel");
     var incomingNetworkName = localStorage.getItem("currentNetworkName");
-    if (incomingNetworkName in pathnames.networkData) {
+    if (incomingNetworkName in fabcoindOldRPC.networkData) {
       this.currentNetworkName = incomingNetworkName;
     }
   } catch (e) {
@@ -169,7 +170,7 @@ Page.prototype.loadPageSettings = function() {
 }
 
 Page.prototype.getCurrentNetwork = function () {
-  return pathnames.networkData[this.currentNetworkName];
+  return fabcoindOldRPC.networkData[this.currentNetworkName];
 }
 
 function getPage() {

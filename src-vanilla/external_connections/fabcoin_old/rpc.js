@@ -47,7 +47,7 @@ var networkData = {
   }
 };
 
-var networkDataKanban = {
+var networkDataKanbanProofOfConcept = {
   testKanban : {
     name: "testKanban",
     folder: "testkanban/",
@@ -85,7 +85,7 @@ var rpcCallsKanban = {
     },
     allowedArgumentValues: {
       net: [ //<- restricted network access!
-        networkDataKanban.testKanban.rpcOption
+        networkDataKanbanProofOfConcept.testKanban.rpcOption
       ]
     },
     address: "",
@@ -101,7 +101,7 @@ var rpcCallsKanban = {
     },
     allowedArgumentValues: {
       net: [ //<- restricted network access!
-        networkDataKanban.testKanban.rpcOption
+        networkDataKanbanProofOfConcept.testKanban.rpcOption
       ]
     },
     address: "",
@@ -117,7 +117,7 @@ var rpcCallsKanban = {
     },
     allowedArgumentValues: {
       net: [ //<- restricted network access!
-        networkDataKanban.testKanban.rpcOption
+        networkDataKanbanProofOfConcept.testKanban.rpcOption
       ]
     },
     address: "",
@@ -136,7 +136,7 @@ var rpcCallsKanban = {
     },
     allowedArgumentValues: {
       net: [ //<- restricted network access!
-        networkDataKanban.testKanban.rpcOption
+        networkDataKanbanProofOfConcept.testKanban.rpcOption
       ]
     },
     address: "",
@@ -153,7 +153,7 @@ var rpcCallsKanban = {
     },
     allowedArgumentValues: {
       net: [ //<- restricted network access!
-        networkDataKanban.testKanban.rpcOption
+        networkDataKanbanProofOfConcept.testKanban.rpcOption
       ]
     },
     address: "",
@@ -172,7 +172,7 @@ var rpcCallsKanban = {
     },
     allowedArgumentValues: {
       net: [ //<- restricted network access!
-        networkDataKanban.testKanban.rpcOption
+        networkDataKanbanProofOfConcept.testKanban.rpcOption
       ]
     },
     address: "",
@@ -188,7 +188,7 @@ var rpcCallsKanban = {
     },
     allowedArgumentValues: {
       net: [ //<- restricted network access!
-        networkDataKanban.testKanban.rpcOption
+        networkDataKanbanProofOfConcept.testKanban.rpcOption
       ]
     },
     address: "",
@@ -207,7 +207,7 @@ var rpcCallsKanban = {
     },
     allowedArgumentValues: {
       net: [ //<- restricted network access!
-        networkDataKanban.testKanban.rpcOption
+        networkDataKanbanProofOfConcept.testKanban.rpcOption
       ]
     },
     address: "",
@@ -223,7 +223,7 @@ var rpcCallsKanban = {
     },
     allowedArgumentValues: {
       net: [ //<- restricted network access!
-        networkDataKanban.testKanban.rpcOption
+        networkDataKanbanProofOfConcept.testKanban.rpcOption
       ]
     },
     address: "",
@@ -243,7 +243,7 @@ var rpcCallsKanban = {
     },
     allowedArgumentValues: {
       net: [ //<- restricted network access!
-        networkDataKanban.testKanban.rpcOption
+        networkDataKanbanProofOfConcept.testKanban.rpcOption
       ]
     },
     address: "",
@@ -261,7 +261,7 @@ var rpcCallsKanban = {
     },
     allowedArgumentValues: {
       net: [ //<- restricted network access!
-        networkDataKanban.testKanban.rpcOption
+        networkDataKanbanProofOfConcept.testKanban.rpcOption
       ]
     },
     address: "",
@@ -607,7 +607,7 @@ var allowedArgumentValuesDefaults = {
 
 var allowedArgumentValuesKanbanDefaults = {
   net: [
-    networkDataKanban.testKanban.rpcOption, 
+    networkDataKanbanProofOfConcept.testKanban.rpcOption, 
     networkData.mainNet.rpcOption
   ]
 };
@@ -625,79 +625,6 @@ for (var label in networkData) {
   networkRPCOption[label] = networkData[label].rpcOption;
   networkNameByRPCNetworkOption[networkData[label].rpcOption] = label;
 }
-
-//To be documented on request. Please email me/tell me in person if you want 
-//me to document the structure below.
-//Not doing it right away because I am still refactoring it heavily.  
-var fabcoinInitializationProceduresOLD = {
-  startFabcoind: {
-    fabcoinInitialization: "startFabcoind", //must be same as label, used for autocomplete
-    command: pathnames.pathname.fabcoind,
-    allowedArgumentValues: {
-      net: [networkRPCOption.regtest, networkRPCOption.testNetNoDNS, networkRPCOption.testNet],
-      mine: ["", "-gen"]
-    },
-    cli: [ ["net", networkRPCOption.testNetNoDNS], ["mine", ""], "-daemon"] //when the argument is an array, the second is the default
-  },
-  startKanban: {
-    fabcoinInitialization: "startKanban", //must be same as label, used for autocomplete
-    command: pathnames.pathname.kanband,
-    allowedArgumentValues: {
-      net: [networkDataKanban.testKanban.rpcOption, networkDataKanban.mainKanban.rpcOption],
-    },
-    cli: [ 
-      ["dataDir", null], //<- please keep this option first, it is referred to in initialize_fabcoin_folders
-      ["net", networkRPCOption.testNetNoDNS], 
-      "-gen", 
-      "-printtoconsole", 
-      "-logips", 
-      "-daemon"      
-    ] //when the argument is an array, the second is the default
-  },
-  killAll: {
-    fabcoinInitialization: "killAll",
-    command: "killall",
-    cli: ["fabcoind"]
-  },
-  killAllKanbans: {
-    fabcoinInitialization: "killAllKanbans",
-    command: "killall",
-    cli: ["fabcoind"]
-  },
-  gitPullNode: {
-    fabcoinInitialization: "gitPullNode",
-    command: "git",
-    path: pathnames.path.base,
-    cli: ["pull"]
-  },
-  gitPullFabcoin: {
-    fabcoinInitialization: "gitPullFabcoin",
-    command: "git",
-    path: pathnames.path.fabcoin,
-    cli: ["pull"]
-  },
-  gitPullKanban: {
-    fabcoinInitialization: "gitPullKanban",
-    command: "git",
-    path: pathnames.path.kanbanProofOfConcept,
-    cli: ["pull"]
-  },
-  makeFabcoin: {
-    fabcoinInitialization: "makeFabcoin",
-    command: "make",
-    path: pathnames.path.fabcoin,
-    cli: []
-  },
-  deleteFabcoinConfiguration: {
-    fabcoinInitialization: "deleteFabcoinConfiguration",
-    command: "rm",
-    path: "fabcoinConfigurationFolder", //<- looked up from pathsComputedAtRunTime
-    allowedArgumentValues: {
-      folder: [networkData.regtest.folder, networkData.testNetNoDNS.folder]
-    },
-    cli: ["-r", ["folder", networkData.testNetNoDNS.folder]]
-  }
-};
 
 function getNetworkDataFromRPCNetworkOption(RPCNetworkOption) {
   return networkData[networkNameByRPCNetworkOption[RPCNetworkOption]];
@@ -1002,5 +929,7 @@ function getRPCcallArguments(theRPCLabel, additionalArguments, errors, isKanban)
 
 module.exports = {
   networkData,
+  networkRPCOption,
+  networkDataKanbanProofOfConcept,
   pathsComputedAtRunTime
 }
