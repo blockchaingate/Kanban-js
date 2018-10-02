@@ -25,8 +25,13 @@ function Page() {
   this.currentKanbanNetworkName = fabcoindOldRPC.networkDataKanbanProofOfConcept.testKanban.name;
   this.pages = {
     fabcoinInitialization: {
-      idPage: ids.defaults.pageFabcoinInitialization,
-      updateFunction: fabcoinInitialization.updateFabcoinInitializationPage,      
+      idPage: ids.defaults.pages.fabcoin.initialization,
+    },
+    //fabcoinInitializationOLD: {
+    //  updateFunction: fabcoinInitialization.updateFabcoinInitializationPage,      
+    //},
+    fabcoinSmartContract: {
+      idPage: ids.defaults.pages.fabcoin.smartContract,
     },
     kanbanGOSendReceive:{
       idPage: ids.defaults.pages.kanbanGOSendReceive

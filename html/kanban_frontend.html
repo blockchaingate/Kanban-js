@@ -315,6 +315,25 @@
   <div class = "divControlPanelDefault" id = "divOutputFabcoinInitialization"></div><!--divFabcoinInitialization-->
 </div><!--pageFabcoinInitialization-->
   
+<div class = "divMainPage" id = "pageFabcoinSmartContract">
+  <div class = "divControlPanelDefault">
+  <table class = "tableKanbanPlusPlusTest">
+  <tr>
+  <td>
+  <table>
+    <tr><td><button class = "buttonStandard" style = "width: 100px" onclick = "window.kanban.fabcoin.rpc.fabNode.run('pleasechangeToActualCommand')">First command</button></td></tr>
+  </table>
+  </td>
+  <td>
+  <input type = "text" class = "inputCrypto" id = "inputPleaseRename" size = "90" value = "-regtest -printtoconsole" placeholder = "arguments"></input><br>
+  </td>
+  </tr>
+  </table>
+  </div>
+  <br>
+  <div class = "divControlPanelDefault" id = "divOutputFabcoinInitialization"></div><!--divFabcoinInitialization-->
+</div><!--pageFabcoinSmartContract-->
+
 
 <div class = "divMainPage" id = "pageSend">
   <div class = "divControlPanelDefault">
@@ -586,6 +605,7 @@
     <div><button class = "buttonSelectPage" onclick = "window.kanban.thePage.selectPage('kanbanGOSendReceive');">KanbanGO</button></div>
     <hr>
     <div><button class = "buttonSelectPage" onclick = "window.kanban.thePage.selectPage('fabcoinInitialization');">fabcoin start</button></div>
+    <div><button class = "buttonSelectPage" onclick = "window.kanban.thePage.selectPage('fabcoinSmartContract');">fabcoin smart</button></div>
     <hr>
     <div><button class = "buttonSelectPage" onclick = "window.kanban.thePage.selectPage('kanbanGO');">CryptoGO</button></div>
     <div><button class = "buttonSelectPage" onclick = "window.kanban.thePage.selectPage('kanbanPlusPlus');">Crypto++</button></div>

@@ -9,13 +9,16 @@ var defaults = {
   pageSend: "pageSend",
   pageMine: "pageMine",
   pageProfiling: "pageProfiling",
-  pageFabcoinInitialization: "pageFabcoinInitialization",
   pages: {
     kanbanJS: "pageKanbanJS",
     kanbanPlusPlus: "pageKanbanPlusPlus",
     kanbanGO: "pageKanbanGO",
     kanbanMyLocalNodes: "pageMyLocalKanbanNodes",
-    kanbanGOSendReceive: "pageKanbanGOSendReceive" 
+    kanbanGOSendReceive: "pageKanbanGOSendReceive",
+    fabcoin: {
+      initialization: "pageFabcoinInitialization",  
+      smartContract: "pageFabcoinSmartContract"
+    }
   },
   progressReport: "spanProgressReport",
   spanPingColumnHeader: "spanPingColumnHeader",
