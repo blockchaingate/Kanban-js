@@ -1,6 +1,12 @@
 "use strict";
+require('colors');
 const fabcoinInitializationSpec = require('./initialization');
+const fabcoinRPC = require('./rpc');
 const childProcess = require("child_process");
+const url = require('url');
+const queryString = require('querystring');
+const path = require('path');
+var OutputStream = require('../../output_stream').OutputStream;
 
 /**
  * Returns a global FabcoinNode object
@@ -11,13 +17,29 @@ function getFabcoinNode() {
 }
 
 function FabcoinNode() {
+  var executableName = global.kanban.configuration.fabcoin.executableFileName;
+  var executablePath = path.dirname(executableName);
   this.paths = {
-    executablePath: global.kanban.configuration.fabcoin.executablePath,
+    executablePath: executablePath,
+    executableFileName: executableName,
     dataDir: global.kanban.configuration.fabcoin.dataDir
   };
   this.handlers = {};
   /** @type {boolean} */
   this.started = false;
+  /**@type {{command: OutputStream, fabcoind: OutputStream} */
+  this.outputStreams = {
+    command: new OutputStream(),
+    fabcoind: new OutputStream(),
+  };
+  this.initStreams();
+}
+
+FabcoinNode.prototype.initStreams =  function() {
+  this.outputStreams.command.idConsole = "[fabcoind command] ";
+  this.outputStreams.command.colorIdConsole = "red";
+  this.outputStreams.fabcoind.idConsole = "[fabcoind] ";
+  this.outputStreams.fabcoind.colorIdConsole = "blue";
 }
 
 FabcoinNode.prototype.handleRequest =  function(request, response) {
@@ -55,7 +77,7 @@ FabcoinNode.prototype.getArgumentsFromSpec = function(spec, queryCommand, /**@ty
 }
 
 FabcoinNode.prototype.handleRPCArguments = function(request, response, queryCommand) {
-  var theCallLabel = queryCommand[fabcoinInitializationSpec.urlStrings.rpcCallLabel];
+  var theCallLabel = queryCommand[fabcoinRPC.urlStrings.rpcCallLabel];
   if (!(theCallLabel in fabcoinInitializationSpec.rpcCalls)) {
     response.writeHead(400);
     return response.end(`Fabcoin initialization call ${theCallLabel} not found. `);    
@@ -65,7 +87,10 @@ FabcoinNode.prototype.handleRPCArguments = function(request, response, queryComm
     return response.end(`{"error": "No handler named ${theCallLabel}"} found. `);
   }
   var currentHandler = this.handlers[theCallLabel];
-  var currentFunction = currentHandler.handler;
+  var currentFunction = null;
+  if (currentHandler !== undefined && currentHandler !== null) {
+    currentFunction = currentHandler.handler;
+  }
   if (currentFunction === undefined || currentFunction === null) {
     currentFunction = this[theCallLabel];
   }
@@ -73,9 +98,10 @@ FabcoinNode.prototype.handleRPCArguments = function(request, response, queryComm
     response.writeHead(500);
     return response.end(`{"error": "Server error: handler ${theCallLabel}"} declared but no implementation found. `);
   }
+  /**@type {string[]} */
   var theArguments = [];
   var errors = [];
-  if (! this.getArgumentsFromSpec(fabcoinInitializationSpec[theCallLabel], queryCommand, theArguments, errors)) {
+  if (!this.getArgumentsFromSpec(fabcoinInitializationSpec.rpcCalls[theCallLabel], queryCommand, theArguments, errors)) {
     response.writeHead(400);
     response.end(`Error obtaining arguments. ${errors[0]}`);
     return;
@@ -88,7 +114,12 @@ FabcoinNode.prototype.handleRPCArguments = function(request, response, queryComm
   }
 }
 
-FabcoinNode.prototype.runNode = function (response, theArguments) {
+FabcoinNode.prototype.showLogFabcoind = function(response, theArguments) {
+  response.writeHead(200);
+  response.end(this.outputStreams.fabcoind.toString());
+}
+
+FabcoinNode.prototype.runFabcoind = function (response, /**@type {string[]} */ theArguments) {
   if (this.started) {
     response.writeHead(200);
     response.end("Node already started. ");
@@ -99,38 +130,63 @@ FabcoinNode.prototype.runNode = function (response, theArguments) {
     cwd: this.paths.executablePath,
     env: process.env
   };
-  this.runShell(this.paths.executablePath, theArguments, options, null);
+  theArguments.push(`-datadir=${this.paths.dataDir}`);
+  this.runShell(this.paths.executableFileName, theArguments, options, null, this.outputStreams.fabcoind);
   response.writeHead(200);
-  response.end("Fabcoind started. ");
+  response.end(this.outputStreams.fabcoind.toString());
   return;
 }
 
-FabcoinNode.prototype.runShell = function(command, theArguments, options, callbackOnExit) {
-  console.log(`About to execute: ${command}`.yellow);
-  console.log(`Arguments: ${theArguments}`.green);
-  var child = childProcess.spawn(command, theArguments, options);
-  var shellId = "[fabcoin]".red;
+FabcoinNode.prototype.killAllFabcoindCallback = function (response) {
+  this.started = false;
+  response.writeHead(200);
+  response.end(this.outputStreams.command.toStringWithFlush());
+}
+
+FabcoinNode.prototype.appendToOutputStream = function (data, /**@type {OutputStream} */ stream) {
+  if (! (stream instanceof OutputStream)) {
+    console.log(`[non-logged command] ${data}`);
+    return;
+  }
+  stream.append(data.toString());
+}
+
+FabcoinNode.prototype.killAllFabcoind = function (response, theArguments) {
+  this.runShell("killall", ["fabcoind"], null, this.killAllFabcoindCallback.bind(this, response), this.outputStreams.command);
+}
+
+FabcoinNode.prototype.runShell = function(command, theArguments, options, callbackOnExit, /**@type {OutputStream} */ output) {
+  if (output !== null && output !== undefined) {
+    output.append(`Command: ${command}`);  
+    if (options !== null && options !== undefined) {
+      output.append(`Executable path: ${options.cwd}`);
+    }
+    output.append(`Arguments: ${theArguments}`);
+  }
+  var child = null;
+  if (options !== null && options !== undefined) {
+    child = childProcess.spawn(command, theArguments, options);
+  } else {
+    child = childProcess.spawn(command, theArguments);
+  }
+  var callerNode = this;
   child.stdout.on('data', function(data) {
-    console.log(shellId + data.toString());
+    callerNode.appendToOutputStream(data.toString(), output);
   });
   child.stderr.on('data', function(data) {
-    console.log(shellId + data.toString());
+    callerNode.appendToOutputStream(data.toString(), output);
   });
   child.on('error', function(data) {
-    console.log(shellId + data.toString());
+    callerNode.appendToOutputStream(data.toString(), output);
   });
   child.on('exit', function(code) {
-    console.log(`Geth ${id} exited with code: ${code}`.green);
+    callerNode.appendToOutputStream(`Exited with code: ${code}`, output);
     if (callbackOnExit !== undefined && callbackOnExit !== null) {
       callbackOnExit();
     }
   });
   return child;
 }
-
-
-
-
 
 module.exports = {
   getFabcoinNode,

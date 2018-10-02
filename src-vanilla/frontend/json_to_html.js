@@ -169,7 +169,7 @@ function getHtmlFromArrayOfObjects(input, options) {
     try {
       inputJSON = JSON.parse(inputJSON);
     } catch (e) {
-      return `<error>Error while parsing ${inputJSON}: ${e}</error>`;
+      return `${getClearParentButton()}<br>${input}<br><b style='color:red; font-size: small'>Could not parse input as JSON.</b>`;
     }
   }
   var rawButton = "";

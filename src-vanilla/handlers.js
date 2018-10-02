@@ -11,6 +11,7 @@ const handlersComputationalEngine = require('./external_connections/other/cpp_en
 const handlersMyNodes = require('./external_connections/fabcoin_old/handlers_my_nodes');
 const handlersKanbanGo = require('./external_connections/kanbango/handlers_rpc');
 const handlersKanbanGoInitialization = require('./external_connections/kanbango/handlers_initialization');
+const handlersFabcoinInitialization = require('./external_connections/fabcoin/handlers_initialization');
 
 function handleRequestsHTTP(request, response) {
   if (request.url in pathnames.url.synonyms) {
@@ -80,6 +81,9 @@ function handleRequests(request, response) {
   }
   if (parsedURL.pathname === pathnames.url.known.computationEngine) {
     return handleComputationalEngineCall(request, response);
+  }  
+  if (parsedURL.pathname === pathnames.url.known.fabcoin.initialization) {
+    return handlersFabcoinInitialization.getFabcoinNode().handleRequest(request, response);
   }  
   //console.log(`DEBUG: The parsed url pathname is: ${parsedURL.pathname}`.red);
   response.writeHead(200);

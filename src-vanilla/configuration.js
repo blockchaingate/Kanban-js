@@ -29,7 +29,7 @@ function Configuration () {
     dataDirName: "secrets_data_kanban_go"
   }
   this.fabcoin = {
-    executable: `${pathnames.path.base}/fabcoin-dev-sm01/src/fabcoind`,
+    executableFileName: `${pathnames.path.base}/fabcoin-dev-sm01/src/fabcoind`,
     dataDir: `${pathnames.path.base}/secrets_data_fabcoin`
   };
   this.myNodes = {};
@@ -46,16 +46,16 @@ Configuration.prototype.processString = function(/**@type {string}*/ inputString
     var resultString = inputString.slice(0, subStart) + replacement + inputString.slice(
       subStart + label.length
     );
-    console.log("DEBUG: result string is: " + resultString);
+    //console.log("DEBUG: result string is: " + resultString);
     // after first successful substituion we return immediately: one substituion per input
     return resultString;
   }
-  console.log("DEBUG: result string is: " + inputString);
+  //console.log("DEBUG: result string is: " + inputString);
   return inputString;
 }
 
 Configuration.prototype.readRecursively = function (base, label, input) {
-  console.log("DEBUG: About to process: label: " + label);
+  //console.log("DEBUG: About to process: label: " + label);
   if (typeof input === "string") {
     base[label] = this.processString(input);
     return;

@@ -10,7 +10,7 @@ function FabcoinNodeInitializer() {
   this.idOutput = ids.defaults.outputFabcoinInitialization;
   var inputInitialization = ids.defaults.fabcoin.inputInitialization;
   this.theFunctions = {
-    runNode: {
+    runFabcoind: {
       inputs: {
         arguments: inputInitialization.fabcoindArguments
       }
@@ -26,7 +26,7 @@ FabcoinNodeInitializer.prototype.callbackStandard = function(functionLabel, inpu
 FabcoinNodeInitializer.prototype.getArguments = function(functionLabel) {
   var theArguments = {};
   var functionFrontend = this.theFunctions[functionLabel];
-  if (functionFrontend === null && functionFrontend === undefined) {
+  if (functionFrontend === null || functionFrontend === undefined) {
     return theArguments;
   }
   var currentInputs = functionFrontend.inputs;
