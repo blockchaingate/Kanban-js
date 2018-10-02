@@ -24,6 +24,8 @@ function FabcoinNode() {
     executableFileName: executableName,
     dataDir: global.kanban.configuration.fabcoin.dataDir
   };
+  /**@type {boolean} */
+  this.flagPrintingToConsole = false;
   this.handlers = {};
   /** @type {boolean} */
   this.started = false;
@@ -119,19 +121,34 @@ FabcoinNode.prototype.showLogFabcoind = function(response, theArguments) {
   response.end(this.outputStreams.fabcoind.toString());
 }
 
-FabcoinNode.prototype.runFabcoind = function (response, /**@type {string[]} */ theArguments) {
+FabcoinNode.prototype.runFabcoind = function (response, /**@type {string[]} */ argumentsNonSplit) {
   if (this.started) {
     response.writeHead(200);
     response.end("Node already started. ");
     return;
+  }
+  var argumentsSplit = [];
+  this.flagPrintingToConsole = false;
+  for (var i = 0; i < argumentsNonSplit.length; i ++) {
+    var currentArguments = argumentsNonSplit[i].split(' ');
+    for (var j = 0; j < currentArguments.length; j ++) {
+      var current = currentArguments[j].trim(); 
+      if (current === "") {
+        continue;
+      }
+      argumentsSplit.push(current);
+      if (current === "-printtoconsole") {
+        this.flagPrintingToConsole = true;
+      }
+    }
   }
   this.started = true;
   var options = {
     cwd: this.paths.executablePath,
     env: process.env
   };
-  theArguments.push(`-datadir=${this.paths.dataDir}`);
-  this.runShell(this.paths.executableFileName, theArguments, options, null, this.outputStreams.fabcoind);
+  argumentsSplit.push(`-datadir=${this.paths.dataDir}`);
+  this.runShell(this.paths.executableFileName, argumentsSplit, options, null, this.outputStreams.fabcoind);
   response.writeHead(200);
   response.end(this.outputStreams.fabcoind.toString());
   return;

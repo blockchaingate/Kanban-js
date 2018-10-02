@@ -61,9 +61,9 @@ div.divMenuButtonPanel div{
 
 div.divMainPage{
   overflow: auto;
-  width: 90%;
+  width: 89%;
   position: absolute;
-/*  height: 90%;*/
+  height: 95%;
 }
 
 div.divTableContainerSearch{

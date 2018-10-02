@@ -268,12 +268,12 @@
   <td>
   <table>
     <tr><td><button class = "buttonStandard" style = "width: 100px" onclick = "window.kanban.fabcoin.initialization.initializer.run('runFabcoind')">start fabcoind</button></td></tr>
-    <tr><td><button class = "buttonStandard" style = "width: 100px" onclick = "window.kanban.fabcoin.initialization.initializer.run('showLogFabcoind')">fab log</button></td></tr>
+    <tr><td><button class = "buttonStandard" style = "width: 100px" onclick = "window.kanban.fabcoin.initialization.initializer.run('showLogFabcoind')">fab stdout</button></td></tr>
     <tr><td><button class = "buttonStandard" style = "width: 100px" onclick = "window.kanban.fabcoin.initialization.initializer.run('killAllFabcoind')"><b style = "color:red">kill all fab</b></button></td></tr>
   </table>
   </td>
   <td>
-  <input type = "text" class = "inputCrypto" id = "inputFabcoindArguments" size = "90" value = "-regtest" placeholder = "arguments"></input><br>
+  <input type = "text" class = "inputCrypto" id = "inputFabcoindArguments" size = "90" value = "-regtest -printtoconsole" placeholder = "arguments"></input><br>
   </td>
   </tr>
   </table>
