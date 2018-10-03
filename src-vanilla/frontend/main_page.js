@@ -113,6 +113,7 @@ Page.prototype.initializeInputPlaceholders = function() {
     ids.defaults.kanbanGO.inputSendReceive,
     ids.defaults.kanbanGO.inputInitialization,
     ids.defaults.fabcoin.inputInitialization,
+    ids.defaults.fabcoin.inputBlockInfo,
   ]
   for (var collectionCounter = 0; collectionCounter < collectionsToPlaceholderify.length; collectionCounter ++) {
     for (var label in collectionsToPlaceholderify[collectionCounter]) {

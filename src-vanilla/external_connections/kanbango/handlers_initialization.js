@@ -361,7 +361,7 @@ KanbanGoInitializer.prototype.handleRPCURLEncodedInput = function(request, respo
     queryCommand = JSON.parse(query.command);
   } catch (e) {
     response.writeHead(400);
-    return response.end(`Bad RPC input. ${e}`);
+    return response.end(`Bad kanbanGO initialization input. ${e}`);
   }
   return this.handleRPCArguments(request, response, queryCommand);
 }

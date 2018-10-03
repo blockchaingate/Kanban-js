@@ -12,6 +12,7 @@ const handlersMyNodes = require('./external_connections/fabcoin_old/handlers_my_
 const handlersKanbanGo = require('./external_connections/kanbango/handlers_rpc');
 const handlersKanbanGoInitialization = require('./external_connections/kanbango/handlers_initialization');
 const handlersFabcoinInitialization = require('./external_connections/fabcoin/handlers_initialization');
+const handlersFabcoinRPC = require('./external_connections/fabcoin/handlers_rpc');
 
 function handleRequestsHTTP(request, response) {
   if (request.url in pathnames.url.synonyms) {
@@ -81,9 +82,12 @@ function handleRequests(request, response) {
   }
   if (parsedURL.pathname === pathnames.url.known.computationEngine) {
     return handleComputationalEngineCall(request, response);
-  }  
+  }
   if (parsedURL.pathname === pathnames.url.known.fabcoin.initialization) {
     return handlersFabcoinInitialization.getFabcoinNode().handleRequest(request, response);
+  }
+  if (parsedURL.pathname === pathnames.url.known.fabcoin.rpc) {
+    return handlersFabcoinRPC.handleRequest(request, response);
   }  
   //console.log(`DEBUG: The parsed url pathname is: ${parsedURL.pathname}`.red);
   response.writeHead(200);
@@ -151,7 +155,7 @@ function handleRPCURLEncodedInput(request, response, urlEncodedInput, isKanban) 
     queryCommand = JSON.parse(query.command);
   } catch (e) {
     response.writeHead(400);
-    return response.end(`Bad RPC input. ${e}`);
+    return response.end(`Error while handing input. ${e}`);
   }
   return fabCli.rpcCall(request, response, queryCommand, isKanban);
 }

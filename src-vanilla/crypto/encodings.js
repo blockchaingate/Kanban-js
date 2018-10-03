@@ -25,6 +25,9 @@ Encoding.prototype.toBase58Check = function(inputBytes) {
   return this.toBase58(bytesWithCheck);
 }
 
+/** 
+ * @returns {string}
+*/
 Encoding.prototype.toHex = function(inputBytes) {
   return Buffer.from(inputBytes).toString('hex');
 }

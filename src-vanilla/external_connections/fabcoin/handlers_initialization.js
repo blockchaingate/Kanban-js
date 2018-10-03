@@ -7,6 +7,8 @@ const url = require('url');
 const queryString = require('querystring');
 const path = require('path');
 var OutputStream = require('../../output_stream').OutputStream;
+const crypto = require('crypto');
+const cryptoKanban = require('../../crypto/encodings');
 
 /**
  * Returns a global FabcoinNode object
@@ -24,8 +26,20 @@ function FabcoinNode() {
     executableFileName: executableName,
     dataDir: global.kanban.configuration.fabcoin.dataDir
   };
-  /**@type {boolean} */
-  this.flagPrintingToConsole = false;
+  this.configuration = {
+    RPCPort: 18667,
+    /**@type {boolean} */
+    network: "",
+    /**@type {boolean} */
+    flagPrintingToConsole: false,
+    /**@type {string} */
+    RPCPassword: (new cryptoKanban.Encoding).toHex(crypto.randomBytes(50)),
+    RPCUser: 'nodejs',
+  };
+
+  console.log(`Node.js' randomly generated password for fabcoin RPC: `+ `${this.configuration.RPCPassword}`.red);
+  /**@type {string[]} */
+  this.argumentList = [];
   this.handlers = {};
   /** @type {boolean} */
   this.started = false;
@@ -63,7 +77,7 @@ FabcoinNode.prototype.handleRPCURLEncodedInput = function(request, response, mes
     queryCommand = JSON.parse(query.command);
   } catch (e) {
     response.writeHead(400);
-    return response.end(`Bad RPC input. ${e}`);
+    return response.end(`Bad fabcoin initialization input. ${e}`);
   }
   return this.handleRPCArguments(request, response, queryCommand);
 }
@@ -121,13 +135,23 @@ FabcoinNode.prototype.showLogFabcoind = function(response, theArguments) {
   response.end(this.outputStreams.fabcoind.toString());
 }
 
+FabcoinNode.prototype.prepareArgumentList = function () {
+  this.argumentList = [];
+  this.argumentList.push(`-rpcpassword=${this.configuration.RPCPassword}`);
+  this.argumentList.push(`-rpcuser=${this.configuration.RPCUser}`);
+  this.argumentList.push(`-datadir=${this.paths.dataDir}`);
+  if (this.configuration.network !== "") {
+    this.argumentList.push(this.configuration.network);
+  }
+}
+
 FabcoinNode.prototype.runFabcoind = function (response, /**@type {string[]} */ argumentsNonSplit) {
   if (this.started) {
     response.writeHead(200);
     response.end("Node already started. ");
     return;
   }
-  var argumentsSplit = [];
+  var fabcoindArguments = [];
   this.flagPrintingToConsole = false;
   for (var i = 0; i < argumentsNonSplit.length; i ++) {
     var currentArguments = argumentsNonSplit[i].split(' ');
@@ -136,9 +160,17 @@ FabcoinNode.prototype.runFabcoind = function (response, /**@type {string[]} */ a
       if (current === "") {
         continue;
       }
-      argumentsSplit.push(current);
-      if (current === "-printtoconsole") {
-        this.flagPrintingToConsole = true;
+      switch(current) {
+        case "-printtoconsole":
+          this.configuration.flagPrintingToConsole = true;
+          break;
+        case "-regtest":
+        case "--regtest":
+          this.configuration.network = "-regtest";
+          break;
+        default:
+          fabcoindArguments.push(current);
+          break;
       }
     }
   }
@@ -147,8 +179,11 @@ FabcoinNode.prototype.runFabcoind = function (response, /**@type {string[]} */ a
     cwd: this.paths.executablePath,
     env: process.env
   };
-  argumentsSplit.push(`-datadir=${this.paths.dataDir}`);
-  this.runShell(this.paths.executableFileName, argumentsSplit, options, null, this.outputStreams.fabcoind);
+  this.prepareArgumentList();
+  for (var i = 0; i < this.argumentList.length; i ++) {
+    fabcoindArguments.push(this.argumentList[i]);
+  }
+  this.runShell(this.paths.executableFileName, fabcoindArguments, options, null, this.outputStreams.fabcoind);
   response.writeHead(200);
   response.end(this.outputStreams.fabcoind.toString());
   return;

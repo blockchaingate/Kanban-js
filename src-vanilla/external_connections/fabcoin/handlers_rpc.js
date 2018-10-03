@@ -2,8 +2,8 @@
 const url  = require('url');
 const queryString = require('querystring');
 const http = require('http');
-const kanbanGORPC = require('./rpc');
-const kanabanGoInitializer = require('./handlers_initialization');
+const fabcoinRPC = require('./rpc');
+const fabcoinInitialization = require('./handlers_initialization');
 
 function handleRequest(request, response) {
   if (request.method === "POST") {
@@ -47,10 +47,10 @@ function handleRPCURLEncodedInput(request, response, messageBodyURLed) {
   try {
     query = queryString.parse(messageBodyURLed);
     queryCommand = JSON.parse(query.command);
-    queryNode = JSON.parse(query[kanbanGORPC.urlStrings.node]);    
+    queryNode = JSON.parse(query[fabcoinRPC.urlStrings.command]);    
   } catch (e) {
     response.writeHead(400);
-    return response.end(`Bad KanbanGO RPC input. ${e}`);
+    return response.end(`Bad fabcoin RPC input: ${messageBodyURLed}. ${e}`);
   }
   return handleRPCArguments(response, queryCommand, queryNode);
 }
@@ -58,24 +58,9 @@ function handleRPCURLEncodedInput(request, response, messageBodyURLed) {
 var numberRequestsRunning = 0;
 var maxRequestsRunning = 20;
 
-function getParameterFromType(input, type) {
-  if (type === "number") {
-    return Number(input);
-  }
-  if (type === "numberHex") {
-    if (typeof input === "string") {
-      if (!input.startsWith("0x")) {
-        input = "0x" + input;
-      }
-      return input;
-    }
-  }
-  return input;
-}
-
 function getRPCRequestJSON(rpcCallLabel, queryCommand, errors) {
   /**@type {{rpcCall: string, method: string, mandatoryFixedArguments: Object,  mandatoryModifiableArguments: Object,  optionalModifiableArguments: Object, allowedArgumentValues: Object, parameters: string[]}}*/
-  var currentRPCCall = kanbanGORPC.rpcCalls[rpcCallLabel];
+  var currentRPCCall = fabcoinRPC.rpcCalls[rpcCallLabel];
   var currentParameters = [];
   for (var counterCommands = 0; counterCommands < currentRPCCall.parameters.length; counterCommands ++) {
     var currentParameterName = currentRPCCall.parameters[counterCommands];
@@ -85,9 +70,6 @@ function getRPCRequestJSON(rpcCallLabel, queryCommand, errors) {
     }
     if (currentParameterName in queryCommand) {
       var incomingParameter = queryCommand[currentParameterName];
-      if (currentRPCCall.types !== undefined) {
-        incomingParameter = getParameterFromType(incomingParameter, currentRPCCall.types[currentParameterName]);
-      }
       currentParameters.push(incomingParameter);
       continue;
     }
@@ -119,50 +101,30 @@ function getRPCRequestJSON(rpcCallLabel, queryCommand, errors) {
   return result;
 }
 
-function handleRPCArguments(response, queryCommand, queryNode) {
+function handleRPCArguments(response, queryCommand) {
   numberRequestsRunning ++;
   if (numberRequestsRunning > maxRequestsRunning) {
     response.writeHead(500);
     numberRequestsRunning --;
     return response.end(`Too many (${numberRequestsRunning}) requests running, maximum allowed: ${maxRequestsRunning}`);
   }
-  var currentNode = null;
   try {
-    if (queryCommand[kanbanGORPC.urlStrings.rpcCallLabel] === undefined) {
+    if (queryCommand[fabcoinRPC.urlStrings.rpcCallLabel] === undefined) {
       response.writeHead(400);
       numberRequestsRunning --;
-      return response.end(`Command is missing the ${kanbanGORPC.urlStrings.rpcCallLabel} entry. `);        
-    }
-    var currentNodeId = queryNode.id;
-    if (currentNodeId === undefined || currentNodeId === null) {
-      response.writeHead(400);
-      numberRequestsRunning --;
-      return response.end(`Node is missing the id variable. `);        
-    }
-    currentNodeId = Number(currentNodeId);
-    var initializer = kanabanGoInitializer.getInitializer(); 
-    currentNode = initializer.nodes[currentNodeId];
-    if (currentNode === undefined || currentNode === null) {
-      response.writeHead(400);
-      numberRequestsRunning --;
-      return response.end(`Failed to extract node id. ${e}`);          
+      return response.end(`Command is missing the ${fabcoinRPC.urlStrings.rpcCallLabel} entry. `);        
     }
   } catch (e) {
     response.writeHead(400);
     numberRequestsRunning --;
     return response.end(`Failed to extract node id. ${e}`);        
   }
-  var theCallLabel = queryCommand[kanbanGORPC.urlStrings.rpcCallLabel];
-  var callCollection = kanbanGORPC.rpcCalls;
+  var theCallLabel = queryCommand[fabcoinRPC.urlStrings.rpcCallLabel];
+  var callCollection = fabcoinRPC.rpcCalls;
   if (!(theCallLabel in callCollection)) {
     response.writeHead(400);
     numberRequestsRunning --;
     return response.end(`RPC call label ${theCallLabel} not found. `);    
-  }
-  var currentCall = callCollection[theCallLabel];
-  if (currentCall.easyAccessControlOrigin === true) {
-    //console.log("Setting header ...");
-    response.setHeader('Access-Control-Allow-Origin', '*');
   }
   var errors = [];
   var theRequestJSON = getRPCRequestJSON(theCallLabel, queryCommand, errors);
@@ -173,27 +135,30 @@ function handleRPCArguments(response, queryCommand, queryNode) {
   }
   console.log("DEBUG: request stringified: " + JSON.stringify(theRequestJSON));
   var requestStringified = JSON.stringify(theRequestJSON);
-  return handleRPCArgumentsPartTwo(response, requestStringified, currentNode);
+  
+  return handleRPCArgumentsPartTwo(response, requestStringified);
 }
 
-function handleRPCArgumentsPartTwo(response, requestStringified, currentNode) {
+function handleRPCArgumentsPartTwo(response, requestStringified) {
+  var theNode = fabcoinInitialization.getFabcoinNode();
   var requestOptions = {
     host: '127.0.0.1',
-    port: currentNode.RPCPort,
-    method: 'POST',
+    port: theNode.configuration.RPCPort,
+    method: "POST",
     path: '/',
     headers: {
       'Host': 'localhost',
       'Content-Length': requestStringified.length,
       'Content-Type': 'application/json'
     },
-    //auth: "bb98a0b6442386d0cdf8a31b267892c1"    
+    auth: `${theNode.configuration.RPCUser}:${theNode.configuration.RPCPassword}`    
     //agent: false,
     //rejectUnauthorized: this.opts.ssl && this.opts.sslStrict !== false
   };
   //console.log ("DEBUG: options for request: " + JSON.stringify(requestOptions));
   console.log (`DEBUG: about to submit request: ${requestStringified}`.green);
   console.log (`DEBUG:  submit options: ${JSON.stringify(requestOptions)}`.green);
+  console.log (`DEBUG:  submit body: ${requestStringified}`);
   //console.log ("DEBUG: request object: " + JSON.stringify(RPCRequestObject));
 
   var theHTTPrequest = http.request(requestOptions);

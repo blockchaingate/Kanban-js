@@ -1,8 +1,28 @@
 "use strict";
 
 var urlStrings = {
-  rpcCallLabel: "rpcCall"
+  rpcCallLabel: "rpcCall",
+  command: "command"
 };
+
+/**
+ * @type {Object.<string,{rpcCall:string, method: string, mandatoryFixedArguments: Object, mandatoryModifiableArguments: Object, types: Object, parameters: string[]}>}
+ */
+var rpcCalls = {
+  getBlockByHeight: {
+    rpcCall: "getBlockByHeight", //<- must be the same as the command name, used for autocomplete purposes
+    method: "getblockhash", //<- rpc method name 
+    mandatoryFixedArguments: { //<- values give defaults, null for none
+    },
+    mandatoryModifiableArguments: { //<- values give defaults, null for none
+      blockNumber: null
+    },
+    types: {
+      blockNumber: "number"
+    },
+    parameters: ["blockNumber"]
+  },
+}
 
 function getPOSTBodyFromRPCLabel(theRPCLabel, theArguments) {
   var theRequest = {};
@@ -18,6 +38,7 @@ function getPOSTBodyFromRPCLabel(theRPCLabel, theArguments) {
 
 
 module.exports = {
+  rpcCalls,
   urlStrings,
   getPOSTBodyFromRPCLabel
 }

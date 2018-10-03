@@ -97,7 +97,12 @@ var defaults = {
     inputInitialization: {
       fabcoindArguments: "inputFabcoindArguments"
     },
-    outputFabcoinInitialization: "divOutputFabcoinInitialization"
+    inputBlockInfo: {
+      blockNumber: "inputFabcoinBlockNumber",
+      blockHash: "inputFabcoinBlockHash"
+    },
+    outputFabcoinInitialization: "divOutputFabcoinInitialization",
+    outputFabcoinBlockInfo: "duvOutputFabcoinBlockInfo"
   },
   inputNumberOfBlocks: "inputNumberOfBlocks",
   inputMaxNumberOfTries: "inputMaxNumberOfTries",

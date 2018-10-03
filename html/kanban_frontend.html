@@ -277,39 +277,6 @@
   </td>
   </tr>
   </table>
-
-    <!--table> 
-    <tr>
-    <td>node</td>
-    <td><button class = "buttonStandard" onclick = "window.kanban.initialization.fabcoin.gitPullNode();">update</button></td>
-    </tr>
-    <tr>
-    <td>fabcoin all nets</td>
-    <td>
-    <button class = "buttonStandard" onclick = "window.kanban.initialization.fabcoin.killAllFabcoinDaemons();">kill fab &amp; kb</button>
-    </td>
-    </tr>
-    <tr>
-    <td>kanban++</td> 
-    <td>
-      <button class = "buttonStandard" onclick = "window.kanban.initialization.fabcoin.gitPullKanban();">update</button>
-      <button class = "buttonStandard" onclick = "window.kanban.initialization.fabcoin.startKanban();">start kb</button>
-    </td>
-    </tr>
-    <tr>
-    <td>fabcoind</td> 
-    <td>
-    <button class = "buttonStandard" onclick = "window.kanban.initialization.fabcoin.gitPullFabcoin();">update</button>
-    <button class = "buttonStandard" onclick = "window.kanban.initialization.fabcoin.deleteFabcoinConfiguration();">del .fab</button>
-    <button class = "buttonStandard" onclick = "window.kanban.initialization.fabcoin.startFabcoinDaemon(false);">start fab</button>
-    <button class = "buttonStandard" onclick = "window.kanban.initialization.fabcoin.makeFabcoin();">make fab</button>
-    &nbsp;
-    <a href = "/logFileTestNetNoDNS" target = "_blank" id = "linkLogFileFabcoin">Log file </a>
-    &nbsp;
-    <a href = "/logFileTestNetNoDNSSession" target = "_blank" id = "linkLogFileFabcoin">Session log file </a>
-    </td>
-    </tr>
-    </table-->
   </div>
   <br>
   <div class = "divControlPanelDefault" id = "divOutputFabcoinInitialization"></div><!--divFabcoinInitialization-->
@@ -321,17 +288,19 @@
   <tr>
   <td>
   <table>
-    <tr><td><button class = "buttonStandard" style = "width: 100px" onclick = "window.kanban.fabcoin.rpc.fabNode.run('pleasechangeToActualCommand')">First command</button></td></tr>
+    <tr><td><button class = "buttonStandard" style = "width: 100px" onclick = "window.kanban.fabcoin.rpc.fabNode.run('getBlockByHeight')">Block by #</button></td></tr>
+    <tr><td><button class = "buttonStandard" style = "width: 100px" onclick = "window.kanban.fabcoin.rpc.fabNode.run('getBlockByHash')">Block by hash</button></td></tr>
   </table>
   </td>
   <td>
-  <input type = "text" class = "inputCrypto" id = "inputPleaseRename" size = "90" value = "-regtest -printtoconsole" placeholder = "arguments"></input><br>
+    <input type = "text" class = "inputCrypto" id = "inputFabcoinBlockNumber" size = "90" value = "0" placeholder = "block #"></input><br>
+    <input type = "text" class = "inputCrypto" id = "inputFabcoinBlockHash" size = "90" value = "" placeholder = "block hash"></input><br>
   </td>
   </tr>
   </table>
   </div>
   <br>
-  <div class = "divControlPanelDefault" id = "divOutputFabcoinInitialization"></div><!--divFabcoinInitialization-->
+  <div class = "divControlPanelDefault" id = "duvOutputFabcoinBlockInfo"></div><!--divFabcoinInitialization-->
 </div><!--pageFabcoinSmartContract-->
 
 
