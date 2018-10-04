@@ -1,11 +1,11 @@
 "use strict";
-const submitRequests = require('./submit_requests');
-const pathnames = require('../pathnames');
-const ids = require('./ids_dom_elements');
-const jsonToHtml = require('./json_to_html');
-const globals = require('./globals');
+const submitRequests = require('./../submit_requests');
+const pathnames = require('../../pathnames');
+const ids = require('./../ids_dom_elements');
+const jsonToHtml = require('./../json_to_html');
+const globals = require('./../globals');
 const RPCGeneral = require('./fabcoin_rpc_general');
-const miscellaneous = require('../miscellaneous');
+const miscellaneous = require('../../miscellaneous');
 
 function callbackMineStandard(input, outputComponent) {
   jsonToHtml.writeJSONtoDOMComponent(input, outputComponent, {});

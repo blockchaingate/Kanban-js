@@ -1,10 +1,10 @@
 "use strict";
-const rpcCallsGeneral = require('./fabcoin_rpc_general');
-const rpcCallsNetwork = require('./fabcoin_rpc_network');
-const rpcCallsSendReceive = require('./fabcoin_rpc_send_receive');
-const rpcCallsMine = require('./fabcoin_rpc_mine');
-const rpcCallsProfiling = require('./fabcoin_rpc_profiling');
-const fabcoinInitialization = require('./fabcoin_initialization');
+const rpcCallsGeneral = require('./fabcoin_old/fabcoin_rpc_general');
+const rpcCallsNetwork = require('./fabcoin_old/fabcoin_rpc_network');
+const rpcCallsSendReceive = require('./fabcoin_old/fabcoin_rpc_send_receive');
+const rpcCallsMine = require('./fabcoin_old/fabcoin_rpc_mine');
+const rpcCallsProfiling = require('./fabcoin_old/fabcoin_rpc_profiling');
+const fabcoinInitialization = require('./fabcoin_old/fabcoin_initialization');
 const ids = require('./ids_dom_elements');
 const pathnames = require('../pathnames');
 const fabcoindOldRPC = require('../external_connections/fabcoin_old/rpc');

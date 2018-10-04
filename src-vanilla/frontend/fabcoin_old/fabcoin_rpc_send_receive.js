@@ -1,15 +1,15 @@
 "use strict";
-const submitRequests = require('./submit_requests');
-const pathnames = require('../pathnames');
-const ids = require('./ids_dom_elements');
-const jsonToHtml = require('./json_to_html');
-const globals = require('./globals');
-const TransactionBuilder = require('../bitcoinjs_src/transaction_builder');
-const ECKey = require('../bitcoinjs_src/ecpair');
-const Block = require('../bitcoinjs_src/block');
+const submitRequests = require('./../submit_requests');
+const pathnames = require('../../pathnames');
+const ids = require('./../ids_dom_elements');
+const jsonToHtml = require('./../json_to_html');
+const globals = require('./../globals');
+const TransactionBuilder = require('../../bitcoinjs_src/transaction_builder');
+const ECKey = require('../../bitcoinjs_src/ecpair');
+const Block = require('../../bitcoinjs_src/block');
 const jsonic = require('jsonic');
-const miscellaneous = require('../miscellaneous');
-const miscellaneousFrontEnd = require('./miscellaneous_frontend');
+const miscellaneous = require('../../miscellaneous');
+const miscellaneousFrontEnd = require('./../miscellaneous_frontend');
 const rpcGeneral = require('./fabcoin_rpc_general');
 const bigInteger = require('big-integer');
 

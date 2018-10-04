@@ -22,6 +22,29 @@ var rpcCalls = {
     },
     parameters: ["blockNumber"]
   },
+  generateBlocks: {
+    rpcCall: "generateBlocks", //<- must be the same as the command name, used for autocomplete purposes
+    method: "generate", //<- rpc method name 
+    mandatoryFixedArguments: { //<- values give defaults, null for none
+    },
+    mandatoryModifiableArguments: { //<- values give defaults, null for none
+      numberOfBlocks: null
+    },
+    types: {
+      numberOfBlocks: "number"
+    },
+    parameters: ["numberOfBlocks"]
+  },
+  getBlockByHash: {
+    rpcCall: "getBlockByHash", //<- must be the same as the command name, used for autocomplete purposes
+    method: "getblock", //<- rpc method name 
+    mandatoryFixedArguments: { //<- values give defaults, null for none
+    },
+    mandatoryModifiableArguments: { //<- values give defaults, null for none
+      hash: null
+    },
+    parameters: ["hash"]
+  },
 }
 
 function getPOSTBodyFromRPCLabel(theRPCLabel, theArguments) {

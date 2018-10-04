@@ -5,14 +5,26 @@ const ids = require('../ids_dom_elements');
 const globals = require('../globals');
 const submitRequests = require('../submit_requests');
 const jsonToHtml = require('../json_to_html');
+const miscellaneousBackend = require('../../miscellaneous');
 
 function FabNode () {
   this.theFunctions = {
     getBlockByHeight: {
       inputs: {
         blockNumber: ids.defaults.fabcoin.inputBlockInfo.blockNumber
-      }    
-    }
+      },
+      outputs: ids.defaults.fabcoin.inputBlockInfo.blockHash
+    },
+    generateBlocks: {
+      inputs: {
+        numberOfBlocks: ids.defaults.fabcoin.inputBlockInfo.numberOfBlocksToGenerate
+      }
+    },
+    getBlockByHash: {
+      inputs: {
+        hash: ids.defaults.fabcoin.inputBlockInfo.blockHash
+      }
+    },
     //for labels please use the name of the rpc call found in fabRPCSpec.rpcCalls
   };
 }
@@ -47,6 +59,7 @@ FabNode.prototype.getArguments = function(functionLabel) {
   var currentInputs = functionFrontend.inputs;
   for (var inputLabel in currentInputs) {
     var inputId = currentInputs[inputLabel];
+    submitRequests.highlightInput(inputId);
     var rawInput = document.getElementById(inputId).value;
     theArguments[inputLabel] = this.convertToCorrectType(functionLabel, inputLabel, rawInput);
   }
@@ -54,6 +67,7 @@ FabNode.prototype.getArguments = function(functionLabel) {
   if (currentInputsBase64 !== null && currentInputsBase64 !== undefined) {
     for (var inputLabel in currentInputsBase64) {
       var theValue =  document.getElementById(currentInputsBase64[inputLabel]).value;
+      submitRequests.highlightInput(currentInputsBase64[inputLabel]);
       theArguments[inputLabel] = Buffer.from(theValue).toString('base64');
     }
   }
@@ -63,8 +77,18 @@ FabNode.prototype.getArguments = function(functionLabel) {
 var optionsForKanbanGOStandard = {};
 FabNode.prototype.callbackStandard = function(functionLabel, input, output) {
   jsonToHtml.writeJSONtoDOMComponent(input, output, optionsForKanbanGOStandard);
+  if (!(functionLabel in this.theFunctions)) {
+    return;
+  }
+  var currentFunction = this.theFunctions[functionLabel];
+  var currentOutputs = currentFunction.outputs;
+  if (currentOutputs === undefined || currentOutputs === null) {
+    return;
+  }
+  if (typeof currentOutputs === "string") {
+    submitRequests.updateValue(currentOutputs, miscellaneousBackend.removeQuotes(input));
+  }
 }
-
 
 FabNode.prototype.run = function(functionLabel) {
   var theArguments = this.getArguments(functionLabel);
@@ -88,7 +112,6 @@ FabNode.prototype.run = function(functionLabel) {
     result: currentResult
   });
 
-  console.log("Here I am");
 }
 
 var fabNode = new FabNode();

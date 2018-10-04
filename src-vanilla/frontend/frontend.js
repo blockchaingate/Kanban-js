@@ -1,11 +1,11 @@
 window.kanban = {
   thePage: null,
   rpc: {
-    general: require('./fabcoin_rpc_general'),
-    network: require('./fabcoin_rpc_network'),
-    sendReceive: require('./fabcoin_rpc_send_receive'),
-    mine: require('./fabcoin_rpc_mine'),
-    profiling: require('./fabcoin_rpc_profiling'),
+    general: require('./fabcoin_old/fabcoin_rpc_general'),
+    network: require('./fabcoin_old/fabcoin_rpc_network'),
+    sendReceive: require('./fabcoin_old/fabcoin_rpc_send_receive'),
+    mine: require('./fabcoin_old/fabcoin_rpc_mine'),
+    profiling: require('./fabcoin_old/fabcoin_rpc_profiling'),
     forceRPCPOST: false
   },
   kanbanJS: {
@@ -22,8 +22,8 @@ window.kanban = {
     initialization: require('./fabcoin/initialization'),
     rpc: require('./fabcoin/rpc')
   },
-  initializationOLD: {
-    fabcoin: require('./fabcoin_initialization'),
+  fabcoinOLD: {
+    initializationOLD: require('./fabcoin_old/fabcoin_initialization'),
   },
   miscellaneous: require('./miscellaneous_frontend'),
   computationalEngineCalls: null,

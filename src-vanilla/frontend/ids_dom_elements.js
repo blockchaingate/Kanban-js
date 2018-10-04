@@ -99,7 +99,8 @@ var defaults = {
     },
     inputBlockInfo: {
       blockNumber: "inputFabcoinBlockNumber",
-      blockHash: "inputFabcoinBlockHash"
+      blockHash: "inputFabcoinBlockHash",
+      numberOfBlocksToGenerate: "inputFabcoinNumberOfBlocksToGenerate"
     },
     outputFabcoinInitialization: "divOutputFabcoinInitialization",
     outputFabcoinBlockInfo: "duvOutputFabcoinBlockInfo"

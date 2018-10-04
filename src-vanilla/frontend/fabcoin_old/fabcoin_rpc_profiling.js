@@ -1,13 +1,13 @@
 "use strict";
-const submitRequests = require('./submit_requests');
-const pathnames = require('../pathnames');
-const ids = require('./ids_dom_elements');
-const jsonToHtml = require('./json_to_html');
-const globals = require('./globals');
+const submitRequests = require('./../submit_requests');
+const pathnames = require('../../pathnames');
+const ids = require('./../ids_dom_elements');
+const jsonToHtml = require('./../json_to_html');
+const globals = require('./../globals');
 const RPCGeneral = require('./fabcoin_rpc_general');
 const escapeHTML = require('escape-html');
 const chartJS = require('chart.js');
-const miscellaneous = require('../miscellaneous');
+const miscellaneous = require('../../miscellaneous');
 const jsZip = require("jszip");
 
 function callbackMemoryPoolArrivals(input, outputComponent) {

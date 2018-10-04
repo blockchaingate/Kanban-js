@@ -290,11 +290,13 @@
   <table>
     <tr><td><button class = "buttonStandard" style = "width: 100px" onclick = "window.kanban.fabcoin.rpc.fabNode.run('getBlockByHeight')">Block by #</button></td></tr>
     <tr><td><button class = "buttonStandard" style = "width: 100px" onclick = "window.kanban.fabcoin.rpc.fabNode.run('getBlockByHash')">Block by hash</button></td></tr>
+    <tr><td><button class = "buttonStandard" style = "width: 100px" onclick = "window.kanban.fabcoin.rpc.fabNode.run('generateBlocks')">Mine blocks</button></td></tr>
   </table>
   </td>
   <td>
     <input type = "text" class = "inputCrypto" id = "inputFabcoinBlockNumber" size = "90" value = "0" placeholder = "block #"></input><br>
     <input type = "text" class = "inputCrypto" id = "inputFabcoinBlockHash" size = "90" value = "" placeholder = "block hash"></input><br>
+    <input type = "text" class = "inputCrypto" id = "inputFabcoinNumberOfBlocksToGenerate" size = "90" value = "" placeholder = "# blocks to generate"></input><br>    
   </td>
   </tr>
   </table>
