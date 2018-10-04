@@ -219,6 +219,11 @@ JSONTransformer.prototype.getHtmlFromArrayOfObjects = function(input, options) {
     result += "<table class='tableJSON'>";
     result += "<tr>";
     for (var counterColumn = 0; counterColumn < labelsRows.labels.length; counterColumn ++) {
+      if (options.transformers !== undefined && options.transformers !== null) {
+        if (options.transformers.labelsAtFirstLevel !== undefined && options.transformers.labelsAtFirstLevel !== null) {
+          //result += this.getClickableEntry()
+        }
+      }
       result += `<th>${labelsRows.labels[counterColumn]}</th>`;
     }
     for (var counterRow = 0; counterRow < labelsRows.rows.length; counterRow ++) {

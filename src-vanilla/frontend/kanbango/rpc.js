@@ -192,8 +192,11 @@ var optionsKanbanGOStandard = {
     hash: {
       clickHandler: miscellaneousFrontEnd.revealLongWithParent,
       transformer: miscellaneous.hexShortenerForDisplay
-    }
-
+    },
+    labelsAtFirstLevel: {
+      clickHandler: miscellaneousFrontEnd.revealLongWithParent,
+      transformer: miscellaneous.hexShortenerForDisplay
+    },
   }
 };
 
