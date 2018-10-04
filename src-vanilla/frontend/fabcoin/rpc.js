@@ -14,7 +14,12 @@ function FabNode () {
         blockNumber: ids.defaults.fabcoin.inputBlockInfo.blockNumber
       },
       outputs: ids.defaults.fabcoin.inputBlockInfo.blockHash,
-      callback: this.callbackGetBlockByHeight
+      callback: this.callbackGetBlockByHeight,
+      outputOptions: {
+        singleEntry: {
+          
+        }
+      }
     },
     generateBlocks: {
       inputs: {

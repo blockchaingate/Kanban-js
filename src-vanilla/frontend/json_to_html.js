@@ -55,6 +55,9 @@ JSONTransformer.prototype.getClickableEntry = function(input, transformers, ambi
 
 
 JSONTransformer.prototype.getClickableEntryUsingTransformer = function(input, theTransformer) {
+  if (theTransformer === undefined || theTransformer === null) {
+    return input;
+  }
   totalClickableEntries ++;
   var currentId = `buttonJSONTransformer${totalClickableEntries}`;
   this.bindings[currentId] = {
@@ -219,25 +222,21 @@ JSONTransformer.prototype.getHtmlFromArrayOfObjects = function(input, options) {
       shouldLayoutAsArrayTable = true;
     }
   }
+  var transformers = options.transformers;
+  if (transformers === undefined || transformers === null) {
+    transformers = {};
+  }
   if (shouldLayoutAsArrayOfObjects) {
     var labelsRows = getLabelsRows(inputJSON);
     result += "<table class='tableJSON'>";
     result += "<tr>";
     for (var counterColumn = 0; counterColumn < labelsRows.labels.length; counterColumn ++) {
-      if (options.transformers !== undefined && options.transformers !== null) {
-        if (options.transformers.labelsAtFirstLevel !== undefined && options.transformers.labelsAtFirstLevel !== null) {
-          result += "<th>";
-          result += this.getClickableEntryUsingTransformer(labelsRows.labels[counterColumn], options.transformers.labelsAtFirstLevel);
-          result += "</th>";
-          continue;
-        }
-      }
-      result += `<th>${labelsRows.labels[counterColumn]}</th>`;
+      result += `<th>${this.getClickableEntryUsingTransformer(labelsRows.labels[counterColumn], transformers.labelsAtFirstLevel)}</th>`;
     }
     for (var counterRow = 0; counterRow < labelsRows.rows.length; counterRow ++) {
       result += "<tr>";
       for (var counterColumn = 0; counterColumn < labelsRows.labels.length; counterColumn ++) {
-        result += `<td>${this.getTableHorizontallyLaidFromJSON(labelsRows.rows[counterRow][counterColumn], options.transformers, labelsRows.labels[counterColumn], labelsRows.labels[counterColumn])}</td>`;
+        result += `<td>${this.getTableHorizontallyLaidFromJSON(labelsRows.rows[counterRow][counterColumn], transformers, labelsRows.labels[counterColumn], labelsRows.labels[counterColumn])}</td>`;
       }
       result += "</tr>";
     }
@@ -246,7 +245,7 @@ JSONTransformer.prototype.getHtmlFromArrayOfObjects = function(input, options) {
   } else if (shouldLayoutAsArrayTable) {
     result += this.getTableHorizontallyLaidFromJSON(inputJSON, options.transformers, "", "", "");
   } else {
-    result += inputJSON + "<br>";
+    result += `${this.getClickableEntryUsingTransformer(inputJSON, options.transformers.singleEntry)}<br>`; 
   }
 
   return result;
