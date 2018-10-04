@@ -4,6 +4,7 @@ const pathnames = require('../../pathnames');
 
 const ids = require('../ids_dom_elements');
 const jsonToHtml = require('../json_to_html');
+var JSONTransformer = jsonToHtml.JSONTransformer;
 //const Block = require('../bitcoinjs_src/block');
 const globals = require('../globals');
 const kanbanGO = require('../../external_connections/kanbango/rpc');
@@ -264,23 +265,32 @@ TestKanbanGO.prototype.callbackStandard = function(/**@type {PendingCall} */ pen
   }
   var resultHTML = "";
   pendingCall.flagShowClearButton = true;
+  var theJSONWriter = new JSONTransformer();
   for (var currentNodeId in pendingCall.nodeCalls) {
-    resultHTML += this.callbackStandardOneCaller(pendingCall, pendingCall.nodeCalls[currentNodeId].result);
+    resultHTML += this.callbackStandardOneCaller(pendingCall, pendingCall.nodeCalls[currentNodeId].result, theJSONWriter);
     pendingCall.flagShowClearButton = false;
   }
   if (typeof output === "string") {
     output = document.getElementById(output);
   }
   output.innerHTML = resultHTML;
+  theJSONWriter.bindButtons();
   delete this.pendingCalls[pendingCall.id];
 }
 
-TestKanbanGO.prototype.callbackStandardOneCaller = function(/**@type {PendingCall} */ pendingCall, input) {
+TestKanbanGO.prototype.callbackStandardOneCaller = function(
+  /**@type {PendingCall} */ 
+  pendingCall, 
+  input, 
+  /**@type {JSONTransformer} */ 
+  theJSONWriter
+) {
   var options = Object.assign({}, optionsForKanbanGOStandard);
   if (!pendingCall.flagShowClearButton) {
     options.flagDontShowClearButton = true;
   }
-  var resultHTML = jsonToHtml.getHtmlFromArrayOfObjects(input, options);
+
+  var resultHTML = theJSONWriter.getHtmlFromArrayOfObjects(input, options);
   var theFunction = this.theFunctions[pendingCall.functionLabel];
   var header = "";
   try {

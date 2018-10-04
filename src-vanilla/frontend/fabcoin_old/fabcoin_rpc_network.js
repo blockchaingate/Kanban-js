@@ -13,7 +13,8 @@ function updateNetworkPage() {
 }
 
 function callbackGetNetworkInfo(input, outputComponent) {
-  jsonToHtml.writeJSONtoDOMComponent(input, outputComponent, {});
+  var transformer = new jsonToHtml.JSONTransformer();
+  transformer.writeJSONtoDOMComponent(input, outputComponent, {});
 }
 
 function getPeerInfo() {

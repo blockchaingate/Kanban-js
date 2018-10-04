@@ -149,11 +149,13 @@ var optionsForStandardSendReceive = {
 miscellaneousFrontEnd.attachModuleFullNameToHandlerNames(optionsForStandardSendReceive.transformers, "window.kanban.rpc.sendReceive");
 
 function callbackStandardSendReceive(input, outputComponent) {
-  jsonToHtml.writeJSONtoDOMComponent(input, outputComponent, optionsForStandardSendReceive);
+  var transformer = new jsonToHtml.JSONTransformer();
+  transformer.writeJSONtoDOMComponent(input, outputComponent, optionsForStandardSendReceive);
 }
 
 function callbackTransactionFetch(input, outputComponent) {
-  jsonToHtml.writeJSONtoDOMComponent(input, outputComponent, optionsForStandardSendReceive);
+  var transformer = new jsonToHtml.JSONTransformer();
+  transformer.writeJSONtoDOMComponent(input, outputComponent, optionsForStandardSendReceive);
   try {
     var parsed = JSON.parse(input);
     var doUpdateOmni = false;
@@ -339,7 +341,8 @@ function sendRawBulkTransactions() {
 }
 
 function callbackSendTransaction(input, output) {
-  jsonToHtml.writeJSONtoDOMComponent(input, output, optionsForStandardSendReceive);
+  var transformer = new jsonToHtml.JSONTransformer();
+  transformer.writeJSONtoDOMComponent(input, output, optionsForStandardSendReceive);
 }
 
 function sendTxidToAddress() {
@@ -694,13 +697,16 @@ function callbackGetBlock(inputHex, outputComponent) {
     var theBlock;
     try {
       theBlock = Block.fromHex(inputHex);
-      jsonToHtml.writeJSONtoDOMComponent(theBlock.toHumanReadableHex(), outputComponent, optionsForStandardSendReceive);
+      var transformer = new jsonToHtml.JSONTransformer();
+      transformer.writeJSONtoDOMComponent(theBlock.toHumanReadableHex(), outputComponent, optionsForStandardSendReceive);
     } catch (e) {
       theBlock = `Error parsing block: ${inputHex}. `;
-      jsonToHtml.writeJSONtoDOMComponent(theBlock, outputComponent, optionsForStandardSendReceive);
+      var transformer = new jsonToHtml.JSONTransformer();
+      transformer.writeJSONtoDOMComponent(theBlock, outputComponent, optionsForStandardSendReceive);
     }
   } else {
-    jsonToHtml.writeJSONtoDOMComponent(inputHex, outputComponent, optionsForStandardSendReceive);
+    var transformer = new jsonToHtml.JSONTransformer();
+    transformer.writeJSONtoDOMComponent(inputHex, outputComponent, optionsForStandardSendReceive);
     try {
       var parsedBlock = JSON.parse(inputHex);
       if (parsedBlock.height !== undefined && parsedBlock.height !== null) {
@@ -737,7 +743,8 @@ function getBlock() {
 function callbackGetBestBlockHash(inputHex, outputComponent) {
   inputHex = miscellaneous.removeQuotes(inputHex);
   submitRequests.updateInnerHtml(ids.defaults.inputBlockHash, inputHex);
-  jsonToHtml.writeJSONtoDOMComponent(inputHex, outputComponent, optionsForStandardSendReceive);
+  var transformer = new jsonToHtml.JSONTransformer();
+  transformer.writeJSONtoDOMComponent(inputHex, outputComponent, optionsForStandardSendReceive);
 }
 
 function getBestBlockHash() {

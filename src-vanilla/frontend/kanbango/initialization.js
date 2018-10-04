@@ -124,7 +124,8 @@ KanbanGoInitializer.prototype.getNodeInformationCallback = function (functionLab
 
 var optionsForKanbanGOStandard = {};
 KanbanGoInitializer.prototype.callbackStandard = function(functionLabel, input, output) {
-  jsonToHtml.writeJSONtoDOMComponent(input, output, optionsForKanbanGOStandard);
+  var transformer = new jsonToHtml.JSONTransformer();
+  transformer.writeJSONtoDOMComponent(input, output, optionsForKanbanGOStandard);
   this.getNodeInformation();
 }
 

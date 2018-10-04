@@ -20,7 +20,8 @@ function FabcoinNodeInitializer() {
 
 var optionsForKanbanGOStandard = {};
 FabcoinNodeInitializer.prototype.callbackStandard = function(functionLabel, input, output) {
-  jsonToHtml.writeJSONtoDOMComponent(input, output, optionsForKanbanGOStandard);
+  var transformer = new jsonToHtml.JSONTransformer();
+  transformer.writeJSONtoDOMComponent(input, output, optionsForKanbanGOStandard);
 }
 
 FabcoinNodeInitializer.prototype.getArguments = function(functionLabel) {

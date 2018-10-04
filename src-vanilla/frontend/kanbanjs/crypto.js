@@ -72,7 +72,8 @@ TestKanbanJS.prototype.updateFields = function(parsedInput, outputs) {
 }
 
 TestKanbanJS.prototype.callbackStandard = function(functionLabel, input) {
-  var resultHTML = jsonToHtml.getHtmlFromArrayOfObjects(input, optionsForKanbanJSStandard);
+  var theJSONWriter = new jsonToHtml.JSONTransformer();
+  var resultHTML = theJSONWriter.getHtmlFromArrayOfObjects(input, optionsForKanbanJSStandard);
   var header = "";
   if (input.resultHTML !== null && input.resultHTML !== undefined) {
     header += input.resultHTML + "<br>"; 
@@ -85,6 +86,7 @@ TestKanbanJS.prototype.callbackStandard = function(functionLabel, input) {
   }
   resultHTML = header + resultHTML;
   document.getElementById(ids.defaults.kanbanJS.outputKBJSCrypto).innerHTML = resultHTML;
+  theJSONWriter.bindButtons();
   var currentFunction = this.theFunctions[functionLabel];
   this.updateFields(input, currentFunction.outputs);
 }

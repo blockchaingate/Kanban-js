@@ -44,7 +44,8 @@ miscellaneousFrontEnd.attachModuleFullNameToHandlerNames(
 );
 
 function callbackKanbanPlusPlusSignatureVerification(input, output) {
-  jsonToHtml.writeJSONtoDOMComponent(input, output, optionsForKanbanPlusPlusGeneralStandard);
+  var transformer = new jsonToHtml.JSONTransformer();
+  transformer.writeJSONtoDOMComponent(input, output, optionsForKanbanPlusPlusGeneralStandard);
   if (typeof output === "string") {
     output = document.getElementById(output);
   }
@@ -57,11 +58,13 @@ function callbackKanbanPlusPlusSignatureVerification(input, output) {
 }
 
 function callbackKanbanPlusPlusGeneralStandard(input, output){
-  jsonToHtml.writeJSONtoDOMComponent(input, output, optionsForKanbanPlusPlusGeneralStandard);
+  var transformer = new jsonToHtml.JSONTransformer();
+  transformer.writeJSONtoDOMComponent(input, output, optionsForKanbanPlusPlusGeneralStandard);
 }
 
 function callbackKanbanPlusPlusGeneralCrypto(input, output){
-  jsonToHtml.writeJSONtoDOMComponent(input, output, optionsForKanbanPlusPlusGeneralStandard);
+  var transformer = new jsonToHtml.JSONTransformer();
+  transformer.writeJSONtoDOMComponent(input, output, optionsForKanbanPlusPlusGeneralStandard);
 }
 
 function getAddressInputValue() {
@@ -283,14 +286,16 @@ function getReceivedByAddress() {
 }
 
 function callbackSchnorrSign(input, output) {
-  jsonToHtml.writeJSONtoDOMComponent(input, output, optionsForKanbanPlusPlusGeneralStandard);
+  var transformer = new jsonToHtml.JSONTransformer();
+  transformer.writeJSONtoDOMComponent(input, output, optionsForKanbanPlusPlusGeneralStandard);
   var inputParsed = JSON.parse(input);
   submitRequests.updateInnerHtml(ids.defaults.kanbanPlusPlus.inputSchnorrSignature.signature, inputParsed.signatureSchnorrBase58);
   submitRequests.updateInnerHtml(ids.defaults.kanbanPlusPlus.inputSchnorrSignature.nonce, inputParsed.nonceSchnorrBase58Check);  
 }
 
 function callbackKanbanPlusPlusAggregateSignatureInitialize(input, output) {
-  jsonToHtml.writeJSONtoDOMComponent(input, output, optionsForKanbanPlusPlusGeneralStandard);
+  var transformer = new jsonToHtml.JSONTransformer();
+  transformer.writeJSONtoDOMComponent(input, output, optionsForKanbanPlusPlusGeneralStandard);
   var inputParsed = JSON.parse(input);
   var privateKeys = [];
   var publicKeys = [];
@@ -303,7 +308,8 @@ function callbackKanbanPlusPlusAggregateSignatureInitialize(input, output) {
 }
 
 function callbackKanbanPlusPlusAggregateSignatureCommit(input, output) {
-  jsonToHtml.writeJSONtoDOMComponent(input, output, optionsForKanbanPlusPlusGeneralStandard);
+  var transformer = new jsonToHtml.JSONTransformer();
+  transformer.writeJSONtoDOMComponent(input, output, optionsForKanbanPlusPlusGeneralStandard);
   var inputParsed = JSON.parse(input);
   var nonces = [];
   var commitments = [];
@@ -317,7 +323,8 @@ function callbackKanbanPlusPlusAggregateSignatureCommit(input, output) {
 }
 
 function callbackKanbanPlusPlusAggregateSignatureChallenge(input, output) {
-  jsonToHtml.writeJSONtoDOMComponent(input, output, optionsForKanbanPlusPlusGeneralStandard);
+  var transformer = new jsonToHtml.JSONTransformer();
+  transformer.writeJSONtoDOMComponent(input, output, optionsForKanbanPlusPlusGeneralStandard);
   var inputParsed = JSON.parse(input);
   submitRequests.updateValue(ids.defaults.kanbanPlusPlus.inputAggregateSignature.messageDigest, inputParsed.aggregator.messageDigest);
   submitRequests.updateValue(ids.defaults.kanbanPlusPlus.inputAggregateSignature.aggregatePubkey, inputParsed.aggregator.aggregatePublicKey);
@@ -326,7 +333,8 @@ function callbackKanbanPlusPlusAggregateSignatureChallenge(input, output) {
 }
 
 function callbackKanbanPlusPlusAggregateSignatureSolutions(input, output) {
-  jsonToHtml.writeJSONtoDOMComponent(input, output, optionsForKanbanPlusPlusGeneralStandard);
+  var transformer = new jsonToHtml.JSONTransformer();
+  transformer.writeJSONtoDOMComponent(input, output, optionsForKanbanPlusPlusGeneralStandard);
   var inputParsed = JSON.parse(input);
   var solutions = [];
   for (var counterKeyPairs = 0; counterKeyPairs < inputParsed.signers.length; counterKeyPairs ++) {
@@ -337,13 +345,15 @@ function callbackKanbanPlusPlusAggregateSignatureSolutions(input, output) {
 }
 
 function callbackKanbanPlusPlusAggregateFinalSolution(input, output) {
-  jsonToHtml.writeJSONtoDOMComponent(input, output, optionsForKanbanPlusPlusGeneralStandard);
+  var transformer = new jsonToHtml.JSONTransformer();
+  transformer.writeJSONtoDOMComponent(input, output, optionsForKanbanPlusPlusGeneralStandard);
   var inputParsed = JSON.parse(input);
   submitRequests.updateValue(ids.defaults.kanbanPlusPlus.inputAggregateSignature.theAggregation, inputParsed.aggregator.signatureNoBitmap);
 }
 
 function callbackKanbanPlusPlusAggregateVerification(input, output) {
-  jsonToHtml.writeJSONtoDOMComponent(input, output, optionsForKanbanPlusPlusGeneralStandard);
+  var transformer = new jsonToHtml.JSONTransformer();
+  transformer.writeJSONtoDOMComponent(input, output, optionsForKanbanPlusPlusGeneralStandard);
   var inputParsed = JSON.parse(input);
   if (typeof output === "string") {
     output = document.getElementById(output);

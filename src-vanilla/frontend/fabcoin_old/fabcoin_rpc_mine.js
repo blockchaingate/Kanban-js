@@ -8,7 +8,8 @@ const RPCGeneral = require('./fabcoin_rpc_general');
 const miscellaneous = require('../../miscellaneous');
 
 function callbackMineStandard(input, outputComponent) {
-  jsonToHtml.writeJSONtoDOMComponent(input, outputComponent, {});
+  var transformer = new jsonToHtml.JSONTransformer();
+  transformer.writeJSONtoDOMComponent(input, outputComponent, {});
 }
 
 function getOutputMiningRadio() {

@@ -16,11 +16,13 @@ function callbackMemoryPoolArrivals(input, outputComponent) {
   } catch (e) {
     console.log(`Error while parsing memory pool arrivals. ${e}`);
   }
-  jsonToHtml.writeJSONtoDOMComponent(input, outputComponent, {});
+  var transformer = new jsonToHtml.JSONTransformer();
+  transformer.writeJSONtoDOMComponent(input, outputComponent, {});
 }
 
 function callbackProfilingStandard(input, outputComponent) {
-  jsonToHtml.writeJSONtoDOMComponent(input, outputComponent, {});
+  var transformer = new jsonToHtml.JSONTransformer();
+  transformer.writeJSONtoDOMComponent(input, outputComponent, {});
 }
 
 function getOutputProfilingStandard() {
@@ -260,7 +262,6 @@ function callbackGetPerformanceProfilePartTwo(input, outputDOM) {
   result += "<span style= 'display:inline-block; max-height:400px; max-width:400px;'><canvas id = 'chartProfiling' style='height:400px; width:400px;'></canvas></span><br><span id='spanDownloadChart'></span>";
   result += "</td></tr></table>";
   result += getThreadTable(inputParsed);
-  //result += jsonToHtml.getHtmlFromArrayOfObjects(input, {});
   outputDOM.innerHTML = result;
 }
 

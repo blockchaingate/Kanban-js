@@ -13,7 +13,8 @@ function FabNode () {
       inputs: {
         blockNumber: ids.defaults.fabcoin.inputBlockInfo.blockNumber
       },
-      outputs: ids.defaults.fabcoin.inputBlockInfo.blockHash
+      outputs: ids.defaults.fabcoin.inputBlockInfo.blockHash,
+      callback: this.callbackGetBlockByHeight
     },
     generateBlocks: {
       inputs: {
@@ -27,6 +28,20 @@ function FabNode () {
     },
     //for labels please use the name of the rpc call found in fabRPCSpec.rpcCalls
   };
+
+  this.outputOptions = {
+    transformers: {
+      previousblockhash: {
+        clickHandler: this.getBlockByHash.bind(this),
+      }
+    },
+  };
+  
+}
+
+FabNode.prototype.getBlockByHash = function (inputHash) {
+  submitRequests.updateValue(ids.defaults.fabcoin.inputBlockInfo.blockHash, inputHash);
+  this.run('getBlockByHash');
 }
 
 FabNode.prototype.convertToCorrectType = function(functionLabel, variableName, inputRaw) {
@@ -74,9 +89,14 @@ FabNode.prototype.getArguments = function(functionLabel) {
   return theArguments;
 }
 
-var optionsForKanbanGOStandard = {};
+FabNode.prototype.callbackGetBlockByHeight = function (functionLabel, input, output) {
+  this.callbackStandard(functionLabel, input, output);
+
+}
+
 FabNode.prototype.callbackStandard = function(functionLabel, input, output) {
-  jsonToHtml.writeJSONtoDOMComponent(input, output, optionsForKanbanGOStandard);
+  var transformer = new jsonToHtml.JSONTransformer();
+  transformer.writeJSONtoDOMComponent(input, output, this.outputOptions);
   if (!(functionLabel in this.theFunctions)) {
     return;
   }

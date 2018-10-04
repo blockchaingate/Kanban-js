@@ -17,7 +17,8 @@ function getOutputFabcoinInitialization() {
 }
 
 function callbackFabcoinInitialization(input, outputComponent) {
-  jsonToHtml.writeJSONtoDOMComponent(input, outputComponent, {});
+  var transformer = new jsonToHtml.JSONTransformer();
+  transformer.writeJSONtoDOMComponent(input, outputComponent, {});
 }
 
 function updateFabcoinInitializationPage() {

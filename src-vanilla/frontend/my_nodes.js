@@ -236,14 +236,16 @@ function callbackBrowserToRemoteMempoolArrivalTimes(input, output) {
   var currentNode = allMyNodes.myNodes[allMyNodes.myNodesBrowserToRemoteResult[output]];
   var outputSpan = document.getElementById(output);
   if (window.kanban.profiling.memoryPoolArrivalTimes === null) {
-    jsonToHtml.writeJSONtoDOMComponent(input, outputSpan, {});
+    var transformer = new jsonToHtml.JSONTransformer();
+    transformer.writeJSONtoDOMComponent(input, outputSpan, {});
     return;
   }
   try {
     currentNode.memoryPoolArrivalTimes = JSON.parse(input).arrivals;
     currentNode.generateMemoryPoolArrivalTimeChart(output);
   } catch (e) {
-    jsonToHtml.writeJSONtoDOMComponent(`Failed to interpret memory pool arrival times. ${e}`, outputSpan, {});
+    var transformer = new jsonToHtml.JSONTransformer();
+    transformer.writeJSONtoDOMComponent(`Failed to interpret memory pool arrival times. ${e}`, outputSpan, {});
   }
   //console.log(`${currentNode.name}: ${currentNode.ipAddress} `);
   //console.log("DEBUG input: " + input);
@@ -254,7 +256,8 @@ function callbackWriteBrowserToRemoteResult(input, output) {
   var allMyNodes = window.kanban.allMyNodes;
   var currentNode = allMyNodes.myNodes[allMyNodes.myNodesBrowserToRemoteResult[output]];
   var outputSpan = document.getElementById(output);
-  jsonToHtml.writeJSONtoDOMComponent(input, outputSpan, {});
+  var transformer = new jsonToHtml.JSONTransformer();
+  transformer.writeJSONtoDOMComponent(input, outputSpan, {});
 }
 
 function callbackWriteBrowserRemotePingResult(input, output) {
@@ -476,7 +479,8 @@ MyNodesContainer.prototype.sshNodeToOneRemoteMachineGitPullMakeFab = function(cu
 MyNodesContainer.prototype.toHTMLWithDebug = function () {
   var result = "";
   result += this.toHTML();
-  result += jsonToHtml.getHtmlFromArrayOfObjects(this.nodesRaw, {});
+  var writer = new jsonToHtml.JSONTransformer();
+  result += writer.getHtmlFromArrayOfObjects(this.nodesRaw, {});
   return result;
 }
 
