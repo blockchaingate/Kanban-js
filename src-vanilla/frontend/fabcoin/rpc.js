@@ -6,8 +6,24 @@ const globals = require('../globals');
 const submitRequests = require('../submit_requests');
 const jsonToHtml = require('../json_to_html');
 const miscellaneousBackend = require('../../miscellaneous');
+const miscellaneousFrontend = require('../miscellaneous_frontend');
 
 function FabNode () {
+  this.transformersStandard = {
+    blockHash: {
+      clickHandler: this.getBlockByHash.bind(this),
+      transformer: miscellaneousBackend.hexShortenerForDisplay
+    }
+  };
+
+  this.outputOptions = {
+    transformers: {
+      previousblockhash: this.transformersStandard.blockHash,
+      nextblockhash: this.transformersStandard.blockHash,
+    },
+
+  };
+
   this.theFunctions = {
     getBlockByHeight: {
       inputs: {
@@ -16,8 +32,8 @@ function FabNode () {
       outputs: ids.defaults.fabcoin.inputBlockInfo.blockHash,
       callback: this.callbackGetBlockByHeight,
       outputOptions: {
-        singleEntry: {
-          
+        transformers: {
+          singleEntry: this.transformersStandard.blockHash
         }
       }
     },
@@ -32,20 +48,12 @@ function FabNode () {
       }
     },
     //for labels please use the name of the rpc call found in fabRPCSpec.rpcCalls
-  };
-
-  this.outputOptions = {
-    transformers: {
-      previousblockhash: {
-        clickHandler: this.getBlockByHash.bind(this),
-      }
-    },
-  };
-  
+  };  
 }
 
-FabNode.prototype.getBlockByHash = function (inputHash) {
+FabNode.prototype.getBlockByHash = function (container, inputHash) {
   submitRequests.updateValue(ids.defaults.fabcoin.inputBlockInfo.blockHash, inputHash);
+  miscellaneousFrontend.revealLongWithParent(container, inputHash);
   this.run('getBlockByHash');
 }
 
@@ -101,11 +109,17 @@ FabNode.prototype.callbackGetBlockByHeight = function (functionLabel, input, out
 
 FabNode.prototype.callbackStandard = function(functionLabel, input, output) {
   var transformer = new jsonToHtml.JSONTransformer();
-  transformer.writeJSONtoDOMComponent(input, output, this.outputOptions);
+  var currentFunction = this.theFunctions[functionLabel];
+  var currentOptions = this.outputOptions;
+  if (currentFunction !== undefined && currentFunction !== null) {
+    if (currentFunction.outputOptions !== null && currentFunction.outputOptions !== undefined) {
+      currentOptions = currentFunction.outputOptions;
+    }
+  }
+  transformer.writeJSONtoDOMComponent(input, output, currentOptions);
   if (!(functionLabel in this.theFunctions)) {
     return;
   }
-  var currentFunction = this.theFunctions[functionLabel];
   var currentOutputs = currentFunction.outputs;
   if (currentOutputs === undefined || currentOutputs === null) {
     return;

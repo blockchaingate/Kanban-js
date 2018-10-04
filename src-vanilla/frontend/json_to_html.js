@@ -243,9 +243,9 @@ JSONTransformer.prototype.getHtmlFromArrayOfObjects = function(input, options) {
     result += "</tr>";
     result += "</table>";
   } else if (shouldLayoutAsArrayTable) {
-    result += this.getTableHorizontallyLaidFromJSON(inputJSON, options.transformers, "", "", "");
+    result += this.getTableHorizontallyLaidFromJSON(inputJSON, transformers, "", "", "");
   } else {
-    result += `${this.getClickableEntryUsingTransformer(inputJSON, options.transformers.singleEntry)}<br>`; 
+    result += `${this.getClickableEntryUsingTransformer(inputJSON, transformers.singleEntry)}<br>`; 
   }
 
   return result;
