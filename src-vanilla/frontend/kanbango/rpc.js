@@ -38,23 +38,44 @@ function TestKanbanGO() {
   /** @type {PendingCall[]}*/
   this.pendingCalls = {};
 
+  /**@type {Object.<string, rpcCall: string, output: string, outputOptions: Object, inputs: Object>} */
   this.theFunctions  = {
     peerView: {
+      // if rpcCall omitted it will be assumed to be equal to the function label.
       rpcCall: kanbanGO.rpcCalls.peerView.rpcCall,
-      output: ids.defaults.kanbanGO.outputSendReceive
+      output: ids.defaults.kanbanGO.outputSendReceive,
+      // This will transform some entries of the output json to buttons.
+      // If outputOptions are omitted or set to null, 
+      // optionsKanbanGOStandard will be used.
+      // If the empty object {} is given, no transformations will be carried out.
+      outputOptions: optionsKanbanGOStandard
     },
     roundChangeRequests: {
+      // if rpcCall omitted it will be assumed to be equal to the function label.
       rpcCall: kanbanGO.rpcCalls.roundChangeRequests.rpcCall,
+      output: ids.defaults.kanbanGO.outputSendReceive,
+      // This will transform some entries of the output json to buttons.
+      // If outputOptions are omitted or set to null, 
+      // optionsKanbanGOStandard will be used.
+      // If the empty object {} is given, no transformations will be carried out.
+      outputOptions: optionsKanbanGOStandard
+    },
+    dumpBlock: {
+      inputs: {
+        blockNumber: inputSendReceive.blockNumber
+      },
       output: ids.defaults.kanbanGO.outputSendReceive
     },
+    round: {
+      output: ids.defaults.kanbanGO.outputSendReceive
+    },
+    validators: {
+      output: ids.defaults.kanbanGO.outputSendReceive,
+      outputOptions: optionsKanbanGOLabelContraction
+    },
     testSha3 : {
+      //if rpcCall omitted it will be assumed to be equal to the function label.
       rpcCall: kanbanGO.rpcCalls.testSha3.rpcCall, 
-      //<- must equal the label of the rpc call in the kanbanGO.rpcCalls data structure.
-      //Setting rpcCall to null or undefined is allowed:
-      //if that happens, in this.correctFunctions() 
-      //we set rpcCall to the natural default - the function label.
-      //If that default is not an rpc call, an error will 
-      //conveniently be thrown to let you know of the matter.
       inputs: {
         message: inputSchnorr.message
       }
@@ -155,18 +176,6 @@ function TestKanbanGO() {
       },
       callback: this.callbackStandard
     },
-    dumpBlock: {
-      inputs: {
-        blockNumber: inputSendReceive.blockNumber
-      },
-      output: ids.defaults.kanbanGO.outputSendReceive
-    },
-    round: {
-      output: ids.defaults.kanbanGO.outputSendReceive
-    },
-    validators: {
-      output: ids.defaults.kanbanGO.outputSendReceive
-    },
   };
   this.correctFunctions();
 }
@@ -193,11 +202,15 @@ var optionsKanbanGOStandard = {
       clickHandler: miscellaneousFrontEnd.revealLongWithParent,
       transformer: miscellaneous.hexShortenerForDisplay
     },
-    labelsAtFirstLevel: {
-      clickHandler: miscellaneousFrontEnd.revealLongWithParent,
-      transformer: miscellaneous.hexShortenerForDisplay
-    },
   }
+};
+
+var optionsKanbanGOLabelContraction = {};
+optionsKanbanGOLabelContraction.transformers = Object.assign({}, optionsKanbanGOStandard.transformers);
+
+optionsKanbanGOLabelContraction.transformers.labelsAtFirstLevel = {
+  clickHandler: miscellaneousFrontEnd.revealLongWithParent,
+  transformer: miscellaneous.hexShortenerForDisplay
 };
 
 function getSignerField(input, label) {
@@ -293,7 +306,14 @@ TestKanbanGO.prototype.callbackStandardOneCaller = function(
   /**@type {JSONTransformer} */ 
   theJSONWriter
 ) {
-  var options = Object.assign({}, optionsKanbanGOStandard);
+  var options = null;
+  var currentFunction = this.theFunctions[pendingCall.functionLabel];
+  if (currentFunction.outputOptions !== null && currentFunction.outputOptions !== undefined) {
+    options = Object.assign({}, currentFunction.outputOptions);
+  } else {
+    options = Object.assign({}, optionsKanbanGOStandard);
+  }
+
   if (!pendingCall.flagShowClearButton) {
     options.flagDontShowClearButton = true;
   }

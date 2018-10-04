@@ -50,6 +50,11 @@ JSONTransformer.prototype.getClickableEntry = function(input, transformers, ambi
   //if (!shouldHighlight) {
   //  return input;
   //}
+  return this.getClickableEntryUsingTransformer(input, theTransformer)
+}
+
+
+JSONTransformer.prototype.getClickableEntryUsingTransformer = function(input, theTransformer) {
   totalClickableEntries ++;
   var currentId = `buttonJSONTransformer${totalClickableEntries}`;
   this.bindings[currentId] = {
@@ -221,7 +226,10 @@ JSONTransformer.prototype.getHtmlFromArrayOfObjects = function(input, options) {
     for (var counterColumn = 0; counterColumn < labelsRows.labels.length; counterColumn ++) {
       if (options.transformers !== undefined && options.transformers !== null) {
         if (options.transformers.labelsAtFirstLevel !== undefined && options.transformers.labelsAtFirstLevel !== null) {
-          //result += this.getClickableEntry()
+          result += "<th>";
+          result += this.getClickableEntryUsingTransformer(labelsRows.labels[counterColumn], options.transformers.labelsAtFirstLevel);
+          result += "</th>";
+          continue;
         }
       }
       result += `<th>${labelsRows.labels[counterColumn]}</th>`;

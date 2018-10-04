@@ -35,6 +35,9 @@ function getDurationReadableFromDaysHoursAndMinutes(inputDays, inputHours, input
 }
 
 function hexShortenerForDisplay(input){
+  if (input.length < 10) {
+    return input;
+  }
   return `${input.substr(0, 4)}...${input.substr(input.length - 4, 4)}`;
 }
 
