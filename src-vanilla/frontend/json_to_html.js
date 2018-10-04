@@ -18,6 +18,12 @@ var keyWeights = {
 };
 
 JSONTransformer.prototype.bindButtons = function() {
+  for (var label in this.bindings) {
+    var currentElement = document.getElementById(label);
+    var currentLabelData = this.bindings[label];
+    var currentHandler = currentLabelData.clickHandler;
+    currentElement.addEventListener('click', currentHandler.bind(null, currentElement, currentLabelData.content));
+  }
 }
 
 JSONTransformer.prototype.writeJSONtoDOMComponent =  function(inputJSON, theDomComponent, options) {

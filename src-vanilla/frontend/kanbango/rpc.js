@@ -171,6 +171,32 @@ function TestKanbanGO() {
   this.correctFunctions();
 }
 
+var optionsKanbanGOStandard = {
+  transformers: {
+    address: {
+      clickHandler: miscellaneousFrontEnd.revealLongWithParent,
+      transformer: miscellaneous.hexShortenerForDisplay
+    },
+    publicKey: {
+      clickHandler: miscellaneousFrontEnd.revealLongWithParent,
+      transformer: miscellaneous.hexShortenerForDisplay
+    },
+    payload: {
+      clickHandler: miscellaneousFrontEnd.revealLongWithParent,
+      transformer: miscellaneous.hexShortenerForDisplay
+    },
+    logsBloom: {
+      clickHandler: miscellaneousFrontEnd.revealLongWithParent,
+      transformer: miscellaneous.hexShortenerForDisplay
+    },
+    hash: {
+      clickHandler: miscellaneousFrontEnd.revealLongWithParent,
+      transformer: miscellaneous.hexShortenerForDisplay
+    }
+
+  }
+};
+
 function getSignerField(input, label) {
   var parsedInput = JSON.parse(input);
   var result = [];
@@ -221,27 +247,6 @@ TestKanbanGO.prototype.correctFunctions = function() {
   }
 }
 
-var optionsForKanbanGOStandard = {
-  transformers: {
-    address: {
-      handlerName: "window.kanban.miscellaneous.revealLongWithParent",
-      transformer: miscellaneous.hexShortenerForDisplay
-    },
-    publicKey: {
-      handlerName: "window.kanban.miscellaneous.revealLongWithParent",
-      transformer: miscellaneous.hexShortenerForDisplay
-    },
-    payload: {
-      handlerName: "window.kanban.miscellaneous.revealLongWithParent",
-      transformer: miscellaneous.hexShortenerForDisplay
-    },
-    logsBloom: {
-      handlerName: "window.kanban.miscellaneous.revealLongWithParent",
-      transformer: miscellaneous.hexShortenerForDisplay
-    }
-  }
-};
-
 TestKanbanGO.prototype.updateFields = function(parsedInput, outputs) {
   if (parsedInput === undefined) {
     return;
@@ -285,7 +290,7 @@ TestKanbanGO.prototype.callbackStandardOneCaller = function(
   /**@type {JSONTransformer} */ 
   theJSONWriter
 ) {
-  var options = Object.assign({}, optionsForKanbanGOStandard);
+  var options = Object.assign({}, optionsKanbanGOStandard);
   if (!pendingCall.flagShowClearButton) {
     options.flagDontShowClearButton = true;
   }
