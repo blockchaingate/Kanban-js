@@ -7,11 +7,11 @@ Kanban needs access to the fabcoin-cli executable.
 While we plan to implement a discovery mechanism by which kanban finds the location of the fabcoin client(s),
 for the time being Kanban expects two fabcoind executables. The first must be at 
 
-```fabcoin-profile/src/fabcoin-cli```.
+```fabcoin-profile/src/fabcoind```.
 
 The second must be at 
 
-```fabcoin-dev-sm01```.
+```fabcoin-dev-sm01/src/fabcoind```.
 
 ### Ubuntu 16.04+
 
@@ -24,8 +24,6 @@ node
 (press ctrl+D to exit).
 
 2. Make sure you've installed all dependencies listed in the Dependencies section.
-
-
 
 3. Download Kanban in a folder:
 ```
@@ -40,30 +38,19 @@ cd fabcoin-dev-sm01
 git checkout sm01-kanban
 ```
 
+5. Compile and build fabcoin. For this follow the website instructions. Alternatively, our Ubuntu installation notes are here:
 
-5. Install nodejs dependencies:
+[intel openCL installation](fabcoind_setup.md)
+
+
+6. Install nodejs dependencies:
 
 ```
 cd ..
 npm install 
 ``` 
 
-6. (Step obsolete, please skip) Compile the kanban GPU driver. 
-
-```
-cd build
-make -j4
-```
-
-The number in the ``-j4`` flag of the make command tells C++ how many threads to use when compiling. Feel free to adjust 
-that number to what you feel is appropriate for your system's processor. Plain ``make`` should compile using a single thread.
-
-7. (Step obsolete, please skip) Test the GPU driver:
-
-```
-./kanban-gpu test
-```
-8. Run kanban:
+7. Run kanban:
 
 ```
 npm run develop
@@ -146,4 +133,21 @@ sudo apt-get install openssl libssl-dev
 ```
 
 
+## Obsolete notes
+
+6. (Step obsolete, please skip) Compile the kanban GPU driver. 
+
+```
+cd build
+make -j4
+```
+
+The number in the ``-j4`` flag of the make command tells C++ how many threads to use when compiling. Feel free to adjust 
+that number to what you feel is appropriate for your system's processor. Plain ``make`` should compile using a single thread.
+
+7. (Step obsolete, please skip) Test the GPU driver:
+
+```
+./kanban-gpu test
+```
 
