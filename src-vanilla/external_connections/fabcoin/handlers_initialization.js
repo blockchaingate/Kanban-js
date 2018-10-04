@@ -27,7 +27,7 @@ function FabcoinNode() {
     dataDir: global.kanban.configuration.fabcoin.dataDir
   };
   this.configuration = {
-    RPCPort: 18667,
+    RPCPort: 38667,
     /**@type {boolean} */
     network: "",
     /**@type {boolean} */
