@@ -21,7 +21,7 @@ function PendingCall () {
   this.totalCalls = 0;
   /** @type {Object} */
   this.nodeCalls = {};
-  /** @type {TestKanbanGO} */
+  /** @type {KanbanGoNodes} */
   this.owner = null;
   /** @type {string} */
   this.functionLabel = "";
@@ -29,7 +29,7 @@ function PendingCall () {
   this.flagShowClearButton = false;
 }
 
-function TestKanbanGO() {
+function KanbanGoNodes() {
   var inputSchnorr = ids.defaults.kanbanGO.inputSchnorr;
   var inputAggregate = ids.defaults.kanbanGO.inputAggregateSignature;
   var inputSendReceive = ids.defaults.kanbanGO.inputSendReceive;
@@ -37,6 +37,77 @@ function TestKanbanGO() {
   this.numberOfCalls = 0;
   /** @type {PendingCall[]}*/
   this.pendingCalls = {};
+
+  this.transformersStandard = {
+    shortener: {
+      clickHandler: miscellaneousFrontEnd.revealLongWithParent,
+      transformer: miscellaneous.hexShortenerForDisplay
+    }
+  }
+  // Specifies options for rpc kanban rpc output display.
+  this.optionsKanbanGOStandard = {
+    // Suppose we are displaying a nested JSON.
+    // The list below specifies how to transform the value of 
+    // each [modified selector key], value
+    // pair nested within the JSON. 
+    //
+    // To define the [modified selector key], we first define the 
+    // [selector key].
+    //
+    // For a simple object such as {a: 1, b: "x"}, 
+    // the [selector key] is the same as the object key, i.e., 
+    // the [selector key]'s in the object above are "a", "b".
+    // For a nested object sich as {a: {b: 1, c: 2}, d: "x", q: ["z", {e: "w"} ] },
+    // the [selector key]'s are obtained by concatenating 
+    // the labels recursively using a dot separator.
+    // Here, each array is interpreted as an object
+    // with a single key given by the string "${number}".
+    // Rather than giving a fixed spec, we 
+    // illustrate the whole procedure on an example. 
+    // In the example {a: {b: 1, c: 2}, d: "x", q: ["z", {e: "w"} ] } above, 
+    // there are 8 [sel. key], value pairs:
+    // 
+    // 1. [sel. key] = "a"     [value] = {b: 1, c: 2}
+    // 2. [sel. key] = "a.b"   [value] = 1
+    // 3. [sel. key] = "a.c"   [value] = 2
+    // 4. [sel. key] = "d"     [value] = "x"
+    // 5. [sel. key] = "q"     [value] = ["z", {e: "w"}]
+    // 6. [sel. key] = "q.1"   [value] = "z"
+    // 7. [sel. key] = "q.2"   [value] = {e: "w"}
+    // 8. [sel. key] = "q.2.e" [value] = "w"
+    //
+    // Finally, we modify each selector key by replacing 
+    // each number by the string  "${number}". 
+    // In this way, the [selector key]s "q.1" and "q.2" are 
+    // both replaced by "q.${number}" and "q.${number}".
+    //
+    // Please not that the modified selector keys do not distinguish between
+    // array members with different indices.
+    //
+    // As an aside note, please note that if the keys of a json object contain dots, then
+    // the modified selectors may end up selecting more than one label combination.
+    // 
+    transformers: {
+      address: this.transformersStandard.shortener,
+      publicKey: this.transformersStandard.shortener,
+      payload: this.transformersStandard.shortener,
+      logsBloom: this.transformersStandard.shortener,
+      hash: this.transformersStandard.shortener,
+      miner: this.transformersStandard.shortener,
+      mixHash: this.transformersStandard.shortener,
+      hashNoSignature: this.transformersStandard.shortener,
+      parentHash: this.transformersStandard.shortener,
+      receiptsRoot: this.transformersStandard.shortener,
+      sha3Uncles: this.transformersStandard.shortener,
+      signature: this.transformersStandard.shortener,
+      nonce: this.transformersStandard.shortener,
+      stateRoot: this.transformersStandard.shortener,
+      transactionsRoot: this.transformersStandard.shortener,
+    }
+  };
+  this.optionsKanbanGOLabelContraction = {};
+  this.optionsKanbanGOLabelContraction.transformers = Object.assign({}, this.optionsKanbanGOStandard.transformers);
+  this.optionsKanbanGOLabelContraction.transformers.labelsAtFirstLevel = this.transformersStandard.shortener;
 
   /**@type {Object.<string, rpcCall: string, output: string, outputOptions: Object, inputs: Object>} */
   this.theFunctions  = {
@@ -48,7 +119,7 @@ function TestKanbanGO() {
       // If outputOptions are omitted or set to null, 
       // optionsKanbanGOStandard will be used.
       // If the empty object {} is given, no transformations will be carried out.
-      outputOptions: optionsKanbanGOStandard
+      outputOptions: this.optionsKanbanGOStandard
     },
     roundChangeRequests: {
       // if rpcCall omitted it will be assumed to be equal to the function label.
@@ -58,7 +129,7 @@ function TestKanbanGO() {
       // If outputOptions are omitted or set to null, 
       // optionsKanbanGOStandard will be used.
       // If the empty object {} is given, no transformations will be carried out.
-      outputOptions: optionsKanbanGOStandard
+      outputOptions: this.optionsKanbanGOStandard
     },
     dumpBlock: {
       inputs: {
@@ -71,7 +142,7 @@ function TestKanbanGO() {
     },
     validators: {
       output: ids.defaults.kanbanGO.outputSendReceive,
-      outputOptions: optionsKanbanGOLabelContraction
+      outputOptions: this.optionsKanbanGOLabelContraction
     },
     testSha3 : {
       //if rpcCall omitted it will be assumed to be equal to the function label.
@@ -180,39 +251,6 @@ function TestKanbanGO() {
   this.correctFunctions();
 }
 
-var optionsKanbanGOStandard = {
-  transformers: {
-    address: {
-      clickHandler: miscellaneousFrontEnd.revealLongWithParent,
-      transformer: miscellaneous.hexShortenerForDisplay
-    },
-    publicKey: {
-      clickHandler: miscellaneousFrontEnd.revealLongWithParent,
-      transformer: miscellaneous.hexShortenerForDisplay
-    },
-    payload: {
-      clickHandler: miscellaneousFrontEnd.revealLongWithParent,
-      transformer: miscellaneous.hexShortenerForDisplay
-    },
-    logsBloom: {
-      clickHandler: miscellaneousFrontEnd.revealLongWithParent,
-      transformer: miscellaneous.hexShortenerForDisplay
-    },
-    hash: {
-      clickHandler: miscellaneousFrontEnd.revealLongWithParent,
-      transformer: miscellaneous.hexShortenerForDisplay
-    },
-  }
-};
-
-var optionsKanbanGOLabelContraction = {};
-optionsKanbanGOLabelContraction.transformers = Object.assign({}, optionsKanbanGOStandard.transformers);
-
-optionsKanbanGOLabelContraction.transformers.labelsAtFirstLevel = {
-  clickHandler: miscellaneousFrontEnd.revealLongWithParent,
-  transformer: miscellaneous.hexShortenerForDisplay
-};
-
 function getSignerField(input, label) {
   var parsedInput = JSON.parse(input);
   var result = [];
@@ -229,13 +267,13 @@ function getSignerField(input, label) {
   return result;
 }
 
-TestKanbanGO.prototype.callbackAggregateSolutions = function(pendingCall, nodeId, input, output) {
+KanbanGoNodes.prototype.callbackAggregateSolutions = function(pendingCall, nodeId, input, output) {
   this.callbackStandard(pendingCall, nodeId, input, output);
   var solutions = getSignerField(input, "mySolution");
   submitRequests.updateValue(ids.defaults.kanbanGO.inputAggregateSignature.solutions, solutions.join(", "));
 }
 
-TestKanbanGO.prototype.callbackAggregateInitialization = function(pendingCall, nodeId, input, output) {
+KanbanGoNodes.prototype.callbackAggregateInitialization = function(pendingCall, nodeId, input, output) {
   this.callbackStandard(pendingCall, nodeId, input, output);
   var privateKeys = getSignerField(input, "privateKeyBase58");
   var publicKeys = getSignerField(input, "myPublicKey");
@@ -243,7 +281,7 @@ TestKanbanGO.prototype.callbackAggregateInitialization = function(pendingCall, n
   submitRequests.updateValue(ids.defaults.kanbanGO.inputAggregateSignature.publicKeys, publicKeys.join(", "));
 }
 
-TestKanbanGO.prototype.callbackAggregateCommitment = function(pendingCall, nodeId, input, output) {
+KanbanGoNodes.prototype.callbackAggregateCommitment = function(pendingCall, nodeId, input, output) {
   this.callbackStandard(pendingCall, nodeId, input, output);
   var commitments = getSignerField(input, "commitmentHexCompressed");
   var nonces = getSignerField(input, "myNonceBase58");
@@ -251,7 +289,7 @@ TestKanbanGO.prototype.callbackAggregateCommitment = function(pendingCall, nodeI
   submitRequests.updateValue(ids.defaults.kanbanGO.inputAggregateSignature.nonces, nonces.join(", "));
 }
 
-TestKanbanGO.prototype.correctFunctions = function() {  
+KanbanGoNodes.prototype.correctFunctions = function() {  
   for (var label in this.theFunctions) {
     var currentCall = this.theFunctions[label];
     if (currentCall.rpcCall === null || currentCall.rpcCall === undefined) {
@@ -263,7 +301,7 @@ TestKanbanGO.prototype.correctFunctions = function() {
   }
 }
 
-TestKanbanGO.prototype.updateFields = function(parsedInput, outputs) {
+KanbanGoNodes.prototype.updateFields = function(parsedInput, outputs) {
   if (parsedInput === undefined) {
     return;
   }
@@ -276,7 +314,7 @@ TestKanbanGO.prototype.updateFields = function(parsedInput, outputs) {
   }
 }
 
-TestKanbanGO.prototype.callbackStandard = function(/**@type {PendingCall} */ pendingCall, nodeId, input, output) {
+KanbanGoNodes.prototype.callbackStandard = function(/**@type {PendingCall} */ pendingCall, nodeId, input, output) {
   //console.log(`DEBUG: pendingCall id: ${pendingCall.id}, nodeId: ${nodeId}, input: ${input}`);
   pendingCall.nodeCalls[nodeId].result = input;
   pendingCall.numberReceived ++;
@@ -299,7 +337,7 @@ TestKanbanGO.prototype.callbackStandard = function(/**@type {PendingCall} */ pen
   delete this.pendingCalls[pendingCall.id];
 }
 
-TestKanbanGO.prototype.callbackStandardOneCaller = function(
+KanbanGoNodes.prototype.callbackStandardOneCaller = function(
   /**@type {PendingCall} */ 
   pendingCall, 
   input, 
@@ -311,7 +349,7 @@ TestKanbanGO.prototype.callbackStandardOneCaller = function(
   if (currentFunction.outputOptions !== null && currentFunction.outputOptions !== undefined) {
     options = Object.assign({}, currentFunction.outputOptions);
   } else {
-    options = Object.assign({}, optionsKanbanGOStandard);
+    options = Object.assign({}, this.optionsKanbanGOStandard);
   }
 
   if (!pendingCall.flagShowClearButton) {
@@ -342,7 +380,7 @@ TestKanbanGO.prototype.callbackStandardOneCaller = function(
   return resultHTML;
 }
 
-TestKanbanGO.prototype.testClear = function() {
+KanbanGoNodes.prototype.testClear = function() {
   var inputAggregate = ids.defaults.kanbanGO.inputAggregateSignature;
   submitRequests.updateValue(inputAggregate.numberOfPrivateKeysToGenerate, '5');
   submitRequests.updateValue(inputAggregate.privateKeys, '');
@@ -357,7 +395,7 @@ TestKanbanGO.prototype.testClear = function() {
   submitRequests.updateValue(inputAggregate.aggregateSignature, '');
 }
 
-TestKanbanGO.prototype.run = function(functionLabel) {
+KanbanGoNodes.prototype.run = function(functionLabel) {
   var initializer = kanbanGOFrontendInitializer.initializer;
   var currentId = initializer.selectedNode;
   this.numberOfCalls ++;
@@ -442,7 +480,7 @@ PendingCall.prototype.runOneId = function (nodeId) {
   }
 }
 
-var testFunctions = new TestKanbanGO();
+var testFunctions = new KanbanGoNodes();
 
 module.exports = {
   testFunctions

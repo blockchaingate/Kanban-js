@@ -19,10 +19,17 @@ sudo apt-get install libtool
 
 3. Configure the project.
 
+3.1 Without wallet support (recommended). 
 ```
 ./configure   --disable-bench --without-gui --disable-tests
 
 ```
+3.2 With wallet support (not recommended).
+```
+./configure --prefix=`pwd`/depends/x86_64-linux-gnu --with-gui=qt4 # Actually check what folder is created in depends after you built the dependencies and use that instead
+make
+```
+
 If nothing fails, go to Step 4. Else checkout Step 5, and return here when done.
 
 4. Make the project 
@@ -48,62 +55,32 @@ sudo add-apt-repository ppa:bitcoin/bitcoin
 sudo apt-get update
 sudo apt-get install libdb4.8-dev libdb4.8++-dev
 ```
-5. General dependencies.
+6. General dependencies.
 
 ```
 sudo apt-get install build-essential libtool autotools-dev automake pkg-config libssl-dev libevent-dev bsdmainutils python3
 ```
 
-6. Libevent.
+7. Libevent.
 ```
 sudo apt-get install libevent-dev
 ```
 
-7. Boost installation.
+8. Boost installation.
 ```
 sudo apt-get install libboost-system-dev libboost-filesystem-dev libboost-chrono-dev libboost-program-options-dev libboost-test-dev libboost-thread-dev
 ```
-8. Sodium installation.
+9. Sodium installation.
 ```
 sudo apt install libsodium-dev
 sudo apt install qt-sdk
 ```
 
-9. Libzmq3 and related: installation.
+10. Libzmq3 and related: installation.
 
 ```
 sudo add-apt-repository ppa:chris-lea/zeromq
 sudo apt-get update
 sudo apt-get install libzmq3-dev
 sudo apt-get install protobuf-compiler
-```
-
-7. 
-```
-cd depends
-make
-```
-
-8. Configure.
-
-```
-cd ..
-./autogen.sh
-```
-8.1. Configure with QT wallet.
-```
-./configure --prefix=`pwd`/depends/x86_64-linux-gnu --with-gui=qt4 # Actually check what folder is created in depends after you built the dependencies and use that instead
-make
-```
-8.2 Configure without QT wallet.
-```
-./configure --prefix=$Home/work --with-incompatible-bdb 
-make
-```
-
-9. Make & make install
-
-```
-make
-make install
 ```

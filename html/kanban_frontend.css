@@ -274,6 +274,7 @@ button.buttonRPCInput {
   border-radius: 2px;
   background-color: #f3f3f3;
   cursor: pointer;
+  font-family: 'Courier New', Courier, monospace;
   transition: 2s all;
 }
 button.buttonRPCInput:hover{

@@ -17,7 +17,7 @@ function FabNode () {
     shortener: {
       clickHandler: miscellaneousFrontend.revealLongWithParent,
       transformer: miscellaneousBackend.hexShortenerForDisplay
-    }
+    }, 
   };
 
   this.outputOptions = {
@@ -30,6 +30,7 @@ function FabNode () {
       hashUTXORoot: this.transformersStandard.shortener,
       merkleroot: this.transformersStandard.shortener,
       nonce: this.transformersStandard.shortener,
+      "tx.${number}": this.transformersStandard.shortener
     },
 
   };

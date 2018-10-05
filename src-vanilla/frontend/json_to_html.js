@@ -38,21 +38,43 @@ JSONTransformer.prototype.writeJSONtoDOMComponent =  function(inputJSON, theDomC
 
 var totalClickableEntries = 0;
 
-JSONTransformer.prototype.getClickableEntry = function(input, transformers, ambientLabel, parentLabel, grandParentLabel) {
+function getLabelString(input) {
+  if (typeof input === "string") {
+    if (Number(input).toString() === input) {
+      return "${number}";
+    }
+    return input;
+  }
+  if (typeof input === "number") {
+    return "${number}";
+  }
+  if (Array.isArray(input)) {
+    var result = "";
+    for (var i = 0; i < input.length; i ++) {
+      result += getLabelString(input[i]);
+      if (i !== input.length -1) {
+        result += ".";
+      }
+    }
+    return result;
+  }
+  return "unknown";
+}
+
+JSONTransformer.prototype.getClickableEntry = function(input, transformers, /** @type {string}*/ label) {
   if (transformers === undefined || transformers === null) {
     return input;
   } 
-  if (!(parentLabel in transformers)) {
+  if (!(label in transformers)) {
     return input;
   }
   //var shouldHighlight = true;
-  var theTransformer = transformers[parentLabel];
+  var theTransformer = transformers[label];
   //if (!shouldHighlight) {
   //  return input;
   //}
   return this.getClickableEntryUsingTransformer(input, theTransformer)
 }
-
 
 JSONTransformer.prototype.getClickableEntryUsingTransformer = function(input, theTransformer) {
   if (theTransformer === undefined || theTransformer === null) {
@@ -78,14 +100,15 @@ JSONTransformer.prototype.getClickableEntryUsingTransformer = function(input, th
 
 var totalEntriesToDisplayAtEnds = 4;
 
-JSONTransformer.prototype.getTableHorizontallyLaidFromJSON = function(input, transformers, ambientLabel, parentLabel, grandParentLabel) {
+JSONTransformer.prototype.getTableHorizontallyLaidFromJSON = function(input, transformers, label) {
   if (
     typeof input === "string" || 
     typeof input === "number" ||
     typeof input === "boolean"
   ) {
-    return this.getClickableEntry(input, transformers, ambientLabel, parentLabel, grandParentLabel);
+    return this.getClickableEntry(input, transformers, label);
   }
+  var newLabel;
   if (typeof input === "object") {
     var result = "";
     result += "<table class='tableJSON'>";
@@ -96,8 +119,11 @@ JSONTransformer.prototype.getTableHorizontallyLaidFromJSON = function(input, tra
     var numSoFar = 0;
     for (item in input) {
       numSoFar ++;
+      if (label !== "" && typeof label === "string") {
+        newLabel = getLabelString([label, item]);
+      }
       if (arrayLength == 0 || numSoFar <= totalEntriesToDisplayAtEnds || numSoFar > arrayLength - totalEntriesToDisplayAtEnds) {
-        result += `<tr><td>${item}</td><td>${this.getTableHorizontallyLaidFromJSON(input[item], transformers, ambientLabel, item, parentLabel)}</td></tr>`; 
+        result += `<tr><td>${item}</td><td>${this.getTableHorizontallyLaidFromJSON(input[item], transformers, newLabel)}</td></tr>`; 
       }
       if (arrayLength > 0 && numSoFar === totalEntriesToDisplayAtEnds && totalEntriesToDisplayAtEnds * 2 < arrayLength) {
         result += "<tr><td>...</td></tr>";
@@ -236,7 +262,8 @@ JSONTransformer.prototype.getHtmlFromArrayOfObjects = function(input, options) {
     for (var counterRow = 0; counterRow < labelsRows.rows.length; counterRow ++) {
       result += "<tr>";
       for (var counterColumn = 0; counterColumn < labelsRows.labels.length; counterColumn ++) {
-        result += `<td>${this.getTableHorizontallyLaidFromJSON(labelsRows.rows[counterRow][counterColumn], transformers, labelsRows.labels[counterColumn], labelsRows.labels[counterColumn])}</td>`;
+        var currentEntry = this.getTableHorizontallyLaidFromJSON(labelsRows.rows[counterRow][counterColumn], transformers, labelsRows.labels[counterColumn]);
+        result += `<td>${currentEntry}</td>`;
       }
       result += "</tr>";
     }
