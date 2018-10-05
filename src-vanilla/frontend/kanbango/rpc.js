@@ -107,11 +107,23 @@ function KanbanGoNodes() {
       nonce: this.transformersStandard.veryShort,
       stateRoot: this.transformersStandard.shortener,
       transactionsRoot: this.transformersStandard.shortener,
+      "messages.received.${number}.payload": this.transformersStandard.shortener,
+      "messages.received.${number}.from": this.transformersStandard.shortener,
+      "messages.received.${number}.to": this.transformersStandard.shortener,
+      "messages.sent.${number}.payload": this.transformersStandard.shortener,
+      "messages.sent.${number}.from": this.transformersStandard.shortener,
+      "messages.sent.${number}.to": this.transformersStandard.shortener,
+      proposerAddress: this.transformersStandard.shortener,
+      "view.blockHash": this.transformersStandard.shortener,
+      "${any}.address": this.transformersStandard.shortener,
+      "peerViews.${label}": this.transformersStandard.shortener,
+      "peerViews.${any}.Digest": this.transformersStandard.shortener,
+      "smallestMajorityView.Digest": this.transformersStandard.shortener,
     }
   };
   this.optionsKanbanGOLabelContraction = {};
   this.optionsKanbanGOLabelContraction.transformers = Object.assign({}, this.optionsKanbanGOStandard.transformers);
-  this.optionsKanbanGOLabelContraction.transformers.labelsAtFirstLevel = this.transformersStandard.shortener;
+  this.optionsKanbanGOLabelContraction.transformers["${label}"] = this.transformersStandard.shortener;
 
   /**@type {Object.<string, rpcCall: string, output: string, outputOptions: Object, inputs: Object>} */
   this.theFunctions  = {
