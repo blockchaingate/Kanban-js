@@ -13,6 +13,10 @@ function FabNode () {
     blockHash: {
       clickHandler: this.getBlockByHash.bind(this),
       transformer: miscellaneousBackend.hexShortenerForDisplay
+    },
+    shortener: {
+      clickHandler: miscellaneousFrontend.revealLongWithParent,
+      transformer: miscellaneousBackend.hexShortenerForDisplay
     }
   };
 
@@ -20,6 +24,12 @@ function FabNode () {
     transformers: {
       previousblockhash: this.transformersStandard.blockHash,
       nextblockhash: this.transformersStandard.blockHash,
+      hash: this.transformersStandard.blockHash,
+      chainwork: this.transformersStandard.shortener,
+      hashStateRoot: this.transformersStandard.shortener,
+      hashUTXORoot: this.transformersStandard.shortener,
+      merkleroot: this.transformersStandard.shortener,
+      nonce: this.transformersStandard.shortener,
     },
 
   };

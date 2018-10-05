@@ -1,18 +1,46 @@
-# Installing developer version of fabcoind on Ubuntu Linux
+# Installing developer version of fabcoind on Ubuntu Linux within Kanban
 
-Instructions from bitcoin repo follow. 
 
-https://github.com/bitcoin/bitcoin/blob/master/doc/build-unix.md
+1. Checkout the fabcoin repo in ``fabcoin-dev-sm01``. The current instructions
+assume that we are working off branch sm01. Should that change, replace sm01 in 
+the relevant branch you need to work on. 
 
-1. Checkout the repository.
-2. Navigate to the base folder. 
-3. Run 
+```
+  #  starting folder assumed to be the kanban base folder.
+git clone git@github.com:blockchaingate/fabcoin-dev.git fabcoin-dev-sm01
+cd fabcoin-dev-sm01
+git checkout sm01
+```
+2. Generate the configure file.
 ```
 sudo apt-get install autoconf
 sudo apt-get install libtool
 ```
 
-4. For the database installation.
+3. Configure the project.
+
+```
+./configure   --disable-bench --without-gui --disable-tests
+
+```
+If nothing fails, go to Step 4. Else checkout Step 5, and return here when done.
+
+4. Make the project 
+
+```
+make -j 10
+```
+
+The number 10 above is the number of cores to use, in this case 10. 
+Replace that number with what is appropriate for your machine.
+
+If everything goes through you are done. 
+
+If something fails in the make, it's most likely a 
+missing library or a bad library version.
+In that case, go to step 5.
+
+5. For the database installation.
 
 ```
 sudo apt-get install software-properties-common
@@ -26,17 +54,22 @@ sudo apt-get install libdb4.8-dev libdb4.8++-dev
 sudo apt-get install build-essential libtool autotools-dev automake pkg-config libssl-dev libevent-dev bsdmainutils python3
 ```
 
-5. Boost installation.
+6. Libevent.
+```
+sudo apt-get install libevent-dev
+```
+
+7. Boost installation.
 ```
 sudo apt-get install libboost-system-dev libboost-filesystem-dev libboost-chrono-dev libboost-program-options-dev libboost-test-dev libboost-thread-dev
 ```
-6. Sodium installation.
+8. Sodium installation.
 ```
 sudo apt install libsodium-dev
 sudo apt install qt-sdk
 ```
 
-7. Libzmq3 and related: installation.
+9. Libzmq3 and related: installation.
 
 ```
 sudo add-apt-repository ppa:chris-lea/zeromq
