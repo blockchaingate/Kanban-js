@@ -175,8 +175,8 @@ var rpcCalls = {
     },
     parameters: ["signature", "committedSigners", "allPublicKeysBase64", "messageBase64"]    
   },
-  dumpBlock: {
-    rpcCall: "dumpBlock",
+  getBlockByNumber: {
+    rpcCall: "getBlockByNumber",
     method: "kanban_getBlockByNumber",
     mandatoryFixedArguments: { //<- values give defaults, null for none
       verbose: true
@@ -192,6 +192,21 @@ var rpcCalls = {
     allowedArgumentValues: {
     },
     parameters: ["blockNumber", "verbose"]
+  },
+  getBlockByHash: {
+    rpcCall: "getBlockByHash",
+    method: "kanban_getBlockByHash",
+    mandatoryFixedArguments: { //<- values give defaults, null for none
+      verbose: true
+    },
+    mandatoryModifiableArguments: { //<- values give defaults, null for none
+      blockHash: null
+    },
+    optionalModifiableArguments: {
+    },
+    allowedArgumentValues: {
+    },
+    parameters: ["blockHash", "verbose"]
   },
     round: {
         rpcCall: "round",

@@ -9,7 +9,7 @@ var JSONTransformer = jsonToHtml.JSONTransformer;
 const globals = require('../globals');
 const kanbanGO = require('../../external_connections/kanbango/rpc');
 const kanbanGOFrontendInitializer = require('./initialization');
-const miscellaneous = require('../../miscellaneous');
+const miscellaneousBackend = require('../../miscellaneous');
 const miscellaneousFrontEnd = require('../miscellaneous_frontend');
 
 function PendingCall () {
@@ -41,12 +41,16 @@ function KanbanGoNodes() {
   this.transformersStandard = {
     shortener: {
       clickHandler: miscellaneousFrontEnd.revealLongWithParent,
-      transformer: miscellaneous.hexShortenerForDisplay
+      transformer: miscellaneousBackend.hexShortenerForDisplay
     },
     veryShort: {
       clickHandler: miscellaneousFrontEnd.revealLongWithParent,
-      transformer: miscellaneous.hexVeryShortDisplay
-    }
+      transformer: miscellaneousBackend.hexVeryShortDisplay
+    },
+    blockHash: {
+      clickHandler: this.getBlockByHash.bind(this),
+      transformer: miscellaneousBackend.hexShortenerForDisplay
+    },
   }
   // Specifies options for rpc kanban rpc output display.
   this.optionsKanbanGOStandard = {
@@ -96,11 +100,11 @@ function KanbanGoNodes() {
       publicKey: this.transformersStandard.shortener,
       payload: this.transformersStandard.shortener,
       logsBloom: this.transformersStandard.veryShort,
-      hash: this.transformersStandard.shortener,
+      hash: this.transformersStandard.blockHash,
       miner: this.transformersStandard.shortener,
       mixHash: this.transformersStandard.veryShort,
       hashNoSignature: this.transformersStandard.shortener,
-      parentHash: this.transformersStandard.shortener,
+      parentHash: this.transformersStandard.blockHash,
       receiptsRoot: this.transformersStandard.veryShort,
       sha3Uncles: this.transformersStandard.shortener,
       signature: this.transformersStandard.shortener,
@@ -147,9 +151,18 @@ function KanbanGoNodes() {
       // If the empty object {} is given, no transformations will be carried out.
       outputOptions: this.optionsKanbanGOStandard
     },
-    dumpBlock: {
+    getBlockByHash: {
+      inputs: {
+        blockHash: inputSendReceive.blockHash
+      },
+      output: ids.defaults.kanbanGO.outputSendReceive
+    },
+    getBlockByNumber: {
       inputs: {
         blockNumber: inputSendReceive.blockNumber
+      },
+      outputs: {
+        hash: inputSendReceive.blockHash        
       },
       output: ids.defaults.kanbanGO.outputSendReceive
     },
@@ -266,6 +279,13 @@ function KanbanGoNodes() {
   };
   this.correctFunctions();
 }
+
+KanbanGoNodes.prototype.getBlockByHash = function (container, inputHash) {
+  submitRequests.updateValue(ids.defaults.kanbanGO.inputSendReceive.blockHash, inputHash);
+  miscellaneousFrontEnd.revealLongWithParent(container, inputHash);
+  this.run('getBlockByHash');
+}
+
 
 function getSignerField(input, label) {
   var parsedInput = JSON.parse(input);

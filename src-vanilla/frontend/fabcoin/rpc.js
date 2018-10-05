@@ -6,7 +6,7 @@ const globals = require('../globals');
 const submitRequests = require('../submit_requests');
 const jsonToHtml = require('../json_to_html');
 const miscellaneousBackend = require('../../miscellaneous');
-const miscellaneousFrontend = require('../miscellaneous_frontend');
+const miscellaneousFrontEnd = require('../miscellaneous_frontend');
 
 function FabNode () {
   this.transformersStandard = {
@@ -15,7 +15,7 @@ function FabNode () {
       transformer: miscellaneousBackend.hexShortenerForDisplay
     },
     shortener: {
-      clickHandler: miscellaneousFrontend.revealLongWithParent,
+      clickHandler: miscellaneousFrontEnd.revealLongWithParent,
       transformer: miscellaneousBackend.hexShortenerForDisplay
     }, 
   };
@@ -64,7 +64,7 @@ function FabNode () {
 
 FabNode.prototype.getBlockByHash = function (container, inputHash) {
   submitRequests.updateValue(ids.defaults.fabcoin.inputBlockInfo.blockHash, inputHash);
-  miscellaneousFrontend.revealLongWithParent(container, inputHash);
+  miscellaneousFrontEnd.revealLongWithParent(container, inputHash);
   this.run('getBlockByHash');
 }
 

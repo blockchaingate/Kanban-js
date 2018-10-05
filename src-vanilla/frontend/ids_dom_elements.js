@@ -54,7 +54,8 @@ var defaults = {
       aggregateSignature: "inputKBGOAggregateSignature",
     },
     inputSendReceive: {
-      blockNumber: "inputKBGOBlockNumber"
+      blockNumber: "inputKBGOBlockNumber",
+      blockHash: "inputKBGOBlockHash"
     },
     inputInitialization: {
       numberOfNodes: "inputKBGONumberOfGethNodes"

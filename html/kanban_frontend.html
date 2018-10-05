@@ -33,15 +33,17 @@
   <table class = "tableKanbanPlusPlusTest"> 
   <tr><td>
   <table>
-    <tr><td><button class = "buttonStandard" onclick = "window.kanban.kanbanGO.rpc.testFunctions.run('dumpBlock');">Block</button></td></tr>
-    <tr><td><button class = "buttonStandard" onclick = "window.kanban.kanbanGO.rpc.testFunctions.run('round');">Round</button></td></tr>
-    <tr><td><button class = "buttonStandard" onclick = "window.kanban.kanbanGO.rpc.testFunctions.run('validators');">Validators</button></td></tr>
-    <tr><td><button class = "buttonStandard" onclick = "window.kanban.kanbanGO.rpc.testFunctions.run('peerView');">Peer View</button></td></tr>
-    <tr><td><button class = "buttonStandard" onclick = "window.kanban.kanbanGO.rpc.testFunctions.run('roundChangeRequests');">Round Change Requests</button></td></tr>
+    <tr><td><button class = "buttonStandard" style = "width:100%" onclick = "window.kanban.kanbanGO.rpc.testFunctions.run('getBlockByNumber');">Block by #</button></td></tr>
+    <tr><td><button class = "buttonStandard" style = "width:100%" onclick = "window.kanban.kanbanGO.rpc.testFunctions.run('getBlockByHash');">Block by hash</button></td></tr>
+    <tr><td><button class = "buttonStandard" style = "width:100%" onclick = "window.kanban.kanbanGO.rpc.testFunctions.run('round');">Round</button></td></tr>
+    <tr><td><button class = "buttonStandard" style = "width:100%" onclick = "window.kanban.kanbanGO.rpc.testFunctions.run('validators');">Validators</button></td></tr>
+    <tr><td><button class = "buttonStandard" style = "width:100%" onclick = "window.kanban.kanbanGO.rpc.testFunctions.run('peerView');">Peer View</button></td></tr>
+    <tr><td><button class = "buttonStandard" style = "width:100%" onclick = "window.kanban.kanbanGO.rpc.testFunctions.run('roundChangeRequests');">Change Round</button></td></tr>
   </table>
   </td>
   <td>
     <input id = "inputKBGOBlockNumber" class = "inputStandard" size = "90" placeholder = "block number" value = "5"></input><br>
+    <input id = "inputKBGOBlockHash" class = "inputStandard" size = "90" placeholder = "block hash"></input><br>
   </td>
   </tr>
   </table>
