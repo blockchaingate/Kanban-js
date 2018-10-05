@@ -19,19 +19,39 @@ function selectText(nodeId) {
 
 var numberOfRevealedContents = 0;
 
+function initializePanel(element) {
+  element.style.maxHeight = '0px';
+  element.style.maxWidth = '0px';
+  doToggleContent(element);
+}
+
+function doToggleContent(element) { 
+  if (element.style.maxHeight === '200px') {
+    element.style.opacity = '0';
+    element.style.maxHeight = '0';
+    element.style.maxWidth = '0';
+  } else {
+    element.style.opacity = '1';
+    element.style.maxHeight = '200px';
+    element.style.maxWidth = '1000px';
+  }
+}
+
 function revealLongWithParent(container, content) {
   if (container.nextElementSibling === null) {
     var parent = container.parentNode;
     var newSpan = document.createElement("span");
     numberOfRevealedContents ++;
     var nodeId = `revealedSpan${numberOfRevealedContents}`;
-    newSpan.innerHTML = `<br> <span id = "${nodeId}">${content}</span>`;
+    newSpan.id = nodeId;
+    newSpan.innerHTML = content;
+    newSpan.className = "panelRevealedContent";
     parent.insertBefore(newSpan, container.nextElementSibling);
     selectText(nodeId);
-  } else  {
-    container.nextElementSibling.remove();
+    setTimeout(initializePanel.bind(null, newSpan), 0);
+  } else {
+    doToggleContent(container.nextElementSibling);
   }
-
 }
 
 function attachModuleFullNameToHandlerNames(transformers, moduleFullName) {

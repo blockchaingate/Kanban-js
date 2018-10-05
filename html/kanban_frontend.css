@@ -375,3 +375,13 @@ table.tableTestKanban td, th{
 .form-control:placeholder-shown + .form-control-placeholder  {
   visibility: hidden;
 }
+
+span.panelRevealedContent {
+  display: block;
+  max-height: 0;
+  margin-top: 0px;
+  margin-bottom: 0px;
+  overflow: hidden;
+  transition: 1s linear;
+  opacity: 0;
+}
