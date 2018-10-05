@@ -76,6 +76,7 @@ JSONTransformer.prototype.getClickableEntry = function(input, transformers, /** 
   return this.getClickableEntryUsingTransformer(input, theTransformer)
 }
 
+/** @returns {string} */
 JSONTransformer.prototype.getClickableEntryUsingTransformer = function(input, theTransformer) {
   if (theTransformer === undefined || theTransformer === null) {
     return input;
@@ -194,6 +195,24 @@ function getClearParentButton() {
   return `<button id = '${theId}' class = "buttonProgress" onclick = "window.kanban.submitRequests.deleteParent(this.id);">clear</button>`;
 }
 
+var labelAbbreviations = {
+  "difficulty" : "diff.",
+  "gasUsed": "g.used",
+  "hashNoSignature": "hash no sig",
+  "logsBloom": "l-bloom",
+  "receiptsRoot": "rec.rt.",
+  "totalDifficulty": "tl. diff.",
+  "transactions": "txs",
+  "transactionsRoot": "txRoot",
+}
+
+function shortenHeaderIfNeedBe(/** @type {string}*/ header) {
+  if (!(header in labelAbbreviations)) {
+    return header
+  }
+  return labelAbbreviations[header];
+}
+
 JSONTransformer.prototype.getHtmlFromArrayOfObjects = function(input, options) {
   var doIncludeTogglePolling = false; 
   var doShowClearButton = true;
@@ -257,7 +276,11 @@ JSONTransformer.prototype.getHtmlFromArrayOfObjects = function(input, options) {
     result += "<table class='tableJSON'>";
     result += "<tr>";
     for (var counterColumn = 0; counterColumn < labelsRows.labels.length; counterColumn ++) {
-      result += `<th>${this.getClickableEntryUsingTransformer(labelsRows.labels[counterColumn], transformers.labelsAtFirstLevel)}</th>`;
+      var header = this.getClickableEntryUsingTransformer(labelsRows.labels[counterColumn], transformers.labelsAtFirstLevel);
+      if (transformers.labelsAtFirstLevel === undefined) {
+        header = `<small>${shortenHeaderIfNeedBe(header)}</small>`;
+      }
+      result += `<th>${header}</th>`;
     }
     for (var counterRow = 0; counterRow < labelsRows.rows.length; counterRow ++) {
       result += "<tr>";

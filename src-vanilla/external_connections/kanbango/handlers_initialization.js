@@ -472,7 +472,7 @@ KanbanGoInitializer.prototype.runNodesFinish = function(response) {
     }
   }
   if (nodeNotes.length > 0) {
-    result.nodeNotes = nodeNotes;
+    result.node = nodeNotes;
   }
   if (this.notes !== "") {
     result.notes = this.notes;

@@ -42,6 +42,10 @@ function KanbanGoNodes() {
     shortener: {
       clickHandler: miscellaneousFrontEnd.revealLongWithParent,
       transformer: miscellaneous.hexShortenerForDisplay
+    },
+    veryShort: {
+      clickHandler: miscellaneousFrontEnd.revealLongWithParent,
+      transformer: miscellaneous.hexVeryShortDisplay
     }
   }
   // Specifies options for rpc kanban rpc output display.
@@ -91,16 +95,16 @@ function KanbanGoNodes() {
       address: this.transformersStandard.shortener,
       publicKey: this.transformersStandard.shortener,
       payload: this.transformersStandard.shortener,
-      logsBloom: this.transformersStandard.shortener,
+      logsBloom: this.transformersStandard.veryShort,
       hash: this.transformersStandard.shortener,
       miner: this.transformersStandard.shortener,
-      mixHash: this.transformersStandard.shortener,
+      mixHash: this.transformersStandard.veryShort,
       hashNoSignature: this.transformersStandard.shortener,
       parentHash: this.transformersStandard.shortener,
-      receiptsRoot: this.transformersStandard.shortener,
+      receiptsRoot: this.transformersStandard.veryShort,
       sha3Uncles: this.transformersStandard.shortener,
       signature: this.transformersStandard.shortener,
-      nonce: this.transformersStandard.shortener,
+      nonce: this.transformersStandard.veryShort,
       stateRoot: this.transformersStandard.shortener,
       transactionsRoot: this.transformersStandard.shortener,
     }
@@ -412,7 +416,6 @@ KanbanGoNodes.prototype.run = function(functionLabel) {
   this.pendingCalls[this.numberOfCalls] = currentPendingCall;
   currentPendingCall.run(functionLabel);
 }
-
 
 PendingCall.prototype.run = function (functionLabel) {
   this.functionLabel = functionLabel;

@@ -34,6 +34,10 @@ function getDurationReadableFromDaysHoursAndMinutes(inputDays, inputHours, input
   return `${inputDays} d, ${inputHours} h, ${inputMinutes} min`;
 }
 
+function hexVeryShortDisplay(input) {
+  return "...";
+}
+
 function hexShortenerForDisplay(input){
   if (input.length < 10) {
     return input;
@@ -124,5 +128,6 @@ module.exports = {
   shortenString,
   SpeedReport, 
   removeQuotes,
-  convertToIntegerIfPossible
+  convertToIntegerIfPossible,
+  hexVeryShortDisplay
 }
