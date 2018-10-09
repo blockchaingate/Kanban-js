@@ -53,6 +53,14 @@ var rpcCalls = {
     },
     parameters: ["txid"]    
   },
+  decodeTransactionRaw: {
+    rpcCall: "decodeTransactionRaw",
+    method: "decoderawtransaction",
+    mandatoryModifiableArguments: {
+      hexString: null
+    },
+    parameters: ["hexString"]
+  }
 }
 
 function getPOSTBodyFromRPCLabel(theRPCLabel, theArguments) {

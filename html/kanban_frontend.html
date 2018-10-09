@@ -294,6 +294,7 @@
     <tr><td><button class = "buttonStandard" style = "width: 100px" onclick = "window.kanban.fabcoin.rpc.fabNode.run('getBlockByHash')">Block by hash</button></td></tr>
     <tr><td><button class = "buttonStandard" style = "width: 100px" onclick = "window.kanban.fabcoin.rpc.fabNode.run('generateBlocks')">Mine blocks</button></td></tr>
     <tr><td><button class = "buttonStandard" style = "width: 100px" onclick = "window.kanban.fabcoin.rpc.fabNode.run('getTransactionById')">Get tx</button></td></tr>
+    <tr><td><button class = "buttonStandard" style = "width: 100px" onclick = "window.kanban.fabcoin.rpc.fabNode.run('decodeTransactionRaw')">Decode txHex</button></td></tr>
   </table>
   </td>
   <td>
@@ -301,6 +302,7 @@
     <input type = "text" class = "inputCrypto" id = "inputFabcoinBlockHash" size = "90" value = "" placeholder = "block hash"></input><br>
     <input type = "text" class = "inputCrypto" id = "inputFabcoinNumberOfBlocksToGenerate" size = "90" value = "" placeholder = "# blocks to generate"></input><br>    
     <input type = "text" class = "inputCrypto" id = "inputFabcoinTransactionId" size = "90" value = "" placeholder = "tx id"></input><br>    
+    <input type = "text" class = "inputCrypto" id = "inputFabcoinTransactionHex" size = "90" value = "" placeholder = "tx hex"></input><br>    
   </td>
   </tr>
   </table>

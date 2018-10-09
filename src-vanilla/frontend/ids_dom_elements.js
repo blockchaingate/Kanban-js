@@ -102,7 +102,8 @@ var defaults = {
       blockNumber: "inputFabcoinBlockNumber",
       blockHash: "inputFabcoinBlockHash",
       numberOfBlocksToGenerate: "inputFabcoinNumberOfBlocksToGenerate",
-      txid: "inputFabcoinTransactionId"
+      txid: "inputFabcoinTransactionId",
+      txHex: "inputFabcoinTransactionHex",
     },
     outputFabcoinInitialization: "divOutputFabcoinInitialization",
     outputFabcoinBlockInfo: "duvOutputFabcoinBlockInfo"

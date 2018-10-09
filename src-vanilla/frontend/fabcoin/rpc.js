@@ -15,7 +15,8 @@ function FabNode () {
     shortener: {
       transformer: miscellaneousBackend.hexShortenerForDisplay
     },
-    transactionId: this.getSetInputAndRun(inputFabBlock.txid, "getTransactionById")
+    transactionId: this.getSetInputAndRun(inputFabBlock.txid, "getTransactionById"),
+    transactionHexDecoder: this.getSetInputAndRun(inputFabBlock.txHex, "decodeTransactionRaw")
   };
 
 
@@ -24,7 +25,7 @@ function FabNode () {
       previousblockhash: this.transformersStandard.blockHash,
       nextblockhash: this.transformersStandard.blockHash,
       blockhash: this.transformersStandard.blockHash,    
-      hex: this.transformersStandard.shortener,  
+      hex: this.transformersStandard.transactionHexDecoder,  
       hash: this.transformersStandard.blockHash,
       chainwork: this.transformersStandard.shortener,
       hashStateRoot: this.transformersStandard.shortener,
@@ -67,7 +68,15 @@ function FabNode () {
       inputs: {
         txid: inputFabBlock.txid
       },
+      outputs: {
+        hex: inputFabBlock.txHex
+      }, 
     },
+    decodeTransactionRaw: {
+      inputs: {
+        hexString: inputFabBlock.txHex
+      }
+    }
     //for labels please use the name of the rpc call found in fabRPCSpec.rpcCalls
   };  
 }
