@@ -64,9 +64,11 @@ function getRPCRequestJSON(rpcCallLabel, queryCommand, errors) {
   var currentParameters = [];
   for (var counterCommands = 0; counterCommands < currentRPCCall.parameters.length; counterCommands ++) {
     var currentParameterName = currentRPCCall.parameters[counterCommands];
-    if (currentParameterName in currentRPCCall.mandatoryFixedArguments) {
-      currentParameters.push(currentRPCCall.mandatoryFixedArguments[currentParameterName]);
-      continue;
+    if (currentRPCCall.mandatoryFixedArguments !== null && currentRPCCall.mandatoryFixedArguments !== undefined) {
+      if (currentParameterName in currentRPCCall.mandatoryFixedArguments) {
+        currentParameters.push(currentRPCCall.mandatoryFixedArguments[currentParameterName]);
+        continue;
+      }
     }
     if (currentParameterName in queryCommand) {
       var incomingParameter = queryCommand[currentParameterName];

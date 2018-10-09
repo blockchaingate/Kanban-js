@@ -5,7 +5,7 @@ const miscellaneousFrontEnd = require('./miscellaneous_frontend');
 function JSONTransformer() {
   /**@type string[] */
   this.bindIdsInOrder = [];
-  /**@type {Object.<string,{clickHandler:function, content: any, idExpandButton: string}>} */
+  /**@type {Object.<string,{clickHandler:function, content: any, idExpandButton: string, label: string}>} */
   this.bindings = {};
 }
 
@@ -25,12 +25,16 @@ JSONTransformer.prototype.bindButtons = function() {
   // To traverse the outer elements first then, we need to  
   // enumerate the elements in order opposite to creation order.
   for (var counterLabels = this.bindIdsInOrder.length - 1; counterLabels >= 0; counterLabels --) {
-    var label = this.bindIdsInOrder[counterLabels];
-    var currentElement = document.getElementById(label);
-    var currentLabelData = this.bindings[label];
+    var idToBindTo = this.bindIdsInOrder[counterLabels];
+    var currentElement = document.getElementById(idToBindTo);
+    var currentLabelData = this.bindings[idToBindTo];
     var currentHandler = currentLabelData.clickHandler;
     if (currentHandler !== undefined && currentHandler !== null && currentElement !== null) {
-      currentElement.addEventListener('click', currentHandler.bind(null, currentElement, currentLabelData.content));
+      var extraData = {
+        label: currentLabelData.label,
+
+      };
+      currentElement.addEventListener('click', currentHandler.bind(null, currentElement, currentLabelData.content, extraData));
     }
     if (currentLabelData.idExpandButton !== "") {
       var currentExpandButton = document.getElementById(currentLabelData.idExpandButton);
@@ -132,7 +136,6 @@ JSONTransformer.prototype.getClickableEntryUsingTransformer = function(input, th
   this.bindIdsInOrder.push(currentId);
   this.bindings[currentId] = {
     content: input,
-    grandParentLabel: null,
     clickHandler: theTransformer.clickHandler,
     idExpandButton: idExpandButton,
     label: label
@@ -373,7 +376,6 @@ JSONTransformer.prototype.getHtmlFromArrayOfObjects = function(input, options) {
   } else {
     result += `${this.getClickableEntryUsingTransformer(inputJSON, transformers.singleEntry, "singleEntry")}<br>`; 
   }
-
   return result;
 }
 

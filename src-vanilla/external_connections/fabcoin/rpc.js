@@ -45,6 +45,14 @@ var rpcCalls = {
     },
     parameters: ["hash"]
   },
+  getTransactionById: {
+    rpcCall: "getTransactionById",
+    method: "gettransaction",
+    mandatoryModifiableArguments: { //<- values give defaults, null for none
+      txid: null
+    },
+    parameters: ["txid"]    
+  },
 }
 
 function getPOSTBodyFromRPCLabel(theRPCLabel, theArguments) {

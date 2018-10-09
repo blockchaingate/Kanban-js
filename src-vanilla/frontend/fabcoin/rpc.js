@@ -9,36 +9,40 @@ const miscellaneousBackend = require('../../miscellaneous');
 const miscellaneousFrontEnd = require('../miscellaneous_frontend');
 
 function FabNode () {
+  var inputFabBlock = ids.defaults.fabcoin.inputBlockInfo;
   this.transformersStandard = {
-    blockHash: {
-      clickHandler: this.getBlockByHash.bind(this),
-      transformer: miscellaneousBackend.hexShortenerForDisplay
-    },
+    blockHash: this.getSetInputAndRun(inputFabBlock.blockHash, "getBlockByHash"),
     shortener: {
       transformer: miscellaneousBackend.hexShortenerForDisplay
-    }, 
+    },
+    transactionId: this.getSetInputAndRun(inputFabBlock.txid, "getTransactionById")
   };
+
 
   this.outputOptions = {
     transformers: {
       previousblockhash: this.transformersStandard.blockHash,
       nextblockhash: this.transformersStandard.blockHash,
+      blockhash: this.transformersStandard.blockHash,    
+      hex: this.transformersStandard.shortener,  
       hash: this.transformersStandard.blockHash,
       chainwork: this.transformersStandard.shortener,
       hashStateRoot: this.transformersStandard.shortener,
       hashUTXORoot: this.transformersStandard.shortener,
       merkleroot: this.transformersStandard.shortener,
       nonce: this.transformersStandard.shortener,
-      "tx.${number}": this.transformersStandard.shortener
+      "tx.${number}": this.transformersStandard.transactionId,
+      txid: this.transformersStandard.transactionId,
+      "details.${number}.address": this.transformersStandard.shortener,
     },
   };
 
   this.theFunctions = {
     getBlockByHeight: {
       inputs: {
-        blockNumber: ids.defaults.fabcoin.inputBlockInfo.blockNumber
+        blockNumber: inputFabBlock.blockNumber
       },
-      outputs: ids.defaults.fabcoin.inputBlockInfo.blockHash,
+      outputs: inputFabBlock.blockHash,
       callback: this.callbackGetBlockByHeight,
       outputOptions: {
         transformers: {
@@ -48,22 +52,50 @@ function FabNode () {
     },
     generateBlocks: {
       inputs: {
-        numberOfBlocks: ids.defaults.fabcoin.inputBlockInfo.numberOfBlocksToGenerate
+        numberOfBlocks: inputFabBlock.numberOfBlocksToGenerate
       }
     },
     getBlockByHash: {
       inputs: {
-        hash: ids.defaults.fabcoin.inputBlockInfo.blockHash
-      }
+        hash: inputFabBlock.blockHash
+      },
+      outputs: {
+        height: inputFabBlock.blockNumber
+      },
+    },
+    getTransactionById: {
+      inputs: {
+        txid: inputFabBlock.txid
+      },
     },
     //for labels please use the name of the rpc call found in fabRPCSpec.rpcCalls
   };  
 }
 
-FabNode.prototype.getBlockByHash = function (container, inputHash) {
-  submitRequests.updateValue(ids.defaults.fabcoin.inputBlockInfo.blockHash, inputHash);
-  miscellaneousFrontEnd.revealLongWithParent(container, inputHash);
-  this.run('getBlockByHash');
+FabNode.prototype.combineClickHandlers = function (/**@type {function[]}*/ functionArray, container, content, extraData) {
+  for (var counterFunction = 0; counterFunction < functionArray.length; counterFunction ++) {
+    functionArray[counterFunction](container, content);
+  }
+}
+
+FabNode.prototype.getSetInputAndRun = function (idOutput, functionLabelToFun) {
+  var setter = this.setInput.bind(this, idOutput);
+  var runner = this.run.bind(this, functionLabelToFun);
+  return {
+    clickHandler: this.combineClickHandlers.bind(this, [setter, runner]),
+    transformer: miscellaneousBackend.hexShortenerForDisplay
+  };  
+}
+
+FabNode.prototype.getSetInput = function (idOutput) {
+  return {
+    clickHandler: this.setInput.bind(this, idOutput),
+    transformer: miscellaneousBackend.hexShortenerForDisplay
+  };  
+}
+
+FabNode.prototype.setInput = function (idToSet, container, content, extraData) {
+  submitRequests.updateValue(idToSet, content);
 }
 
 FabNode.prototype.convertToCorrectType = function(functionLabel, variableName, inputRaw) {
@@ -133,8 +165,19 @@ FabNode.prototype.callbackStandard = function(functionLabel, input, output) {
   if (currentOutputs === undefined || currentOutputs === null) {
     return;
   }
-  if (typeof currentOutputs === "string") {
-    submitRequests.updateValue(currentOutputs, miscellaneousBackend.removeQuotes(input));
+  try {
+    var inputParsed = JSON.parse(input);
+
+    if (typeof currentOutputs === "string") {
+      submitRequests.updateValue(currentOutputs, miscellaneousBackend.removeQuotes(input));
+    }
+    if (typeof currentOutputs === "object") {
+      for (var label in currentOutputs) {
+        submitRequests.updateValue(currentOutputs[label], miscellaneousBackend.removeQuotes(inputParsed[label]))
+      }
+    } 
+  } catch (e) {
+    throw(`Fatal error parsing: ${input}. ${e}`);
   }
 }
 

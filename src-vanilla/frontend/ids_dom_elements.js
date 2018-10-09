@@ -101,7 +101,8 @@ var defaults = {
     inputBlockInfo: {
       blockNumber: "inputFabcoinBlockNumber",
       blockHash: "inputFabcoinBlockHash",
-      numberOfBlocksToGenerate: "inputFabcoinNumberOfBlocksToGenerate"
+      numberOfBlocksToGenerate: "inputFabcoinNumberOfBlocksToGenerate",
+      txid: "inputFabcoinTransactionId"
     },
     outputFabcoinInitialization: "divOutputFabcoinInitialization",
     outputFabcoinBlockInfo: "duvOutputFabcoinBlockInfo"
