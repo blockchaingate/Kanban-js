@@ -1,8 +1,9 @@
 "use srict";
 const submitRequests = require('./submit_requests');
+const miscellaneousFrontEnd = require('./miscellaneous_frontend');
 
 function JSONTransformer() {
-  /**@type {Object.<string,{clickHandler:function, content: any}>} */
+  /**@type {Object.<string,{clickHandler:function, content: any, idExpandButton: string}>} */
   this.bindings = {};
 }
 
@@ -22,7 +23,14 @@ JSONTransformer.prototype.bindButtons = function() {
     var currentElement = document.getElementById(label);
     var currentLabelData = this.bindings[label];
     var currentHandler = currentLabelData.clickHandler;
-    currentElement.addEventListener('click', currentHandler.bind(null, currentElement, currentLabelData.content));
+    if (currentHandler !== undefined && currentHandler !== null) {
+      currentElement.addEventListener('click', currentHandler.bind(null, currentElement, currentLabelData.content));
+    }
+    if (currentLabelData.idExpandButton !== "") {
+      var currentExpandButton = document.getElementById(currentLabelData.idExpandButton);
+      var expander = miscellaneousFrontEnd.revealLongWithParent.bind(null, currentExpandButton, currentLabelData.content);
+      currentExpandButton.addEventListener('click', expander);
+    }
   }
 }
 
@@ -99,19 +107,34 @@ JSONTransformer.prototype.getClickableEntryUsingTransformer = function(input, th
   }
   totalClickableEntries ++;
   var currentId = `buttonJSONTransformer${totalClickableEntries}`;
+  var idExpandButton = "";
+  if (theTransformer.transformer !== undefined && theTransformer.transformer !== null) {
+    idExpandButton = `JSONExpandButton${totalClickableEntries}`;
+  }
   this.bindings[currentId] = {
     content: input,
     grandParentLabel: null,
-    clickHandler: theTransformer.clickHandler
+    clickHandler: theTransformer.clickHandler,
+    idExpandButton: idExpandButton,
   }
   var result = "";
-  result += `<button class = "buttonRPCInput" id = "${currentId}">`; 
+  if (idExpandButton !== "") {
+    result += `<span class = "panelRPCWithExpansion">`;
+  }
+  if (theTransformer.clickHandler !== null && theTransformer.clickHandler !== undefined) {
+    result += `<button class = "buttonRPCInput" id = "${currentId}">`; 
+  }
   if (theTransformer.transformer !== undefined && theTransformer.transformer !== null) {
     result += theTransformer.transformer(input);
   } else {
     result += input;
   }
-  result += "</button>";
+  if (idExpandButton !== "") {
+    result += `<button id = "${idExpandButton}" class = "buttonJSONExpand">&#9668;</button></span>`;
+  }
+  if (theTransformer.clickHandler !== null && theTransformer.clickHandler !== undefined) {
+    result += "</button>";
+  }
   return result;
 }
 
@@ -223,7 +246,7 @@ var labelAbbreviations = {
   "hashNoSignature": "hash no sig",
   "logsBloom": "l-bloom",
   "receiptsRoot": "rec.rt.",
-  "totalDifficulty": "tl. diff.",
+  "totalDifficulty": "ttl diff.",
   "transactions": "txs",
   "transactionsRoot": "txRoot",
   "aggregateSignatureStatus": "agg. status",

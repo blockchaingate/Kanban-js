@@ -19,21 +19,23 @@ function selectText(nodeId) {
 
 var numberOfRevealedContents = 0;
 
-function initializePanel(element) {
+function initializePanel(container, element) {
   element.style.maxHeight = '0px';
   element.style.maxWidth = '0px';
-  doToggleContent(element);
+  doToggleContent(container, element);
 }
 
-function doToggleContent(element) { 
+function doToggleContent(container, element) { 
   if (element.style.maxHeight === '200px') {
     element.style.opacity = '0';
     element.style.maxHeight = '0';
     element.style.maxWidth = '0';
+    container.innerHTML = "&#9668;";
   } else {
     element.style.opacity = '1';
     element.style.maxHeight = '200px';
     element.style.maxWidth = '1000px';
+    container.innerHTML = "&#9660;";
   }
 }
 
@@ -48,9 +50,9 @@ function revealLongWithParent(container, content) {
     newSpan.className = "panelRevealedContent";
     parent.insertBefore(newSpan, container.nextElementSibling);
     selectText(nodeId);
-    setTimeout(initializePanel.bind(null, newSpan), 0);
+    setTimeout(initializePanel.bind(null, container, newSpan), 0);
   } else {
-    doToggleContent(container.nextElementSibling);
+    doToggleContent(container, container.nextElementSibling);
   }
 }
 

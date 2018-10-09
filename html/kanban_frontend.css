@@ -267,18 +267,37 @@ img.imgFabLogo{
   background-color: lightgreen;
 }
 
+button.buttonJSONExpand {
+  background: none;
+  outline: none;
+  border: none;
+  border-radius: 2px;
+  margin: 0px;
+  cursor: pointer;
+  transition: 2s all;
+}
+
+button.buttonJSONExpand:hover {
+  background-color: lightgray;
+}
+
 button.buttonRPCInput {
   background: none;
   outline: none;
   border: none;
   border-radius: 2px;
-  background-color: #f3f3f3;
+  margin: 0px;
   cursor: pointer;
-  font-family: 'Courier New', Courier, monospace;
   transition: 2s all;
+  font-family: 'Courier New', Courier, monospace;
+  background-color: #f3f3f3;
 }
 button.buttonRPCInput:hover{
   background-color: lightcyan;
+}
+
+span.panelRPCWithExpansion {
+  white-space: nowrap;
 }
 
 .updatedRecently {

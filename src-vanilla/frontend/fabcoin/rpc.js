@@ -15,7 +15,6 @@ function FabNode () {
       transformer: miscellaneousBackend.hexShortenerForDisplay
     },
     shortener: {
-      clickHandler: miscellaneousFrontEnd.revealLongWithParent,
       transformer: miscellaneousBackend.hexShortenerForDisplay
     }, 
   };
