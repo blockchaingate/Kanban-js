@@ -40,11 +40,9 @@ function KanbanGoNodes() {
 
   this.transformersStandard = {
     shortener: {
-      clickHandler: miscellaneousFrontEnd.revealLongWithParent,
       transformer: miscellaneousBackend.hexShortenerForDisplay
     },
     veryShort: {
-      clickHandler: miscellaneousFrontEnd.revealLongWithParent,
       transformer: miscellaneousBackend.hexVeryShortDisplay
     },
     blockHash: {
@@ -111,6 +109,7 @@ function KanbanGoNodes() {
       nonce: this.transformersStandard.veryShort,
       stateRoot: this.transformersStandard.shortener,
       transactionsRoot: this.transformersStandard.shortener,
+      "messages": this.transformersStandard.veryShort,
       "messages.received.${number}.payload": this.transformersStandard.shortener,
       "messages.received.${number}.from": this.transformersStandard.shortener,
       "messages.received.${number}.to": this.transformersStandard.shortener,
@@ -123,6 +122,10 @@ function KanbanGoNodes() {
       "peerViews.${label}": this.transformersStandard.shortener,
       "peerViews.${any}.Digest": this.transformersStandard.shortener,
       "smallestMajorityView.Digest": this.transformersStandard.shortener,
+      privateKeyBase58: this.transformersStandard.shortener,
+      privateKeyBase58Check: this.transformersStandard.shortener,
+      privateKeyBase64: this.transformersStandard.shortener,
+      privateKeyHex: this.transformersStandard.shortener,
     }
   };
   this.optionsKanbanGOLabelContraction = {};
@@ -154,6 +157,9 @@ function KanbanGoNodes() {
     getBlockByHash: {
       inputs: {
         blockHash: inputSendReceive.blockHash
+      },
+      outputs: {
+        number: inputSendReceive.blockNumber
       },
       output: ids.defaults.kanbanGO.outputSendReceive
     },

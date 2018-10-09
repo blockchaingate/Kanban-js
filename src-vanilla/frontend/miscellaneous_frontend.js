@@ -20,7 +20,7 @@ function selectText(nodeId) {
 var numberOfRevealedContents = 0;
 
 function initializePanel(container, element) {
-  element.style.maxHeight = '0px';
+  element.style.maxHeight = '200px';
   element.style.maxWidth = '0px';
   doToggleContent(container, element);
 }
@@ -34,23 +34,27 @@ function doToggleContent(container, element) {
   } else {
     element.style.opacity = '1';
     element.style.maxHeight = '200px';
-    element.style.maxWidth = '1000px';
+    element.style.maxWidth = '1500px';
     container.innerHTML = "&#9660;";
   }
 }
 
+function getPanelForRevealing(container, content) {
+  var parent = container.parentNode;
+  var newSpan = document.createElement("span");
+  numberOfRevealedContents ++;
+  var nodeId = `revealedSpan${numberOfRevealedContents}`;
+  newSpan.id = nodeId;
+  newSpan.innerHTML = content;
+  newSpan.className = "panelRevealedContent";
+  parent.insertBefore(newSpan, container.nextElementSibling);
+  selectText(nodeId);
+  setTimeout(initializePanel.bind(null, container, newSpan), 0);
+}
+
 function revealLongWithParent(container, content) {
   if (container.nextElementSibling === null) {
-    var parent = container.parentNode;
-    var newSpan = document.createElement("span");
-    numberOfRevealedContents ++;
-    var nodeId = `revealedSpan${numberOfRevealedContents}`;
-    newSpan.id = nodeId;
-    newSpan.innerHTML = content;
-    newSpan.className = "panelRevealedContent";
-    parent.insertBefore(newSpan, container.nextElementSibling);
-    selectText(nodeId);
-    setTimeout(initializePanel.bind(null, container, newSpan), 0);
+    getPanelForRevealing(container, content);
   } else {
     doToggleContent(container, container.nextElementSibling);
   }
@@ -69,5 +73,6 @@ function attachModuleFullNameToHandlerNames(transformers, moduleFullName) {
 
 module.exports = {
   attachModuleFullNameToHandlerNames,
-  revealLongWithParent
+  revealLongWithParent,
+  getPanelForRevealing
 }

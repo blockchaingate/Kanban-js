@@ -31,7 +31,6 @@ function FabNode () {
       nonce: this.transformersStandard.shortener,
       "tx.${number}": this.transformersStandard.shortener
     },
-
   };
 
   this.theFunctions = {

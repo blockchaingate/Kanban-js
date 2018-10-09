@@ -3,6 +3,8 @@ const submitRequests = require('./submit_requests');
 const miscellaneousFrontEnd = require('./miscellaneous_frontend');
 
 function JSONTransformer() {
+  /**@type string[] */
+  this.bindIdsInOrder = [];
   /**@type {Object.<string,{clickHandler:function, content: any, idExpandButton: string}>} */
   this.bindings = {};
 }
@@ -19,23 +21,31 @@ var keyWeights = {
 };
 
 JSONTransformer.prototype.bindButtons = function() {
-  for (var label in this.bindings) {
+  // Inside elements are processed first.
+  // To traverse the outer elements first then, we need to  
+  // enumerate the elements in order opposite to creation order.
+  for (var counterLabels = this.bindIdsInOrder.length - 1; counterLabels >= 0; counterLabels --) {
+    var label = this.bindIdsInOrder[counterLabels];
     var currentElement = document.getElementById(label);
     var currentLabelData = this.bindings[label];
     var currentHandler = currentLabelData.clickHandler;
-    if (currentHandler !== undefined && currentHandler !== null) {
+    if (currentHandler !== undefined && currentHandler !== null && currentElement !== null) {
       currentElement.addEventListener('click', currentHandler.bind(null, currentElement, currentLabelData.content));
     }
     if (currentLabelData.idExpandButton !== "") {
       var currentExpandButton = document.getElementById(currentLabelData.idExpandButton);
-      var expander = miscellaneousFrontEnd.revealLongWithParent.bind(null, currentExpandButton, currentLabelData.content);
-      currentExpandButton.addEventListener('click', expander);
+      if (currentExpandButton !== null) {
+        var expander = miscellaneousFrontEnd.revealLongWithParent.bind(null, currentExpandButton, currentLabelData.content);
+        currentExpandButton.addEventListener('click', expander);
+        miscellaneousFrontEnd.getPanelForRevealing(currentExpandButton, currentLabelData.content);
+      }
     }
   }
 }
 
 JSONTransformer.prototype.writeJSONtoDOMComponent =  function(inputJSON, theDomComponent, options) {
   this.bindings = {};
+  this.bindIdsInOrder = [];
   if (typeof theDomComponent === "string") {
     theDomComponent = document.getElementById(theDomComponent);
   }
@@ -60,7 +70,7 @@ function getLabelString(input) {
     var result = "";
     for (var i = 0; i < input.length; i ++) {
       result += getLabelString(input[i]);
-      if (i !== input.length -1) {
+      if (i !== input.length - 1) {
         result += ".";
       }
     }
@@ -91,19 +101,27 @@ function getTransformerForLabel(/** @type {string} */ label, transformers) {
 
 JSONTransformer.prototype.getClickableEntry = function(input, transformers, /** @type {string}*/ label) {
   if (transformers === undefined || transformers === null) {
-    return input;
+    return processInputStringStandard(input);
   }
   var theTransformer = getTransformerForLabel(label, transformers);
   if (theTransformer === null) {
-    return input;
+    return processInputStringStandard(input);
   }
-  return this.getClickableEntryUsingTransformer(input, theTransformer)
+  return this.getClickableEntryUsingTransformer(input, theTransformer, label)
 }
 
 /** @returns {string} */
-JSONTransformer.prototype.getClickableEntryUsingTransformer = function(input, theTransformer) {
-  if (theTransformer === undefined || theTransformer === null) {
+function processInputStringStandard(input) {
+  if (typeof input !== "number") {
     return input;
+  }
+  return input.toFixed();
+}
+
+/** @returns {string} */
+JSONTransformer.prototype.getClickableEntryUsingTransformer = function(input, theTransformer, label) {
+  if (theTransformer === undefined || theTransformer === null) {
+    return processInputStringStandard(input);
   }
   totalClickableEntries ++;
   var currentId = `buttonJSONTransformer${totalClickableEntries}`;
@@ -111,11 +129,13 @@ JSONTransformer.prototype.getClickableEntryUsingTransformer = function(input, th
   if (theTransformer.transformer !== undefined && theTransformer.transformer !== null) {
     idExpandButton = `JSONExpandButton${totalClickableEntries}`;
   }
+  this.bindIdsInOrder.push(currentId);
   this.bindings[currentId] = {
     content: input,
     grandParentLabel: null,
     clickHandler: theTransformer.clickHandler,
     idExpandButton: idExpandButton,
+    label: label
   }
   var result = "";
   if (idExpandButton !== "") {
@@ -127,10 +147,11 @@ JSONTransformer.prototype.getClickableEntryUsingTransformer = function(input, th
   if (theTransformer.transformer !== undefined && theTransformer.transformer !== null) {
     result += theTransformer.transformer(input);
   } else {
-    result += input;
+    result += processInputStringStandard(input);
   }
   if (idExpandButton !== "") {
-    result += `<button id = "${idExpandButton}" class = "buttonJSONExpand">&#9668;</button></span>`;
+    result += `<button id = "${idExpandButton}" class = "buttonJSONExpand">&#9668;</button>`;
+    result += `</span>`;
   }
   if (theTransformer.clickHandler !== null && theTransformer.clickHandler !== undefined) {
     result += "</button>";
@@ -152,15 +173,17 @@ JSONTransformer.prototype.getTableHorizontallyLaidFromJSON = function(input, tra
     return typeof input;
   }
   var newLabel;
-  var result = "";
-  result += "<table class='tableJSON'>";
   var arrayLength = 0;
   if (Array.isArray(input)) {
     arrayLength = input.length;
   } 
   var numSoFar = 0;
+  var transformerAll = getTransformerForLabel(label, transformers);
+
   var labelTransformer = getTransformerForLabel(label + ".${label}", transformers);
   var labelToDisplay = "";
+  var resultContent = "";
+  resultContent += "<table class='tableJSON'>";
   for (item in input) {
     numSoFar ++;
     if (label !== "" && typeof label === "string") {
@@ -169,16 +192,17 @@ JSONTransformer.prototype.getTableHorizontallyLaidFromJSON = function(input, tra
     if (labelTransformer === null) {
       labelToDisplay = abbreviateLabel(item);
     } else {
-      labelToDisplay = this.getClickableEntryUsingTransformer(item, labelTransformer);
+      labelToDisplay = this.getClickableEntryUsingTransformer(item, labelTransformer, item);
     }
-      if (arrayLength == 0 || numSoFar <= totalEntriesToDisplayAtEnds || numSoFar > arrayLength - totalEntriesToDisplayAtEnds) {
-      result += `<tr><td>${labelToDisplay}</td><td>${this.getTableHorizontallyLaidFromJSON(input[item], transformers, newLabel)}</td></tr>`; 
+    if (arrayLength == 0 || numSoFar <= totalEntriesToDisplayAtEnds || numSoFar > arrayLength - totalEntriesToDisplayAtEnds) {
+      resultContent += `<tr><td>${labelToDisplay}</td><td>${this.getTableHorizontallyLaidFromJSON(input[item], transformers, newLabel)}</td></tr>`; 
     }
     if (arrayLength > 0 && numSoFar === totalEntriesToDisplayAtEnds && totalEntriesToDisplayAtEnds * 2 < arrayLength) {
-      result += "<tr><td>...</td></tr>";
+      resultContent += "<tr><td>...</td></tr>";
     }
   }
-  result += "</table>";
+  resultContent += "</table>";
+  var result = this.getClickableEntryUsingTransformer(resultContent, transformerAll, label);
   return result;  
 }
 
@@ -255,6 +279,7 @@ var labelAbbreviations = {
   "proposerAddress": "prop.addr.",
   "proposerIndex": "prop.#",
   "address": "addr.",
+  "strippedsize": "strip"
 }
 
 function abbreviateLabel(/** @type {string}*/ header) {
@@ -327,7 +352,7 @@ JSONTransformer.prototype.getHtmlFromArrayOfObjects = function(input, options) {
     result += "<table class='tableJSON'>";
     result += "<tr>";
     for (var counterColumn = 0; counterColumn < labelsRows.labels.length; counterColumn ++) {
-      var header = this.getClickableEntryUsingTransformer(labelsRows.labels[counterColumn], transformers["${label}"]);
+      var header = this.getClickableEntryUsingTransformer(labelsRows.labels[counterColumn], transformers["${label}"], "${label}");
       if (transformers["${label}"] === undefined) {
         header = `<small>${abbreviateLabel(header)}</small>`;
       }
@@ -346,7 +371,7 @@ JSONTransformer.prototype.getHtmlFromArrayOfObjects = function(input, options) {
   } else if (shouldLayoutAsArrayTable) {
     result += this.getTableHorizontallyLaidFromJSON(inputJSON, transformers, "", "", "");
   } else {
-    result += `${this.getClickableEntryUsingTransformer(inputJSON, transformers.singleEntry)}<br>`; 
+    result += `${this.getClickableEntryUsingTransformer(inputJSON, transformers.singleEntry, "singleEntry")}<br>`; 
   }
 
   return result;
