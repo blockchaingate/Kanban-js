@@ -36,6 +36,9 @@ function doToggleContent(container, element) {
     element.style.maxHeight = '200px';
     element.style.maxWidth = '1500px';
     container.innerHTML = "&#9660;";
+    if (element.getElementsByClassName("tableJSON").length === 0) {
+      selectText(element.id);
+    }
   }
 }
 
@@ -48,7 +51,6 @@ function getPanelForRevealing(container, content) {
   newSpan.innerHTML = content;
   newSpan.className = "panelRevealedContent";
   parent.insertBefore(newSpan, container.nextElementSibling);
-  selectText(nodeId);
   setTimeout(initializePanel.bind(null, container, newSpan), 0);
 }
 
