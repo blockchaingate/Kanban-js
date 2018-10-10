@@ -104,6 +104,11 @@ var defaults = {
       numberOfBlocksToGenerate: "inputFabcoinNumberOfBlocksToGenerate",
       txid: "inputFabcoinTransactionId",
       txHex: "inputFabcoinTransactionHex",
+      address: "inputFabcoinAddress",
+      publicKey: "inputFabcoinPublicKey",
+      privateKey: "inputFabcoinPrivateKey",
+      vout: "inputFabcoinVout",
+//      toAddress: "inputFabcoinToAddress",
     },
     outputFabcoinInitialization: "divOutputFabcoinInitialization",
     outputFabcoinBlockInfo: "duvOutputFabcoinBlockInfo"

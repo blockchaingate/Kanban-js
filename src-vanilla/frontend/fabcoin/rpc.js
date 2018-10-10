@@ -11,14 +11,21 @@ const miscellaneousFrontEnd = require('../miscellaneous_frontend');
 function FabNode () {
   var inputFabBlock = ids.defaults.fabcoin.inputBlockInfo;
   this.transformersStandard = {
-    blockHash: this.getSetInputAndRun(inputFabBlock.blockHash, "getBlockByHash"),
+    blockHash: this.getSetInputAndRunWithShortener(inputFabBlock.blockHash, "getBlockByHash"),
     shortener: {
       transformer: miscellaneousBackend.hexShortenerForDisplay
     },
-    transactionId: this.getSetInputAndRun(inputFabBlock.txid, "getTransactionById"),
-    transactionHexDecoder: this.getSetInputAndRun(inputFabBlock.txHex, "decodeTransactionRaw")
+    extremeShortener: {
+      transformer: miscellaneousBackend.hexVeryShortDisplay
+    },
+    transactionId: this.getSetInputAndRunWithShortener(inputFabBlock.txid, "getTransactionById"),
+    transactionHexDecoder: this.getSetInputAndRunWithShortener(inputFabBlock.txHex, "decodeTransactionRaw"),
+    setAddress: this.getSetInputWithShortener(inputFabBlock.address),
+    setAddressWithVout: {
+      clickHandler: this.setAddressWithVout,
+      transformer: miscellaneousBackend.hexShortenerForDisplay
+    },
   };
-
 
   this.outputOptions = {
     transformers: {
@@ -34,7 +41,8 @@ function FabNode () {
       nonce: this.transformersStandard.shortener,
       "tx.${number}": this.transformersStandard.transactionId,
       txid: this.transformersStandard.transactionId,
-      "details.${number}.address": this.transformersStandard.shortener,
+      "details.${number}.address": this.transformersStandard.setAddress,
+      "vout.${number}.scriptPubKey.addresses.${number}": this.transformersStandard.setAddressWithVout
     },
   };
 
@@ -92,6 +100,12 @@ function FabNode () {
       inputs: {
         hexString: inputFabBlock.txHex
       }
+    },
+    dumpPrivateKey: {
+      inputs: {
+        address: inputFabBlock.address
+      },
+      outputs: inputFabBlock.privateKey
     }
     //for labels please use the name of the rpc call found in fabRPCSpec.rpcCalls
   };  
@@ -103,7 +117,7 @@ FabNode.prototype.combineClickHandlers = function (/**@type {function[]}*/ funct
   }
 }
 
-FabNode.prototype.getSetInputAndRun = function (idOutput, functionLabelToFun) {
+FabNode.prototype.getSetInputAndRunWithShortener = function (idOutput, functionLabelToFun) {
   var setter = this.setInput.bind(this, idOutput);
   var runner = this.run.bind(this, functionLabelToFun);
   return {
@@ -112,14 +126,29 @@ FabNode.prototype.getSetInputAndRun = function (idOutput, functionLabelToFun) {
   };  
 }
 
-FabNode.prototype.getSetInput = function (idOutput) {
+FabNode.prototype.getSetInputNoShortener = function (idOutput) {
+  return {
+    clickHandler: this.setInput.bind(this, idOutput)
+  };  
+}
+
+FabNode.prototype.getSetInputWithShortener = function (idOutput) {
   return {
     clickHandler: this.setInput.bind(this, idOutput),
     transformer: miscellaneousBackend.hexShortenerForDisplay
   };  
 }
 
+FabNode.prototype.setAddressWithVout = function (container, content, extraData) {
+  var extraDataString = JSON.stringify(extraData);
+  console.log(`DEBUG: Content: ${content}, extra data: ${extraDataString}`);
+  submitRequests.updateValue(ids.defaults.fabcoin.inputBlockInfo.address, content);
+  submitRequests.updateValue(ids.defaults.fabcoin.inputBlockInfo.vout, extraData.labelArray[extraData.labelArray.length - 1]);
+}
+
 FabNode.prototype.setInput = function (idToSet, container, content, extraData) {
+  //var extraDataString = JSON.stringify(extraData);
+  //console.log(`DEBUG: Content: ${content}, extra data: ${extraDataString}`);
   submitRequests.updateValue(idToSet, content);
 }
 

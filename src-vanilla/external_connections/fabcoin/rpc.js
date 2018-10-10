@@ -79,6 +79,14 @@ var rpcCalls = {
       maxDisplay: 1000
     },
     parameters: ["start", "maxDisplay"]
+  },
+  dumpPrivateKey: {
+    rpcCall: "dumpPrivateKey",
+    method: "dumpprivkey",
+    mandatoryModifiableArguments: {
+      address: null
+    },
+    parameters: ["address"]
   }
 }
 
