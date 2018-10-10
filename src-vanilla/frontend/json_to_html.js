@@ -175,15 +175,23 @@ JSONTransformer.prototype.getTableHorizontallyLaidFromJSON = function(input, tra
   if (typeof input !== "object") {
     return typeof input;
   }
-  var newLabel;
+  var newLabel = "";
   var arrayLength = 0;
   if (Array.isArray(input)) {
     arrayLength = input.length;
   } 
   var numSoFar = 0;
-  var transformerAll = getTransformerForLabel(label, transformers);
-
-  var labelTransformer = getTransformerForLabel(label + ".${label}", transformers);
+  var transformerAll = null;
+  if (label !== null && label !== undefined) {
+    transformerAll = getTransformerForLabel(label, transformers);
+  }
+  var labelOfLabel;
+  if (label !== null && label !== undefined) {
+    labelOfLabel = label + ".${label}";
+  } else {
+    labelOfLabel = "${label}"; 
+  }
+  var labelTransformer = getTransformerForLabel(labelOfLabel, transformers);
   var labelToDisplay = "";
   var resultContent = "";
   resultContent += "<table class='tableJSON'>";
@@ -191,6 +199,8 @@ JSONTransformer.prototype.getTableHorizontallyLaidFromJSON = function(input, tra
     numSoFar ++;
     if (label !== "" && typeof label === "string") {
       newLabel = getLabelString([label, item]);
+    } else {
+      newLabel = getLabelString(item);
     }
     if (labelTransformer === null) {
       labelToDisplay = abbreviateLabel(item);
@@ -364,7 +374,11 @@ JSONTransformer.prototype.getHtmlFromArrayOfObjects = function(input, options) {
     for (var counterRow = 0; counterRow < labelsRows.rows.length; counterRow ++) {
       result += "<tr>";
       for (var counterColumn = 0; counterColumn < labelsRows.labels.length; counterColumn ++) {
-        var currentEntry = this.getTableHorizontallyLaidFromJSON(labelsRows.rows[counterRow][counterColumn], transformers, labelsRows.labels[counterColumn]);
+        var currentEntry = this.getTableHorizontallyLaidFromJSON(
+          labelsRows.rows[counterRow][counterColumn], 
+          transformers, 
+          labelsRows.labels[counterColumn]
+        );
         result += `<td>${currentEntry}</td>`;
       }
       result += "</tr>";
@@ -372,7 +386,7 @@ JSONTransformer.prototype.getHtmlFromArrayOfObjects = function(input, options) {
     result += "</tr>";
     result += "</table>";
   } else if (shouldLayoutAsArrayTable) {
-    result += this.getTableHorizontallyLaidFromJSON(inputJSON, transformers, "", "", "");
+    result += this.getTableHorizontallyLaidFromJSON(inputJSON, transformers, null);
   } else {
     result += `${this.getClickableEntryUsingTransformer(inputJSON, transformers.singleEntry, "singleEntry")}<br>`; 
   }

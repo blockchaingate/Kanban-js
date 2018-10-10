@@ -22,6 +22,26 @@ var rpcCalls = {
     },
     parameters: ["blockNumber"]
   },
+  getBlockCount: {
+    rpcCall: "getBlockCount",
+    method: "getblockcount",
+    parameters: []
+  },
+  getBestBlockHash: {
+    rpcCall: "getBestBlockHash",
+    method: "getbestblockhash",
+    parameters: []
+  },
+  getBlockByHash: {
+    rpcCall: "getBlockByHash", //<- must be the same as the command name, used for autocomplete purposes
+    method: "getblock", //<- rpc method name 
+    mandatoryFixedArguments: { //<- values give defaults, null for none
+    },
+    mandatoryModifiableArguments: { //<- values give defaults, null for none
+      hash: null
+    },
+    parameters: ["hash"]
+  },
   generateBlocks: {
     rpcCall: "generateBlocks", //<- must be the same as the command name, used for autocomplete purposes
     method: "generate", //<- rpc method name 
@@ -34,16 +54,6 @@ var rpcCalls = {
       numberOfBlocks: "number"
     },
     parameters: ["numberOfBlocks"]
-  },
-  getBlockByHash: {
-    rpcCall: "getBlockByHash", //<- must be the same as the command name, used for autocomplete purposes
-    method: "getblock", //<- rpc method name 
-    mandatoryFixedArguments: { //<- values give defaults, null for none
-    },
-    mandatoryModifiableArguments: { //<- values give defaults, null for none
-      hash: null
-    },
-    parameters: ["hash"]
   },
   getTransactionById: {
     rpcCall: "getTransactionById",
@@ -60,6 +70,15 @@ var rpcCalls = {
       hexString: null
     },
     parameters: ["hexString"]
+  },
+  listContracts: {
+    rpcCall: "listContract",
+    method: "listcontracts",
+    mandatoryModifiableArguments:{
+      start: 1,
+      maxDisplay: 1000
+    },
+    parameters: ["start", "maxDisplay"]
   }
 }
 

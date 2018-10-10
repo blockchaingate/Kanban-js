@@ -54,6 +54,22 @@ function FabNode () {
     generateBlocks: {
       inputs: {
         numberOfBlocks: inputFabBlock.numberOfBlocksToGenerate
+      },
+      outputOptions: {
+        transformers: {
+          "${number}": this.transformersStandard.blockHash
+        }
+      }
+    },
+    getBlockCount: {
+      outputs: inputFabBlock.blockNumber
+    },
+    getBestBlockHash: {
+      outputs: inputFabBlock.blockHash,
+      outputOptions: {
+        transformers: {
+          singleEntry: this.transformersStandard.blockHash
+        }
       }
     },
     getBlockByHash: {

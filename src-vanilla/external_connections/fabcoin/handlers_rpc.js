@@ -84,6 +84,11 @@ function getRPCRequestJSON(rpcCallLabel, queryCommand, errors) {
     }
     if (currentRPCCall.mandatoryModifiableArguments !== undefined && currentRPCCall.mandatoryModifiableArguments !== null) {
       if (currentParameterName in currentRPCCall.mandatoryModifiableArguments) {
+        var defaultValue = currentRPCCall.mandatoryModifiableArguments[currentParameterName]; 
+        if (defaultValue !== null && defaultValue !== undefined) {
+          currentParameters.push(defaultValue);
+          continue;
+        }
         errors.push(`Missing parameter ${currentParameterName} in method ${rpcCallLabel}.`);
         return {};
       }
