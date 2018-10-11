@@ -164,6 +164,13 @@ function FabNode () {
         contractHex: inputFabBlock.contractHex
       }
     },
+    createDataTransaction: {
+      rpcCall: fabRPCSpec.rpcCalls.createRawTransaction.rpcCall,
+      inputs: {
+        inputs: this.getObjectFromInput.bind(this, inputFabBlock.txInputs),
+        outputs: this.getObjectFromInput.bind(this, inputFabBlock.txOutputs),
+      }
+    }
   };  
 }
 
@@ -273,11 +280,11 @@ FabNode.prototype.setInput = function (idToSet, container, content, extraData) {
   submitRequests.updateValue(idToSet, content);
 }
 
-FabNode.prototype.convertToCorrectType = function(functionLabel, variableName, inputRaw) {
-  if (!(functionLabel in fabRPCSpec.rpcCalls)) {
-    throw `While converting types, failed to find function ${functionLabel}`;
+FabNode.prototype.convertToCorrectType = function(functionLabelBackend, variableName, inputRaw) {
+  if (!(functionLabelBackend in fabRPCSpec.rpcCalls)) {
+    throw `While converting types, failed to find function ${functionLabelBackend}`;
   }
-  var currentFunction = fabRPCSpec.rpcCalls[functionLabel];
+  var currentFunction = fabRPCSpec.rpcCalls[functionLabelBackend];
   if (currentFunction.types === undefined || currentFunction.types === null) {
     return inputRaw;
   }
@@ -291,12 +298,12 @@ FabNode.prototype.convertToCorrectType = function(functionLabel, variableName, i
   return inputRaw;
 }
 
-FabNode.prototype.getArguments = function(functionLabel) {
-  if (! (functionLabel in fabRPCSpec.rpcCalls) ) {
-    throw (`Function label ${functionLabel} not found among the listed rpc calls. `);
+FabNode.prototype.getArguments = function(functionLabelFrontEnd, functionLabelBackend) {
+  if (! (functionLabelBackend in fabRPCSpec.rpcCalls) ) {
+    throw (`Function label ${functionLabelBackend} not found among the listed rpc calls. `);
   }
   var theArguments = {};
-  var functionFrontend = this.theFunctions[functionLabel];
+  var functionFrontend = this.theFunctions[functionLabelFrontEnd];
   if (functionFrontend === null || functionFrontend === undefined) {
     return theArguments;
   }
@@ -312,7 +319,7 @@ FabNode.prototype.getArguments = function(functionLabel) {
       //inputObject is a function that returns the raw input
       rawInput = inputObject();
     }
-    theArguments[inputLabel] = this.convertToCorrectType(functionLabel, inputLabel, rawInput);
+    theArguments[inputLabel] = this.convertToCorrectType(functionLabelBackend, inputLabel, rawInput);
   }
   var currentInputsBase64 = functionFrontend.inputsBase64;
   if (currentInputsBase64 !== null && currentInputsBase64 !== undefined) {
@@ -330,9 +337,9 @@ FabNode.prototype.callbackGetBlockByHeight = function (functionLabel, input, out
 
 }
 
-FabNode.prototype.callbackStandard = function(functionLabel, input, output) {
+FabNode.prototype.callbackStandard = function(functionLabelFrontEnd, input, output) {
   var transformer = new jsonToHtml.JSONTransformer();
-  var currentFunction = this.theFunctions[functionLabel];
+  var currentFunction = this.theFunctions[functionLabelFrontEnd];
   var currentOptions = this.outputOptionsStandard;
   if (currentFunction !== undefined && currentFunction !== null) {
     if (currentFunction.outputOptions !== null && currentFunction.outputOptions !== undefined) {
@@ -340,7 +347,7 @@ FabNode.prototype.callbackStandard = function(functionLabel, input, output) {
     }
   }
   transformer.writeJSONtoDOMComponent(input, output, currentOptions);
-  if (!(functionLabel in this.theFunctions)) {
+  if (!(functionLabelFrontEnd in this.theFunctions)) {
     return;
   }
   var currentOutputs = currentFunction.outputs;
@@ -363,20 +370,28 @@ FabNode.prototype.callbackStandard = function(functionLabel, input, output) {
   }
 }
 
-FabNode.prototype.run = function(functionLabel) {
-  var theArguments = this.getArguments(functionLabel);
-  var messageBody = fabRPCSpec.getPOSTBodyFromRPCLabel(functionLabel, theArguments);
+FabNode.prototype.run = function(functionLabelFrontEnd) {
+  var functionLabelBackend = functionLabelFrontEnd;
+  if (functionLabelFrontEnd in this.theFunctions) {
+    var rpcLabel = this.theFunctions[functionLabelFrontEnd].rpcCall; 
+    if (rpcLabel !== undefined && rpcLabel !== null) {
+      functionLabelBackend = rpcLabel;
+    }
+  }
+
+  var theArguments = this.getArguments(functionLabelFrontEnd, functionLabelBackend);
+  var messageBody = fabRPCSpec.getPOSTBodyFromRPCLabel(functionLabelBackend, theArguments);
   var theURL = `${pathnames.url.known.fabcoin.rpc}`;
   var currentResult = ids.defaults.fabcoin.outputFabcoinBlockInfo;
   var currentProgress = globals.spanProgress();
   var callbackCurrent = this.callbackStandard;
-  var functionFrontend = this.theFunctions[functionLabel];
+  var functionFrontend = this.theFunctions[functionLabelFrontEnd];
   if (functionFrontend !== undefined) {
     if (functionFrontend.callback !== undefined && functionFrontend.callback !== null) {
       callbackCurrent = functionFrontend.callback;
     }  
   }
-  callbackCurrent = callbackCurrent.bind(this, functionLabel);
+  callbackCurrent = callbackCurrent.bind(this, functionLabelFrontEnd);
   theURL += `?${fabRPCSpec.urlStrings.command}=${messageBody}`;
   submitRequests.submitGET({
     url: theURL,
