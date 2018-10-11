@@ -61,7 +61,7 @@ function FabNode () {
       "vin.${number}.scriptSig.asm": this.transformersStandard.shortener,
       "vin.${number}.scriptSig.hex": this.transformersStandard.shortener,
     }
-  }
+  };
 
   this.theFunctions = {
     getBlockByHeight: {
@@ -130,20 +130,28 @@ function FabNode () {
         inputs: this.getObjectFromInput.bind(this, inputFabBlock.txInputs),
         outputs: this.getObjectFromInput.bind(this, inputFabBlock.txOutputs),
       },
+      outputs: inputFabBlock.txHex,
       outputOptions: {
         transformers: {
           singleEntry: this.transformersStandard.transactionHexDecoder
         }
       },
-      outputs: inputFabBlock.txHex
     },
     signRawTransaction: {
       inputs: {
         hexString: inputFabBlock.txHex
       },
+      outputs: {
+        hex: inputFabBlock.txHex,
+      },
       outputOptions: this.outputOptionsTransaction
     },
-    //for labels please use the name of the rpc call found in fabRPCSpec.rpcCalls
+    sendRawTransaction: {
+      inputs: {
+        rawTransactionHex: inputFabBlock.txHex
+      },
+      outputOptions: this.outputOptionsTransaction
+    },
   };  
 }
 
@@ -204,7 +212,7 @@ FabNode.prototype.setTxInputVoutAndValue = function (container, content, extraDa
   var inputFab = ids.defaults.fabcoin.inputBlockInfo;
   var incomingAmount = 0;
   if (extraData.labelArray[extraData.labelArray.length - 1] === "amount") {
-    incomingAmount = content;
+    incomingAmount = content - 1;
   }
   var incomingId = extraData.ambientInput.txid;
   var incomingVout = extraData.labelArray[extraData.labelArray.length - 2];

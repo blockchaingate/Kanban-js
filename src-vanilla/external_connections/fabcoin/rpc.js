@@ -110,9 +110,24 @@ var rpcCalls = {
       hexString: null,
     },
     parameters: ["hexString", "parents", "privateKeys"]
-  }
-
-}
+  },
+  sendRawTransaction: {
+    rpcCall: "sendRawTransaction",
+    method: "sendrawtransaction",
+    mandatoryModifiableArguments: {
+      rawTransactionHex: null
+    },
+    parameters: ["rawTransactionHex"]
+  },
+  getRawMempool: {
+    rpcCall: "getRawMempool",
+    method: "getrawmempool",
+    mandatoryFixedArguments: {
+      verbose: null
+    },
+    parameters: ["verbose"]
+  },
+};
 
 function getPOSTBodyFromRPCLabel(theRPCLabel, theArguments) {
   var theRequest = {};
