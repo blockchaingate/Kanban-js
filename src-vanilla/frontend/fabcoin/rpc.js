@@ -152,6 +152,13 @@ function FabNode () {
       },
       outputOptions: this.outputOptionsTransaction
     },
+    getRawMempool: {
+      outputOptions: {
+        transformers: {
+          "${number}" : this.transformersStandard.transactionId
+        }
+      }
+    }
   };  
 }
 
