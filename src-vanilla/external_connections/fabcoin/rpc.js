@@ -6,7 +6,7 @@ var urlStrings = {
 };
 
 /**
- * @type {Object.<string,{rpcCall:string, method: string, mandatoryFixedArguments: Object, mandatoryModifiableArguments: Object, types: Object, parameters: string[]}>}
+ * @type {Object.<string,{rpcCall:string, method: string, mandatoryFixedArguments: Object, mandatoryModifiableArguments: Object, optionalArguments: Object, types: Object, parameters: string[]}>}
  */
 var rpcCalls = {
   getBlockByHeight: {
@@ -96,7 +96,22 @@ var rpcCalls = {
       outputs: null
     },
     parameters: ["inputs", "outputs"]
+  },
+  signRawTransaction: {
+    rpcCall: "signRawTransaction",
+    method: "signrawtransaction",
+    mandatoryFixedArguments: {
+      parents: [],
+    },
+    optionalArguments: {
+      privateKeys: null
+    },
+    mandatoryModifiableArguments: {
+      hexString: null,
+    },
+    parameters: ["hexString", "parents", "privateKeys"]
   }
+
 }
 
 function getPOSTBodyFromRPCLabel(theRPCLabel, theArguments) {

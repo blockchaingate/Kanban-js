@@ -53,7 +53,13 @@ function FabNode () {
       "details.${number}.address": this.transformersStandard.setAddress,
       "vout.${number}.scriptPubKey.addresses.${number}": this.transformersStandard.shortener,
       "vout.${number}.n": this.transformersStandard.setTxInputVoutAndValue,
-      "vout.${number}.value": this.transformersStandard.setTxInputVoutAndValue
+      "vout.${number}.value": this.transformersStandard.setTxInputVoutAndValue,
+      "vout.${number}.scriptPubKey.asm": this.transformersStandard.shortener,
+      "vout.${number}.scriptPubKey.hex": this.transformersStandard.shortener,
+      hex: this.transformersStandard.transactionHexDecoder,
+      "vin.${number}.txid": this.transformersStandard.transactionId,
+      "vin.${number}.scriptSig.asm": this.transformersStandard.shortener,
+      "vin.${number}.scriptSig.hex": this.transformersStandard.shortener,
     }
   }
 
@@ -128,8 +134,15 @@ function FabNode () {
         transformers: {
           singleEntry: this.transformersStandard.transactionHexDecoder
         }
-      }
-    }
+      },
+      outputs: inputFabBlock.txHex
+    },
+    signRawTransaction: {
+      inputs: {
+        hexString: inputFabBlock.txHex
+      },
+      outputOptions: this.outputOptionsTransaction
+    },
     //for labels please use the name of the rpc call found in fabRPCSpec.rpcCalls
   };  
 }

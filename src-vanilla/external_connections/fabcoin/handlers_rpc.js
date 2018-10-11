@@ -59,7 +59,7 @@ var numberRequestsRunning = 0;
 var maxRequestsRunning = 20;
 
 function getRPCRequestJSON(rpcCallLabel, queryCommand, errors) {
-  /**@type {{rpcCall: string, method: string, mandatoryFixedArguments: Object,  mandatoryModifiableArguments: Object,  optionalModifiableArguments: Object, allowedArgumentValues: Object, parameters: string[]}}*/
+  /**@type {{rpcCall: string, method: string, mandatoryFixedArguments: Object,  mandatoryModifiableArguments: Object,  optionalArguments: Object, allowedArgumentValues: Object, parameters: string[]}}*/
   var currentRPCCall = fabcoinRPC.rpcCalls[rpcCallLabel];
   var currentParameters = [];
   for (var counterCommands = 0; counterCommands < currentRPCCall.parameters.length; counterCommands ++) {
@@ -75,8 +75,8 @@ function getRPCRequestJSON(rpcCallLabel, queryCommand, errors) {
       currentParameters.push(incomingParameter);
       continue;
     }
-    if (currentRPCCall.optionalModifiableArguments !== undefined && currentRPCCall.optionalModifiableArguments !== null) {
-      var currentDefault = currentRPCCall.optionalModifiableArguments[currentParameterName];
+    if (currentRPCCall.optionalArguments !== undefined && currentRPCCall.optionalArguments !== null) {
+      var currentDefault = currentRPCCall.optionalArguments[currentParameterName];
       if (currentDefault !== undefined && currentDefault !== null) {
         currentParameters.push(currentDefault);
         continue;
@@ -92,7 +92,7 @@ function getRPCRequestJSON(rpcCallLabel, queryCommand, errors) {
         errors.push(`Missing parameter ${currentParameterName} in method ${rpcCallLabel}.`);
         return {};
       }
-      var currentDefault = currentRPCCall.optionalModifiableArguments[currentParameterName];
+      var currentDefault = currentRPCCall.mandatoryModifiableArguments[currentParameterName];
       if (currentDefault !== null && currentDefault !== undefined) {
         currentParameters.push(currentDefault);
         continue;
