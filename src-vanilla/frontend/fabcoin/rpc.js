@@ -158,7 +158,12 @@ function FabNode () {
           "${number}" : this.transformersStandard.transactionId
         }
       }
-    }
+    },
+    createContract: {
+      inputs: {
+        contractHex: inputFabBlock.contractHex
+      }
+    },
   };  
 }
 

@@ -109,7 +109,7 @@ var defaults = {
       privateKey: "inputFabcoinPrivateKey",
       txOutputs: "inputFabcoinTransactionOutputs",
       txInputs: "inputFabcoinTransactionInputs",
-//      toAddress: "inputFabcoinToAddress",
+      contractHex: "inputFabcoinContractHex",
     },
     outputFabcoinInitialization: "divOutputFabcoinInitialization",
     outputFabcoinBlockInfo: "duvOutputFabcoinBlockInfo"

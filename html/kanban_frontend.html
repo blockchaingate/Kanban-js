@@ -305,11 +305,12 @@
       <tr><td><button class = "buttonStandard" style = "width: 100px" onclick = "window.kanban.fabcoin.rpc.fabNode.run('signRawTransaction')">Sign raw</button></td></tr>
       <tr><td><button class = "buttonStandard" style = "width: 100px" onclick = "window.kanban.fabcoin.rpc.fabNode.run('sendRawTransaction')"><b style = "color:red">Send raw</b></button></td></tr>
       <tr><td style = "text-align: center; border-bottom: 1px solid black; font-size: x-small;"><span>contracts</span></td></tr>
-    <tr><td><button class = "buttonStandard" style = "width: 100px" onclick = "window.kanban.fabcoin.rpc.fabNode.run('listContracts')">List contracts</button></td></tr>
-  </table>
+      <tr><td><button class = "buttonStandard" style = "width: 100px" onclick = "window.kanban.fabcoin.rpc.fabNode.run('listContracts')">List contracts</button></td></tr>
+      <tr><td><button class = "buttonStandard" style = "width: 100px" onclick = "window.kanban.fabcoin.rpc.fabNode.run('createContract')">Create</button></td></tr>
+    </table>
   </td>
   <td>
-    <input type = "text" class = "inputCrypto" id = "inputFabcoinBlockNumber" size = "90" value = "6" placeholder = "block #"></input><br>
+    <input type = "text" class = "inputCrypto" id = "inputFabcoinBlockNumber" size = "90" value = "7" placeholder = "block #"></input><br>
     <input type = "text" class = "inputCrypto" id = "inputFabcoinBlockHash" size = "90" value = "" placeholder = "block hash"></input><br>
     <input type = "text" class = "inputCrypto" id = "inputFabcoinNumberOfBlocksToGenerate" size = "90" value = "" placeholder = "# blocks to generate"></input><br>    
     <input type = "text" class = "inputCrypto" id = "inputFabcoinTransactionId" size = "90" value = "" placeholder = "tx id"></input><br>    
@@ -319,7 +320,9 @@
 
     <input type = "text" class = "inputCrypto" id = "inputFabcoinTransactionInputs" size = "90" value = "" placeholder = "tx inputs"></input><br>
     <input type = "text" class = "inputCrypto" id = "inputFabcoinTransactionOutputs" size = "90" value = "" placeholder = "tx outputs"></input><br>
-    <input type = "text" class = "inputCrypto" id = "inputFabcoinAddress" size = "90" value = "" placeholder = "address"></input><br>    
+    <input type = "text" class = "inputCrypto" id = "inputFabcoinAddress" size = "90" value = "" placeholder = "address"></input><br>
+
+    <input type = "text" class = "inputCrypto" id = "inputFabcoinContractHex" size = "90" value = "" placeholder = "contract hex"></input><br>
   </td>
   </tr>
   </table>

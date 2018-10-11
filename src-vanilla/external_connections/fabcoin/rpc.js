@@ -127,6 +127,14 @@ var rpcCalls = {
     },
     parameters: ["verbose"]
   },
+  createContract: {
+    rpcCall: "createContract",
+    method: "createcontract",
+    mandatoryModifiableArguments: {
+      contractHex: null
+    },
+    parameters: ["contractHex"]
+  },
 };
 
 function getPOSTBodyFromRPCLabel(theRPCLabel, theArguments) {
