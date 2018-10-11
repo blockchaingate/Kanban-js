@@ -121,18 +121,23 @@ function FabNode () {
     },
     createRawTransaction: {
       inputs: {
-        inputs: this.getJSONFromInput.bind(this, inputFabBlock.txInputs),
-        outputs: this.getJSONFromInput.bind(this, inputFabBlock.txOutputs),
+        inputs: this.getObjectFromInput.bind(this, inputFabBlock.txInputs),
+        outputs: this.getObjectFromInput.bind(this, inputFabBlock.txOutputs),
+      },
+      outputOptions: {
+        transformers: {
+          singleEntry: this.transformersStandard.transactionHexDecoder
+        }
       }
     }
     //for labels please use the name of the rpc call found in fabRPCSpec.rpcCalls
   };  
 }
 
-FabNode.prototype.getJSONFromInput = function(inputId) {
+FabNode.prototype.getObjectFromInput = function(inputId) {
   var rawInput = document.getElementById(inputId).value;
   var outputObject = jsonic(rawInput);
-  return JSON.stringify(outputObject);
+  return outputObject;
 }
 
 FabNode.prototype.combineClickHandlers = function (/**@type {function[]}*/ functionArray, container, content, extraData) {
