@@ -1,12 +1,14 @@
 "use srict";
 const submitRequests = require('./submit_requests');
 const miscellaneousFrontEnd = require('./miscellaneous_frontend');
+const miscellaneousBackEnd = require('../miscellaneous');
 
 function JSONTransformer() {
   /**@type string[] */
   this.bindIdsInOrder = [];
-  /**@type {Object.<string,{clickHandler:function, content: any, contentHTML: string, idExpandButton: string, label: string, labelArray:string[]}>} */
+  /**@type {Object.<string,{clickHandler:function, content: any, contentHTML: string, idExpandButton: string, label: string, labelArray:string[], ambientInput: object}>} */
   this.bindings = {};
+  this.originalInputs = [];
 }
 
 var keyWeights = {
@@ -32,7 +34,8 @@ JSONTransformer.prototype.bindButtons = function() {
     if (currentHandler !== undefined && currentHandler !== null && currentElement !== null) {
       var extraData = {
         label: currentLabelData.label,
-        labelArray: currentLabelData.labelArray
+        labelArray: currentLabelData.labelArray,
+        ambientInput: currentLabelData.ambientInput
       };
       currentElement.addEventListener('click', currentHandler.bind(null, currentElement, currentLabelData.content, extraData));
     }
@@ -50,6 +53,7 @@ JSONTransformer.prototype.bindButtons = function() {
 JSONTransformer.prototype.writeJSONtoDOMComponent =  function(inputJSON, theDomComponent, options) {
   this.bindings = {};
   this.bindIdsInOrder = [];
+  this.originalInputs = [];
   if (typeof theDomComponent === "string") {
     theDomComponent = document.getElementById(theDomComponent);
   }
@@ -143,8 +147,9 @@ JSONTransformer.prototype.getClickableEntryUsingTransformer = function(input, in
     clickHandler: theTransformer.clickHandler,
     idExpandButton: idExpandButton,
     label: label,
-    labelArray: labelArray.slice()
-  }
+    labelArray: labelArray.slice(),
+    ambientInput: this.originalInputs[this.originalInputs.length - 1]
+  };
   var result = "";
   if (idExpandButton !== "") {
     result += `<span class = "panelRPCWithExpansion">`;
@@ -304,7 +309,12 @@ var labelAbbreviations = {
   "proposerAddress": "prop.addr.",
   "proposerIndex": "prop.#",
   "address": "addr.",
-  "strippedsize": "strip"
+  "strippedsize": "strip",
+  "bip125-replaceable": "b125-r.",
+  "confirmations": "conf.",
+  "walletconflicts": "w.confl.",
+  "blockindex": "bl.ind.",
+  "generated": "gen.",
 }
 
 function abbreviateLabel(/** @type {string}*/ header) {
@@ -337,6 +347,7 @@ JSONTransformer.prototype.getHtmlFromArrayOfObjects = function(input, options) {
       return `${getClearParentButton()}<br>${input}<br><b style='color:red; font-size: small'>Could not parse input as JSON.</b>`;
     }
   }
+  this.originalInputs.push(miscellaneousBackEnd.deepCopy(inputJSON, 0));
   var rawButton = "";
   var clearButton = "";
   if (doIncludeTogglePolling === true) {

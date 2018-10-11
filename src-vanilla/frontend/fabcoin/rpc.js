@@ -7,6 +7,7 @@ const submitRequests = require('../submit_requests');
 const jsonToHtml = require('../json_to_html');
 const miscellaneousBackend = require('../../miscellaneous');
 const miscellaneousFrontEnd = require('../miscellaneous_frontend');
+const jsonic = require('jsonic');
 
 function FabNode () {
   var inputFabBlock = ids.defaults.fabcoin.inputBlockInfo;
@@ -21,13 +22,12 @@ function FabNode () {
     transactionId: this.getSetInputAndRunWithShortener(inputFabBlock.txid, "getTransactionById"),
     transactionHexDecoder: this.getSetInputAndRunWithShortener(inputFabBlock.txHex, "decodeTransactionRaw"),
     setAddress: this.getSetInputWithShortener(inputFabBlock.address),
-    setAddressWithVout: {
-      clickHandler: this.setAddressWithVout,
-      transformer: miscellaneousBackend.hexShortenerForDisplay
-    },
+    setTxInputVoutAndValue: {
+      clickHandler: this.setTxInputVoutAndValue.bind(this),
+    }
   };
 
-  this.outputOptions = {
+  this.outputOptionsStandard = {
     transformers: {
       previousblockhash: this.transformersStandard.blockHash,
       nextblockhash: this.transformersStandard.blockHash,
@@ -42,9 +42,20 @@ function FabNode () {
       "tx.${number}": this.transformersStandard.transactionId,
       txid: this.transformersStandard.transactionId,
       "details.${number}.address": this.transformersStandard.setAddress,
-      "vout.${number}.scriptPubKey.addresses.${number}": this.transformersStandard.setAddressWithVout
+      "details.${number}.amount": this.transformersStandard.setTxInputVoutAndValue,
+      "details.${number}.vout": this.transformersStandard.setTxInputVoutAndValue,
     },
   };
+  this.outputOptionsTransaction = {
+    transformers: {
+      hash: this.transformersStandard.transactionId,
+      txid: this.transformersStandard.transactionId,
+      "details.${number}.address": this.transformersStandard.setAddress,
+      "vout.${number}.scriptPubKey.addresses.${number}": this.transformersStandard.shortener,
+      "vout.${number}.n": this.transformersStandard.setTxInputVoutAndValue,
+      "vout.${number}.value": this.transformersStandard.setTxInputVoutAndValue
+    }
+  }
 
   this.theFunctions = {
     getBlockByHeight: {
@@ -99,16 +110,29 @@ function FabNode () {
     decodeTransactionRaw: {
       inputs: {
         hexString: inputFabBlock.txHex
-      }
+      },
+      outputOptions: this.outputOptionsTransaction,
     },
     dumpPrivateKey: {
       inputs: {
         address: inputFabBlock.address
       },
       outputs: inputFabBlock.privateKey
+    },
+    createRawTransaction: {
+      inputs: {
+        inputs: this.getJSONFromInput.bind(this, inputFabBlock.txInputs),
+        outputs: this.getJSONFromInput.bind(this, inputFabBlock.txOutputs),
+      }
     }
     //for labels please use the name of the rpc call found in fabRPCSpec.rpcCalls
   };  
+}
+
+FabNode.prototype.getJSONFromInput = function(inputId) {
+  var rawInput = document.getElementById(inputId).value;
+  var outputObject = jsonic(rawInput);
+  return JSON.stringify(outputObject);
 }
 
 FabNode.prototype.combineClickHandlers = function (/**@type {function[]}*/ functionArray, container, content, extraData) {
@@ -139,11 +163,70 @@ FabNode.prototype.getSetInputWithShortener = function (idOutput) {
   };  
 }
 
-FabNode.prototype.setAddressWithVout = function (container, content, extraData) {
-  var extraDataString = JSON.stringify(extraData);
-  console.log(`DEBUG: Content: ${content}, extra data: ${extraDataString}`);
-  submitRequests.updateValue(ids.defaults.fabcoin.inputBlockInfo.address, content);
-  submitRequests.updateValue(ids.defaults.fabcoin.inputBlockInfo.vout, extraData.labelArray[extraData.labelArray.length - 1]);
+FabNode.prototype.setTxOutput = function (address, value) {
+  if (address === "" || address === null || address === undefined) {
+    return;
+  }
+  var inputFab = ids.defaults.fabcoin.inputBlockInfo;
+  var currentOutputsRaw;
+  var currentOutputs; 
+  try {
+    currentOutputsRaw = document.getElementById(inputFab.txOutputs).value;
+    currentOutputs = jsonic(currentOutputsRaw);
+    currentOutputs[address] = value;
+    submitRequests.updateValue(inputFab.txOutputs, jsonic.stringify(currentOutputs));
+  } catch (e) {
+    console.log(`Failed to parse your current transaction inputs. Inputs raw: ${currentOutputsRaw}. Inputs parsed: ${JSON.stringify(currentOutputs)}. ${e}`);
+    submitRequests.highlightError(inputFab.txOutputs);
+    return;    
+  }
+}
+
+FabNode.prototype.setTxInputVoutAndValue = function (container, content, extraData) {
+  var inputFab = ids.defaults.fabcoin.inputBlockInfo;
+  var incomingAmount = 0;
+  if (extraData.labelArray[extraData.labelArray.length - 1] === "amount") {
+    incomingAmount = content;
+  }
+  var incomingId = extraData.ambientInput.txid;
+  var incomingVout = extraData.labelArray[extraData.labelArray.length - 2];
+  /**@type {string} */
+  var currentInputsRaw;
+  var currentInputs;
+  try {
+    currentInputsRaw = document.getElementById(inputFab.txInputs).value;
+    if (currentInputsRaw.trim() === "") {
+      currentInputs = [];
+    } else {
+      currentInputs = jsonic(currentInputsRaw);
+    }
+    var found = false;
+    for (var counterInputs = 0; counterInputs < currentInputs.length; counterInputs ++) {
+      var currentIn = currentInputs[counterInputs];
+      if (currentIn.txid === incomingId) {
+        currentIn.vout = incomingVout
+        found = true;
+        break;
+      }
+    }
+    if (!found) {
+      currentInputs.push({txid: incomingId, vout: incomingVout });
+    }
+    submitRequests.updateValue(inputFab.txInputs, jsonic.stringify(currentInputs));
+    var currentOutputs = document.getElementById(inputFab.txOutputs).value; 
+    var currentPreferredAddress = document.getElementById(inputFab.address).value;
+    if (currentOutputs === "" || currentOutputs === null) {
+      if (currentPreferredAddress === "" || currentPreferredAddress === null) {
+        submitRequests.highlightError(inputFab.address);
+      } else {
+        this.setTxOutput(currentPreferredAddress, incomingAmount);
+      }
+    }
+  } catch (e) {
+    console.log(`Failed to parse your current transaction inputs. Inputs raw: ${currentInputsRaw}. Inputs parsed: ${JSON.stringify(currentInputs)}. ${e}`);
+    submitRequests.highlightError(inputFab.txInputs);
+    return;
+  }
 }
 
 FabNode.prototype.setInput = function (idToSet, container, content, extraData) {
@@ -181,9 +264,16 @@ FabNode.prototype.getArguments = function(functionLabel) {
   }
   var currentInputs = functionFrontend.inputs;
   for (var inputLabel in currentInputs) {
-    var inputId = currentInputs[inputLabel];
-    submitRequests.highlightInput(inputId);
-    var rawInput = document.getElementById(inputId).value;
+    var inputObject = currentInputs[inputLabel];
+    var rawInput = null;
+    if (typeof inputObject === "string") {
+      //inputObject is an id
+      submitRequests.highlightInput(inputObject);
+      rawInput = document.getElementById(inputObject).value;
+    } else if (typeof inputObject === "function"){
+      //inputObject is a function that returns the raw input
+      rawInput = inputObject();
+    }
     theArguments[inputLabel] = this.convertToCorrectType(functionLabel, inputLabel, rawInput);
   }
   var currentInputsBase64 = functionFrontend.inputsBase64;
@@ -205,7 +295,7 @@ FabNode.prototype.callbackGetBlockByHeight = function (functionLabel, input, out
 FabNode.prototype.callbackStandard = function(functionLabel, input, output) {
   var transformer = new jsonToHtml.JSONTransformer();
   var currentFunction = this.theFunctions[functionLabel];
-  var currentOptions = this.outputOptions;
+  var currentOptions = this.outputOptionsStandard;
   if (currentFunction !== undefined && currentFunction !== null) {
     if (currentFunction.outputOptions !== null && currentFunction.outputOptions !== undefined) {
       currentOptions = currentFunction.outputOptions;

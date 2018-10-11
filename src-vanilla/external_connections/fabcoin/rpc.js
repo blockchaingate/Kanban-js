@@ -87,6 +87,15 @@ var rpcCalls = {
       address: null
     },
     parameters: ["address"]
+  },
+  createRawTransaction: {
+    rpcCall: "createRawTransaction",
+    method: "createrawtransaction",
+    mandatoryModifiableArguments: {
+      inputs: null,
+      outputs: null
+    },
+    parameters: ["inputs", "outputs"]
   }
 }
 

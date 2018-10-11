@@ -1,5 +1,35 @@
 "use strict";
 
+var maxDeepCopyDepth = 1000;
+
+function deepCopyThroughJSON (input) {
+  return JSON.parse(JSON.stringify(input));
+}
+
+function deepCopy (input, recursionDepth) {
+  if (recursionDepth === undefined || recursionDepth === null) {
+    recursionDepth = 0;
+  }
+  if (recursionDepth >= maxDeepCopyDepth) {;
+    throw(`Deep copy reached max copy depth. ${maxDeepCopyDepth}`)
+  }
+  if (Array.isArray(input)) {
+    var result = [];
+    for (var counterInput = 0; counterInput < input.length; counterInput ++) {
+      result.push(deepCopy(input[counterInput], recursionDepth + 1));
+    }
+    return result;
+  }
+  if (typeof input === "object") {
+    var result = {};
+    for (var label in input) {
+      result[label] = deepCopy(input[label], recursionDepth + 1);
+    }
+    return result;
+  }
+  return input;
+}
+
 function getDurationReadableFromMilliseconds(inputMilliseconds) {
   if (inputMilliseconds > 1500)
     return getDurationReadableFromSeconds(inputMilliseconds / 1000);
@@ -122,6 +152,8 @@ SpeedReport.prototype.toString = function () {
 }
 
 module.exports = {
+  deepCopy,
+  deepCopyThroughJSON,
   hexShortenerForDisplay,
   getDurationReadableFromSeconds,
   getDurationReadableFromMilliseconds,
