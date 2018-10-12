@@ -22,6 +22,7 @@ function FabNode () {
     transactionId: this.getSetInputAndRunWithShortener(inputFabBlock.txid, "getTransactionById"),
     transactionHexDecoder: this.getSetInputAndRunWithShortener(inputFabBlock.txHex, "decodeTransactionRaw"),
     setAddress: this.getSetInputWithShortener(inputFabBlock.address),
+    setPrivateKey: this.getSetInputWithShortener(inputFabBlock.privateKey),
     setTxInputVoutAndValue: {
       clickHandler: this.setTxInputVoutAndValue.bind(this),
     },
@@ -132,6 +133,11 @@ function FabNode () {
     dumpPrivateKey: {
       inputs: {
         address: inputFabBlock.address
+      },
+      outputOptions: {
+        transformers: {
+          singleEntry: this.transformersStandard.setPrivateKey
+        }
       },
       outputs: inputFabBlock.privateKey
     },
