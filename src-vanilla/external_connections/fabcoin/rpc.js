@@ -135,6 +135,25 @@ var rpcCalls = {
     },
     parameters: ["contractHex"]
   },
+  sendToContract: {
+    rpcCall: "sendToContract",
+    method: "sendtocontract",
+    mandatoryModifiableArguments: {
+      contractId: null,
+      data: null,
+      amount: 0,
+    },
+    parameters: ["contractId", "data", "amount"]
+  },
+  callContract: {
+    rpcCall: "callContract",
+    method: "callcontract",
+    mandatoryModifiableArguments: {
+      contractId: null,
+      data: null,
+    },
+    parameters: ["contractId", "data"]
+  },
 };
 
 function getPOSTBodyFromRPCLabel(theRPCLabel, theArguments) {

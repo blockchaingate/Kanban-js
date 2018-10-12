@@ -110,6 +110,9 @@ var defaults = {
       txOutputs: "inputFabcoinTransactionOutputs",
       txInputs: "inputFabcoinTransactionInputs",
       contractHex: "inputFabcoinContractHex",
+      contractId: "inputFabcoinContractId",
+      contractData: "inputFabcoinContractData",
+      walletAmount: "inputFabcoinWalletAmount"
     },
     outputFabcoinInitialization: "divOutputFabcoinInitialization",
     outputFabcoinBlockInfo: "duvOutputFabcoinBlockInfo"

@@ -24,7 +24,8 @@ function FabNode () {
     setAddress: this.getSetInputWithShortener(inputFabBlock.address),
     setTxInputVoutAndValue: {
       clickHandler: this.setTxInputVoutAndValue.bind(this),
-    }
+    },
+    setContractId: this.getSetInputWithShortener(inputFabBlock.contractId),
   };
 
   this.outputOptionsStandard = {
@@ -62,6 +63,15 @@ function FabNode () {
       "vin.${number}.scriptSig.hex": this.transformersStandard.shortener,
     }
   };
+
+  this.outputOptionsContract = {
+    transformers: {
+      address: this.transformersStandard.setContractId,
+      hash160: this.transformersStandard.extremeShortener,
+      txid: this.transformersStandard.transactionId,
+      sender: this.transformersStandard.setAddress
+    }
+  }
 
   this.theFunctions = {
     getBlockByHeight: {
@@ -162,13 +172,29 @@ function FabNode () {
     createContract: {
       inputs: {
         contractHex: inputFabBlock.contractHex
-      }
+      },
+      outputOptions: this.outputOptionsContract,
     },
-    createDataTransaction: {
-      rpcCall: fabRPCSpec.rpcCalls.createRawTransaction.rpcCall,
+    callContract: {
       inputs: {
-        inputs: this.getObjectFromInput.bind(this, inputFabBlock.txInputs),
-        outputs: this.getObjectFromInput.bind(this, inputFabBlock.txOutputs),
+        contractId: inputFabBlock.contractId,
+        data: inputFabBlock.contractData,
+      },
+      outputOptions: this.outputOptionsContract,
+    },
+    sendToContract: {
+      inputs: {
+        contractId: inputFabBlock.contractId,
+        data: inputFabBlock.contractData,
+        amount: inputFabBlock.walletAmount,
+      },
+      outputOptions: this.outputOptionsContract,
+    },
+    listContracts: {
+      outputOptions: {
+        transformers: {
+          "${label}" : this.transformersStandard.setContractId
+        }
       }
     }
   };  
