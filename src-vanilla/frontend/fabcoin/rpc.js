@@ -196,6 +196,13 @@ function FabNode () {
           "${label}" : this.transformersStandard.setContractId
         }
       }
+    },
+    getNewAddress: {
+      outputOptions: {
+        transformers: {
+          singleEntry: this.transformersStandard.setAddress
+        }
+      }
     }
   };  
 }

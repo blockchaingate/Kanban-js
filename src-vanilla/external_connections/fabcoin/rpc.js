@@ -80,6 +80,14 @@ var rpcCalls = {
     },
     parameters: ["start", "maxDisplay"]
   },
+  getNewAddress: {
+    rpcCall: "getNewAddress",
+    method: "getnewaddress",
+    optionalArguments: {
+      name: null
+    },
+    parameters: ["name"]
+  },
   dumpPrivateKey: {
     rpcCall: "dumpPrivateKey",
     method: "dumpprivkey",
