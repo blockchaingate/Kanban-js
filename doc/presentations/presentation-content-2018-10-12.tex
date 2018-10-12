@@ -1,0 +1,28 @@
+\begin{frame}[fragile]
+\frametitle{How is senderadress validated in a sendtocontract call?}
+\begin{itemize}
+\item 
+\end{itemize}
+\end{frame}
+
+\begin{frame}[fragile]
+\begin{itemize}
+\item To write to the foundation chain, the Kanban group needs authentication. 3 possibilities.
+\item Use aggregate Schnorr signature to sign one txin. 
+\begin{itemize}
+\item This is today's proposal.
+\item Cons: 
+\begin{enumerate}
+\item Need new opcode, \verb|OP_AGGREGATE|. 
+\item Implies new types of lock/unlock scripts, "pay to aggregate signature".
+\item Need to (only) modify ExtractDestination in standard.cpp.
+\end{enumerate}
+\item Pros: 
+\begin{enumerate}
+\item The fastest approach.
+\item No smart contract locks. No smart contract authentication logic.
+\item Aggregate signature code in C++ already exists and builds within fabcoin (demoed already under kanban-poc).
+\end{enumerate}
+\end{itemize}
+\end{itemize}
+\end{frame}
