@@ -39,7 +39,7 @@ Encoding.prototype.computeCheck = function(inputBytes) {
 }
 
 Encoding.prototype.toBytesWithCheck = function(inputBytes) {
-  var inputBufferized = Buffer.concat([Buffer.from([0]), inputBytes]);
+  var inputBufferized = Buffer.from(inputBytes);
   var check = this.computeCheck(inputBufferized);
   var result = Buffer.concat([inputBufferized, check]);
   return result;

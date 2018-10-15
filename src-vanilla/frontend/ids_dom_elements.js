@@ -105,6 +105,8 @@ var defaults = {
       txid: "inputFabcoinTransactionId",
       txHex: "inputFabcoinTransactionHex",
       address: "inputFabcoinAddress",
+      addressMainnet: "inputFabcoinAddressMainnet",
+      addressEthereum: "inputEthereumAddress",
       publicKey: "inputFabcoinPublicKey",
       privateKey: "inputFabcoinPrivateKey",
       txOutputs: "inputFabcoinTransactionOutputs",

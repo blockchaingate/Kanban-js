@@ -6,8 +6,10 @@ const globals = require('../globals');
 const submitRequests = require('../submit_requests');
 const jsonToHtml = require('../json_to_html');
 const miscellaneousBackend = require('../../miscellaneous');
-const miscellaneousFrontEnd = require('../miscellaneous_frontend');
+//const miscellaneousFrontEnd = require('../miscellaneous_frontend');
 const jsonic = require('jsonic');
+const cryptoKanban = require('../../crypto/crypto_kanban');
+const encodingsKanban = require('../../crypto/encodings');
 
 function FabNode () {
   var inputFabBlock = ids.defaults.fabcoin.inputBlockInfo;
@@ -22,7 +24,10 @@ function FabNode () {
     transactionId: this.getSetInputAndRunWithShortener(inputFabBlock.txid, "getTransactionById"),
     transactionHexDecoder: this.getSetInputAndRunWithShortener(inputFabBlock.txHex, "decodeTransactionRaw"),
     setAddress: this.getSetInputWithShortener(inputFabBlock.address),
-    setPrivateKey: this.getSetInputWithShortener(inputFabBlock.privateKey),
+    setPrivateKey: {
+      clickHandler: this.setPrivateKeyComputeAllElse.bind(this),
+      transformer: miscellaneousBackend.hexShortenerForDisplay,
+    },
     setTxInputVoutAndValue: {
       clickHandler: this.setTxInputVoutAndValue.bind(this),
     },
@@ -319,6 +324,30 @@ FabNode.prototype.setInput = function (idToSet, container, content, extraData) {
   submitRequests.updateValue(idToSet, content);
 }
 
+FabNode.prototype.computePublicKeyFromPrivate = function() {
+  submitRequests.highlightInput(ids.defaults.fabcoin.inputBlockInfo.privateKey);
+  this.setPrivateKeyComputeAllElse(null, document.getElementById(ids.defaults.fabcoin.inputBlockInfo.privateKey).value);
+}
+
+FabNode.prototype.setPrivateKeyComputeAllElse = function (container, content, extraData) {
+  var thePrivateKey = new cryptoKanban.CurveExponent();
+  thePrivateKey.fromArbitrary(content);
+  var thePublicKey = thePrivateKey.getExponent();
+  submitRequests.updateValue(ids.defaults.fabcoin.inputBlockInfo.publicKey, thePublicKey.toHex());
+  var addressEthereumHex = thePublicKey.computeEthereumAddressHex();
+  var addressFabTestnetBytes = thePublicKey.computeFABAddressTestnetBytes();
+  var addressFabTestnetBase58 =  encodingsKanban.encodingDefault.toBase58Check(addressFabTestnetBytes);
+
+  var addressFabMainnetBytes = thePublicKey.computeFABAddressBytes();
+  var addressFabMainnetBase58 =  encodingsKanban.encodingDefault.toBase58Check(addressFabMainnetBytes);
+  submitRequests.updateValue(ids.defaults.fabcoin.inputBlockInfo.address, addressFabTestnetBase58);
+  submitRequests.updateValue(ids.defaults.fabcoin.inputBlockInfo.addressMainnet, addressFabMainnetBase58);
+  submitRequests.updateValue(ids.defaults.fabcoin.inputBlockInfo.addressEthereum, addressEthereumHex);
+
+  console.log(`DEBUG: private key hex: ${thePrivateKey.toHex()}`);
+  console.log(`DEBUG: content: ${JSON.stringify(content)}`);
+}
+
 FabNode.prototype.convertToCorrectType = function(functionLabelBackend, variableName, inputRaw) {
   if (!(functionLabelBackend in fabRPCSpec.rpcCalls)) {
     throw `While converting types, failed to find function ${functionLabelBackend}`;
@@ -371,11 +400,6 @@ FabNode.prototype.getArguments = function(functionLabelFrontEnd, functionLabelBa
   return theArguments;
 }
 
-FabNode.prototype.callbackGetBlockByHeight = function (functionLabel, input, output) {
-  this.callbackStandard(functionLabel, input, output);
-
-}
-
 FabNode.prototype.callbackStandard = function(functionLabelFrontEnd, input, output) {
   var transformer = new jsonToHtml.JSONTransformer();
   var currentFunction = this.theFunctions[functionLabelFrontEnd];
@@ -407,6 +431,14 @@ FabNode.prototype.callbackStandard = function(functionLabelFrontEnd, input, outp
   } catch (e) {
     throw(`Fatal error parsing: ${input}. ${e}`);
   }
+}
+
+FabNode.prototype.runCallbackFunction = function(
+  /** @type {string}*/
+  callbackFunctionName,
+  input
+) {
+
 }
 
 FabNode.prototype.run = function(functionLabelFrontEnd) {

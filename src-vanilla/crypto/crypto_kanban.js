@@ -171,14 +171,33 @@ CurvePoint.prototype.computeEthereumAddressHex = function() {
   return result;
 }
 
-CurvePoint.prototype.computeFABAddressBytes = function() {
+CurvePoint.prototype.computeFABAddressBytesWithPrefix = function(prefix) {
   if (this.point === null) {
     throw "Uninitialized curve point";
   }
   var shaedBytes = hashes.sha256(this.toBytes());
   var ripemd160Bytes = hashes.ripemd160(shaedBytes);
-  return ripemd160Bytes;
+  if (prefix === null || prefix === undefined || typeof prefix !== "number") { 
+    return ripemd160Bytes;
+  }
+  var outputArray = [];
+  outputArray.push(prefix);
+  console.log("DEBUG: HERE BE UI")
+  for (var counter = 0; counter < ripemd160Bytes.length; counter ++) {
+    outputArray.push(ripemd160Bytes[counter]);
+  }
+  console.log("DEBUIG: outputarray length: " + outputArray.length);
+  return Buffer.from(outputArray);
 }
+
+CurvePoint.prototype.computeFABAddressBytes = function() {
+  return this.computeFABAddressBytesWithPrefix(0);
+}
+
+CurvePoint.prototype.computeFABAddressTestnetBytes = function() {
+  return this.computeFABAddressBytesWithPrefix(111);
+}
+
 
 CurvePoint.prototype.computeFABAddressHex = function() {
   if (this.point === null) {
