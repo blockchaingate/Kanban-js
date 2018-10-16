@@ -75,7 +75,11 @@ function FabNode () {
       address: this.transformersStandard.setContractId,
       hash160: this.transformersStandard.extremeShortener,
       txid: this.transformersStandard.transactionId,
-      sender: this.transformersStandard.setAddress
+      sender: this.transformersStandard.setAddress,
+      "transactionReceipt.bloom": this.transformersStandard.shortener,
+      "transactionReceipt.stateRoot": this.transformersStandard.shortener,
+      "executionResult.newAddress": this.transformersStandard.shortener,
+      "executionResult.output": this.transformersStandard.shortener,
     }
   }
 
@@ -470,7 +474,11 @@ FabNode.prototype.run = function(functionLabelFrontEnd) {
     callback: callbackCurrent,
     result: currentResult
   });
+}
 
+FabNode.prototype.handleSolidityInput = function () {
+  var solidityInput = document.getElementById(ids.defaults.fabcoin.inputBlockInfo.solidityInput).value;
+  console.log(solidityInput);
 }
 
 var fabNode = new FabNode();

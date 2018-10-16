@@ -3,41 +3,28 @@ const submitRequests = require('../submit_requests');
 const pathnames = require('../../pathnames');
 
 const ids = require('../ids_dom_elements');
-const jsonToHtml = require('../json_to_html');
-var JSONTransformer = jsonToHtml.JSONTransformer;
 //const Block = require('../bitcoinjs_src/block');
-const globals = require('../globals');
 const kanbanGO = require('../../external_connections/kanbango/rpc');
-const kanbanGOFrontendInitializer = require('./initialization');
+const kanbanGOInitialization = require('../../external_connections/kanbango/initialization');
 const miscellaneousBackend = require('../../miscellaneous');
 const miscellaneousFrontEnd = require('../miscellaneous_frontend');
-
-function PendingCall () {
-  /** @type {number} */
-  this.id = - 1;
-  /** @type {number} */
-  this.numberReceived = 0;
-  /** @type {number} */
-  this.totalCalls = 0;
-  /** @type {Object} */
-  this.nodeCalls = {};
-  /** @type {KanbanGoNodes} */
-  this.owner = null;
-  /** @type {string} */
-  this.functionLabel = "";
-  /** @type {bool} */
-  this.flagShowClearButton = false;
-}
+const PendingCall = require('./pending_calls').PendingCall;
+const KanbanGONode = require('./pending_calls').KanbanGONode;
 
 function KanbanGoNodes() {
   var inputSchnorr = ids.defaults.kanbanGO.inputSchnorr;
   var inputAggregate = ids.defaults.kanbanGO.inputAggregateSignature;
   var inputSendReceive = ids.defaults.kanbanGO.inputSendReceive;
+  var inputInitialization = ids.defaults.kanbanGO.inputInitialization;
   /** @type {number}*/
   this.numberOfCalls = 0;
   /** @type {PendingCall[]}*/
   this.pendingCalls = {};
-
+  /**@type {KanbanGONode[]} */
+  this.nodes = [];
+  /**@type {string} */
+  this.selectedNode = "";
+  
   this.transformersStandard = {
     shortener: {
       transformer: miscellaneousBackend.hexShortenerForDisplay
@@ -132,16 +119,40 @@ function KanbanGoNodes() {
   this.optionsKanbanGOLabelContraction.transformers = Object.assign({}, this.optionsKanbanGOStandard.transformers);
   this.optionsKanbanGOLabelContraction.transformers["${label}"] = this.transformersStandard.shortener;
 
+  this.callTypes = {
+    standard: {
+      json: this.optionsKanbanGOStandard,
+      idDefaultOutput: ids.defaults.kanbanGO.outputSendReceive,
+      rpcCalls: kanbanGO.rpcCalls,
+      url: pathnames.url.known.kanbanGO.rpc,
+    },
+    test: {
+      json: this.optionsKanbanGOStandard,
+      idDefaultOutput: ids.defaults.kanbanGO.outputKBGOTest,
+      rpcCalls: kanbanGO.rpcCalls,
+      url: pathnames.url.known.kanbanGO.rpc,
+    },
+    initialization: {
+      json: {
+      },
+      rpcCalls: kanbanGOInitialization.rpcCalls,
+      idDefaultOutput: ids.defaults.kanbanGO.outputKanbanInitialization,
+      url: pathnames.url.known.kanbanGO.initialization,
+    }
+  }; 
+  // if rpcCall omitted it will be assumed to be equal to the function label.
   /**@type {Object.<string, rpcCall: string, output: string, outputOptions: Object, inputs: Object>} */
   this.theFunctions  = {
+    runNodes: {
+      inputs: {
+        numberOfNodes: inputInitialization.numberOfNodes
+      }
+    },
+    getNodeInformation: {
+      callback: this.getNodeInformationCallback
+    },
     peerView: {
-      // if rpcCall omitted it will be assumed to be equal to the function label.
-      rpcCall: kanbanGO.rpcCalls.peerView.rpcCall,
       output: ids.defaults.kanbanGO.outputSendReceive,
-      // This will transform some entries of the output json to buttons.
-      // If outputOptions are omitted or set to null, 
-      // optionsKanbanGOStandard will be used.
-      // If the empty object {} is given, no transformations will be carried out.
       outputOptions: this.optionsKanbanGOStandard
     },
     roundChangeRequests: {
@@ -162,6 +173,12 @@ function KanbanGoNodes() {
         number: inputSendReceive.blockNumber
       },
       output: ids.defaults.kanbanGO.outputSendReceive
+    },
+    compileSolidity: {
+      inputs: {
+        solidityInput: ids.defaults.kanbanGO.inputSendReceive.solidityInput
+      },
+      output: ids.defaults.kanbanGO.outputSendReceive      
     },
     getBlockByNumber: {
       inputs: {
@@ -334,92 +351,19 @@ KanbanGoNodes.prototype.callbackAggregateCommitment = function(pendingCall, node
 KanbanGoNodes.prototype.correctFunctions = function() {  
   for (var label in this.theFunctions) {
     var currentCall = this.theFunctions[label];
-    if (currentCall.rpcCall === null || currentCall.rpcCall === undefined) {
-      currentCall.rpcCall = label; 
-      if (label !== kanbanGO.rpcCalls[label].rpcCall) {
-        throw(`Fatal error: kanbanGO rpc label ${label} doesn't equal the expected value ${kanbanGO.rpcCalls[label].rpcCall}.`);
-      }
+    var actualLabel = currentCall.rpcCall;
+    if (actualLabel === null || actualLabel === undefined) {
+      actualLabel = label;
+    }
+    currentCall.rpcCall = actualLabel; 
+    var currentRPCCall = kanbanGO.rpcCalls[label];
+    if (currentRPCCall === undefined || currentRPCCall === null) {
+      currentRPCCall = kanbanGOInitialization.rpcCalls[label];
+    }
+    if (currentRPCCall === undefined || currentRPCCall === null) {
+      throw(`Fatal error: the kanbanGO rpc label ${label} is not an available rpc call. `);
     }
   }
-}
-
-KanbanGoNodes.prototype.updateFields = function(parsedInput, outputs) {
-  if (parsedInput === undefined) {
-    return;
-  }
-  for (var label in outputs) {
-    if (typeof outputs[label] === "string") {
-      submitRequests.updateValue(outputs[label], parsedInput[label]);
-    } else {
-      this.updateFields(parsedInput[label], outputs[label]);
-    }
-  }
-}
-
-KanbanGoNodes.prototype.callbackStandard = function(/**@type {PendingCall} */ pendingCall, nodeId, input, output) {
-  //console.log(`DEBUG: pendingCall id: ${pendingCall.id}, nodeId: ${nodeId}, input: ${input}`);
-  pendingCall.nodeCalls[nodeId].result = input;
-  pendingCall.numberReceived ++;
-  if (pendingCall.numberReceived < pendingCall.totalCalls) {
-    //console.log("DEBUG: Received some");
-    return;
-  }
-  var resultHTML = "";
-  pendingCall.flagShowClearButton = true;
-  var theJSONWriter = new JSONTransformer();
-  for (var currentNodeId in pendingCall.nodeCalls) {
-    resultHTML += this.callbackStandardOneCaller(pendingCall, pendingCall.nodeCalls[currentNodeId].result, theJSONWriter);
-    pendingCall.flagShowClearButton = false;
-  }
-  if (typeof output === "string") {
-    output = document.getElementById(output);
-  }
-  output.innerHTML = resultHTML;
-  theJSONWriter.bindButtons();
-  delete this.pendingCalls[pendingCall.id];
-}
-
-KanbanGoNodes.prototype.callbackStandardOneCaller = function(
-  /**@type {PendingCall} */ 
-  pendingCall, 
-  input, 
-  /**@type {JSONTransformer} */ 
-  theJSONWriter
-) {
-  var options = null;
-  var currentFunction = this.theFunctions[pendingCall.functionLabel];
-  if (currentFunction.outputOptions !== null && currentFunction.outputOptions !== undefined) {
-    options = Object.assign({}, currentFunction.outputOptions);
-  } else {
-    options = Object.assign({}, this.optionsKanbanGOStandard);
-  }
-
-  if (!pendingCall.flagShowClearButton) {
-    options.flagDontShowClearButton = true;
-  }
-
-  var resultHTML = theJSONWriter.getHtmlFromArrayOfObjects(input, options);
-  var theFunction = this.theFunctions[pendingCall.functionLabel];
-  var header = "";
-  try {
-    var parsedInput = JSON.parse(input);
-    if (parsedInput.resultHTML !== null && parsedInput.resultHTML !== undefined) {
-      header += parsedInput.resultHTML + "<br>"; 
-    }
-    if (parsedInput.error !== null && parsedInput.error !== undefined) {
-      header += `<b>Error:</b> <span style='color:red'>${parsedInput.error}</span><br>`;
-    }
-    if (parsedInput.reason !== null && parsedInput.reason !== undefined) {
-      header += parsedInput.reason + "<br>";
-    }
-    if (theFunction.outputs !== null && theFunction.outputs !== undefined) {
-      this.updateFields(parsedInput, theFunction.outputs);
-    }
-  } catch (e) {
-    header = `<b>Error:</b> ${e}<br>`;
-  }
-  resultHTML = header + resultHTML;
-  return resultHTML;
 }
 
 KanbanGoNodes.prototype.testClear = function() {
@@ -437,92 +381,60 @@ KanbanGoNodes.prototype.testClear = function() {
   submitRequests.updateValue(inputAggregate.aggregateSignature, '');
 }
 
-KanbanGoNodes.prototype.run = function(functionLabel) {
-  var initializer = kanbanGOFrontendInitializer.initializer;
-  var currentId = initializer.selectedNode;
+KanbanGoNodes.prototype.run = function(functionLabel, callType) {
+  if (callType === undefined) {
+    callType = "standard";
+  }
+  if (! (callType in this.callTypes)) {
+    throw `Call type not among the allowed call types: ${Object.keys(this.callTypes)}`;
+  }
+  var currentId = this.selectedNode;
   this.numberOfCalls ++;
   var currentPendingCall = new PendingCall();
   if (currentId !== "all") {
     currentPendingCall.nodeCalls[currentId] = {result: null};
   } else {
-    for (var i = 0; i < initializer.nodes.length; i ++) {
-      currentPendingCall.nodeCalls[initializer.nodes[i].idBackend] = {result: null};
+    for (var i = 0; i < this.nodes.length; i ++) {
+      currentPendingCall.nodeCalls[this.nodes[i].idBackend] = {result: null};
     }
   }
   currentPendingCall.id = this.numberOfCalls;
   currentPendingCall.owner = this;
+  currentPendingCall.callType = callType;
   this.pendingCalls[this.numberOfCalls] = currentPendingCall;
   currentPendingCall.run(functionLabel);
 }
 
-PendingCall.prototype.run = function (functionLabel) {
-  this.functionLabel = functionLabel;
-  for (var currentId in this.nodeCalls) {
-    this.runOneId(currentId);
-  }
+KanbanGoNodes.prototype.getNodeInformation = function () {
+  this.run('getNodeInformation', 'initialization');
 }
 
-PendingCall.prototype.runOneId = function (nodeId) {
-  var theFunction = this.owner.theFunctions[this.functionLabel];
-  if (theFunction === null || theFunction === undefined) {
-    throw (`Unknown function call label: ${this.functionLabel}`);
-  }
-  var theArguments = {};
-  var currentInputs = theFunction.inputs;
-  for (var inputLabel in currentInputs) {
-    theArguments[inputLabel] = document.getElementById(currentInputs[inputLabel]).value;
-  }
-  var currentInputsBase64 = theFunction.inputsBase64;
-  if (currentInputsBase64 !== null && currentInputsBase64 !== undefined) {
-    for (var inputLabel in currentInputsBase64) {
-      var theValue =  document.getElementById(currentInputsBase64[inputLabel]).value;
-      theArguments[inputLabel] = Buffer.from(theValue).toString('base64');
-    }
-  }
-  var messageBody = kanbanGO.getPOSTBodyFromKanbanGORPCLabel(theFunction.rpcCall, theArguments);
-  var nodeObject = {
-    id: nodeId
-  };
-  messageBody += `&node=${escape(JSON.stringify(nodeObject))}`;
-
-  var theURL = `${pathnames.url.known.kanbanGO.rpc}`;
-  var currentResult = ids.defaults.kanbanGO.outputKBGOTest;
-  if (theFunction.output !== undefined && theFunction.output !== null) {
-    currentResult = theFunction.output;
-  }
-  var currentProgress = globals.spanProgress();
-  var usePOST = window.kanban.rpc.forceRPCPOST;
-  if (!usePOST) {
-    if (messageBody.length > 1000) {
-      usePOST = true;
-    }
-  }
-  var callbackCurrent = this.owner.callbackStandard;
-  if (theFunction.callback !== undefined && theFunction.callback !== null) {
-    callbackCurrent = theFunction.callback;
-  }  
-  callbackCurrent = callbackCurrent.bind(this.owner, this, nodeId);
-  if (usePOST) {
-    submitRequests.submitPOST({
-      url: theURL,
-      messageBody: messageBody,
-      progress: currentProgress,
-      callback: callbackCurrent,
-      result: currentResult
-    });
-  } else {
-    theURL += `?command=${messageBody}`;
-    submitRequests.submitGET({
-      url: theURL,
-      progress: currentProgress,
-      callback: callbackCurrent,
-      result: currentResult
-    });
-  }
+KanbanGoNodes.prototype.selectRadio = function (idRadio) {
+  this.selectedNode = idRadio;
+  //console.log(`DEBUG: set this.selectedNode to: ${idRadio} `);
 }
 
-var testFunctions = new KanbanGoNodes();
+KanbanGoNodes.prototype.toHTMLRadioButton = function () {
+  var radioButtonHTML = "";
+  radioButtonHTML += `<label class = "containerRadioButton">`;
+  radioButtonHTML += `<input type = "radio" name = "rpcKanbanGO" id = "kanbanGoNodeSelector_all" `;
+  radioButtonHTML += ` onchange = "window.kanban.kanbanGO.rpc.theKBNodes.selectRadio('all')" `; 
+  if (this.selectedNode === "all") {
+    radioButtonHTML += "checked";
+  }
+  radioButtonHTML += `>`;
+  radioButtonHTML += `<span class = "radioMark"></span>`;
+  radioButtonHTML += `all`;
+  radioButtonHTML += `</label>`;
+
+  for (var counterNode = 0; counterNode < this.nodes.length; counterNode ++) {
+    radioButtonHTML += this.nodes[counterNode].toHTMLRadioButton();
+  } 
+  return radioButtonHTML;
+}
+
+var theKBNodes = new KanbanGoNodes();
 
 module.exports = {
-  testFunctions
+  theKBNodes
 }

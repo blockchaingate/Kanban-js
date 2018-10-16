@@ -16,7 +16,6 @@ window.kanban = {
   },
   kanbanGO: {
     rpc: require('./kanbango/rpc'),
-    initialization: require('./kanbango/initialization')
   },
   fabcoin: {
     initialization: require('./fabcoin/initialization'),

@@ -15,6 +15,7 @@ const fsExtra = require('fs-extra');
 const path = require('path');
 const rimraf = require('rimraf');
 const cryptoKanban = require('../../crypto/crypto_kanban');
+var OutputStream = require('../../output_stream').OutputStream;
 require('colors');
 
 /**
@@ -63,6 +64,13 @@ function NodeKanbanGo(inputId) {
   this.nodeSensitiveInformation = {};
   /** @type {ChildProcess} */
   this.childProcessHandle = null;
+  /**@type {{log: OutputStream} */
+  this.outputStreams = {
+    log: new OutputStream(),
+  };
+  var initializer = getInitializer();
+  this.outputStreams.log.idConsole = `[Node ${this.id}]`;
+  this.outputStreams.log.colorIdConsole = initializer.colors[this.id % initializer.colors.length];
 }
 
 NodeKanbanGo.prototype.initializeFoldersAndKeys = function(response) {
@@ -75,8 +83,7 @@ NodeKanbanGo.prototype.initialize2ReadKeyStore = function(response, error) {
 
 NodeKanbanGo.prototype.log = function(input) {
   this.notes += `${input}<br>\n`;
-  var initializer = getInitializer();
-  console.log(`[Node ${this.id}] `[initializer.colors[this.id % initializer.colors.length]] + `${input}`);
+  this.outputStreams.log.append(input);
 }
 
 NodeKanbanGo.prototype.initialize3SelectAddress = function(response, error, fileNames) {
@@ -356,14 +363,19 @@ KanbanGoInitializer.prototype.handleRPCGET = function(request, response) {
 KanbanGoInitializer.prototype.handleRPCURLEncodedInput = function(request, response, messageBodyURLed) {
   var query = null;
   var queryCommand = null;
+  var queryNode = null;
   try {
     query = queryString.parse(messageBodyURLed);
     queryCommand = JSON.parse(query.command);
+    var nodeJSON = query[kanbanGORPC.urlStrings.node];
+    if (nodeJSON !== null && nodeJSON !== undefined) {
+      queryNode = JSON.parse(nodeJSON);
+    }
   } catch (e) {
     response.writeHead(400);
-    return response.end(`Bad kanbanGO initialization input. ${e}`);
+    return response.end(`Bad kanbanGO initialization input: ${messageBodyURLed}. ${e}`);
   }
-  return this.handleRPCArguments(request, response, queryCommand);
+  return this.handleRPCArguments(request, response, queryCommand, queryNode);
 }
 
 KanbanGoInitializer.prototype.computePaths = function() {
@@ -499,7 +511,7 @@ KanbanGoInitializer.prototype.getNodeInformation = function(response, queryComma
   this.numberRequestsRunning --;
 }
 
-KanbanGoInitializer.prototype.runNodes = function(response, queryCommand) {
+KanbanGoInitializer.prototype.runNodes = function(response, queryCommand, currentNodeNotUsed) {
   var candidateNumberOfNodes = Number(queryCommand.numberOfNodes);
   var maxNumberOfNodes = 100;
   if (candidateNumberOfNodes > maxNumberOfNodes || candidateNumberOfNodes < 1) {
@@ -519,6 +531,11 @@ KanbanGoInitializer.prototype.runNodes = function(response, queryCommand) {
   for (var counterNode = 0; counterNode < this.nodes.length; counterNode ++) {
     this.nodes[counterNode].initializeFoldersAndKeys(response);
   }
+}
+
+KanbanGoInitializer.prototype.getLogFile = function(response, queryCommand, currentNode) {
+  response.writeHead(200);
+  response.end(`Current node id: ${currentNode}`);
 }
 
 KanbanGoInitializer.prototype.runNodes2ReadConfig = function(response) {
@@ -674,7 +691,7 @@ KanbanGoInitializer.prototype.runShell = function(command, theArguments, theOpti
   return child;
 }
 
-KanbanGoInitializer.prototype.handleRPCArguments = function(request, response, queryCommand) {
+KanbanGoInitializer.prototype.handleRPCArguments = function(request, response, queryCommand, queryNode) {
   //console.log(`DEBUG: this.paths: ${this.paths}.`);
   this.numberRequestsRunning ++;
   if (this.numberRequestsRunning > this.maxRequestsRunning) {
@@ -690,8 +707,34 @@ KanbanGoInitializer.prototype.handleRPCArguments = function(request, response, q
   }
   if (!(theCallLabel in this.handlers)) {
     response.writeHead(200);
-    return response.end(`{"error": "No handler named ${theCallLabel}"} found. `);
+    return response.end(`{"error": "No handler named ${theCallLabel} found."} `);
   }
+  var currentNode = null;
+  try {
+    if (queryNode !== null){
+      var currentNodeId = queryNode.id;
+      if (currentNodeId === undefined || currentNodeId === null) {
+        response.writeHead(400);
+        numberRequestsRunning --;
+        return response.end(`Node is missing the id variable. `);        
+      }
+      if (currentNodeId === "") {
+        currentNode = null;
+      } else {
+        currentNodeId = Number(currentNodeId);
+        currentNode = this.nodes[currentNodeId];
+        if (currentNode === undefined || currentNode === null) {
+          response.writeHead(400);
+          numberRequestsRunning --;
+          return response.end(`Failed to extract node id.`);          
+        }
+      }
+    }
+  } catch (e) {
+    response.writeHead(200);
+    return response.end(`{"error": "Failed to process node info. ${e}"} `);
+  }
+
   var currentHandler = this.handlers[theCallLabel];
   var currentFunction = currentHandler.handler;
   if (currentFunction === undefined || currentFunction === null) {
@@ -702,7 +745,7 @@ KanbanGoInitializer.prototype.handleRPCArguments = function(request, response, q
     return response.end(`{"error": "Server error: handler ${theCallLabel}"} declared but no implementation found. `);
   }
   try {
-    return (currentFunction.bind(this))(response, queryCommand);
+    return (currentFunction.bind(this))(response, queryCommand, currentNode);
   } catch (e) {
     response.writeHead(500);
     return response.end(`Server error: ${e}`);

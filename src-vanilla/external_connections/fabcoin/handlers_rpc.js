@@ -124,7 +124,7 @@ function handleRPCArguments(response, queryCommand) {
   } catch (e) {
     response.writeHead(400);
     numberRequestsRunning --;
-    return response.end(`Failed to extract node id. ${e}`);        
+    return response.end(`Failed to extract rpc call label. ${e}`);        
   }
   var theCallLabel = queryCommand[fabcoinRPC.urlStrings.rpcCallLabel];
   var callCollection = fabcoinRPC.rpcCalls;

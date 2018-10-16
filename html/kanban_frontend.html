@@ -15,7 +15,8 @@
   <table class = "tableKanbanPlusPlusTest"> 
     <tr><td>
       <table>
-        <tr><td><button class = "buttonStandard" onclick = "window.kanban.kanbanGO.initialization.initializer.run('runNodes');">run nodes</button></td></tr>
+        <tr><td><button class = "buttonStandard" style = "width:100%" onclick = "window.kanban.kanbanGO.rpc.theKBNodes.run('runNodes', 'initialization');">Run</button></td></tr>
+        <tr><td><button class = "buttonStandard" style = "width:100%" onclick = "window.kanban.kanbanGO.rpc.theKBNodes.run('getLogFile', 'initialization');">Logs</button></td></tr>
       </table>
     </td>
   <td>
@@ -33,17 +34,35 @@
   <table class = "tableKanbanPlusPlusTest"> 
   <tr><td>
   <table>
-    <tr><td><button class = "buttonStandard" style = "width:100%" onclick = "window.kanban.kanbanGO.rpc.testFunctions.run('getBlockByNumber');">Block by #</button></td></tr>
-    <tr><td><button class = "buttonStandard" style = "width:100%" onclick = "window.kanban.kanbanGO.rpc.testFunctions.run('getBlockByHash');">Block by hash</button></td></tr>
-    <tr><td><button class = "buttonStandard" style = "width:100%" onclick = "window.kanban.kanbanGO.rpc.testFunctions.run('round');">Round</button></td></tr>
-    <tr><td><button class = "buttonStandard" style = "width:100%" onclick = "window.kanban.kanbanGO.rpc.testFunctions.run('validators');">Validators</button></td></tr>
-    <tr><td><button class = "buttonStandard" style = "width:100%" onclick = "window.kanban.kanbanGO.rpc.testFunctions.run('peerView');">Peer View</button></td></tr>
-    <tr><td><button class = "buttonStandard" style = "width:100%" onclick = "window.kanban.kanbanGO.rpc.testFunctions.run('roundChangeRequests');">Change Round</button></td></tr>
+    <tr><td><button class = "buttonStandard" style = "width:100%" onclick = "window.kanban.kanbanGO.rpc.theKBNodes.run('getBlockByNumber');">Block by #</button></td></tr>
+    <tr><td><button class = "buttonStandard" style = "width:100%" onclick = "window.kanban.kanbanGO.rpc.theKBNodes.run('getBlockByHash');">Block by hash</button></td></tr>
+    <tr><td><button class = "buttonStandard" style = "width:100%" onclick = "window.kanban.kanbanGO.rpc.theKBNodes.run('round');">Round</button></td></tr>
+    <tr><td><button class = "buttonStandard" style = "width:100%" onclick = "window.kanban.kanbanGO.rpc.theKBNodes.run('validators');">Validators</button></td></tr>
+    <tr><td><button class = "buttonStandard" style = "width:100%" onclick = "window.kanban.kanbanGO.rpc.theKBNodes.run('peerView');">Peer View</button></td></tr>
+    <tr><td><button class = "buttonStandard" style = "width:100%" onclick = "window.kanban.kanbanGO.rpc.theKBNodes.run('roundChangeRequests');">Change Round</button></td></tr>
   </table>
   </td>
   <td>
     <input id = "inputKBGOBlockNumber" class = "inputStandard" size = "90" placeholder = "block number" value = "5"></input><br>
     <input id = "inputKBGOBlockHash" class = "inputStandard" size = "90" placeholder = "block hash"></input><br>
+    <textarea id = "textAreaSolidityInputForKanbanGO" onchange = "window.kanban.kanbanGO.rpc.theKBNodes.run('compileSolidity')">
+pragma solidity ^0.4.0;
+contract DataWriter {
+
+    struct State {
+        bytes32 data;
+    }
+
+    State internal theState;
+    function writeData(bytes32 input) public {
+        theState.data = input;
+    }
+    function readData() public view returns (bytes32) {
+        return theState.data;
+    }
+}
+</textarea>
+
   </td>
   </tr>
   </table>
@@ -175,13 +194,13 @@
   <tr>
   <td>
     <table>
-      <tr><td><button class = "buttonStandard" style = "width: 100px" onclick = "window.kanban.kanbanGO.rpc.testFunctions.run('versionGO');"><b>Version</b></button></td></tr>
+      <tr><td><button class = "buttonStandard" style = "width: 100px" onclick = "window.kanban.kanbanGO.rpc.theKBNodes.run('versionGO');"><b>Version</b></button></td></tr>
       <tr><td style = "text-align: center; border-bottom: 1px solid black; font-size: x-small;"><span>Schnorr</span></td></tr>
-      <tr><td><button class = "buttonStandard" style = "width: 100px" onclick = "window.kanban.kanbanGO.rpc.testFunctions.run('testSha3')"><b>Sha3 256</b></button></td></tr>
-      <tr><td><button class = "buttonStandard" style = "width: 100px" onclick = "window.kanban.kanbanGO.rpc.testFunctions.run('testPrivateKeyGeneration');"><b style = "color:red">Private key</b></button></td></tr>
-      <tr><td><button class = "buttonStandard" style = "width: 100px" onclick = "window.kanban.kanbanGO.rpc.testFunctions.run('testPublicKeyFromPrivate');"><b>Public key</b></button></td></tr>
-      <tr><td><button class = "buttonStandard" style = "width: 100px" onclick = "window.kanban.kanbanGO.rpc.testFunctions.run('testSchnorrSignature');"><b>Signature</b></button></td></tr>
-      <tr><td><button class = "buttonStandard" style = "width: 100px" onclick = "window.kanban.kanbanGO.rpc.testFunctions.run('testSchnorrVerification');"><b>Verify</b></button></td></tr>
+      <tr><td><button class = "buttonStandard" style = "width: 100px" onclick = "window.kanban.kanbanGO.rpc.theKBNodes.run('testSha3')"><b>Sha3 256</b></button></td></tr>
+      <tr><td><button class = "buttonStandard" style = "width: 100px" onclick = "window.kanban.kanbanGO.rpc.theKBNodes.run('testPrivateKeyGeneration');"><b style = "color:red">Private key</b></button></td></tr>
+      <tr><td><button class = "buttonStandard" style = "width: 100px" onclick = "window.kanban.kanbanGO.rpc.theKBNodes.run('testPublicKeyFromPrivate');"><b>Public key</b></button></td></tr>
+      <tr><td><button class = "buttonStandard" style = "width: 100px" onclick = "window.kanban.kanbanGO.rpc.theKBNodes.run('testSchnorrSignature');"><b>Signature</b></button></td></tr>
+      <tr><td><button class = "buttonStandard" style = "width: 100px" onclick = "window.kanban.kanbanGO.rpc.theKBNodes.run('testSchnorrVerification');"><b>Verify</b></button></td></tr>
     </table>
   </td>
   <td>
@@ -333,6 +352,8 @@
     <input type = "text" class = "inputCrypto" id = "inputFabcoinContractId" size = "90" value = "" placeholder = "contract id"></input><br>
     <input type = "text" class = "inputCrypto" id = "inputFabcoinContractData" size = "90" value = "" placeholder = "contract data"></input><br>
     <input type = "text" class = "inputCrypto" id = "inputFabcoinWalletAmount" size = "90" value = "" placeholder = "amount (wallet)"></input><br>
+
+    <textarea id = "textAreaSolidityInputForFabcoin" onchange = "window.kanban.fabcoin.rpc.fabNode.handleSolidityInput()"></textarea>
   </td>
   </tr>
   </table>

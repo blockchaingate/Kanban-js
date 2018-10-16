@@ -5,6 +5,9 @@ var urlStrings = {
   rpcCallLabel: "rpcCall"
 };
 
+/**
+ * @type {Object.<string,{rpcCall:string, method: string, mandatoryFixedArguments: Object, mandatoryModifiableArguments: Object, optionalArguments: Object, types: Object, parameters: string[]}>}
+ */
 var rpcCalls = {
   //The method names of the ethereum calls are composed like this:
   //1. Take the function name, say, TestSha3. 
@@ -237,58 +240,29 @@ var rpcCalls = {
   roundChangeRequests: {
     rpcCall: "roundChangeRequests", //must be same as rpc label, used for autocomplete
     method: "pbft_roundChangeRequests", //<- method name passed to kanban-go
-    mandatoryFixedArguments: { //<- values give defaults, null for none
-    },
-    mandatoryModifiableArguments: { //<- values give defaults, null for none
-    },
-    optionalModifiableArguments: {
-    },
-    allowedArgumentValues: {
-    },
     parameters: []
   },
   validators: {
     rpcCall: "validators",
     method: "pbft_validators",
-    mandatoryFixedArguments: { //<- values give defaults, null for none
-    },
-    mandatoryModifiableArguments: { //<- values give defaults, null for none
-    },
-    optionalModifiableArguments: {
-    },
-    allowedArgumentValues: {
-    },
     parameters: []
   },
   versionGO: {
     rpcCall: "versionGO", //must be same as rpc label, used for autocomplete
     method: "web3_clientVersion",
-    mandatoryFixedArguments: { //<- values give defaults, null for none
-    },
-    mandatoryModifiableArguments: { //<- values give defaults, null for none
-    },
-    optionalModifiableArguments: {
-    },
-    allowedArgumentValues: {
-    },
     parameters: []
   },
+  compileSolidity: {
+    rpcCall: "compileSolidity",
+    method: "kanban_compileSolidity",
+    mandatoryModifiableArguments: {
+      solidityInput: null,
+    },
+    parameters: []
+  }
 };
-
-function getPOSTBodyFromKanbanGORPCLabel(theRPCLabel, theArguments) {
-  var theRequest = {};
-  theRequest[urlStrings.rpcCallLabel] = theRPCLabel;
-  if (theArguments === undefined) {
-    theArguments = {};
-  }
-  for (var label in theArguments) {
-    theRequest[label] = theArguments[label];
-  }
-  return `${encodeURIComponent(JSON.stringify(theRequest))}`;
-}
 
 module.exports = {
   urlStrings,
-  rpcCalls,
-  getPOSTBodyFromKanbanGORPCLabel
+  rpcCalls
 }

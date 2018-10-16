@@ -4,12 +4,10 @@ const rpcCallsNetwork = require('./fabcoin_old/fabcoin_rpc_network');
 const rpcCallsSendReceive = require('./fabcoin_old/fabcoin_rpc_send_receive');
 const rpcCallsMine = require('./fabcoin_old/fabcoin_rpc_mine');
 const rpcCallsProfiling = require('./fabcoin_old/fabcoin_rpc_profiling');
-const fabcoinInitialization = require('./fabcoin_old/fabcoin_initialization');
 const ids = require('./ids_dom_elements');
-const pathnames = require('../pathnames');
 const fabcoindOldRPC = require('../external_connections/fabcoin_old/rpc');
 const myNodes = require('./my_nodes');
-const kanabanInitialization = require('./kanbango/initialization');
+const kanbanRPC = require('./kanbango/rpc');
 
 function Page() {
   this.fabcoinNetworkRadioIds = {};
@@ -38,7 +36,7 @@ function Page() {
     },
     myLocalKanbanNodes: {
       idPage: ids.defaults.pages.kanbanMyLocalNodes,
-      updateFunction: kanabanInitialization.initializer.getNodeInformation
+      updateFunction: kanbanRPC.theKBNodes.getNodeInformation.bind(kanbanRPC.theKBNodes)
     },
     myNodes: {
       idPage: ids.defaults.pageMyNodes,

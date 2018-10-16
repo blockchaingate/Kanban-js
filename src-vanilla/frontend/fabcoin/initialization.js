@@ -10,11 +10,6 @@ function FabcoinNodeInitializer() {
   this.idOutput = ids.defaults.outputFabcoinInitialization;
   var inputInitialization = ids.defaults.fabcoin.inputInitialization;
   this.theFunctions = {
-    runFabcoind: {
-      inputs: {
-        arguments: inputInitialization.fabcoindArguments
-      }
-    },
   };
 }
 

@@ -9,6 +9,9 @@ var rpcCalls = {
       numberOfNodes: null
     },
   },
+  getLogFile: {
+    rpcCall: "getLogFile",
+  },
   getNodeInformation: {
     rpcCall: "getNodeInformation",
     mandatoryFixedArguments: { //<- values give defaults, null for none

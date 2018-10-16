@@ -55,13 +55,13 @@ var defaults = {
     },
     inputSendReceive: {
       blockNumber: "inputKBGOBlockNumber",
-      blockHash: "inputKBGOBlockHash"
+      blockHash: "inputKBGOBlockHash",
+      solidityInput: "textAreaSolidityInputForKanbanGO",
     },
     inputInitialization: {
       numberOfNodes: "inputKBGONumberOfGethNodes"
     },
     nodePanel: "spanKanbanGoNodeContainer",
-    outputInitialization: "divFabcoinOldInitialization",
     outputKBGOTest: "divOutputKBGOTest",
     outputKanbanInitialization: "divOutputMyLocalKanbanNodes",
     outputSendReceive: "divOutputKBGOSendReceive"
@@ -114,7 +114,8 @@ var defaults = {
       contractHex: "inputFabcoinContractHex",
       contractId: "inputFabcoinContractId",
       contractData: "inputFabcoinContractData",
-      walletAmount: "inputFabcoinWalletAmount"
+      walletAmount: "inputFabcoinWalletAmount",
+      solidityInput: "textAreaSolidityInputForFabcoin",
     },
     outputFabcoinInitialization: "divOutputFabcoinInitialization",
     outputFabcoinBlockInfo: "duvOutputFabcoinBlockInfo"

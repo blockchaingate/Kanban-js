@@ -145,7 +145,7 @@ function handleRPCArguments(response, queryCommand, queryNode) {
     if (currentNode === undefined || currentNode === null) {
       response.writeHead(400);
       numberRequestsRunning --;
-      return response.end(`Failed to extract node id. ${e}`);          
+      return response.end(`Failed to extract node id.`);          
     }
   } catch (e) {
     response.writeHead(400);
