@@ -113,6 +113,17 @@ function KanbanGoNodes() {
       privateKeyBase58Check: this.transformersStandard.shortener,
       privateKeyBase64: this.transformersStandard.shortener,
       privateKeyHex: this.transformersStandard.shortener,
+      ethereumAddressHex: this.transformersStandard.shortener,
+      fabAddressMainnetBase58Check: this.transformersStandard.shortener,
+      fabAddressMainnetHexNocheck: this.transformersStandard.shortener,
+      fabAddressTestnetBase58Check: this.transformersStandard.shortener,
+      fabAddressTestnetHexNocheck: this.transformersStandard.shortener,
+      inputPrivateKeyBase58: this.transformersStandard.shortener,
+      inputPrivateKeyBase58CheckRecoded: this.transformersStandard.shortener,
+      inputPrivateKeyBase58Recoded: this.transformersStandard.shortener,
+      inputPrivateKeyHex: this.transformersStandard.shortener,
+      publicKeyHex: this.transformersStandard.shortener,
+      publicKeyHexInternal: this.transformersStandard.shortener,
     }
   };
   this.optionsKanbanGOLabelContraction = {};

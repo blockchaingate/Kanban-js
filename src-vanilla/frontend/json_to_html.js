@@ -315,6 +315,17 @@ var labelAbbreviations = {
   "walletconflicts": "w.confl.",
   "blockindex": "bl.ind.",
   "generated": "gen.",
+  "ethereumAddressHex": "ethAddrHex",
+  "fabAddressMainnetBase58Check": "fabAddrMain58Ch",
+  "fabAddressMainnetHexNocheck": "fabAddrMHex",
+  "fabAddressTestnetBase58Check": "fabAddrTHexCh",
+  "fabAddressTestnetHexNocheck": "fabAddrTHex",
+  "inputPrivateKeyBase58CheckRecoded": "inPriv58ChRe",
+  "inputPrivateKeyBase58": "inPriv58",
+  "inputPrivateKeyBase58Recoded": "inPriv58Re",
+  "inputPrivateKeyHex": "inPrivHex",
+  "publicKeyHex": "pubHex",
+  "publicKeyHexInternal": "pubHexInt",
 }
 
 function abbreviateLabel(/** @type {string}*/ header) {
