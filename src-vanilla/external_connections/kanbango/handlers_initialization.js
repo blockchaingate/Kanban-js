@@ -715,18 +715,18 @@ KanbanGoInitializer.prototype.handleRPCArguments = function(request, response, q
       var currentNodeId = queryNode.id;
       if (currentNodeId === undefined || currentNodeId === null) {
         response.writeHead(400);
-        numberRequestsRunning --;
+        this.numberRequestsRunning --;
         return response.end(`Node is missing the id variable. `);        
       }
-      if (currentNodeId === "") {
+      if (currentNodeId === "none" || currentNodeId === "all") {
         currentNode = null;
       } else {
-        currentNodeId = Number(currentNodeId);
-        currentNode = this.nodes[currentNodeId];
+        var currentNodeIdNumber = Number(currentNodeId);
+        currentNode = this.nodes[currentNodeIdNumber];
         if (currentNode === undefined || currentNode === null) {
           response.writeHead(400);
-          numberRequestsRunning --;
-          return response.end(`Failed to extract node id.`);          
+          this.numberRequestsRunning --;
+          return response.end(`Failed to extract node id from ${currentNodeId}.`);          
         }
       }
     }

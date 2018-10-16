@@ -23,7 +23,7 @@ function KanbanGoNodes() {
   /**@type {KanbanGONode[]} */
   this.nodes = [];
   /**@type {string} */
-  this.selectedNode = "";
+  this.selectedNode = "none";
   
   this.transformersStandard = {
     shortener: {
@@ -149,7 +149,7 @@ function KanbanGoNodes() {
       }
     },
     getNodeInformation: {
-      callback: this.getNodeInformationCallback
+      callback: this.getNodeInformationCallback.bind(this)
     },
     peerView: {
       output: ids.defaults.kanbanGO.outputSendReceive,
@@ -431,6 +431,34 @@ KanbanGoNodes.prototype.toHTMLRadioButton = function () {
     radioButtonHTML += this.nodes[counterNode].toHTMLRadioButton();
   } 
   return radioButtonHTML;
+}
+
+KanbanGoNodes.prototype.getNodeInformationCallback = function (functionLabel, input, output) {
+  //console.log("DEBUG: Got back:" + input);
+  try {
+    var inputParsed = JSON.parse(input);
+    this.nodes = [];
+    if (this.selectedNode === "" && inputParsed.length > 0) {
+      this.selectedNode = "all";
+    } else {
+      this.selectedNode = "none";
+    }
+
+    for (var counterNode = 0; counterNode < inputParsed.length; counterNode ++) {
+      var currentNode = new KanbanGONode();
+      currentNode.init(inputParsed[counterNode]);
+      //console.log("DEBUG: This selected node: " + this.selectedNode + " id backend:  " + currentNode.idBackend);
+      if (this.selectedNode === currentNode.idBackend) {
+        //console.log("DEbug: selecting node: " + currentNode.idBackend);
+        currentNode.flagSelected = true;
+      }
+      this.nodes.push(currentNode);
+    } 
+  } catch (e) {
+    console.log(`Error while updating node information panel. ${e}`);
+  }
+  var nodePanel = document.getElementById(ids.defaults.kanbanGO.nodePanel);
+  nodePanel.innerHTML = this.toHTMLRadioButton();  
 }
 
 var theKBNodes = new KanbanGoNodes();
