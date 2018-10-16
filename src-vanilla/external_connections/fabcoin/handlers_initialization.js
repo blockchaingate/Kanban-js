@@ -100,7 +100,7 @@ FabcoinNode.prototype.handleRPCArguments = function(request, response, queryComm
   }
   if (!(theCallLabel in this.handlers) && !(theCallLabel in this)) {
     response.writeHead(200);
-    return response.end(`{"error": "No handler named ${theCallLabel} found."}`);
+    return response.end(`{"error": "No FAB handler named ${theCallLabel} found."}`);
   }
   var currentHandler = this.handlers[theCallLabel];
   var currentFunction = null;

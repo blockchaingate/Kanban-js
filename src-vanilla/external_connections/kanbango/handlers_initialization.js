@@ -66,11 +66,14 @@ function NodeKanbanGo(inputId) {
   this.childProcessHandle = null;
   /**@type {{log: OutputStream} */
   this.outputStreams = {
+    initialization: new OutputStream(),
     log: new OutputStream(),
   };
   var initializer = getInitializer();
   this.outputStreams.log.idConsole = `[Node ${this.id}]`;
   this.outputStreams.log.colorIdConsole = initializer.colors[this.id % initializer.colors.length];
+  this.outputStreams.initialization.idConsole = `[Node ${this.id}]`;
+  this.outputStreams.initialization.colorIdConsole = initializer.colors[this.id % initializer.colors.length];
 }
 
 NodeKanbanGo.prototype.initializeFoldersAndKeys = function(response) {
@@ -81,21 +84,26 @@ NodeKanbanGo.prototype.initialize2ReadKeyStore = function(response, error) {
   fs.readdir(this.keyStoreFolder, this.initialize3SelectAddress.bind(this, response));
 }
 
-NodeKanbanGo.prototype.log = function(input) {
+NodeKanbanGo.prototype.logToInitializationStream = function(input) {
+  this.notes += `${input}<br>\n`;
+  this.outputStreams.initialization.append(input);
+}
+
+NodeKanbanGo.prototype.logRegular = function(input) {
   this.notes += `${input}<br>\n`;
   this.outputStreams.log.append(input);
 }
 
 NodeKanbanGo.prototype.initialize3SelectAddress = function(response, error, fileNames) {
   if (error !== null && error !== undefined) {
-    this.log(`Error reading key store directory: ${this.keyStoreFolder}. ${error}`);
+    this.logToInitializationStream(`Error reading key store directory: ${this.keyStoreFolder}. ${error}`);
     this.flagFoldersWereInitialized = false;
   } else {
-    this.log(`Successfully read key store directory: ${this.keyStoreFolder}`);
+    this.logToInitializationStream(`Successfully read key store directory: ${this.keyStoreFolder}`);
   }
   this.numberAttemptsToSelectAddress ++;
   if (this.numberAttemptsToSelectAddress > this.maximumAttemptsToSelectAddress) {
-    this.log(`${this.numberAttemptsToSelectAddress} failed attempts to select address: aborting.`);
+    this.logToInitializationStream(`${this.numberAttemptsToSelectAddress} failed attempts to select address: aborting.`);
     getInitializer().runNodes2ReadConfig(response);
     return;
   }
@@ -106,7 +114,7 @@ NodeKanbanGo.prototype.initialize3SelectAddress = function(response, error, file
     }
   }
   if (!hasKeys) {
-    this.log(`Found no previously generated keys. Resetting all folders and keys. `);
+    this.logToInitializationStream(`Found no previously generated keys. Resetting all folders and keys. `);
     this.flagFoldersWereInitialized = false;
     this.initialize5ResetFolders(response);
     return;
@@ -117,7 +125,7 @@ NodeKanbanGo.prototype.initialize3SelectAddress = function(response, error, file
 
 NodeKanbanGo.prototype.initialize4ReadAccountAddress = function(response, error, data) {
   if (error !== null && error !== undefined) {
-    this.log(`Error reading stored key: ${this.fileNameNodeAddress}. ${error}`);
+    this.logToInitializationStream(`Error reading stored key: ${this.fileNameNodeAddress}. ${error}`);
     this.flagFoldersWereInitialized = false;
     this.initialize5ResetFolders(response);
     return;
@@ -126,16 +134,16 @@ NodeKanbanGo.prototype.initialize4ReadAccountAddress = function(response, error,
     this.ethereumAddressFileContent = data;
     this.ethereumAddressFileParsed = JSON.parse(this.ethereumAddressFileContent);
     this.ethereumAddress = this.ethereumAddressFileParsed.address;
-    this.log(`Successfully read ethereum address: ${this.ethereumAddress}`);
+    this.logToInitializationStream(`Successfully read ethereum address: ${this.ethereumAddress}`);
   } catch (e) {
-    this.log(`Error while parsing key file. ${error}. The key file content: ${data}`);
+    this.logToInitializationStream(`Error while parsing key file. ${error}. The key file content: ${data}`);
     this.initialize5ResetFolders(response);
     return;
   }
   this.flagFoldersInitialized = true;
   fs.readFile(this.nodeKeyFileName, (err, data)=>{
     if (err !== null && err !== undefined) {
-      this.log(`Error reading node key: ${this.nodeKeyFileName}. ${error}`);
+      this.logToInitializationStream(`Error reading node key: ${this.nodeKeyFileName}. ${error}`);
       this.flagFoldersWereInitialized = false;
       this.initialize5ResetFolders(response);
       return;
@@ -144,7 +152,7 @@ NodeKanbanGo.prototype.initialize4ReadAccountAddress = function(response, error,
     this.nodePublicKeyHex = this.nodePrivateKey.getExponent().toHex();
     this.nodePublicKeyHexUncompressedNoPrefix = this.nodePrivateKey.getExponent().toHexUncompressed().slice(2);
     this.nodeAddressHex = this.nodePrivateKey.getExponent().computeEthereumAddressHex();
-    this.log(`Loaded private key from node key file: ${this.nodePrivateKey.toHex()} with corresponding ethereum address: ${this.nodeAddressHex}`);
+    this.logToInitializationStream(`Loaded private key from node key file: ${this.nodePrivateKey.toHex()} with corresponding ethereum address: ${this.nodeAddressHex}`);
     getInitializer().numberOfInitializedFolders ++;
     getInitializer().runNodes2ReadConfig(response);
   });
@@ -156,11 +164,11 @@ NodeKanbanGo.prototype.initialize5ResetFolders = function(response) {
 
 NodeKanbanGo.prototype.initialize6CreateFolders = function(response, error) {
   if (error !== null && error !== undefined) {
-    this.log(`Error while deleting folder: ${this.dataDir}. ${error}`);
+    this.logToInitializationStream(`Error while deleting folder: ${this.dataDir}. ${error}`);
   } else {
-    this.log(`Deleted folder: ${this.dataDir}.`);
+    this.logToInitializationStream(`Deleted folder: ${this.dataDir}.`);
   }
-  this.log(`Proceding to create account for new node.`);
+  this.logToInitializationStream(`Proceding to create account for new node.`);
   var initializer = getInitializer(); 
   var theOptions = {
     cwd: initializer.paths.gethPath,
@@ -193,22 +201,22 @@ NodeKanbanGo.prototype.computeNodeInfo = function () {
 }
 
 NodeKanbanGo.prototype.initialize7GenerateKey = function(response, error) {
-  this.log(`Generated acount in key store. Proceding to generate node key. `);
+  this.logToInitializationStream(`Generated acount in key store. Proceding to generate node key. `);
   this.nodePrivateKey.generateAtRandom();
   fsExtra.ensureDir(this.nodeKeyDir, this.initialize8WriteKey.bind(this, response));
 }
 
 NodeKanbanGo.prototype.initialize8WriteKey = function(response, errorDir) {
   if (errorDir !== null && errorDir !== undefined) {
-    this.log(`Failed to create directory: ${this.nodeKeyDir}. ${errorDir}`);
+    this.logToInitializationStream(`Failed to create directory: ${this.nodeKeyDir}. ${errorDir}`);
     this.initialize2ReadKeyStore(response, null);
     return;
   }
   fs.writeFile(this.nodeKeyFileName, this.nodePrivateKey.toHex(), (errorWrite)=> {
     if (errorWrite !== null && errorWrite !== undefined) {
-      this.log(`Error writing node private key: ${errorWrite}.`);
+      this.logToInitializationStream(`Error writing node private key: ${errorWrite}.`);
     } else {
-      this.log(`Wrote node key file. `);
+      this.logToInitializationStream(`Wrote node key file. `);
     }
     this.initialize2ReadKeyStore(response, null);
   });
@@ -220,7 +228,7 @@ NodeKanbanGo.prototype.initialize9GenesisBlock = function(response) {
     cwd: initializer.paths.gethPath,
     env: process.env
   };
-  this.log(`Proceding to initialize genesis. `);
+  this.logToInitializationStream(`Proceding to initialize genesis. `);
   this.flagFoldersWereInitialized = false;
   var theArguments = [
     "--datadir",
@@ -248,11 +256,11 @@ NodeKanbanGo.prototype.initialize10WriteNodeConnections = function(response) {
     }
     this.nodeConnections.push(initializer.nodes[currentId].myEnodeAddress);
   }
-  this.log(`Writing connections: ${JSON.stringify(this.nodeConnections)} to file: ${this.connectionsFileName}`);
+  this.logToInitializationStream(`Writing connections: ${JSON.stringify(this.nodeConnections)} to file: ${this.connectionsFileName}`);
   fs.writeFile(this.connectionsFileName, JSON.stringify(this.nodeConnections), (errorConnections)=> {
     //console.log(`DEBUG: did finally write connections`);
     if (errorConnections !== null && errorConnections !== undefined) {
-      this.log(`Error writing node connections. ${e}`);
+      this.logToInitializationStream(`Error writing node connections. ${e}`);
     }
     getInitializer().runNodes6DoRunNodes(response);
   });
@@ -304,6 +312,8 @@ function KanbanGoInitializer() {
     runNodes: {
     }, 
     getNodeInformation: {
+    },
+    getLogFile: {
     }
   };
   this.colors = ["yellow", "green", "blue", "cyan", "magenta"];
@@ -511,6 +521,22 @@ KanbanGoInitializer.prototype.getNodeInformation = function(response, queryComma
   this.numberRequestsRunning --;
 }
 
+KanbanGoInitializer.prototype.getLogFile = function(
+  response, 
+  queryCommand,
+  /**@type {NodeKanbanGo} */ 
+  currentNode
+) {
+  this.numberRequestsRunning --;
+  if (currentNode === null || currentNode === undefined || !(currentNode instanceof NodeKanbanGo)) {
+    response.writeHead(400);
+    response.end(`Bad node id. Current node: ${currentNode} `);
+  }
+  response.writeHead(200);
+  var result = currentNode.outputStreams.log.toString();
+  response.end(result);
+}
+
 KanbanGoInitializer.prototype.runNodes = function(response, queryCommand, currentNodeNotUsed) {
   var candidateNumberOfNodes = Number(queryCommand.numberOfNodes);
   var maxNumberOfNodes = 100;
@@ -531,11 +557,6 @@ KanbanGoInitializer.prototype.runNodes = function(response, queryCommand, curren
   for (var counterNode = 0; counterNode < this.nodes.length; counterNode ++) {
     this.nodes[counterNode].initializeFoldersAndKeys(response);
   }
-}
-
-KanbanGoInitializer.prototype.getLogFile = function(response, queryCommand, currentNode) {
-  response.writeHead(200);
-  response.end(`Current node id: ${currentNode}`);
 }
 
 KanbanGoInitializer.prototype.runNodes2ReadConfig = function(response) {
@@ -666,24 +687,42 @@ KanbanGoInitializer.prototype.runShell = function(command, theArguments, theOpti
   console.log(`About to execute: ${command}`.yellow);
   console.log(`Arguments: ${theArguments}`.green);
   var child = childProcess.spawn(command, theArguments, theOptions);
-  var shellId = "";
+  var currentNode = null;
   if (id >= 0) {
-    var color = this.colors[id % this.colors.length];
-    shellId = `[shell ${id}] `[color];
-  } else {
-    shellId = `[KanbanGoInitializer] `.red;
+    currentNode = this.nodes[id];
   }
+  if (currentNode === undefined) {
+    currentNode = null;
+  }
+  var thisContainer = this;
   child.stdout.on('data', function(data) {
-    console.log(shellId + data.toString());
+    if (currentNode !== null) {
+      currentNode.logRegular(data.toString());
+    } else {
+      thisContainer.log(data.toString())
+    }
   });
   child.stderr.on('data', function(data) {
-    console.log(shellId + data.toString());
+    if (currentNode !== null) {
+      currentNode.logRegular(data.toString());
+    } else {
+      thisContainer.log(data.toString())
+    }
   });
   child.on('error', function(data) {
-    console.log(shellId + data.toString());
+    if (currentNode !== null) {
+      currentNode.logRegular(data.toString());
+    } else {
+      thisContainer.log(data.toString())
+    }
   });
   child.on('exit', function(code) {
-    console.log(`Geth ${id} exited with code: ${code}`.green);
+    if (currentNode !== null) {
+      currentNode.logRegular(`Geth ${id} exited with code: ${code}`);
+      console.log(`Geth ${id} exited with code: ${code}`.green);
+    } else {
+      thisContainer.log(`Run shell exit with code: ${code}`.green);
+    }
     if (callbackOnExit !== undefined && callbackOnExit !== null) {
       callbackOnExit();
     }
@@ -707,7 +746,8 @@ KanbanGoInitializer.prototype.handleRPCArguments = function(request, response, q
   }
   if (!(theCallLabel in this.handlers)) {
     response.writeHead(200);
-    return response.end(`{"error": "No handler named ${theCallLabel} found."} `);
+    this.numberRequestsRunning --;
+    return response.end(`{"error": "No KB handler named ${theCallLabel} found."} `);
   }
   var currentNode = null;
   try {
@@ -732,6 +772,7 @@ KanbanGoInitializer.prototype.handleRPCArguments = function(request, response, q
     }
   } catch (e) {
     response.writeHead(200);
+    this.numberRequestsRunning --;
     return response.end(`{"error": "Failed to process node info. ${e}"} `);
   }
 
@@ -742,12 +783,14 @@ KanbanGoInitializer.prototype.handleRPCArguments = function(request, response, q
   }
   if (currentFunction === undefined || currentFunction === null || (typeof currentFunction !== "function")) {
     response.writeHead(500);
+    this.numberRequestsRunning --;
     return response.end(`{"error": "Server error: handler ${theCallLabel}"} declared but no implementation found. `);
   }
   try {
     return (currentFunction.bind(this))(response, queryCommand, currentNode);
   } catch (e) {
     response.writeHead(500);
+    this.numberRequestsRunning --;
     return response.end(`Server error: ${e}`);
   }
 }
