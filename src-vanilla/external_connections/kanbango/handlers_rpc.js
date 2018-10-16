@@ -139,13 +139,13 @@ function handleRPCArguments(response, queryCommand, queryNode) {
       numberRequestsRunning --;
       return response.end(`Node is missing the id variable. `);        
     }
-    currentNodeId = Number(currentNodeId);
+    var currentNodeIdNumber = Number(currentNodeId);
     var initializer = kanabanGoInitializer.getInitializer(); 
-    currentNode = initializer.nodes[currentNodeId];
+    currentNode = initializer.nodes[currentNodeIdNumber];
     if (currentNode === undefined || currentNode === null) {
       response.writeHead(400);
       numberRequestsRunning --;
-      return response.end(`Failed to extract node id.`);          
+      return response.end(`Failed to extract node id from ${currentNodeId}.`);          
     }
   } catch (e) {
     response.writeHead(400);

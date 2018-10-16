@@ -146,7 +146,8 @@ function KanbanGoNodes() {
     runNodes: {
       inputs: {
         numberOfNodes: inputInitialization.numberOfNodes
-      }
+      },
+      callback: PendingCall.prototype.runNodesCallback,
     },
     getNodeInformation: {
       callback: this.getNodeInformationCallback.bind(this)
@@ -308,7 +309,6 @@ KanbanGoNodes.prototype.getBlockByHash = function (container, inputHash) {
   miscellaneousFrontEnd.revealLongWithParent(container, inputHash);
   this.run('getBlockByHash');
 }
-
 
 function getSignerField(input, label) {
   var parsedInput = JSON.parse(input);

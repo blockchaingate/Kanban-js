@@ -13,7 +13,6 @@ var rpcCalls = {
   //1. Take the function name, say, TestSha3. 
   //2. Lowercase the first letter, say, testSha3.
   //3. Prefix the name with the module name, say, kanban_testSha3.
-
   testSha3: {
     rpcCall: "testSha3", //must be same as rpc label, used for autocomplete
     method: "kanban_testSha3", //<- name of go's RPC method 

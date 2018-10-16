@@ -128,6 +128,11 @@ PendingCall.prototype.callbackStandardOneCaller = function(
   return resultHTML;
 }
 
+PendingCall.prototype.callbackRunNodes = function(nodeId, input, output) {
+  this.callbackStandard(nodeId, input, output);
+  this.owner.getNodeInformation();
+}
+
 PendingCall.prototype.callbackStandard = function(nodeId, input, output) {
   //console.log(`DEBUG: pendingCall id: ${pendingCall.id}, nodeId: ${nodeId}, input: ${input}`);
   this.nodeCalls[nodeId].result = input;
