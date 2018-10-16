@@ -121,19 +121,19 @@ function KanbanGoNodes() {
 
   this.callTypes = {
     standard: {
-      json: this.optionsKanbanGOStandard,
+      jsonOptions: this.optionsKanbanGOStandard,
       idDefaultOutput: ids.defaults.kanbanGO.outputSendReceive,
       rpcCalls: kanbanGO.rpcCalls,
       url: pathnames.url.known.kanbanGO.rpc,
     },
-    test: {
-      json: this.optionsKanbanGOStandard,
+    cryptoTest: {
+      jsonOptions: this.optionsKanbanGOStandard,
       idDefaultOutput: ids.defaults.kanbanGO.outputKBGOTest,
       rpcCalls: kanbanGO.rpcCalls,
       url: pathnames.url.known.kanbanGO.rpc,
     },
     initialization: {
-      json: {
+      jsonOptions: {
       },
       rpcCalls: kanbanGOInitialization.rpcCalls,
       idDefaultOutput: ids.defaults.kanbanGO.outputKanbanInitialization,
@@ -147,7 +147,7 @@ function KanbanGoNodes() {
       inputs: {
         numberOfNodes: inputInitialization.numberOfNodes
       },
-      callback: PendingCall.prototype.runNodesCallback,
+      callback: PendingCall.prototype.callbackRunNodes,
     },
     getNodeInformation: {
       callback: this.getNodeInformationCallback.bind(this)
@@ -438,7 +438,7 @@ KanbanGoNodes.prototype.getNodeInformationCallback = function (functionLabel, in
   try {
     var inputParsed = JSON.parse(input);
     this.nodes = [];
-    if (this.selectedNode === "" && inputParsed.length > 0) {
+    if (this.selectedNode === "none" && inputParsed.length > 0) {
       this.selectedNode = "all";
     } else {
       this.selectedNode = "none";

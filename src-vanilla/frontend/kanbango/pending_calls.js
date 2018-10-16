@@ -32,7 +32,7 @@ KanbanGONode.prototype.toHTMLRadioButton = function() {
   result += `&nbsp;&nbsp;&nbsp;`;
   result += `<label class = "containerRadioButton">`;
   result += `<input type = "radio" name = "rpcKanbanGO" id = "${this.idDOM}" `;
-  result += ` onchange = "window.kanban.kanbanGO.initialization.initializer.selectRadio('${this.idBackend}')" `; 
+  result += ` onchange = "window.kanban.kanbanGO.rpc.theKBNodes.selectRadio('${this.idBackend}')" `; 
   if (this.flagSelected) {
     result += "checked";
   }
@@ -46,6 +46,8 @@ KanbanGONode.prototype.toHTMLRadioButton = function() {
 function PendingCall () {
   /**@type {string} */
   this.callType = "";
+  /**@type {{jsonOptions: Object, idDefaultOutput: string, rpcCalls: Object, url: string}} */
+  this.callTypeSpec = null;
   /** @type {number} */
   this.id = - 1;
   /** @type {number} */
@@ -92,11 +94,11 @@ PendingCall.prototype.callbackStandardOneCaller = function(
     currentFunction = null;
   }
   if (currentFunction === null) {
-    options = Object.assign({}, this.owner.JSONOptionsStandard);
+    options = Object.assign({}, this.callTypeSpec.jsonOptions);
   } else if (currentFunction.outputOptions !== null && currentFunction.outputOptions !== undefined) {
     options = Object.assign({}, currentFunction.outputOptions);
   } else {
-    options = Object.assign({}, this.owner.JSONOptionsStandard);
+    options = Object.assign({}, this.callTypeSpec.jsonOptions);
   }
 
   if (!this.flagShowClearButton) {
@@ -171,8 +173,8 @@ function getPOSTBodyFromKanbanRPCLabel(theRPCLabel, theArguments) {
 
 PendingCall.prototype.runOneId = function (nodeId) {
   var theFunction = this.owner.theFunctions[this.functionLabel];
-  var currentCallType = this.owner.callTypes[this.callType]
-  theRPCCalls = currentCallType.rpcCalls;
+  this.callTypeSpec = this.owner.callTypes[this.callType];
+  theRPCCalls = this.callTypeSpec.rpcCalls;
   if (theFunction === null || theFunction === undefined) {
     if (this.functionLabel in theRPCCalls) {
       theFunction = null;
@@ -210,8 +212,8 @@ PendingCall.prototype.runOneId = function (nodeId) {
   };
   messageBody += `&node=${escape(JSON.stringify(nodeObject))}`;
 
-  var theURL = currentCallType.url;
-  var currentResult = currentCallType.idDefaultOutput;
+  var theURL = this.callTypeSpec.url;
+  var currentResult = this.callTypeSpec.idDefaultOutput;
   if (theFunction !== null) {
     if (theFunction.output !== undefined && theFunction.output !== null) {
       currentResult = theFunction.output;
