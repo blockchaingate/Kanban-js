@@ -512,8 +512,14 @@ function SolidityCode (codeBase64, basePath) {
   this.pathBase = basePath;
   /** @type {string[]} */
   this.lines = null;
+  /** @type {string[]} */
+  this.tokens = null;
+  /** @type {string[]} */
+  this.contractNames = [];
   this.fileNameBinaryWithPath = "";
   this.fileNameABIWithPath = "";
+  this.flagTokenized = false;
+  this.flagContractNamesComputed = false;
 }
 
 SolidityCode.prototype.getSourceFileNameWithPath = function () {
@@ -525,34 +531,45 @@ SolidityCode.prototype.getABIFileNameWithPath = function () {
   return this.fileNameABIWithPath;
 }
 
+SolidityCode.prototype.extractTokens = function() {
+  if (this.flagTokenized) {
+    return;
+  }
+  this.lines = this.code.split("\n");
+  this.tokens = ["\n"];
+  for (var i = 0; i < this.lines.length; i ++) {
+    var currentLine = this.lines[i].split(" ");
+    for (var j = 0; j < currentLine.length; j ++) {
+      var currentCandidate = currentLine[j].trim(); 
+      if (currentCandidate !== "") {
+        this.tokens.push(currentCandidate);
+      }
+    }
+    this.tokens.push("\n");
+  }
+  this.flagTokenized = true;
+}
+
+SolidityCode.prototype.computeContractNames = function () {
+  if (this.flagContractNamesComputed) {
+    return;
+  }
+  this.extractTokens();
+  this.contractNames = [];
+  for (var i = 2; i < this.tokens.length; i ++) {
+    if (this.tokens[i - 2] === "\n" && this.tokens[i - 1] === "contract") {
+      this.contractNames.push( this.tokens[i]);
+    }
+  }
+  this.flagContractNamesComputed = true;
+}
+
 SolidityCode.prototype.getBinaryFileNameWithPath = function () {
   if (this.fileNameBinaryWithPath !== "") {
     return this.fileNameBinaryWithPath;
   }
-  var contractName = "";
-  this.lines = this.code.split("\n");
-  for (var i = 0; i < this.lines.length; i ++) {
-    var contractNameStart = this.lines[i].indexOf("contract ");
-    if (contractNameStart < 0) {
-      continue;
-    }
-    for (; contractNameStart < this.lines[i].length; contractNameStart ++) {
-      if (this.lines[i][contractNameStart] === " ") {
-        contractNameStart ++;
-        break;
-      }
-    }
-    for (var j = contractNameStart; j < this.lines[i].length; j ++) {
-      if (this.lines[i][j] === '{') {
-        break;
-      }
-      contractName += this.lines[i][j];
-    }
-    break;
-  }
-  contractName = contractName.trim();
-  this.fileNameBinaryWithPath = `${this.pathBase}/${this.fileNameBase}_${contractName}.bin`;
-  this.fileNameABIWithPath = `${this.pathBase}/${this.fileNameBase}_${contractName}.abi`;
+  this.fileNameBinaryWithPath = `${this.pathBase}/${this.fileNameBase}_${this.contractNames[0]}.bin`;
+  this.fileNameABIWithPath = `${this.pathBase}/${this.fileNameBase}_${this.contractNames[0]}.abi`;
   return this.fileNameBinaryWithPath;
 }
 
@@ -566,30 +583,27 @@ KanbanGoInitializer.prototype.compileSolidityPart3 = function(
   solidityCode
 ) {
   var result = {};
+  solidityCode.computeContractNames();
+  result.contractNames = solidityCode.contractNames;
   var container = this;
   fs.readFile(solidityCode.getBinaryFileNameWithPath(), function (err, dataBinary) {
     if (err) {
       response.writeHead(400);
       container.numberRequestsRunning --;
-      response.end(`Failed to read binary file. ${err}`);
+      result.error = `Failed to read binary file. ${err}`;
+      response.end(JSON.stringify(result));
       return;
     }
+    result.binary = encodingsKanban.encodingDefault.toHex(dataBinary);
     fs.readFile(solidityCode.getABIFileNameWithPath(), function(err, dataABI){
       if (err) {
         response.writeHead(400);
         container.numberRequestsRunning --;
-        response.end(`Failed to read binary file. ${err}`);
+        result.error = `Failed to read binary file.  ${err}`; 
+        response.end(JSON.stringify(result));
         return;
       }  
-      try {
-        result.binary = encodingsKanban.encodingDefault.toHex(dataBinary);
-        result.ABI = JSON.parse(dataABI);
-      } catch (e) {
-        response.writeHead(200);
-        container.numberRequestsRunning --;
-        result.error = e;
-        response.end(JSON.stringify(result));  
-      }
+      result.ABI = JSON.parse(dataABI);
       response.writeHead(200);
       container.numberRequestsRunning --;
       response.end(JSON.stringify(result));
@@ -622,7 +636,7 @@ KanbanGoInitializer.prototype.compileSolidity = function(
   numberOfSolidityCalls ++;
   try {
     var solidityCode = new SolidityCode(queryCommand.code, this.paths.solidityDir);
-    if (solidityCode.code.length > 20000) {
+    if (solidityCode.code.length > 100000) {
       response.writeHead(200);
       this.numberRequestsRunning --;
       response.end(`Code too large: ${solidityCode.code.length}`);

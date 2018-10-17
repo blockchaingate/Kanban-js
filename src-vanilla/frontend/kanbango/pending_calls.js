@@ -218,7 +218,7 @@ PendingCall.prototype.runOneId = function (nodeId) {
     }
   } 
 
-  var messageBody = getPOSTBodyFromKanbanRPCLabel(theRPCCall, theArguments);
+  var messageBody = `command=${getPOSTBodyFromKanbanRPCLabel(theRPCCall, theArguments)}`;
   var nodeObject = {
     id: nodeId
   };
@@ -254,7 +254,7 @@ PendingCall.prototype.runOneId = function (nodeId) {
       result: currentResult
     });
   } else {
-    theURL += `?command=${messageBody}`;
+    theURL += `?${messageBody}`;
     submitRequests.submitGET({
       url: theURL,
       progress: currentProgress,
