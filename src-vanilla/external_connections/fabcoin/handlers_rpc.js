@@ -4,43 +4,13 @@ const queryString = require('querystring');
 const http = require('http');
 const fabcoinRPC = require('./rpc');
 const fabcoinInitialization = require('./handlers_initialization');
+const handlersStandard = require('../../handlers_standard');
 
 function handleRequest(request, response) {
-  if (request.method === "POST") {
-    return handleRPCPOST(request, response);
-  }
-  if (request.method === "GET") {
-    return handleRPCGET(request, response);
-  }
-  response.writeHead(400);
-  return response.end(`Method not implemented: ${request.method} not implemented. `);
-}
+  handlersStandard.getQueryStringFromRequest(request, response, handleRPCURLEncodedInput);
+ }
 
-function handleRPCPOST(request, response) {
-  let body = [];
-  request.on('error', (theError) => {
-    response.writeHead(400);
-    response.end(`Error during message body retrieval. ${theError}`);
-  }).on('data', (chunk) => {
-    body.push(chunk);
-  }).on('end', () => {
-    body = Buffer.concat(body).toString();
-    return handleRPCURLEncodedInput(request, response, body);
-  });
-}
-
-function handleRPCGET(request, response) {
-  var parsedURL = null;
-  try {
-    parsedURL = url.parse(request.url);
-  } catch (e) {
-    response.writeHead(400);
-    return response.end(`In handlers_kanban_go: bad RPC request: ${e}.`);
-  }
-  return handleRPCURLEncodedInput(request, response, parsedURL.query);
-}
-
-function handleRPCURLEncodedInput(request, response, messageBodyURLed) {
+function handleRPCURLEncodedInput(response, messageBodyURLed) {
   var query = null;
   var queryCommand = null;
   var queryNode = null;

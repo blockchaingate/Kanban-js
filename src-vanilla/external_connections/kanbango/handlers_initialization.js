@@ -14,6 +14,7 @@ const cryptoKanban = require('../../crypto/crypto_kanban');
 const encodingsKanban = require('../../crypto/encodings');
 var OutputStream = require('../../output_stream').OutputStream;
 require('colors');
+const handlersStandard = require('../../handlers_standard');
 
 /**
  * Returns the ambient kanbanGOInitializer.
@@ -348,26 +349,13 @@ KanbanGoInitializer.prototype.log = function(input) {
 }
 
 KanbanGoInitializer.prototype.handleRequest =  function(request, response) {
-  //console.log("DEBUG: kanban go init: " + JSON.stringify(this));
-  if (request.method === "GET") {
-    return this.handleRPCGET(request, response);
-  }
-  response.writeHead(400);
-  return response.end(`Method not implemented: ${request.method} not implemented. `);
+  handlersStandard.getQueryStringFromRequest(
+    request, 
+    this.handleRPCURLEncodedInput.bind(this)
+  );
 }
 
-KanbanGoInitializer.prototype.handleRPCGET = function(request, response) {
-  var parsedURL = null;
-  try {
-    parsedURL = url.parse(request.url);
-  } catch (e) {
-    response.writeHead(400);
-    return response.end(`In handlers_kanban_go: bad RPC request: ${e}.`);
-  }
-  return this.handleRPCURLEncodedInput(request, response, parsedURL.query);
-}
-
-KanbanGoInitializer.prototype.handleRPCURLEncodedInput = function(request, response, messageBodyURLed) {
+KanbanGoInitializer.prototype.handleRPCURLEncodedInput = function(response, messageBodyURLed) {
   var query = null;
   var queryCommand = null;
   var queryNode = null;
@@ -382,7 +370,7 @@ KanbanGoInitializer.prototype.handleRPCURLEncodedInput = function(request, respo
     response.writeHead(400);
     return response.end(`Bad kanbanGO initialization input: ${messageBodyURLed}. ${e}`);
   }
-  return this.handleRPCArguments(request, response, queryCommand, queryNode);
+  return this.handleRPCArguments(response, queryCommand, queryNode);
 }
 
 KanbanGoInitializer.prototype.computePaths = function() {
@@ -881,7 +869,7 @@ KanbanGoInitializer.prototype.runShell = function(command, theArguments, theOpti
   return child;
 }
 
-KanbanGoInitializer.prototype.handleRPCArguments = function(request, response, queryCommand, queryNode) {
+KanbanGoInitializer.prototype.handleRPCArguments = function(response, queryCommand, queryNode) {
   //console.log(`DEBUG: this.paths: ${this.paths}.`);
   this.numberRequestsRunning ++;
   if (this.numberRequestsRunning > this.maxRequestsRunning) {

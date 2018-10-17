@@ -9,6 +9,7 @@ const path = require('path');
 var OutputStream = require('../../output_stream').OutputStream;
 const crypto = require('crypto');
 const cryptoKanban = require('../../crypto/encodings');
+const handlersStandard = require('../../handlers_standard');
 
 /**
  * Returns a global FabcoinNode object
@@ -59,17 +60,14 @@ FabcoinNode.prototype.initStreams =  function() {
 }
 
 FabcoinNode.prototype.handleRequest =  function(request, response) {
-  var parsedURL = null;
-  try {
-    parsedURL = url.parse(request.url);
-  } catch (e) {
-    response.writeHead(400);
-    return response.end(`In handlers_kanban_go: bad RPC request: ${e}.`);
-  }
-  return this.handleRPCURLEncodedInput(request, response, parsedURL.query);
+  handlersStandard.getQueryStringFromRequest(
+    request, 
+    response, 
+    this.handleRPCURLEncodedInput.bind(this)
+  );
 }
 
-FabcoinNode.prototype.handleRPCURLEncodedInput = function(request, response, messageBodyURLed) {
+FabcoinNode.prototype.handleRPCURLEncodedInput = function(response, messageBodyURLed) {
   var query = null;
   var queryCommand = null;
   try {
@@ -79,7 +77,7 @@ FabcoinNode.prototype.handleRPCURLEncodedInput = function(request, response, mes
     response.writeHead(400);
     return response.end(`Bad fabcoin initialization input. ${e}`);
   }
-  return this.handleRPCArguments(request, response, queryCommand);
+  return this.handleRPCArguments(response, queryCommand);
 }
 
 FabcoinNode.prototype.getArgumentsFromSpec = function(spec, queryCommand, /**@type {Array}*/output, outputErrors) {
@@ -92,7 +90,7 @@ FabcoinNode.prototype.getArgumentsFromSpec = function(spec, queryCommand, /**@ty
   return true;
 }
 
-FabcoinNode.prototype.handleRPCArguments = function(request, response, queryCommand) {
+FabcoinNode.prototype.handleRPCArguments = function(response, queryCommand) {
   var theCallLabel = queryCommand[fabcoinRPC.urlStrings.rpcCallLabel];
   if (!(theCallLabel in fabcoinInitializationSpec.rpcCalls)) {
     response.writeHead(400);
