@@ -55,8 +55,7 @@ var defaults = {
     },
     inputSendReceive: {
       blockNumber: "inputKBGOBlockNumber",
-      blockHash: "inputKBGOBlockHash",
-      solidityInput: "textAreaSolidityInputForKanbanGO",
+      blockHash: "inputKBGOBlockHash"
     },
     inputInitialization: {
       numberOfNodes: "inputKBGONumberOfGethNodes"
@@ -116,6 +115,7 @@ var defaults = {
       contractData: "inputFabcoinContractData",
       walletAmount: "inputFabcoinWalletAmount",
       solidityInput: "textAreaSolidityInputForFabcoin",
+      contractFunctionName: "inputSolidityFunctionName",
     },
     outputFabcoinInitialization: "divOutputFabcoinInitialization",
     outputFabcoinBlockInfo: "duvOutputFabcoinBlockInfo"

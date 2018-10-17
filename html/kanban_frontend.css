@@ -150,6 +150,11 @@ table.tableProfiling td{
 table.tableJSON {
   border-collapse: collapse;
   border: 1px black solid;
+  vertical-align: top;
+}
+
+table.tableJSON tr{
+  vertical-align: top;
 }
 
 table.tableJSON th{
@@ -162,6 +167,7 @@ table.tableJSON td{
   font-size: small;
   font-weight: lighter;
   border: 1px black solid;
+  vertical-align: top;
 }
 
 span.spanRESTDeveloperInfo{
@@ -237,6 +243,7 @@ img.imgFabLogo{
 
 .textAreaStandard{
   display: inline-block;
+  margin: 5px;
 }
 
 .inputStandard {

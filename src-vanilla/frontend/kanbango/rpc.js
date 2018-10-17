@@ -27,16 +27,24 @@ function KanbanGoNodes() {
   
   this.transformersStandard = {
     shortener: {
-      transformer: miscellaneousBackend.hexShortenerForDisplay
+      transformer: miscellaneousBackend.hexShortenerForDisplay,
     },
     veryShort: {
-      transformer: miscellaneousBackend.hexVeryShortDisplay
+      transformer: miscellaneousBackend.hexVeryShortDisplay,
     },
     blockHash: {
       clickHandler: this.getBlockByHash.bind(this),
-      transformer: miscellaneousBackend.hexShortenerForDisplay
+      transformer: miscellaneousBackend.hexShortenerForDisplay,
     },
-  }
+    contractHexSetter: {
+      clickHandler: this.setContractHex.bind(this),
+      transformer: miscellaneousBackend.hexShortenerForDisplay,
+    },
+    contractCallSetter: {
+      clickHandler: this.setContractFunctionName.bind(this),
+      transformer: miscellaneousBackend.hexShortenerForDisplay,
+    },
+  };
   // Specifies options for rpc kanban rpc output display.
   this.optionsKanbanGOStandard = {
     // Suppose we are displaying a nested JSON.
@@ -130,6 +138,13 @@ function KanbanGoNodes() {
   this.optionsKanbanGOLabelContraction.transformers = Object.assign({}, this.optionsKanbanGOStandard.transformers);
   this.optionsKanbanGOLabelContraction.transformers["${label}"] = this.transformersStandard.shortener;
 
+  this.optionsInitialization = {
+    transformers: {
+      "binaries.${number}": this.transformersStandard.contractHexSetter,
+      "contractNames.${number}": this.transformersStandard.contractHexSetter,
+      "ABI.${number}.${number}.name": this.transformersStandard.contractCallSetter
+    }
+  };
   this.callTypes = {
     standard: {
       jsonOptions: this.optionsKanbanGOStandard,
@@ -144,8 +159,7 @@ function KanbanGoNodes() {
       url: pathnames.url.known.kanbanGO.rpc,
     },
     initialization: {
-      jsonOptions: {
-      },
+      jsonOptions: this.optionsInitialization,
       rpcCalls: kanbanGOInitialization.rpcCalls,
       idDefaultOutput: ids.defaults.kanbanGO.outputKanbanInitialization,
       url: pathnames.url.known.kanbanGO.initialization,
@@ -307,12 +321,42 @@ function KanbanGoNodes() {
     },
     compileSolidity: {
       inputsBase64: {
-        code: inputSendReceive.solidityInput
+        code: ids.defaults.fabcoin.inputBlockInfo.solidityInput
       },
-      output: ids.defaults.kanbanGO.outputSendReceive
+      output: ids.defaults.fabcoin.outputFabcoinBlockInfo
+    }, 
+    fetchKanbanContract: {
+      outputs: {
+        code: ids.defaults.fabcoin.inputBlockInfo.solidityInput
+      },
+      output: ids.defaults.fabcoin.outputFabcoinBlockInfo
     }
   };
   this.correctFunctions();
+}
+
+KanbanGoNodes.prototype.setContractFunctionName = function (container, content, extraData) {
+  var counter = extraData.labelArray[extraData.labelArray.length - 2];
+  this.setInput(ids.defaults.fabcoin.inputBlockInfo.contractHex, null, extraData.ambientInput.binaries[counter]);
+  this.setInput(ids.defaults.fabcoin.inputBlockInfo.contractFunctionName, null, content);
+}
+
+KanbanGoNodes.prototype.setContractHex = function (container, content, extraData) {
+  var counter = extraData.labelArray[extraData.labelArray.length - 1];
+  this.setInput(ids.defaults.fabcoin.inputBlockInfo.contractHex, null, extraData.ambientInput.binaries[counter]);
+}
+
+KanbanGoNodes.prototype.getSetInputWithShortener = function (idOutput) {
+  return {
+    clickHandler: this.setInput.bind(this, idOutput),
+    transformer: miscellaneousBackend.hexShortenerForDisplay
+  };  
+}
+
+KanbanGoNodes.prototype.setInput = function (idToSet, container, content, extraData) {
+  //var extraDataString = JSON.stringify(extraData);
+  //console.log(`DEBUG: Content: ${content}, extra data: ${extraDataString}`);
+  submitRequests.updateValue(idToSet, content);
 }
 
 KanbanGoNodes.prototype.getBlockByHash = function (container, inputHash) {

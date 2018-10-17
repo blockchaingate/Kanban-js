@@ -108,7 +108,7 @@ FabcoinNode.prototype.handleRPCArguments = function(response, queryCommand) {
   }
   if (currentFunction === undefined || currentFunction === null || (typeof currentFunction !== "function")) {
     response.writeHead(500);
-    return response.end(`{"error": "Server error: handler ${theCallLabel}"} declared but no implementation found. `);
+    return response.end(`{"error": "Server error: handler ${theCallLabel} eclared but no implementation found."}`);
   }
   /**@type {string[]} */
   var theArguments = [];

@@ -516,19 +516,22 @@ function SolidityCode (codeBase64, basePath) {
   this.tokens = null;
   /** @type {string[]} */
   this.contractNames = [];
-  this.fileNameBinaryWithPath = "";
-  this.fileNameABIWithPath = "";
+  this.fileNamesBinaryWithPath = [];
+  this.fileNamesABIWithPath = [];
   this.flagTokenized = false;
   this.flagContractNamesComputed = false;
+  this.responseToUser = null;
+  this.responseContent = {
+    ABI: null,
+    binaries: null,
+    contractNames: null,
+  };
+  this.numberOfFilesRead = 0;
+  this.owner = null;
 }
 
 SolidityCode.prototype.getSourceFileNameWithPath = function () {
   return `${this.pathBase}/${this.getSourceFileName()}`;
-}
-
-SolidityCode.prototype.getABIFileNameWithPath = function () {
-  this.getBinaryFileNameWithPath();
-  return this.fileNameABIWithPath;
 }
 
 SolidityCode.prototype.extractTokens = function() {
@@ -562,53 +565,87 @@ SolidityCode.prototype.computeContractNames = function () {
     }
   }
   this.flagContractNamesComputed = true;
+  this.computeFileNames();
 }
 
-SolidityCode.prototype.getBinaryFileNameWithPath = function () {
-  if (this.fileNameBinaryWithPath !== "") {
-    return this.fileNameBinaryWithPath;
+SolidityCode.prototype.computeFileNames = function () {
+  var sourceStart = this.getSourceFileNameWithPath();
+  this.fileNamesABIWithPath = [];
+  this.fileNamesBinaryWithPath = [];
+  for (var i = 0; i < this.contractNames.length; i ++) {
+    this.fileNamesABIWithPath.push(`${sourceStart}_${this.contractNames[i]}.abi`);
+    this.fileNamesBinaryWithPath.push(`${sourceStart}_${this.contractNames[i]}.bin`);
   }
-  this.fileNameBinaryWithPath = `${this.pathBase}/${this.fileNameBase}_${this.contractNames[0]}.bin`;
-  this.fileNameABIWithPath = `${this.pathBase}/${this.fileNameBase}_${this.contractNames[0]}.abi`;
-  return this.fileNameBinaryWithPath;
 }
 
 SolidityCode.prototype.getSourceFileName = function() {
   return this.fileNameBase;
 }
 
-KanbanGoInitializer.prototype.compileSolidityPart3 = function(
-  response,
-  /**@type {SolidityCode} */
-  solidityCode
-) {
-  var result = {};
-  solidityCode.computeContractNames();
-  result.contractNames = solidityCode.contractNames;
-  var container = this;
-  fs.readFile(solidityCode.getBinaryFileNameWithPath(), function (err, dataBinary) {
-    if (err) {
-      response.writeHead(400);
-      container.numberRequestsRunning --;
-      result.error = `Failed to read binary file. ${err}`;
-      response.end(JSON.stringify(result));
-      return;
-    }
-    result.binary = encodingsKanban.encodingDefault.toHex(dataBinary);
-    fs.readFile(solidityCode.getABIFileNameWithPath(), function(err, dataABI){
-      if (err) {
-        response.writeHead(400);
-        container.numberRequestsRunning --;
-        result.error = `Failed to read binary file.  ${err}`; 
-        response.end(JSON.stringify(result));
-        return;
-      }  
-      result.ABI = JSON.parse(dataABI);
-      response.writeHead(200);
-      container.numberRequestsRunning --;
-      response.end(JSON.stringify(result));
-    });
-  });
+SolidityCode.prototype.sendResultIfNeeded = function() {
+  //console.log(`DEBUG: number of files read: ${this.numberOfFilesRead}`);
+  if (this.numberOfFilesRead >= this.contractNames.length * 2) {
+    this.sendResult();
+  }
+}
+
+SolidityCode.prototype.sendResult = function() {
+  if (this.responseToUser === null) {
+    return;
+  }
+  if (this.responseContent.error !== null && this.responseContent.error !== undefined){
+    this.responseToUser.writeHead(400);
+  } else {
+    this.responseToUser.writeHead(200);
+  }
+  this.responseToUser.end(JSON.stringify(this.responseContent));
+  this.owner.numberRequestsRunning --;
+  this.responseToUser = null;
+}
+
+SolidityCode.prototype.readBinary = function(counter, err, dataBinary) {
+  if (this.responseToUser === null) {
+    return;
+  }
+  if (err) {
+    this.responseContent.error = `Failed to read binary file ${this.fileNamesBinaryWithPath[counter]}. ${err}`;
+    return this.sendResult();
+  }
+  this.responseContent.binaries[counter] = encodingsKanban.encodingDefault.toHex(dataBinary);
+  this.numberOfFilesRead ++;  
+  this.sendResultIfNeeded();
+}
+
+SolidityCode.prototype.readABI = function(counter, err, dataABI) {
+  if (this.responseToUser === null) {
+    return;
+  }
+  if (err) {
+    this.responseContent.error = `Failed to read binary file. ${err}`; 
+    return this.sendResult();
+  }  
+  try {
+    this.responseContent.ABI[counter] = JSON.parse(dataABI);
+  } catch (e) {
+    this.responseToUser.error = `Failed to parse ABI file ${this.fileNamesABIWithPath[counter]}. ${e}`;
+    return this.sendResult();
+  }
+  this.numberOfFilesRead ++;  
+  this.sendResultIfNeeded();
+}
+
+SolidityCode.prototype.readAndReturnBinaries = function() {
+  //console.log("DEBUG: exectuing readAndReturnBinaries");
+  this.computeContractNames();
+  this.responseContent.ABI = [];
+  this.responseContent.binaries = [];
+  this.responseContent.contractNames = this.contractNames;
+  this.numberOfFilesRead = 0;
+  for (var i = 0; i < this.fileNamesBinaryWithPath.length; i ++) {
+    //console.log(`DEBUG:reading ${this.fileNamesBinaryWithPath[i]}, ${this.fileNamesABIWithPath[i]}`);
+    fs.readFile(this.fileNamesBinaryWithPath[i], this.readBinary.bind(this, i));
+    fs.readFile(this.fileNamesABIWithPath[i], this.readABI.bind(this, i));
+  }
 }
 
 KanbanGoInitializer.prototype.compileSolidityPart2 = function(
@@ -625,7 +662,9 @@ KanbanGoInitializer.prototype.compileSolidityPart2 = function(
     cwd: this.paths.solidityDir,
     env: process.env,
   };
-  this.runShell("solcjs", theArguments, theOptions, - 1, this.compileSolidityPart3.bind(this, response, solidityCode));
+  solidityCode.responseToUser = response;
+  solidityCode.owner = this;
+  this.runShell("solcjs", theArguments, theOptions, - 1, solidityCode.readAndReturnBinaries.bind(solidityCode));
 }
 
 KanbanGoInitializer.prototype.compileSolidity = function(
@@ -937,7 +976,7 @@ KanbanGoInitializer.prototype.handleRPCArguments = function(response, queryComma
   if (currentFunction === undefined || currentFunction === null || (typeof currentFunction !== "function")) {
     response.writeHead(500);
     this.numberRequestsRunning --;
-    return response.end(`{"error": "Server error: handler ${theCallLabel}"} declared but no implementation found. `);
+    return response.end(`{"error": "Server error: handler ${theCallLabel} declared but no implementation found."} `);
   }
   try {
     return (currentFunction.bind(this))(response, queryCommand, currentNode);

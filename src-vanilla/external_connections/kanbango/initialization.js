@@ -26,6 +26,9 @@ var rpcCalls = {
     mandatoryModifiableArguments: {
       code: null
     }
+  },
+  fetchKanbanContract: {
+    rpcCall: "fetchKanbanContract",    
   }
 };
 

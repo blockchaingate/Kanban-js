@@ -477,8 +477,8 @@ FabNode.prototype.run = function(functionLabelFrontEnd) {
 }
 
 FabNode.prototype.handleSolidityInput = function () {
-  var solidityInput = document.getElementById(ids.defaults.fabcoin.inputBlockInfo.solidityInput).value;
-  console.log(solidityInput);
+  //var solidityInput = document.getElementById(ids.defaults.fabcoin.inputBlockInfo.solidityInput).value;
+  //console.log(solidityInput);
 }
 
 var fabNode = new FabNode();

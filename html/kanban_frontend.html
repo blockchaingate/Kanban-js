@@ -41,30 +41,11 @@
     <tr><td><button class = "buttonStandard" style = "width:100%" onclick = "window.kanban.kanbanGO.rpc.theKBNodes.run('validators');">Validators</button></td></tr>
     <tr><td><button class = "buttonStandard" style = "width:100%" onclick = "window.kanban.kanbanGO.rpc.theKBNodes.run('peerView');">Peer View</button></td></tr>
     <tr><td><button class = "buttonStandard" style = "width:100%" onclick = "window.kanban.kanbanGO.rpc.theKBNodes.run('roundChangeRequests');">Change Round</button></td></tr>
-    <tr><td><button class = "buttonStandard" style = "width:100%" onclick = "window.kanban.kanbanGO.rpc.theKBNodes.run('compileSolidity', 'initialization');">Compile</button></td></tr>
   </table>
   </td>
   <td>
     <input id = "inputKBGOBlockNumber" class = "inputStandard" size = "90" placeholder = "block number" value = "5"></input><br>
     <input id = "inputKBGOBlockHash" class = "inputStandard" size = "90" placeholder = "block hash"></input><br>
-    <textarea id = "textAreaSolidityInputForKanbanGO">
-pragma solidity ^0.4.0;
-contract DataWriter {
-
-    struct State {
-        bytes32 data;
-    }
-
-    State internal theState;
-    function writeData(bytes32 input) public {
-        theState.data = input;
-    }
-    function readData() public view returns (bytes32) {
-        return theState.data;
-    }
-}
-</textarea>
-
   </td>
   </tr>
   </table>
@@ -233,18 +214,18 @@ contract DataWriter {
       </table>
     </td>
     <td>
-      <input type = "text" class = "inputCrypto" id = "inputKBGOMessage" size = "90" placeholder = "message"></input><br>
-      <input type = "text" class = "inputCrypto" id = "inputKBGONumberOfPrivateKeysToGenerate" size = "90" placeholder = "# private keys to generate"></input><br>
-      <input type = "text" class = "inputCrypto" id = "inputKBGOPrivateKeys" size = "90" placeholder = "private keys"></input><br>
-      <input type = "text" class = "inputCrypto" id = "inputKBGONonces" size = "90" placeholder = "nonces"></input><br>
-      <input type = "text" class = "inputCrypto" id = "inputKBGOPublicKeys" size = "90" placeholder = "public keys"></input><br>
-      <input type = "text" class = "inputCrypto" id = "inputKBGOCommittedSignersBitmap" size = "90" placeholder = "committed signers bitmap"></input><br>
-      <input type = "text" class = "inputCrypto" id = "inputKBGOCommitments" size = "90" placeholder = "commitments"></input><br>
-      <input type = "text" class = "inputCrypto" id = "inputKBGODigest" size = "90" placeholder = "digest"></input><br>
-      <input type = "text" class = "inputCrypto" id = "inputKBGOAggregatePublicKey" size = "90" placeholder = "challenge/aggregate commitment"></input><br>
-      <input type = "text" class = "inputCrypto" id = "inputKBGOAggregateCommitment" size = "90" placeholder = "aggregate public key"></input><br>
-      <input type = "text" class = "inputCrypto" id = "inputKBGOSolutions" size = "90" placeholder = "solutions"></input><br>
-      <input type = "text" class = "inputCrypto" id = "inputKBGOAggregateSignature" size = "90" placeholder = "aggregate signature"></input><br>
+      <input type = "text" class = "inputStandard" id = "inputKBGOMessage" size = "90" placeholder = "message"></input><br>
+      <input type = "text" class = "inputStandard" id = "inputKBGONumberOfPrivateKeysToGenerate" size = "90" placeholder = "# private keys to generate"></input><br>
+      <input type = "text" class = "inputStandard" id = "inputKBGOPrivateKeys" size = "90" placeholder = "private keys"></input><br>
+      <input type = "text" class = "inputStandard" id = "inputKBGONonces" size = "90" placeholder = "nonces"></input><br>
+      <input type = "text" class = "inputStandard" id = "inputKBGOPublicKeys" size = "90" placeholder = "public keys"></input><br>
+      <input type = "text" class = "inputStandard" id = "inputKBGOCommittedSignersBitmap" size = "90" placeholder = "committed signers bitmap"></input><br>
+      <input type = "text" class = "inputStandard" id = "inputKBGOCommitments" size = "90" placeholder = "commitments"></input><br>
+      <input type = "text" class = "inputStandard" id = "inputKBGODigest" size = "90" placeholder = "digest"></input><br>
+      <input type = "text" class = "inputStandard" id = "inputKBGOAggregatePublicKey" size = "90" placeholder = "challenge/aggregate commitment"></input><br>
+      <input type = "text" class = "inputStandard" id = "inputKBGOAggregateCommitment" size = "90" placeholder = "aggregate public key"></input><br>
+      <input type = "text" class = "inputStandard" id = "inputKBGOSolutions" size = "90" placeholder = "solutions"></input><br>
+      <input type = "text" class = "inputStandard" id = "inputKBGOAggregateSignature" size = "90" placeholder = "aggregate signature"></input><br>
     </td>
     </tr></table>
     </div> <!--divControlPanelDefault-->
@@ -272,9 +253,9 @@ contract DataWriter {
     </table>
   </td>
   <td>
-    <input type = "text" class = "inputCrypto" id = "inputKBJSMessage" size = "90" placeholder = "message"></input><br>
-    <input type = "text" class = "inputCrypto" id = "inputKBJSPrivateKey" size = "90" placeholder = "private key"></input><br>
-    <input type = "text" class = "inputCrypto" id = "inputKBJSPublicKey" size = "90" placeholder = "public key"></input><br>
+    <input type = "text" class = "inputStandard" id = "inputKBJSMessage" size = "90" placeholder = "message"></input><br>
+    <input type = "text" class = "inputStandard" id = "inputKBJSPrivateKey" size = "90" placeholder = "private key"></input><br>
+    <input type = "text" class = "inputStandard" id = "inputKBJSPublicKey" size = "90" placeholder = "public key"></input><br>
   </td>
   </tr></table>
   </div><!--divControlPanelDefault-->
@@ -296,7 +277,7 @@ contract DataWriter {
   </table>
   </td>
   <td>
-  <input type = "text" class = "inputCrypto" id = "inputFabcoindArguments" size = "90" value = "-regtest -printtoconsole" placeholder = "arguments"></input><br>
+  <input type = "text" class = "inputStandard" id = "inputFabcoindArguments" size = "90" value = "-regtest -printtoconsole" placeholder = "arguments"></input><br>
   </td>
   </tr>
   </table>
@@ -332,30 +313,33 @@ contract DataWriter {
     <tr><td><button class = "buttonStandard" style = "width: 100px" onclick = "window.kanban.fabcoin.rpc.fabNode.run('createContract')">Create</button></td></tr>
     <tr><td><button class = "buttonStandard" style = "width: 100px" onclick = "window.kanban.fabcoin.rpc.fabNode.run('sendToContract')">Send to contr.</button></td></tr>
     <tr><td><button class = "buttonStandard" style = "width: 100px" onclick = "window.kanban.fabcoin.rpc.fabNode.run('callContract')">Call contract</button></td></tr>
+    <tr><td><button class = "buttonStandard" style = "width: 100px" onclick = "window.kanban.kanbanGO.rpc.theKBNodes.run('fetchKanbanContract', 'initialization');">Fetch contract</button></td></tr>
+    <tr><td><button class = "buttonStandard" style = "width: 100px" onclick = "window.kanban.kanbanGO.rpc.theKBNodes.run('compileSolidity', 'initialization');">Compile</button></td></tr>
   </table>
   </td>
   <td>
-    <input type = "text" class = "inputCrypto" id = "inputFabcoinBlockNumber" size = "90" value = "14" placeholder = "block #"></input><br>
-    <input type = "text" class = "inputCrypto" id = "inputFabcoinBlockHash" size = "90" value = "" placeholder = "block hash"></input><br>
-    <input type = "text" class = "inputCrypto" id = "inputFabcoinNumberOfBlocksToGenerate" size = "90" value = "" placeholder = "# blocks to generate"></input><br>    
-    <input type = "text" class = "inputCrypto" id = "inputFabcoinTransactionId" size = "90" value = "" placeholder = "tx id"></input><br>    
-    <input type = "text" class = "inputCrypto" id = "inputFabcoinTransactionHex" size = "90" value = "" placeholder = "tx hex"></input><br>
+    <input type = "text" class = "inputStandard" id = "inputFabcoinBlockNumber" size = "90" value = "14" placeholder = "block #"></input><br>
+    <input type = "text" class = "inputStandard" id = "inputFabcoinBlockHash" size = "90" value = "" placeholder = "block hash"></input><br>
+    <input type = "text" class = "inputStandard" id = "inputFabcoinNumberOfBlocksToGenerate" size = "90" value = "" placeholder = "# blocks to generate"></input><br>    
+    <input type = "text" class = "inputStandard" id = "inputFabcoinTransactionId" size = "90" value = "" placeholder = "tx id"></input><br>    
+    <input type = "text" class = "inputStandard" id = "inputFabcoinTransactionHex" size = "90" value = "" placeholder = "tx hex"></input><br>
 
-    <input type = "text" class = "inputCrypto" id = "inputFabcoinPrivateKey" size = "90" value = "" placeholder = "private key"></input><br>    
-    <input type = "text" class = "inputCrypto" id = "inputFabcoinPublicKey" size = "90" value = "" placeholder = "public key"></input><br>    
-    <input type = "text" class = "inputCrypto" id = "inputFabcoinAddress" size = "90" value = "" placeholder = "address FAB testnet"></input><br>
-    <input type = "text" class = "inputCrypto" id = "inputFabcoinAddressMainnet" size = "90" value = "" placeholder = "address FAB mainnet"></input><br>
-    <input type = "text" class = "inputCrypto" id = "inputEthereumAddress" size = "90" value = "" placeholder = "address Ethereum"></input><br>
+    <input type = "text" class = "inputStandard" id = "inputFabcoinPrivateKey" size = "90" value = "" placeholder = "private key"></input><br>    
+    <input type = "text" class = "inputStandard" id = "inputFabcoinPublicKey" size = "90" value = "" placeholder = "public key"></input><br>    
+    <input type = "text" class = "inputStandard" id = "inputFabcoinAddress" size = "90" value = "" placeholder = "address FAB testnet"></input><br>
+    <input type = "text" class = "inputStandard" id = "inputFabcoinAddressMainnet" size = "90" value = "" placeholder = "address FAB mainnet"></input><br>
+    <input type = "text" class = "inputStandard" id = "inputEthereumAddress" size = "90" value = "" placeholder = "address Ethereum"></input><br>
 
-    <input type = "text" class = "inputCrypto" id = "inputFabcoinTransactionInputs" size = "90" value = "" placeholder = "tx inputs"></input><br>
-    <input type = "text" class = "inputCrypto" id = "inputFabcoinTransactionOutputs" size = "90" value = "" placeholder = "tx outputs"></input><br>
+    <input type = "text" class = "inputStandard" id = "inputFabcoinTransactionInputs" size = "90" value = "" placeholder = "tx inputs"></input><br>
+    <input type = "text" class = "inputStandard" id = "inputFabcoinTransactionOutputs" size = "90" value = "" placeholder = "tx outputs"></input><br>
 
-    <input type = "text" class = "inputCrypto" id = "inputFabcoinContractHex" size = "90" value = "" placeholder = "contract hex"></input><br>
-    <input type = "text" class = "inputCrypto" id = "inputFabcoinContractId" size = "90" value = "" placeholder = "contract id"></input><br>
-    <input type = "text" class = "inputCrypto" id = "inputFabcoinContractData" size = "90" value = "" placeholder = "contract data"></input><br>
-    <input type = "text" class = "inputCrypto" id = "inputFabcoinWalletAmount" size = "90" value = "" placeholder = "amount (wallet)"></input><br>
+    <input type = "text" class = "inputStandard" id = "inputFabcoinContractHex" size = "90" value = "" placeholder = "contract hex"></input><br>
+    <input type = "text" class = "inputStandard" id = "inputFabcoinContractId" size = "90" value = "" placeholder = "contract id"></input><br>
+    <input type = "text" class = "inputStandard" id = "inputFabcoinContractData" size = "90" value = "" placeholder = "contract data"></input><br>
+    <input type = "text" class = "inputStandard" id = "inputFabcoinWalletAmount" size = "90" value = "" placeholder = "amount (wallet)"></input><br>
+    <input type = "text" class = "inputStandard" id = "inputSolidityFunctionName" size = "90" value = "" placeholder = "contract functino name"></input><br>
 
-    <textarea id = "textAreaSolidityInputForFabcoin" onchange = "window.kanban.fabcoin.rpc.fabNode.handleSolidityInput()"></textarea>
+    <textarea class = "textAreaStandard inputOmni" cols = "93" rows = "5" id = "textAreaSolidityInputForFabcoin" onchange = "window.kanban.fabcoin.rpc.fabNode.handleSolidityInput()"></textarea>
   </td>
   </tr>
   </table>
