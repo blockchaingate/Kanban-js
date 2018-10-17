@@ -257,19 +257,18 @@ function KanbanGoNodes() {
       inputsBase64: {
         messageBase64: inputSchnorr.message
       },
-      callback: this.callbackStandard
     },
     testAggregateInitialize: {
       inputs: {
         numberOfPrivateKeysToGenerate: inputAggregate.numberOfPrivateKeysToGenerate
       },
-      callback: this.callbackAggregateInitialization
+      callback: PendingCall.prototype.callbackAggregateInitialization
     },
     testAggregateCommitment: {
       inputsBase64: {
         messageBase64: inputAggregate.message
       },
-      callback: this.callbackAggregateCommitment
+      callback: PendingCall.prototype.callbackAggregateCommitment
     },
     testAggregateChallenge: {
       inputs: {        
@@ -293,7 +292,7 @@ function KanbanGoNodes() {
         aggregateCommitment: inputAggregate.aggregateCommitment,
         aggregatePublicKey: inputAggregate.aggregatePublickey
       },
-      callback: this.callbackAggregateSolutions
+      callback: PendingCall.prototype.callbackAggregateSolutions
     },
     testAggregateSignature: {
       inputs: {
@@ -317,7 +316,6 @@ function KanbanGoNodes() {
         signature: inputAggregate.aggregateSignature,
         committedSigners: inputAggregate.committedSignersBitmap,
       },
-      callback: this.callbackStandard
     },
     compileSolidity: {
       inputsBase64: {
@@ -329,7 +327,8 @@ function KanbanGoNodes() {
       outputs: {
         code: ids.defaults.fabcoin.inputBlockInfo.solidityInput
       },
-      output: ids.defaults.fabcoin.outputFabcoinBlockInfo
+      output: ids.defaults.fabcoin.outputFabcoinBlockInfo,
+      callback: this.callbackSolidityCode
     }
   };
   this.correctFunctions();
@@ -363,44 +362,6 @@ KanbanGoNodes.prototype.getBlockByHash = function (container, inputHash) {
   submitRequests.updateValue(ids.defaults.kanbanGO.inputSendReceive.blockHash, inputHash);
   miscellaneousFrontEnd.revealLongWithParent(container, inputHash);
   this.run('getBlockByHash');
-}
-
-function getSignerField(input, label) {
-  var parsedInput = JSON.parse(input);
-  var result = [];
-  if (parsedInput.signers === null || parsedInput.signers === undefined) {
-    return result;
-  }
-  for (var i = 0; i < parsedInput.signers.length; i ++) {
-    var incoming = parsedInput.signers[i][label];
-    if (incoming === "" || incoming === null || incoming === undefined) {
-      incoming = "(ignored)";
-    }
-    result.push(incoming);
-  }
-  return result;
-}
-
-KanbanGoNodes.prototype.callbackAggregateSolutions = function(pendingCall, nodeId, input, output) {
-  this.callbackStandard(pendingCall, nodeId, input, output);
-  var solutions = getSignerField(input, "mySolution");
-  submitRequests.updateValue(ids.defaults.kanbanGO.inputAggregateSignature.solutions, solutions.join(", "));
-}
-
-KanbanGoNodes.prototype.callbackAggregateInitialization = function(pendingCall, nodeId, input, output) {
-  this.callbackStandard(pendingCall, nodeId, input, output);
-  var privateKeys = getSignerField(input, "privateKeyBase58");
-  var publicKeys = getSignerField(input, "myPublicKey");
-  submitRequests.updateValue(ids.defaults.kanbanGO.inputAggregateSignature.privateKeys, privateKeys.join(", "));
-  submitRequests.updateValue(ids.defaults.kanbanGO.inputAggregateSignature.publicKeys, publicKeys.join(", "));
-}
-
-KanbanGoNodes.prototype.callbackAggregateCommitment = function(pendingCall, nodeId, input, output) {
-  this.callbackStandard(pendingCall, nodeId, input, output);
-  var commitments = getSignerField(input, "commitmentHexCompressed");
-  var nonces = getSignerField(input, "myNonceBase58");
-  submitRequests.updateValue(ids.defaults.kanbanGO.inputAggregateSignature.commitments, commitments.join(", "));
-  submitRequests.updateValue(ids.defaults.kanbanGO.inputAggregateSignature.nonces, nonces.join(", "));
 }
 
 KanbanGoNodes.prototype.correctFunctions = function() {  

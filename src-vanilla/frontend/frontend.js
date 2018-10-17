@@ -34,7 +34,8 @@ window.kanban = {
     memoryPoolArrivalTimes: null,
     statistics: {},
     statDetails: {}
-  }
+  },
+	ace: require('./ace'),
 };
 
 window.kanban.thePage = require('./main_page').getPage(); // <- function call uses window.kanban

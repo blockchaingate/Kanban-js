@@ -3,6 +3,7 @@ const jsonToHtml = require('../json_to_html');
 var JSONTransformer = jsonToHtml.JSONTransformer;
 const kanbanGO = require('../../external_connections/kanbango/rpc');
 const globals = require('../globals');
+const ids = require('../ids_dom_elements');
 
 function KanbanGONode() {
   /**@type {string} */
@@ -134,6 +135,45 @@ PendingCall.prototype.callbackRunNodes = function(nodeId, input, output) {
   this.callbackStandard(nodeId, input, output);
   this.owner.getNodeInformation();
 }
+
+function getSignerField(input, label) {
+  var parsedInput = JSON.parse(input);
+  var result = [];
+  if (parsedInput.signers === null || parsedInput.signers === undefined) {
+    return result;
+  }
+  for (var i = 0; i < parsedInput.signers.length; i ++) {
+    var incoming = parsedInput.signers[i][label];
+    if (incoming === "" || incoming === null || incoming === undefined) {
+      incoming = "(ignored)";
+    }
+    result.push(incoming);
+  }
+  return result;
+}
+
+PendingCall.prototype.callbackAggregateSolutions = function(nodeId, input, output) {
+  this.callbackStandard(nodeId, input, output);
+  var solutions = getSignerField(input, "mySolution");
+  submitRequests.updateValue(ids.defaults.kanbanGO.inputAggregateSignature.solutions, solutions.join(", "));
+}
+
+PendingCall.prototype.callbackAggregateInitialization = function(nodeId, input, output) {
+  this.callbackStandard(nodeId, input, output);
+  var privateKeys = getSignerField(input, "privateKeyBase58");
+  var publicKeys = getSignerField(input, "myPublicKey");
+  submitRequests.updateValue(ids.defaults.kanbanGO.inputAggregateSignature.privateKeys, privateKeys.join(", "));
+  submitRequests.updateValue(ids.defaults.kanbanGO.inputAggregateSignature.publicKeys, publicKeys.join(", "));
+}
+
+PendingCall.prototype.callbackAggregateCommitment = function(nodeId, input, output) {
+  this.callbackStandard(nodeId, input, output);
+  var commitments = getSignerField(input, "commitmentHexCompressed");
+  var nonces = getSignerField(input, "myNonceBase58");
+  submitRequests.updateValue(ids.defaults.kanbanGO.inputAggregateSignature.commitments, commitments.join(", "));
+  submitRequests.updateValue(ids.defaults.kanbanGO.inputAggregateSignature.nonces, nonces.join(", "));
+}
+
 
 PendingCall.prototype.callbackStandard = function(nodeId, input, output) {
   //console.log(`DEBUG: pendingCall id: ${pendingCall.id}, nodeId: ${nodeId}, input: ${input}`);
