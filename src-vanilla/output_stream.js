@@ -45,6 +45,10 @@ OutputStream.prototype.toString = function () {
   return result;
 }
 
+OutputStream.prototype.log = function (data) {
+  this.append(data);
+}
+
 OutputStream.prototype.append = function (data) {
   console.log(this.idConsole[this.colorIdConsole] + data);
   if (this.recentOutputs.length >= this.maximumLength ) {

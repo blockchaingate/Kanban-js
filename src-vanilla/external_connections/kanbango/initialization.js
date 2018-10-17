@@ -1,5 +1,8 @@
 "use strict";
 
+/**
+ * @type {Object.<string,{rpcCall:string, method: string, mandatoryFixedArguments: Object, mandatoryModifiableArguments: Object, optionalArguments: Object, types: Object, parameters: string[]}>}
+ */
 var rpcCalls = {
   runNodes: {
     rpcCall: "runNodes",
@@ -12,15 +15,16 @@ var rpcCalls = {
   getLogFile: {
     rpcCall: "getLogFile",
   },
+  getRPCLogFile: {
+    rpcCall: "getRPCLogFile",
+  },  
   getNodeInformation: {
     rpcCall: "getNodeInformation",
-    mandatoryFixedArguments: { //<- values give defaults, null for none
-    },
-    mandatoryModifiableArguments: { //<- values give defaults, null for none
-    },
-    optionalModifiableArguments: {
-    },
-    allowedArgumentValues: {
+  },
+  compileSolidity: {
+    rpcCall: "compileSolidity",
+    mandatoryModifiableArguments: {
+      code: null
     }
   }
 };

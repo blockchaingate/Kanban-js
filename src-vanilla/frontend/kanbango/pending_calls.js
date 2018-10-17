@@ -170,6 +170,18 @@ function getPOSTBodyFromKanbanRPCLabel(theRPCLabel, theArguments) {
   return `${encodeURIComponent(JSON.stringify(theRequest))}`;
 }
 
+function getValueFromId(/**@type {string}*/ id) {
+  var domElement = document.getElementById(id);
+  if (domElement === null) {
+    return null;
+  }
+  if (domElement.tagName === "INPUT") {
+    return domElement.value;
+  }
+  if (domElement.tagName === "TEXTAREA") {
+    return domElement.value;
+  }
+}
 
 PendingCall.prototype.runOneId = function (nodeId) {
   var theFunction = this.owner.theFunctions[this.functionLabel];
@@ -193,10 +205,10 @@ PendingCall.prototype.runOneId = function (nodeId) {
     currentInputsBase64 = {};
   }
   for (var inputLabel in currentInputs) {
-    theArguments[inputLabel] = document.getElementById(currentInputs[inputLabel]).value;
+    theArguments[inputLabel] = getValueFromId(currentInputs[inputLabel]);
   }
   for (var inputLabel in currentInputsBase64) {
-    var theValue =  document.getElementById(currentInputsBase64[inputLabel]).value;
+    var theValue = getValueFromId(currentInputsBase64[inputLabel]);
     theArguments[inputLabel] = Buffer.from(theValue).toString('base64');
   }
   var theRPCCall = this.functionLabel;

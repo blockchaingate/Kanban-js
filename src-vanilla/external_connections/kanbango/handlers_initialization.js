@@ -1,7 +1,3 @@
-/** 
- * @module handlersKanbanGoInitialization 
- * @exports KanbanGoInitializer
-*/
 "use strict";
 
 const url  = require('url');
@@ -15,6 +11,7 @@ const fsExtra = require('fs-extra');
 const path = require('path');
 const rimraf = require('rimraf');
 const cryptoKanban = require('../../crypto/crypto_kanban');
+const encodingsKanban = require('../../crypto/encodings');
 var OutputStream = require('../../output_stream').OutputStream;
 require('colors');
 
@@ -64,16 +61,21 @@ function NodeKanbanGo(inputId) {
   this.nodeSensitiveInformation = {};
   /** @type {ChildProcess} */
   this.childProcessHandle = null;
-  /**@type {{log: OutputStream} */
+  /**@type {{log: OutputStream, initialization: OutputStream, rpcCalls: OutputStream}} */
   this.outputStreams = {
     initialization: new OutputStream(),
     log: new OutputStream(),
+    rpcCalls: new OutputStream(),
   };
   var initializer = getInitializer();
   this.outputStreams.log.idConsole = `[Node ${this.id}]`;
   this.outputStreams.log.colorIdConsole = initializer.colors[this.id % initializer.colors.length];
   this.outputStreams.initialization.idConsole = `[Node ${this.id}]`;
   this.outputStreams.initialization.colorIdConsole = initializer.colors[this.id % initializer.colors.length];
+  this.outputStreams.log.maximumLength = 3000;
+  this.outputStreams.rpcCalls.idConsole = `[RPC node ${this.id}]`;
+  this.outputStreams.rpcCalls.colorIdConsole = initializer.colors[this.id % initializer.colors.length];
+  this.outputStreams.rpcCalls.maximumLength = 3000;
 }
 
 NodeKanbanGo.prototype.initializeFoldersAndKeys = function(response) {
@@ -309,12 +311,6 @@ function KanbanGoInitializer() {
   this.numberRequestsRunning = 0;
   this.maxRequestsRunning = 4;
   this.handlers = {
-    runNodes: {
-    }, 
-    getNodeInformation: {
-    },
-    getLogFile: {
-    }
   };
   this.colors = ["yellow", "green", "blue", "cyan", "magenta"];
   this.paths = {
@@ -322,6 +318,7 @@ function KanbanGoInitializer() {
     gethPath: "",
     gethProjectBase: "",
     dataDir: "",
+    solidityDir: "",
     nodesDir: "",
     passwordEmptyFile: "",
     pbftConfigSeed: "",
@@ -420,6 +417,7 @@ KanbanGoInitializer.prototype.computePaths = function() {
   var currentDataDir = `${pathnames.path.base}/${kanbanDataDirName}`;
   if (fs.existsSync(currentDataDir)) {
     this.paths.dataDir = currentDataDir;
+    this.paths.solidityDir = `${currentDataDir}/solidity`;
   }
   if (this.paths.geth === "") {
     console.log(`Could not find geth executable. Searched directories along: ${startingPath}`.red);
@@ -521,6 +519,143 @@ KanbanGoInitializer.prototype.getNodeInformation = function(response, queryComma
   this.numberRequestsRunning --;
 }
 
+var numberOfSolidityCalls = 0;
+
+function SolidityCode (codeBase64, basePath) {
+  this.code = Buffer.from(codeBase64, "base64").toString();;
+  this.fileNameBase = `solidityFile${numberOfSolidityCalls}`;
+  this.pathBase = basePath;
+  /** @type {string[]} */
+  this.lines = null;
+  this.fileNameBinaryWithPath = "";
+  this.fileNameABIWithPath = "";
+}
+
+SolidityCode.prototype.getSourceFileNameWithPath = function () {
+  return `${this.pathBase}/${this.getSourceFileName()}`;
+}
+
+SolidityCode.prototype.getABIFileNameWithPath = function () {
+  this.getBinaryFileNameWithPath();
+  return this.fileNameABIWithPath;
+}
+
+SolidityCode.prototype.getBinaryFileNameWithPath = function () {
+  if (this.fileNameBinaryWithPath !== "") {
+    return this.fileNameBinaryWithPath;
+  }
+  var contractName = "";
+  this.lines = this.code.split("\n");
+  for (var i = 0; i < this.lines.length; i ++) {
+    var contractNameStart = this.lines[i].indexOf("contract ");
+    if (contractNameStart < 0) {
+      continue;
+    }
+    for (; contractNameStart < this.lines[i].length; contractNameStart ++) {
+      if (this.lines[i][contractNameStart] === " ") {
+        contractNameStart ++;
+        break;
+      }
+    }
+    for (var j = contractNameStart; j < this.lines[i].length; j ++) {
+      if (this.lines[i][j] === '{') {
+        break;
+      }
+      contractName += this.lines[i][j];
+    }
+    break;
+  }
+  contractName = contractName.trim();
+  this.fileNameBinaryWithPath = `${this.pathBase}/${this.fileNameBase}_${contractName}.bin`;
+  this.fileNameABIWithPath = `${this.pathBase}/${this.fileNameBase}_${contractName}.abi`;
+  return this.fileNameBinaryWithPath;
+}
+
+SolidityCode.prototype.getSourceFileName = function() {
+  return this.fileNameBase;
+}
+
+KanbanGoInitializer.prototype.compileSolidityPart3 = function(
+  response,
+  /**@type {SolidityCode} */
+  solidityCode
+) {
+  var result = {};
+  var container = this;
+  fs.readFile(solidityCode.getBinaryFileNameWithPath(), function (err, dataBinary) {
+    if (err) {
+      response.writeHead(400);
+      container.numberRequestsRunning --;
+      response.end(`Failed to read binary file. ${err}`);
+      return;
+    }
+    fs.readFile(solidityCode.getABIFileNameWithPath(), function(err, dataABI){
+      if (err) {
+        response.writeHead(400);
+        container.numberRequestsRunning --;
+        response.end(`Failed to read binary file. ${err}`);
+        return;
+      }  
+      try {
+        result.binary = encodingsKanban.encodingDefault.toHex(dataBinary);
+        result.ABI = JSON.parse(dataABI);
+      } catch (e) {
+        response.writeHead(200);
+        container.numberRequestsRunning --;
+        result.error = e;
+        response.end(JSON.stringify(result));  
+      }
+      response.writeHead(200);
+      container.numberRequestsRunning --;
+      response.end(JSON.stringify(result));
+    });
+  });
+}
+
+KanbanGoInitializer.prototype.compileSolidityPart2 = function(
+  response,
+  /**@type {SolidityCode} */
+  solidityCode
+) {
+  var theArguments = [
+    "--bin",
+    "--abi",
+    solidityCode.getSourceFileName()
+  ];
+  var theOptions = {
+    cwd: this.paths.solidityDir,
+    env: process.env,
+  };
+  this.runShell("solcjs", theArguments, theOptions, - 1, this.compileSolidityPart3.bind(this, response, solidityCode));
+}
+
+KanbanGoInitializer.prototype.compileSolidity = function(
+  response, 
+  queryCommand,
+  notUsed,
+) {
+  numberOfSolidityCalls ++;
+  try {
+    var solidityCode = new SolidityCode(queryCommand.code, this.paths.solidityDir);
+    if (solidityCode.code.length > 20000) {
+      response.writeHead(200);
+      this.numberRequestsRunning --;
+      response.end(`Code too large: ${solidityCode.code.length}`);
+      return;
+    }
+    fs.writeFile(
+      solidityCode.getSourceFileNameWithPath(), 
+      solidityCode.code, 
+      this.compileSolidityPart2.bind(this, response, solidityCode),
+    );
+  } catch (e) {
+    response.writeHead(200);
+    this.numberRequestsRunning --;
+    response.end(`Failed to extract code from ${queryCommand.code}. ${e}`);
+    return;
+  }
+}
+
 KanbanGoInitializer.prototype.getLogFile = function(
   response, 
   queryCommand,
@@ -534,6 +669,22 @@ KanbanGoInitializer.prototype.getLogFile = function(
   }
   response.writeHead(200);
   var result = currentNode.outputStreams.log.toString();
+  response.end(result);
+}
+
+KanbanGoInitializer.prototype.getRPCLogFile = function(
+  response, 
+  queryCommand,
+  /**@type {NodeKanbanGo} */ 
+  currentNode
+) {
+  this.numberRequestsRunning --;
+  if (currentNode === null || currentNode === undefined || !(currentNode instanceof NodeKanbanGo)) {
+    response.writeHead(400);
+    response.end(`Bad node id. Current node: ${currentNode} `);
+  }
+  response.writeHead(200);
+  var result = currentNode.outputStreams.rpcCalls.toString();
   response.end(result);
 }
 
@@ -744,7 +895,7 @@ KanbanGoInitializer.prototype.handleRPCArguments = function(request, response, q
     this.numberRequestsRunning --;
     return response.end(`KanbanGO initialization call label ${theCallLabel} not found. `);    
   }
-  if (!(theCallLabel in this.handlers)) {
+  if (!(theCallLabel in this.handlers) && !(kanbanGOInitialization.rpcCalls)) {
     response.writeHead(200);
     this.numberRequestsRunning --;
     return response.end(`{"error": "No KB handler named ${theCallLabel} found."} `);
@@ -776,8 +927,11 @@ KanbanGoInitializer.prototype.handleRPCArguments = function(request, response, q
     return response.end(`{"error": "Failed to process node info. ${e}"} `);
   }
 
-  var currentHandler = this.handlers[theCallLabel];
-  var currentFunction = currentHandler.handler;
+  var currentFunction = null;
+  if (theCallLabel in this.handlers) { 
+    var currentHandler = this.handlers[theCallLabel];
+    currentFunction = currentHandler.handler;
+  }
   if (currentFunction === undefined || currentFunction === null) {
     currentFunction = this[theCallLabel];
   }
@@ -796,6 +950,7 @@ KanbanGoInitializer.prototype.handleRPCArguments = function(request, response, q
 }
 
 module.exports = {
+  NodeKanbanGo,
   KanbanGoInitializer,
   getInitializer
 }

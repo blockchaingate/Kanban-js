@@ -4,6 +4,8 @@ const queryString = require('querystring');
 const http = require('http');
 const kanbanGORPC = require('./rpc');
 const kanabanGoInitializer = require('./handlers_initialization');
+const NodeKanbanGo = kanabanGoInitializer.NodeKanbanGo;
+
 
 function handleRequest(request, response) {
   if (request.method === "POST") {
@@ -79,9 +81,11 @@ function getRPCRequestJSON(rpcCallLabel, queryCommand, errors) {
   var currentParameters = [];
   for (var counterCommands = 0; counterCommands < currentRPCCall.parameters.length; counterCommands ++) {
     var currentParameterName = currentRPCCall.parameters[counterCommands];
-    if (currentParameterName in currentRPCCall.mandatoryFixedArguments) {
-      currentParameters.push(currentRPCCall.mandatoryFixedArguments[currentParameterName]);
-      continue;
+    if (currentRPCCall.mandatoryFixedArguments !== undefined && currentRPCCall.mandatoryFixedArguments !== null) {
+      if (currentParameterName in currentRPCCall.mandatoryFixedArguments) {
+        currentParameters.push(currentRPCCall.mandatoryFixedArguments[currentParameterName]);
+        continue;
+      }
     }
     if (currentParameterName in queryCommand) {
       var incomingParameter = queryCommand[currentParameterName];
@@ -171,12 +175,11 @@ function handleRPCArguments(response, queryCommand, queryNode) {
     numberRequestsRunning --;
     return response.end(JSON.stringify({error: errors[0]}));
   }
-  console.log("DEBUG: request stringified: " + JSON.stringify(theRequestJSON));
   var requestStringified = JSON.stringify(theRequestJSON);
   return handleRPCArgumentsPartTwo(response, requestStringified, currentNode);
 }
 
-function handleRPCArgumentsPartTwo(response, requestStringified, currentNode) {
+function handleRPCArgumentsPartTwo(response, requestStringified, /**@type {{NodeKanbanGo}} */ currentNode) {
   var requestOptions = {
     host: '127.0.0.1',
     port: currentNode.RPCPort,
@@ -191,10 +194,8 @@ function handleRPCArgumentsPartTwo(response, requestStringified, currentNode) {
     //agent: false,
     //rejectUnauthorized: this.opts.ssl && this.opts.sslStrict !== false
   };
-  //console.log ("DEBUG: options for request: " + JSON.stringify(requestOptions));
-  // console.log (`DEBUG: about to submit request: ${requestStringified}`.green);
-  // console.log (`DEBUG:  submit options: ${JSON.stringify(requestOptions)}`.green);
-  //console.log ("DEBUG: request object: " + JSON.stringify(RPCRequestObject));
+  currentNode.outputStreams.rpcCalls.log(`RPC request: ${requestStringified}`);
+  currentNode.outputStreams.rpcCalls.log(`Options: ${JSON.stringify(requestOptions)}`);
 
   var theHTTPrequest = http.request(requestOptions);
 

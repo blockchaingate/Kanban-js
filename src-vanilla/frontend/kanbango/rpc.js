@@ -186,12 +186,6 @@ function KanbanGoNodes() {
       },
       output: ids.defaults.kanbanGO.outputSendReceive
     },
-    compileSolidity: {
-      inputs: {
-        solidityInput: ids.defaults.kanbanGO.inputSendReceive.solidityInput
-      },
-      output: ids.defaults.kanbanGO.outputSendReceive      
-    },
     getBlockByNumber: {
       inputs: {
         blockNumber: inputSendReceive.blockNumber
@@ -311,6 +305,12 @@ function KanbanGoNodes() {
       },
       callback: this.callbackStandard
     },
+    compileSolidity: {
+      inputsBase64: {
+        code: inputSendReceive.solidityInput
+      },
+      output: ids.defaults.kanbanGO.outputSendReceive
+    }
   };
   this.correctFunctions();
 }
@@ -448,6 +448,9 @@ KanbanGoNodes.prototype.getNodeInformationCallback = function (functionLabel, in
   //console.log("DEBUG: Got back:" + input);
   try {
     var inputParsed = JSON.parse(input);
+    if (this.nodes.length === inputParsed.length) {
+      return;
+    }
     this.nodes = [];
     if (this.selectedNode === "none" && inputParsed.length > 0) {
       this.selectedNode = "all";
