@@ -1,29 +1,50 @@
-function getQueryStringFromRequest(request, response, callbackToPassQueryStringTo) {
+const url  = require('url');
+const queryString = require('querystring');
+const miscellaneousBackend = require('./miscellaneous');
+
+function getQueryStringFromRequest(request, response, callbackQuery) {
   if (request.method === "GET") {
-    return handleRPCGET(request, response, callbackToPassQueryStringTo);
+    return handleRPCGET(request, response, callbackQuery);
   }
   if (request.method === "POST") {
-    return handleRPCPOST(request, response);
+    return handleRPCPOST(request, response, callbackQuery);
   }
   response.writeHead(400);
   return response.end(`Method not implemented: ${request.method}. `);
 }
 
-function handleRPCGET(request, response, callbackToPassQueryStringTo) {
-  var parsedURL = null;
+function handleRPCGET(request, response, callbackQuery) {
+  var parsedURLobject = null;
   try {
-    parsedURL = url.parse(request.url);
+    parsedURLobject = url.parse(request.url);
+    console.log(`DEBUG: parsed url object: ${JSON.stringify(parsedURLobject)}`)
   } catch (e) {
     response.writeHead(400);
     return response.end(`In handleRPCGET: bad RPC request: ${e}.`);
   }
-  if (parsedURL === null || parsedURL === undefined) {
+  if (parsedURLobject === null || parsedURLobject === undefined) {
     return response.end(`Failed to parse URL in handleRPCGET.`)
   }
-  callbackToPassQueryStringTo(response, parsedURL);
+  extractQuery(response, parsedURLobject.query, callbackQuery)
 }
 
-function handleRPCPOST(request, response, callbackToPassQueryStringTo) {
+function extractQuery(response, parsedURL, callbackQuery) {
+  var query = null;
+  try {
+    query = queryString.parse(parsedURL);
+    console.log(`DEBUG: parsed url: ${JSON.stringify(parsedURL)}`)
+  } catch (e) {
+    response.writeHead(400);
+    return response.end(`In handleRPCGET: bad RPC request: ${e}.`);
+  }
+  if (query === null || query === undefined) {
+    response.writeHead(400);
+    return response.end(`Failed to parse URL in handleRPCGET.`);
+  }
+  callbackQuery(response, query, callbackQuery);
+}
+
+function handleRPCPOST(request, response, callbackQuery) {
   let body = [];
   request.on('error', (theError) => {
     response.writeHead(400);
@@ -32,7 +53,7 @@ function handleRPCPOST(request, response, callbackToPassQueryStringTo) {
     body.push(chunk);
   }).on('end', () => {
     body = Buffer.concat(body).toString();
-    return callbackToPassQueryStringTo(response, body);
+    return extractQuery(response, body, callbackQuery);
   });
 }
 

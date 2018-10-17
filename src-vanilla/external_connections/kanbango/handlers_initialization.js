@@ -1,7 +1,5 @@
 "use strict";
 
-const url  = require('url');
-const queryString = require('querystring');
 const kanbanGOInitialization = require('./initialization');
 const kanbanGORPC = require('./rpc');
 const pathnames = require('../../pathnames');
@@ -351,16 +349,15 @@ KanbanGoInitializer.prototype.log = function(input) {
 KanbanGoInitializer.prototype.handleRequest =  function(request, response) {
   handlersStandard.getQueryStringFromRequest(
     request, 
-    this.handleRPCURLEncodedInput.bind(this)
+    response,
+    this.handleQuery.bind(this)
   );
 }
 
-KanbanGoInitializer.prototype.handleRPCURLEncodedInput = function(response, messageBodyURLed) {
-  var query = null;
+KanbanGoInitializer.prototype.handleQuery = function(response, query) {
   var queryCommand = null;
   var queryNode = null;
   try {
-    query = queryString.parse(messageBodyURLed);
     queryCommand = JSON.parse(query.command);
     var nodeJSON = query[kanbanGORPC.urlStrings.node];
     if (nodeJSON !== null && nodeJSON !== undefined) {
@@ -368,7 +365,7 @@ KanbanGoInitializer.prototype.handleRPCURLEncodedInput = function(response, mess
     }
   } catch (e) {
     response.writeHead(400);
-    return response.end(`Bad kanbanGO initialization input: ${messageBodyURLed}. ${e}`);
+    return response.end(`Bad kanbanGO initialization input: ${JSON.stringify(query)}. ${e}`);
   }
   return this.handleRPCArguments(response, queryCommand, queryNode);
 }
