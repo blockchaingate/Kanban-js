@@ -516,6 +516,7 @@ function SolidityCode (codeBase64, basePath) {
   this.tokens = null;
   /** @type {string[]} */
   this.contractNames = [];
+  this.contractParents = {};
   this.fileNamesBinaryWithPath = [];
   this.fileNamesABIWithPath = [];
   this.flagTokenized = false;
@@ -525,6 +526,7 @@ function SolidityCode (codeBase64, basePath) {
     ABI: null,
     binaries: null,
     contractNames: null,
+    contractInheritance: null,
   };
   this.numberOfFilesRead = 0;
   this.totalFilesToRead = 0;
@@ -539,6 +541,7 @@ SolidityCode.prototype.extractTokens = function() {
   if (this.flagTokenized) {
     return;
   }
+  //console.log("DEbug: this.code: " + this.code);
   this.lines = this.code.split("\n");
   this.tokens = ["\n"];
   for (var i = 0; i < this.lines.length; i ++) {
@@ -560,9 +563,19 @@ SolidityCode.prototype.computeContractNames = function () {
   }
   this.extractTokens();
   this.contractNames = [];
+  this.contractParents = {};
   for (var i = 2; i < this.tokens.length; i ++) {
     if (this.tokens[i - 2] === "\n" && this.tokens[i - 1] === "contract") {
-      this.contractNames.push( this.tokens[i]);
+      var currentName = this.tokens[i];
+      this.contractNames.push(currentName);
+      if (this.contractParents[currentName] === undefined) {
+        this.contractParents[currentName] = {};
+      }
+      if (i + 2 < this.tokens.length) {
+        if (this.tokens[i + 1] === "is") {
+          this.contractParents[currentName][this.tokens[i + 2]] = true;
+        }
+      }
     }
   }
   this.flagContractNamesComputed = true;
@@ -641,6 +654,7 @@ SolidityCode.prototype.readAndReturnBinaries = function() {
   this.responseContent.ABI = [];
   this.responseContent.binaries = [];
   this.responseContent.contractNames = this.contractNames;
+  this.responseContent.contractInheritance = this.contractParents;
   this.numberOfFilesRead = 0;
   this.totalFilesToRead = this.contractNames.length * 2;
   for (var i = 0; i < this.fileNamesBinaryWithPath.length; i ++) {
@@ -648,6 +662,62 @@ SolidityCode.prototype.readAndReturnBinaries = function() {
     fs.readFile(this.fileNamesBinaryWithPath[i], this.readBinary.bind(this, i));
     fs.readFile(this.fileNamesABIWithPath[i], this.readABI.bind(this, i));
   }
+}
+
+SolidityCode.prototype.removeLineFromTokens = function(startIndex) {
+  var found = false;
+  var comment = "\n//";
+  for (var j = startIndex; j < this.tokens.length; j ++) {
+    if (this.tokens[j] === "\n") {
+      if (found) {
+        this.tokens[startIndex] = comment;
+        return;
+      } 
+      found = true;
+      continue;
+    }
+    comment += this.tokens[j];
+    this.tokens[j] = "";
+  }
+}
+
+SolidityCode.prototype.codeInherits = function(/**@type {SolidityCode} */ other) {
+  for (var myContract in this.contractParents) {
+    for (var myParent in this.contractParents[myContract]) {
+      if (myParent in other.contractParents) {
+        return true;
+      }
+    }
+  }
+  return false;
+} 
+
+SolidityCode.prototype.buildSolFileKanbanGoFromCombinedFile = function(inputCode) {
+  this.code = inputCode;
+  this.extractTokens();
+  var pragmaFound = false;
+  for (var i = 2; i < this.tokens.length; i ++) {
+    if (this.tokens[i - 2] === "\n" && this.tokens[i - 1] === "pragma") {
+      if (!pragmaFound) {
+        pragmaFound = true;
+        continue;
+      }
+      this.removeLineFromTokens(i - 2);
+    }
+    if (this.tokens[i - 1] === "\n" && this.tokens[i] === "import") {
+      this.removeLineFromTokens(i - 1);
+    }
+  }
+  var tokensWithWhiteSpace = new Array(this.tokens.length);
+  for (var i = 1; i < this.tokens.length; i ++) {
+    if (this.tokens[i] !== "\n" && this.tokens[i] !== "") {
+      tokensWithWhiteSpace[i] = this.tokens[i] + " ";
+    } else {
+      tokensWithWhiteSpace[i] = this.tokens[i];
+    }
+  }
+  this.code = tokensWithWhiteSpace.join("");
+  return this.code;
 }
 
 KanbanGoInitializer.prototype.compileSolidityPart2 = function(
@@ -669,9 +739,14 @@ KanbanGoInitializer.prototype.compileSolidityPart2 = function(
   this.runShell("solcjs", theArguments, theOptions, - 1, solidityCode.readAndReturnBinaries.bind(solidityCode));
 }
 
-function FileCombinator (){
+function SolidityBuilder (){
   this.fileNames = [];
   this.fileContents = [];
+  /**@type {Array.<SolidityCode>} */
+  this.contentParsers = [];
+  this.contentSortedIndices = [];
+
+  this.fileContentsSorted = [];
   this.pathBase = "";
   this.response = null;
   this.owner = null;
@@ -680,22 +755,75 @@ function FileCombinator (){
   this.numberOfFilesRead = 0;
 }
 
-FileCombinator.prototype.respond = function () {
+SolidityBuilder.prototype.compareContentIndices = function (leftIndex, rightIndex) {
+  var leftContract = this.contentParsers[leftIndex];
+  var rightContract = this.contentParsers[rightIndex];
+  var leftComesEarlier =  rightContract.codeInherits(leftContract);
+  var rightComesEarlier = leftContract.codeInherits(rightContract);
+  var uncomparable = (leftComesEarlier && rightComesEarlier) || (!leftComesEarlier && !rightComesEarlier);
+  console.log(`DEBUG: comparing contract: ${leftContract.contractNames[0]} with ${rightContract.contractNames[0]}`);
+  if (uncomparable) {
+    if (leftIndex < rightIndex) {
+      return - 1;
+    }
+    if (leftIndex > rightIndex) {
+      return 1;
+    }
+    return 0;
+  }
+  if (leftComesEarlier) {
+    return - 1;
+  }
+  if (rightComesEarlier) {
+    return 1;
+  }
+  throw "While comparing code, reached a line of code that should be unreachable";
+}
+
+SolidityBuilder.prototype.sortCode = function () {
+  this.contentParsers = new Array(this.fileContents.length);
+  this.contentSortedIndices = new Array(this.fileContents.length);
+  for (var i = 0; i < this.contentParsers.length; i ++) {
+    this.contentParsers[i] = new SolidityCode("", "");
+    this.contentParsers[i].code = this.fileContents[i].toString();
+    this.contentParsers[i].extractTokens();
+    this.contentParsers[i].computeContractNames();
+    this.contentSortedIndices[i] = i;
+  }
+  //Using bubble sort because contracts are only partially ordered by inheritance
+  for (var i = 0; i < this.contentSortedIndices.length; i ++) {
+    for ( var j = i + 1; j < this.contentSortedIndices.length; j ++) {
+      if (this.compareContentIndices(this.contentSortedIndices[i], this.contentSortedIndices[j]) > 0) {
+        var temp = this.contentSortedIndices[i];
+        this.contentSortedIndices[i] = this.contentSortedIndices[j];
+        this.contentSortedIndices[j] = temp;
+      }
+    }
+  }
+  for (var i = 0; i < this.contentSortedIndices.length; i ++) {
+    this.fileContentsSorted[i] = this.fileContents[this.contentSortedIndices[i]];
+  }
+}
+
+SolidityBuilder.prototype.respond = function () {
   if (this.response === null) {
     return;
   }
+  this.sortCode();
   this.response.writeHead (200);
-  this.result.code = this.fileContents.join("");
+  var solidityMassage = new SolidityCode("", "");
+  var joinedCode = this.fileContentsSorted.join("");
+  this.result.code = solidityMassage.buildSolFileKanbanGoFromCombinedFile(joinedCode);
   this.response.end(JSON.stringify(this.result));
   this.owner.numberRequestsRunning --;
   this.response = null;
 }
 
-FileCombinator.prototype.combineFiles = function () {
+SolidityBuilder.prototype.combineFiles = function () {
   fs.readdir(this.pathBase, this.callbackReadDirectory.bind(this));
 }
 
-FileCombinator.prototype.callbackReadDirectory = function (error, fileNames) {
+SolidityBuilder.prototype.callbackReadDirectory = function (error, fileNames) {
   if (error !== null && error !== undefined) {
     this.result.error = error;
     return this.respond();
@@ -709,7 +837,7 @@ FileCombinator.prototype.callbackReadDirectory = function (error, fileNames) {
   }
 }
 
-FileCombinator.prototype.callbackReadFile = function(counter, error, content) {
+SolidityBuilder.prototype.callbackReadFile = function(counter, error, content) {
   if (error !== null && error !== undefined) {
     this.result.error = error;
     return this.respond();
@@ -726,11 +854,11 @@ KanbanGoInitializer.prototype.fetchKanbanContract = function(
   queryCommand,
   notUsed,
 ) {
-  var fileCombinator = new FileCombinator();
+  var fileCombinator = new SolidityBuilder();
   fileCombinator.response = response;
   fileCombinator.pathBase = `${this.paths.gethProjectBase}/contracts/scar/contract`; 
   fileCombinator.owner = this;
-  fileCombinator.combineFiles();  
+  fileCombinator.combineFiles();
 }
 
 KanbanGoInitializer.prototype.compileSolidity = function(
