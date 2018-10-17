@@ -10,17 +10,15 @@ function handleRequest(request, response) {
   handlersStandard.getQueryStringFromRequest(request, response, handleRPCURLEncodedInput);
  }
 
-function handleRPCURLEncodedInput(response, messageBodyURLed) {
-  var query = null;
+function handleRPCURLEncodedInput(response, query) {
   var queryCommand = null;
   var queryNode = null;
   try {
-    query = queryString.parse(messageBodyURLed);
     queryCommand = JSON.parse(query.command);
     queryNode = JSON.parse(query[fabcoinRPC.urlStrings.command]);    
   } catch (e) {
     response.writeHead(400);
-    return response.end(`Bad fabcoin RPC input: ${messageBodyURLed}. ${e}`);
+    return response.end(`Bad fabcoin RPC input: ${JSON.stringify(query)}. ${e}`);
   }
   return handleRPCArguments(response, queryCommand, queryNode);
 }

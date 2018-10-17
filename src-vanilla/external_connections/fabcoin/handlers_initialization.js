@@ -67,11 +67,9 @@ FabcoinNode.prototype.handleRequest =  function(request, response) {
   );
 }
 
-FabcoinNode.prototype.handleRPCURLEncodedInput = function(response, messageBodyURLed) {
-  var query = null;
+FabcoinNode.prototype.handleRPCURLEncodedInput = function(response, query) {
   var queryCommand = null;
   try {
-    query = queryString.parse(messageBodyURLed);
     queryCommand = JSON.parse(query.command);
   } catch (e) {
     response.writeHead(400);

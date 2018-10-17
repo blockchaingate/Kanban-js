@@ -10,12 +10,10 @@ function handleRequest(request, response) {
   handlersStandard.getQueryStringFromRequest(request, response, handleRPCURLEncodedInput);
 }
 
-function handleRPCURLEncodedInput(response, messageBodyURLed) {
-  var query = null;
+function handleRPCURLEncodedInput(response, query) {
   var queryCommand = null;
   var queryNode = null;
   try {
-    query = queryString.parse(messageBodyURLed);
     queryCommand = JSON.parse(query.command);
     queryNode = JSON.parse(query[kanbanGORPC.urlStrings.node]);    
   } catch (e) {
