@@ -250,7 +250,7 @@ var rpcCalls = {
     rpcCall: "versionGO", //must be same as rpc label, used for autocomplete
     method: "web3_clientVersion",
     parameters: []
-  }
+  }, 
 };
 
 module.exports = {

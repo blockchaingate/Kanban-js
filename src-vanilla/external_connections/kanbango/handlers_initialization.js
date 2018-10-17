@@ -527,6 +527,7 @@ function SolidityCode (codeBase64, basePath) {
     contractNames: null,
   };
   this.numberOfFilesRead = 0;
+  this.totalFilesToRead = 0;
   this.owner = null;
 }
 
@@ -584,7 +585,7 @@ SolidityCode.prototype.getSourceFileName = function() {
 
 SolidityCode.prototype.sendResultIfNeeded = function() {
   //console.log(`DEBUG: number of files read: ${this.numberOfFilesRead}`);
-  if (this.numberOfFilesRead >= this.contractNames.length * 2) {
+  if (this.numberOfFilesRead >= this.totalFilesToRead) {
     this.sendResult();
   }
 }
@@ -641,6 +642,7 @@ SolidityCode.prototype.readAndReturnBinaries = function() {
   this.responseContent.binaries = [];
   this.responseContent.contractNames = this.contractNames;
   this.numberOfFilesRead = 0;
+  this.totalFilesToRead = this.contractNames.length * 2;
   for (var i = 0; i < this.fileNamesBinaryWithPath.length; i ++) {
     //console.log(`DEBUG:reading ${this.fileNamesBinaryWithPath[i]}, ${this.fileNamesABIWithPath[i]}`);
     fs.readFile(this.fileNamesBinaryWithPath[i], this.readBinary.bind(this, i));
@@ -665,6 +667,70 @@ KanbanGoInitializer.prototype.compileSolidityPart2 = function(
   solidityCode.responseToUser = response;
   solidityCode.owner = this;
   this.runShell("solcjs", theArguments, theOptions, - 1, solidityCode.readAndReturnBinaries.bind(solidityCode));
+}
+
+function FileCombinator (){
+  this.fileNames = [];
+  this.fileContents = [];
+  this.pathBase = "";
+  this.response = null;
+  this.owner = null;
+  this.result = {
+  };
+  this.numberOfFilesRead = 0;
+}
+
+FileCombinator.prototype.respond = function () {
+  if (this.response === null) {
+    return;
+  }
+  this.response.writeHead (200);
+  this.result.code = this.fileContents.join("");
+  this.response.end(JSON.stringify(this.result));
+  this.owner.numberRequestsRunning --;
+  this.response = null;
+}
+
+FileCombinator.prototype.combineFiles = function () {
+  fs.readdir(this.pathBase, this.callbackReadDirectory.bind(this));
+}
+
+FileCombinator.prototype.callbackReadDirectory = function (error, fileNames) {
+  if (error !== null && error !== undefined) {
+    this.result.error = error;
+    return this.respond();
+  }
+  this.fileNames = fileNames;
+  this.result.fileNames = this.fileNames;
+  this.fileContents = new Array(this.fileNames.length);
+  this.numberOfFilesRead = 0;
+  for (var i = 0; i < this.fileNames.length; i ++) {
+    fs.readFile(`${this.pathBase}/${this.fileNames[i]}`, this.callbackReadFile.bind(this, i));
+  }
+}
+
+FileCombinator.prototype.callbackReadFile = function(counter, error, content) {
+  if (error !== null && error !== undefined) {
+    this.result.error = error;
+    return this.respond();
+  }
+  this.fileContents[counter] = content;
+  this.numberOfFilesRead ++;
+  if (this.numberOfFilesRead >= this.fileNames.length) {
+    this.respond();
+  }
+}
+
+KanbanGoInitializer.prototype.fetchKanbanContract = function(  
+  response, 
+  queryCommand,
+  notUsed,
+) {
+  var fileCombinator = new FileCombinator();
+  fileCombinator.response = response;
+  fileCombinator.pathBase = `${this.paths.gethProjectBase}/contracts/scar/contract`; 
+  fileCombinator.owner = this;
+  fileCombinator.combineFiles();  
 }
 
 KanbanGoInitializer.prototype.compileSolidity = function(
