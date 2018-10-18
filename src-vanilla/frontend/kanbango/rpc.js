@@ -44,6 +44,10 @@ function KanbanGoNodes() {
       clickHandler: this.setContractFunctionName.bind(this),
       transformer: miscellaneousBackend.hexShortenerForDisplay,
     },
+    contractSourceSetter: {
+      clickHandler: this.setInput.bind(this, ids.defaults.fabcoin.inputBlockInfo.solidityInput),
+      transformer: miscellaneousBackend.hexShortenerForDisplay,
+    },
   };
   // Specifies options for rpc kanban rpc output display.
   this.optionsKanbanGOStandard = {
@@ -142,7 +146,8 @@ function KanbanGoNodes() {
     transformers: {
       "binaries.${number}": this.transformersStandard.contractHexSetter,
       "contractNames.${number}": this.transformersStandard.contractHexSetter,
-      "ABI.${number}.${number}.name": this.transformersStandard.contractCallSetter
+      "ABI.${number}.${number}.name": this.transformersStandard.contractCallSetter,
+      "code": this.transformersStandard.contractSourceSetter,
     }
   };
   this.callTypes = {

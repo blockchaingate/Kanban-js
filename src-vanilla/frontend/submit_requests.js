@@ -1,5 +1,6 @@
 "use srict";
 const escapeHtml = require('escape-html');
+const ids = require('./ids_dom_elements');
 
 function buttonProgressClick(buttonElement) {
   //console.log(buttonElement);
@@ -67,6 +68,10 @@ function highlightInput(id) {
 }
 
 function updateValue(id, content) {
+  if (id === ids.defaults.fabcoin.inputBlockInfo.solidityInput) {
+    window.kanban.ace.editor.setValue(content);
+    return;
+  }
   var theElement = document.getElementById(id);
   if (theElement.value === content) {
     return;

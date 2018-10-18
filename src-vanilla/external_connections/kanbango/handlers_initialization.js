@@ -761,7 +761,7 @@ SolidityBuilder.prototype.compareContentIndices = function (leftIndex, rightInde
   var leftComesEarlier =  rightContract.codeInherits(leftContract);
   var rightComesEarlier = leftContract.codeInherits(rightContract);
   var uncomparable = (leftComesEarlier && rightComesEarlier) || (!leftComesEarlier && !rightComesEarlier);
-  console.log(`DEBUG: comparing contract: ${leftContract.contractNames[0]} with ${rightContract.contractNames[0]}`);
+  //console.log(`DEBUG: comparing contract: ${leftContract.contractNames[0]} with ${rightContract.contractNames[0]}`);
   if (uncomparable) {
     if (leftIndex < rightIndex) {
       return - 1;

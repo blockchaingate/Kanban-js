@@ -180,6 +180,7 @@ PendingCall.prototype.callbackFetchSmartContract = function (nodeId, input, outp
   if (window.kanban.ace.editor === null) {
     window.kanban.ace.editor = window.kanban.ace.ace.edit('aceEditor');
     window.kanban.ace.editor.getSession().setMode('ace/mode/solidity');
+    window.kanban.ace.editor.$blockScrolling = Infinity
   }
   try {
     var parsedInput = JSON.parse(input);
@@ -226,7 +227,7 @@ function getPOSTBodyFromKanbanRPCLabel(theRPCLabel, theArguments) {
 
 function getValueFromId(/**@type {string}*/ id) {
   if (id === ids.defaults.fabcoin.inputBlockInfo.solidityInput) {
-    return window.kanban.aceEditor.getValue();
+    return window.kanban.ace.editor.getValue();
   }
   var domElement = document.getElementById(id);
   if (domElement === null) {

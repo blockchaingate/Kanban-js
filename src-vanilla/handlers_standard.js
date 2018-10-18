@@ -17,7 +17,7 @@ function handleRPCGET(request, response, callbackQuery) {
   var parsedURLobject = null;
   try {
     parsedURLobject = url.parse(request.url);
-    console.log(`DEBUG: parsed url object: ${JSON.stringify(parsedURLobject)}`)
+    //console.log(`DEBUG: parsed url object: ${JSON.stringify(parsedURLobject)}`)
   } catch (e) {
     response.writeHead(400);
     return response.end(`In handleRPCGET: bad RPC request: ${e}.`);
@@ -32,7 +32,7 @@ function extractQuery(response, parsedURL, callbackQuery) {
   var query = null;
   try {
     query = queryString.parse(parsedURL);
-    console.log(`DEBUG: parsed url: ${JSON.stringify(parsedURL)}`)
+    //console.log(`DEBUG: parsed url: ${JSON.stringify(parsedURL)}`)
   } catch (e) {
     response.writeHead(400);
     return response.end(`In handleRPCGET: bad RPC request: ${e}.`);
