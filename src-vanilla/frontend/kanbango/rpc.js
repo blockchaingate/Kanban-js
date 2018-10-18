@@ -328,7 +328,7 @@ function KanbanGoNodes() {
         code: ids.defaults.fabcoin.inputBlockInfo.solidityInput
       },
       output: ids.defaults.fabcoin.outputFabcoinBlockInfo,
-      callback: this.callbackSolidityCode
+      callback: PendingCall.prototype.callbackFetchSmartContract
     }
   };
   this.correctFunctions();

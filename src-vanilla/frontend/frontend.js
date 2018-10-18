@@ -1,11 +1,5 @@
 window.kanban = {
-  thePage: null,
-  rpc: {
-    general: require('./fabcoin_old/fabcoin_rpc_general'),
-    network: require('./fabcoin_old/fabcoin_rpc_network'),
-    sendReceive: require('./fabcoin_old/fabcoin_rpc_send_receive'),
-    mine: require('./fabcoin_old/fabcoin_rpc_mine'),
-    profiling: require('./fabcoin_old/fabcoin_rpc_profiling'),
+  thePage: null,  rpc: {
     forceRPCPOST: false
   },
   kanbanJS: {
@@ -15,7 +9,7 @@ window.kanban = {
     general: require('./kanban_plus_plus')
   },
   kanbanGO: {
-    rpc: require('./kanbango/rpc'),
+    rpc: null,
   },
   fabcoin: {
     initialization: require('./fabcoin/initialization'),
@@ -35,8 +29,13 @@ window.kanban = {
     statistics: {},
     statDetails: {}
   },
-	ace: require('./ace'),
+  ace: {
+    ace: require('./brace'),
+    editor: null
+  }
 };
+
+window.kanban.kanbanGO.rpc = require('./kanbango/rpc'); // <- function call uses window.kanban
 
 window.kanban.thePage = require('./main_page').getPage(); // <- function call uses window.kanban
 window.kanban.computationalEngineCalls = require('./computational_engine_calls'); // <- module loading uses window.kanban

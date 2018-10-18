@@ -412,3 +412,16 @@ span.panelRevealedContent {
   transition: 1s linear;
   opacity: 0;
 }
+
+#aceEditor {
+  margin: 0;
+  display: inline-block;
+  position: relative;
+  height: 600px;
+  width: 600px;
+
+  top: 0;
+  bottom: 0;
+  left: 0;
+  right: 0;
+}

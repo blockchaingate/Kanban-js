@@ -1149,7 +1149,7 @@ KanbanGoInitializer.prototype.handleRPCArguments = function(response, queryComma
         if (currentNode === undefined || currentNode === null) {
           response.writeHead(400);
           this.numberRequestsRunning --;
-          return response.end(`Failed to extract node id from ${currentNodeId}.`);          
+          return response.end(`KanbanGoInitializer: failed to extract node id from ${currentNodeId}.`);          
         }
       }
     }

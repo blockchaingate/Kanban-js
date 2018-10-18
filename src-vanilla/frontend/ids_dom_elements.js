@@ -114,7 +114,7 @@ var defaults = {
       contractId: "inputFabcoinContractId",
       contractData: "inputFabcoinContractData",
       walletAmount: "inputFabcoinWalletAmount",
-      solidityInput: "textAreaSolidityInputForFabcoin",
+      solidityInput: "aceEditor",
       contractFunctionName: "inputSolidityFunctionName",
     },
     outputFabcoinInitialization: "divOutputFabcoinInitialization",

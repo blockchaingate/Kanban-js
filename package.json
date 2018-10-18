@@ -28,6 +28,7 @@
   "dependencies": {
     "big-integer": "^1.6.36",
     "bitcoinjs-lib": "^3.3.2",
+    "brace": "^0.11.1",
     "browserify": "^16.1.1",
     "bs58": "^4.0.1",
     "chart.js": "^2.7.2",

@@ -4,6 +4,7 @@ var JSONTransformer = jsonToHtml.JSONTransformer;
 const kanbanGO = require('../../external_connections/kanbango/rpc');
 const globals = require('../globals');
 const ids = require('../ids_dom_elements');
+require('../brace/mode/solidity');
 
 function KanbanGONode() {
   /**@type {string} */
@@ -174,6 +175,19 @@ PendingCall.prototype.callbackAggregateCommitment = function(nodeId, input, outp
   submitRequests.updateValue(ids.defaults.kanbanGO.inputAggregateSignature.nonces, nonces.join(", "));
 }
 
+PendingCall.prototype.callbackFetchSmartContract = function (nodeId, input, output) {
+  this.callbackStandard(nodeId, input, output);
+  if (window.kanban.ace.editor === null) {
+    window.kanban.ace.editor = window.kanban.ace.ace.edit('aceEditor');
+    window.kanban.ace.editor.getSession().setMode('ace/mode/solidity');
+  }
+  try {
+    var parsedInput = JSON.parse(input);
+    window.kanban.ace.editor.setValue(parsedInput.code);
+  } catch (e) {
+    console.log(`Error parsing input. ${e}`)
+  }
+}
 
 PendingCall.prototype.callbackStandard = function(nodeId, input, output) {
   //console.log(`DEBUG: pendingCall id: ${pendingCall.id}, nodeId: ${nodeId}, input: ${input}`);
@@ -211,6 +225,9 @@ function getPOSTBodyFromKanbanRPCLabel(theRPCLabel, theArguments) {
 }
 
 function getValueFromId(/**@type {string}*/ id) {
+  if (id === ids.defaults.fabcoin.inputBlockInfo.solidityInput) {
+    return window.kanban.aceEditor.getValue();
+  }
   var domElement = document.getElementById(id);
   if (domElement === null) {
     return null;
