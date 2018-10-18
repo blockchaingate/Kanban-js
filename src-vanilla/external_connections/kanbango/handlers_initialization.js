@@ -736,7 +736,7 @@ KanbanGoInitializer.prototype.compileSolidityPart2 = function(
   };
   solidityCode.responseToUser = response;
   solidityCode.owner = this;
-  this.runShell("solcjs", theArguments, theOptions, - 1, solidityCode.readAndReturnBinaries.bind(solidityCode));
+  this.runShell(`${pathnames.path.base}/node_modules/solc/solcjs`, theArguments, theOptions, - 1, solidityCode.readAndReturnBinaries.bind(solidityCode));
 }
 
 function SolidityBuilder (){

@@ -1,1 +1,1 @@
-## Used for fabcoin data.
+## Used for fabcoin data
