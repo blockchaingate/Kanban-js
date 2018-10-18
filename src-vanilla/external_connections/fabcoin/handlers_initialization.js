@@ -10,6 +10,8 @@ var OutputStream = require('../../output_stream').OutputStream;
 const crypto = require('crypto');
 const cryptoKanban = require('../../crypto/encodings');
 const handlersStandard = require('../../handlers_standard');
+const fs = require('fs');
+//const kanbanGO = require('../kanbango/handlers_initialization');
 
 /**
  * Returns a global FabcoinNode object
@@ -134,6 +136,11 @@ FabcoinNode.prototype.showLogFabcoind = function(response, theArguments) {
 FabcoinNode.prototype.prepareArgumentList = function () {
   this.argumentList = [];
   this.argumentList.push(`-rpcpassword=${this.configuration.RPCPassword}`);
+  var initializer = global.kanban.kanbanGOInitializer;
+  //console.log(`Initializer: ${JSON.stringify(initializer.paths)}`);
+  var outputPath = `${initializer.paths.gethProjectBase}/fabcoind_rpc_password`; 
+  //console.log(`DEBUG: About to write ${this.configuration.RPCPassword} to file: ${outputPath}`);
+  fs.writeFile(outputPath, this.configuration.RPCPassword, (err)=>{});
   this.argumentList.push(`-rpcuser=${this.configuration.RPCUser}`);
   this.argumentList.push(`-datadir=${this.paths.dataDir}`);
   if (this.configuration.network !== "") {
