@@ -624,6 +624,20 @@
     <div><button class = "buttonSelectPage" onclick = "window.kanban.thePage.selectPage('kanbanPlusPlus');">Crypto++</button></div>
     <div><button class = "buttonSelectPage" onclick = "window.kanban.thePage.selectPage('kanbanJS');">CryptoJS</button></div>
 
+
+    <br>
+    <label class = "containerRadioButton containerRadioButtonOnSidePanel">
+      <input type = "radio" name = "radioTheme" onchange = "if (this.checked) window.kanban.themes.setTheme('Light');">
+      <span class = "radioMark"></span>
+      Light
+    </label>
+    &nbsp;&nbsp;&nbsp;
+    <label class = "containerRadioButton containerRadioButtonOnSidePanel">
+      <input type = "radio" name = "radioTheme" onchange = "if (this.checked) window.kanban.themes.setTheme('Dark');">
+      <span class = "radioMark"></span>
+      Dark
+    </label>
+
     <!--div><button class = "buttonSelectPage" onclick = "window.kanban.thePage.selectPage('myNodes');">My remote nodes</button></div>
     <div><button class = "buttonSelectPage" onclick = "window.kanban.thePage.selectPage('network');">Network</button></div>
     <div><button class = "buttonSelectPage" onclick = "window.kanban.thePage.selectPage('send');">Send</button></div>

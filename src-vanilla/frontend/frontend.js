@@ -32,7 +32,8 @@ window.kanban = {
   ace: {
     ace: require('./brace'),
     editor: null
-  }
+  },
+  themes: require('./themes'),
 };
 
 window.kanban.kanbanGO.rpc = require('./kanbango/rpc'); // <- function call uses window.kanban

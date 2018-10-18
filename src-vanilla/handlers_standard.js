@@ -1,4 +1,4 @@
-const url  = require('url');
+const url = require('url');
 const queryString = require('querystring');
 const miscellaneousBackend = require('./miscellaneous');
 
