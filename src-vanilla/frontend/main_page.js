@@ -73,6 +73,9 @@ function Page() {
     profiling: {
       idPage: ids.defaults.pageProfiling,
       updateFunction: rpcCallsProfiling.updateProfilingPage
+    },
+    themes: {
+      idPage: ids.defaults.pages.themes
     }
   }
   this.currentPageLabel = null;

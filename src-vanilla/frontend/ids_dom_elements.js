@@ -17,8 +17,9 @@ var defaults = {
     kanbanGOSendReceive: "pageKanbanGOSendReceive",
     fabcoin: {
       initialization: "pageFabcoinInitialization",  
-      smartContract: "pageFabcoinSmartContract"
-    }
+      smartContract: "pageFabcoinSmartContract",
+    },
+    themes: "pageThemes"
   },
   progressReport: "spanProgressReport",
   spanPingColumnHeader: "spanPingColumnHeader",
@@ -116,6 +117,7 @@ var defaults = {
       walletAmount: "inputFabcoinWalletAmount",
       solidityInput: "aceEditor",
       contractFunctionName: "inputSolidityFunctionName",
+      contractFunctionId: "inputSolidityFunctionId",
     },
     outputFabcoinInitialization: "divOutputFabcoinInitialization",
     outputFabcoinBlockInfo: "duvOutputFabcoinBlockInfo"

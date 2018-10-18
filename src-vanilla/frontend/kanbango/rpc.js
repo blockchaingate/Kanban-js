@@ -10,6 +10,7 @@ const miscellaneousBackend = require('../../miscellaneous');
 const miscellaneousFrontEnd = require('../miscellaneous_frontend');
 const PendingCall = require('./pending_calls').PendingCall;
 const KanbanGONode = require('./pending_calls').KanbanGONode;
+const cryptoKanbanHashes = require('../../crypto/hashes');
 
 function KanbanGoNodes() {
   var inputSchnorr = ids.defaults.kanbanGO.inputSchnorr;
@@ -340,9 +341,27 @@ function KanbanGoNodes() {
 }
 
 KanbanGoNodes.prototype.setContractFunctionName = function (container, content, extraData) {
-  var counter = extraData.labelArray[extraData.labelArray.length - 3];
-  this.setInput(ids.defaults.fabcoin.inputBlockInfo.contractHex, null, extraData.ambientInput.binaries[counter]);
-  this.setInput(ids.defaults.fabcoin.inputBlockInfo.contractFunctionName, null, content);
+  var counterContract = extraData.labelArray[extraData.labelArray.length - 3];
+  var counterFunction = extraData.labelArray[extraData.labelArray.length - 2];
+  var ambientInput = extraData.ambientInput;
+  var abi = extraData.ambientInput.ABI[counterContract][counterFunction];
+  var functionSignature = "";
+  functionSignature += abi.name;
+  functionSignature += "(";
+  for (var counterType = 0; counterType < abi.inputs.length; counterType ++) {
+    functionSignature += abi.inputs[counterType].type;
+    if (counterType !== abi.inputs.length - 1) {
+      functionSignature += ",";
+    }
+  }
+  functionSignature += ")";
+  console.log(`DEBUG: fun signature so far: ${functionSignature}`);
+  var contractIds = ids.defaults.fabcoin.inputBlockInfo; 
+  submitRequests.updateValue(contractIds.contractHex, ambientInput.binaries[counterContract]);
+  submitRequests.updateValue(contractIds.contractFunctionName, content);
+  var keccak = cryptoKanbanHashes.hashes.keccak_ToHex(functionSignature);
+  var keccakFirstFour = keccak.slice(0, 8);
+  submitRequests.updateValue(contractIds.contractFunctionId, keccakFirstFour);
 }
 
 KanbanGoNodes.prototype.setContractHex = function (container, content, extraData) {

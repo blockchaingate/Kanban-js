@@ -1,6 +1,15 @@
 :root{
   --colorBackgroundDefault: white;
   --colorFontDefault: black;
+  --colorButtonStandard: lightblue;
+  --colorButtonStandardHovered: lightskyblue;
+  --colorButtonStandardSelected: skyblue;
+}
+
+body {
+  background: var(--colorBackgroundDefault);
+  color: var(--colorFontDefault);
+  transition: all 3s;
 }
 
 div.divPageAndMenu{
@@ -8,6 +17,7 @@ div.divPageAndMenu{
   flex-direction: row;*/
   width: 100%;
   visibility: visible;
+  transition: all 3s;
 }
 
 div.divMenuSeparator{
@@ -54,7 +64,6 @@ div.divControlPanelDefault{
   transition: all 3s;
   border: 1px solid black;
   display: inline-block;
-  color: var(--colorFontDefault);
 }
 
 div.divMenuButtonPanel div{
@@ -70,6 +79,7 @@ div.divMainPage{
   width: 89%;
   position: absolute;
   height: 95%;
+  transition: all 3s;
   background: var(--colorBackgroundDefault);
   color: var(--colorFontDefault);
 }
@@ -92,7 +102,7 @@ div.pageMainWindow{
 button.buttonSelectPage{
   border: 0;
   background-color: lightblue;
-  transition: 2s all;
+  transition: all 2s;
   border-radius: 2px;
   padding: 5px;
   width: 120px;
@@ -105,25 +115,25 @@ button.buttonSelectPage:hover{
 button.buttonStandardLight{
   border: 0;
   background-color: azure;
-  transition: 2s all;
+  transition: all 2s;
   border-radius: 2px;
   padding: 5px;
 }
 
 button.buttonStandard{
   border: 0;
-  background-color: lightblue;
-  transition: 2s all;
+  background-color: var(--colorButtonStandard);
+  transition: all 2s;
   border-radius: 2px;
   padding: 5px;
 }
 
 button.buttonStandardSelected{
-  background-color: skyblue;
+  background-color: var(--colorButtonStandardSelected)
 }
 
 button.buttonStandard:hover{
-  background-color: lightskyblue;
+  background-color: var(--colorButtonStandardHovered);
 }
 
 button.buttonStandardLight:hover{
@@ -133,7 +143,7 @@ button.buttonStandardLight:hover{
 button.buttonProgress {
   border: 0;
   background: none;
-  transition: 2s all;
+  transition: all 2s;
   border-radius: 2px;
   margin-top: 0px;
 }
@@ -181,7 +191,7 @@ table.tableJSON td{
 span.spanRESTDeveloperInfo{
   white-space: pre-wrap;
   word-wrap:break-word;
-  transition: 2s all;  
+  transition: all 2s;  
 }
 
 img.imgFabLogo{
@@ -210,9 +220,6 @@ img.imgFabLogo{
   opacity: 0;
 }
 
-.containerRadioButtonOnSidePanel {
-  background: white;
-}
 
 /* Create a custom radio button */
 .radioMark {
@@ -266,11 +273,7 @@ img.imgFabLogo{
   transition: all 2s;
   margin: 5px;
   color: var(--colorFontDefault);
-}
-
-.inputCrypto {
-  transition: all 2s;
-  margin: 5px;
+  background: var(--colorBackgroundDefault);
 }
 
 .inputOmni {
@@ -298,7 +301,7 @@ button.buttonJSONExpand {
   border-radius: 2px;
   margin: 0px;
   cursor: pointer;
-  transition: 2s all;
+  transition: all 2s;
 }
 
 button.buttonJSONExpand:hover {
@@ -312,7 +315,7 @@ button.buttonRPCInput {
   border-radius: 2px;
   margin: 0px;
   cursor: pointer;
-  transition: 2s all;
+  transition: all 2s;
   font-family: 'Courier New', Courier, monospace;
   background-color: #f3f3f3;
 }
@@ -402,7 +405,7 @@ table.tableTestKanban td, th{
 }
 
 .form-control-placeholder {
-  transition: all 200ms;
+  transition: all 0.2s;
   margin: 5px;
   opacity: 0.5;
   position: absolute;
@@ -426,7 +429,7 @@ span.panelRevealedContent {
   margin-top: 0px;
   margin-bottom: 0px;
   overflow-x: hidden;
-  transition: 1s linear;
+  transition: all 1s linear;
   opacity: 0;
 }
 

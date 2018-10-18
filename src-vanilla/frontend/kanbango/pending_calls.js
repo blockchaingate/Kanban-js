@@ -176,18 +176,12 @@ PendingCall.prototype.callbackAggregateCommitment = function(nodeId, input, outp
 }
 
 PendingCall.prototype.callbackFetchSmartContract = function (nodeId, input, output) {
-  this.callbackStandard(nodeId, input, output);
   if (window.kanban.ace.editor === null) {
     window.kanban.ace.editor = window.kanban.ace.ace.edit('aceEditor');
     window.kanban.ace.editor.getSession().setMode('ace/mode/solidity');
     window.kanban.ace.editor.$blockScrolling = Infinity
   }
-  try {
-    var parsedInput = JSON.parse(input);
-    window.kanban.ace.editor.setValue(parsedInput.code);
-  } catch (e) {
-    console.log(`Error parsing input. ${e}`)
-  }
+  this.callbackStandard(nodeId, input, output);
 }
 
 PendingCall.prototype.callbackStandard = function(nodeId, input, output) {

@@ -1,7 +1,6 @@
 "use strict";
 
 function setTheme (themeName) {
-  console.log("DEBIG: theme name: " + themeName);
   let root = document.documentElement;
   if (themeName === "Light") {
     root.style.setProperty("--colorBackgroundDefault", "white");
