@@ -340,7 +340,7 @@ function KanbanGoNodes() {
 }
 
 KanbanGoNodes.prototype.setContractFunctionName = function (container, content, extraData) {
-  var counter = extraData.labelArray[extraData.labelArray.length - 2];
+  var counter = extraData.labelArray[extraData.labelArray.length - 3];
   this.setInput(ids.defaults.fabcoin.inputBlockInfo.contractHex, null, extraData.ambientInput.binaries[counter]);
   this.setInput(ids.defaults.fabcoin.inputBlockInfo.contractFunctionName, null, content);
 }
