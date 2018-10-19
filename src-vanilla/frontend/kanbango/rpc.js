@@ -362,6 +362,7 @@ KanbanGoNodes.prototype.setContractFunctionName = function (container, content, 
   var keccak = cryptoKanbanHashes.hashes.keccak_ToHex(functionSignature);
   var keccakFirstFour = keccak.slice(0, 8);
   submitRequests.updateValue(contractIds.contractFunctionId, keccakFirstFour);
+  submitRequests.updateValue(contractIds.contractData, keccakFirstFour);
 }
 
 KanbanGoNodes.prototype.setContractHex = function (container, content, extraData) {

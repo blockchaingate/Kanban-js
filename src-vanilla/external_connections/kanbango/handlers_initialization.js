@@ -625,7 +625,7 @@ SolidityCode.prototype.readBinary = function(counter, err, dataBinary) {
     this.responseContent.error = `Failed to read binary file ${this.fileNamesBinaryWithPath[counter]}. ${err}`;
     return this.sendResult();
   }
-  this.responseContent.binaries[counter] = encodingsKanban.encodingDefault.toHex(dataBinary);
+  this.responseContent.binaries[counter] = dataBinary.toString();
   this.numberOfFilesRead ++;  
   this.sendResultIfNeeded();
 }
