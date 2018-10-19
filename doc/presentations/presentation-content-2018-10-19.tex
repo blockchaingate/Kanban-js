@@ -1,8 +1,60 @@
 \begin{frame}
+\frametitle{KanbanGO smart contract data structures}
+\begin{itemize}
+\item Nodes: an iterable map of nodes: 
+
+\hfil\hfil
+$\text{Nodes}:\text{bytes32}\to \text{Node}$
+\item Accounts: an iterable map of accounts:
+
+\hfil\hfil$\text{Accounts}: address \to \text{uint256}$
+\item Shards: an iterable map of shards:
+
+\hfil\hfil$\text{Shards}: bytes32 \to \text{Shard}$
+\end{itemize}
+\end{frame}
+
+\begin{frame}[fragile]
+\frametitle{KanbanGO smart contract first interface}
+
+\begin{itemize}
+\item \verb|RegisterNode(publicKey PubKey, [...])| returns bool.
+\item \verb|MessageSenderHasAuthorizedAggregateSignature(bytes32 ShardId)| returns bool.
+\item \verb|IsMessageSenderHandledBy(bytes32 ShardId)| returns bool.
+\item \verb|ReFormAllShards()| private, public when developing.
+\item \verb|GetShardPubkeys(bytes32 shardId)| returns bytes33.
+\item \verb|GetMyShard(address myAccountAddress)| returns bytes32.
+\item \verb|ModifyAccounts(...)| returns bool.
+\end{itemize}
+\end{frame}
+
+
+\begin{frame}[fragile]
 \frametitle{Workflow for KanbanGO bootstrap}
 
 \begin{itemize}
-\item 
+\item Create blank contract.
+\item \begin{enumerate}
+	\item $\text{KB1} \stackrel{\text{deposit}}{\to} \text{contract}$.
+	
+	...
+	
+	\item $\text{KB16} \stackrel{\text{deposit}}{\to} \text{contract}$.
+\end{enumerate}
+\item Call \verb|ReFormAllShards|. This will do the following.
+\begin{enumerate}
+	\item Compute shardId.
+	\item Compute shardAggregateAddress.
+	\item $\text{contract} \stackrel{0}{\to}\text{shardAggregateAddress} $
+	\item The transformation above is going to have a special unlock script.
+\end{enumerate}
 \end{itemize}
 
+\end{frame}
+
+\begin{frame}[fragile]
+\frametitle{The unlock script for shardAggregateAddress: how does ModifyAccounts work?}
+\begin{itemize}
+	\item To be discussed in person.
+\end{itemize}
 \end{frame}
