@@ -433,12 +433,18 @@ span.panelRevealedContent {
   opacity: 0;
 }
 
+#outputSolidityCompilation {
+  display: inline-block;
+  max-height: 250px;
+  overflow: auto;
+}
+
 #aceEditor {
   margin: 0;
   display: inline-block;
   position: relative;
-  height: 600px;
-  width: 600px;
+  height: 400px;
+  width: 800px;
 
   top: 0;
   bottom: 0;

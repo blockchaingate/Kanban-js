@@ -149,6 +149,7 @@ function KanbanGoNodes() {
       "contractNames.${number}": this.transformersStandard.contractHexSetter,
       "ABI.${number}.${number}.name": this.transformersStandard.contractCallSetter,
       "code": this.transformersStandard.contractSourceSetter,
+      "contractInheritance.${label}": this.transformersStandard.shortener,
     }
   };
   this.callTypes = {
@@ -327,7 +328,7 @@ function KanbanGoNodes() {
       inputsBase64: {
         code: ids.defaults.fabcoin.inputBlockInfo.solidityInput
       },
-      output: ids.defaults.fabcoin.outputFabcoinBlockInfo
+      output: ids.defaults.fabcoin.outputSolidityCompilation
     }, 
     fetchKanbanContract: {
       outputs: {

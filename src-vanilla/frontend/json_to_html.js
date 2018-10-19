@@ -326,6 +326,7 @@ var labelAbbreviations = {
   "inputPrivateKeyHex": "inPrivHex",
   "publicKeyHex": "pubHex",
   "publicKeyHexInternal": "pubHexInt",
+  "stateMutability": "st.mut."
 }
 
 function abbreviateLabel(/** @type {string}*/ header) {

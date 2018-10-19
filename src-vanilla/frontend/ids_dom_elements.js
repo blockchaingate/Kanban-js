@@ -120,7 +120,8 @@ var defaults = {
       contractFunctionId: "inputSolidityFunctionId",
     },
     outputFabcoinInitialization: "divOutputFabcoinInitialization",
-    outputFabcoinBlockInfo: "duvOutputFabcoinBlockInfo"
+    outputFabcoinBlockInfo: "divOutputFabcoinBlockInfo",
+    outputSolidityCompilation: "outputSolidityCompilation"
   },
   inputNumberOfBlocks: "inputNumberOfBlocks",
   inputMaxNumberOfTries: "inputMaxNumberOfTries",

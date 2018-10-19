@@ -19,8 +19,8 @@ $\text{Nodes}:\text{bytes32}\to \text{Node}$
 
 \begin{itemize}
 \item \verb|RegisterNode(publicKey PubKey, [...])| returns bool.
-\item \verb|MessageSenderHasAuthorizedAggregateSignature(bytes32 ShardId)| returns bool.
-\item \verb|IsMessageSenderHandledBy(bytes32 ShardId)| returns bool.
+\item \verb|SenderHasAuthorizedAggregateSignature(bytes32 ShardId)| returns bool.
+\item \verb|SenderIsHandledBy(bytes32 ShardId)| returns bool.
 \item \verb|ReFormAllShards()| private, public when developing.
 \item \verb|GetShardPubkeys(bytes32 shardId)| returns bytes33.
 \item \verb|GetMyShard(address myAccountAddress)| returns bytes32.
@@ -35,26 +35,49 @@ $\text{Nodes}:\text{bytes32}\to \text{Node}$
 \begin{itemize}
 \item Create blank contract.
 \item \begin{enumerate}
-	\item $\text{KB1} \stackrel{\text{deposit}}{\to} \text{contract}$.
-	
-	...
-	
-	\item $\text{KB16} \stackrel{\text{deposit}}{\to} \text{contract}$.
+\item KB1 executes \verb|RegisterNode|. Besides data, KB1 inputs deposit.
+
+...
+
+\item KB16 executes \verb|RegisterNode|.  Besides data, KB16 inputs deposit.
 \end{enumerate}
 \item Call \verb|ReFormAllShards|. This will do the following.
 \begin{enumerate}
-	\item Compute shardId.
-	\item Compute shardAggregateAddress.
-	\item $\text{contract} \stackrel{0}{\to}\text{shardAggregateAddress} $
-	\item The transformation above is going to have a special unlock script.
+\item Sort the public keys and compute $ \text{shardAggregateAddres} = SHA3(\text{pubKey1},\dots, \text{pubKey16})$
+\item $\text{contract} \stackrel{0}{\to}\text{shardAggregateAddress} $
+\item The transformation above is going to have a special unlock script.
+\end{enumerate}
+\item Start the KB shard.
+\begin{enumerate}
+\item Periodically, KB machines agree on inputs to \verb|ModifyAccounts| via a fault-tolerant aggregate signature. 
+\item The fault tolerant signature is used as inputs to the unlock script to perform \verb|ModifyAccounts(...)|.
+\item In the same transaction as the contract call to  \verb|ModifyAccounts(...)|, we generate the vout for the next \verb|ModifyAccounts(...)| call.
+
+\item Repeat.
 \end{enumerate}
 \end{itemize}
 
 \end{frame}
 
 \begin{frame}[fragile]
-\frametitle{The unlock script for shardAggregateAddress: how does ModifyAccounts work?}
+\frametitle{Security: unlock script for shardAggregateAddress}
 \begin{itemize}
-	\item To be discussed in person.
+\item When bootstrapping the kb nodes, an transaction is generated:
+
+$\text{contract} \stackrel{0}{\to}\text{shardAggregateAddress} $
+
+\item Unlock script of above = critically important security lock.
+\item Unlock script format:
+
+$\text{shardAggregateAddress} ~\text{OP\_AGGREGATE\_SIGNATURE\_VERIFY} $
+
+\item To unlock:
+\begin{itemize}
+\item Push on the stack the public keys KB1, \dots, KB16.
+\item Push on the stack the aggregate fault-tolerant signature of KB1, \dots, KB16.
+\item The fabcoind function $\text{VerifyScript}$ will be extended to execute a cryptographic call whenever it sees $OP\_AGGREGATE\_SIGNATURE\_VERIFY$.
+\item The opcode shall flush the entire stack into the cpp function.
+\item The cpp function will verify that the pubkeys match the aggregate address and that the pubkeys match the aggregate signature for the message.
+\end{itemize}
 \end{itemize}
 \end{frame}
