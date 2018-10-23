@@ -17,7 +17,9 @@ var rpcCalls = {
     mandatoryFixedArguments: { //<- values give defaults, null for none
     },
     mandatoryModifiableArguments: { //<- values give defaults, null for none
-      numberOfNodes: null
+      numberOfNodes: null,
+      abiJSON: null,
+      contractId: null,
     },
   },
   getLogFile: {

@@ -183,7 +183,9 @@ function KanbanGoNodes() {
     },
     runNodesOnFAB: {
       inputs: {
-        numberOfNodes: inputInitialization.numberOfNodes
+        numberOfNodes: inputInitialization.numberOfNodes,
+        abiJSON: inputInitialization.contractABI,
+        contractId: inputInitialization.contractId
       },
       callback: PendingCall.prototype.callbackRunNodes,
     },
@@ -334,7 +336,8 @@ function KanbanGoNodes() {
       inputsBase64: {
         code: ids.defaults.fabcoin.inputBlockInfo.solidityInput
       },
-      output: ids.defaults.fabcoin.outputSolidityCompilation
+      output: ids.defaults.fabcoin.outputSolidityCompilation,
+      callback: PendingCall.prototype.callbackCompileSolidity
     }, 
     fetchKanbanContract: {
       outputs: {

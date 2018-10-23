@@ -179,6 +179,16 @@ PendingCall.prototype.callbackAggregateCommitment = function(nodeId, input, outp
   submitRequests.updateValue(ids.defaults.kanbanGO.inputAggregateSignature.nonces, nonces.join(", "));
 }
 
+PendingCall.prototype.callbackCompileSolidity = function (nodeId, input, output) {
+  console.log(input);
+  submitRequests.updateValue(ids.defaults.kanbanGO.inputInitialization.contractABI, input);
+  // try{
+    // var a = JSON.parse(input)
+    // console.log(input);
+  // }catch(e){}
+  this.callbackStandard(nodeId, input, output);
+}
+
 PendingCall.prototype.callbackFetchSmartContract = function (nodeId, input, output) {
   this.callbackStandard(nodeId, input, output);
 }

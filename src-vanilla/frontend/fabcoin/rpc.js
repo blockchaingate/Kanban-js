@@ -31,7 +31,10 @@ function FabNode () {
     setTxInputVoutAndValue: {
       clickHandler: this.setTxInputVoutAndValue.bind(this),
     },
-    setContractId: this.getSetInputWithShortener(inputFabBlock.contractId),
+    setContractId: {
+      clickHandler: this.setContractId.bind(this),
+      transformer: miscellaneousBackend.hexShortenerForDisplay
+    },
   };
 
   this.outputOptionsStandard = {
@@ -190,6 +193,9 @@ function FabNode () {
       inputs: {
         contractHex: inputFabBlock.contractHex
       },
+      outputs:{
+        address: inputFabBlock.contractId
+      },
       outputOptions: this.outputOptionsContract,
     },
     callContract: {
@@ -322,6 +328,13 @@ FabNode.prototype.setTxInputVoutAndValue = function (container, content, extraDa
     submitRequests.highlightError(inputFab.txInputs);
     return;
   }
+}
+
+FabNode.prototype.setContractId = function (container, content, extraData) {
+  //var extraDataString = JSON.stringify(extraData);
+  //console.log(`DEBUG: Content: ${content}, extra data: ${extraDataString}`);
+  submitRequests.updateValue(ids.defaults.fabcoin.inputBlockInfo.contractId, content);
+  submitRequests.updateValue(ids.defaults.kanbanGO.inputInitialization.contractId, content);
 }
 
 FabNode.prototype.setInput = function (idToSet, container, content, extraData) {

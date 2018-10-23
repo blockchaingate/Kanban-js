@@ -59,7 +59,9 @@ var defaults = {
       blockHash: "inputKBGOBlockHash"
     },
     inputInitialization: {
-      numberOfNodes: "inputKBGONumberOfGethNodes"
+      numberOfNodes: "inputKBGONumberOfGethNodes",
+      contractId: "inputKBGOContractId",
+      contractABI: "inputKBGOContractABI"
     },
     nodePanel: "spanKanbanGoNodeContainer",
     outputKBGOTest: "divOutputKBGOTest",
