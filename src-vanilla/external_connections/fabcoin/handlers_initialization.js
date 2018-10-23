@@ -39,6 +39,10 @@ function FabcoinNode() {
     RPCPassword: (new cryptoKanban.Encoding).toHex(crypto.randomBytes(50)),
     RPCUser: 'nodejs',
   };
+  console.log("WARNING: OVER-RIDING non-randomly generated password, please fix!");
+  this.configuration.RPCPassword = "password";
+  this.configuration.RPCUser = "nodejs";
+
 
   console.log(`Node.js' randomly generated password for fabcoin RPC: `+ `${this.configuration.RPCPassword}`.red);
   /**@type {string[]} */
@@ -135,14 +139,16 @@ FabcoinNode.prototype.showLogFabcoind = function(response, theArguments) {
 
 FabcoinNode.prototype.prepareArgumentList = function () {
   this.argumentList = [];
+
   this.argumentList.push(`-rpcpassword=${this.configuration.RPCPassword}`);
-  var initializer = global.kanban.kanbanGOInitializer;
+  //var initializer = global.kanban.kanbanGOInitializer;
   //console.log(`Initializer: ${JSON.stringify(initializer.paths)}`);
-  var outputPath = `${initializer.paths.gethProjectBase}/fabcoind_rpc_password`; 
+  //var outputPath = `${initializer.paths.gethProjectBase}/fabcoind_rpc_password`; 
   //console.log(`DEBUG: About to write ${this.configuration.RPCPassword} to file: ${outputPath}`);
-  fs.writeFile(outputPath, this.configuration.RPCPassword, (err)=>{});
+  //fs.writeFile(outputPath, this.configuration.RPCPassword, (err)=>{});
   this.argumentList.push(`-rpcuser=${this.configuration.RPCUser}`);
   this.argumentList.push(`-datadir=${this.paths.dataDir}`);
+  this.argumentList.push(`-txindex=1`);
   if (this.configuration.network !== "") {
     this.argumentList.push(this.configuration.network);
   }

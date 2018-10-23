@@ -56,6 +56,7 @@ function FabNode () {
   this.outputOptionsTransaction = {
     transformers: {
       hash: this.transformersStandard.transactionId,
+      blockhash: this.transformersStandard.blockHash,
       txid: this.transformersStandard.transactionId,
       "details.${number}.address": this.transformersStandard.setAddress,
       "vout.${number}.scriptPubKey.addresses.${number}": this.transformersStandard.shortener,
@@ -132,6 +133,7 @@ function FabNode () {
       outputs: {
         hex: inputFabBlock.txHex
       }, 
+      outputOptions: this.outputOptionsTransaction,
     },
     decodeTransactionRaw: {
       inputs: {

@@ -78,11 +78,17 @@ function NodeKanbanGo(inputId) {
 }
 
 NodeKanbanGo.prototype.initializeFoldersAndKeys = function(response) {
+  console.log(`DEBUIG: got to init folders and keys`);
   fs.unlink(this.lockFileName, this.initialize2ReadKeyStore.bind(this, response));
 }
 
 NodeKanbanGo.prototype.initialize2ReadKeyStore = function(response, error) {
-  fs.readdir(this.keyStoreFolder, this.initialize3SelectAddress.bind(this, response));
+  var initializer = getInitializer();
+  if (!initializer.flagGetGenesisFromFoundationChain) {
+    fs.readdir(this.keyStoreFolder, this.initialize3SelectAddress.bind(this, response));
+  } else {
+    this.initialize4point5ReadNodeKey(response);
+  }
 }
 
 NodeKanbanGo.prototype.logToInitializationStream = function(input) {
@@ -96,6 +102,7 @@ NodeKanbanGo.prototype.logRegular = function(input) {
 }
 
 NodeKanbanGo.prototype.initialize3SelectAddress = function(response, error, fileNames) {
+  console.log(`DEBUIG: got to initialize3selectaddress`);
   if (error !== null && error !== undefined) {
     this.logToInitializationStream(`Error reading key store directory: ${this.keyStoreFolder}. ${error}`);
     this.flagFoldersWereInitialized = false;
@@ -141,10 +148,14 @@ NodeKanbanGo.prototype.initialize4ReadAccountAddress = function(response, error,
     this.initialize5ResetFolders(response);
     return;
   }
+  this.initialize4point5ReadNodeKey(response);
+}
+
+NodeKanbanGo.prototype.initialize4point5ReadNodeKey = function(response) {
   this.flagFoldersInitialized = true;
   fs.readFile(this.nodeKeyFileName, (err, data)=>{
     if (err !== null && err !== undefined) {
-      this.logToInitializationStream(`Error reading node key: ${this.nodeKeyFileName}. ${error}`);
+      this.logToInitializationStream(`Error reading node key: ${this.nodeKeyFileName}. ${err}`);
       this.flagFoldersWereInitialized = false;
       this.initialize5ResetFolders(response);
       return;
@@ -297,6 +308,14 @@ NodeKanbanGo.prototype.run = function(response) {
     "--rpcport",
     this.RPCPort.toString()
   ];
+  if (getInitializer().flagGetGenesisFromFoundationChain) {
+    theArguments.push(
+      "--bridge.chainnet",
+      "reg",
+      "--bridge.attachtorunning",
+    );
+  }
+
   this.childProcessHandle = initializer.runShell(initializer.paths.geth, theArguments, theOptions, this.id);
   initializer.numberOfStartedNodes ++;
   initializer.runNodesFinish(response);
@@ -309,6 +328,7 @@ NodeKanbanGo.prototype.run = function(response) {
 function KanbanGoInitializer() {
   this.numberRequestsRunning = 0;
   this.maxRequestsRunning = 4;
+  this.flagGetGenesisFromFoundationChain = false;
   this.handlers = {
   };
   this.colors = ["yellow", "green", "blue", "cyan", "magenta"];
@@ -920,10 +940,28 @@ KanbanGoInitializer.prototype.getRPCLogFile = function(
   response.end(result);
 }
 
-KanbanGoInitializer.prototype.runNodes = function(response, queryCommand, currentNodeNotUsed) {
+KanbanGoInitializer.prototype.runNodesDetached = function(response, queryCommand, currentNodeNotUsed) {
+  this.flagGetGenesisFromFoundationChain = false;
+  this.paths.nodesDir = `${this.paths.dataDir}/nodes_detached`;
+  this.runNodes(response, queryCommand);
+}
+
+KanbanGoInitializer.prototype.runNodesOnFAB = function(response, queryCommand, currentNodeNotUsed) {
+  this.flagGetGenesisFromFoundationChain = true;
+  this.paths.nodesDir = `${this.paths.dataDir}/nodes_fab`;
+  this.runNodes(response, queryCommand);
+}
+
+KanbanGoInitializer.prototype.runNodes = function(response, queryCommand) {
+  console.log(`DEBUIG: got to here pt 1`);
   var candidateNumberOfNodes = Number(queryCommand.numberOfNodes);
   var maxNumberOfNodes = 100;
-  if (candidateNumberOfNodes > maxNumberOfNodes || candidateNumberOfNodes < 1) {
+  if (
+    candidateNumberOfNodes > maxNumberOfNodes || 
+    candidateNumberOfNodes < 1 || 
+    typeof candidateNumberOfNodes !== "number" ||
+    Number.isNaN(candidateNumberOfNodes)
+  ) {
     response.writeHead(400);
     response.end(`Bad number of nodes: ${candidateNumberOfNodes}. I expected a number between 1 and ${maxNumberOfNodes}.`);
     return;
@@ -931,12 +969,13 @@ KanbanGoInitializer.prototype.runNodes = function(response, queryCommand, curren
   if (this.nodes.length > 0) {
     this.numberRequestsRunning --;
     response.writeHead(200);
-    response.end(`${this.nodes.length} nodes already spawned. Restart the server if you want a new number of nodes. `);
+    response.end(`${this.nodes.length} nodes already spawned. Restart node.js if you want a new number of nodes. `);
     return;
   }
   for (var counterNode = 0; counterNode < candidateNumberOfNodes; counterNode ++) {
     this.nodes.push(new NodeKanbanGo(counterNode));
   }
+  console.log(`DEBUIG: got to before loop, candidates: ${candidateNumberOfNodes}`);
   for (var counterNode = 0; counterNode < this.nodes.length; counterNode ++) {
     this.nodes[counterNode].initializeFoldersAndKeys(response);
   }
@@ -979,22 +1018,24 @@ KanbanGoInitializer.prototype.runNodes3ParseConfigRunNodes = function(response, 
   }
   try {
     this.pbftConfiguration = JSON.parse(data);
-    if (this.pbftConfiguration.config.pbft.proposers.length !== this.nodes.length) {
-      this.log(`File pbft.json indicates ${this.pbftConfiguration.config.pbft.proposers.length} proposers but you asked me to spin ${this.nodes.length}. Rebuilding pbft.json... `);
-      this.runNodes4RebuildPBFTConfiguration(response);
-      return;
-    }
-    if (this.pbftConfiguration.config.chainId !== this.chainId) {
-      this.log(`File pbft.json indicates chain id: ${this.pbftConfiguration.config.chainId}, but the requested chain id is: ${this.chainId}. Rebuilding pbft.json... `);
-      this.runNodes4RebuildPBFTConfiguration(response);
-      return;
-    }
-    for (var counterProposers = 0; counterProposers < this.pbftConfiguration.config.pbft.proposers.length; counterProposers ++) {
-      var currentAddress = this.pbftConfiguration.config.pbft.proposers[counterProposers];
-      if (!(currentAddress in this.allAddresses)) {
-        this.log(`Proposer ${currentAddress} from pbft.json not found among the nodes stored on disk. Rebuilding pbft.json... `);
+    if (!this.flagGetGenesisFromFoundationChain) {
+      if (this.pbftConfiguration.config.pbft.proposers.length !== this.nodes.length) {
+        this.log(`File pbft.json indicates ${this.pbftConfiguration.config.pbft.proposers.length} proposers but you asked me to spin ${this.nodes.length}. Rebuilding pbft.json... `);
         this.runNodes4RebuildPBFTConfiguration(response);
         return;
+      }
+      if (this.pbftConfiguration.config.chainId !== this.chainId) {
+        this.log(`File pbft.json indicates chain id: ${this.pbftConfiguration.config.chainId}, but the requested chain id is: ${this.chainId}. Rebuilding pbft.json... `);
+        this.runNodes4RebuildPBFTConfiguration(response);
+        return;
+      }
+      for (var counterProposers = 0; counterProposers < this.pbftConfiguration.config.pbft.proposers.length; counterProposers ++) {
+        var currentAddress = this.pbftConfiguration.config.pbft.proposers[counterProposers];
+        if (!(currentAddress in this.allAddresses)) {
+          this.log(`Proposer ${currentAddress} from pbft.json not found among the nodes stored on disk. Rebuilding pbft.json... `);
+          this.runNodes4RebuildPBFTConfiguration(response);
+          return;
+        }
       }
     }
   } catch (e) {
@@ -1008,7 +1049,7 @@ KanbanGoInitializer.prototype.runNodes3ParseConfigRunNodes = function(response, 
 
 KanbanGoInitializer.prototype.runNodes6DoRunNodes = function(response) {
   this.numberOfInitializedGenesis ++;
-  if (this.numberOfInitializedGenesis < this.nodes.length) {
+  if (this.numberOfInitializedGenesis < this.nodes.length && !this.flagGetGenesisFromFoundationChain) {
     return;
   }
   for (var counterNode = 0; counterNode < this.nodes.length; counterNode ++) {
@@ -1050,8 +1091,13 @@ KanbanGoInitializer.prototype.runNodes5InitGenesis = function(response) {
     this.nodes[counterNode].computeMyEnodeAddress();
   }
   for (var counterNode = 0; counterNode < this.nodes.length; counterNode ++) {
-    this.nodes[counterNode].initialize9GenesisBlock(response);
+    if (this.flagGetGenesisFromFoundationChain) {
+      this.nodes[counterNode].initialize10WriteNodeConnections(response);
+    } else {
+      this.nodes[counterNode].initialize9GenesisBlock(response);
+    }
   }
+  
   this.runNodes7WriteNodeConfig();
 }
 

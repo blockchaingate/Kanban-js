@@ -55,13 +55,23 @@ var rpcCalls = {
     },
     parameters: ["numberOfBlocks"]
   },
-  getTransactionById: {
-    rpcCall: "getTransactionById",
+  getWalletTransactionById: {
+    rpcCall: "getWalletTransactionById",
     method: "gettransaction",
     mandatoryModifiableArguments: { //<- values give defaults, null for none
-      txid: null
+      txid: null,
+      includeWatchOnly: false,
     },
-    parameters: ["txid"]    
+    parameters: ["txid", "includeWatchOnly"]    
+  },
+  getTransactionById: {
+    rpcCall: "getTransactionById",
+    method: "getrawtransaction",
+    mandatoryModifiableArguments: { //<- values give defaults, null for none
+      txid: null,
+      verbose: true
+    },
+    parameters: ["txid", "verbose"]    
   },
   decodeTransactionRaw: {
     rpcCall: "decodeTransactionRaw",

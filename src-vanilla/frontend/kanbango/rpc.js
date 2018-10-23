@@ -175,7 +175,13 @@ function KanbanGoNodes() {
   // if rpcCall omitted it will be assumed to be equal to the function label.
   /**@type {Object.<string, rpcCall: string, output: string, outputOptions: Object, inputs: Object>} */
   this.theFunctions  = {
-    runNodes: {
+    runNodesDetached: {
+      inputs: {
+        numberOfNodes: inputInitialization.numberOfNodes
+      },
+      callback: PendingCall.prototype.callbackRunNodes,
+    },
+    runNodesOnFAB: {
       inputs: {
         numberOfNodes: inputInitialization.numberOfNodes
       },
@@ -341,6 +347,14 @@ function KanbanGoNodes() {
   this.correctFunctions();
 }
 
+KanbanGoNodes.prototype.computeContractData = function () {
+  var contractIds = ids.defaults.fabcoin.inputBlockInfo; 
+  var contractData = "";
+  contractData += document.getElementById(contractIds.contractFunctionId).value;
+  contractData += document.getElementById(contractIds.contractFunctionData).value;
+  submitRequests.updateValue(contractIds.contractData, contractData); 
+}
+
 KanbanGoNodes.prototype.setContractFunctionName = function (container, content, extraData) {
   var counterContract = extraData.labelArray[extraData.labelArray.length - 3];
   var counterFunction = extraData.labelArray[extraData.labelArray.length - 2];
@@ -358,12 +372,15 @@ KanbanGoNodes.prototype.setContractFunctionName = function (container, content, 
   functionSignature += ")";
   console.log(`DEBUG: fun signature so far: ${functionSignature}`);
   var contractIds = ids.defaults.fabcoin.inputBlockInfo; 
+  if (abi.payable === false || abi.payable === "false") {
+    submitRequests.updateValue(contractIds.walletAmount, 0);
+  }
   submitRequests.updateValue(contractIds.contractHex, ambientInput.binaries[counterContract]);
   submitRequests.updateValue(contractIds.contractFunctionName, content);
   var keccak = cryptoKanbanHashes.hashes.keccak_ToHex(functionSignature);
   var keccakFirstFour = keccak.slice(0, 8);
   submitRequests.updateValue(contractIds.contractFunctionId, keccakFirstFour);
-  submitRequests.updateValue(contractIds.contractData, keccakFirstFour);
+  this.computeContractData();
 }
 
 KanbanGoNodes.prototype.setContractHex = function (container, content, extraData) {

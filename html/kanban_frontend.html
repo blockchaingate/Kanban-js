@@ -15,7 +15,8 @@
   <table class = "tableKanbanPlusPlusTest"> 
     <tr><td>
       <table>
-        <tr><td><button class = "buttonStandard" style = "width:100%" onclick = "window.kanban.kanbanGO.rpc.theKBNodes.run('runNodes', 'initialization');">Run</button></td></tr>
+        <tr><td><button class = "buttonStandard" style = "width:100%" onclick = "window.kanban.kanbanGO.rpc.theKBNodes.run('runNodesOnFAB', 'initialization');"><b>Run on FAB</b></button></td></tr>
+        <!--tr><td><button class = "buttonStandard" style = "width:100%" onclick = "window.kanban.kanbanGO.rpc.theKBNodes.run('runNodesDetached', 'initialization');">Run detached</button></td></tr-->
         <tr><td><button class = "buttonStandard" style = "width:100%" onclick = "window.kanban.kanbanGO.rpc.theKBNodes.run('getLogFile', 'initialization');">Logs</button></td></tr>
         <tr><td><button class = "buttonStandard" style = "width:100%" onclick = "window.kanban.kanbanGO.rpc.theKBNodes.run('getRPCLogFile', 'initialization');">RPC logs</button></td></tr>
       </table>
@@ -332,10 +333,11 @@
     <input type = "text" class = "inputStandard" id = "inputFabcoinTransactionOutputs"       size = "50" value = "" placeholder = "tx outputs"></input><br>
     <input type = "text" class = "inputStandard" id = "inputFabcoinContractHex"              size = "50" value = "" placeholder = "contract hex"></input><br>
     <input type = "text" class = "inputStandard" id = "inputFabcoinContractId"               size = "50" value = "" placeholder = "contract id"></input><br>
-    <input type = "text" class = "inputStandard" id = "inputFabcoinContractData"             size = "50" value = "" placeholder = "contract data"></input><br>
+    <input type = "text" class = "inputStandard" id = "inputSolidityFunctionName"            size = "50" value = "" placeholder = "contract f-n name"></input><br>
+    <input type = "text" class = "inputStandard" id = "inputFabcoinContractFunctionId"       size = "50" value = "" placeholder = "contract f-n id" onchange = "window.kanban.kanbanGO.rpc.theKBNodes.computeContractData()"></input><br>
+    <input type = "text" class = "inputStandard" id = "inputFabcoinContractFunctionData"     size = "50" value = "" placeholder = "contract f-n data" onchange = "window.kanban.kanbanGO.rpc.theKBNodes.computeContractData()"></input><br>
+    <input type = "text" class = "inputStandard" id = "inputFabcoinContractData"             size = "50" value = "" placeholder = "contract function + data"></input><br>
     <input type = "text" class = "inputStandard" id = "inputFabcoinWalletAmount"             size = "50" value = "" placeholder = "amount (wallet)"></input><br>
-    <input type = "text" class = "inputStandard" id = "inputSolidityFunctionName"            size = "50" value = "" placeholder = "contract function name"></input><br>
-    <input type = "text" class = "inputStandard" id = "inputSolidityFunctionId"              size = "50" value = "" placeholder = "contract function id"></input><br>
   </td>
   <td style = "vertical-align: top" ><pre id = "aceEditor"></pre>  <br> <div id = "outputSolidityCompilation"> </div> </td>
   </tr>
