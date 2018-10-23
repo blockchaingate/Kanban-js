@@ -181,11 +181,13 @@ PendingCall.prototype.callbackAggregateCommitment = function(nodeId, input, outp
 
 PendingCall.prototype.callbackCompileSolidity = function (nodeId, input, output) {
   console.log(input);
-  submitRequests.updateValue(ids.defaults.kanbanGO.inputInitialization.contractABI, input);
-  // try{
-    // var a = JSON.parse(input)
-    // console.log(input);
-  // }catch(e){}
+  try {
+    var parsedInput = JSON.parse(input)
+    submitRequests.updateValue(ids.defaults.kanbanGO.inputInitialization.contractABI, JSON.stringify(parsedInput.ABI));
+    console.log(input);
+  } catch(e) { 
+    submitRequests.updateInnerHtml(ids.defaults.kanbanGO.inputInitialization.contractABI, "Failed to parse ABI. ");
+  }
   this.callbackStandard(nodeId, input, output);
 }
 
