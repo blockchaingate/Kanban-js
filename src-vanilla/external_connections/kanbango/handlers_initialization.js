@@ -1050,6 +1050,8 @@ KanbanGoInitializer.prototype.runNodes3ParseConfigRunNodes = function(response, 
           return;
         }
       }
+    } else {
+      this.runNodes5InitGenesis(response);
     }
   } catch (e) {
     this.log(`Error reading pbft configuration. ${e}`);
