@@ -108,9 +108,13 @@ PendingCall.prototype.callbackStandardOneCaller = function(
   }
 
   var resultHTML = theJSONWriter.getHtmlFromArrayOfObjects(input, options);
+  if (input === "") {
+    return resultHTML;
+  }
   var header = "";
   try {
     var parsedInput = JSON.parse(input);
+    
     if (parsedInput.resultHTML !== null && parsedInput.resultHTML !== undefined) {
       header += parsedInput.resultHTML + "<br>"; 
     }
@@ -176,11 +180,6 @@ PendingCall.prototype.callbackAggregateCommitment = function(nodeId, input, outp
 }
 
 PendingCall.prototype.callbackFetchSmartContract = function (nodeId, input, output) {
-  if (window.kanban.ace.editor === null) {
-    window.kanban.ace.editor = window.kanban.ace.ace.edit('aceEditor');
-    window.kanban.ace.editor.getSession().setMode('ace/mode/solidity');
-    window.kanban.ace.editor.$blockScrolling = Infinity
-  }
   this.callbackStandard(nodeId, input, output);
 }
 

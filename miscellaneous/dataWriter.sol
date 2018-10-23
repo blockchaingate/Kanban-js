@@ -12,7 +12,7 @@ contract DataWriter {
         return address(this).balance;
     }
     function emitEvent() public {
-        log0("***Kanban shard creation***");
+        log0("KanbanAggregateSignatureUnlockScript");
         bytes32 theAddress = 0xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa;
         log0(theAddress);
         bytes32[] memory thePubKeys = new bytes32[](3);

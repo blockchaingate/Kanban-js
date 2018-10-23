@@ -313,6 +313,10 @@ NodeKanbanGo.prototype.run = function(response) {
       "--bridge.chainnet",
       "reg",
       "--bridge.attachtorunning",
+      "--bridge.rpcuser",
+      global.fabcoinNode.configuration.RPCUser,
+      "--bridge.rpcpassword",
+      global.fabcoinNode.configuration.RPCPassword,
     );
   }
 

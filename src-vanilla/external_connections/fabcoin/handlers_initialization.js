@@ -39,9 +39,9 @@ function FabcoinNode() {
     RPCPassword: (new cryptoKanban.Encoding).toHex(crypto.randomBytes(50)),
     RPCUser: 'nodejs',
   };
-  console.log("WARNING: OVER-RIDING non-randomly generated password, please fix!");
-  this.configuration.RPCPassword = "password";
-  this.configuration.RPCUser = "nodejs";
+//  console.log("WARNING: OVER-RIDING non-randomly generated password, please fix!");
+//  this.configuration.RPCPassword = "password";
+//  this.configuration.RPCUser = "nodejs";
 
 
   console.log(`Node.js' randomly generated password for fabcoin RPC: `+ `${this.configuration.RPCPassword}`.red);

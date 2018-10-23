@@ -87,6 +87,11 @@ Page.prototype.initialize = function() {
   document.getElementById(currentRadioId).checked = true;
   this.initializeInputPlaceholders();
   this.initializeCurrentPage();
+  if (window.kanban.ace.editor === null) {
+    window.kanban.ace.editor = window.kanban.ace.ace.edit('aceEditor');
+    window.kanban.ace.editor.getSession().setMode('ace/mode/solidity');
+    window.kanban.ace.editor.$blockScrolling = Infinity;
+  }
 }
 
 Page.prototype.initializeInputPlaceholder = function (idInput) {
