@@ -13,6 +13,7 @@ const encodingsKanban = require('../../crypto/encodings');
 
 function FabNode () {
   var inputFabBlock = ids.defaults.fabcoin.inputBlockInfo;
+  var inputFabCryptoSchnorr = ids.defaults.fabcoin.inputCrypto.inputSchnorrSignature;
   this.transformersStandard = {
     blockHash: this.getSetInputAndRunWithShortener(inputFabBlock.blockHash, "getBlockByHash"),
     shortener: {
@@ -228,6 +229,9 @@ function FabNode () {
       }
     },
     testSha3: {
+      inputsBase64: {
+        message: inputFabCryptoSchnorr.messageToSha3
+      },
       outputJSON: ids.defaults.fabcoin.outputFabcoinCrypto
     }
   };
