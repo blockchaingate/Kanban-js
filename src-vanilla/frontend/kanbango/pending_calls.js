@@ -290,8 +290,8 @@ PendingCall.prototype.runOneId = function (nodeId) {
   var theURL = this.callTypeSpec.url;
   var currentResult = this.callTypeSpec.idDefaultOutput;
   if (theFunction !== null) {
-    if (theFunction.output !== undefined && theFunction.output !== null) {
-      currentResult = theFunction.output;
+    if (theFunction.outputJSON !== undefined && theFunction.outputJSON !== null) {
+      currentResult = theFunction.outputJSON;
     }
   }
   var currentProgress = globals.spanProgress();

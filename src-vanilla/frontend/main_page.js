@@ -45,8 +45,8 @@ function Page() {
     kanbanJS: {
       idPage: ids.defaults.pages.kanbanJS,
     },
-    kanbanPlusPlus: {
-      idPage: ids.defaults.pages.kanbanPlusPlus,
+    fabcoinCrypto: {
+      idPage: ids.defaults.pages.fabcoin.crypto,
       updateFunction: null
     },
     kanbanGO: {
@@ -113,8 +113,8 @@ Page.prototype.initializeInputPlaceholders = function() {
   var collectionsToPlaceholderify = [
     ids.defaults.kanbanGO.inputSchnorr,
     ids.defaults.kanbanGO.inputAggregateSignature,
-    ids.defaults.kanbanPlusPlus.inputSchnorrSignature,
-    ids.defaults.kanbanPlusPlus.inputAggregateSignature,
+    ids.defaults.fabcoin.inputCrypto.inputSchnorrSignature,
+    ids.defaults.fabcoin.inputCrypto.inputAggregateSignature,
     ids.defaults.kanbanJS.inputSchnorr,
     ids.defaults.kanbanGO.inputSendReceive,
     ids.defaults.kanbanGO.inputInitialization,

@@ -172,6 +172,18 @@ var rpcCalls = {
     },
     parameters: ["contractId", "data"]
   },
+  testSha3: {
+    rpcCall: "testSha3", //must be same as rpc label, used for autocomplete
+    method: "testshathree",
+    mandatoryModifiableArguments: { //<- values give defaults, null for none
+      message: null
+    },
+    types: {
+      message: "base64"
+    },
+    parameters: ["message"]
+  },
+
 };
 
 function getPOSTBodyFromRPCLabel(theRPCLabel, theArguments) {

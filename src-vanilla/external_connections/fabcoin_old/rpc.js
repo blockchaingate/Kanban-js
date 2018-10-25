@@ -213,22 +213,7 @@ var rpcCallsKanban = {
     address: "",
     cli: ["net", "command", "signature", "committedSignersBitmap", "publicKeys", "message"]
   },
-  testSha3: {
-    rpcCall: "testSha3", //must be same as rpc label, used for autocomplete
-    mandatoryFixedArguments: { //<- values give defaults, null for none
-      command: "testshathree",
-    },
-    mandatoryModifiableArguments: { //<- values give defaults, null for none
-      message: null
-    },
-    allowedArgumentValues: {
-      net: [ //<- restricted network access!
-        networkDataKanbanProofOfConcept.testKanban.rpcOption
-      ]
-    },
-    address: "",
-    cli: ["net", "command", "message"]
-  },
+
   testSchnorrSignature: {
     rpcCall: "testSchnorrSignature", //must be same as rpc label, used for autocomplete
     mandatoryFixedArguments: { //<- values give defaults, null for none

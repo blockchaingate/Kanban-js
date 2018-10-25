@@ -193,13 +193,13 @@ function KanbanGoNodes() {
       callback: this.getNodeInformationCallback.bind(this)
     },
     peerView: {
-      output: ids.defaults.kanbanGO.outputSendReceive,
+      outputJSON: ids.defaults.kanbanGO.outputSendReceive,
       outputOptions: this.optionsKanbanGOStandard
     },
     roundChangeRequests: {
       // if rpcCall omitted it will be assumed to be equal to the function label.
       rpcCall: kanbanGO.rpcCalls.roundChangeRequests.rpcCall,
-      output: ids.defaults.kanbanGO.outputSendReceive,
+      outputJSON: ids.defaults.kanbanGO.outputSendReceive,
       // This will transform some entries of the output json to buttons.
       // If outputOptions are omitted or set to null, 
       // optionsKanbanGOStandard will be used.
@@ -213,7 +213,7 @@ function KanbanGoNodes() {
       outputs: {
         number: inputSendReceive.blockNumber
       },
-      output: ids.defaults.kanbanGO.outputSendReceive
+      outputJSON: ids.defaults.kanbanGO.outputSendReceive
     },
     getBlockByNumber: {
       inputs: {
@@ -222,13 +222,13 @@ function KanbanGoNodes() {
       outputs: {
         hash: inputSendReceive.blockHash        
       },
-      output: ids.defaults.kanbanGO.outputSendReceive
+      outputJSON: ids.defaults.kanbanGO.outputSendReceive
     },
     round: {
-      output: ids.defaults.kanbanGO.outputSendReceive
+      outputJSON: ids.defaults.kanbanGO.outputSendReceive
     },
     validators: {
-      output: ids.defaults.kanbanGO.outputSendReceive,
+      outputJSON: ids.defaults.kanbanGO.outputSendReceive,
       outputOptions: this.optionsKanbanGOLabelContraction
     },
     testSha3 : {
@@ -336,14 +336,14 @@ function KanbanGoNodes() {
       inputsBase64: {
         code: ids.defaults.fabcoin.inputBlockInfo.solidityInput
       },
-      output: ids.defaults.fabcoin.outputSolidityCompilation,
+      outputJSON: ids.defaults.fabcoin.outputSolidityCompilation,
       callback: PendingCall.prototype.callbackCompileSolidity
     }, 
     fetchKanbanContract: {
       outputs: {
         code: ids.defaults.fabcoin.inputBlockInfo.solidityInput
       },
-      output: ids.defaults.fabcoin.outputFabcoinBlockInfo,
+      outputJSON: ids.defaults.fabcoin.outputFabcoinBlockInfo,
       callback: PendingCall.prototype.callbackFetchSmartContract
     }
   };
@@ -447,7 +447,7 @@ KanbanGoNodes.prototype.run = function(functionLabel, callType) {
   if (callType === undefined) {
     callType = "standard";
   }
-  if (! (callType in this.callTypes)) {
+  if (!(callType in this.callTypes)) {
     throw `Call type not among the allowed call types: ${Object.keys(this.callTypes)}`;
   }
   var currentId = this.selectedNode;

@@ -11,13 +11,13 @@ var defaults = {
   pageProfiling: "pageProfiling",
   pages: {
     kanbanJS: "pageKanbanJS",
-    kanbanPlusPlus: "pageKanbanPlusPlus",
     kanbanGO: "pageKanbanGO",
     kanbanMyLocalNodes: "pageMyLocalKanbanNodes",
     kanbanGOSendReceive: "pageKanbanGOSendReceive",
     fabcoin: {
       initialization: "pageFabcoinInitialization",  
       smartContract: "pageFabcoinSmartContract",
+      crypto: "pageFabcoinCrypto",
     },
     themes: "pageThemes"
   },
@@ -122,6 +122,31 @@ var defaults = {
       solidityInput: "aceEditor",
       contractFunctionName: "inputSolidityFunctionName",
     },
+    inputCrypto: {
+      inputSchnorrSignature: {
+        publicKey: "inputPublicKeyDefault",
+        privateKey: "inputPrivateKeySchnorrDefault",
+        messageToSha3: "inputMessageToSha3",
+        outputSha3DigestDefault: "inputOutputSha3DigestDefault",
+        nonce: "inputNoncesDefault",
+        signature: "inputSignatureDefault",
+      },
+      inputAggregateSignature: {
+        message: "inputAggregateSignatureMessage",
+        commitments: "inputAggregateSignatureCommitments",
+        numberOfPrivateKeysToGenerate: "inputAggregateSignatureNumberOfPrivateKeysToGenerate",
+        privateKeys: "inputAggregateSignaturePrivateKeys",
+        publicKeys: "inputAggregateSignaturePublicKeys",
+        committedSignersBitmap: "inputAggregateSignatureCommittedSignersBitmap",
+        messageDigest: "inputAggregateSignatureMessageDigest",
+        aggregatePubkey: "inputAggregateSignatureAggregatePubkey",    
+        aggregateCommitment: "inputAggregateSignatureAggregateCommitment",
+        solutions: "inputAggregateSignaturesSolutions",
+        nonces: "inputAggregateSignatureNonces",
+        theAggregation: "inputAggregateSignaturesTheAggregation",
+      },  
+    },
+    outputFabcoinCrypto: "divFabcoinCryptoOutput",
     outputFabcoinInitialization: "divOutputFabcoinInitialization",
     outputFabcoinBlockInfo: "divOutputFabcoinBlockInfo",
     outputSolidityCompilation: "outputSolidityCompilation"

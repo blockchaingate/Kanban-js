@@ -226,8 +226,12 @@ function FabNode () {
           singleEntry: this.transformersStandard.setAddress
         }
       }
+    },
+    testSha3: {
+      outputJSON: ids.defaults.fabcoin.outputFabcoinCrypto
     }
-  };  
+  };
+
 }
 
 FabNode.prototype.getObjectFromInput = function(inputId) {
@@ -420,6 +424,7 @@ FabNode.prototype.getArguments = function(functionLabelFrontEnd, functionLabelBa
 }
 
 FabNode.prototype.callbackStandard = function(functionLabelFrontEnd, input, output) {
+  //console.log(`DEBUG: Call back standard here. Input: ${input}. Fun label: ${functionLabelFrontEnd}, output: ${output}`);
   var transformer = new jsonToHtml.JSONTransformer();
   var currentFunction = this.theFunctions[functionLabelFrontEnd];
   var currentOptions = this.outputOptionsStandard;
@@ -452,14 +457,6 @@ FabNode.prototype.callbackStandard = function(functionLabelFrontEnd, input, outp
   }
 }
 
-FabNode.prototype.runCallbackFunction = function(
-  /** @type {string}*/
-  callbackFunctionName,
-  input
-) {
-
-}
-
 FabNode.prototype.run = function(functionLabelFrontEnd) {
   var functionLabelBackend = functionLabelFrontEnd;
   if (functionLabelFrontEnd in this.theFunctions) {
@@ -473,6 +470,7 @@ FabNode.prototype.run = function(functionLabelFrontEnd) {
   var messageBody = fabRPCSpec.getPOSTBodyFromRPCLabel(functionLabelBackend, theArguments);
   var theURL = `${pathnames.url.known.fabcoin.rpc}`;
   var currentResult = ids.defaults.fabcoin.outputFabcoinBlockInfo;
+  
   var currentProgress = globals.spanProgress();
   var callbackCurrent = this.callbackStandard;
   var functionFrontend = this.theFunctions[functionLabelFrontEnd];
@@ -480,6 +478,9 @@ FabNode.prototype.run = function(functionLabelFrontEnd) {
     if (functionFrontend.callback !== undefined && functionFrontend.callback !== null) {
       callbackCurrent = functionFrontend.callback;
     }  
+    if (functionFrontend.outputJSON !== undefined && functionFrontend.outputJSON !== null) {
+      currentResult = functionFrontend.outputJSON;
+    }
   }
   callbackCurrent = callbackCurrent.bind(this, functionLabelFrontEnd);
   theURL += `?${fabRPCSpec.urlStrings.command}=${messageBody}`;
