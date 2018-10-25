@@ -13,19 +13,20 @@ contract DataWriter {
     }
     function emitEvent() public {
         log0("KanbanAggregateSignatureUnlock");
-        bytes32 theAddress = 0xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa;
-        log0(theAddress);
-        bytes32[] memory thePubKeys = new bytes32[](3);
-        thePubKeys[0] = 0x1111111111111111111111111111111111111111111111111111111111111111;
-        thePubKeys[1] = 0x2222222222222222222222222222222222222222222222222222222222222222;
-        thePubKeys[2] = 0x3333333333333333333333333333333333333333333333333333333333333333;
-        for (uint i = 0; i < 3; i ++) {
+        bytes32[] memory thePubKeys = new bytes32[](2);
+        thePubKeys[0] = 0xfabfabfabfabfabfabfabfabfabfabfabfabfabfabfabfab1111111111111111;
+        thePubKeys[1] = 0xfabfabfabfabfabfabfabfabfabfabfabfabfabfabfabfab2222222222222222;
+        for (uint i = 0; i < 2; i ++) {
             log0(thePubKeys[i]);
         }
     }
 
     function bounceFabcoins() public payable returns (uint256) {
         msg.sender.send(msg.value);
+        return msg.value;
+    }
+    function sendFabcoinsToBadAddress() public payable returns (uint256) {
+        address(0x1212121212121212121212121212121212121212).send(msg.value);
         return msg.value;
     }
     function getBallance() public view returns (uint256) {
