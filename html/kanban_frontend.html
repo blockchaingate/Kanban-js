@@ -87,21 +87,20 @@
   <td>
     <table>
       <tr><td style = "text-align: center; border-bottom: 1px solid black; font-size: x-small;"><span>Schnorr</span></td></tr>
-      <tr><td><button class = "buttonStandard" style = "width: 100px" onclick = "window.kanban.fabcoin.rpc.fabNode.run('testSha3');"><b>Sha3 256</b></button></td></tr>
-      <tr><td><button class = "buttonStandard" style = "width: 100px" onclick = "window.kanban.kanbanPlusPlus.general.dumpPrivateKey();"><b style = "color:red">Private key</b></button></td></tr>
-      <tr><td><button class = "buttonStandard" style = "width: 100px" onclick = "window.kanban.kanbanPlusPlus.general.testPublicKeyFromPrivate();"><b>Public key</b></button></td></tr>
+      <tr><td><button class = "buttonStandard" style = "width: 100px" onclick = "window.kanban.fabcoin.rpc.fabNode.run('testSha3');">Sha3 256</button></td></tr>
+      <tr><td><button class = "buttonStandard" style = "width: 100px" onclick = "window.kanban.fabcoin.rpc.fabNode.run('testPrivateKeyGeneration');">Private gen. </button></td></tr>
+      <tr><td><button class = "buttonStandard" style = "width: 100px" onclick = "window.kanban.fabcoin.rpc.fabNode.run('testPublicKeyFromPrivate');">Public key</button></td></tr>
       <tr><td><button class = "buttonStandard" style = "width: 100px" onclick = "window.kanban.kanbanPlusPlus.general.testSchnorrSignature();"><b>Signature</b></button></td></tr>
       <tr><td><button class = "buttonStandard" style = "width: 100px" onclick = "window.kanban.kanbanPlusPlus.general.testSchnorrSignatureVerify();"><b>Verify</b></button></td></tr>
     </table>
   </td>
   <td>
-    <input type = "text" class = "inputStandard" id = "inputMessageToSha3" size = "90" placeholder = "message"></input><br>
-    <input type = "text" class = "inputStandard" id = "inputAddressDefault" size = "90" placeholder = "fab address"></input><br>
-    <input type = "text" class = "inputStandard" id = "inputPrivateKeySchnorrDefault" size = "90" placeholder = "private key Schnorr"></input><br>
-    <input type = "text" class = "inputStandard" id = "inputNoncesDefault" size = "90" placeholder = "nonce"></input><br>
-    <input type = "text" class = "inputStandard" id = "inputPublicKeyDefault" size = "90" placeholder = "public key"></input><br>
-    <input type = "text" class = "inputStandard" id = "inputSignatureDefault" size = "90" placeholder = "signature"></input><br>
-    <input type = "text" class = "inputStandard" id = "inputOutputSha3DigestDefault" size = "90" placeholder = "result sha3 digest"></input>
+    <input type = "text" class = "inputStandard" id = "inputMessageToSha3" size = "50" placeholder = "message"></input><br>
+    <input type = "text" class = "inputStandard" id = "inputAddressDefault" size = "50" placeholder = "fab address"></input><br>
+    <input type = "text" class = "inputStandard" id = "inputPrivateKeySchnorrDefault" size = "50" placeholder = "private key Schnorr"></input><br>
+    <input type = "text" class = "inputStandard" id = "inputNoncesDefault" size = "50" placeholder = "nonce"></input><br>
+    <input type = "text" class = "inputStandard" id = "inputPublicKeyDefault" size = "50" placeholder = "public key"></input><br>
+    <input type = "text" class = "inputStandard" id = "inputSignatureDefault" size = "50" placeholder = "signature"></input><br>
   </td>
   </tr></table>
   </div><!--divControlPanelDefault-->
@@ -114,27 +113,27 @@
         <tr><td style = "text-align: center; border-bottom: 1px solid black; font-size: x-small;"><span>aggregate</span></td></tr>
         <!--tr><td><button class = "buttonStandardLight" style = "width: 100px" onclick = "window.kanban.fabcoin.rpc.fabNode.run('');"><b>Example</b></button></td></tr-->
         <tr><td><button class = "buttonStandardLight" style = "width: 100px" onclick = "window.kanban.kanbanPlusPlus.general.testAggregateSignatureClear();"><b>Clear</b></button></td></tr>
-        <tr><td><button class = "buttonStandard" style = "width: 100px" onclick = "window.kanban.kanbanPlusPlus.general.testAggregateSignatureInitialize();"><b>Initialize</b></button></td></tr>
-        <tr><td><button class = "buttonStandard" style = "width: 100px" onclick = "window.kanban.kanbanPlusPlus.general.testAggregateSignatureCommit();"><b>Commit</b></button></td></tr>
-        <tr><td><button class = "buttonStandard" style = "width: 100px" onclick = "window.kanban.kanbanPlusPlus.general.testAggregateSignatureChallenge();"><b>Challenge</b></button></td></tr>
-        <tr><td><button class = "buttonStandard" style = "width: 100px" onclick = "window.kanban.kanbanPlusPlus.general.testAggregateSignatureSolutions();"><b>Solutions</b></button></td></tr>
-        <tr><td><button class = "buttonStandard" style = "width: 100px" onclick = "window.kanban.kanbanPlusPlus.general.testAggregateSignatureAggregateSolutions();"><b>Aggregate</b></button></td></tr>
-        <tr><td><button class = "buttonStandard" style = "width: 100px" onclick = "window.kanban.kanbanPlusPlus.general.testAggregateSignatureVerify();"><b>Verify</b></button></td></tr>
+        <tr><td><button class = "buttonStandard"      style = "width: 100px" onclick = "window.kanban.kanbanPlusPlus.general.testAggregateSignatureInitialize();"><b>Initialize</b></button></td></tr>
+        <tr><td><button class = "buttonStandard"      style = "width: 100px" onclick = "window.kanban.kanbanPlusPlus.general.testAggregateSignatureCommit();"><b>Commit</b></button></td></tr>
+        <tr><td><button class = "buttonStandard"      style = "width: 100px" onclick = "window.kanban.kanbanPlusPlus.general.testAggregateSignatureChallenge();"><b>Challenge</b></button></td></tr>
+        <tr><td><button class = "buttonStandard"      style = "width: 100px" onclick = "window.kanban.kanbanPlusPlus.general.testAggregateSignatureSolutions();"><b>Solutions</b></button></td></tr>
+        <tr><td><button class = "buttonStandard"      style = "width: 100px" onclick = "window.kanban.kanbanPlusPlus.general.testAggregateSignatureAggregateSolutions();"><b>Aggregate</b></button></td></tr>
+        <tr><td><button class = "buttonStandard"      style = "width: 100px" onclick = "window.kanban.kanbanPlusPlus.general.testAggregateSignatureVerify();"><b>Verify</b></button></td></tr>
       </table>
     </td>
     <td>
-      <input type = "text" class = "inputStandard" id = "inputAggregateSignatureMessage" size = "90" placeholder = "message"></input><br>
-      <input type = "text" class = "inputStandard" id = "inputAggregateSignatureNumberOfPrivateKeysToGenerate" size = "90" placeholder = "# private keys to generate"></input><br>
-      <input type = "text" class = "inputStandard" id = "inputAggregateSignaturePrivateKeys" size = "90" placeholder = "private keys"></input><br>
-      <input type = "text" class = "inputStandard" id = "inputAggregateSignatureNonces" size = "90" placeholder = "nonces"></input><br>
-      <input type = "text" class = "inputStandard" id = "inputAggregateSignaturePublicKeys" size = "90" placeholder = "public keys"></input><br>
-      <input type = "text" class = "inputStandard" id = "inputAggregateSignatureCommitments" size = "90" placeholder = "commitments"></input><br>
-      <input type = "text" class = "inputStandard" id = "inputAggregateSignatureCommittedSignersBitmap" size = "90" placeholder = "committed signers bitmap"></input><br>
-      <input type = "text" class = "inputStandard" id = "inputAggregateSignatureMessageDigest" size = "90" placeholder = "digest"></input><br>
-      <input type = "text" class = "inputStandard" id = "inputAggregateSignatureAggregateCommitment" size = "90" placeholder = "aggregate commitment"></input><br>
-      <input type = "text" class = "inputStandard" id = "inputAggregateSignatureAggregatePubkey" size = "90" placeholder = "aggregate public key"></input><br>
-      <input type = "text" class = "inputStandard" id = "inputAggregateSignaturesSolutions" size = "90" placeholder = "solutions"></input><br>
-      <input type = "text" class = "inputStandard" id = "inputAggregateSignaturesTheAggregation" size = "90" placeholder = "aggregate signature"></input><br>
+      <input type = "text" class = "inputStandard" id = "inputAggregateSignatureMessage" size = "50" placeholder = "message"></input><br>
+      <input type = "text" class = "inputStandard" id = "inputAggregateSignatureNumberOfPrivateKeysToGenerate" size = "50" placeholder = "# private keys to generate"></input><br>
+      <input type = "text" class = "inputStandard" id = "inputAggregateSignaturePrivateKeys" size = "50" placeholder = "private keys"></input><br>
+      <input type = "text" class = "inputStandard" id = "inputAggregateSignatureNonces" size = "50" placeholder = "nonces"></input><br>
+      <input type = "text" class = "inputStandard" id = "inputAggregateSignaturePublicKeys" size = "50" placeholder = "public keys"></input><br>
+      <input type = "text" class = "inputStandard" id = "inputAggregateSignatureCommitments" size = "50" placeholder = "commitments"></input><br>
+      <input type = "text" class = "inputStandard" id = "inputAggregateSignatureCommittedSignersBitmap" size = "50" placeholder = "committed signers bitmap"></input><br>
+      <input type = "text" class = "inputStandard" id = "inputAggregateSignatureMessageDigest" size = "50" placeholder = "digest"></input><br>
+      <input type = "text" class = "inputStandard" id = "inputAggregateSignatureAggregateCommitment" size = "50" placeholder = "aggregate commitment"></input><br>
+      <input type = "text" class = "inputStandard" id = "inputAggregateSignatureAggregatePubkey" size = "50" placeholder = "aggregate public key"></input><br>
+      <input type = "text" class = "inputStandard" id = "inputAggregateSignaturesSolutions" size = "50" placeholder = "solutions"></input><br>
+      <input type = "text" class = "inputStandard" id = "inputAggregateSignaturesTheAggregation" size = "50" placeholder = "aggregate signature"></input><br>
     </td>
     </tr></table>
     </div> <!--divControlPanelDefault-->

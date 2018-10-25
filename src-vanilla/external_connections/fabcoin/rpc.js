@@ -183,7 +183,19 @@ var rpcCalls = {
     },
     parameters: ["message"]
   },
-
+  testPrivateKeyGeneration: {
+    rpcCall: "testPrivateKeyGeneration", //must be same as rpc label, used for autocomplete
+    method: "testprivatekeygeneration",
+    parameters: []
+  },
+  testPublicKeyFromPrivate: {
+    rpcCall: "testPublicKeyFromPrivate", //must be same as rpc label, used for autocomplete
+    method: "testpublickeyfromprivate",
+    mandatoryModifiableArguments: {
+      privateKey: null,
+    },
+    parameters: ["privateKey"]
+  },
 };
 
 function getPOSTBodyFromRPCLabel(theRPCLabel, theArguments) {

@@ -29,6 +29,7 @@ function FabNode () {
       clickHandler: this.setPrivateKeyComputeAllElse.bind(this),
       transformer: miscellaneousBackend.hexShortenerForDisplay,
     },
+    setPrivateKeySchnorr: this.getSetInputWithShortener(inputFabCryptoSchnorr.privateKey),
     setTxInputVoutAndValue: {
       clickHandler: this.setTxInputVoutAndValue.bind(this),
     },
@@ -86,7 +87,16 @@ function FabNode () {
       "executionResult.newAddress": this.transformersStandard.shortener,
       "executionResult.output": this.transformersStandard.shortener,
     }
-  }
+  };
+  this.outputOptionsCrypto = {
+    transformers: {
+      privateKeyBase58Check: this.transformersStandard.setPrivateKeySchnorr,
+      privateKeyBase58WithoutCheck: this.transformersStandard.setPrivateKeySchnorr,
+      privateKeyHex: this.transformersStandard.setPrivateKeySchnorr,
+      secretHex: this.transformersStandard.setPrivateKeySchnorr,
+      
+    },
+  };
 
   this.theFunctions = {
     getBlockByHeight: {
@@ -232,8 +242,27 @@ function FabNode () {
       inputsBase64: {
         message: inputFabCryptoSchnorr.messageToSha3
       },
-      outputJSON: ids.defaults.fabcoin.outputFabcoinCrypto
-    }
+      outputJSON: ids.defaults.fabcoin.outputFabcoinCrypto,
+      outputOptions: {
+        transformers: {
+          singleEntry: this.transformersStandard.shortener,
+        }
+      }
+    },
+    testPrivateKeyGeneration: {
+      outputJSON: ids.defaults.fabcoin.outputFabcoinCrypto,
+      outputOptions: this.outputOptionsCrypto,
+    },
+    testPublicKeyFromPrivate: {
+      inputs: {
+        privateKey: inputFabCryptoSchnorr.privateKey
+      },
+      outputJSON: ids.defaults.fabcoin.outputFabcoinCrypto,
+      outputOptions: this.outputOptionsCrypto,
+      outputs: {
+        publicKey: inputFabCryptoSchnorr.publicKey
+      }
+    },
   };
 
 }

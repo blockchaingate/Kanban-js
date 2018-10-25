@@ -91,22 +91,6 @@ var rpcCallsKanban = {
     address: "",
     cli: ["net", "command", "address"]
   },
-  testPublicKeyGeneration: {
-    rpcCall: "testPublicKeyGeneration", //must be same as rpc label, used for autocomplete
-    mandatoryFixedArguments: { //<- values give defaults, null for none
-      command: "testpublickeygeneration",
-    },
-    mandatoryModifiableArguments: { //<- values give defaults, null for none
-      privateKey: null
-    },
-    allowedArgumentValues: {
-      net: [ //<- restricted network access!
-        networkDataKanbanProofOfConcept.testKanban.rpcOption
-      ]
-    },
-    address: "",
-    cli: ["net", "command", "privateKey"]
-  },
   testAggregateSignatureInitialize: {
     rpcCall: "testAggregateSignatureInitialize", //must be same as rpc label, used for autocomplete
     mandatoryFixedArguments: { //<- values give defaults, null for none
