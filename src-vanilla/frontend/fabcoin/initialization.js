@@ -45,7 +45,7 @@ FabcoinNodeInitializer.prototype.getArguments = function(functionLabel) {
   return theArguments;
 }
 
-FabcoinNodeInitializer.prototype.run = function(functionLabel) {
+FabcoinNodeInitializer.prototype.run = function(functionLabel, callbackOverridesStandard) {
   //console.log(`DEBUG: running ${functionLabel}. `);
   var theArguments = this.getArguments(functionLabel);
   var messageBody = fabcoinRPC.getPOSTBodyFromRPCLabel(functionLabel, theArguments);
@@ -59,7 +59,11 @@ FabcoinNodeInitializer.prototype.run = function(functionLabel) {
       callbackCurrent = functionFrontend.callback;
     }  
   }
-  callbackCurrent = callbackCurrent.bind(this, functionLabel);
+  if (callbackOverridesStandard !== null && callbackOverridesStandard !== undefined) {
+    callbackCurrent = callbackOverridesStandard;
+  } else {
+    callbackCurrent = callbackCurrent.bind(this, functionLabel);
+  }
   theURL += `?command=${messageBody}`;
   submitRequests.submitGET({
     url: theURL,

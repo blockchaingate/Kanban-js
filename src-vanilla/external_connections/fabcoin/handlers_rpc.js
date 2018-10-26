@@ -3,6 +3,7 @@ const url  = require('url');
 const queryString = require('querystring');
 const http = require('http');
 const fabcoinRPC = require('./rpc');
+const fabcoinInitializationSpec = require('./initialization');
 const fabcoinInitialization = require('./handlers_initialization');
 const handlersStandard = require('../../handlers_standard');
 
@@ -108,7 +109,15 @@ function handleRPCArguments(response, queryCommand) {
     numberRequestsRunning --;
     return response.end(JSON.stringify({error: errors[0]}));
   }
-  console.log("DEBUG: request stringified: " + JSON.stringify(theRequestJSON));
+  if (!fabcoinInitialization.getFabcoinNode().flagStartWasEverAttempted) {
+    numberRequestsRunning --;
+    fabcoinInitialization.getFabcoinNode().flagStartWasEverAttempted = true;
+    response.writeHead(200);
+    response.end(`{"error": "${fabcoinInitializationSpec.urlStrings.errorFabNeverStarted}"}`);
+    return;
+  }
+
+  //console.log("DEBUG: request stringified: " + JSON.stringify(theRequestJSON));
   var requestStringified = JSON.stringify(theRequestJSON);
   
   return handleRPCArgumentsPartTwo(response, requestStringified);

@@ -49,7 +49,9 @@ function FabcoinNode() {
   this.argumentList = [];
   this.handlers = {};
   /** @type {boolean} */
-  this.started = false;
+  this.flagStarted = false;
+  /** @type {boolean} */
+  this.flagStartWasEverAttempted = false;
   /**@type {{command: OutputStream, fabcoind: OutputStream} */
   this.outputStreams = {
     command: new OutputStream(),
@@ -114,7 +116,7 @@ FabcoinNode.prototype.handleRPCArguments = function(response, queryCommand) {
   }
   if (currentFunction === undefined || currentFunction === null || (typeof currentFunction !== "function")) {
     response.writeHead(500);
-    return response.end(`{"error": "Server error: handler ${theCallLabel} eclared but no implementation found."}`);
+    return response.end(`{"error": "Server error: handler ${theCallLabel} declared but no implementation found."}`);
   }
   /**@type {string[]} */
   var theArguments = [];
@@ -155,9 +157,9 @@ FabcoinNode.prototype.prepareArgumentList = function () {
 }
 
 FabcoinNode.prototype.runFabcoind = function (response, /**@type {string[]} */ argumentsNonSplit) {
-  if (this.started) {
+  if (this.flagStarted) {
     response.writeHead(200);
-    response.end("Node already started. ");
+    response.end(`{error: "Node already started, use killaAllFabcoind to reset. " `);
     return;
   }
   var fabcoindArguments = [];
@@ -183,7 +185,7 @@ FabcoinNode.prototype.runFabcoind = function (response, /**@type {string[]} */ a
       }
     }
   }
-  this.started = true;
+  this.flagStarted = true;
   var options = {
     cwd: this.paths.executablePath,
     env: process.env
@@ -199,7 +201,7 @@ FabcoinNode.prototype.runFabcoind = function (response, /**@type {string[]} */ a
 }
 
 FabcoinNode.prototype.killAllFabcoindCallback = function (response) {
-  this.started = false;
+  this.flagStarted = false;
   response.writeHead(200);
   response.end(this.outputStreams.command.toStringWithFlush());
 }

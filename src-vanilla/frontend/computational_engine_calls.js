@@ -111,7 +111,7 @@ function pollServerStart(id, output) {
     callIdInfo = JSON.parse(id);
     jobs.ongoing[callIdInfo.callId] = callIdInfo;
   } catch (e) {
-    output.innerHTML = `<error>Failed to extract job information. ${e}</error>`;
+    output.innerHTML = `<b style = 'color:red'>Failed to extract job information. ${e}</b>`;
     return;
   }
   pollServerDoStart(output);

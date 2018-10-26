@@ -119,7 +119,7 @@ PendingCall.prototype.callbackStandardOneCaller = function(
       header += parsedInput.resultHTML + "<br>"; 
     }
     if (parsedInput.error !== null && parsedInput.error !== undefined) {
-      header += `<b>Error:</b> <span style='color:red'>${parsedInput.error}</span><br>`;
+      header += `<b style = 'color:red'>Error:</b> ${parsedInput.error}<br>`;
     }
     if (parsedInput.reason !== null && parsedInput.reason !== undefined) {
       header += parsedInput.reason + "<br>";
@@ -130,7 +130,7 @@ PendingCall.prototype.callbackStandardOneCaller = function(
       }
     }
   } catch (e) {
-    header = `<b>Error:</b> ${e}<br>`;
+    header = `<b style = 'color:red'>Error:</b> ${e}<br>`;
   }
   resultHTML = header + resultHTML;
   return resultHTML;

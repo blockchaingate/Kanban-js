@@ -79,7 +79,7 @@ TestKanbanJS.prototype.callbackStandard = function(functionLabel, input) {
     header += input.resultHTML + "<br>"; 
   }
   if (input.error !== null && input.error !== undefined) {
-    header += `<b>Error:</b> <span style='color:red'>${input.error}</span><br>`;
+    header += `<b style = 'color:red'>Error:</b> <span style='color:red'>${input.error}</span><br>`;
   }
   if (input.reason !== null && input.reason !== undefined) {
     header += input.reason + "<br>";

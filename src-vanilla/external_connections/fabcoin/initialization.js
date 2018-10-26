@@ -1,5 +1,8 @@
 "use strict";
 
+var urlStrings = {
+  errorFabNeverStarted: "Fabcoind was never started. "
+};
 
 var rpcCalls = {
   runFabcoind: {
@@ -22,5 +25,6 @@ var rpcCalls = {
 }
 
 module.exports = {
-  rpcCalls
+  rpcCalls,
+  urlStrings
 }

@@ -1,5 +1,6 @@
 "use strict";
 const fabRPCSpec = require('../../external_connections/fabcoin/rpc');
+const fabInitializationSpec = require('../../external_connections/fabcoin/initialization');
 const pathnames = require('../../pathnames');
 const ids = require('../ids_dom_elements');
 const globals = require('../globals');
@@ -10,6 +11,7 @@ const miscellaneousBackend = require('../../miscellaneous');
 const jsonic = require('jsonic');
 const cryptoKanban = require('../../crypto/crypto_kanban');
 const encodingsKanban = require('../../crypto/encodings');
+const fabcoinInitializationFrontend = require('./initialization');
 
 function FabNode () {
   var inputFabBlock = ids.defaults.fabcoin.inputBlockInfo;
@@ -250,6 +252,9 @@ function FabNode () {
       }
     },
     testPrivateKeyGeneration: {
+      outputs: {
+        privateKeyBase58Check: inputFabCryptoSchnorr.privateKey
+      },
       outputJSON: ids.defaults.fabcoin.outputFabcoinCrypto,
       outputOptions: this.outputOptionsCrypto,
     },
@@ -487,24 +492,30 @@ FabNode.prototype.getArguments = function(functionLabelFrontEnd, functionLabelBa
   return theArguments;
 }
 
+FabNode.prototype.callbackAutoStartFabcoind = function(outputComponent, input, output) {
+  var transformer = new jsonToHtml.JSONTransformer();
+  var extraHTML = transformer.getHtmlFromArrayOfObjects(input, this.outputOptionsStandard);
+  outputComponent.innerHTML += `<br>${extraHTML}`;
+  transformer.bindButtons();
+}
+
 FabNode.prototype.callbackStandard = function(functionLabelFrontEnd, input, output) {
   //console.log(`DEBUG: Call back standard here. Input: ${input}. Fun label: ${functionLabelFrontEnd}, output: ${output}`);
   var transformer = new jsonToHtml.JSONTransformer();
   var currentFunction = this.theFunctions[functionLabelFrontEnd];
   var currentOptions = this.outputOptionsStandard;
+  var currentOutputs = null;
   if (currentFunction !== undefined && currentFunction !== null) {
     if (currentFunction.outputOptions !== null && currentFunction.outputOptions !== undefined) {
       currentOptions = currentFunction.outputOptions;
     }
+    currentOutputs = currentFunction.outputs;
   }
-  transformer.writeJSONtoDOMComponent(input, output, currentOptions);
-  if (!(functionLabelFrontEnd in this.theFunctions)) {
-    return;
+  if (typeof output === "string") {
+    output = document.getElementById(output);
   }
-  var currentOutputs = currentFunction.outputs;
-  if (currentOutputs === undefined || currentOutputs === null) {
-    return;
-  }
+  var resultHTML = transformer.getHtmlFromArrayOfObjects(input, currentOptions);
+  var triggerFabcoindStart = false;
   try {
     var inputParsed = JSON.parse(input);
 
@@ -516,8 +527,24 @@ FabNode.prototype.callbackStandard = function(functionLabelFrontEnd, input, outp
         submitRequests.updateValue(currentOutputs[label], miscellaneousBackend.removeQuotes(inputParsed[label]))
       }
     } 
+    if (inputParsed.error !== undefined && inputParsed.error !== null) {
+      resultHTML = `<b style= 'color:red'>Error:</b> ${inputParsed.error}<br>`;
+      if (inputParsed.error === fabInitializationSpec.urlStrings.errorFabNeverStarted) {
+        triggerFabcoindStart = true;
+        resultHTML += "<b style='color:green'> Will start fabcoind for you in 2s. </b><br>"
+        resultHTML += "Equivalent to pressing the start fabcoind button. <br>";
+      }
+    }
+    output.innerHTML = resultHTML;
+    transformer.bindButtons();
   } catch (e) {
     throw(`Fatal error parsing: ${input}. ${e}`);
+  }
+  if (triggerFabcoindStart) {
+    var initializer = fabcoinInitializationFrontend.initializer;
+    var callbackExtra = this.callbackAutoStartFabcoind.bind(this, output);
+    var callStartFabcoind = initializer.run.bind(initializer, 'runFabcoind', callbackExtra);
+    setTimeout(callStartFabcoind, 2000);
   }
 }
 
