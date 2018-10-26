@@ -317,9 +317,9 @@ NodeKanbanGo.prototype.run = function(response) {
       global.fabcoinNode.configuration.RPCUser,
       "--bridge.rpcpassword",
       global.fabcoinNode.configuration.RPCPassword,
-      "--bridge.mainentry.contractaddress",
+      "--bridge.scar.address",
       initializer.smartContractId,
-      "--bridge.mainentry.abi",
+      "--bridge.scar.abi",
       initializer.abiJSON
     );
   }
@@ -960,7 +960,7 @@ KanbanGoInitializer.prototype.runNodesOnFAB = function(response, queryCommand, c
   this.flagGetGenesisFromFoundationChain = true;
   this.paths.nodesDir = `${this.paths.dataDir}/nodes_fab`;
   console.log(`DBUG: this is queryCommand: ${JSON.stringify(queryCommand)}`);
-  this.smartContractId = queryCommand.smartContractId;
+  this.smartContractId = queryCommand.contractId;
   this.abiJSON = queryCommand.abiJSON;
   this.runNodes(response, queryCommand);
 }
