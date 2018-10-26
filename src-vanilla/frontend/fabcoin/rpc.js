@@ -101,6 +101,13 @@ function FabNode () {
       publicKeyHexCompressed: this.transformersStandard.setPublicKeySchnorr,
     },
   };
+  /**@type {Object.<string,{outputJSONDefault: string, outputOptionsDefault: string}>} */
+  this.callTypes = {
+    crypto: {
+      outputJSONDefault: ids.defaults.fabcoin.outputFabcoinCrypto,
+      outputOptionsDefault: this.outputOptionsCrypto,
+    },
+  }
 
   this.theFunctions = {
     getBlockByHeight: {
@@ -246,7 +253,7 @@ function FabNode () {
       inputsBase64: {
         message: inputFabCryptoSchnorr.messageToSha3
       },
-      outputJSON: ids.defaults.fabcoin.outputFabcoinCrypto,
+      callType: this.callTypes.crypto,
       outputOptions: {
         transformers: {
           singleEntry: this.transformersStandard.shortener,
@@ -257,19 +264,32 @@ function FabNode () {
       outputs: {
         privateKeyBase58Check: inputFabCryptoSchnorr.privateKey
       },
-      outputJSON: ids.defaults.fabcoin.outputFabcoinCrypto,
-      outputOptions: this.outputOptionsCrypto,
+      callType: this.callTypes.crypto,
     },
     testPublicKeyFromPrivate: {
       inputs: {
         privateKey: inputFabCryptoSchnorr.privateKey
       },
-      outputJSON: ids.defaults.fabcoin.outputFabcoinCrypto,
-      outputOptions: this.outputOptionsCrypto,
+      callType: this.callTypes.crypto,
       outputs: {
         publicKeyHexCompressed: inputFabCryptoSchnorr.publicKey
       }
     },
+    testSchnorrSignature: {
+      inputs: {
+        privateKey: inputFabCryptoSchnorr.privateKey,
+        message: inputFabCryptoSchnorr.messageToSha3
+      },
+      callType: this.callTypes.crypto,
+    },
+    testSchnorrSignatureVerify: {
+      inputs: {
+        signature: inputFabCryptoSchnorr.signature,
+        publicKey: inputFabCryptoSchnorr.publicKey,
+        message: inputFabCryptoSchnorr.messageToSha3
+      },
+      callType: this.callTypes.crypto
+    }
   };
 
 }
@@ -510,6 +530,10 @@ FabNode.prototype.callbackStandard = function(functionLabelFrontEnd, input, outp
   if (currentFunction !== undefined && currentFunction !== null) {
     if (currentFunction.outputOptions !== null && currentFunction.outputOptions !== undefined) {
       currentOptions = currentFunction.outputOptions;
+    } else {
+      if (currentFunction.callType !== null && currentFunction.callType !== undefined) {
+        currentOptions = currentFunction.callType.outputOptionsDefault;
+      }
     }
     currentOutputs = currentFunction.outputs;
   }
@@ -562,18 +586,26 @@ FabNode.prototype.run = function(functionLabelFrontEnd) {
   var theArguments = this.getArguments(functionLabelFrontEnd, functionLabelBackend);
   var messageBody = fabRPCSpec.getPOSTBodyFromRPCLabel(functionLabelBackend, theArguments);
   var theURL = `${pathnames.url.known.fabcoin.rpc}`;
-  var currentResult = ids.defaults.fabcoin.outputFabcoinBlockInfo;
-  
+  var currentResult = null;
+
   var currentProgress = globals.spanProgress();
   var callbackCurrent = this.callbackStandard;
   var functionFrontend = this.theFunctions[functionLabelFrontEnd];
-  if (functionFrontend !== undefined) {
+  if (functionFrontend !== undefined && functionFrontend !== null) {
     if (functionFrontend.callback !== undefined && functionFrontend.callback !== null) {
       callbackCurrent = functionFrontend.callback;
     }  
     if (functionFrontend.outputJSON !== undefined && functionFrontend.outputJSON !== null) {
       currentResult = functionFrontend.outputJSON;
     }
+    if (currentResult === undefined || currentResult === null) {
+      if (functionFrontend.callType !== null && functionFrontend.callType !== undefined) {
+        currentResult = functionFrontend.callType.outputJSONDefault;
+      }
+    }
+  }
+  if (currentResult === undefined || currentResult === null) {
+    currentResult = ids.defaults.fabcoin.outputFabcoinBlockInfo;
   }
   callbackCurrent = callbackCurrent.bind(this, functionLabelFrontEnd);
   theURL += `?${fabRPCSpec.urlStrings.command}=${messageBody}`;
