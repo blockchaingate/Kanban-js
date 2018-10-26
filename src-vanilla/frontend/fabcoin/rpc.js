@@ -267,9 +267,40 @@ function FabNode () {
 
 }
 
+FabNode.prototype.sanitizeTxOutputs = function () {
+  var txOuts = this.getObjectFromInput(ids.defaults.fabcoin.inputBlockInfo.txOutputs);
+  var isGood = true;
+  if (typeof txOuts === "object") {
+    if (Object.keys(txOuts).length <= 0) {
+      isGood = false;
+    }
+  } else {
+    isGood = false;
+  }
+  if (isGood) {
+    return;
+  }
+  var sanitizedTxOuts = {};
+  if (typeof txOuts !== "string") {
+    submitRequests.highlightError(ids.defaults.fabcoin.inputBlockInfo.txOutputs);
+    return;
+  }
+  sanitizedTxOuts[txOuts] = 0;
+  submitRequests.updateValue(ids.defaults.fabcoin.inputBlockInfo.txOutputs, jsonic.stringify(sanitizedTxOuts));
+}
+
 FabNode.prototype.getObjectFromInput = function(inputId) {
   var rawInput = document.getElementById(inputId).value;
-  var outputObject = jsonic(rawInput);
+  var outputObject = null;
+  try {
+    outputObject = jsonic(rawInput);
+  } catch (e) {
+    if (typeof rawInput === "string"){
+      outputObject = rawInput;
+    } else {
+      outputObject = {};
+    }
+  }
   return outputObject;
 }
 

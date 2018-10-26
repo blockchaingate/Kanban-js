@@ -170,6 +170,7 @@ function KanbanGoNodes() {
       rpcCalls: kanbanGOInitialization.rpcCalls,
       idDefaultOutput: ids.defaults.kanbanGO.outputKanbanInitialization,
       url: pathnames.url.known.kanbanGO.initialization,
+      useOneNode: true
     }
   }; 
   // if rpcCall omitted it will be assumed to be equal to the function label.
@@ -445,12 +446,20 @@ KanbanGoNodes.prototype.testClear = function() {
 
 KanbanGoNodes.prototype.run = function(functionLabel, callType) {
   if (callType === undefined) {
-    callType = "standard";
+    if (functionLabel in this.theFunctions) {
+      callType = this.theFunctions[functionLabel].callType;
+    }
+    if (callType === null || callType === undefined) {
+      callType = "standard";
+    }
   }
   if (!(callType in this.callTypes)) {
     throw `Call type not among the allowed call types: ${Object.keys(this.callTypes)}`;
   }
   var currentId = this.selectedNode;
+  if (this.callTypes[callType].useOneNode) {
+    currentId = "none";
+  }
   this.numberOfCalls ++;
   var currentPendingCall = new PendingCall();
   if (currentId !== "all") {
