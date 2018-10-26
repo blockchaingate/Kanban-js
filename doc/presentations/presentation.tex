@@ -67,6 +67,82 @@
 %\pgfdeclareimage[height=0.8cm]{logo}{bluelogo}
 %\logo{\pgfuseimage{logo}}
 
+
+\usepackage[latin1]{inputenc}
+\usepackage{etex}
+\usepackage{ifthen}
+\usepackage[strings]{underscore}
+\usepackage{tikz}
+\usetikzlibrary{calc}
+\usepackage{bbding}
+\let\Cross\relax
+\let\Square\relax
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{cancel}
+\usepackage{comment}
+\usepackage{multirow}
+\usepackage{multicol}
+\usepackage{psfrag}
+\usepackage{rotating}
+\usepackage{fp}
+\usepackage{calc}
+\usepackage{bm}
+\usepackage[all,cmtip]{xy}
+\RequirePackage{xstring}
+\usepackage{times}
+\usepackage[english]{babel}
+\usepackage{longtable}
+\usepackage{graphicx}
+\usepackage{verbatim}
+\usepackage{array}
+\usepackage[breakwords]{truncate}
+
+
+
+\newcommand{\alertNoH}[2]{\alert<handout:0|#1>{#2}}
+
+\newcommand{\fcAnswerNoH}[2]{
+\FPeval{\fcResult}{clip(#1-1)}
+\uncover<handout:0|\fcResult>{\alertNoH{\fcResult}{\textbf{?} }} \worksheet{\uncover<handout:0| #1->{\alertNoH{#1}{\!\!\!#2}}}
+}
+\newcommand{\fcAnswer}[2]{%
+\uncover<handout:0|\the\numexpr#1-1\relax>{\alertNoH{\the\numexpr#1-1\relax}{\textbf{?}}}\worksheet{\uncover<#1->{\alertNoH{#1}{\!\!\!#2}}}%
+}%
+
+\newcommand{\fcAnswerUncover}[3]{%
+\FPeval{\fcResult}{clip(#2-1)}%
+\uncover<handout:0|#1-\fcResult>{\alertNoH{\fcResult}{\textbf{?}}}\worksheet{\uncover<#2->{\alertNoH{#2}{\!\!\!#3}}}
+%\makebox[\widthof{#3}][c]{\only<handout:0|#1-\fcResult>{\alertNoH{\fcResult}{\textbf{?}}} \only<#2->{\alertNoH{#2}{\!\!\!#3}}}%
+}
+\newcommand{\fcAnswerUncoverNew}[4]{%
+\uncover<handout:0|.(#1)-.(#2)>{\alertNoH{.(#2)}{\textbf{?}}}\worksheet{\uncover<.(#3)->{\alertNoH{.(#3)}{\!\!\!#4}}}
+%\makebox[\widthof{#3}][c]{\only<handout:0|#1-\fcResult>{\alertNoH{\fcResult}{\textbf{?}}} \only<#2->{\alertNoH{#2}{\!\!\!#3}}}%
+}
+
+\newcommand{\fcAnswerUncoverNoH}[3]{
+\FPeval{\fcResult}{clip(#2-1)}
+\uncover<handout:0|#1-\fcResult>{\alertNoH{\fcResult}{\textbf{?}}}\worksheet{\uncover<handout:0|#2->{\alertNoH{#2}{\!\!\!#3}}}
+}
+
+\newcommand{\fcQuestion}[2]{%
+\FPeval{\fcResult}{clip(#1+1)}%
+\uncover<#1->{\alertNoH{ #1,\fcResult}{#2}}%
+}
+\newcommand{\fcEvalToInt}[1]{\FPeval{\fcResult}{clip(#1)}\fcResult}
+\newcommand{\refBad}[3]{%
+\ifthenelse{\equal{#1}{??}}%
+{#2}%
+{#3}%
+}%example usage: \refBad{\ref{eqMacLaurinDef}}{their definition}{their definition (Definition \ref{eqMacLaurinDef})}
+\newcommand{\fcCancel}[2]{%
+\FPeval{\fcResult}{clip(#1-1)}%
+\only<handout:0|-\fcResult>{{#2}} \only<#1->{{\alertNoH{#1}{{\cancel{{\alertNoH{0}{{#2}}}}}}}}
+\vphantom{{\cancel{#2}}}%
+}
+
+
+
 \begin{document}
 
 \AtBeginLecture{%
@@ -86,7 +162,7 @@
 \end{frame}
 }%
 \lect{\today}{Proposal}{1}{
-\include{presentation-content-2018-10-19}
+\include{presentation-content-2018-10-26}
 }
 
 \end{document}

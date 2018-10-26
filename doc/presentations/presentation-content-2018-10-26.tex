@@ -1,0 +1,60 @@
+\begin{frame}[fragile]
+\frametitle{Unlock for shardAggregateAddress: update}
+\begin{itemize}
+\item $\fcCancel{2}{\text{Previous version: shard authority via:}}$
+
+$\fcCancel{2}{\text{contract} \stackrel{0}{\to}\text{shardAggregateAddress} }$
+
+\item \alertNoH{3}{Found simpler approach.}
+\begin{enumerate}
+\item<4-> Use solidity logs, for example:
+\begin{enumerate}
+\item \verb|log0("KanbanAggregateSignatureUnlock")|
+\item \verb|log0(pubKey1)|
+
+\dots 
+
+\item \verb|log0(pubKey16)|
+\end{enumerate}
+\item<4-> Logs: intercepted at \verb|FascState::execute|, fascstate.cpp.
+\item<4-> When logs triggered as above: generate tx with unlock script:
+
+\verb| pubkey1 ... pubkey16 OP_AGGREGATEVERIFY|
+\item<4-> \verb|OP_AGGREGATEVERIFY| - newly defined opcode. 
+\end{enumerate}
+\end{itemize}
+\end{frame}
+
+\begin{frame}[fragile]
+\frametitle{OP\_AGGREGATEVERIFY}
+\begin{itemize}
+\item On branch: \verb|tmilev/fabcoin-dev/aggregate-signature|.
+\item Forked from: \verb|blockchaingate/fabvoin-dev/sm01|.
+\item So far implemented:
+\begin{enumerate}
+\item Opcode registration.
+\item \verb|CScript::IsPayToAggregateSignature|
+\item Schnorr and aggregate signature crypto library. 
+\item Crypto code taken from Kanban proof of concept \verb|tmilev/kanban-poc|.
+\item Code based on secp256k1 library. All non-secp256k1 functionality implemented in-house.
+
+\end{enumerate}
+\end{itemize}
+\end{frame}
+
+\begin{frame}[fragile]
+\frametitle{OP\_AGGREGATEVERIFY: to do}
+\begin{itemize}
+\item Bootstrap crypto test RPC calls (regtest only):
+\begin{verbatim}
+if (chainparams.NetworkIDString() == "regtest") {
+    RegisterTestCommands(tableRPC);
+}
+\end{verbatim}
+
+To do: make RegisterTestCommands work properly.
+\item C++ crypto library is several iterations behind its GO counterpart: update.
+\item Ensure C++ crypto matches GO crypto 100\% (pubKey sort, serialization, prefixes, encodings, defaults, \dots).
+\item Attach crypto library to \verb|OP_AGGREGATEVERIFY| evaluation in \verb|bool EvalScript(..)|.
+\end{itemize}
+\end{frame}
