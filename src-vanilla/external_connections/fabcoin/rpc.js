@@ -17,10 +17,10 @@ var rpcCalls = {
     mandatoryModifiableArguments: { //<- values give defaults, null for none
       blockNumber: null
     },
-    types: {
+    types: { // <- indicates expected type for a given input.
       blockNumber: "number"
     },
-    parameters: ["blockNumber"]
+    parameters: ["blockNumber"] // <- parameters passed to the method, in the given order
   },
   getBlockCount: {
     rpcCall: "getBlockCount",
@@ -33,21 +33,21 @@ var rpcCalls = {
     parameters: []
   },
   getBlockByHash: {
-    rpcCall: "getBlockByHash", //<- must be the same as the command name, used for autocomplete purposes
-    method: "getblock", //<- rpc method name 
-    mandatoryFixedArguments: { //<- values give defaults, null for none
+    rpcCall: "getBlockByHash",
+    method: "getblock",  
+    mandatoryFixedArguments: {
     },
-    mandatoryModifiableArguments: { //<- values give defaults, null for none
+    mandatoryModifiableArguments: {
       hash: null
     },
     parameters: ["hash"]
   },
   generateBlocks: {
-    rpcCall: "generateBlocks", //<- must be the same as the command name, used for autocomplete purposes
-    method: "generate", //<- rpc method name 
-    mandatoryFixedArguments: { //<- values give defaults, null for none
+    rpcCall: "generateBlocks", 
+    method: "generate",  
+    mandatoryFixedArguments: {
     },
-    mandatoryModifiableArguments: { //<- values give defaults, null for none
+    mandatoryModifiableArguments: {
       numberOfBlocks: null
     },
     types: {
@@ -58,7 +58,7 @@ var rpcCalls = {
   getWalletTransactionById: {
     rpcCall: "getWalletTransactionById",
     method: "gettransaction",
-    mandatoryModifiableArguments: { //<- values give defaults, null for none
+    mandatoryModifiableArguments: {
       txid: null,
       includeWatchOnly: false,
     },
@@ -67,7 +67,7 @@ var rpcCalls = {
   getTransactionById: {
     rpcCall: "getTransactionById",
     method: "getrawtransaction",
-    mandatoryModifiableArguments: { //<- values give defaults, null for none
+    mandatoryModifiableArguments: {
       txid: null,
       verbose: true
     },
@@ -173,9 +173,9 @@ var rpcCalls = {
     parameters: ["contractId", "data"]
   },
   testSha3: {
-    rpcCall: "testSha3", //must be same as rpc label, used for autocomplete
+    rpcCall: "testSha3",
     method: "testshathree",
-    mandatoryModifiableArguments: { //<- values give defaults, null for none
+    mandatoryModifiableArguments: {
       message: null
     },
     types: {
@@ -184,17 +184,98 @@ var rpcCalls = {
     parameters: ["message"]
   },
   testPrivateKeyGeneration: {
-    rpcCall: "testPrivateKeyGeneration", //must be same as rpc label, used for autocomplete
+    rpcCall: "testPrivateKeyGeneration",
     method: "testprivatekeygeneration",
     parameters: []
   },
   testPublicKeyFromPrivate: {
-    rpcCall: "testPublicKeyFromPrivate", //must be same as rpc label, used for autocomplete
+    rpcCall: "testPublicKeyFromPrivate",
     method: "testpublickeyfromprivate",
     mandatoryModifiableArguments: {
       privateKey: null,
     },
     parameters: ["privateKey"]
+  },
+  testAggregateSignatureInitialize: {
+    rpcCall: "testAggregateSignatureInitialize", 
+    method: "testaggregatesignatureinitialize",
+    mandatoryModifiableArguments: {
+      numberOfPrivateKeysToGenerate: null,
+    },
+    parameters: ["numberOfPrivateKeysToGenerate"]
+  },
+  testAggregateSignatureCommitment: {
+    rpcCall: "testAggregateSignatureCommitment",
+    method: "testaggregatesignaturecommit",
+    mandatoryModifiableArguments: {
+      message: null
+    },
+    optionalArguments: {
+      nonces: null
+    },
+    parameters: ["message", "nonces"]
+  },
+  testAggregateSignatureChallenge: {
+    rpcCall: "testAggregateSignatureChallenge",
+    method: "testaggregatesignaturechallenge",
+    mandatoryModifiableArguments: {
+      committedSignersBitmap: null,
+      commitments: null,
+    },
+    parameters: ["committedSignersBitmap", "commitments"]
+  },
+  testAggregateSignatureSolutions: {
+    rpcCall: "testAggregateSignatureSolutions",
+    method: "testaggregatesignaturesolutions",
+    mandatoryModifiableArguments: {
+      committedSignersBitmap: null,
+      messageDigest: null,
+      aggregatedCommitment: null, 
+      aggregatedPublicKey: null
+    },
+    parameters: ["committedSignersBitmap", "messageDigest", "aggregatedCommitment", "aggregatedPublicKey"]
+  },
+  testAggregateSignatureAggregation: {
+    rpcCall: "testAggregateSignatureAggregation",
+    method: "testaggregatesignatureaggregation",
+    mandatoryModifiableArguments: {
+      solutions: null
+    },
+    parameters: ["solutions"]
+  },
+  testAggregateSignatureVerification: {
+    rpcCall: "testAggregateSignatureVerification",
+    method: "testaggregatesignatureverification",
+    mandatoryModifiableArguments: {
+      signature: null,
+      committedSignersBitmap: null,
+      publicKeys: null,
+      message: null
+    },
+    parameters: ["signature", "committedSignersBitmap", "publicKeys", "message"]
+  },
+
+  testSchnorrSignature: {
+    rpcCall: "testSchnorrSignature",
+    method: "testschnorrsignature",
+    mandatoryModifiableArguments: {
+      privateKey: null,
+      message: null,
+    },
+    optionalArguments: {
+      nonce: null
+    },
+    parameters: ["privateKey", "message", "nonce"]
+  },
+  testSchnorrSignatureVerify: {
+    rpcCall: "testSchnorrSignatureVerify", 
+    method: "testschnorrverification",
+    mandatoryModifiableArguments: {
+      signature: null,
+      publicKey: null,
+      message: null
+    },
+    parameters: ["signature", "publicKey", "message"]
   },
 };
 

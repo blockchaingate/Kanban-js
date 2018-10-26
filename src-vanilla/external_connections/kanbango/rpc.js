@@ -21,7 +21,7 @@ var rpcCalls = {
     mandatoryModifiableArguments: { //<- values give defaults, null for none
       message: null
     },
-    optionalModifiableArguments: {
+    optionalArguments: {
     },
     allowedArgumentValues: {
     },
@@ -34,7 +34,7 @@ var rpcCalls = {
     },
     mandatoryModifiableArguments: { //<- values give defaults, null for none
     },
-    optionalModifiableArguments: {
+    optionalArguments: {
     },
     allowedArgumentValues: {
     },
@@ -48,7 +48,7 @@ var rpcCalls = {
     mandatoryModifiableArguments: { //<- values give defaults, null for none
       privateKey: null
     },
-    optionalModifiableArguments: {
+    optionalArguments: {
     },
     allowedArgumentValues: {
     },
@@ -63,7 +63,7 @@ var rpcCalls = {
       privateKey: null,
       messageBase64: null
     },
-    optionalModifiableArguments: {
+    optionalArguments: {
     },
     allowedArgumentValues: {
     },
@@ -79,7 +79,7 @@ var rpcCalls = {
       publicKey: null,
       messageBase64: null,
     },
-    optionalModifiableArguments: {
+    optionalArguments: {
     },
     allowedArgumentValues: {
     },
@@ -93,7 +93,7 @@ var rpcCalls = {
     mandatoryModifiableArguments: { //<- values give defaults, null for none
       numberOfPrivateKeysToGenerate: null
     },
-    optionalModifiableArguments: {
+    optionalArguments: {
     },
     allowedArgumentValues: {
     },
@@ -107,7 +107,7 @@ var rpcCalls = {
     mandatoryModifiableArguments: { //<- values give defaults, null for none
       messageBase64: null
     },
-    optionalModifiableArguments: {
+    optionalArguments: {
     },
     allowedArgumentValues: {
     },
@@ -122,7 +122,7 @@ var rpcCalls = {
       commitmentsBase64: null,
       committedSigners: null
     },
-    optionalModifiableArguments: {
+    optionalArguments: {
     },
     allowedArgumentValues: {
     },
@@ -139,7 +139,7 @@ var rpcCalls = {
       aggregateCommitment: null,
       aggregatePublicKey: null
     },
-    optionalModifiableArguments: {
+    optionalArguments: {
     },
     allowedArgumentValues: {
     },
@@ -154,7 +154,7 @@ var rpcCalls = {
       committedSigners: null,
       solutionsBase64: null,
     },
-    optionalModifiableArguments: {
+    optionalArguments: {
     },
     allowedArgumentValues: {
     },
@@ -171,7 +171,7 @@ var rpcCalls = {
       allPublicKeysBase64: null,
       messageBase64: null,
     },
-    optionalModifiableArguments: {
+    optionalArguments: {
     },
     allowedArgumentValues: {
     },
@@ -189,7 +189,7 @@ var rpcCalls = {
     types: {
       blockNumber: "numberHex"
     },
-    optionalModifiableArguments: {
+    optionalArguments: {
     },
     allowedArgumentValues: {
     },
@@ -204,7 +204,7 @@ var rpcCalls = {
     mandatoryModifiableArguments: { //<- values give defaults, null for none
       blockHash: null
     },
-    optionalModifiableArguments: {
+    optionalArguments: {
     },
     allowedArgumentValues: {
     },
@@ -217,7 +217,7 @@ var rpcCalls = {
     },
     mandatoryModifiableArguments: { //<- values give defaults, null for none
     },
-    optionalModifiableArguments: {
+    optionalArguments: {
     },
     allowedArgumentValues: {
     },
@@ -230,7 +230,7 @@ var rpcCalls = {
     },
     mandatoryModifiableArguments: { //<- values give defaults, null for none
     },
-    optionalModifiableArguments: {
+    optionalArguments: {
     },
     allowedArgumentValues: {
     },

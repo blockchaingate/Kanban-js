@@ -32,6 +32,7 @@ function FabNode () {
       transformer: miscellaneousBackend.hexShortenerForDisplay,
     },
     setPrivateKeySchnorr: this.getSetInputWithShortener(inputFabCryptoSchnorr.privateKey),
+    setPublicKeySchnorr: this.getSetInputAndRunWithShortener(inputFabCryptoSchnorr.publicKey),
     setTxInputVoutAndValue: {
       clickHandler: this.setTxInputVoutAndValue.bind(this),
     },
@@ -96,7 +97,8 @@ function FabNode () {
       privateKeyBase58WithoutCheck: this.transformersStandard.setPrivateKeySchnorr,
       privateKeyHex: this.transformersStandard.setPrivateKeySchnorr,
       secretHex: this.transformersStandard.setPrivateKeySchnorr,
-      
+      "input.${number}": this.transformersStandard.shortener,
+      publicKeyHexCompressed: this.transformersStandard.setPublicKeySchnorr,
     },
   };
 
@@ -265,7 +267,7 @@ function FabNode () {
       outputJSON: ids.defaults.fabcoin.outputFabcoinCrypto,
       outputOptions: this.outputOptionsCrypto,
       outputs: {
-        publicKey: inputFabCryptoSchnorr.publicKey
+        publicKeyHexCompressed: inputFabCryptoSchnorr.publicKey
       }
     },
   };
@@ -531,7 +533,7 @@ FabNode.prototype.callbackStandard = function(functionLabelFrontEnd, input, outp
       resultHTML = `<b style= 'color:red'>Error:</b> ${inputParsed.error}<br>`;
       if (inputParsed.error === fabInitializationSpec.urlStrings.errorFabNeverStarted) {
         triggerFabcoindStart = true;
-        resultHTML += "<b style='color:green'> Will start fabcoind for you in 2s. </b><br>"
+        resultHTML += "<b style='color:green'> Will start fabcoind for you. </b><br>"
         resultHTML += "Equivalent to pressing the start fabcoind button. <br>";
       }
     }
@@ -544,7 +546,7 @@ FabNode.prototype.callbackStandard = function(functionLabelFrontEnd, input, outp
     var initializer = fabcoinInitializationFrontend.initializer;
     var callbackExtra = this.callbackAutoStartFabcoind.bind(this, output);
     var callStartFabcoind = initializer.run.bind(initializer, 'runFabcoind', callbackExtra);
-    setTimeout(callStartFabcoind, 2000);
+    setTimeout(callStartFabcoind, 0);
   }
 }
 

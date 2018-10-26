@@ -330,6 +330,7 @@ var labelAbbreviations = {
   "privateKeyBase58Check": "priv58Ch",
   "privateKeyBase58WithoutCheck": "priv58NoCh",
   "privateKeyHex": "privHex", 
+  "publicKeyHexCompressed": "pubHexCompressed",
 }
 
 function abbreviateLabel(/** @type {string}*/ header) {
