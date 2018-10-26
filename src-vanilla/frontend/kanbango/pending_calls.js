@@ -183,7 +183,7 @@ PendingCall.prototype.callbackCompileSolidity = function (nodeId, input, output)
   console.log(input);
   try {
     var parsedInput = JSON.parse(input)
-    submitRequests.updateValue(ids.defaults.kanbanGO.inputInitialization.contractABI, JSON.stringify(parsedInput.ABI));
+    submitRequests.updateValue(ids.defaults.kanbanGO.inputInitialization.contractABI, JSON.stringify(parsedInput.ABI[0]));
     console.log(input);
   } catch(e) { 
     submitRequests.updateInnerHtml(ids.defaults.kanbanGO.inputInitialization.contractABI, "Failed to parse ABI. ");
