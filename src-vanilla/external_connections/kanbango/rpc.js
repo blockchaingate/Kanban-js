@@ -15,7 +15,7 @@ var rpcCalls = {
   //3. Prefix the name with the module name, say, kanban_testSha3.
   testSha3: {
     rpcCall: "testSha3", //must be same as rpc label, used for autocomplete
-    method: "kanban_testSha3", //<- name of go's RPC method 
+    method: "cryptotest_testSha3", //<- name of go's RPC method 
     mandatoryFixedArguments: { //<- values give defaults, null for none
     },
     mandatoryModifiableArguments: { //<- values give defaults, null for none

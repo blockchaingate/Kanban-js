@@ -152,6 +152,12 @@ function KanbanGoNodes() {
       "contractInheritance.${label}": this.transformersStandard.shortener,
     }
   };
+  this.optionsCrypto = {
+    transformers: {
+      resultKeccak: this.transformersStandard.shortener,
+      resultSha3: this.transformersStandard.shortener,
+    }  
+  };
   this.callTypes = {
     standard: {
       jsonOptions: this.optionsKanbanGOStandard,
@@ -160,7 +166,7 @@ function KanbanGoNodes() {
       url: pathnames.url.known.kanbanGO.rpc,
     },
     cryptoTest: {
-      jsonOptions: this.optionsKanbanGOStandard,
+      jsonOptions: this.optionsCrypto,
       idDefaultOutput: ids.defaults.kanbanGO.outputKBGOTest,
       rpcCalls: kanbanGO.rpcCalls,
       url: pathnames.url.known.kanbanGO.rpc,
@@ -234,10 +240,10 @@ function KanbanGoNodes() {
     },
     testSha3 : {
       //if rpcCall omitted it will be assumed to be equal to the function label.
-      rpcCall: kanbanGO.rpcCalls.testSha3.rpcCall, 
-      inputs: {
+      inputsBase64: {
         message: inputSchnorr.message
-      }
+      },
+      callType: "cryptoTest"
     },
     versionGO: {
     },
