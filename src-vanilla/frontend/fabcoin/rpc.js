@@ -16,6 +16,7 @@ const fabcoinInitializationFrontend = require('./initialization');
 function FabNode () {
   var inputFabBlock = ids.defaults.fabcoin.inputBlockInfo;
   var inputFabCryptoSchnorr = ids.defaults.fabcoin.inputCrypto.inputSchnorrSignature;
+  var inputFabCryptoAggregate = ids.defaults.fabcoin.inputCrypto.inputAggregateSignature;
   this.transformersStandard = {
     blockHash: this.getSetInputAndRunWithShortener(inputFabBlock.blockHash, "getBlockByHash"),
     shortener: {
@@ -32,6 +33,7 @@ function FabNode () {
       transformer: miscellaneousBackend.hexShortenerForDisplay,
     },
     setPrivateKeySchnorr: this.getSetInputWithShortener(inputFabCryptoSchnorr.privateKey),
+    setNonceSchnorr: this.getSetInputWithShortener(inputFabCryptoSchnorr.nonce),
     setPublicKeySchnorr: this.getSetInputAndRunWithShortener(inputFabCryptoSchnorr.publicKey),
     setTxInputVoutAndValue: {
       clickHandler: this.setTxInputVoutAndValue.bind(this),
@@ -40,6 +42,7 @@ function FabNode () {
       clickHandler: this.setContractId.bind(this),
       transformer: miscellaneousBackend.hexShortenerForDisplay
     },
+    setSchnorrSignature: this.getSetInputWithShortener(inputFabCryptoSchnorr.signature, "signatureSchnorrBase58"),
   };
 
   this.outputOptionsStandard = {
@@ -78,7 +81,6 @@ function FabNode () {
       "vin.${number}.scriptSig.hex": this.transformersStandard.shortener,
     }
   };
-
   this.outputOptionsContract = {
     transformers: {
       address: this.transformersStandard.setContractId,
@@ -99,6 +101,36 @@ function FabNode () {
       secretHex: this.transformersStandard.setPrivateKeySchnorr,
       "input.${number}": this.transformersStandard.shortener,
       publicKeyHexCompressed: this.transformersStandard.setPublicKeySchnorr,
+      challengeHex: this.transformersStandard.shortener,
+      nonceSchnorrBase58Check: this.transformersStandard.shortener,
+      signatureSchnorrBase58Check: this.transformersStandard.shortener,
+      signatureSchnorrBase58: this.transformersStandard.setSchnorrSignature,
+      solutionBase58Check: this.transformersStandard.shortener,
+      publicKeyHex: this.transformersStandard.setPublicKeySchnorr,
+      "aggregator.publicKeys.${number}": this.transformersStandard.setPublicKeySchnorr,
+      "aggregator.commitments.${number}": this.transformersStandard.shortener,
+      "aggregator.aggregatePublicKey": this.transformersStandard.shortener,
+      "aggregator.aggregateCommitment": this.transformersStandard.shortener,
+      "aggregator.messageDigest": this.transformersStandard.shortener,
+      "aggregator.aggregateSolution": this.transformersStandard.shortener,
+      "aggregator.aggregateCommitmentFromSignature": this.transformersStandard.shortener,
+      "aggregator.signatureNoBitmap": this.transformersStandard.shortener,
+      "aggregator.lockingCoefficients.${number}": this.transformersStandard.shortener,
+      "signers.${number}.myPublicKey": this.transformersStandard.setPublicKeySchnorr,
+      "signers.${number}.privateKeyBase58": this.transformersStandard.setPrivateKeySchnorr,
+      "signers.${number}.myNonceBase58": this.transformersStandard.setNonceSchnorr,
+      "signers.${number}.myLockingCoefficient": this.transformersStandard.shortener,
+      "signers.${number}.mySolution": this.transformersStandard.shortener,
+      "signers.${number}.commitmentHexCompressed": this.transformersStandard.shortener,
+      "verifier.lockingCoefficients.${number}": this.transformersStandard.shortener,
+      "verifier.concatenatedPublicKeys": this.transformersStandard.shortener,
+      "verifier.messageDigest": this.transformersStandard.shortener,
+      "verifier.aggregatePublicKey": this.transformersStandard.shortener,
+      "verifier.publicKeys.${number}": this.transformersStandard.shortener,
+      "verifier.aggregateSolution": this.transformersStandard.shortener,
+      "verifier.aggregateCommitment": this.transformersStandard.shortener,
+      "verifier.aggregateCommitmentFromSignature": this.transformersStandard.shortener,
+      "verifier.signatureNoBitmap": this.transformersStandard.shortener,
     },
   };
   /**@type {Object.<string,{outputJSONDefault: string, outputOptionsDefault: string}>} */
@@ -278,7 +310,12 @@ function FabNode () {
     testSchnorrSignature: {
       inputs: {
         privateKey: inputFabCryptoSchnorr.privateKey,
+      },
+      inputsBase64: {
         message: inputFabCryptoSchnorr.messageToSha3
+      },
+      outputs: {
+        signatureSchnorrBase58: inputFabCryptoSchnorr.signature
       },
       callType: this.callTypes.crypto,
     },
@@ -286,9 +323,74 @@ function FabNode () {
       inputs: {
         signature: inputFabCryptoSchnorr.signature,
         publicKey: inputFabCryptoSchnorr.publicKey,
+      },
+      inputsBase64: {
         message: inputFabCryptoSchnorr.messageToSha3
       },
       callType: this.callTypes.crypto
+    },
+    testAggregateSignatureInitialize: {
+      inputs: {
+        numberOfPrivateKeysToGenerate: inputFabCryptoAggregate.numberOfPrivateKeysToGenerate
+      },
+      output: {
+        privateKeys: inputFabCryptoAggregate.privateKeys
+      },
+      callType: this.callTypes.crypto,
+      callback: this.callbackAggregateSignatureInitialize
+    },
+    testAggregateSignatureCommitment: {
+      inputsBase64: {
+        message: inputFabCryptoAggregate.message
+      },
+      callType: this.callTypes.crypto,
+      callback: this.callbackAggregateSignatureCommit
+    },
+    testAggregateSignatureChallenge: {
+      inputs: {
+        committedSignersBitmap: inputFabCryptoAggregate.committedSignersBitmap,
+        commitments: inputFabCryptoAggregate.commitments
+      },
+      outputs: {
+        aggregator: {
+          aggregateCommitment: inputFabCryptoAggregate.aggregateCommitment,
+          aggregatePublicKey: inputFabCryptoAggregate.aggregatePubkey,
+          messageDigest: inputFabCryptoAggregate.messageDigest,
+        },
+      },
+      callType: this.callTypes.crypto,
+    },
+    testAggregateSignatureSolutions: {
+      inputs: {
+        committedSignersBitmap: inputFabCryptoAggregate.committedSignersBitmap,
+        messageDigest: inputFabCryptoAggregate.messageDigest,
+        aggregateCommitment: inputFabCryptoAggregate.aggregateCommitment, 
+        aggregatePublicKey: inputFabCryptoAggregate.aggregatePubkey,
+      },
+      callback: this.callbackAggregateSignatureSolutions,
+      callType: this.callTypes.crypto,
+    },
+    testAggregateSignatureAggregation: {
+      inputs: {
+        solutions: inputFabCryptoAggregate.solutions,
+      },
+      outputs: {
+        aggregator: {
+          signatureNoBitmap: inputFabCryptoAggregate.theAggregation,
+        }
+      },
+      callType: this.callTypes.crypto,
+    },
+    testAggregateSignatureVerification: {
+      inputs: {
+        signature: inputFabCryptoAggregate.theAggregation,
+        committedSignersBitmap: inputFabCryptoAggregate.committedSignersBitmap,
+        publicKeys: inputFabCryptoAggregate.publicKeys,
+      },
+      inputsBase64: {
+        message: inputFabCryptoAggregate.message
+      },
+      callType: this.callTypes.crypto,
     }
   };
 
@@ -462,6 +564,61 @@ FabNode.prototype.setPrivateKeyComputeAllElse = function (container, content, ex
   console.log(`DEBUG: content: ${JSON.stringify(content)}`);
 }
 
+FabNode.prototype.testAggregateSignatureClear = function() {
+  var inputAggregate = ids.defaults.fabcoin.inputCrypto.inputAggregateSignature;
+  submitRequests.updateInnerHtml(inputAggregate.numberOfPrivateKeysToGenerate, "5");
+  submitRequests.updateInnerHtml(inputAggregate.privateKeys, "");
+  submitRequests.updateInnerHtml(inputAggregate.nonces, "");
+  submitRequests.updateInnerHtml(inputAggregate.publicKeys, "");
+  submitRequests.updateInnerHtml(inputAggregate.commitments, "");
+  submitRequests.updateInnerHtml(inputAggregate.committedSignersBitmap, "11111");
+  submitRequests.updateInnerHtml(inputAggregate.aggregatePubkey, "");
+  submitRequests.updateInnerHtml(inputAggregate.messageDigest, "");
+  submitRequests.updateInnerHtml(inputAggregate.theAggregation, "");
+  submitRequests.updateInnerHtml(inputAggregate.solutions, "");
+  submitRequests.updateInnerHtml(inputAggregate.aggregateCommitment, "");
+}
+
+FabNode.prototype.callbackAggregateSignatureInitialize = function(functionLabelFrontEnd, input, output) {
+  this.callbackStandard(functionLabelFrontEnd, input, output);
+  var inputParsed = JSON.parse(input);
+  var privateKeys = [];
+  var publicKeys = [];
+  for (var counterKeyPairs = 0; counterKeyPairs < inputParsed.signers.length; counterKeyPairs ++) {
+    privateKeys.push(inputParsed.signers[counterKeyPairs].privateKeyBase58);
+    publicKeys.push(inputParsed.signers[counterKeyPairs].myPublicKey);
+  }
+  var aggregateIds = ids.defaults.fabcoin.inputCrypto.inputAggregateSignature;
+  submitRequests.updateValue(aggregateIds.privateKeys, privateKeys.join(", "));
+  submitRequests.updateValue(aggregateIds.publicKeys, publicKeys.join(", "));
+}
+
+FabNode.prototype.callbackAggregateSignatureCommit = function(functionLabelFrontEnd, input, output) {
+  this.callbackStandard(functionLabelFrontEnd, input, output);
+  var inputParsed = JSON.parse(input);
+  var nonces = [];
+  var commitments = [];
+  for (var counterKeyPairs = 0; counterKeyPairs < inputParsed.signers.length; counterKeyPairs ++) {
+    var currentSigner = inputParsed.signers[counterKeyPairs]; 
+    nonces.push(currentSigner.myNonceBase58);
+    commitments.push(currentSigner.commitmentHexCompressed);
+  }
+  var aggregateIds = ids.defaults.fabcoin.inputCrypto.inputAggregateSignature;
+  submitRequests.updateValue(aggregateIds.nonces, nonces.join(", "));
+  submitRequests.updateValue(aggregateIds.commitments, commitments.join(", "));
+}
+
+FabNode.prototype.callbackAggregateSignatureSolutions = function(functionLabelFrontEnd, input, output) {
+  this.callbackStandard(functionLabelFrontEnd, input, output);
+  var inputParsed = JSON.parse(input);
+  var solutions = [];
+  for (var counterKeyPairs = 0; counterKeyPairs < inputParsed.signers.length; counterKeyPairs ++) {
+    var currentSigner = inputParsed.signers[counterKeyPairs]; 
+    solutions.push(currentSigner.mySolution);
+  }
+  submitRequests.updateValue(ids.defaults.kanbanPlusPlus.inputAggregateSignature.solutions, solutions.join(", "));
+}
+
 FabNode.prototype.convertToCorrectType = function(functionLabelBackend, variableName, inputRaw) {
   if (!(functionLabelBackend in fabRPCSpec.rpcCalls)) {
     throw `While converting types, failed to find function ${functionLabelBackend}`;
@@ -549,12 +706,13 @@ FabNode.prototype.callbackStandard = function(functionLabelFrontEnd, input, outp
       submitRequests.updateValue(currentOutputs, miscellaneousBackend.removeQuotes(input));
     }
     if (typeof currentOutputs === "object") {
-      for (var label in currentOutputs) {
-        submitRequests.updateValue(currentOutputs[label], miscellaneousBackend.removeQuotes(inputParsed[label]))
-      }
+      submitRequests.updateFieldsRecursively(inputParsed, currentOutputs);
     } 
+    if (inputParsed.resultHTML !== undefined && inputParsed.resultHTML !== undefined) {
+      resultHTML = inputParsed.resultHTML + "<br>" + resultHTML;
+    }
     if (inputParsed.error !== undefined && inputParsed.error !== null) {
-      resultHTML = `<b style= 'color:red'>Error:</b> ${inputParsed.error}<br>`;
+      resultHTML = `<b style= 'color:red'>Error:</b> ${inputParsed.error}<br>` + resultHTML;
       if (inputParsed.error === fabInitializationSpec.urlStrings.errorFabNeverStarted) {
         triggerFabcoindStart = true;
         resultHTML += "<b style='color:green'> Will start fabcoind for you. </b><br>"

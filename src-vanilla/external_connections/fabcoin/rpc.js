@@ -230,10 +230,10 @@ var rpcCalls = {
     mandatoryModifiableArguments: {
       committedSignersBitmap: null,
       messageDigest: null,
-      aggregatedCommitment: null, 
-      aggregatedPublicKey: null
+      aggregateCommitment: null, 
+      aggregatePublicKey: null
     },
-    parameters: ["committedSignersBitmap", "messageDigest", "aggregatedCommitment", "aggregatedPublicKey"]
+    parameters: ["committedSignersBitmap", "messageDigest", "aggregateCommitment", "aggregatePublicKey"]
   },
   testAggregateSignatureAggregation: {
     rpcCall: "testAggregateSignatureAggregation",
@@ -254,7 +254,6 @@ var rpcCalls = {
     },
     parameters: ["signature", "committedSignersBitmap", "publicKeys", "message"]
   },
-
   testSchnorrSignature: {
     rpcCall: "testSchnorrSignature",
     method: "testschnorrsignature",

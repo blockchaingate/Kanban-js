@@ -1,6 +1,7 @@
 "use srict";
 const escapeHtml = require('escape-html');
 const ids = require('./ids_dom_elements');
+const miscellaneousBackend = require('../miscellaneous');
 
 function buttonProgressClick(buttonElement) {
   //console.log(buttonElement);
@@ -65,6 +66,20 @@ function highlightInput(id) {
   var highlightName = "inputUsedAsInput";
   theElement.classList.add(highlightName);
   setTimeout(removeUpdateHighlight.bind(null, id, highlightName), 1000);
+}
+
+function updateFieldsRecursively(parsedInput, outputs) {
+  if (parsedInput === undefined) {
+    return;
+  }
+  for (var label in outputs) {
+    if (typeof outputs[label] === "string") {
+      var sanitized = miscellaneousBackend.removeQuotes(parsedInput[label]);
+      updateValue(outputs[label], sanitized);
+    } else {
+      updateFieldsRecursively(parsedInput[label], outputs[label]);
+    }
+  }
 }
 
 function updateValue(id, content) {
@@ -223,6 +238,7 @@ module.exports = {
   deleteParent,
   updateInnerHtml,
   updateValue,
+  updateFieldsRecursively,
   highlightInput,
   highlightError
 }

@@ -73,16 +73,7 @@ PendingCall.prototype.run = function (functionLabel) {
 }
 
 PendingCall.prototype.updateFields = function(parsedInput, outputs) {
-  if (parsedInput === undefined) {
-    return;
-  }
-  for (var label in outputs) {
-    if (typeof outputs[label] === "string") {
-      submitRequests.updateValue(outputs[label], parsedInput[label]);
-    } else {
-      this.updateFields(parsedInput[label], outputs[label]);
-    }
-  }
+  submitRequests.updateFieldsRecursively(parsedInput, outputs);
 }
 
 PendingCall.prototype.callbackStandardOneCaller = function(

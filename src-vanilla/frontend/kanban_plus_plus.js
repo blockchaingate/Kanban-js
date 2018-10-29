@@ -293,77 +293,8 @@ function callbackSchnorrSign(input, output) {
   submitRequests.updateInnerHtml(ids.defaults.kanbanPlusPlus.inputSchnorrSignature.nonce, inputParsed.nonceSchnorrBase58Check);  
 }
 
-function callbackKanbanPlusPlusAggregateSignatureInitialize(input, output) {
-  var transformer = new jsonToHtml.JSONTransformer();
-  transformer.writeJSONtoDOMComponent(input, output, optionsForKanbanPlusPlusGeneralStandard);
-  var inputParsed = JSON.parse(input);
-  var privateKeys = [];
-  var publicKeys = [];
-  for (var counterKeyPairs = 0; counterKeyPairs < inputParsed.signers.length; counterKeyPairs ++) {
-    privateKeys.push(inputParsed.signers[counterKeyPairs].privateKeyBase58);
-    publicKeys.push(inputParsed.signers[counterKeyPairs].myPublicKey);
-  }
-  submitRequests.updateValue(ids.defaults.kanbanPlusPlus.inputAggregateSignature.privateKeys, privateKeys.join(", "));
-  submitRequests.updateValue(ids.defaults.kanbanPlusPlus.inputAggregateSignature.publicKeys, publicKeys.join(", "));
-}
 
-function callbackKanbanPlusPlusAggregateSignatureCommit(input, output) {
-  var transformer = new jsonToHtml.JSONTransformer();
-  transformer.writeJSONtoDOMComponent(input, output, optionsForKanbanPlusPlusGeneralStandard);
-  var inputParsed = JSON.parse(input);
-  var nonces = [];
-  var commitments = [];
-  for (var counterKeyPairs = 0; counterKeyPairs < inputParsed.signers.length; counterKeyPairs ++) {
-    var currentSigner = inputParsed.signers[counterKeyPairs]; 
-    nonces.push(currentSigner.myNonceBase58);
-    commitments.push(currentSigner.commitmentHexCompressed);
-  }
-  submitRequests.updateValue(ids.defaults.kanbanPlusPlus.inputAggregateSignature.nonces, nonces.join(", "));
-  submitRequests.updateValue(ids.defaults.kanbanPlusPlus.inputAggregateSignature.commitments, commitments.join(", "));
-}
 
-function callbackKanbanPlusPlusAggregateSignatureChallenge(input, output) {
-  var transformer = new jsonToHtml.JSONTransformer();
-  transformer.writeJSONtoDOMComponent(input, output, optionsForKanbanPlusPlusGeneralStandard);
-  var inputParsed = JSON.parse(input);
-  submitRequests.updateValue(ids.defaults.kanbanPlusPlus.inputAggregateSignature.messageDigest, inputParsed.aggregator.messageDigest);
-  submitRequests.updateValue(ids.defaults.kanbanPlusPlus.inputAggregateSignature.aggregatePubkey, inputParsed.aggregator.aggregatePublicKey);
-  submitRequests.updateValue(ids.defaults.kanbanPlusPlus.inputAggregateSignature.committedSignersBitmap, inputParsed.aggregator.committedSignersBitmap);
-  submitRequests.updateValue(ids.defaults.kanbanPlusPlus.inputAggregateSignature.aggregateCommitment, inputParsed.aggregator.aggregateCommitment);
-}
-
-function callbackKanbanPlusPlusAggregateSignatureSolutions(input, output) {
-  var transformer = new jsonToHtml.JSONTransformer();
-  transformer.writeJSONtoDOMComponent(input, output, optionsForKanbanPlusPlusGeneralStandard);
-  var inputParsed = JSON.parse(input);
-  var solutions = [];
-  for (var counterKeyPairs = 0; counterKeyPairs < inputParsed.signers.length; counterKeyPairs ++) {
-    var currentSigner = inputParsed.signers[counterKeyPairs]; 
-    solutions.push(currentSigner.mySolution);
-  }
-  submitRequests.updateValue(ids.defaults.kanbanPlusPlus.inputAggregateSignature.solutions, solutions.join(", "));
-}
-
-function callbackKanbanPlusPlusAggregateFinalSolution(input, output) {
-  var transformer = new jsonToHtml.JSONTransformer();
-  transformer.writeJSONtoDOMComponent(input, output, optionsForKanbanPlusPlusGeneralStandard);
-  var inputParsed = JSON.parse(input);
-  submitRequests.updateValue(ids.defaults.kanbanPlusPlus.inputAggregateSignature.theAggregation, inputParsed.aggregator.signatureNoBitmap);
-}
-
-function callbackKanbanPlusPlusAggregateVerification(input, output) {
-  var transformer = new jsonToHtml.JSONTransformer();
-  transformer.writeJSONtoDOMComponent(input, output, optionsForKanbanPlusPlusGeneralStandard);
-  var inputParsed = JSON.parse(input);
-  if (typeof output === "string") {
-    output = document.getElementById(output);
-  }
-  if (inputParsed.result === "1" || inputParsed.result === 1) {
-    output.innerHTML = "<b style='color:green'>Verified</b><br>" + output.innerHTML;
-  } else {
-    output.innerHTML = "<b style='color:red'>Failed</b><br>" + output.innerHTML;
-  }
-}
 
 function testAggregateSignatureInitialize() {
   
@@ -384,20 +315,7 @@ function testAggregateSignatureInitialize() {
   });    
 }
 
-function testAggregateSignatureClear() {
-  var inputAggregate = ids.defaults.kanbanPlusPlus.inputAggregateSignature
-  submitRequests.updateInnerHtml(inputAggregate.numberOfPrivateKeysToGenerate, "5");
-  submitRequests.updateInnerHtml(inputAggregate.privateKeys, "");
-  submitRequests.updateInnerHtml(inputAggregate.nonces, "");
-  submitRequests.updateInnerHtml(inputAggregate.publicKeys, "");
-  submitRequests.updateInnerHtml(inputAggregate.commitments, "");
-  submitRequests.updateInnerHtml(inputAggregate.committedSignersBitmap, "11111");
-  submitRequests.updateInnerHtml(inputAggregate.aggregatePubkey, "");
-  submitRequests.updateInnerHtml(inputAggregate.messageDigest, "");
-  submitRequests.updateInnerHtml(inputAggregate.theAggregation, "");
-  submitRequests.updateInnerHtml(inputAggregate.solutions, "");
-  submitRequests.updateInnerHtml(inputAggregate.aggregateCommitment, "");
-}
+
 
 function testAggregateSignatureChallenge() {
   highlightRedIfEmpty([
@@ -430,8 +348,8 @@ function testAggregateSignatureSolutions() {
         net: globals.mainPage().getRPCKanbanNetworkOption(),
         committedSignersBitmap: getCommittedSignersBitmap(),
         messageDigest: getMessageDigest(),
-        aggregatedCommitment: getAggregateCommitment(),
-        aggregatedPublicKey: getAggregatePublicKey()
+        aggregateCommitment: getAggregateCommitment(),
+        aggregatePublicKey: getAggregatePublicKey()
       }, 
       true
     ),
@@ -552,7 +470,6 @@ module.exports = {
   testAggregateSignatureInitialize,
   testAggregateSignatureCommit,
   testAggregateSignatureChallenge,
-  testAggregateSignatureClear,
   testAggregateSignatureSolutions,
   testAggregateSignatureAggregateSolutions,
   testAggregateSignatureVerify

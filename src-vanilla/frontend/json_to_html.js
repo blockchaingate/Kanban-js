@@ -331,6 +331,16 @@ var labelAbbreviations = {
   "privateKeyBase58WithoutCheck": "priv58NoCh",
   "privateKeyHex": "privHex", 
   "publicKeyHexCompressed": "pubHexCompressed",
+  "aggregateCommitmentFromSignature": "aggCommFrSig.",
+  "committedSignersBitmap": "commSign.",
+  "aggregateCommitment": "aggComm.",
+  "lockingCoefficients": "lckCf.",
+  "aggregatePublicKey": "aggPubKey",
+  "signatureNoBitmap": "sigNoBmp.",
+  "aggregateSolution": "aggSoln.",
+  "knownPublicKeys": "pubKeys",
+  "concatenatedPublicKeys": "c.PubKeys",
+  "messageDigest": "msgDgst."
 }
 
 function abbreviateLabel(/** @type {string}*/ header) {
