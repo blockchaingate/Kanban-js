@@ -113,7 +113,7 @@ PendingCall.prototype.callbackStandardOneCaller = function(
       header += parsedInput.resultHTML + "<br>"; 
     }
     if (parsedInput.error !== null && parsedInput.error !== undefined) {
-      if (parsedInput.error = kanbanGO.urlStrings.errorKanbanNodeStartWasNeverAttempted) {
+      if (parsedInput.error === kanbanGO.urlStrings.errorKanbanNodeStartWasNeverAttempted) {
         this.flagFoundNotStartedError = true;
       }
       header += `<b style = 'color:red'>Error:</b> ${parsedInput.error}<br>`;
@@ -193,10 +193,11 @@ PendingCall.prototype.callbackFetchSmartContract = function (nodeId, input, outp
   this.callbackStandard(nodeId, input, output);
 }
 
-PendingCall.prototype.callbackAutoStartKanbanGO = function(outputComponent, input, output) {
+PendingCall.prototype.callbackAutoStartKanbanGO = function(owner, outputComponent, input, output) {
   var theJSONWriter = new JSONTransformer();
   var resultHTML = theJSONWriter.getHtmlFromArrayOfObjects(input, {});
   outputComponent.innerHTML += resultHTML;
+  owner.getNodeInformation();
 }
 
 PendingCall.prototype.callbackStandard = function(nodeId, input, output) {
@@ -220,7 +221,7 @@ PendingCall.prototype.callbackStandard = function(nodeId, input, output) {
   if (this.flagFoundNotStartedError) {
     resultHTML += "<b style='color:green'> Will try to run kanbanGO for you. </b><br>"
     resultHTML += "Equivalent to pressing the 'Run on FAB' button. <br>";
-    this.owner.run('runNodesOnFAB', 'initialization', this.callbackAutoStartKanbanGO.bind(null, output));
+    this.owner.run('runNodesOnFAB', 'initialization', this.callbackAutoStartKanbanGO.bind(null, this.owner, output));
   }
   output.innerHTML = resultHTML;
   theJSONWriter.bindButtons();

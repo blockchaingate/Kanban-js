@@ -49,7 +49,9 @@ function KanbanGoNodes() {
       clickHandler: this.setInput.bind(this, ids.defaults.fabcoin.inputBlockInfo.solidityInput),
       transformer: miscellaneousBackend.hexShortenerForDisplay,
     },
-    setPrivateKeySchnorr: this.getSetInputWithShortener(inputSchnorr.privateKey)
+    setPrivateKeySchnorr: this.getSetInputWithShortener(inputSchnorr.privateKey),
+    setPublicKeySchnorr: this.getSetInputWithShortener(inputSchnorr.publicKey),
+    setSignatureSchnorr: this.getSetInputWithShortener(inputSchnorr.signature),
   };
   // Specifies options for rpc kanban rpc output display.
   this.optionsKanbanGOStandard = {
@@ -157,11 +159,26 @@ function KanbanGoNodes() {
     transformers: {
       resultKeccak: this.transformersStandard.shortener,
       resultSha3: this.transformersStandard.shortener,
-      privateKeyBase58: this.transformersStandard.setPrivateKeySchnorr,
-      privateKeyBase58Check: this.transformersStandard.setPrivateKeySchnorr,
+      privateKeyBase58: this.transformersStandard.shortener,
+      privateKeyBase58Check: this.transformersStandard.shortener,
       privateKeyBase64: this.transformersStandard.shortener,
-      privateKeyBase58Check: this.transformersStandard.setPrivateKeySchnorr,
-      privateKeyHex: this.transformersStandard.setPrivateKeySchnorr,
+      privateKeyHex: this.transformersStandard.shortener,
+      ethereumAddressHex: this.transformersStandard.shortener,
+      fabAddressMainnetBase58Check: this.transformersStandard.shortener,
+      fabAddressMainnetHexNocheck: this.transformersStandard.shortener,
+      fabAddressTestnetBase58Check: this.transformersStandard.shortener,
+      fabAddressTestnetHexNocheck: this.transformersStandard.shortener,
+      inputPrivateKeyBase58: this.transformersStandard.setPrivateKeySchnorr,
+      inputPrivateKeyBase58CheckRecoded: this.transformersStandard.setPrivateKeySchnorr,
+      inputPrivateKeyBase58Recoded: this.transformersStandard.setPrivateKeySchnorr,
+      inputPrivateKeyHex: this.transformersStandard.setPrivateKeySchnorr,
+      publicKeyHex: this.transformersStandard.setPublicKeySchnorr,
+      publicKeyHexInternal: this.transformersStandard.setPublicKeySchnorr,
+      inputPublicKeyHex: this.transformersStandard.setPublicKeySchnorr,
+      inputPublicKeyHexRecoded: this.transformersStandard.setPublicKeySchnorr,
+      inputSignatureBase58: this.transformersStandard.setSignatureSchnorr,
+      inputSignatureBase58Recoded: this.transformersStandard.setSignatureSchnorr,
+      signatureBase58: this.transformersStandard.setSignatureSchnorr,
     }  
   };
   this.callTypes = {
