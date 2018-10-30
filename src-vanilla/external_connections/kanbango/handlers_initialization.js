@@ -337,6 +337,7 @@ function KanbanGoInitializer() {
   this.numberRequestsRunning = 0;
   this.maxRequestsRunning = 4;
   this.flagGetGenesisFromFoundationChain = false;
+  this.flagStartWasEverAttempted = false;
   this.handlers = {
   };
   this.colors = ["yellow", "green", "blue", "cyan", "magenta"];
@@ -982,6 +983,7 @@ KanbanGoInitializer.prototype.runNodesOnFAB = function(response, queryCommand, c
 }
 
 KanbanGoInitializer.prototype.runNodes = function(response, queryCommand) {
+  this.flagStartWasEverAttempted = true;
   console.log(`DEBUIG: got to here pt 1`);
   var candidateNumberOfNodes = Number(queryCommand.numberOfNodes);
   var maxNumberOfNodes = 100;

@@ -49,6 +49,7 @@ function KanbanGoNodes() {
       clickHandler: this.setInput.bind(this, ids.defaults.fabcoin.inputBlockInfo.solidityInput),
       transformer: miscellaneousBackend.hexShortenerForDisplay,
     },
+    setPrivateKeySchnorr: this.getSetInputWithShortener(inputSchnorr.privateKey)
   };
   // Specifies options for rpc kanban rpc output display.
   this.optionsKanbanGOStandard = {
@@ -156,6 +157,11 @@ function KanbanGoNodes() {
     transformers: {
       resultKeccak: this.transformersStandard.shortener,
       resultSha3: this.transformersStandard.shortener,
+      privateKeyBase58: this.transformersStandard.setPrivateKeySchnorr,
+      privateKeyBase58Check: this.transformersStandard.setPrivateKeySchnorr,
+      privateKeyBase64: this.transformersStandard.shortener,
+      privateKeyBase58Check: this.transformersStandard.setPrivateKeySchnorr,
+      privateKeyHex: this.transformersStandard.setPrivateKeySchnorr,
     }  
   };
   this.callTypes = {
@@ -453,7 +459,7 @@ KanbanGoNodes.prototype.testClear = function() {
   submitRequests.updateValue(inputAggregate.aggregateSignature, '');
 }
 
-KanbanGoNodes.prototype.run = function(functionLabel, callType) {
+KanbanGoNodes.prototype.run = function(functionLabel, callType, callbackOverridesStandard) {
   if (callType === undefined) {
     if (functionLabel in this.theFunctions) {
       callType = this.theFunctions[functionLabel].callType;
@@ -481,6 +487,7 @@ KanbanGoNodes.prototype.run = function(functionLabel, callType) {
   currentPendingCall.id = this.numberOfCalls;
   currentPendingCall.owner = this;
   currentPendingCall.callType = callType;
+  currentPendingCall.callbackOverridesStandard = callbackOverridesStandard;
   this.pendingCalls[this.numberOfCalls] = currentPendingCall;
   currentPendingCall.run(functionLabel);
 }

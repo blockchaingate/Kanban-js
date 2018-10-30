@@ -46,6 +46,8 @@ KanbanGONode.prototype.toHTMLRadioButton = function() {
 }
 
 function PendingCall () {
+  /**@type boolean */
+  this.flagFoundNotStartedError = false;
   /**@type {string} */
   this.callType = "";
   /**@type {{jsonOptions: Object, idDefaultOutput: string, rpcCalls: Object, url: string}} */
@@ -63,6 +65,7 @@ function PendingCall () {
   this.functionLabel = "";
   /** @type {bool} */
   this.flagShowClearButton = false;
+  this.callbackOverridesStandard = null;
 }
 
 PendingCall.prototype.run = function (functionLabel) {
@@ -110,6 +113,9 @@ PendingCall.prototype.callbackStandardOneCaller = function(
       header += parsedInput.resultHTML + "<br>"; 
     }
     if (parsedInput.error !== null && parsedInput.error !== undefined) {
+      if (parsedInput.error = kanbanGO.urlStrings.errorKanbanNodeStartWasNeverAttempted) {
+        this.flagFoundNotStartedError = true;
+      }
       header += `<b style = 'color:red'>Error:</b> ${parsedInput.error}<br>`;
     }
     if (parsedInput.reason !== null && parsedInput.reason !== undefined) {
@@ -187,6 +193,12 @@ PendingCall.prototype.callbackFetchSmartContract = function (nodeId, input, outp
   this.callbackStandard(nodeId, input, output);
 }
 
+PendingCall.prototype.callbackAutoStartKanbanGO = function(outputComponent, input, output) {
+  var theJSONWriter = new JSONTransformer();
+  var resultHTML = theJSONWriter.getHtmlFromArrayOfObjects(input, {});
+  outputComponent.innerHTML += resultHTML;
+}
+
 PendingCall.prototype.callbackStandard = function(nodeId, input, output) {
   //console.log(`DEBUG: pendingCall id: ${pendingCall.id}, nodeId: ${nodeId}, input: ${input}`);
   this.nodeCalls[nodeId].result = input;
@@ -204,6 +216,11 @@ PendingCall.prototype.callbackStandard = function(nodeId, input, output) {
   }
   if (typeof output === "string") {
     output = document.getElementById(output);
+  }
+  if (this.flagFoundNotStartedError) {
+    resultHTML += "<b style='color:green'> Will try to run kanbanGO for you. </b><br>"
+    resultHTML += "Equivalent to pressing the 'Run on FAB' button. <br>";
+    this.owner.run('runNodesOnFAB', 'initialization', this.callbackAutoStartKanbanGO.bind(null, output));
   }
   output.innerHTML = resultHTML;
   theJSONWriter.bindButtons();
@@ -299,7 +316,11 @@ PendingCall.prototype.runOneId = function (nodeId) {
       callbackCurrent = theFunction.callback;
     }  
   }
-  callbackCurrent = callbackCurrent.bind(this, nodeId);
+  if (this.callbackOverridesStandard !== null && this.callbackOverridesStandard !== undefined) {
+    callbackCurrent = this.callbackOverridesStandard;
+  } else {
+    callbackCurrent = callbackCurrent.bind(this, nodeId);
+  }
   if (usePOST) {
     submitRequests.submitPOST({
       url: theURL,

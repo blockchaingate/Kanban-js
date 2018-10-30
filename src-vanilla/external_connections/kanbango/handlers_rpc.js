@@ -94,20 +94,32 @@ function handleRPCArguments(response, queryCommand, queryNode) {
   if (numberRequestsRunning > maxRequestsRunning) {
     response.writeHead(500);
     numberRequestsRunning --;
-    return response.end(`Too many (${numberRequestsRunning}) requests running, maximum allowed: ${maxRequestsRunning}`);
+    var reponseJSON = {
+      error: `Too many (${numberRequestsRunning}) requests running, maximum allowed: ${maxRequestsRunning}`
+    };
+    return response.end(JSON.stringify(reponseJSON));
   }
   var currentNode = null;
   try {
     if (queryCommand[kanbanGORPC.urlStrings.rpcCallLabel] === undefined) {
       response.writeHead(400);
       numberRequestsRunning --;
-      return response.end(`Command is missing the ${kanbanGORPC.urlStrings.rpcCallLabel} entry. `);        
+      var reponseJSON = {
+        error: `Command is missing the ${kanbanGORPC.urlStrings.rpcCallLabel} entry. `
+      };
+      return response.end(JSON.stringify(reponseJSON));        
     }
     var currentNodeId = queryNode.id;
+    //if (currentNodeId === "none") {
+    //  currentNodeId = 0;
+    //}
     if (currentNodeId === undefined || currentNodeId === null) {
       response.writeHead(400);
       numberRequestsRunning --;
-      return response.end(`Node is missing the id variable. `);        
+      var reponseJSON = {
+        error: `Node is missing the id variable. `
+      };
+      return response.end(JSON.stringify(reponseJSON));        
     }
     var currentNodeIdNumber = Number(currentNodeId);
     var initializer = kanabanGoInitializer.getInitializer(); 
@@ -115,7 +127,13 @@ function handleRPCArguments(response, queryCommand, queryNode) {
     if (currentNode === undefined || currentNode === null) {
       response.writeHead(400);
       numberRequestsRunning --;
-      return response.end(`Failed to extract node id from ${currentNodeId}.`);          
+      var reponseJSON = {
+        error: `Failed to extract node id from ${currentNodeId}.`
+      };
+      if (!initializer.flagStartWasEverAttempted) {
+        reponseJSON.error = kanbanGORPC.urlStrings.errorKanbanNodeStartWasNeverAttempted;        
+      }
+      return response.end(JSON.stringify(reponseJSON));          
     }
   } catch (e) {
     response.writeHead(400);
@@ -127,7 +145,10 @@ function handleRPCArguments(response, queryCommand, queryNode) {
   if (!(theCallLabel in callCollection)) {
     response.writeHead(400);
     numberRequestsRunning --;
-    return response.end(`RPC call label ${theCallLabel} not found. `);    
+    var reponseJSON = {
+      error: `RPC call label ${theCallLabel} not found. `
+    };
+    return response.end(JSON.stringify(reponseJSON));    
   }
   var currentCall = callCollection[theCallLabel];
   if (currentCall.easyAccessControlOrigin === true) {

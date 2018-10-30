@@ -2,7 +2,8 @@
 
 var urlStrings = {
   node: "node",
-  rpcCallLabel: "rpcCall"
+  rpcCallLabel: "rpcCall",
+  errorKanbanNodeStartWasNeverAttempted: "KanbanGo start was never attempted. ",
 };
 
 /**
@@ -29,7 +30,7 @@ var rpcCalls = {
   },
   testPrivateKeyGeneration: {
     rpcCall: "testPrivateKeyGeneration", //must be same as rpc label, used for autocomplete
-    method: "kanban_testPrivateKeyGeneration", //<- name of go's RPC method 
+    method: "cryptotest_testPrivateKeyGeneration", //<- name of go's RPC method 
     mandatoryFixedArguments: { //<- values give defaults, null for none
     },
     mandatoryModifiableArguments: { //<- values give defaults, null for none
@@ -42,7 +43,7 @@ var rpcCalls = {
   },
   testPublicKeyFromPrivate: {
     rpcCall: "testPublicKeyFromPrivate", //must be same as rpc label, used for autocomplete
-    method: "kanban_testPublicKeyFromPrivate", //<- name of go's RPC method 
+    method: "cryptotest_testPublicKeyFromPrivate", //<- name of go's RPC method 
     mandatoryFixedArguments: { //<- values give defaults, null for none
     },
     mandatoryModifiableArguments: { //<- values give defaults, null for none
@@ -56,7 +57,7 @@ var rpcCalls = {
   },
   testSchnorrSignature: {
     rpcCall: "testSchnorrSignature", //must be same as rpc label, used for autocomplete
-    method: "kanban_testSchnorrSignature", //<- name of go's RPC method 
+    method: "cryptotest_testSchnorrSignature", //<- name of go's RPC method 
     mandatoryFixedArguments: { //<- values give defaults, null for none
     },
     mandatoryModifiableArguments: { //<- values give defaults, null for none
@@ -71,7 +72,7 @@ var rpcCalls = {
   },
   testSchnorrVerification: {
     rpcCall: "testSchnorrVerification", //must be same as rpc label, used for autocomplete
-    method: "kanban_testSchnorrVerification", //<- name of go's RPC method 
+    method: "cryptotest_testSchnorrVerification", //<- name of go's RPC method 
     mandatoryFixedArguments: { //<- values give defaults, null for none
     },
     mandatoryModifiableArguments: { //<- values give defaults, null for none
@@ -87,7 +88,7 @@ var rpcCalls = {
   },
   testAggregateInitialize: {
     rpcCall: "testAggregateInitialize", //must be same as rpc label, used for autocomplete
-    method: "kanban_testAggregateInitialize", //<- name of go's RPC method 
+    method: "cryptotest_testAggregateInitialize", //<- name of go's RPC method 
     mandatoryFixedArguments: { //<- values give defaults, null for none
     },
     mandatoryModifiableArguments: { //<- values give defaults, null for none
@@ -101,7 +102,7 @@ var rpcCalls = {
   },
   testAggregateCommitment: {
     rpcCall: "testAggregateCommitment", //must be same as rpc label, used for autocomplete
-    method: "kanban_testAggregateCommitment", //<- name of go's RPC method 
+    method: "cryptotest_testAggregateCommitment", //<- name of go's RPC method 
     mandatoryFixedArguments: { //<- values give defaults, null for none
     },
     mandatoryModifiableArguments: { //<- values give defaults, null for none
@@ -115,7 +116,7 @@ var rpcCalls = {
   },
   testAggregateChallenge: {
     rpcCall: "testAggregateChallenge", //must be same as rpc label, used for autocomplete
-    method: "kanban_testAggregateChallenge", //<- name of go's RPC method 
+    method: "cryptotest_testAggregateChallenge", //<- name of go's RPC method 
     mandatoryFixedArguments: { //<- values give defaults, null for none
     },
     mandatoryModifiableArguments: { //<- values give defaults, null for none
@@ -130,7 +131,7 @@ var rpcCalls = {
   },
   testAggregateSolutions: {
     rpcCall: "testAggregateSolutions", //must be same as rpc label, used for autocomplete
-    method: "kanban_testAggregateSolutions", //<- name of go's RPC method 
+    method: "cryptotest_testAggregateSolutions", //<- name of go's RPC method 
     mandatoryFixedArguments: { //<- values give defaults, null for none
     },
     mandatoryModifiableArguments: { //<- values give defaults, null for none
@@ -147,7 +148,7 @@ var rpcCalls = {
   },
   testAggregateSignature: {
     rpcCall: "testAggregateSignature", //must be same as rpc label, used for autocomplete
-    method: "kanban_testAggregateSignature", //<- name of go's RPC method 
+    method: "cryptotest_testAggregateSignature", //<- name of go's RPC method 
     mandatoryFixedArguments: { //<- values give defaults, null for none
     },
     mandatoryModifiableArguments: { //<- values give defaults, null for none
@@ -162,7 +163,7 @@ var rpcCalls = {
   },
   testAggregateVerification: {
     rpcCall: "testAggregateVerification", //must be same as rpc label, used for autocomplete
-    method: "kanban_testAggregateVerification", //<- name of go's RPC method 
+    method: "cryptotest_testAggregateVerification", //<- name of go's RPC method 
     mandatoryFixedArguments: { //<- values give defaults, null for none
     },
     mandatoryModifiableArguments: { //<- values give defaults, null for none
