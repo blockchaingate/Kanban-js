@@ -188,6 +188,7 @@ function KanbanGoNodes() {
       "aggregator.messageDigest": this.transformersStandard.shortener,
       "aggregator.aggregateSolution": this.transformersStandard.shortener,
       "aggregator.signatureNoBitmap": this.transformersStandard.shortener,
+      "aggregator.signatureComplete": this.transformersStandard.shortener,
 
       "verifier.aggregateCommitment": this.transformersStandard.shortener,
       "verifier.aggregateSolution": this.transformersStandard.shortener,
@@ -198,6 +199,7 @@ function KanbanGoNodes() {
       "verifier.publicKeys.${number}": this.transformersStandard.shortener,
       "verifier.publicKeysJacobian.${number}": this.transformersStandard.shortener,
       "verifier.signatureNoBitmap": this.transformersStandard.shortener,
+      "verifier.signatureComplete": this.transformersStandard.shortener,
 
       "signers.${number}.myPublicKey": this.transformersStandard.shortener,
       "signers.${number}.privateKeyBase58": this.transformersStandard.shortener,
@@ -389,7 +391,8 @@ function KanbanGoNodes() {
       },
       outputs: {
         aggregator: {
-          signatureNoBitmap: inputAggregate.aggregateSignature
+          signatureNoBitmap: inputAggregate.aggregateSignature,
+          signatureComplete: inputAggregate.aggregateSignatureComplete
         }
       }
     },

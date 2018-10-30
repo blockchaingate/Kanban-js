@@ -13,7 +13,7 @@ var rpcCalls = {
   //The method names of the ethereum calls are composed like this:
   //1. Take the function name, say, TestSha3. 
   //2. Lowercase the first letter, say, testSha3.
-  //3. Prefix the name with the module name, say, kanban_testSha3.
+  //3. Prefix the name with the module name, say, cryptotest_testSha3.
   testSha3: {
     rpcCall: "testSha3", //must be same as rpc label, used for autocomplete
     method: "cryptotest_testSha3", //<- name of go's RPC method 
@@ -29,216 +29,134 @@ var rpcCalls = {
     parameters: ["message"]
   },
   testPrivateKeyGeneration: {
-    rpcCall: "testPrivateKeyGeneration", //must be same as rpc label, used for autocomplete
-    method: "cryptotest_testPrivateKeyGeneration", //<- name of go's RPC method 
-    mandatoryFixedArguments: { //<- values give defaults, null for none
-    },
-    mandatoryModifiableArguments: { //<- values give defaults, null for none
-    },
-    optionalArguments: {
-    },
-    allowedArgumentValues: {
-    },
+    rpcCall: "testPrivateKeyGeneration",
+    method: "cryptotest_testPrivateKeyGeneration",
     parameters: []
   },
   testPublicKeyFromPrivate: {
-    rpcCall: "testPublicKeyFromPrivate", //must be same as rpc label, used for autocomplete
-    method: "cryptotest_testPublicKeyFromPrivate", //<- name of go's RPC method 
-    mandatoryFixedArguments: { //<- values give defaults, null for none
-    },
-    mandatoryModifiableArguments: { //<- values give defaults, null for none
+    rpcCall: "testPublicKeyFromPrivate",
+    method: "cryptotest_testPublicKeyFromPrivate", 
+    mandatoryModifiableArguments: {
       privateKey: null
-    },
-    optionalArguments: {
-    },
-    allowedArgumentValues: {
     },
     parameters: ["privateKey"]
   },
   testSchnorrSignature: {
-    rpcCall: "testSchnorrSignature", //must be same as rpc label, used for autocomplete
-    method: "cryptotest_testSchnorrSignature", //<- name of go's RPC method 
-    mandatoryFixedArguments: { //<- values give defaults, null for none
-    },
-    mandatoryModifiableArguments: { //<- values give defaults, null for none
+    rpcCall: "testSchnorrSignature", 
+    method: "cryptotest_testSchnorrSignature",
+    mandatoryModifiableArguments: {
       privateKey: null,
       messageBase64: null
-    },
-    optionalArguments: {
-    },
-    allowedArgumentValues: {
     },
     parameters: ["privateKey", "messageBase64"]
   },
   testSchnorrVerification: {
-    rpcCall: "testSchnorrVerification", //must be same as rpc label, used for autocomplete
-    method: "cryptotest_testSchnorrVerification", //<- name of go's RPC method 
-    mandatoryFixedArguments: { //<- values give defaults, null for none
-    },
-    mandatoryModifiableArguments: { //<- values give defaults, null for none
+    rpcCall: "testSchnorrVerification",
+    method: "cryptotest_testSchnorrVerification",
+    mandatoryModifiableArguments: {
       signature: null,
       publicKey: null,
       messageBase64: null,
     },
-    optionalArguments: {
-    },
-    allowedArgumentValues: {
-    },
     parameters: ["signature", "publicKey", "messageBase64"]
   },
   testAggregateInitialize: {
-    rpcCall: "testAggregateInitialize", //must be same as rpc label, used for autocomplete
-    method: "cryptotest_testAggregateInitialize", //<- name of go's RPC method 
-    mandatoryFixedArguments: { //<- values give defaults, null for none
-    },
-    mandatoryModifiableArguments: { //<- values give defaults, null for none
+    rpcCall: "testAggregateInitialize",
+    method: "cryptotest_testAggregateInitialize",
+    mandatoryModifiableArguments: {
       numberOfPrivateKeysToGenerate: null
-    },
-    optionalArguments: {
-    },
-    allowedArgumentValues: {
     },
     parameters: ["numberOfPrivateKeysToGenerate"]    
   },
   testAggregateCommitment: {
-    rpcCall: "testAggregateCommitment", //must be same as rpc label, used for autocomplete
-    method: "cryptotest_testAggregateCommitment", //<- name of go's RPC method 
-    mandatoryFixedArguments: { //<- values give defaults, null for none
-    },
-    mandatoryModifiableArguments: { //<- values give defaults, null for none
+    rpcCall: "testAggregateCommitment",
+    method: "cryptotest_testAggregateCommitment",
+    mandatoryModifiableArguments: {
       messageBase64: null
-    },
-    optionalArguments: {
-    },
-    allowedArgumentValues: {
     },
     parameters: ["messageBase64"]    
   },
   testAggregateChallenge: {
-    rpcCall: "testAggregateChallenge", //must be same as rpc label, used for autocomplete
-    method: "cryptotest_testAggregateChallenge", //<- name of go's RPC method 
-    mandatoryFixedArguments: { //<- values give defaults, null for none
-    },
-    mandatoryModifiableArguments: { //<- values give defaults, null for none
+    rpcCall: "testAggregateChallenge",
+    method: "cryptotest_testAggregateChallenge",
+    mandatoryModifiableArguments: {
       commitmentsBase64: null,
       committedSigners: null
-    },
-    optionalArguments: {
-    },
-    allowedArgumentValues: {
     },
     parameters: ["commitmentsBase64", "committedSigners"]    
   },
   testAggregateSolutions: {
-    rpcCall: "testAggregateSolutions", //must be same as rpc label, used for autocomplete
-    method: "cryptotest_testAggregateSolutions", //<- name of go's RPC method 
-    mandatoryFixedArguments: { //<- values give defaults, null for none
-    },
-    mandatoryModifiableArguments: { //<- values give defaults, null for none
+    rpcCall: "testAggregateSolutions",
+    method: "cryptotest_testAggregateSolutions",
+    mandatoryModifiableArguments: {
       committedSigners: null,
       digest: null,
       aggregateCommitment: null,
       aggregatePublicKey: null
     },
-    optionalArguments: {
-    },
-    allowedArgumentValues: {
-    },
     parameters: ["committedSigners", "digest", "aggregateCommitment", "aggregatePublicKey"]    
   },
   testAggregateSignature: {
-    rpcCall: "testAggregateSignature", //must be same as rpc label, used for autocomplete
-    method: "cryptotest_testAggregateSignature", //<- name of go's RPC method 
-    mandatoryFixedArguments: { //<- values give defaults, null for none
-    },
-    mandatoryModifiableArguments: { //<- values give defaults, null for none
+    rpcCall: "testAggregateSignature",
+    method: "cryptotest_testAggregateSignature",
+    mandatoryModifiableArguments: {
       committedSigners: null,
       solutionsBase64: null,
-    },
-    optionalArguments: {
-    },
-    allowedArgumentValues: {
     },
     parameters: ["committedSigners", "solutionsBase64"]    
   },
   testAggregateVerification: {
-    rpcCall: "testAggregateVerification", //must be same as rpc label, used for autocomplete
-    method: "cryptotest_testAggregateVerification", //<- name of go's RPC method 
-    mandatoryFixedArguments: { //<- values give defaults, null for none
-    },
-    mandatoryModifiableArguments: { //<- values give defaults, null for none
+    rpcCall: "testAggregateVerification",
+    method: "cryptotest_testAggregateVerification",
+    mandatoryModifiableArguments: {
       signature: null,
       committedSigners: null,
       allPublicKeysBase64: null,
       messageBase64: null,
     },
-    optionalArguments: {
-    },
-    allowedArgumentValues: {
-    },
     parameters: ["signature", "committedSigners", "allPublicKeysBase64", "messageBase64"]    
+  },
+  testAggregateVerificationComplete: {
+    rpcCall: "testAggregateVerificationComplete",
+    method: "cryptotest_testAggregateVerificationComplete",
   },
   getBlockByNumber: {
     rpcCall: "getBlockByNumber",
     method: "kanban_getBlockByNumber",
-    mandatoryFixedArguments: { //<- values give defaults, null for none
+    mandatoryFixedArguments: {
       verbose: true
     },
-    mandatoryModifiableArguments: { //<- values give defaults, null for none
+    mandatoryModifiableArguments: {
       blockNumber: null
     },
     types: {
       blockNumber: "numberHex"
-    },
-    optionalArguments: {
-    },
-    allowedArgumentValues: {
     },
     parameters: ["blockNumber", "verbose"]
   },
   getBlockByHash: {
     rpcCall: "getBlockByHash",
     method: "kanban_getBlockByHash",
-    mandatoryFixedArguments: { //<- values give defaults, null for none
+    mandatoryFixedArguments: {
       verbose: true
     },
-    mandatoryModifiableArguments: { //<- values give defaults, null for none
+    mandatoryModifiableArguments: {
       blockHash: null
-    },
-    optionalArguments: {
-    },
-    allowedArgumentValues: {
     },
     parameters: ["blockHash", "verbose"]
   },
   round: {
     rpcCall: "round",
     method: "pbft_round",
-    mandatoryFixedArguments: { //<- values give defaults, null for none
-    },
-    mandatoryModifiableArguments: { //<- values give defaults, null for none
-    },
-    optionalArguments: {
-    },
-    allowedArgumentValues: {
-    },
     parameters: []
   },
   peerView: {
-    rpcCall: "peerView", //must be same as rpc label, used for autocomplete
+    rpcCall: "peerView",
     method: "pbft_peerView", //<- method name passed to kanban-go
-    mandatoryFixedArguments: { //<- values give defaults, null for none
-    },
-    mandatoryModifiableArguments: { //<- values give defaults, null for none
-    },
-    optionalArguments: {
-    },
-    allowedArgumentValues: {
-    },
     parameters: []
   },
   roundChangeRequests: {
-    rpcCall: "roundChangeRequests", //must be same as rpc label, used for autocomplete
+    rpcCall: "roundChangeRequests",
     method: "pbft_roundChangeRequests", //<- method name passed to kanban-go
     parameters: []
   },
@@ -248,7 +166,7 @@ var rpcCalls = {
     parameters: []
   },
   versionGO: {
-    rpcCall: "versionGO", //must be same as rpc label, used for autocomplete
+    rpcCall: "versionGO",
     method: "web3_clientVersion",
     parameters: []
   }, 

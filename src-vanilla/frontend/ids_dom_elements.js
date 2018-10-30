@@ -53,6 +53,7 @@ var defaults = {
       aggregateCommitment: "inputKBGOAggregateCommitment",
       solutions: "inputKBGOSolutions",
       aggregateSignature: "inputKBGOAggregateSignature",
+      aggregateSignatureComplete: "inputKBGOAggregateSignatureComplete",
     },
     inputSendReceive: {
       blockNumber: "inputKBGOBlockNumber",
