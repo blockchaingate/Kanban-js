@@ -179,6 +179,22 @@ function KanbanGoNodes() {
       inputSignatureBase58: this.transformersStandard.setSignatureSchnorr,
       inputSignatureBase58Recoded: this.transformersStandard.setSignatureSchnorr,
       signatureBase58: this.transformersStandard.setSignatureSchnorr,
+      "aggregator.publicKeys.${number}": this.transformersStandard.shortener,
+      "aggregator.aggregateCommitment": this.transformersStandard.shortener,
+      "aggregator.aggregatePublicKey": this.transformersStandard.shortener,
+      "aggregator.commitments.${number}": this.transformersStandard.shortener,
+      "aggregator.lockingCoefficients.${number}": this.transformersStandard.shortener,
+      "aggregator.publicKeys.${number}": this.transformersStandard.shortener,
+      "aggregator.messageDigest": this.transformersStandard.shortener,
+      "aggregator.aggregateSolution": this.transformersStandard.shortener,
+      "aggregator.signatureNoBitmap": this.transformersStandard.shortener,
+      "signers.${number}.myPublicKey": this.transformersStandard.shortener,
+      "signers.${number}.privateKeyBase58": this.transformersStandard.shortener,
+      "signers.${number}.commitmentHexCompressed": this.transformersStandard.shortener,
+      "signers.${number}.myNonceBase58": this.transformersStandard.shortener,
+      "signers.${number}.myLockingCoefficient": this.transformersStandard.shortener,
+      "signers.${number}.mySolution": this.transformersStandard.shortener,
+      "inputPublicKeys.${number}": this.transformersStandard.shortener,
     }  
   };
   this.callTypes = {
