@@ -188,6 +188,17 @@ function KanbanGoNodes() {
       "aggregator.messageDigest": this.transformersStandard.shortener,
       "aggregator.aggregateSolution": this.transformersStandard.shortener,
       "aggregator.signatureNoBitmap": this.transformersStandard.shortener,
+
+      "verifier.aggregateCommitment": this.transformersStandard.shortener,
+      "verifier.aggregateSolution": this.transformersStandard.shortener,
+      "verifier.aggregatePublicKey": this.transformersStandard.shortener,
+      "verifier.concatenatedPublicKeys": this.transformersStandard.shortener,
+      "verifier.lockingCoefficients.${number}": this.transformersStandard.shortener,
+      "verifier.messageDigest": this.transformersStandard.shortener,
+      "verifier.publicKeys.${number}": this.transformersStandard.shortener,
+      "verifier.publicKeysJacobian.${number}": this.transformersStandard.shortener,
+      "verifier.signatureNoBitmap": this.transformersStandard.shortener,
+
       "signers.${number}.myPublicKey": this.transformersStandard.shortener,
       "signers.${number}.privateKeyBase58": this.transformersStandard.shortener,
       "signers.${number}.commitmentHexCompressed": this.transformersStandard.shortener,
@@ -215,17 +226,17 @@ function KanbanGoNodes() {
       rpcCalls: kanbanGOInitialization.rpcCalls,
       idDefaultOutput: ids.defaults.kanbanGO.outputKanbanInitialization,
       url: pathnames.url.known.kanbanGO.initialization,
-      useOneNode: true
     }
   }; 
   // if rpcCall omitted it will be assumed to be equal to the function label.
-  /**@type {Object.<string, rpcCall: string, output: string, outputOptions: Object, inputs: Object>} */
+  /**@type {Object.<string, rpcCall: string, output: string, outputs: Object, outputOptions: Object, inputs: Object, callback: Object, useOneNode: boolean>} */
   this.theFunctions  = {
     runNodesDetached: {
       inputs: {
         numberOfNodes: inputInitialization.numberOfNodes
       },
       callback: PendingCall.prototype.callbackRunNodes,
+      useOneNode: true
     },
     runNodesOnFAB: {
       inputs: {
@@ -234,12 +245,23 @@ function KanbanGoNodes() {
         contractId: inputInitialization.contractId
       },
       callback: PendingCall.prototype.callbackRunNodes,
+      useOneNode: true
     },
     killAllGeth: {
       callback: this.getNodeInformationCallback.bind(this)
     },
+    getLogFile: {
+      outputOptions: {
+        totalEntriesToDisplayAtEnds: 1000,
+      },
+    },
+    getRPCLogFile: {
+      outputOptions: {
+        totalEntriesToDisplayAtEnds: 1000,
+      },
+    },
     getNodeInformation: {
-      callback: this.getNodeInformationCallback.bind(this)
+      
     },
     peerView: {
       outputJSON: ids.defaults.kanbanGO.outputSendReceive,
@@ -505,8 +527,10 @@ KanbanGoNodes.prototype.run = function(functionLabel, callType, callbackOverride
     throw `Call type not among the allowed call types: ${Object.keys(this.callTypes)}`;
   }
   var currentId = this.selectedNode;
-  if (this.callTypes[callType].useOneNode) {
-    currentId = "none";
+  if (functionLabel in this.theFunctions) {
+    if (this.theFunctions[functionLabel].useOneNode) {
+      currentId = "none";
+    }
   }
   this.numberOfCalls ++;
   var currentPendingCall = new PendingCall();
@@ -526,7 +550,7 @@ KanbanGoNodes.prototype.run = function(functionLabel, callType, callbackOverride
 }
 
 KanbanGoNodes.prototype.getNodeInformation = function () {
-  this.run('getNodeInformation', 'initialization');
+  this.run('getNodeInformation', 'initialization', this.getNodeInformationCallback.bind(this));
 }
 
 KanbanGoNodes.prototype.selectRadio = function (idRadio) {
@@ -553,7 +577,7 @@ KanbanGoNodes.prototype.toHTMLRadioButton = function () {
   return radioButtonHTML;
 }
 
-KanbanGoNodes.prototype.getNodeInformationCallback = function (functionLabel, input, output) {
+KanbanGoNodes.prototype.getNodeInformationCallback = function (input, output) {
   //console.log("DEBUG: Got back:" + input);
   try {
     var inputParsed = JSON.parse(input);
@@ -570,9 +594,9 @@ KanbanGoNodes.prototype.getNodeInformationCallback = function (functionLabel, in
     for (var counterNode = 0; counterNode < inputParsed.length; counterNode ++) {
       var currentNode = new KanbanGONode();
       currentNode.init(inputParsed[counterNode]);
-      //console.log("DEBUG: This selected node: " + this.selectedNode + " id backend:  " + currentNode.idBackend);
+      console.log("DEBUG: This selected node: " + this.selectedNode + " id backend:  " + currentNode.idBackend);
       if (this.selectedNode === currentNode.idBackend) {
-        //console.log("DEbug: selecting node: " + currentNode.idBackend);
+        console.log("Debug: selecting node: " + currentNode.idBackend);
         currentNode.flagSelected = true;
       }
       this.nodes.push(currentNode);

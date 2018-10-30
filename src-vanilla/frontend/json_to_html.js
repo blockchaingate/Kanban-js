@@ -174,13 +174,13 @@ JSONTransformer.prototype.getClickableEntryUsingTransformer = function(input, in
 
 var totalEntriesToDisplayAtEnds = 4;
 
-JSONTransformer.prototype.getTableHorizontallyLaidFromJSON = function(input, transformers, labelString, labelArray) {
+JSONTransformer.prototype.getTableHorizontallyLaidFromJSON = function(input, options, labelString, labelArray) {
   if (
     typeof input === "string" || 
     typeof input === "number" ||
     typeof input === "boolean"
   ) {
-    return this.getClickableEntry(input, input, transformers, labelString, labelArray);
+    return this.getClickableEntry(input, input, options.transformers, labelString, labelArray);
   }
   if (typeof input !== "object") {
     return typeof input;
@@ -193,7 +193,7 @@ JSONTransformer.prototype.getTableHorizontallyLaidFromJSON = function(input, tra
   var numSoFar = 0;
   var transformerAll = null;
   if (labelString !== null && labelString !== undefined) {
-    transformerAll = getTransformerForLabel(labelString, transformers);
+    transformerAll = getTransformerForLabel(labelString, options.transformers);
   }
   var labelOfLabel;
   if (labelString !== null && labelString !== undefined) {
@@ -201,13 +201,17 @@ JSONTransformer.prototype.getTableHorizontallyLaidFromJSON = function(input, tra
   } else {
     labelOfLabel = "${label}"; 
   }
-  var labelTransformer = getTransformerForLabel(labelOfLabel, transformers);
+  var labelTransformer = getTransformerForLabel(labelOfLabel, options.transformers);
   var labelToDisplay = "";
   var resultContent = "";
   if (labelArray === undefined) {
     labelArray = [];
   }
   resultContent += "<table class='tableJSON'>";
+  var entriesAtEachEnd = totalEntriesToDisplayAtEnds;
+  if (options.totalEntriesToDisplayAtEnds !== undefined && options.totalEntriesToDisplayAtEnds !== null) {
+    entriesAtEachEnd = options.totalEntriesToDisplayAtEnds;
+  }
   for (item in input) {
     numSoFar ++;
     var newLabelArray; 
@@ -224,10 +228,10 @@ JSONTransformer.prototype.getTableHorizontallyLaidFromJSON = function(input, tra
     } else {
       labelToDisplay = this.getClickableEntryUsingTransformer(item, item, labelTransformer, item, labelArray);
     }
-    if (arrayLength == 0 || numSoFar <= totalEntriesToDisplayAtEnds || numSoFar > arrayLength - totalEntriesToDisplayAtEnds) {
-      resultContent += `<tr><td>${labelToDisplay}</td><td>${this.getTableHorizontallyLaidFromJSON(input[item], transformers, newLabel, newLabelArray)}</td></tr>`; 
+    if (arrayLength == 0 || numSoFar <= entriesAtEachEnd || numSoFar > arrayLength - entriesAtEachEnd) {
+      resultContent += `<tr><td>${labelToDisplay}</td><td>${this.getTableHorizontallyLaidFromJSON(input[item], options, newLabel, newLabelArray)}</td></tr>`; 
     }
-    if (arrayLength > 0 && numSoFar === totalEntriesToDisplayAtEnds && totalEntriesToDisplayAtEnds * 2 < arrayLength) {
+    if (arrayLength > 0 && numSoFar === entriesAtEachEnd && entriesAtEachEnd * 2 < arrayLength) {
       resultContent += "<tr><td>...</td></tr>";
     }
   }
@@ -341,7 +345,7 @@ var labelAbbreviations = {
   "signatureNoBitmap": "sigNoBmp.",
   "aggregateSolution": "aggSoln.",
   "knownPublicKeys": "pubKeys",
-  "concatenatedPublicKeys": "c.PubKeys",
+  "concatenatedPublicKeys": "concatPubK",
   "messageDigest": "msgDgst."
 }
 
@@ -407,9 +411,8 @@ JSONTransformer.prototype.getHtmlFromArrayOfObjects = function(input, options) {
       shouldLayoutAsArrayTable = true;
     }
   }
-  var transformers = options.transformers;
-  if (transformers === undefined || transformers === null) {
-    transformers = {};
+  if (options.transformers === undefined || options.transformers === null) {
+    options.transformers = {};
   }
   if (shouldLayoutAsArrayOfObjects) {
     var labelsRows = getLabelsRows(inputJSON);
@@ -419,11 +422,11 @@ JSONTransformer.prototype.getHtmlFromArrayOfObjects = function(input, options) {
       var header = this.getClickableEntryUsingTransformer(
         labelsRows.labels[counterColumn], 
         labelsRows.labels[counterColumn], 
-        transformers["${label}"], 
+        options.transformers["${label}"], 
         "${label}",
         []
       );
-      if (transformers["${label}"] === undefined) {
+      if (options.transformers["${label}"] === undefined) {
         header = `<small>${abbreviateLabel(header)}</small>`;
       }
       result += `<th>${header}</th>`;
@@ -433,7 +436,7 @@ JSONTransformer.prototype.getHtmlFromArrayOfObjects = function(input, options) {
       for (var counterColumn = 0; counterColumn < labelsRows.labels.length; counterColumn ++) {
         var currentEntry = this.getTableHorizontallyLaidFromJSON(
           labelsRows.rows[counterRow][counterColumn], 
-          transformers, 
+          options, 
           labelsRows.labels[counterColumn],
           [labelsRows.labels[counterColumn]]
         );
@@ -444,9 +447,9 @@ JSONTransformer.prototype.getHtmlFromArrayOfObjects = function(input, options) {
     result += "</tr>";
     result += "</table>";
   } else if (shouldLayoutAsArrayTable) {
-    result += this.getTableHorizontallyLaidFromJSON(inputJSON, transformers, null, []);
+    result += this.getTableHorizontallyLaidFromJSON(inputJSON, options, null, []);
   } else {
-    result += `${this.getClickableEntryUsingTransformer(inputJSON, inputJSON, transformers.singleEntry, "singleEntry", [])}<br>`; 
+    result += `${this.getClickableEntryUsingTransformer(inputJSON, inputJSON, options.transformers.singleEntry, "singleEntry", [])}<br>`; 
   }
   return result;
 }

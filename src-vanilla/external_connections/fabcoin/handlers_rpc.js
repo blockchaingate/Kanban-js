@@ -82,25 +82,37 @@ function handleRPCArguments(response, queryCommand) {
   if (numberRequestsRunning > maxRequestsRunning) {
     response.writeHead(500);
     numberRequestsRunning --;
-    return response.end(`Too many (${numberRequestsRunning}) requests running, maximum allowed: ${maxRequestsRunning}`);
+    var result = {
+      error: `Too many (${numberRequestsRunning}) requests running, maximum allowed: ${maxRequestsRunning}`
+    };
+    return response.end(JSON.stringify(result));
   }
   try {
     if (queryCommand[fabcoinRPC.urlStrings.rpcCallLabel] === undefined) {
       response.writeHead(400);
       numberRequestsRunning --;
-      return response.end(`Command is missing the ${fabcoinRPC.urlStrings.rpcCallLabel} entry. `);        
+      var result = {
+        error: `Command is missing the ${fabcoinRPC.urlStrings.rpcCallLabel} entry. `
+      };
+      return response.end(JSON.stringify(result));        
     }
   } catch (e) {
     response.writeHead(400);
     numberRequestsRunning --;
-    return response.end(`Failed to extract rpc call label. ${e}`);        
+    var result = {
+      error: `Failed to extract rpc call label. ${e}`
+    };
+    return response.end(JSON.stringify(result));        
   }
   var theCallLabel = queryCommand[fabcoinRPC.urlStrings.rpcCallLabel];
   var callCollection = fabcoinRPC.rpcCalls;
   if (!(theCallLabel in callCollection)) {
     response.writeHead(400);
     numberRequestsRunning --;
-    return response.end(`RPC call label ${theCallLabel} not found. `);    
+    var result = {
+      error: `RPC call label ${theCallLabel} not found. `
+    };
+    return response.end(JSON.stringify(result));    
   }
   var errors = [];
   var theRequestJSON = getRPCRequestJSON(theCallLabel, queryCommand, errors);
@@ -113,7 +125,10 @@ function handleRPCArguments(response, queryCommand) {
     numberRequestsRunning --;
     fabcoinInitialization.getFabcoinNode().flagStartWasEverAttempted = true;
     response.writeHead(200);
-    response.end(`{"error": "${fabcoinInitializationSpec.urlStrings.errorFabNeverStarted}"}`);
+    var result = {
+      error: fabcoinInitializationSpec.urlStrings.errorFabNeverStarted
+    };
+    response.end(JSON.stringify(result));
     return;
   }
 
@@ -141,8 +156,8 @@ function handleRPCArgumentsPartTwo(response, requestStringified) {
   };
   //console.log ("DEBUG: options for request: " + JSON.stringify(requestOptions));
   console.log (`DEBUG: about to submit request: ${requestStringified}`.green);
-  console.log (`DEBUG:  submit options: ${JSON.stringify(requestOptions)}`.green);
-  console.log (`DEBUG:  submit body: ${requestStringified}`);
+  console.log (`DEBUG: submit options: ${JSON.stringify(requestOptions)}`.green);
+  console.log (`DEBUG: submit body: ${requestStringified}`);
   //console.log ("DEBUG: request object: " + JSON.stringify(RPCRequestObject));
 
   var theHTTPrequest = http.request(requestOptions);
@@ -152,8 +167,11 @@ function handleRPCArgumentsPartTwo(response, requestStringified) {
     theHTTPrequest.on('error', function(theError) {
       response.writeHead(500);
       numberRequestsRunning --;
-      response.end(`Eror during commmunication with rpc server. ${theError}. `);
-      console.log(`Eror during commmunication with rpc server. ${theError}. `);
+      var result =  {
+        error: `Eror during commmunication with rpc server. ${theError}. `,
+      }
+      response.end(JSON.stringify(result));
+      console.log(JSON.stringify(result));
     }); 
     theHTTPrequest.on('response', function(theHTTPresponse) {
       var finalData = "";
@@ -165,7 +183,10 @@ function handleRPCArgumentsPartTwo(response, requestStringified) {
       theHTTPresponse.on('error', function(yetAnotherError){
         response.writeHead(500);
         numberRequestsRunning --;
-        response.end(`Eror during commmunication with rpc server. ${yetAnotherError}. `);
+        var result =  {
+          error: `Eror during commmunication with rpc server. ${yetAnotherError}. `,
+        }
+        response.end(JSON.stringify(result));
         //console.log(`Eror during commmunication with rpc server. ${yetAnotherError}. `);  
       });
       theHTTPresponse.on('end', function() {
@@ -187,7 +208,11 @@ function handleRPCArgumentsPartTwo(response, requestStringified) {
           return response.end(JSON.stringify(dataParsed.result));
         } catch (errorParsing) {
           response.writeHead(500);
-          return response.end(`Error parsing kanbanGO's output: ${finalData}. Error message: ${errorParsing}. `);
+          var result = {
+            error: errorParsing,
+            kanbanGOResult: dataParsed,            
+          }
+          return response.end(JSON.stringify(result));
         }
       });
     });

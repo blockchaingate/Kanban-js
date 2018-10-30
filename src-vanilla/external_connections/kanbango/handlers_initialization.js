@@ -944,11 +944,14 @@ KanbanGoInitializer.prototype.getLogFile = function(
   this.numberRequestsRunning --;
   if (currentNode === null || currentNode === undefined || !(currentNode instanceof NodeKanbanGo)) {
     response.writeHead(400);
-    response.end(`Bad node id. Current node: ${currentNode} `);
+    var result = {
+      error: `Bad node id. Current node: ${currentNode} `
+    };
+    response.end(JSON.stringify(result));
   }
   response.writeHead(200);
-  var result = currentNode.outputStreams.log.toString();
-  response.end(result);
+  var result = currentNode.outputStreams.log.toArray();
+  response.end(JSON.stringify(result));
 }
 
 KanbanGoInitializer.prototype.getRPCLogFile = function(
@@ -960,11 +963,14 @@ KanbanGoInitializer.prototype.getRPCLogFile = function(
   this.numberRequestsRunning --;
   if (currentNode === null || currentNode === undefined || !(currentNode instanceof NodeKanbanGo)) {
     response.writeHead(400);
-    response.end(`Bad node id. Current node: ${currentNode} `);
+    var result = {
+      error: `Bad node id. Current node: ${currentNode} `
+    };
+    response.end(JSON.stringify(result));
   }
   response.writeHead(200);
-  var result = currentNode.outputStreams.rpcCalls.toString();
-  response.end(result);
+  var result = currentNode.outputStreams.rpcCalls.toArray();
+  response.end(JSON.stringify(result));
 }
 
 KanbanGoInitializer.prototype.runNodesDetached = function(response, queryCommand, currentNodeNotUsed) {

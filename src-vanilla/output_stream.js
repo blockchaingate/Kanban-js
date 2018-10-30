@@ -45,6 +45,21 @@ OutputStream.prototype.toString = function () {
   return result;
 }
 
+/**
+ * Prepares html with the output stream.
+ * @returns {string}
+ */
+OutputStream.prototype.toArray = function () {
+  var result = [];
+  if (this.numberOfOutputsFlushed > 0) {
+    result.push(`(... ${this.numberOfOutputsFlushed} earlier outputs deleted ...)`);
+  }
+  for (var i = 0; i < this.recentOutputs.length; i ++) {
+    result.push(this.recentOutputs[i]);
+  }
+  return result;
+}
+
 OutputStream.prototype.log = function (data) {
   this.append(data);
 }

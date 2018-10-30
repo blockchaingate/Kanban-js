@@ -162,11 +162,11 @@ function handleRPCArguments(response, queryCommand, queryNode) {
     numberRequestsRunning --;
     return response.end(JSON.stringify({error: errors[0]}));
   }
-  var requestStringified = JSON.stringify(theRequestJSON);
-  return handleRPCArgumentsPartTwo(response, requestStringified, currentNode);
+  return handleRPCArgumentsPartTwo(response, theRequestJSON, currentNode);
 }
 
-function handleRPCArgumentsPartTwo(response, requestStringified, /**@type {{NodeKanbanGo}} */ currentNode) {
+function handleRPCArgumentsPartTwo(response, theRequestJSON, /**@type {{NodeKanbanGo}} */ currentNode) {
+  var requestStringified = JSON.stringify(theRequestJSON);
   var requestOptions = {
     host: '127.0.0.1',
     port: currentNode.RPCPort,
@@ -181,8 +181,12 @@ function handleRPCArgumentsPartTwo(response, requestStringified, /**@type {{Node
     //agent: false,
     //rejectUnauthorized: this.opts.ssl && this.opts.sslStrict !== false
   };
-  currentNode.outputStreams.rpcCalls.log(`RPC request: ${requestStringified}`);
-  currentNode.outputStreams.rpcCalls.log(`Options: ${JSON.stringify(requestOptions)}`);
+  var theRequest = {
+    request: theRequestJSON,
+    options: requestOptions
+  };
+
+  currentNode.outputStreams.rpcCalls.log(JSON.stringify(theRequest));
 
   var theHTTPrequest = http.request(requestOptions);
 
@@ -226,7 +230,11 @@ function handleRPCArgumentsPartTwo(response, requestStringified, /**@type {{Node
           return response.end(JSON.stringify(dataParsed.result));
         } catch (errorParsing) {
           response.writeHead(500);
-          return response.end(`Error parsing kanbanGO's output: ${finalData}. Error message: ${errorParsing}. `);
+          var result = {
+            error: `Error parsing kanbanGO's output. Error message: ${errorParsing}. `,
+            kanbanGoData: finalData
+          }
+          return response.end(JSON.stringify(result));
         }
       });
     });
