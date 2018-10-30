@@ -22,6 +22,9 @@ var rpcCalls = {
       contractId: null,
     },
   },
+  killAllGeth: {
+    rpcCall: "killAllGeth",
+  },
   getLogFile: {
     rpcCall: "getLogFile",
   },

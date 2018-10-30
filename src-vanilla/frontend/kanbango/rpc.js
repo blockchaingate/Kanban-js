@@ -196,6 +196,9 @@ function KanbanGoNodes() {
       },
       callback: PendingCall.prototype.callbackRunNodes,
     },
+    killAllGeth: {
+      callback: this.getNodeInformationCallback.bind(this)
+    },
     getNodeInformation: {
       callback: this.getNodeInformationCallback.bind(this)
     },

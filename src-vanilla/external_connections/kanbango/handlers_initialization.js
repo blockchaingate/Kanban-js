@@ -77,9 +77,9 @@ function NodeKanbanGo(inputId) {
   this.outputStreams.rpcCalls.maximumLength = 3000;
 }
 
-NodeKanbanGo.prototype.initializeFoldersAndKeys = function(response) {
-  console.log(`DEBUIG: got to init folders and keys`);
-  fs.unlink(this.lockFileName, this.initialize2ReadKeyStore.bind(this, response));
+NodeKanbanGo.prototype.initializeDeleteLockFile = function(response, callback) {
+  console.log(`DEBUG: got to init folders and keys`);
+  fs.unlink(this.lockFileName, callback);
 }
 
 NodeKanbanGo.prototype.initialize2ReadKeyStore = function(response, error) {
@@ -918,6 +918,22 @@ KanbanGoInitializer.prototype.compileSolidity = function(
   }
 }
 
+KanbanGoInitializer.prototype.killAllGeth = function(
+  response, 
+  queryCommand,
+  /**@type {NodeKanbanGo} */ 
+  currentNode
+) {
+  for (var i = 0; i < this.nodes.length; i ++) {
+    this.log(`Running child process kill command for node ${i}. ` );
+    this.nodes[i].childProcessHandle.kill();
+    this.nodes[i].initializeDeleteLockFile(response, ()=>{});
+  }
+  this.runShell("killall", ["geth"]);
+  this.nodes = [];
+  this.getNodeInformation(response, queryCommand)
+}
+
 KanbanGoInitializer.prototype.getLogFile = function(
   response, 
   queryCommand,
@@ -988,9 +1004,10 @@ KanbanGoInitializer.prototype.runNodes = function(response, queryCommand) {
   for (var counterNode = 0; counterNode < candidateNumberOfNodes; counterNode ++) {
     this.nodes.push(new NodeKanbanGo(counterNode));
   }
-  console.log(`DEBUIG: got to before loop, candidates: ${candidateNumberOfNodes}`);
+  console.log(`DEBUG: got to before loop, candidates: ${candidateNumberOfNodes}`);
   for (var counterNode = 0; counterNode < this.nodes.length; counterNode ++) {
-    this.nodes[counterNode].initializeFoldersAndKeys(response);
+    var currentNode = this.nodes[counterNode]; 
+    currentNode.initializeDeleteLockFile(response, currentNode.initialize2ReadKeyStore.bind(currentNode, response));
   }
 }
 
