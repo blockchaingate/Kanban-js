@@ -209,6 +209,7 @@ function KanbanGoNodes() {
       "signers.${number}.myLockingCoefficient": this.transformersStandard.shortener,
       "signers.${number}.mySolution": this.transformersStandard.shortener,
       "inputPublicKeys.${number}": this.transformersStandard.shortener,
+      reason: this.transformersStandard.shortener,
     }  
   };
   this.callTypes = {

@@ -133,6 +133,7 @@ function FabNode () {
       "verifier.aggregateSolution": this.transformersStandard.shortener,
       "verifier.aggregateCommitment": this.transformersStandard.shortener,
       "verifier.aggregateCommitmentFromSignature": this.transformersStandard.shortener,
+      reason: this.transformersStandard.shortener,
     },
   };
   /**@type {Object.<string,{outputJSONDefault: string, outputOptionsDefault: string}>} */
