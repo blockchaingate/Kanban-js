@@ -243,8 +243,8 @@ var rpcCalls = {
     },
     parameters: ["solutions"]
   },
-  testAggregateSignatureVerification: {
-    rpcCall: "testAggregateSignatureVerification",
+  testAggregateVerification: {
+    rpcCall: "testAggregateVerification",
     method: "testaggregatesignatureverification",
     mandatoryModifiableArguments: {
       signature: null,
@@ -256,7 +256,7 @@ var rpcCalls = {
   },
   testAggregateVerificationComplete: {
     rpcCall: "testAggregateVerificationComplete",
-    method: "cryptotest_testAggregateVerificationComplete",
+    method: "testaggregateverificationcomplete",
     mandatoryModifiableArguments: {
       signatureComplete: null,
       messageBase64: null

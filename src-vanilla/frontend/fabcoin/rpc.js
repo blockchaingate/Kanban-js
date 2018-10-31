@@ -381,7 +381,7 @@ function FabNode () {
       },
       callType: this.callTypes.crypto,
     },
-    testAggregateSignatureVerification: {
+    testAggregateVerification: {
       inputs: {
         signature: inputFabCryptoAggregate.theAggregation,
         committedSignersBitmap: inputFabCryptoAggregate.committedSignersBitmap,
@@ -389,6 +389,15 @@ function FabNode () {
       },
       inputsBase64: {
         message: inputFabCryptoAggregate.message
+      },
+      callType: this.callTypes.crypto,
+    },
+    testAggregateVerificationComplete: {
+      inputs: {
+        signatureComplete: inputFabCryptoAggregate.aggregateSignatureComplete,
+      },
+      inputsBase64: {
+        messageBase64: inputFabCryptoAggregate.message
       },
       callType: this.callTypes.crypto,
     }
@@ -712,7 +721,11 @@ FabNode.prototype.callbackStandard = function(functionLabelFrontEnd, input, outp
       resultHTML = inputParsed.resultHTML + "<br>" + resultHTML;
     }
     if (inputParsed.error !== undefined && inputParsed.error !== null) {
-      resultHTML = `<b style= 'color:red'>Error:</b> ${inputParsed.error}<br>` + resultHTML;
+      var errorMessage = inputParsed.error
+      if (typeof errorMessage === "object") {
+        errorMessage = JSON.stringify(errorMessage);
+      }
+      resultHTML = `<b style= 'color:red'>Error:</b> ${errorMessage}<br>` + resultHTML;
       if (inputParsed.error === fabInitializationSpec.urlStrings.errorFabNeverStarted) {
         triggerFabcoindStart = true;
         resultHTML += "<b style='color:green'> Will start fabcoind for you. </b><br>"
