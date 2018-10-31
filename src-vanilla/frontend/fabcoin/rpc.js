@@ -42,7 +42,9 @@ function FabNode () {
       clickHandler: this.setContractId.bind(this),
       transformer: miscellaneousBackend.hexShortenerForDisplay
     },
-    setSchnorrSignature: this.getSetInputWithShortener(inputFabCryptoSchnorr.signature, "signatureSchnorrBase58"),
+    setSchnorrSignature: this.getSetInputWithShortener(inputFabCryptoSchnorr.signature),
+    setAggregateSignature: this.getSetInputWithShortener(inputFabCryptoAggregate.theAggregation),
+    setAggregateSignatureComplete: this.getSetInputWithShortener(inputFabCryptoAggregate.aggregateSignatureComplete),
   };
 
   this.outputOptionsStandard = {
@@ -114,7 +116,8 @@ function FabNode () {
       "aggregator.messageDigest": this.transformersStandard.shortener,
       "aggregator.aggregateSolution": this.transformersStandard.shortener,
       "aggregator.aggregateCommitmentFromSignature": this.transformersStandard.shortener,
-      "aggregator.signatureNoBitmap": this.transformersStandard.shortener,
+      "aggregator.signatureNoBitmap": this.transformersStandard.setAggregateSignature,
+      "aggregator.signatureComplete": this.transformersStandard.setAggregateSignatureComplete,
       "aggregator.lockingCoefficients.${number}": this.transformersStandard.shortener,
       "signers.${number}.myPublicKey": this.transformersStandard.setPublicKeySchnorr,
       "signers.${number}.privateKeyBase58": this.transformersStandard.setPrivateKeySchnorr,
@@ -130,7 +133,6 @@ function FabNode () {
       "verifier.aggregateSolution": this.transformersStandard.shortener,
       "verifier.aggregateCommitment": this.transformersStandard.shortener,
       "verifier.aggregateCommitmentFromSignature": this.transformersStandard.shortener,
-      "verifier.signatureNoBitmap": this.transformersStandard.shortener,
     },
   };
   /**@type {Object.<string,{outputJSONDefault: string, outputOptionsDefault: string}>} */
@@ -377,6 +379,7 @@ function FabNode () {
       outputs: {
         aggregator: {
           signatureNoBitmap: inputFabCryptoAggregate.theAggregation,
+          signatureComplete: inputFabCryptoAggregate.aggregateSignatureComplete
         }
       },
       callType: this.callTypes.crypto,
