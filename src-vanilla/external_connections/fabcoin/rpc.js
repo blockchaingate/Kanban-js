@@ -254,6 +254,15 @@ var rpcCalls = {
     },
     parameters: ["signature", "committedSignersBitmap", "publicKeys", "message"]
   },
+  testAggregateVerificationComplete: {
+    rpcCall: "testAggregateVerificationComplete",
+    method: "cryptotest_testAggregateVerificationComplete",
+    mandatoryModifiableArguments: {
+      signatureComplete: null,
+      messageBase64: null
+    },
+    parameters: ["signatureComplete", "messageBase64"]
+  },
   testSchnorrSignature: {
     rpcCall: "testSchnorrSignature",
     method: "testschnorrsignature",

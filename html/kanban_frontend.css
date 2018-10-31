@@ -324,7 +324,7 @@ button.buttonRPCInput:hover{
 }
 
 span.panelRPCWithExpansion {
-  white-space: nowrap;
+  overflow-wrap: break-word;
 }
 
 .updatedRecently {

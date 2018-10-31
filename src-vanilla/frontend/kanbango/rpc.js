@@ -179,6 +179,7 @@ function KanbanGoNodes() {
       inputSignatureBase58: this.transformersStandard.setSignatureSchnorr,
       inputSignatureBase58Recoded: this.transformersStandard.setSignatureSchnorr,
       signatureBase58: this.transformersStandard.setSignatureSchnorr,
+      inputSignature: this.transformersStandard.shortener,
       "aggregator.publicKeys.${number}": this.transformersStandard.shortener,
       "aggregator.aggregateCommitment": this.transformersStandard.shortener,
       "aggregator.aggregatePublicKey": this.transformersStandard.shortener,
@@ -404,6 +405,14 @@ function KanbanGoNodes() {
       inputs: {
         signature: inputAggregate.aggregateSignature,
         committedSigners: inputAggregate.committedSignersBitmap,
+      },
+    },
+    testAggregateVerificationComplete: {
+      inputsBase64: {
+        messageBase64: inputAggregate.message,
+      },
+      inputs: {
+        signatureComplete: inputAggregate.aggregateSignatureComplete,
       },
     },
     compileSolidity: {

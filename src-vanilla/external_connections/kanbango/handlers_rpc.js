@@ -45,6 +45,9 @@ function getRPCRequestJSON(rpcCallLabel, queryCommand, errors) {
   /**@type {{rpcCall: string, method: string, mandatoryFixedArguments: Object,  mandatoryModifiableArguments: Object,  optionalArguments: Object, allowedArgumentValues: Object, parameters: string[]}}*/
   var currentRPCCall = kanbanGORPC.rpcCalls[rpcCallLabel];
   var currentParameters = [];
+  if (currentRPCCall.parameters === undefined || currentRPCCall.parameters === null) {
+    currentRPCCall.parameters = [];
+  }
   for (var counterCommands = 0; counterCommands < currentRPCCall.parameters.length; counterCommands ++) {
     var currentParameterName = currentRPCCall.parameters[counterCommands];
     if (currentRPCCall.mandatoryFixedArguments !== undefined && currentRPCCall.mandatoryFixedArguments !== null) {
