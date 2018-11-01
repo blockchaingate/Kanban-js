@@ -72,7 +72,7 @@ function FabNode () {
       blockhash: this.transformersStandard.blockHash,
       txid: this.transformersStandard.transactionId,
       "details.${number}.address": this.transformersStandard.setAddress,
-      "vout.${number}.scriptPubKey.addresses.${number}": this.transformersStandard.shortener,
+      "vout.${number}.scriptPubKey.addresses.${number}": this.transformersStandard.setAddress,
       "vout.${number}.n": this.transformersStandard.setTxInputVoutAndValue,
       "vout.${number}.value": this.transformersStandard.setTxInputVoutAndValue,
       "vout.${number}.scriptPubKey.asm": this.transformersStandard.shortener,
@@ -475,17 +475,28 @@ FabNode.prototype.getSetInputWithShortener = function (idOutput) {
   };  
 }
 
-FabNode.prototype.setTxOutput = function (address, value) {
+FabNode.prototype.setTxOutput = function () {
+  var inputFab = ids.defaults.fabcoin.inputBlockInfo;
+  var address = document.getElementById(inputFab.txOutputAddresses).value;
+  var amount = document.getElementById(inputFab.walletAmount).value;
+  var isGood = true;
   if (address === "" || address === null || address === undefined) {
+    submitRequests.highlightError(inputFab.txOutputAddresses);
+    isGood = false;
+  }
+  if (amount === "" || amount === null || amount === undefined) {
+    submitRequests.highlightError(inputFab.walletAmount);
+    isGood = true;
+  }
+  if (!isGood) {
     return;
   }
-  var inputFab = ids.defaults.fabcoin.inputBlockInfo;
   var currentOutputsRaw;
   var currentOutputs; 
   try {
     currentOutputsRaw = document.getElementById(inputFab.txOutputs).value;
     currentOutputs = jsonic(currentOutputsRaw);
-    currentOutputs[address] = value;
+    currentOutputs[address] = amount;
     submitRequests.updateValue(inputFab.txOutputs, jsonic.stringify(currentOutputs));
   } catch (e) {
     console.log(`Failed to parse your current transaction inputs. Inputs raw: ${currentOutputsRaw}. Inputs parsed: ${JSON.stringify(currentOutputs)}. ${e}`);
@@ -497,11 +508,16 @@ FabNode.prototype.setTxOutput = function (address, value) {
 FabNode.prototype.setTxInputVoutAndValue = function (container, content, extraData) {
   var inputFab = ids.defaults.fabcoin.inputBlockInfo;
   var incomingAmount = 0;
-  if (extraData.labelArray[extraData.labelArray.length - 1] === "amount") {
+  if (extraData.labelArray[extraData.labelArray.length - 1] === "value") {
     incomingAmount = content - 1;
   }
   var incomingId = extraData.ambientInput.txid;
   var incomingVout = extraData.labelArray[extraData.labelArray.length - 2];
+  var addressVout = null;
+  try{
+    addressVout = extraData.ambientInput.vout[incomingVout].scriptPubKey.addresses[0];
+  } catch (e) {
+  }
   /**@type {string} */
   var currentInputsRaw;
   var currentInputs;
@@ -525,15 +541,13 @@ FabNode.prototype.setTxInputVoutAndValue = function (container, content, extraDa
       currentInputs.push({txid: incomingId, vout: incomingVout });
     }
     submitRequests.updateValue(inputFab.txInputs, jsonic.stringify(currentInputs));
-    var currentOutputs = document.getElementById(inputFab.txOutputs).value; 
-    var currentPreferredAddress = document.getElementById(inputFab.address).value;
-    if (currentOutputs === "" || currentOutputs === null) {
-      if (currentPreferredAddress === "" || currentPreferredAddress === null) {
-        submitRequests.highlightError(inputFab.address);
-      } else {
-        this.setTxOutput(currentPreferredAddress, incomingAmount);
-      }
+    if (addressVout !== null) {
+      submitRequests.updateValue(inputFab.address, addressVout);
     }
+    submitRequests.updateValue(inputFab.walletAmount, incomingAmount);
+    var currentOutputs = document.getElementById(inputFab.txOutputs).value; 
+    var currentPreferredAddress = document.getElementById(inputFab.txOutputAddresses).value;
+    this.setTxOutput();
   } catch (e) {
     console.log(`Failed to parse your current transaction inputs. Inputs raw: ${currentInputsRaw}. Inputs parsed: ${JSON.stringify(currentInputs)}. ${e}`);
     submitRequests.highlightError(inputFab.txInputs);

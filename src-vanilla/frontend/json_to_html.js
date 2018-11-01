@@ -131,9 +131,9 @@ JSONTransformer.prototype.getClickableEntryUsingTransformer = function(input, in
   if (theTransformer === undefined || theTransformer === null) {
     return processInputStringStandard(inputHTML);
   }
-  if (input !== inputHTML) {
-    console.log(`DEBUG: input and inputHTML: ${JSON.stringify(input)}, ${inputHTML}`);
-  }
+  //if (input !== inputHTML) {
+  //  console.log(`DEBUG: input and inputHTML: ${JSON.stringify(input)}, ${inputHTML}`);
+  //}
   totalClickableEntries ++;
   var currentId = `buttonJSONTransformer${totalClickableEntries}`;
   var idExpandButton = "";
@@ -162,12 +162,12 @@ JSONTransformer.prototype.getClickableEntryUsingTransformer = function(input, in
   } else {
     result += processInputStringStandard(inputHTML);
   }
+  if (theTransformer.clickHandler !== null && theTransformer.clickHandler !== undefined) {
+    result += "</button>";
+  }
   if (idExpandButton !== "") {
     result += `<button id = "${idExpandButton}" class = "buttonJSONExpand">&#9668;</button>`;
     result += `</span>`;
-  }
-  if (theTransformer.clickHandler !== null && theTransformer.clickHandler !== undefined) {
-    result += "</button>";
   }
   return result;
 }

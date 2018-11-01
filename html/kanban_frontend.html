@@ -295,25 +295,28 @@
   </table>
   </td>
   <td>
-    <input type = "text" class = "inputStandard" id = "inputFabcoinBlockNumber"              size = "50" value = "14" placeholder = "block #"></input><br>
-    <input type = "text" class = "inputStandard" id = "inputFabcoinBlockHash"                size = "50" value = "" placeholder = "block hash"></input><br>
-    <input type = "text" class = "inputStandard" id = "inputFabcoinNumberOfBlocksToGenerate" size = "50" value = "" placeholder = "# blocks to generate"></input><br>    
-    <input type = "text" class = "inputStandard" id = "inputFabcoinTransactionId"            size = "50" value = "" placeholder = "tx id"></input><br>    
-    <input type = "text" class = "inputStandard" id = "inputFabcoinTransactionHex"           size = "50" value = "" placeholder = "tx hex"></input><br>
-    <input type = "text" class = "inputStandard" id = "inputFabcoinPrivateKey"               size = "50" value = "" placeholder = "private key"></input><br>    
-    <input type = "text" class = "inputStandard" id = "inputFabcoinPublicKey"                size = "50" value = "" placeholder = "public key"></input><br>    
-    <input type = "text" class = "inputStandard" id = "inputFabcoinAddress"                  size = "50" value = "" placeholder = "address FAB testnet"></input><br>
-    <input type = "text" class = "inputStandard" id = "inputFabcoinAddressMainnet"           size = "50" value = "" placeholder = "address FAB mainnet"></input><br>
-    <input type = "text" class = "inputStandard" id = "inputEthereumAddress"                 size = "50" value = "" placeholder = "address Ethereum"></input><br>
-    <input type = "text" class = "inputStandard" id = "inputFabcoinTransactionInputs"        size = "50" value = "" placeholder = "tx inputs"></input><br>
-    <input type = "text" class = "inputStandard" id = "inputFabcoinTransactionOutputs"       size = "50" value = "" placeholder = "tx outputs"></input><br>
-    <input type = "text" class = "inputStandard" id = "inputFabcoinContractHex"              size = "50" value = "" placeholder = "contract hex"></input><br>
-    <input type = "text" class = "inputStandard" id = "inputFabcoinContractId"               size = "50" value = "" placeholder = "contract id"></input><br>
-    <input type = "text" class = "inputStandard" id = "inputSolidityFunctionName"            size = "50" value = "" placeholder = "contract f-n name"></input><br>
-    <input type = "text" class = "inputStandard" id = "inputFabcoinContractFunctionId"       size = "50" value = "" placeholder = "contract f-n id" onchange = "window.kanban.kanbanGO.rpc.theKBNodes.computeContractData()"></input><br>
-    <input type = "text" class = "inputStandard" id = "inputFabcoinContractFunctionData"     size = "50" value = "" placeholder = "contract f-n data" onchange = "window.kanban.kanbanGO.rpc.theKBNodes.computeContractData()"></input><br>
-    <input type = "text" class = "inputStandard" id = "inputFabcoinContractData"             size = "50" value = "" placeholder = "contract function + data"></input><br>
-    <input type = "text" class = "inputStandard" id = "inputFabcoinWalletAmount"             size = "50" value = "" placeholder = "amount (wallet)"></input><br>
+    <input type = "text" class = "inputStandard" id = "inputFabcoinBlockNumber"                size = "50" value = "33" placeholder = "block #"></input><br>
+    <input type = "text" class = "inputStandard" id = "inputFabcoinBlockHash"                  size = "50" value = "" placeholder = "block hash"></input><br>
+    <input type = "text" class = "inputStandard" id = "inputFabcoinNumberOfBlocksToGenerate"   size = "50" value = "" placeholder = "# blocks to generate"></input><br>    
+    <input type = "text" class = "inputStandard" id = "inputFabcoinTransactionId"              size = "50" value = "" placeholder = "tx id"></input><br>    
+    <input type = "text" class = "inputStandard" id = "inputFabcoinTransactionHex"             size = "50" value = "" placeholder = "tx hex"></input><br>
+    <input type = "text" class = "inputStandard" id = "inputFabcoinPrivateKey"                 size = "50" value = "" placeholder = "private key"></input><br>    
+    <input type = "text" class = "inputStandard" id = "inputFabcoinPublicKey"                  size = "50" value = "" placeholder = "public key"></input><br>    
+    <input type = "text" class = "inputStandard" id = "inputFabcoinAddress"                    size = "50" value = "" placeholder = "address FAB testnet"></input><br>
+    <input type = "text" class = "inputStandard" id = "inputFabcoinAddressMainnet"             size = "50" value = "" placeholder = "address FAB mainnet"></input><br>
+    <input type = "text" class = "inputStandard" id = "inputEthereumAddress"                   size = "50" value = "" placeholder = "address Ethereum"></input><br>
+
+    <input type = "text" class = "inputStandard" id = "inputFabcoinTransactionInputs"          size = "50" value = "" placeholder = "tx inputs"></input><br>
+
+    <input type = "text" class = "inputStandard" id = "inputFabcoinWalletAmount"               size = "50" value = "" placeholder = "amount (wallet)"></input><br>
+    <input type = "text" class = "inputStandard" id = "inputFabcoinTransactionOutputAddresses" size = "50" value = "" placeholder = "outputs address(es)"></input><br>
+    <input type = "text" class = "inputStandard" id = "inputFabcoinTransactionOutputs"         size = "50" value = "" placeholder = "tx outputs"></input><br>
+    <input type = "text" class = "inputStandard" id = "inputFabcoinContractHex"                size = "50" value = "" placeholder = "contract hex"></input><br>
+    <input type = "text" class = "inputStandard" id = "inputFabcoinContractId"                 size = "50" value = "" placeholder = "contract id"></input><br>
+    <input type = "text" class = "inputStandard" id = "inputSolidityFunctionName"              size = "50" value = "" placeholder = "contract f-n name"></input><br>
+    <input type = "text" class = "inputStandard" id = "inputFabcoinContractFunctionId"         size = "50" value = "" placeholder = "contract f-n id" onchange = "window.kanban.kanbanGO.rpc.theKBNodes.computeContractData()"></input><br>
+    <input type = "text" class = "inputStandard" id = "inputFabcoinContractFunctionData"       size = "50" value = "" placeholder = "contract f-n data" onchange = "window.kanban.kanbanGO.rpc.theKBNodes.computeContractData()"></input><br>
+    <input type = "text" class = "inputStandard" id = "inputFabcoinContractData"               size = "50" value = "" placeholder = "contract function + data"></input><br>
   </td>
   <td style = "vertical-align: top"><pre id = "aceEditor"></pre><br> <div id = "outputSolidityCompilation"> </div> </td>
   </tr>

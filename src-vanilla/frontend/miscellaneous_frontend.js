@@ -43,7 +43,7 @@ function doToggleContent(container, element) {
 }
 
 function getPanelForRevealing(container, content) {
-  var parent = container.parentNode;
+  var parent = container.parentNode.parentNode;
   var newSpan = document.createElement("span");
   numberOfRevealedContents ++;
   var nodeId = `revealedSpan${numberOfRevealedContents}`;
@@ -55,10 +55,10 @@ function getPanelForRevealing(container, content) {
 }
 
 function revealLongWithParent(container, content) {
-  if (container.nextElementSibling === null) {
+  if (container.parentNode.nextElementSibling === null) {
     getPanelForRevealing(container, content);
   } else {
-    doToggleContent(container, container.nextElementSibling);
+    doToggleContent(container, container.parentNode.nextElementSibling);
   }
 }
 

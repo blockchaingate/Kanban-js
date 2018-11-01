@@ -324,7 +324,7 @@ button.buttonRPCInput:hover{
 }
 
 span.panelRPCWithExpansion {
-  overflow-wrap: break-word;
+  white-space: nowrap;
 }
 
 .updatedRecently {
@@ -429,6 +429,7 @@ span.panelRevealedContent {
   margin-top: 0px;
   margin-bottom: 0px;
   overflow-x: hidden;
+  word-wrap: break-word;
   transition: all 1s linear;
   opacity: 0;
 }
