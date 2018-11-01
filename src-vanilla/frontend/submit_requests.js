@@ -76,6 +76,11 @@ function updateFieldsRecursively(parsedInput, outputs) {
     if (typeof outputs[label] === "string") {
       var sanitized = miscellaneousBackend.removeQuotes(parsedInput[label]);
       updateValue(outputs[label], sanitized);
+    } else if (Array.isArray(outputs[label])){
+      var sanitized = miscellaneousBackend.removeQuotes(parsedInput[label]);
+      for (var i = 0; i < outputs[label].length; i ++) {
+        updateValue(outputs[label][i], sanitized);
+      }
     } else {
       updateFieldsRecursively(parsedInput[label], outputs[label]);
     }

@@ -36,6 +36,7 @@ function KanbanGoNodes() {
     blockHash: {
       clickHandler: this.getBlockByHash.bind(this),
       transformer: miscellaneousBackend.hexShortenerForDisplay,
+      tooltip: "Sets the block hash field &amp; and fetches the block info. "
     },
     contractHexSetter: {
       clickHandler: this.setContractHex.bind(this),
@@ -52,6 +53,9 @@ function KanbanGoNodes() {
     setPrivateKeySchnorr: this.getSetInputWithShortener(inputSchnorr.privateKey),
     setPublicKeySchnorr: this.getSetInputWithShortener(inputSchnorr.publicKey),
     setSignatureSchnorr: this.getSetInputWithShortener(inputSchnorr.signature),
+    setAggregateSignatureNoBitmap: this.getSetInputWithShortener(inputAggregate.aggregateSignature),
+    setAggregateSignatureUncompressed: this.getSetInputWithShortener(inputAggregate.aggregateSignatureUncompressed),
+    setAggregateSignatureComplete: this.getSetInputWithShortener(inputAggregate.aggregateSignatureComplete),
   };
   // Specifies options for rpc kanban rpc output display.
   this.optionsKanbanGOStandard = {
@@ -188,8 +192,9 @@ function KanbanGoNodes() {
       "aggregator.publicKeys.${number}": this.transformersStandard.shortener,
       "aggregator.messageDigest": this.transformersStandard.shortener,
       "aggregator.aggregateSolution": this.transformersStandard.shortener,
-      "aggregator.signatureNoBitmap": this.transformersStandard.shortener,
-      "aggregator.signatureComplete": this.transformersStandard.shortener,
+      "aggregator.signatureNoBitmap": this.transformersStandard.setAggregateSignatureNoBitmap,
+      "aggregator.signatureUncompressed": this.transformersStandard.setAggregateSignatureUncompressed,
+      "aggregator.signatureComplete": this.transformersStandard.setAggregateSignatureComplete,
 
       "verifier.aggregateCommitment": this.transformersStandard.shortener,
       "verifier.aggregateSolution": this.transformersStandard.shortener,
@@ -394,7 +399,8 @@ function KanbanGoNodes() {
       outputs: {
         aggregator: {
           signatureNoBitmap: inputAggregate.aggregateSignature,
-          signatureComplete: inputAggregate.aggregateSignatureComplete
+          signatureUncompressed: [inputAggregate.aggregateSignatureUncompressed, ids.defaults.fabcoin.inputBlockInfo.txAggregateSignature],
+          signatureComplete: inputAggregate.aggregateSignatureComplete,
         }
       }
     },

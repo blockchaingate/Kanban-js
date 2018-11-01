@@ -166,6 +166,8 @@ PendingCall.prototype.callbackAggregateInitialization = function(nodeId, input, 
   var publicKeys = getSignerField(input, "myPublicKey");
   submitRequests.updateValue(ids.defaults.kanbanGO.inputAggregateSignature.privateKeys, privateKeys.join(", "));
   submitRequests.updateValue(ids.defaults.kanbanGO.inputAggregateSignature.publicKeys, publicKeys.join(", "));
+  var publicKeysJoined = `["${publicKeys.join('","')}"]`; 
+  submitRequests.updateValue(ids.defaults.fabcoin.inputBlockInfo.txAggregatePublicKeys, publicKeysJoined);
 }
 
 PendingCall.prototype.callbackAggregateCommitment = function(nodeId, input, output) {

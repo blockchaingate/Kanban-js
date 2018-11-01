@@ -96,6 +96,9 @@ Page.prototype.initialize = function() {
 
 Page.prototype.initializeInputPlaceholder = function (idInput) {
   var oldInput = document.getElementById(idInput);
+  if (oldInput === null) {
+    throw(`Input id: ${idInput} not found. `);
+  }
   var theInput = oldInput.cloneNode();
   var theParent = oldInput.parentElement;
   var groupContainer = document.createElement("SPAN");

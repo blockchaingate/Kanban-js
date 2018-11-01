@@ -18,14 +18,14 @@ function FabNode () {
   var inputFabCryptoSchnorr = ids.defaults.fabcoin.inputCrypto.inputSchnorrSignature;
   var inputFabCryptoAggregate = ids.defaults.fabcoin.inputCrypto.inputAggregateSignature;
   this.transformersStandard = {
-    blockHash: this.getSetInputAndRunWithShortener(inputFabBlock.blockHash, "getBlockByHash"),
+    blockHash: this.getSetInputAndRunWithShortener(inputFabBlock.blockHash, "getBlockByHash", "Sets the block hash field &amp; and fetches the block info. "),
     shortener: {
       transformer: miscellaneousBackend.hexShortenerForDisplay
     },
     extremeShortener: {
       transformer: miscellaneousBackend.hexVeryShortDisplay
     },
-    transactionId: this.getSetInputAndRunWithShortener(inputFabBlock.txid, "getTransactionById"),
+    transactionId: this.getSetInputAndRunWithShortener(inputFabBlock.txid, "getTransactionById", "Sets the transaction id field, fetches and decodes the transaction. "),
     transactionHexDecoder: this.getSetInputAndRunWithShortener(inputFabBlock.txHex, "decodeTransactionRaw"),
     setAddress: this.getSetInputWithShortener(inputFabBlock.address),
     setPrivateKey: {
@@ -44,6 +44,7 @@ function FabNode () {
     },
     setSchnorrSignature: this.getSetInputWithShortener(inputFabCryptoSchnorr.signature),
     setAggregateSignature: this.getSetInputWithShortener(inputFabCryptoAggregate.theAggregation),
+    setAggregateSignatureUncompressed: this.getSetInputWithShortener(inputFabCryptoAggregate.aggregateSignatureUncompressed),
     setAggregateSignatureComplete: this.getSetInputWithShortener(inputFabCryptoAggregate.aggregateSignatureComplete),
   };
 
@@ -117,6 +118,7 @@ function FabNode () {
       "aggregator.aggregateSolution": this.transformersStandard.shortener,
       "aggregator.aggregateCommitmentFromSignature": this.transformersStandard.shortener,
       "aggregator.signatureNoBitmap": this.transformersStandard.setAggregateSignature,
+      "aggregator.signatureUncompressed": this.transformersStandard.setAggregateSignatureUncompressed,
       "aggregator.signatureComplete": this.transformersStandard.setAggregateSignatureComplete,
       "aggregator.lockingCoefficients.${number}": this.transformersStandard.shortener,
       "signers.${number}.myPublicKey": this.transformersStandard.setPublicKeySchnorr,
@@ -381,7 +383,8 @@ function FabNode () {
       outputs: {
         aggregator: {
           signatureNoBitmap: inputFabCryptoAggregate.theAggregation,
-          signatureComplete: inputFabCryptoAggregate.aggregateSignatureComplete
+          signatureComplete: inputFabCryptoAggregate.aggregateSignatureComplete,
+          signatureUncompressed: [inputFabCryptoAggregate.aggregateSignatureUncompressed, inputFabBlock.txAggregateSignature]
         }
       },
       callType: this.callTypes.crypto,
@@ -453,12 +456,13 @@ FabNode.prototype.combineClickHandlers = function (/**@type {function[]}*/ funct
   }
 }
 
-FabNode.prototype.getSetInputAndRunWithShortener = function (idOutput, functionLabelToFun) {
+FabNode.prototype.getSetInputAndRunWithShortener = function (idOutput, functionLabelToFun, tooltip) {
   var setter = this.setInput.bind(this, idOutput);
   var runner = this.run.bind(this, functionLabelToFun);
   return {
     clickHandler: this.combineClickHandlers.bind(this, [setter, runner]),
-    transformer: miscellaneousBackend.hexShortenerForDisplay
+    transformer: miscellaneousBackend.hexShortenerForDisplay,
+    tooltip: tooltip
   };  
 }
 
@@ -619,6 +623,8 @@ FabNode.prototype.callbackAggregateSignatureInitialize = function(functionLabelF
   var aggregateIds = ids.defaults.fabcoin.inputCrypto.inputAggregateSignature;
   submitRequests.updateValue(aggregateIds.privateKeys, privateKeys.join(", "));
   submitRequests.updateValue(aggregateIds.publicKeys, publicKeys.join(", "));
+  var publicKeysJoined = `["${publicKeys.join('","')}"]`; 
+  submitRequests.updateValue(ids.defaults.fabcoin.inputBlockInfo.txAggregatePublicKeys, publicKeysJoined);
 }
 
 FabNode.prototype.callbackAggregateSignatureCommit = function(functionLabelFrontEnd, input, output) {

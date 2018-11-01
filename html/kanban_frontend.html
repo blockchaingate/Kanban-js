@@ -40,6 +40,7 @@
   <table class = "tableStandardInputs"> 
   <tr><td>
   <table>
+    <tr><td><button class = "buttonStandard" style = "width:100%" onclick = "window.kanban.kanbanGO.rpc.theKBNodes.run('versionGO');">Version</button></td></tr>
     <tr><td><button class = "buttonStandard" style = "width:100%" onclick = "window.kanban.kanbanGO.rpc.theKBNodes.run('getBlockByNumber');">Block by #</button></td></tr>
     <tr><td><button class = "buttonStandard" style = "width:100%" onclick = "window.kanban.kanbanGO.rpc.theKBNodes.run('getBlockByHash');">Block by hash</button></td></tr>
     <tr><td><button class = "buttonStandard" style = "width:100%" onclick = "window.kanban.kanbanGO.rpc.theKBNodes.run('round');">Round</button></td></tr>
@@ -137,7 +138,8 @@
       <input type = "text" class = "inputStandard" id = "inputAggregateSignatureAggregatePubkey"               size = "50" placeholder = "aggregate public key"></input><br>
       <input type = "text" class = "inputStandard" id = "inputAggregateSignaturesSolutions"                    size = "50" placeholder = "solutions"></input><br>
       <input type = "text" class = "inputStandard" id = "inputAggregateSignaturesTheAggregation"               size = "50" placeholder = "aggregate signature"></input><br>
-      <input type = "text" class = "inputStandard" id = "inputAggregateSignatureComplete"                      size = "50" placeholder = "aggregate signature"></input><br>
+      <input type = "text" class = "inputStandard" id = "inputAggregateSignatureUncompressed"                  size = "50" placeholder = "aggregate signature uncompressed"></input><br>
+      <input type = "text" class = "inputStandard" id = "inputAggregateSignatureComplete"                      size = "50" placeholder = "aggregate signature complete"></input><br>
     </td>
     </tr></table>
     </div> <!--divControlPanelDefault-->
@@ -153,7 +155,6 @@
   <tr>
   <td>
     <table>
-      <tr><td><button class = "buttonStandard" style = "width: 100px" onclick = "window.kanban.kanbanGO.rpc.theKBNodes.run('versionGO', 'cryptoTest');">Version</button></td></tr>
       <tr><td style = "text-align: center; border-bottom: 1px solid black; font-size: x-small;"><span>Schnorr</span></td></tr>
       <tr><td><button class = "buttonStandard" style = "width: 100px" onclick = "window.kanban.kanbanGO.rpc.theKBNodes.run('testSha3', 'cryptoTest')">Sha3 256</button></td></tr>
       <tr><td><button class = "buttonStandard" style = "width: 100px" onclick = "window.kanban.kanbanGO.rpc.theKBNodes.run('testPrivateKeyGeneration', 'cryptoTest');"><b style = "color:red">Private key</b></button></td></tr>
@@ -190,19 +191,20 @@
       </table>
     </td>
     <td>
-      <input type = "text" class = "inputStandard" id = "inputKBGOMessage"                       size = "50" placeholder = "message"></input><br>
-      <input type = "text" class = "inputStandard" id = "inputKBGONumberOfPrivateKeysToGenerate" size = "50" placeholder = "# private keys to generate"></input><br>
-      <input type = "text" class = "inputStandard" id = "inputKBGOPrivateKeys"                   size = "50" placeholder = "private keys"></input><br>
-      <input type = "text" class = "inputStandard" id = "inputKBGONonces"                        size = "50" placeholder = "nonces"></input><br>
-      <input type = "text" class = "inputStandard" id = "inputKBGOPublicKeys"                    size = "50" placeholder = "public keys"></input><br>
-      <input type = "text" class = "inputStandard" id = "inputKBGOCommittedSignersBitmap"        size = "50" placeholder = "committed signers bitmap"></input><br>
-      <input type = "text" class = "inputStandard" id = "inputKBGOCommitments"                   size = "50" placeholder = "commitments"></input><br>
-      <input type = "text" class = "inputStandard" id = "inputKBGODigest"                        size = "50" placeholder = "digest"></input><br>
-      <input type = "text" class = "inputStandard" id = "inputKBGOAggregatePublicKey"            size = "50" placeholder = "challenge/aggregate commitment"></input><br>
-      <input type = "text" class = "inputStandard" id = "inputKBGOAggregateCommitment"           size = "50" placeholder = "aggregate public key"></input><br>
-      <input type = "text" class = "inputStandard" id = "inputKBGOSolutions"                     size = "50" placeholder = "solutions"></input><br>
-      <input type = "text" class = "inputStandard" id = "inputKBGOAggregateSignature"            size = "50" placeholder = "aggregate signature"></input><br>
-      <input type = "text" class = "inputStandard" id = "inputKBGOAggregateSignatureComplete"    size = "50" placeholder = "aggregate signature complete"></input><br>
+      <input type = "text" class = "inputStandard" id = "inputKBGOMessage"                        size = "50" placeholder = "message"></input><br>
+      <input type = "text" class = "inputStandard" id = "inputKBGONumberOfPrivateKeysToGenerate"  size = "50" placeholder = "# private keys to generate"></input><br>
+      <input type = "text" class = "inputStandard" id = "inputKBGOPrivateKeys"                    size = "50" placeholder = "private keys"></input><br>
+      <input type = "text" class = "inputStandard" id = "inputKBGONonces"                         size = "50" placeholder = "nonces"></input><br>
+      <input type = "text" class = "inputStandard" id = "inputKBGOPublicKeys"                     size = "50" placeholder = "public keys"></input><br>
+      <input type = "text" class = "inputStandard" id = "inputKBGOCommittedSignersBitmap"         size = "50" placeholder = "committed signers bitmap"></input><br>
+      <input type = "text" class = "inputStandard" id = "inputKBGOCommitments"                    size = "50" placeholder = "commitments"></input><br>
+      <input type = "text" class = "inputStandard" id = "inputKBGODigest"                         size = "50" placeholder = "digest"></input><br>
+      <input type = "text" class = "inputStandard" id = "inputKBGOAggregatePublicKey"             size = "50" placeholder = "challenge/aggregate commitment"></input><br>
+      <input type = "text" class = "inputStandard" id = "inputKBGOAggregateCommitment"            size = "50" placeholder = "aggregate public key"></input><br>
+      <input type = "text" class = "inputStandard" id = "inputKBGOSolutions"                      size = "50" placeholder = "solutions"></input><br>
+      <input type = "text" class = "inputStandard" id = "inputKBGOAggregateSignature"             size = "50" placeholder = "aggregate signature"></input><br>
+      <input type = "text" class = "inputStandard" id = "inputKBGOAggregateSignatureUncompressed" size = "50" placeholder = "aggregate signature uncompressed"></input><br>
+      <input type = "text" class = "inputStandard" id = "inputKBGOAggregateSignatureComplete"     size = "50" placeholder = "aggregate signature complete"></input><br>
     </td>
     </tr></table>
     </div> <!--divControlPanelDefault-->
@@ -310,7 +312,12 @@
 
     <input type = "text" class = "inputStandard" id = "inputFabcoinWalletAmount"               size = "50" value = "" placeholder = "amount (wallet)"></input><br>
     <input type = "text" class = "inputStandard" id = "inputFabcoinTransactionOutputAddresses" size = "50" value = "" placeholder = "outputs address(es)"></input><br>
+
+    <input type = "text" class = "inputStandard" id = "inputAggregateSignaturePubKeysForTx"    size = "50" placeholder = "aggregate output public keys"></input><br>
+    <input type = "text" class = "inputStandard" id = "inputAggregateSignatureForTx"           size = "50" placeholder = "aggregate output signature"></input><br>
+
     <input type = "text" class = "inputStandard" id = "inputFabcoinTransactionOutputs"         size = "50" value = "" placeholder = "tx outputs"></input><br>
+
     <input type = "text" class = "inputStandard" id = "inputFabcoinContractHex"                size = "50" value = "" placeholder = "contract hex"></input><br>
     <input type = "text" class = "inputStandard" id = "inputFabcoinContractId"                 size = "50" value = "" placeholder = "contract id"></input><br>
     <input type = "text" class = "inputStandard" id = "inputSolidityFunctionName"              size = "50" value = "" placeholder = "contract f-n name"></input><br>

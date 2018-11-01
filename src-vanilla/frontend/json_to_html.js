@@ -28,6 +28,9 @@ JSONTransformer.prototype.bindButtons = function() {
   // enumerate the elements in order opposite to creation order.
   for (var counterLabels = this.bindIdsInOrder.length - 1; counterLabels >= 0; counterLabels --) {
     var idToBindTo = this.bindIdsInOrder[counterLabels];
+    if (idToBindTo === "") {
+      throw (`Empty bind id. `);
+    }
     var currentElement = document.getElementById(idToBindTo);
     var currentLabelData = this.bindings[idToBindTo];
     var currentHandler = currentLabelData.clickHandler;
@@ -140,6 +143,9 @@ JSONTransformer.prototype.getClickableEntryUsingTransformer = function(input, in
   if (theTransformer.transformer !== undefined && theTransformer.transformer !== null) {
     idExpandButton = `JSONExpandButton${totalClickableEntries}`;
   }
+  if (currentId === "" || typeof currentId !== "string" ) {
+    throw(`Invalid currentId: ${currentId}`);
+  }
   this.bindIdsInOrder.push(currentId);
   this.bindings[currentId] = {
     content: input,
@@ -155,7 +161,11 @@ JSONTransformer.prototype.getClickableEntryUsingTransformer = function(input, in
     result += `<span class = "panelRPCWithExpansion">`;
   }
   if (theTransformer.clickHandler !== null && theTransformer.clickHandler !== undefined) {
-    result += `<button class = "buttonRPCInput" id = "${currentId}">`; 
+    var tooltipClass = "";
+    if (theTransformer.tooltip !== undefined && theTransformer.tooltip !== null) {
+      tooltipClass = " tooltip";
+    }
+    result += `<button class = "buttonRPCInput${tooltipClass}" id = "${currentId}">`; 
   }
   if (theTransformer.transformer !== undefined && theTransformer.transformer !== null) {
     result += theTransformer.transformer(inputHTML);
@@ -163,7 +173,10 @@ JSONTransformer.prototype.getClickableEntryUsingTransformer = function(input, in
     result += processInputStringStandard(inputHTML);
   }
   if (theTransformer.clickHandler !== null && theTransformer.clickHandler !== undefined) {
-    result += "</button>";
+    if (theTransformer.tooltip !== undefined && theTransformer.tooltip !== null) {
+      result += `<span class = "tooltiptext">${theTransformer.tooltip}</span>`;
+    }
+    result += `</button>`;
   }
   if (idExpandButton !== "") {
     result += `<button id = "${idExpandButton}" class = "buttonJSONExpand">&#9668;</button>`;
@@ -449,7 +462,7 @@ JSONTransformer.prototype.getHtmlFromArrayOfObjects = function(input, options) {
   } else if (shouldLayoutAsArrayTable) {
     result += this.getTableHorizontallyLaidFromJSON(inputJSON, options, null, []);
   } else {
-    result += `${this.getClickableEntryUsingTransformer(inputJSON, inputJSON, options.transformers.singleEntry, "singleEntry", [])}<br>`; 
+    result += `${this.getClickableEntryUsingTransformer(inputJSON, inputJSON, options.transformers.singleEntry, "singleEntry", [])}`; 
   }
   return result;
 }
