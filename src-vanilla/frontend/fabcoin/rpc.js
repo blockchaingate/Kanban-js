@@ -26,7 +26,7 @@ function FabNode () {
       transformer: miscellaneousBackend.hexVeryShortDisplay
     },
     transactionId: this.getSetInputAndRunWithShortener(inputFabBlock.txid, "getTransactionById", "Sets the transaction id field, fetches and decodes the transaction. "),
-    transactionHexDecoder: this.getSetInputAndRunWithShortener(inputFabBlock.txHex, "decodeTransactionRaw"),
+    transactionHexDecoder: this.getSetInputAndRunWithShortener(inputFabBlock.txHex, "decodeTransactionRaw", "Sets the transaction hex field and decodes the tx."),
     setAddress: this.getSetInputWithShortener(inputFabBlock.address),
     setPrivateKey: {
       clickHandler: this.setPrivateKeyComputeAllElse.bind(this),
@@ -37,6 +37,11 @@ function FabNode () {
     setPublicKeySchnorr: this.getSetInputAndRunWithShortener(inputFabCryptoSchnorr.publicKey),
     setTxInputVoutAndValue: {
       clickHandler: this.setTxInputVoutAndValue.bind(this),
+      tooltip: "Sets the tx inputs to this vout. Sets the transfer amount to the value of this txout minus 1."
+    },
+    setTxInputVoutNoValue: {
+      clickHandler: this.setTxInputVoutAndValue.bind(this),
+      tooltip: "Sets the tx inputs to this vout. Sets the transfer amount to 0. "
     },
     setContractId: {
       clickHandler: this.setContractId.bind(this),
@@ -64,7 +69,7 @@ function FabNode () {
       txid: this.transformersStandard.transactionId,
       "details.${number}.address": this.transformersStandard.setAddress,
       "details.${number}.amount": this.transformersStandard.setTxInputVoutAndValue,
-      "details.${number}.vout": this.transformersStandard.setTxInputVoutAndValue,
+      "details.${number}.vout": this.transformersStandard.setTxInputVoutNoValue,
     },
   };
   this.outputOptionsTransaction = {
@@ -74,7 +79,7 @@ function FabNode () {
       txid: this.transformersStandard.transactionId,
       "details.${number}.address": this.transformersStandard.setAddress,
       "vout.${number}.scriptPubKey.addresses.${number}": this.transformersStandard.setAddress,
-      "vout.${number}.n": this.transformersStandard.setTxInputVoutAndValue,
+      "vout.${number}.n": this.transformersStandard.setTxInputVoutNoValue,
       "vout.${number}.value": this.transformersStandard.setTxInputVoutAndValue,
       "vout.${number}.scriptPubKey.asm": this.transformersStandard.shortener,
       "vout.${number}.scriptPubKey.hex": this.transformersStandard.shortener,
@@ -482,15 +487,26 @@ FabNode.prototype.getSetInputWithShortener = function (idOutput) {
 FabNode.prototype.setTxOutput = function () {
   var inputFab = ids.defaults.fabcoin.inputBlockInfo;
   var address = document.getElementById(inputFab.txOutputAddresses).value;
+  var publicKeysForAggregateString = document.getElementById(inputFab.txAggregatePublicKeys).value;
   var amount = document.getElementById(inputFab.walletAmount).value;
   var isGood = true;
   if (address === "" || address === null || address === undefined) {
     submitRequests.highlightError(inputFab.txOutputAddresses);
     isGood = false;
   }
+  var publicKeysForAggregate = null;
+  if (publicKeysForAggregateString.trim() !== "") {
+    try {
+      publicKeysForAggregate = JSON.parse(publicKeysForAggregateString);
+      isGood = true;
+    } catch (e) {
+      console.log("Error parsing public keys for aggregate signature. ");
+      publicKeysForAggregate = null;
+    }
+  }
   if (amount === "" || amount === null || amount === undefined) {
     submitRequests.highlightError(inputFab.walletAmount);
-    isGood = true;
+    isGood = false;
   }
   if (!isGood) {
     return;
@@ -500,8 +516,17 @@ FabNode.prototype.setTxOutput = function () {
   try {
     currentOutputsRaw = document.getElementById(inputFab.txOutputs).value;
     currentOutputs = jsonic(currentOutputsRaw);
-    currentOutputs[address] = amount;
-    submitRequests.updateValue(inputFab.txOutputs, jsonic.stringify(currentOutputs));
+    if (address !== null && address !== undefined && address !== "") {
+      currentOutputs[address] = amount;
+      amount = 0;
+    }
+    if (publicKeysForAggregate !== null) {
+      currentOutputs.aggregateSignature = {
+        publicKeys: publicKeysForAggregate,
+        amount: amount,
+      };
+    }
+    submitRequests.updateValue(inputFab.txOutputs, JSON.stringify(currentOutputs));
   } catch (e) {
     console.log(`Failed to parse your current transaction inputs. Inputs raw: ${currentOutputsRaw}. Inputs parsed: ${JSON.stringify(currentOutputs)}. ${e}`);
     submitRequests.highlightError(inputFab.txOutputs);
@@ -549,8 +574,6 @@ FabNode.prototype.setTxInputVoutAndValue = function (container, content, extraDa
       submitRequests.updateValue(inputFab.address, addressVout);
     }
     submitRequests.updateValue(inputFab.walletAmount, incomingAmount);
-    var currentOutputs = document.getElementById(inputFab.txOutputs).value; 
-    var currentPreferredAddress = document.getElementById(inputFab.txOutputAddresses).value;
     this.setTxOutput();
   } catch (e) {
     console.log(`Failed to parse your current transaction inputs. Inputs raw: ${currentInputsRaw}. Inputs parsed: ${JSON.stringify(currentInputs)}. ${e}`);

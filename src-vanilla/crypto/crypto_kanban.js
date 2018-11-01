@@ -107,6 +107,7 @@ CurvePoint.prototype.toHex = function() {
   if (this.point === null) {
     return "(uninitialized)";
   }
+  //console.log( Buffer.from(this.point.encodeCompressed()));
   return Buffer.from(this.point.encodeCompressed()).toString('hex');
 }
 
