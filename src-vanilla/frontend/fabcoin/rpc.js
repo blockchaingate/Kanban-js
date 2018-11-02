@@ -84,6 +84,8 @@ function FabNode () {
       "vout.${number}.scriptPubKey.asm": this.transformersStandard.shortener,
       "vout.${number}.scriptPubKey.hex": this.transformersStandard.shortener,
       hex: this.transformersStandard.transactionHexDecoder,
+      inputRawTransaction: this.transformersStandard.transactionHexDecoder,
+      inputTransactionDecodedAndRecoded: this.transformersStandard.transactionHexDecoder,
       "vin.${number}.txid": this.transformersStandard.transactionId,
       "vin.${number}.scriptSig.asm": this.transformersStandard.shortener,
       "vin.${number}.scriptSig.hex": this.transformersStandard.shortener,
@@ -244,6 +246,13 @@ function FabNode () {
     sendRawTransaction: {
       inputs: {
         rawTransactionHex: inputFabBlock.txHex
+      },
+      outputOptions: this.outputOptionsTransaction
+    },
+    insertAggregateSignature: {
+      inputs: {
+        rawTransaction: inputFabBlock.txHex,
+        aggregateSignature: inputFabBlock.txAggregateSignature,
       },
       outputOptions: this.outputOptionsTransaction
     },

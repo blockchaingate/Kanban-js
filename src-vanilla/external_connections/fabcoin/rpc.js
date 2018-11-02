@@ -129,6 +129,15 @@ var rpcCalls = {
     },
     parameters: ["hexString", "parents", "privateKeys"]
   },
+  insertAggregateSignature: {
+    rpcCall: "insertAggregateSignature",
+    method: "insertaggregatesignature",
+    mandatoryModifiableArguments: {
+      rawTransaction: null,
+      aggregateSignature: null,
+    },
+    parameters: ["rawTransaction", "aggregateSignature"]
+  },
   sendRawTransaction: {
     rpcCall: "sendRawTransaction",
     method: "sendrawtransaction",
