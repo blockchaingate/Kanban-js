@@ -445,7 +445,7 @@ KanbanGoNodes.prototype.computeContractData = function () {
   var contractData = "";
   contractData += document.getElementById(contractIds.contractFunctionId).value;
   contractData += document.getElementById(contractIds.contractFunctionData).value;
-  submitRequests.updateValue(contractIds.contractData, contractData); 
+  miscellaneousFrontEnd.updateValue(contractIds.contractData, contractData); 
 }
 
 KanbanGoNodes.prototype.setContractFunctionName = function (container, content, extraData) {
@@ -466,13 +466,13 @@ KanbanGoNodes.prototype.setContractFunctionName = function (container, content, 
   console.log(`DEBUG: fun signature so far: ${functionSignature}`);
   var contractIds = ids.defaults.fabcoin.inputBlockInfo; 
   if (abi.payable === false || abi.payable === "false") {
-    submitRequests.updateValue(contractIds.walletAmount, 0);
+    miscellaneousFrontEnd.updateValue(contractIds.walletAmount, 0);
   }
-  submitRequests.updateValue(contractIds.contractHex, ambientInput.binaries[counterContract]);
-  submitRequests.updateValue(contractIds.contractFunctionName, content);
+  miscellaneousFrontEnd.updateValue(contractIds.contractHex, ambientInput.binaries[counterContract]);
+  miscellaneousFrontEnd.updateValue(contractIds.contractFunctionName, content);
   var keccak = cryptoKanbanHashes.hashes.keccak_ToHex(functionSignature);
   var keccakFirstFour = keccak.slice(0, 8);
-  submitRequests.updateValue(contractIds.contractFunctionId, keccakFirstFour);
+  miscellaneousFrontEnd.updateValue(contractIds.contractFunctionId, keccakFirstFour);
   this.computeContractData();
 }
 
@@ -491,11 +491,11 @@ KanbanGoNodes.prototype.getSetInputWithShortener = function (idOutput) {
 KanbanGoNodes.prototype.setInput = function (idToSet, container, content, extraData) {
   //var extraDataString = JSON.stringify(extraData);
   //console.log(`DEBUG: Content: ${content}, extra data: ${extraDataString}`);
-  submitRequests.updateValue(idToSet, content);
+  miscellaneousFrontEnd.updateValue(idToSet, content);
 }
 
 KanbanGoNodes.prototype.getBlockByHash = function (container, inputHash) {
-  submitRequests.updateValue(ids.defaults.kanbanGO.inputSendReceive.blockHash, inputHash);
+  miscellaneousFrontEnd.updateValue(ids.defaults.kanbanGO.inputSendReceive.blockHash, inputHash);
   miscellaneousFrontEnd.revealLongWithParent(container, inputHash);
   this.run('getBlockByHash');
 }
@@ -520,17 +520,17 @@ KanbanGoNodes.prototype.correctFunctions = function() {
 
 KanbanGoNodes.prototype.testClear = function() {
   var inputAggregate = ids.defaults.kanbanGO.inputAggregateSignature;
-  submitRequests.updateValue(inputAggregate.numberOfPrivateKeysToGenerate, '5');
-  submitRequests.updateValue(inputAggregate.privateKeys, '');
-  submitRequests.updateValue(inputAggregate.nonces, '');
-  submitRequests.updateValue(inputAggregate.publicKeys, '');
-  submitRequests.updateValue(inputAggregate.committedSignersBitmap, '01111');
-  submitRequests.updateValue(inputAggregate.commitments, '');
-  submitRequests.updateValue(inputAggregate.digest, '');
-  submitRequests.updateValue(inputAggregate.aggregateCommitment, '');
-  submitRequests.updateValue(inputAggregate.aggregatePublickey, '');
-  submitRequests.updateValue(inputAggregate.solutions, '');
-  submitRequests.updateValue(inputAggregate.aggregateSignature, '');
+  miscellaneousFrontEnd.updateValue(inputAggregate.numberOfPrivateKeysToGenerate, '5');
+  miscellaneousFrontEnd.updateValue(inputAggregate.privateKeys, '');
+  miscellaneousFrontEnd.updateValue(inputAggregate.nonces, '');
+  miscellaneousFrontEnd.updateValue(inputAggregate.publicKeys, '');
+  miscellaneousFrontEnd.updateValue(inputAggregate.committedSignersBitmap, '01111');
+  miscellaneousFrontEnd.updateValue(inputAggregate.commitments, '');
+  miscellaneousFrontEnd.updateValue(inputAggregate.digest, '');
+  miscellaneousFrontEnd.updateValue(inputAggregate.aggregateCommitment, '');
+  miscellaneousFrontEnd.updateValue(inputAggregate.aggregatePublickey, '');
+  miscellaneousFrontEnd.updateValue(inputAggregate.solutions, '');
+  miscellaneousFrontEnd.updateValue(inputAggregate.aggregateSignature, '');
 }
 
 KanbanGoNodes.prototype.run = function(functionLabel, callType, callbackOverridesStandard) {

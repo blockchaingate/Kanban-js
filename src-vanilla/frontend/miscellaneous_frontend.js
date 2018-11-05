@@ -1,4 +1,6 @@
 "use strict";
+const ids = require('./ids_dom_elements');
+const miscellaneousBackend = require('../miscellaneous');
 
 function selectText(nodeId) {
   var node = document.getElementById(nodeId);
@@ -42,6 +44,110 @@ function doToggleContent(container, element) {
   }
 }
 
+function removeUpdateHighlight(id, highlightName) {
+  var theElement = null;
+  if (typeof id === "string" ) {
+    theElement = document.getElementById(id);
+  } else {
+    theElement = id;
+  }
+  if (theElement.classList.contains(highlightName)) {
+    theElement.classList.remove(highlightName);
+  }
+}
+
+function highlightError(id) {
+  var theElement = document.getElementById(id);
+  var highlightName = "inputErrorRecently";
+  theElement.classList.add(highlightName);
+  setTimeout(removeUpdateHighlight.bind(null, id, highlightName), 1000);
+}
+
+function highlightInput(id) {
+  var theElement = document.getElementById(id);
+  var highlightName = "inputUsedAsInput";
+  theElement.classList.add(highlightName);
+  setTimeout(removeUpdateHighlight.bind(null, id, highlightName), 1000);
+}
+
+function updateFieldsRecursively(parsedInput, outputs) {
+  if (parsedInput === undefined) {
+    return;
+  }
+  for (var label in outputs) {
+    if (typeof outputs[label] === "string") {
+      var sanitized = miscellaneousBackend.removeQuotes(parsedInput[label]);
+      updateValue(outputs[label], sanitized);
+    } else if (Array.isArray(outputs[label])){
+      var sanitized = miscellaneousBackend.removeQuotes(parsedInput[label]);
+      for (var i = 0; i < outputs[label].length; i ++) {
+        updateValue(outputs[label][i], sanitized);
+      }
+    } else {
+      updateFieldsRecursively(parsedInput[label], outputs[label]);
+    }
+  }
+}
+
+function updateValue(id, content) {
+  if (id === ids.defaults.fabcoin.inputBlockInfo.solidityInput) {
+    window.kanban.ace.editor.setValue(content);
+    return;
+  }
+  var theElement = null;
+  if (typeof id === "string") {
+    theElement = document.getElementById(id);
+  } else {
+    theElement = id;
+  }
+  if (theElement.value === content) {
+    return;
+  }
+  var highlightName = "updatedRecently";
+  theElement.value = content;
+  theElement.classList.add(highlightName);
+  setTimeout(removeUpdateHighlight.bind(null, id, highlightName), 1000);
+}
+
+function updateInnerHtml(id, content) {
+  var theElement = document.getElementById(id);
+  if (theElement.tagName === "INPUT") {
+    theElement.value = content;
+  } else {
+    theElement.innerHTML = content;
+  }
+  var highlightName = "updatedRecently";
+  theElement.classList.add(highlightName);
+  setTimeout(removeUpdateHighlight.bind(null, id, highlightName), 1000);
+}
+
+function unHexAndCopy(fromHex, toNonHex) {
+  var incoming = fromHex.value;
+  if (incoming === undefined || incoming === null) {
+    incoming = "";
+  }
+  var theBuffer = Buffer.from(incoming, "hex");
+  var theString = theBuffer.toString('binary');
+  updateValue(toNonHex, theString);
+}
+
+function transformToHexAndCopy(fromNonHex, toHex) {
+  var incoming = fromNonHex.value;
+  if (incoming === undefined || incoming === null) {
+    incoming = "";
+  }
+  updateValue(toHex, Buffer.from(incoming).toString('hex'));
+}
+
+function hookUpHexWithStringInput(idInputNonHex, idInputHex) {
+  var inputNonHex = document.getElementById(idInputNonHex);
+  var inputHex = document.getElementById(idInputHex);
+  inputNonHex.addEventListener('keydown', transformToHexAndCopy.bind(null, inputNonHex, inputHex));
+  //inputNonHex.addEventListener('onchange', transformToHexAndCopy.bind(null, inputNonHex, inputHex));
+  inputHex.addEventListener('keydown', unHexAndCopy.bind(null, inputHex, inputNonHex));
+  //inputHex.addEventListener('onchange', unHexAndCopy.bind(null, inputHex, inputNonHex));
+}
+
 function getPanelForRevealing(container, content) {
   var parent = container.parentNode.parentNode;
   var newSpan = document.createElement("span");
@@ -76,5 +182,11 @@ function attachModuleFullNameToHandlerNames(transformers, moduleFullName) {
 module.exports = {
   attachModuleFullNameToHandlerNames,
   revealLongWithParent,
-  getPanelForRevealing
+  getPanelForRevealing,
+  hookUpHexWithStringInput,
+  highlightInput,
+  highlightError,
+  updateInnerHtml,
+  updateValue,
+  updateFieldsRecursively,
 }

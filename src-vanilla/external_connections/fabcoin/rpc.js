@@ -217,12 +217,12 @@ var rpcCalls = {
     rpcCall: "testAggregateSignatureCommitment",
     method: "testaggregatesignaturecommit",
     mandatoryModifiableArguments: {
-      message: null
+      messageHex: null
     },
     optionalArguments: {
       nonces: null
     },
-    parameters: ["message", "nonces"]
+    parameters: ["messageHex", "nonces"]
   },
   testAggregateSignatureChallenge: {
     rpcCall: "testAggregateSignatureChallenge",
@@ -259,18 +259,18 @@ var rpcCalls = {
       signature: null,
       committedSignersBitmap: null,
       publicKeys: null,
-      message: null
+      messageHex: null
     },
-    parameters: ["signature", "committedSignersBitmap", "publicKeys", "message"]
+    parameters: ["signature", "committedSignersBitmap", "publicKeys", "messageHex"]
   },
   testAggregateVerificationComplete: {
     rpcCall: "testAggregateVerificationComplete",
     method: "testaggregateverificationcomplete",
     mandatoryModifiableArguments: {
       signatureComplete: null,
-      messageBase64: null
+      messageHex: null
     },
-    parameters: ["signatureComplete", "messageBase64"]
+    parameters: ["signatureComplete", "messageHex"]
   },
   testSchnorrSignature: {
     rpcCall: "testSchnorrSignature",

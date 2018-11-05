@@ -5,6 +5,7 @@ const ids = require('../ids_dom_elements');
 const jsonToHtml = require('../json_to_html');
 const cryptoKanban = require('../../crypto/crypto_kanban');
 const encodingDefault = require('../../crypto/encodings').encodingDefault;
+const miscellaneousFrontEnd = require('../miscellaneous_frontend');
 
 function TestKanbanJS() {
   var inputSchnorr = ids.defaults.kanbanJS.inputSchnorr;
@@ -64,7 +65,7 @@ TestKanbanJS.prototype.updateFields = function(parsedInput, outputs) {
   }
   for (var label in outputs) {
     if (typeof outputs[label] === "string") {
-      submitRequests.updateValue(outputs[label], parsedInput[label]);
+      miscellaneousFrontEnd.updateValue(outputs[label], parsedInput[label]);
     } else {
       this.updateFields(parsedInput[label], outputs[label]);
     }

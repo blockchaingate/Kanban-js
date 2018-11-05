@@ -49,71 +49,6 @@ function deleteParent(id) {
   document.getElementById(id).parentElement.innerHTML = "";
 }
 
-function removeUpdateHighlight(id, highlightName) {
-  var theElement = document.getElementById(id);
-  theElement.classList.remove(highlightName);
-}
-
-function highlightError(id) {
-  var theElement = document.getElementById(id);
-  var highlightName = "inputErrorRecently";
-  theElement.classList.add(highlightName);
-  setTimeout(removeUpdateHighlight.bind(null, id, highlightName), 1000);
-}
-
-function highlightInput(id) {
-  var theElement = document.getElementById(id);
-  var highlightName = "inputUsedAsInput";
-  theElement.classList.add(highlightName);
-  setTimeout(removeUpdateHighlight.bind(null, id, highlightName), 1000);
-}
-
-function updateFieldsRecursively(parsedInput, outputs) {
-  if (parsedInput === undefined) {
-    return;
-  }
-  for (var label in outputs) {
-    if (typeof outputs[label] === "string") {
-      var sanitized = miscellaneousBackend.removeQuotes(parsedInput[label]);
-      updateValue(outputs[label], sanitized);
-    } else if (Array.isArray(outputs[label])){
-      var sanitized = miscellaneousBackend.removeQuotes(parsedInput[label]);
-      for (var i = 0; i < outputs[label].length; i ++) {
-        updateValue(outputs[label][i], sanitized);
-      }
-    } else {
-      updateFieldsRecursively(parsedInput[label], outputs[label]);
-    }
-  }
-}
-
-function updateValue(id, content) {
-  if (id === ids.defaults.fabcoin.inputBlockInfo.solidityInput) {
-    window.kanban.ace.editor.setValue(content);
-    return;
-  }
-  var theElement = document.getElementById(id);
-  if (theElement.value === content) {
-    return;
-  }
-  var highlightName = "updatedRecently";
-  theElement.value = content;
-  theElement.classList.add(highlightName);
-  setTimeout(removeUpdateHighlight.bind(null, id, highlightName), 1000);
-}
-
-function updateInnerHtml(id, content) {
-  var theElement = document.getElementById(id);
-  if (theElement.tagName === "INPUT") {
-    theElement.value = content;
-  } else {
-    theElement.innerHTML = content;
-  }
-  var highlightName = "updatedRecently";
-  theElement.classList.add(highlightName);
-  setTimeout(removeUpdateHighlight.bind(null, id, highlightName), 1000);
-}
-
 function recordProgressDone(progress) {
   if (progress === null || progress === undefined) {
     return;
@@ -241,9 +176,4 @@ module.exports = {
   getToggleButton,
   getToggleButtonPausePolling,
   deleteParent,
-  updateInnerHtml,
-  updateValue,
-  updateFieldsRecursively,
-  highlightInput,
-  highlightError
 }

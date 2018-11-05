@@ -7,7 +7,7 @@ const globals = require('../globals');
 const submitRequests = require('../submit_requests');
 const jsonToHtml = require('../json_to_html');
 const miscellaneousBackend = require('../../miscellaneous');
-//const miscellaneousFrontEnd = require('../miscellaneous_frontend');
+const miscellaneousFrontEnd = require('../miscellaneous_frontend');
 const jsonic = require('jsonic');
 const cryptoKanban = require('../../crypto/crypto_kanban');
 const encodingsKanban = require('../../crypto/encodings');
@@ -360,8 +360,8 @@ function FabNode () {
       callback: this.callbackAggregateSignatureInitialize
     },
     testAggregateSignatureCommitment: {
-      inputsBase64: {
-        message: inputFabCryptoAggregate.message
+      inputs: {
+        messageHex: inputFabCryptoAggregate.messageHex
       },
       callType: this.callTypes.crypto,
       callback: this.callbackAggregateSignatureCommit
@@ -408,18 +408,14 @@ function FabNode () {
         signature: inputFabCryptoAggregate.theAggregation,
         committedSignersBitmap: inputFabCryptoAggregate.committedSignersBitmap,
         publicKeys: inputFabCryptoAggregate.publicKeys,
-      },
-      inputsBase64: {
-        message: inputFabCryptoAggregate.message
+        messageHex: inputFabCryptoAggregate.messageHex,
       },
       callType: this.callTypes.crypto,
     },
     testAggregateVerificationComplete: {
       inputs: {
         signatureComplete: inputFabCryptoAggregate.aggregateSignatureComplete,
-      },
-      inputsBase64: {
-        messageBase64: inputFabCryptoAggregate.message
+        messageHex: inputFabCryptoAggregate.messageHex
       },
       callType: this.callTypes.crypto,
     }
@@ -442,11 +438,11 @@ FabNode.prototype.sanitizeTxOutputs = function () {
   }
   var sanitizedTxOuts = {};
   if (typeof txOuts !== "string") {
-    submitRequests.highlightError(ids.defaults.fabcoin.inputBlockInfo.txOutputs);
+    miscellaneousFrontEnd.highlightError(ids.defaults.fabcoin.inputBlockInfo.txOutputs);
     return;
   }
   sanitizedTxOuts[txOuts] = 0;
-  submitRequests.updateValue(ids.defaults.fabcoin.inputBlockInfo.txOutputs, jsonic.stringify(sanitizedTxOuts));
+  miscellaneousFrontEnd.updateValue(ids.defaults.fabcoin.inputBlockInfo.txOutputs, jsonic.stringify(sanitizedTxOuts));
 }
 
 FabNode.prototype.getObjectFromInput = function(inputId) {
@@ -500,7 +496,7 @@ FabNode.prototype.setTxOutput = function () {
   var amount = document.getElementById(inputFab.walletAmount).value;
   var isGood = true;
   if (address === "" || address === null || address === undefined) {
-    submitRequests.highlightError(inputFab.txOutputAddresses);
+    miscellaneousFrontEnd.highlightError(inputFab.txOutputAddresses);
     isGood = false;
   }
   var publicKeysForAggregate = null;
@@ -514,7 +510,7 @@ FabNode.prototype.setTxOutput = function () {
     }
   }
   if (amount === "" || amount === null || amount === undefined) {
-    submitRequests.highlightError(inputFab.walletAmount);
+    miscellaneousFrontEnd.highlightError(inputFab.walletAmount);
     isGood = false;
   }
   if (!isGood) {
@@ -535,10 +531,10 @@ FabNode.prototype.setTxOutput = function () {
         amount: amount,
       };
     }
-    submitRequests.updateValue(inputFab.txOutputs, JSON.stringify(currentOutputs));
+    miscellaneousFrontEnd.updateValue(inputFab.txOutputs, JSON.stringify(currentOutputs));
   } catch (e) {
     console.log(`Failed to parse your current transaction inputs. Inputs raw: ${currentOutputsRaw}. Inputs parsed: ${JSON.stringify(currentOutputs)}. ${e}`);
-    submitRequests.highlightError(inputFab.txOutputs);
+    miscellaneousFrontEnd.highlightError(inputFab.txOutputs);
     return;    
   }
 }
@@ -578,15 +574,15 @@ FabNode.prototype.setTxInputVoutAndValue = function (container, content, extraDa
     if (!found) {
       currentInputs.push({txid: incomingId, vout: incomingVout });
     }
-    submitRequests.updateValue(inputFab.txInputs, jsonic.stringify(currentInputs));
+    miscellaneousFrontEnd.updateValue(inputFab.txInputs, jsonic.stringify(currentInputs));
     if (addressVout !== null) {
-      submitRequests.updateValue(inputFab.address, addressVout);
+      miscellaneousFrontEnd.updateValue(inputFab.address, addressVout);
     }
-    submitRequests.updateValue(inputFab.walletAmount, incomingAmount);
+    miscellaneousFrontEnd.updateValue(inputFab.walletAmount, incomingAmount);
     this.setTxOutput();
   } catch (e) {
     console.log(`Failed to parse your current transaction inputs. Inputs raw: ${currentInputsRaw}. Inputs parsed: ${JSON.stringify(currentInputs)}. ${e}`);
-    submitRequests.highlightError(inputFab.txInputs);
+    miscellaneousFrontEnd.highlightError(inputFab.txInputs);
     return;
   }
 }
@@ -594,18 +590,18 @@ FabNode.prototype.setTxInputVoutAndValue = function (container, content, extraDa
 FabNode.prototype.setContractId = function (container, content, extraData) {
   //var extraDataString = JSON.stringify(extraData);
   //console.log(`DEBUG: Content: ${content}, extra data: ${extraDataString}`);
-  submitRequests.updateValue(ids.defaults.fabcoin.inputBlockInfo.contractId, content);
-  submitRequests.updateValue(ids.defaults.kanbanGO.inputInitialization.contractId, content);
+  miscellaneousFrontEnd.updateValue(ids.defaults.fabcoin.inputBlockInfo.contractId, content);
+  miscellaneousFrontEnd.updateValue(ids.defaults.kanbanGO.inputInitialization.contractId, content);
 }
 
 FabNode.prototype.setInput = function (idToSet, container, content, extraData) {
   //var extraDataString = JSON.stringify(extraData);
   //console.log(`DEBUG: Content: ${content}, extra data: ${extraDataString}`);
-  submitRequests.updateValue(idToSet, content);
+  miscellaneousFrontEnd.updateValue(idToSet, content);
 }
 
 FabNode.prototype.computePublicKeyFromPrivate = function() {
-  submitRequests.highlightInput(ids.defaults.fabcoin.inputBlockInfo.privateKey);
+  miscellaneousFrontEnd.highlightInput(ids.defaults.fabcoin.inputBlockInfo.privateKey);
   this.setPrivateKeyComputeAllElse(null, document.getElementById(ids.defaults.fabcoin.inputBlockInfo.privateKey).value);
 }
 
@@ -613,16 +609,16 @@ FabNode.prototype.setPrivateKeyComputeAllElse = function (container, content, ex
   var thePrivateKey = new cryptoKanban.CurveExponent();
   thePrivateKey.fromArbitrary(content);
   var thePublicKey = thePrivateKey.getExponent();
-  submitRequests.updateValue(ids.defaults.fabcoin.inputBlockInfo.publicKey, thePublicKey.toHex());
+  miscellaneousFrontEnd.updateValue(ids.defaults.fabcoin.inputBlockInfo.publicKey, thePublicKey.toHex());
   var addressEthereumHex = thePublicKey.computeEthereumAddressHex();
   var addressFabTestnetBytes = thePublicKey.computeFABAddressTestnetBytes();
   var addressFabTestnetBase58 =  encodingsKanban.encodingDefault.toBase58Check(addressFabTestnetBytes);
 
   var addressFabMainnetBytes = thePublicKey.computeFABAddressBytes();
   var addressFabMainnetBase58 =  encodingsKanban.encodingDefault.toBase58Check(addressFabMainnetBytes);
-  submitRequests.updateValue(ids.defaults.fabcoin.inputBlockInfo.address, addressFabTestnetBase58);
-  submitRequests.updateValue(ids.defaults.fabcoin.inputBlockInfo.addressMainnet, addressFabMainnetBase58);
-  submitRequests.updateValue(ids.defaults.fabcoin.inputBlockInfo.addressEthereum, addressEthereumHex);
+  miscellaneousFrontEnd.updateValue(ids.defaults.fabcoin.inputBlockInfo.address, addressFabTestnetBase58);
+  miscellaneousFrontEnd.updateValue(ids.defaults.fabcoin.inputBlockInfo.addressMainnet, addressFabMainnetBase58);
+  miscellaneousFrontEnd.updateValue(ids.defaults.fabcoin.inputBlockInfo.addressEthereum, addressEthereumHex);
 
   console.log(`DEBUG: private key hex: ${thePrivateKey.toHex()}`);
   console.log(`DEBUG: content: ${JSON.stringify(content)}`);
@@ -630,17 +626,17 @@ FabNode.prototype.setPrivateKeyComputeAllElse = function (container, content, ex
 
 FabNode.prototype.testAggregateSignatureClear = function() {
   var inputAggregate = ids.defaults.fabcoin.inputCrypto.inputAggregateSignature;
-  submitRequests.updateInnerHtml(inputAggregate.numberOfPrivateKeysToGenerate, "5");
-  submitRequests.updateInnerHtml(inputAggregate.privateKeys, "");
-  submitRequests.updateInnerHtml(inputAggregate.nonces, "");
-  submitRequests.updateInnerHtml(inputAggregate.publicKeys, "");
-  submitRequests.updateInnerHtml(inputAggregate.commitments, "");
-  submitRequests.updateInnerHtml(inputAggregate.committedSignersBitmap, "11111");
-  submitRequests.updateInnerHtml(inputAggregate.aggregatePubkey, "");
-  submitRequests.updateInnerHtml(inputAggregate.messageDigest, "");
-  submitRequests.updateInnerHtml(inputAggregate.theAggregation, "");
-  submitRequests.updateInnerHtml(inputAggregate.solutions, "");
-  submitRequests.updateInnerHtml(inputAggregate.aggregateCommitment, "");
+  miscellaneousFrontEnd.updateInnerHtml(inputAggregate.numberOfPrivateKeysToGenerate, "5");
+  miscellaneousFrontEnd.updateInnerHtml(inputAggregate.privateKeys, "");
+  miscellaneousFrontEnd.updateInnerHtml(inputAggregate.nonces, "");
+  miscellaneousFrontEnd.updateInnerHtml(inputAggregate.publicKeys, "");
+  miscellaneousFrontEnd.updateInnerHtml(inputAggregate.commitments, "");
+  miscellaneousFrontEnd.updateInnerHtml(inputAggregate.committedSignersBitmap, "11111");
+  miscellaneousFrontEnd.updateInnerHtml(inputAggregate.aggregatePubkey, "");
+  miscellaneousFrontEnd.updateInnerHtml(inputAggregate.messageDigest, "");
+  miscellaneousFrontEnd.updateInnerHtml(inputAggregate.theAggregation, "");
+  miscellaneousFrontEnd.updateInnerHtml(inputAggregate.solutions, "");
+  miscellaneousFrontEnd.updateInnerHtml(inputAggregate.aggregateCommitment, "");
 }
 
 FabNode.prototype.callbackAggregateSignatureInitialize = function(functionLabelFrontEnd, input, output) {
@@ -653,10 +649,10 @@ FabNode.prototype.callbackAggregateSignatureInitialize = function(functionLabelF
     publicKeys.push(inputParsed.signers[counterKeyPairs].myPublicKey);
   }
   var aggregateIds = ids.defaults.fabcoin.inputCrypto.inputAggregateSignature;
-  submitRequests.updateValue(aggregateIds.privateKeys, privateKeys.join(", "));
-  submitRequests.updateValue(aggregateIds.publicKeys, publicKeys.join(", "));
+  miscellaneousFrontEnd.updateValue(aggregateIds.privateKeys, privateKeys.join(", "));
+  miscellaneousFrontEnd.updateValue(aggregateIds.publicKeys, publicKeys.join(", "));
   var publicKeysJoined = `["${publicKeys.join('","')}"]`; 
-  submitRequests.updateValue(ids.defaults.fabcoin.inputBlockInfo.txAggregatePublicKeys, publicKeysJoined);
+  miscellaneousFrontEnd.updateValue(ids.defaults.fabcoin.inputBlockInfo.txAggregatePublicKeys, publicKeysJoined);
 }
 
 FabNode.prototype.callbackAggregateSignatureCommit = function(functionLabelFrontEnd, input, output) {
@@ -670,8 +666,8 @@ FabNode.prototype.callbackAggregateSignatureCommit = function(functionLabelFront
     commitments.push(currentSigner.commitmentHexCompressed);
   }
   var aggregateIds = ids.defaults.fabcoin.inputCrypto.inputAggregateSignature;
-  submitRequests.updateValue(aggregateIds.nonces, nonces.join(", "));
-  submitRequests.updateValue(aggregateIds.commitments, commitments.join(", "));
+  miscellaneousFrontEnd.updateValue(aggregateIds.nonces, nonces.join(", "));
+  miscellaneousFrontEnd.updateValue(aggregateIds.commitments, commitments.join(", "));
 }
 
 FabNode.prototype.callbackAggregateSignatureSolutions = function(functionLabelFrontEnd, input, output) {
@@ -682,7 +678,7 @@ FabNode.prototype.callbackAggregateSignatureSolutions = function(functionLabelFr
     var currentSigner = inputParsed.signers[counterKeyPairs]; 
     solutions.push(currentSigner.mySolution);
   }
-  submitRequests.updateValue(ids.defaults.kanbanPlusPlus.inputAggregateSignature.solutions, solutions.join(", "));
+  miscellaneousFrontEnd.updateValue(ids.defaults.kanbanPlusPlus.inputAggregateSignature.solutions, solutions.join(", "));
 }
 
 FabNode.prototype.convertToCorrectType = function(functionLabelBackend, variableName, inputRaw) {
@@ -718,7 +714,7 @@ FabNode.prototype.getArguments = function(functionLabelFrontEnd, functionLabelBa
     var rawInput = null;
     if (typeof inputObject === "string") {
       //inputObject is an id
-      submitRequests.highlightInput(inputObject);
+      miscellaneousFrontEnd.highlightInput(inputObject);
       rawInput = document.getElementById(inputObject).value;
     } else if (typeof inputObject === "function"){
       //inputObject is a function that returns the raw input
@@ -730,7 +726,7 @@ FabNode.prototype.getArguments = function(functionLabelFrontEnd, functionLabelBa
   if (currentInputsBase64 !== null && currentInputsBase64 !== undefined) {
     for (var inputLabel in currentInputsBase64) {
       var theValue =  document.getElementById(currentInputsBase64[inputLabel]).value;
-      submitRequests.highlightInput(currentInputsBase64[inputLabel]);
+      miscellaneousFrontEnd.highlightInput(currentInputsBase64[inputLabel]);
       theArguments[inputLabel] = Buffer.from(theValue).toString('base64');
     }
   }
@@ -769,10 +765,10 @@ FabNode.prototype.callbackStandard = function(functionLabelFrontEnd, input, outp
     var inputParsed = JSON.parse(input);
 
     if (typeof currentOutputs === "string") {
-      submitRequests.updateValue(currentOutputs, miscellaneousBackend.removeQuotes(input));
+      miscellaneousFrontEnd.updateValue(currentOutputs, miscellaneousBackend.removeQuotes(input));
     }
     if (typeof currentOutputs === "object") {
-      submitRequests.updateFieldsRecursively(inputParsed, currentOutputs);
+      miscellaneousFrontEnd.updateFieldsRecursively(inputParsed, currentOutputs);
     } 
     if (inputParsed.resultHTML !== undefined && inputParsed.resultHTML !== undefined) {
       resultHTML = inputParsed.resultHTML + "<br>" + resultHTML;

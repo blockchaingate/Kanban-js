@@ -137,6 +137,7 @@ var defaults = {
       },
       inputAggregateSignature: {
         message: "inputAggregateSignatureMessage",
+        messageHex: "inputAggregateSignatureMessageHex",
         commitments: "inputAggregateSignatureCommitments",
         numberOfPrivateKeysToGenerate: "inputAggregateSignatureNumberOfPrivateKeysToGenerate",
         privateKeys: "inputAggregateSignaturePrivateKeys",

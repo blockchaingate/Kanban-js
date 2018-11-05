@@ -1,3 +1,5 @@
+"use strict"
+const miscellaneousFrontEnd = require('../miscellaneous_frontend');
 const submitRequests = require('../submit_requests');
 const jsonToHtml = require('../json_to_html');
 var JSONTransformer = jsonToHtml.JSONTransformer;
@@ -76,7 +78,7 @@ PendingCall.prototype.run = function (functionLabel) {
 }
 
 PendingCall.prototype.updateFields = function(parsedInput, outputs) {
-  submitRequests.updateFieldsRecursively(parsedInput, outputs);
+  miscellaneousFrontEnd.updateFieldsRecursively(parsedInput, outputs);
 }
 
 PendingCall.prototype.callbackStandardOneCaller = function(
@@ -157,36 +159,36 @@ function getSignerField(input, label) {
 PendingCall.prototype.callbackAggregateSolutions = function(nodeId, input, output) {
   this.callbackStandard(nodeId, input, output);
   var solutions = getSignerField(input, "mySolution");
-  submitRequests.updateValue(ids.defaults.kanbanGO.inputAggregateSignature.solutions, solutions.join(", "));
+  miscellaneousFrontEnd.updateValue(ids.defaults.kanbanGO.inputAggregateSignature.solutions, solutions.join(", "));
 }
 
 PendingCall.prototype.callbackAggregateInitialization = function(nodeId, input, output) {
   this.callbackStandard(nodeId, input, output);
   var privateKeys = getSignerField(input, "privateKeyBase58");
   var publicKeys = getSignerField(input, "myPublicKey");
-  submitRequests.updateValue(ids.defaults.kanbanGO.inputAggregateSignature.privateKeys, privateKeys.join(", "));
-  submitRequests.updateValue(ids.defaults.kanbanGO.inputAggregateSignature.publicKeys, publicKeys.join(", "));
+  miscellaneousFrontEnd.updateValue(ids.defaults.kanbanGO.inputAggregateSignature.privateKeys, privateKeys.join(", "));
+  miscellaneousFrontEnd.updateValue(ids.defaults.kanbanGO.inputAggregateSignature.publicKeys, publicKeys.join(", "));
   var publicKeysJoined = `["${publicKeys.join('","')}"]`; 
-  submitRequests.updateValue(ids.defaults.fabcoin.inputBlockInfo.txAggregatePublicKeys, publicKeysJoined);
+  miscellaneousFrontEnd.updateValue(ids.defaults.fabcoin.inputBlockInfo.txAggregatePublicKeys, publicKeysJoined);
 }
 
 PendingCall.prototype.callbackAggregateCommitment = function(nodeId, input, output) {
   this.callbackStandard(nodeId, input, output);
   var commitments = getSignerField(input, "commitmentHexCompressed");
   var nonces = getSignerField(input, "myNonceBase58");
-  submitRequests.updateValue(ids.defaults.kanbanGO.inputAggregateSignature.commitments, commitments.join(", "));
-  submitRequests.updateValue(ids.defaults.kanbanGO.inputAggregateSignature.nonces, nonces.join(", "));
+  miscellaneousFrontEnd.updateValue(ids.defaults.kanbanGO.inputAggregateSignature.commitments, commitments.join(", "));
+  miscellaneousFrontEnd.updateValue(ids.defaults.kanbanGO.inputAggregateSignature.nonces, nonces.join(", "));
 }
 
 PendingCall.prototype.callbackCompileSolidity = function (nodeId, input, output) {
   console.log(input);
   try {
     var parsedInput = JSON.parse(input)
-    submitRequests.updateValue(ids.defaults.kanbanGO.inputInitialization.contractABI, JSON.stringify(parsedInput.ABI[0]));
-    submitRequests.updateValue(ids.defaults.fabcoin.inputBlockInfo.contractHex, parsedInput.binaries[0]);
+    miscellaneousFrontEnd.updateValue(ids.defaults.kanbanGO.inputInitialization.contractABI, JSON.stringify(parsedInput.ABI[0]));
+    miscellaneousFrontEnd.updateValue(ids.defaults.fabcoin.inputBlockInfo.contractHex, parsedInput.binaries[0]);
     console.log(input);
   } catch(e) { 
-    submitRequests.updateInnerHtml(ids.defaults.kanbanGO.inputInitialization.contractABI, "Failed to parse ABI. ");
+    miscellaneousFrontEnd.updateInnerHtml(ids.defaults.kanbanGO.inputInitialization.contractABI, "Failed to parse ABI. ");
   }
   this.callbackStandard(nodeId, input, output);
 }

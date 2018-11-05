@@ -8,6 +8,7 @@ const ids = require('./ids_dom_elements');
 const fabcoindOldRPC = require('../external_connections/fabcoin_old/rpc');
 const myNodes = require('./my_nodes');
 const kanbanRPC = require('./kanbango/rpc');
+const miscellaneousFrontEnd = require('./miscellaneous_frontend');
 
 function Page() {
   this.fabcoinNetworkRadioIds = {};
@@ -92,6 +93,10 @@ Page.prototype.initialize = function() {
     window.kanban.ace.editor.getSession().setMode('ace/mode/solidity');
     window.kanban.ace.editor.$blockScrolling = Infinity;
   }
+  miscellaneousFrontEnd.hookUpHexWithStringInput(
+    ids.defaults.fabcoin.inputCrypto.inputAggregateSignature.message, 
+    ids.defaults.fabcoin.inputCrypto.inputAggregateSignature.messageHex
+  );
 }
 
 Page.prototype.initializeInputPlaceholder = function (idInput) {

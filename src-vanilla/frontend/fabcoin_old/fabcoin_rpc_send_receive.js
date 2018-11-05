@@ -14,14 +14,14 @@ const rpcGeneral = require('./fabcoin_rpc_general');
 const bigInteger = require('big-integer');
 
 function setAddress(container) {
-  submitRequests.updateValue(ids.defaults.inputSendAddress, container.getAttribute("content"));
-  submitRequests.updateValue(ids.defaults.inputSendPrivateKey, "");
+  miscellaneousFrontEnd.updateValue(ids.defaults.inputSendAddress, container.getAttribute("content"));
+  miscellaneousFrontEnd.updateValue(ids.defaults.inputSendPrivateKey, "");
   updateOmniFromInputs();
 }
 
 function setTransactionId(container) {
-  submitRequests.updateValue(ids.defaults.inputSendTransactionId, container.getAttribute("content"));
-  submitRequests.updateValue(ids.defaults.inputSendInputRawTransaction, "");
+  miscellaneousFrontEnd.updateValue(ids.defaults.inputSendTransactionId, container.getAttribute("content"));
+  miscellaneousFrontEnd.updateValue(ids.defaults.inputSendInputRawTransaction, "");
   updateOmniFromInputs(); 
 }
 
@@ -46,7 +46,7 @@ function setNothing() {
 }
 
 function setBlockHash(container) {
-  submitRequests.updateValue(ids.defaults.inputBlockHash, container.getAttribute("content"));
+  miscellaneousFrontEnd.updateValue(ids.defaults.inputBlockHash, container.getAttribute("content"));
   getBlock();
 }
 
@@ -58,8 +58,8 @@ function setValueFromContainer(container) {
 
 function setValue(inputValue, inputVout, dontUpdateOmni) {
   var valueInLius = bigInteger(inputValue * 100000000).toString();
-  submitRequests.updateValue(ids.defaults.inputSendAmount, valueInLius);
-  submitRequests.updateValue(ids.defaults.inputSendIndexValueOut, inputVout);
+  miscellaneousFrontEnd.updateValue(ids.defaults.inputSendAmount, valueInLius);
+  miscellaneousFrontEnd.updateValue(ids.defaults.inputSendIndexValueOut, inputVout);
   if (dontUpdateOmni) {
     return;
   }
@@ -160,10 +160,10 @@ function callbackTransactionFetch(input, outputComponent) {
     var parsed = JSON.parse(input);
     var doUpdateOmni = false;
     if (parsed.hex !== undefined && parsed.hex !== null) {
-      submitRequests.updateInnerHtml(ids.defaults.inputSendInputRawTransaction, parsed.hex);
+      miscellaneousFrontEnd.updateInnerHtml(ids.defaults.inputSendInputRawTransaction, parsed.hex);
     } 
     if (parsed.txid !== undefined && parsed.txid !== null) {
-      submitRequests.updateInnerHtml(ids.defaults.inputSendTransactionId, parsed.txid);
+      miscellaneousFrontEnd.updateInnerHtml(ids.defaults.inputSendTransactionId, parsed.txid);
       doUpdateOmni = true;
     }
     var vout = null;
@@ -273,7 +273,7 @@ function getReceivedByAddress() {
 }
 
 function callbackDumpPrivateKey(input, output){
-  submitRequests.updateInnerHtml(ids.defaults.inputSendPrivateKey, miscellaneous.removeQuotes(input));
+  miscellaneousFrontEnd.updateInnerHtml(ids.defaults.inputSendPrivateKey, miscellaneous.removeQuotes(input));
   updateOmniFromInputs();
 }
 
@@ -395,7 +395,7 @@ function updateOmniFromInputs() {
     }
     indexCurrent ++;
   }
-  submitRequests.updateValue(ids.defaults.inputSendOmni, resultString);
+  miscellaneousFrontEnd.updateValue(ids.defaults.inputSendOmni, resultString);
   updateComposedRawTransactionFromOmni();
 }
 
@@ -451,7 +451,7 @@ TransactionTester.prototype.hasNonEmptyInputs = function() {
   var isGood = true;
   for (var label in idsToCheck) {
     if (hasEmptyValue(label)) {
-      submitRequests.highlightError(label);
+      miscellaneousFrontEnd.highlightError(label);
       isGood = false;
     }
   }
@@ -503,7 +503,7 @@ TransactionTester.prototype.generate1kTransactionsFinish = function() {
   for (var counterTransactions = 0; counterTransactions < this.transactionsSmall.length; counterTransactions ++) {
     hexList[counterTransactions + 1] = this.transactionsSmall[counterTransactions].toHex();
   }
-  submitRequests.updateValue(ids.defaults.inputSendRawBulkTransaction, `[${hexList.join(", ")}]`);
+  miscellaneousFrontEnd.updateValue(ids.defaults.inputSendRawBulkTransaction, `[${hexList.join(", ")}]`);
 }
 
 TransactionTester.prototype.toStringProgress = function () {
@@ -519,7 +519,7 @@ TransactionTester.prototype.toStringProgress = function () {
 TransactionTester.prototype.generateTX1kOutputsPart3 = function() {
   this.transactionBuilderLarge.sign(0, this.theKey);
   this.transactionLarge = this.transactionBuilderLarge.build();
-  submitRequests.updateValue(ids.defaults.inputSendRawBulkTransaction, this.transactionLarge.toHex());
+  miscellaneousFrontEnd.updateValue(ids.defaults.inputSendRawBulkTransaction, this.transactionLarge.toHex());
   //console.log(`Generated tx with id: ${this.transactionLarge.getId()} and hash: ${this.transactionLarge.toHex()}`);
   if (this.callbackLargeTransactionGenerated !== null && this.callbackLargeTransactionGenerated !== undefined) {
     this.callbackLargeTransactionGenerated();
@@ -573,7 +573,7 @@ function updateComposedRawTransactionFromOmni() {
   }
   try {
     var theTransaction = buildSendTransaction();
-    submitRequests.updateValue(ids.defaults.inputSendRawNonBulkTransaction, theTransaction.build().toHex());
+    miscellaneousFrontEnd.updateValue(ids.defaults.inputSendRawNonBulkTransaction, theTransaction.build().toHex());
   } catch (e) {
     console.log(e);
   }
@@ -594,7 +594,7 @@ function updateInputsFromOmni() {
       if (parsed[label] === undefined || parsed[label] === null) {
         continue;
       }
-      submitRequests.updateValue(pairsToUpdateLabelToId[label], parsed[label]);
+      miscellaneousFrontEnd.updateValue(pairsToUpdateLabelToId[label], parsed[label]);
     }
     updateComposedRawTransactionFromOmni();
     var theOmni = document.getElementById(ids.defaults.inputSendOmni);
@@ -612,12 +612,12 @@ function interpretTransaction() {
   var rawTransaction = getTransactionRawInput().trim();
   var transactionId = getTransactionIdToSend().trim();
   if (rawTransaction.length > 0) {
-    submitRequests.highlightInput(ids.defaults.inputSendInputRawTransaction);
+    miscellaneousFrontEnd.highlightInput(ids.defaults.inputSendInputRawTransaction);
     return decodeRawTransaction(rawTransaction);
   }
   if ((rawTransaction === null || rawTransaction === "") && transactionId.length > 0) {
-    submitRequests.highlightInput(ids.defaults.inputSendTransactionId);
-    submitRequests.updateValue(ids.defaults.inputSendInputRawTransaction, "");
+    miscellaneousFrontEnd.highlightInput(ids.defaults.inputSendTransactionId);
+    miscellaneousFrontEnd.updateValue(ids.defaults.inputSendInputRawTransaction, "");
     return getTransaction(transactionId);
   }
 }
@@ -710,7 +710,7 @@ function callbackGetBlock(inputHex, outputComponent) {
     try {
       var parsedBlock = JSON.parse(inputHex);
       if (parsedBlock.height !== undefined && parsedBlock.height !== null) {
-        submitRequests.updateInnerHtml(ids.defaults.inputBestBlockIndex, parsedBlock.height);
+        miscellaneousFrontEnd.updateInnerHtml(ids.defaults.inputBestBlockIndex, parsedBlock.height);
       }
     } catch (e) {
       console.log(`Error parsing block. ${e}.`);
@@ -742,7 +742,7 @@ function getBlock() {
 
 function callbackGetBestBlockHash(inputHex, outputComponent) {
   inputHex = miscellaneous.removeQuotes(inputHex);
-  submitRequests.updateInnerHtml(ids.defaults.inputBlockHash, inputHex);
+  miscellaneousFrontEnd.updateInnerHtml(ids.defaults.inputBlockHash, inputHex);
   var transformer = new jsonToHtml.JSONTransformer();
   transformer.writeJSONtoDOMComponent(inputHex, outputComponent, optionsForStandardSendReceive);
 }

@@ -9,16 +9,16 @@ const miscellaneous = require('../miscellaneous');
 const miscellaneousFrontEnd = require('./miscellaneous_frontend');
 
 function setAddress(container) {
-  submitRequests.updateValue(ids.defaults.kanbanPlusPlus.inputAddressDefault, container.getAttribute("content"));
-  submitRequests.updateValue(ids.defaults.kanbanPlusPlus.inputSchnorrSignature.privateKey, "");
+  miscellaneousFrontEnd.updateValue(ids.defaults.kanbanPlusPlus.inputAddressDefault, container.getAttribute("content"));
+  miscellaneousFrontEnd.updateValue(ids.defaults.kanbanPlusPlus.inputSchnorrSignature.privateKey, "");
 }
 
 function setSignatureSchnorr(container) {
-  submitRequests.updateValue(ids.defaults.kanbanPlusPlus.inputSchnorrSignature.signature, container.getAttribute("content"));
+  miscellaneousFrontEnd.updateValue(ids.defaults.kanbanPlusPlus.inputSchnorrSignature.signature, container.getAttribute("content"));
 }
 
 function setNonceSchnorr(container) {
-  submitRequests.updateValue(ids.defaults.kanbanPlusPlus.inputSchnorrSignature.nonce, container.getAttribute("content"));
+  miscellaneousFrontEnd.updateValue(ids.defaults.kanbanPlusPlus.inputSchnorrSignature.nonce, container.getAttribute("content"));
 }
 
 var optionsForKanbanPlusPlusGeneralStandard = {
@@ -163,17 +163,17 @@ function highlightRedIfEmpty(idsToCheck) {
   var isGood = true;
   for (var counterIds = 0; counterIds < idsToCheck.length; counterIds ++) {
     if (hasEmptyValue(idsToCheck[counterIds])) {
-      submitRequests.highlightError(idsToCheck[counterIds]);
+      miscellaneousFrontEnd.highlightError(idsToCheck[counterIds]);
       isGood = false;
     } else {
-      submitRequests.highlightInput(idsToCheck[counterIds]);
+      miscellaneousFrontEnd.highlightInput(idsToCheck[counterIds]);
     }
   }
   return isGood;
 }
 
 function callbackDumpPrivateKey(input, output) {
-  submitRequests.updateInnerHtml(ids.defaults.kanbanPlusPlus.inputSchnorrSignature.privateKey, miscellaneous.removeQuotes(input));
+  miscellaneousFrontEnd.updateInnerHtml(ids.defaults.kanbanPlusPlus.inputSchnorrSignature.privateKey, miscellaneous.removeQuotes(input));
 }
 
 function callbackPublicKeyFromPrivate(input, output) {
@@ -183,11 +183,11 @@ function callbackPublicKeyFromPrivate(input, output) {
   } catch (e) {
     result = miscellaneous.removeQuotes(input);
   }
-  submitRequests.updateInnerHtml(ids.defaults.kanbanPlusPlus.inputSchnorrSignature.publicKey, result);
+  miscellaneousFrontEnd.updateInnerHtml(ids.defaults.kanbanPlusPlus.inputSchnorrSignature.publicKey, result);
 }
 
 function callbackSha3(input, output) {
-  submitRequests.updateInnerHtml(ids.defaults.kanbanPlusPlus.inputSchnorrSignature.outputSha3DigestDefault, miscellaneous.removeQuotes(input));
+  miscellaneousFrontEnd.updateInnerHtml(ids.defaults.kanbanPlusPlus.inputSchnorrSignature.outputSha3DigestDefault, miscellaneous.removeQuotes(input));
 }
 
 function dumpPrivateKey() {
@@ -289,8 +289,8 @@ function callbackSchnorrSign(input, output) {
   var transformer = new jsonToHtml.JSONTransformer();
   transformer.writeJSONtoDOMComponent(input, output, optionsForKanbanPlusPlusGeneralStandard);
   var inputParsed = JSON.parse(input);
-  submitRequests.updateInnerHtml(ids.defaults.kanbanPlusPlus.inputSchnorrSignature.signature, inputParsed.signatureSchnorrBase58);
-  submitRequests.updateInnerHtml(ids.defaults.kanbanPlusPlus.inputSchnorrSignature.nonce, inputParsed.nonceSchnorrBase58Check);  
+  miscellaneousFrontEnd.updateInnerHtml(ids.defaults.kanbanPlusPlus.inputSchnorrSignature.signature, inputParsed.signatureSchnorrBase58);
+  miscellaneousFrontEnd.updateInnerHtml(ids.defaults.kanbanPlusPlus.inputSchnorrSignature.nonce, inputParsed.nonceSchnorrBase58Check);  
 }
 
 
