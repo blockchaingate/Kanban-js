@@ -10,6 +10,7 @@ const myNodes = require('./my_nodes');
 const kanbanRPC = require('./kanbango/rpc');
 const miscellaneousFrontEnd = require('./miscellaneous_frontend');
 const storage = require('./storage').storage;
+const themes = require('./themes');
 
 function Page() {
   this.fabcoinNetworkRadioIds = {};
@@ -84,6 +85,7 @@ function Page() {
 
 Page.prototype.initialize = function() {
   this.initializeInputPlaceholders();
+  storage.variables.theme.changeValueHandler = themes.setTheme;
   storage.loadAll();
   storage.variables.currentPage.changeValueHandler = this.initializeCurrentPage.bind(this);
   this.initializeCurrentPage();

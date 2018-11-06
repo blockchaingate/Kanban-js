@@ -19,6 +19,12 @@ function Storage() {
       value: null,
       changeValueHandler: null,
     },
+    theme: {
+      name: "theme",
+      nameLocalStorage: "theme",
+      value: null,
+      changeValueHandler: null,
+    }
 
   };
   this.oldAnchorString = "";

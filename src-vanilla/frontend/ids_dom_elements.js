@@ -21,6 +21,12 @@ var defaults = {
     },
     themes: "pageThemes"
   },
+  themes: {
+    radios: {
+      light: "radioThemeLight",
+      dark: "radioThemeDark",
+    }
+  },
   progressReport: "spanProgressReport",
   spanPingColumnHeader: "spanPingColumnHeader",
   kanbanJS: {
