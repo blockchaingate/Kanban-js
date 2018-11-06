@@ -99,6 +99,7 @@ function updateValue(id, content) {
     theElement = document.getElementById(id);
   } else {
     theElement = id;
+    id = theElement.id;
   }
   if (theElement.value === content) {
     return;
@@ -107,6 +108,7 @@ function updateValue(id, content) {
   theElement.value = content;
   theElement.classList.add(highlightName);
   setTimeout(removeUpdateHighlight.bind(null, id, highlightName), 1000);
+  window.kanban.storage.storeInputChange(id);
 }
 
 function updateInnerHtml(id, content) {

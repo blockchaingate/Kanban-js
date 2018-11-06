@@ -34,6 +34,7 @@ window.kanban = {
     editor: null
   },
   themes: require('./themes'),
+  storage: require('./storage').storage,
 };
 
 window.kanban.kanbanGO.rpc = require('./kanbango/rpc'); // <- function call uses window.kanban

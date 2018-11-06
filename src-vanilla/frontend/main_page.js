@@ -9,6 +9,7 @@ const fabcoindOldRPC = require('../external_connections/fabcoin_old/rpc');
 const myNodes = require('./my_nodes');
 const kanbanRPC = require('./kanbango/rpc');
 const miscellaneousFrontEnd = require('./miscellaneous_frontend');
+const storage = require('./storage').storage;
 
 function Page() {
   this.fabcoinNetworkRadioIds = {};
@@ -79,15 +80,14 @@ function Page() {
       idPage: ids.defaults.pages.themes
     }
   }
-  this.currentPageLabel = null;
 }
 
 Page.prototype.initialize = function() {
-  this.loadPageSettings();
-  var currentRadioId = this.fabcoinNetworkRadioIds[this.currentNetworkName];
-  document.getElementById(currentRadioId).checked = true;
   this.initializeInputPlaceholders();
+  storage.loadAll();
+  storage.variables.currentPage.changeValueHandler = this.initializeCurrentPage.bind(this);
   this.initializeCurrentPage();
+  window.onhashchange = storage.onWindowHashChange.bind(storage);
   if (window.kanban.ace.editor === null) {
     window.kanban.ace.editor = window.kanban.ace.ace.edit('aceEditor');
     window.kanban.ace.editor.getSession().setMode('ace/mode/solidity');
@@ -98,6 +98,7 @@ Page.prototype.initialize = function() {
     ids.defaults.fabcoin.inputCrypto.inputAggregateSignature.messageHex
   );
 }
+
 
 Page.prototype.initializeInputPlaceholder = function (idInput) {
   var oldInput = document.getElementById(idInput);
@@ -115,23 +116,27 @@ Page.prototype.initializeInputPlaceholder = function (idInput) {
   groupContainer.appendChild(theInput);
   groupContainer.appendChild(label);
   theParent.replaceChild(groupContainer, oldInput);
+  theInput.addEventListener('change', storage.storeInputChange.bind(storage, theInput));
+  theInput.addEventListener('keydown', storage.storeInputChange.bind(storage, theInput));
 }
 
 Page.prototype.initializeInputPlaceholders = function() {
   var collectionsToPlaceholderify = [
     ids.defaults.kanbanGO.inputSchnorr,
     ids.defaults.kanbanGO.inputAggregateSignature,
-    ids.defaults.fabcoin.inputCrypto.inputSchnorrSignature,
+    ids.defaults.fabcoin.inputCrypto.inputSchnorrSignature, 
     ids.defaults.fabcoin.inputCrypto.inputAggregateSignature,
     ids.defaults.kanbanJS.inputSchnorr,
     ids.defaults.kanbanGO.inputSendReceive,
     ids.defaults.kanbanGO.inputInitialization,
     ids.defaults.fabcoin.inputInitialization,
     ids.defaults.fabcoin.inputBlockInfo,
-  ]
+  ];
   for (var collectionCounter = 0; collectionCounter < collectionsToPlaceholderify.length; collectionCounter ++) {
-    for (var label in collectionsToPlaceholderify[collectionCounter]) {
-      this.initializeInputPlaceholder(collectionsToPlaceholderify[collectionCounter][label]);
+    var currentCollection = collectionsToPlaceholderify[collectionCounter];
+    for (var label in currentCollection) {
+      this.initializeInputPlaceholder(currentCollection[label]);
+      storage.registerInputBox(currentCollection[label]);
     }
   }
 }
@@ -141,10 +146,11 @@ Page.prototype.initializeCurrentPage = function() {
     var pageId = this.pages[label].idPage;
     document.getElementById(pageId).style.display = "none";
   }
-  if (this.currentPageLabel in this.pages) {
-    var pageId = this.pages[this.currentPageLabel].idPage;
+  var currentPageLabel = storage.getVariable(storage.variables.currentPage);
+  if (currentPageLabel in this.pages) {
+    var pageId = this.pages[currentPageLabel].idPage;
     document.getElementById(pageId).style.display = "";
-    var currentPage = this.pages[this.currentPageLabel];
+    var currentPage = this.pages[currentPageLabel];
     if (currentPage.updateFunction !== null && currentPage.updateFunction !== undefined) {
       currentPage.updateFunction();
     }
@@ -152,46 +158,7 @@ Page.prototype.initializeCurrentPage = function() {
 }
 
 Page.prototype.selectPage = function(pageLabel) {
-  this.currentPageLabel = pageLabel;
-  this.initializeCurrentPage();
-  this.storePageSettings();
-}
-
-Page.prototype.storePageSettings = function() {
-  try {
-    localStorage.setItem("currentPageLabel", this.currentPageLabel);
-    localStorage.setItem("currentNetworkName", this.currentNetworkName);
-  } catch (e) {
-    console.log(`While trying to load local storage, got error: ${e}. Is local storage available?`);
-  }  
-}
-
-Page.prototype.getCurrentTransactionProtocolLabel = function () {
-  return fabcoindOldRPC.networkData[this.currentNetworkName].transactionProtocolLabel;
-}
-
-Page.prototype.getRPCNetworkOption = function () {
-  return fabcoindOldRPC.networkData[this.currentNetworkName].rpcOption;
-}
-
-Page.prototype.getRPCKanbanNetworkOption = function () {
-  return fabcoindOldRPC.networkDataKanban[this.currentKanbanNetworkName].rpcOption;
-}
-
-Page.prototype.loadPageSettings = function() {
-  try {
-    this.currentPageLabel = localStorage.getItem("currentPageLabel");
-    var incomingNetworkName = localStorage.getItem("currentNetworkName");
-    if (incomingNetworkName in fabcoindOldRPC.networkData) {
-      this.currentNetworkName = incomingNetworkName;
-    }
-  } catch (e) {
-    console.log(`While trying to load local storage, got error: ${e}. Is local storage available?`);
-  }
-}
-
-Page.prototype.getCurrentNetwork = function () {
-  return fabcoindOldRPC.networkData[this.currentNetworkName];
+  storage.setVariable(storage.variables.currentPage, pageLabel, false);
 }
 
 function getPage() {
