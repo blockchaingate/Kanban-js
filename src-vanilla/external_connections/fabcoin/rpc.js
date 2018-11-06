@@ -205,13 +205,21 @@ var rpcCalls = {
     },
     parameters: ["privateKey"]
   },
-  testAggregateSignatureInitialize: {
-    rpcCall: "testAggregateSignatureInitialize", 
-    method: "testaggregatesignatureinitialize",
+  testAggregateSignatureGeneratePrivateKeys: {
+    rpcCall: "testAggregateSignatureGeneratePrivateKeys", 
+    method: "testaggregatesignaturegenerateprivatekeys",
     mandatoryModifiableArguments: {
       numberOfPrivateKeysToGenerate: null,
     },
     parameters: ["numberOfPrivateKeysToGenerate"]
+  },
+  testAggregateSignatureInitialize: {
+    rpcCall: "testAggregateSignatureInitialize", 
+    method: "testaggregatesignatureinitialize",
+    mandatoryModifiableArguments: {
+      privateKeys: null,
+    },
+    parameters: ["privateKeys"]
   },
   testAggregateSignatureCommitment: {
     rpcCall: "testAggregateSignatureCommitment",

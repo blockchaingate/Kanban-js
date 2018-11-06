@@ -442,9 +442,7 @@ KanbanGoInitializer.prototype.computePaths = function() {
       if (fs.existsSync(currentPathGeth)) {
         this.paths.geth = currentPathGeth;
         this.paths.gethPath = currentPath;
-      } else {
-        console.log("DEBUG: XXXXXXXXXXXX", currentPathGeth);
-      }
+      } 
     }
     if (this.paths.geth !== "" && this.paths.dataDir !== "") {
       break;

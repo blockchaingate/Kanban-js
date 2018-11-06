@@ -293,9 +293,6 @@ function callbackSchnorrSign(input, output) {
   miscellaneousFrontEnd.updateInnerHtml(ids.defaults.kanbanPlusPlus.inputSchnorrSignature.nonce, inputParsed.nonceSchnorrBase58Check);  
 }
 
-
-
-
 function testAggregateSignatureInitialize() {
   
   highlightRedIfEmpty([

@@ -184,6 +184,7 @@ function KanbanGoNodes() {
       inputSignatureBase58Recoded: this.transformersStandard.setSignatureSchnorr,
       signatureBase58: this.transformersStandard.setSignatureSchnorr,
       inputSignature: this.transformersStandard.shortener,
+      "privateKeys.${number}": this.transformersStandard.setPrivateKeySchnorr,
       "aggregator.publicKeys.${number}": this.transformersStandard.shortener,
       "aggregator.aggregateCommitment": this.transformersStandard.shortener,
       "aggregator.aggregatePublicKey": this.transformersStandard.shortener,

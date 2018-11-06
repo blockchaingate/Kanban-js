@@ -117,6 +117,7 @@ function FabNode () {
       signatureSchnorrBase58: this.transformersStandard.setSchnorrSignature,
       solutionBase58Check: this.transformersStandard.shortener,
       publicKeyHex: this.transformersStandard.setPublicKeySchnorr,
+      "privateKeys.${number}": this.transformersStandard.setPrivateKeySchnorr,
       "aggregator.publicKeys.${number}": this.transformersStandard.setPublicKeySchnorr,
       "aggregator.commitments.${number}": this.transformersStandard.shortener,
       "aggregator.aggregatePublicKey": this.transformersStandard.shortener,
@@ -349,12 +350,16 @@ function FabNode () {
       },
       callType: this.callTypes.crypto
     },
+    testAggregateSignatureGeneratePrivateKeys: {
+      inputs: {
+        numberOfPrivateKeysToGenerate: inputFabCryptoAggregate.numberOfPrivateKeysToGenerate,
+      },
+      callType: this.callTypes.crypto,
+      callback: this.callbackAggregateSignatureGeneratePrivateKeys
+    },
     testAggregateSignatureInitialize: {
       inputs: {
-        numberOfPrivateKeysToGenerate: inputFabCryptoAggregate.numberOfPrivateKeysToGenerate
-      },
-      output: {
-        privateKeys: inputFabCryptoAggregate.privateKeys
+        privateKeys: inputFabCryptoAggregate.privateKeys,
       },
       callType: this.callTypes.crypto,
       callback: this.callbackAggregateSignatureInitialize
@@ -637,20 +642,32 @@ FabNode.prototype.testAggregateSignatureClear = function() {
   miscellaneousFrontEnd.updateInnerHtml(inputAggregate.theAggregation, "");
   miscellaneousFrontEnd.updateInnerHtml(inputAggregate.solutions, "");
   miscellaneousFrontEnd.updateInnerHtml(inputAggregate.aggregateCommitment, "");
+  this.run(fabRPCSpec.rpcCalls.testAggregateSignatureGeneratePrivateKeys.rpcCall);
+}
+
+FabNode.prototype.callbackAggregateSignatureGeneratePrivateKeys = function(functionLabelFrontEnd, input, output) {
+  this.callbackStandard(functionLabelFrontEnd, input, output);
+  var inputParsed = JSON.parse(input);
+  var privateKeys = [];
+  for (var counterKeyPairs = 0; counterKeyPairs < inputParsed.privateKeys.length; counterKeyPairs ++) {
+    privateKeys.push(inputParsed.privateKeys[counterKeyPairs]);
+  }
+  var aggregateIds = ids.defaults.fabcoin.inputCrypto.inputAggregateSignature;
+  miscellaneousFrontEnd.updateValue(aggregateIds.privateKeys, privateKeys.join(", "));
 }
 
 FabNode.prototype.callbackAggregateSignatureInitialize = function(functionLabelFrontEnd, input, output) {
   this.callbackStandard(functionLabelFrontEnd, input, output);
   var inputParsed = JSON.parse(input);
-  var privateKeys = [];
   var publicKeys = [];
+  var privateKeys = [];
   for (var counterKeyPairs = 0; counterKeyPairs < inputParsed.signers.length; counterKeyPairs ++) {
-    privateKeys.push(inputParsed.signers[counterKeyPairs].privateKeyBase58);
     publicKeys.push(inputParsed.signers[counterKeyPairs].myPublicKey);
+    privateKeys.push(inputParsed.signers[counterKeyPairs].privateKeyBase58);
   }
   var aggregateIds = ids.defaults.fabcoin.inputCrypto.inputAggregateSignature;
-  miscellaneousFrontEnd.updateValue(aggregateIds.privateKeys, privateKeys.join(", "));
   miscellaneousFrontEnd.updateValue(aggregateIds.publicKeys, publicKeys.join(", "));
+  miscellaneousFrontEnd.updateValue(aggregateIds.privateKeys, privateKeys.join(", "));
   var publicKeysJoined = `["${publicKeys.join('","')}"]`; 
   miscellaneousFrontEnd.updateValue(ids.defaults.fabcoin.inputBlockInfo.txAggregatePublicKeys, publicKeysJoined);
 }
