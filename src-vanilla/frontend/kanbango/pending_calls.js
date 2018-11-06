@@ -263,7 +263,7 @@ function getValueFromId(/**@type {string}*/ id) {
 PendingCall.prototype.runOneId = function (nodeId) {
   var theFunction = this.owner.theFunctions[this.functionLabel];
   this.callTypeSpec = this.owner.callTypes[this.callType];
-  theRPCCalls = this.callTypeSpec.rpcCalls;
+  var theRPCCalls = this.callTypeSpec.rpcCalls;
   if (theFunction === null || theFunction === undefined) {
     if (this.functionLabel in theRPCCalls) {
       theFunction = null;

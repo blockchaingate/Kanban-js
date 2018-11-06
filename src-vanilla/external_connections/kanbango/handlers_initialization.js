@@ -419,6 +419,9 @@ KanbanGoInitializer.prototype.handleQuery = function(responseNoWrapper, query) {
 KanbanGoInitializer.prototype.computePaths = function() {
   /** @type {string} */
   var startingPath = global.kanban.configuration.kanbanGO.gethFolder;
+  if (!startingPath.endsWith("/")){
+    startingPath += "/";
+  }
   if (startingPath === undefined || startingPath === null) {
     startingPath = "/";
   }
@@ -426,6 +429,7 @@ KanbanGoInitializer.prototype.computePaths = function() {
   var currentPath = startingPath;
   var maxNumRuns = 100;
   var numRuns = 0;
+  /** @type {string} */
   var kanbanDataDirName = global.kanban.configuration.kanbanGO.dataDirName;
   //console.log(`DEBUG: searching for geth executable. Searched directories along: ${startingPath}`.red);
   while (currentPath !== "/") {
@@ -438,6 +442,8 @@ KanbanGoInitializer.prototype.computePaths = function() {
       if (fs.existsSync(currentPathGeth)) {
         this.paths.geth = currentPathGeth;
         this.paths.gethPath = currentPath;
+      } else {
+        console.log("DEBUG: XXXXXXXXXXXX", currentPathGeth);
       }
     }
     if (this.paths.geth !== "" && this.paths.dataDir !== "") {
