@@ -162,6 +162,16 @@ PendingCall.prototype.callbackAggregateSolutions = function(nodeId, input, outpu
   miscellaneousFrontEnd.updateValue(ids.defaults.kanbanGO.inputAggregateSignature.solutions, solutions.join(", "));
 }
 
+PendingCall.prototype.callbackAggregatePrivateKeyGeneration = function (nodeId, input, output) {
+  this.callbackStandard(nodeId, input, output);
+  var inputParsed = JSON.parse(input);
+  var privateKeys = [];
+  for (var i = 0; i < inputParsed.privateKeys.length; i ++) {
+    privateKeys.push(inputParsed.privateKeys[i]);
+  }
+  miscellaneousFrontEnd.updateValue(ids.defaults.kanbanGO.inputAggregateSignature.privateKeys, privateKeys.join(", "));
+}
+
 PendingCall.prototype.callbackAggregateInitialization = function(nodeId, input, output) {
   this.callbackStandard(nodeId, input, output);
   var privateKeys = getSignerField(input, "privateKeyBase58");

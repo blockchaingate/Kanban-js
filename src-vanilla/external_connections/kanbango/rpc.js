@@ -60,13 +60,21 @@ var rpcCalls = {
     },
     parameters: ["signature", "publicKey", "messageBase64"]
   },
+  testAggregateGeneratePrivateKeys: {
+    rpcCall: "testAggregateGeneratePrivateKeys", 
+    method: "cryptotest_testAggregatePrivateKeyGeneration",
+    mandatoryModifiableArguments: {
+      numberOfPrivateKeysToGenerate: null,
+    },
+    parameters: ["numberOfPrivateKeysToGenerate"]
+  },
   testAggregateInitialize: {
-    rpcCall: "testAggregateInitialize",
+    rpcCall: "testAggregateInitialize", 
     method: "cryptotest_testAggregateInitialize",
     mandatoryModifiableArguments: {
-      numberOfPrivateKeysToGenerate: null
+      privateKeys: null,
     },
-    parameters: ["numberOfPrivateKeysToGenerate"]    
+    parameters: ["privateKeys"]
   },
   testAggregateCommitment: {
     rpcCall: "testAggregateCommitment",

@@ -176,6 +176,7 @@ function KanbanGoNodes() {
       inputPrivateKeyBase58CheckRecoded: this.transformersStandard.setPrivateKeySchnorr,
       inputPrivateKeyBase58Recoded: this.transformersStandard.setPrivateKeySchnorr,
       inputPrivateKeyHex: this.transformersStandard.setPrivateKeySchnorr,
+      inputPrivateKeys: this.transformersStandard.shortener,
       publicKeyHex: this.transformersStandard.setPublicKeySchnorr,
       publicKeyHexInternal: this.transformersStandard.setPublicKeySchnorr,
       inputPublicKeyHex: this.transformersStandard.setPublicKeySchnorr,
@@ -206,6 +207,7 @@ function KanbanGoNodes() {
       "verifier.publicKeys.${number}": this.transformersStandard.shortener,
       "verifier.publicKeysJacobian.${number}": this.transformersStandard.shortener,
       "verifier.signatureNoBitmap": this.transformersStandard.shortener,
+      "verifier.signatureUncompressed": this.transformersStandard.setAggregateSignatureUncompressed,
       "verifier.signatureComplete": this.transformersStandard.shortener,
 
       "signers.${number}.myPublicKey": this.transformersStandard.shortener,
@@ -354,9 +356,15 @@ function KanbanGoNodes() {
         messageBase64: inputSchnorr.message
       },
     },
-    testAggregateInitialize: {
+    testAggregateGeneratePrivateKeys: {
       inputs: {
         numberOfPrivateKeysToGenerate: inputAggregate.numberOfPrivateKeysToGenerate
+      },
+      callback: PendingCall.prototype.callbackAggregatePrivateKeyGeneration
+    },
+    testAggregateInitialize: {
+      inputsBase64: {
+        privateKeys: inputAggregate.privateKeys
       },
       callback: PendingCall.prototype.callbackAggregateInitialization
     },
@@ -532,6 +540,7 @@ KanbanGoNodes.prototype.testClear = function() {
   miscellaneousFrontEnd.updateValue(inputAggregate.aggregatePublickey, '');
   miscellaneousFrontEnd.updateValue(inputAggregate.solutions, '');
   miscellaneousFrontEnd.updateValue(inputAggregate.aggregateSignature, '');
+  this.run('testAggregateGeneratePrivateKeys', 'cryptoTest');
 }
 
 KanbanGoNodes.prototype.run = function(functionLabel, callType, callbackOverridesStandard) {
