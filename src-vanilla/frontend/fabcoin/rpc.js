@@ -154,6 +154,10 @@ function FabNode () {
       outputJSONDefault: ids.defaults.fabcoin.outputFabcoinCrypto,
       outputOptionsDefault: this.outputOptionsCrypto,
     },
+    initialization: {
+      outputJSONDefault: ids.defaults.fabcoin.outputFabcoinInitialization,
+      outputOptionsDefault: this.outputOptionsCrypto,
+    }
   }
 
   this.theFunctions = {
@@ -424,7 +428,10 @@ function FabNode () {
         messageHex: inputFabCryptoAggregate.messageHex
       },
       callType: this.callTypes.crypto,
-    }
+    },
+    showLogFile: {
+      callType: this.callTypes.initialization,
+    },
   };
 
 }
@@ -816,7 +823,7 @@ FabNode.prototype.callbackStandard = function(functionLabelFrontEnd, input, outp
   }
 }
 
-FabNode.prototype.run = function(functionLabelFrontEnd) {
+FabNode.prototype.run = function(functionLabelFrontEnd, callbackOverridesStandard, manualInputs) {
   var functionLabelBackend = functionLabelFrontEnd;
   if (functionLabelFrontEnd in this.theFunctions) {
     var rpcLabel = this.theFunctions[functionLabelFrontEnd].rpcCall; 
@@ -826,6 +833,9 @@ FabNode.prototype.run = function(functionLabelFrontEnd) {
   }
 
   var theArguments = this.getArguments(functionLabelFrontEnd, functionLabelBackend);
+  if (manualInputs !== null && manualInputs !== undefined) {
+    theArguments = Object.assign(theArguments, manualInputs);
+  }
   var messageBody = fabRPCSpec.getPOSTBodyFromRPCLabel(functionLabelBackend, theArguments);
   var theURL = `${pathnames.url.known.fabcoin.rpc}`;
   var currentResult = null;

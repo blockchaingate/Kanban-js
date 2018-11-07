@@ -302,6 +302,14 @@ var rpcCalls = {
     },
     parameters: ["signature", "publicKey", "message"]
   },
+  showLogFile: {
+    rpcCall: "showLogFile",
+    method: "getlogfile",
+    mandatoryModifiableArguments: {
+      logFile: null,
+    },
+    parameters: ["logFile"],
+  },
 };
 
 function getPOSTBodyFromRPCLabel(theRPCLabel, theArguments) {

@@ -45,9 +45,12 @@ FabcoinNodeInitializer.prototype.getArguments = function(functionLabel) {
   return theArguments;
 }
 
-FabcoinNodeInitializer.prototype.run = function(functionLabel, callbackOverridesStandard) {
+FabcoinNodeInitializer.prototype.run = function(functionLabel, callbackOverridesStandard, manualInputs) {
   //console.log(`DEBUG: running ${functionLabel}. `);
   var theArguments = this.getArguments(functionLabel);
+  if (manualInputs !== null && manualInputs !== undefined) {
+    theArguments = Object.assign(theArguments, manualInputs);
+  }
   var messageBody = fabcoinRPC.getPOSTBodyFromRPCLabel(functionLabel, theArguments);
   var theURL = `${pathnames.url.known.fabcoin.initialization}`;
   var currentResult = ids.defaults.fabcoin.outputFabcoinInitialization;
