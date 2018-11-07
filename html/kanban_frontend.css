@@ -137,6 +137,7 @@ button.buttonStandard{
   transition: all 2s;
   border-radius: 2px;
   padding: 5px;
+  margin: 2px;
 }
 
 button.buttonStandardSelected{
@@ -170,6 +171,11 @@ error{
 
 table.tableStandardInputs {
   border-collapse: collapse;
+  vertical-align: top;
+}
+
+table.tableStandardInputs td{
+  vertical-align: top;
 }
 
 table.tableProfiling td{
@@ -305,6 +311,13 @@ img.imgFabLogo{
   background-color: var(--colorBackgroundUsedAsInput);
 }
 
+div.divLabelButtonGroup {
+  text-align: right; 
+  font-size: x-small;
+  width: 100%;
+  min-width: 105px;
+}
+
 button.buttonJSONExpand {
   background: none;
   outline: none;
@@ -335,6 +348,17 @@ button.buttonRPCInput {
 
 button.buttonRPCInput:hover{
   background-color: var(--colorButtonBackgroundHoverRPCInput);
+}
+
+.panelStandard {
+  transition: all linear 2s;
+  max-height: 0px;
+  max-width: 0px;
+  margin-top: 0px;
+  margin-bottom: 0px;
+  overflow-x: hidden;
+  word-wrap: break-word;
+  transition: all 1s linear;
 }
 
 span.panelRPCWithExpansion {

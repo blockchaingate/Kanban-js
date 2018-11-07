@@ -24,8 +24,7 @@ function Storage() {
       nameLocalStorage: "theme",
       value: null,
       changeValueHandler: null,
-    }
-
+    },
   };
   this.oldAnchorString = "";
   /**@type {string} */
@@ -188,7 +187,6 @@ Storage.prototype.loadAll = function () {
     this.loadVariable(label);
   }
 }
-
 
 var storage = new Storage();
 

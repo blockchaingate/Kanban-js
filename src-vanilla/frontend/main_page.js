@@ -86,6 +86,7 @@ function Page() {
 Page.prototype.initialize = function() {
   this.initializeInputPlaceholders();
   storage.variables.theme.changeValueHandler = themes.setTheme;
+  this.initializePanels();
   storage.loadAll();
   storage.variables.currentPage.changeValueHandler = this.initializeCurrentPage.bind(this);
   this.initializeCurrentPage();
@@ -120,6 +121,24 @@ Page.prototype.initializeInputPlaceholder = function (idInput) {
   theParent.replaceChild(groupContainer, oldInput);
   theInput.addEventListener('change', storage.storeInputChange.bind(storage, theInput));
   theInput.addEventListener('keydown', storage.storeInputChange.bind(storage, theInput));
+}
+
+Page.prototype.initializePanels = function() {
+  var standardPanels = document.getElementsByClassName("panelStandard");
+  for (var i = 0; i < standardPanels.length; i ++) {
+    var currentPanel = standardPanels[i];
+    miscellaneousFrontEnd.makePanel(currentPanel);
+    var currentId = currentPanel.id; 
+    if (currentId in storage.variables) {
+      throw (`Id ${currentId} already registered. `);
+    }
+    storage.variables[currentId] = {
+      name: currentId,
+      nameLocalStorage: currentId,
+      value: null,
+      changeValueHandler: miscellaneousFrontEnd.standardExpandButtonHandler.bind(null, currentId)  
+    };
+  }
 }
 
 Page.prototype.initializeInputPlaceholders = function() {

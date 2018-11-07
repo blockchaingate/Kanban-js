@@ -150,6 +150,44 @@ function hookUpHexWithStringInput(idInputNonHex, idInputHex) {
   //inputHex.addEventListener('onchange', unHexAndCopy.bind(null, inputHex, inputNonHex));
 }
 
+function standardExpandButtonHandler(containerId) {
+  var panel = document.getElementById(containerId)
+  var buttonId = panel.getAttribute("buttonExpansion");
+  var button = document.getElementById(buttonId);
+  var value = window.kanban.storage.getVariable(containerId);
+  if (value === "collapsed") {
+    panel.style.maxHeight = 0;
+    panel.style.display = 'none';
+    button.innerHTML = "&#9668;";
+  } else {
+    panel.style.maxHeight = "1500px";
+    panel.style.display = '';
+    button.innerHTML = "&#9660;";
+  }
+}
+
+function toggleStandardPanel(containerId) {
+  var currentValue = window.kanban.storage.getVariable(containerId);
+  if (currentValue === "expanded") {
+    window.kanban.storage.setVariable(containerId, "collapsed");
+  } else {
+    window.kanban.storage.setVariable(containerId, "expanded");
+  }
+}
+
+var buttonPanelStandardCount = 0;
+function makePanel(container) {
+  var expandButtonSpan = document.createElement("span");
+  buttonPanelStandardCount ++;
+  var buttonId = `buttonPanelStandard${buttonPanelStandardCount}`;
+  expandButtonSpan.innerHTML = `<button class = "buttonRPCInput" id = "${buttonId}">&#9660;</button>`;
+  var previousSibling = container.previousSibling;
+  previousSibling.appendChild(expandButtonSpan);
+  var theButton = document.getElementById(buttonId);
+  container.setAttribute("buttonExpansion", buttonId);
+  theButton.addEventListener('click', toggleStandardPanel.bind(null, container.id));
+}
+
 function getPanelForRevealing(container, content) {
   var parent = container.parentNode.parentNode;
   var newSpan = document.createElement("span");
@@ -191,4 +229,6 @@ module.exports = {
   updateInnerHtml,
   updateValue,
   updateFieldsRecursively,
+  makePanel,
+  standardExpandButtonHandler,
 }

@@ -151,6 +151,7 @@ function KanbanGoNodes() {
   this.optionsKanbanGOLabelContraction.transformers["${label}"] = this.transformersStandard.shortener;
 
   this.optionsInitialization = {
+    totalEntriesToDisplayAtEnds: 30,
     transformers: {
       "binaries.${number}": this.transformersStandard.contractHexSetter,
       "contractNames.${number}": this.transformersStandard.contractHexSetter,
