@@ -570,6 +570,7 @@ function SolidityCode (codeBase64, basePath) {
   this.fileNamesABIWithPath = [];
   this.flagTokenized = false;
   this.flagContractNamesComputed = false;
+  /**@type {ResponseWrapperWithLimits} */
   this.responseToUser = null;
   this.responseContent = {
     ABI: null,
@@ -580,6 +581,10 @@ function SolidityCode (codeBase64, basePath) {
   this.numberOfFilesRead = 0;
   this.totalFilesToRead = 0;
   this.owner = null;
+  /**@type {OutputStream} */
+  this.errorStream = new OutputStream();
+  this.errorStream.idConsole = "[Solidity]";
+  this.errorStream.colorIdConsole = "red";
 }
 
 SolidityCode.prototype.getSourceFileNameWithPath = function () {
@@ -697,6 +702,14 @@ SolidityCode.prototype.readABI = function(counter, err, dataABI) {
 }
 
 SolidityCode.prototype.readAndReturnBinaries = function() {
+  if (this.errorStream.recentOutputs.length > 0) {
+    this.responseToUser.writeHead(200);
+    var result = {};
+    result.error = `Failed to compile your solidity file. `;
+    result.errorStream = this.errorStream.toString(); 
+    this.responseToUser.end(JSON.stringify(result));
+    return;
+  }
   //console.log("DEBUG: exectuing readAndReturnBinaries");
   this.computeContractNames();
   this.responseContent.ABI = [];
@@ -769,9 +782,10 @@ SolidityCode.prototype.buildSolFileKanbanGoFromCombinedFile = function(inputCode
 }
 
 KanbanGoInitializer.prototype.compileSolidityPart2 = function(
+  /**@type {ResponseWrapperWithLimits} */
   response,
   /**@type {SolidityCode} */
-  solidityCode
+  solidityCode,
 ) {
   var theArguments = [
     "--bin",
@@ -784,7 +798,14 @@ KanbanGoInitializer.prototype.compileSolidityPart2 = function(
   };
   solidityCode.responseToUser = response;
   solidityCode.owner = this;
-  this.runShell(`${pathnames.path.base}/node_modules/solc/solcjs`, theArguments, theOptions, - 1, solidityCode.readAndReturnBinaries.bind(solidityCode));
+  this.runShell(
+    `${pathnames.path.base}/node_modules/solc/solcjs`, 
+    theArguments, 
+    theOptions, 
+    - 1, 
+    solidityCode.readAndReturnBinaries.bind(solidityCode),
+    solidityCode.errorStream
+  );
 }
 
 function SolidityBuilder (){
@@ -1163,7 +1184,15 @@ KanbanGoInitializer.prototype.runNodes7WriteNodeConfig = function() {
   fs.writeFile(this.paths.nodeConfiguration, JSON.stringify(nodeConfig, null, 2),()=>{});
 }
 
-KanbanGoInitializer.prototype.runShell = function(command, theArguments, theOptions, id, callbackOnExit) {
+KanbanGoInitializer.prototype.runShell = function(
+  command, 
+  theArguments, 
+  theOptions, 
+  id, 
+  callbackOnExit,
+  /**@type {OutputStream} */
+  errorLog
+) {
   console.log(`About to execute: ${command}`.yellow);
   console.log(`Arguments: ${theArguments}`.green);
   var child = childProcess.spawn(command, theArguments, theOptions);
@@ -1183,14 +1212,18 @@ KanbanGoInitializer.prototype.runShell = function(command, theArguments, theOpti
     }
   });
   child.stderr.on('data', function(data) {
-    if (currentNode !== null) {
+    if (errorLog !== null && errorLog !== undefined) {
+      errorLog.append(data.toString());
+    } else if (currentNode !== null) {
       currentNode.logRegular(data.toString());
     } else {
       thisContainer.log(data.toString())
     }
   });
   child.on('error', function(data) {
-    if (currentNode !== null) {
+    if (errorLog !== null && errorLog !== undefined) {
+      errorLog.append(data.toString());
+    } else if (currentNode !== null) {
       currentNode.logRegular(data.toString());
     } else {
       thisContainer.log(data.toString())
