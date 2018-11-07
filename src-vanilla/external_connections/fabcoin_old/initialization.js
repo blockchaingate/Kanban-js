@@ -32,7 +32,8 @@ var fabcoinInitializationProceduresOLD = {
       "-gen", 
       "-printtoconsole", 
       "-logips", 
-      "-daemon"      
+      "-daemon",
+      "-logevents"
     ] //when the argument is an array, the second is the default
   },
   killAll: {
