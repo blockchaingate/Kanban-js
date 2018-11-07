@@ -677,11 +677,11 @@ SolidityCode.prototype.sendResult = function() {
 }
 
 SolidityCode.prototype.readBinary = function(counter, err, dataBinary) {
-  console.log("Got to read binary result pt -1");
+  //console.log("Got to read binary result pt -1");
   if (this.responseToUser === null) {
     return;
   }
-  console.log("Got to read binary result");
+  //console.log("Got to read binary result");
   if (err) {
     this.responseContent.error = `Failed to read binary file ${this.fileNamesBinaryWithPath[counter]}. ${err}`;
     return this.sendResult();
@@ -714,7 +714,7 @@ SolidityCode.prototype.readABI = function(counter, err, dataABI) {
 }
 
 SolidityCode.prototype.readAndReturnBinaries = function() {
-  console.log("DEBUIG: got to this point of code.");
+  //console.log("DEBUIG: got to this point of code.");
   if (this.errorStream.recentOutputs.length > 0) {
     this.responseToUser.writeHead(200);
     var result = {};

@@ -156,6 +156,7 @@ function KanbanGoNodes() {
       "binaries.${number}": this.transformersStandard.contractHexSetter,
       "contractNames.${number}": this.transformersStandard.contractHexSetter,
       "ABI.${number}.${number}.name": this.transformersStandard.contractCallSetter,
+      "resultHTML": this.transformersStandard.shortener,
       "code": this.transformersStandard.contractSourceSetter,
       "contractInheritance.${label}": this.transformersStandard.shortener,
     }
