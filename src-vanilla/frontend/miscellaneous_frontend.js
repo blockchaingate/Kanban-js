@@ -91,6 +91,12 @@ function updateFieldsRecursively(parsedInput, outputs) {
 
 function updateValue(id, content) {
   if (id === ids.defaults.fabcoin.inputBlockInfo.solidityInput) {
+    if (typeof content !== "string") {
+      return;
+    }
+    if (window.kanban.ace.editor === null) {
+      return;
+    }
     window.kanban.ace.editor.setValue(content);
     return;
   }
