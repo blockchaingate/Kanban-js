@@ -15,6 +15,7 @@ const fabcoinInitializationFrontend = require('./initialization');
 
 function FabNode () {
   var inputFabBlock = ids.defaults.fabcoin.inputBlockInfo;
+  var inputKBGOInitialization = ids.defaults.kanbanGO.inputInitialization;
   var inputFabCryptoSchnorr = ids.defaults.fabcoin.inputCrypto.inputSchnorrSignature;
   var inputFabCryptoAggregate = ids.defaults.fabcoin.inputCrypto.inputAggregateSignature;
   this.transformersStandard = {
@@ -269,7 +270,7 @@ function FabNode () {
         contractHex: inputFabBlock.contractHex
       },
       outputs:{
-        address: inputFabBlock.contractId
+        address: [inputFabBlock.contractId, inputKBGOInitialization.contractId]
       },
       outputOptions: this.outputOptionsContract,
     },

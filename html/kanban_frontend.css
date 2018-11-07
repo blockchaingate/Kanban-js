@@ -1,10 +1,19 @@
 :root{
   --colorBackgroundDefault: white;
   --colorFontDefault: black;
-  --colorButtonStandard: lightblue;
+  --colorButtonBackgroundStandard: lightblue;
+  --colorButtonFontStandard: black;
   --colorButtonStandardHovered: lightskyblue;
   --colorButtonStandardSelected: skyblue;
   --colorBackgroundTooltip: lightgray;
+  --colorBackgroundUsedAsInput: lightgreen;
+  --colorBackgroundUpdatedRecently: lightcyan;
+  --colorBackgroundButtonProgressHover: lightgray;
+  --colorBorderPanel: black;
+  --colorBorderMenuSeparator: black;
+  --colorButtonBackgroundRPCInput: #f3f3f3;
+  --colorButtonBackgroundHoverRPCInput: lightcyan;
+  --colorButtonFontRPCInput: black;
 }
 
 body {
@@ -25,7 +34,7 @@ div.divMenuSeparator{
   text-align: center;
   font-weight: lighter;
   font-size: smaller;
-  border-bottom: 1px solid black;
+  border-bottom: 1px solid var(--colorBorderMenuSeparator);
 }
 
 div.divMenu{
@@ -63,7 +72,7 @@ div.divControlPanelDefault{
   margin: 6px;
   padding: 6px;
   transition: all 3s;
-  border: 1px solid black;
+  border: 1px solid var(--colorBorderPanel);
   display: inline-block;
 }
 
@@ -92,7 +101,6 @@ div.divTableContainerSearch{
 }
 
 span.spanProgressReport{
-  background: white;
   transition: all 2s;
 }
 
@@ -102,7 +110,8 @@ div.pageMainWindow{
 
 button.buttonSelectPage{
   border: 0;
-  background-color: lightblue;
+  background-color: var(--colorButtonBackgroundStandard);
+  color: var(--colorButtonFontStandard);
   transition: all 2s;
   border-radius: 2px;
   padding: 5px;
@@ -110,7 +119,7 @@ button.buttonSelectPage{
 }
 
 button.buttonSelectPage:hover{
-  background-color: lightskyblue;
+  background-color: var(--colorButtonStandardHovered);
 }
 
 button.buttonStandardLight{
@@ -123,7 +132,8 @@ button.buttonStandardLight{
 
 button.buttonStandard{
   border: 0;
-  background-color: var(--colorButtonStandard);
+  background-color: var(--colorButtonBackgroundStandard);
+  color: var(--colorButtonFontStandard);
   transition: all 2s;
   border-radius: 2px;
   padding: 5px;
@@ -150,7 +160,7 @@ button.buttonProgress {
 }
 
 button.buttonProgress:hover {
-  background-color: lightgray;
+  background-color: var(--colorBackgroundButtonProgressHover);
 }
 
 error{
@@ -168,7 +178,7 @@ table.tableProfiling td{
 
 table.tableJSON {
   border-collapse: collapse;
-  border: 1px black solid;
+  border: 1px solid var(--colorBorderPanel);
   vertical-align: top;
 }
 
@@ -179,13 +189,13 @@ table.tableJSON tr{
 table.tableJSON th{
   font-size: small;
   font-weight: lighter;
-  border: 1px black solid;
+  border: 1px solid var(--colorBorderPanel);
 }
 
 table.tableJSON td{
   font-size: small;
   font-weight: lighter;
-  border: 1px black solid;
+  border: 1px solid var(--colorBorderPanel);
   vertical-align: top;
 }
 
@@ -292,7 +302,7 @@ img.imgFabLogo{
 
 .inputUsedAsInput {
   transition: all 2s; 
-  background-color: lightgreen;
+  background-color: var(--colorBackgroundUsedAsInput);
 }
 
 button.buttonJSONExpand {
@@ -303,10 +313,11 @@ button.buttonJSONExpand {
   margin: 0px;
   cursor: pointer;
   transition: all 2s;
+  color: var(--colorFontDefault);
 }
 
 button.buttonJSONExpand:hover {
-  background-color: lightgray;
+  background-color: var(--colorBackgroundButtonProgressHover);
 }
 
 button.buttonRPCInput {
@@ -318,10 +329,12 @@ button.buttonRPCInput {
   cursor: pointer;
   transition: all 2s;
   font-family: 'Courier New', Courier, monospace;
-  background-color: #f3f3f3;
+  color: var(--colorButtonFontRPCInput);
+  background-color: var(--colorButtonBackgroundRPCInput);
 }
+
 button.buttonRPCInput:hover{
-  background-color: lightcyan;
+  background-color: var(--colorButtonBackgroundHoverRPCInput);
 }
 
 span.panelRPCWithExpansion {
@@ -330,7 +343,7 @@ span.panelRPCWithExpansion {
 
 .updatedRecently {
   transition: all 1s;
-  background: lightcyan;
+  background: var(--colorBackgroundUpdatedRecently);
 }
 
 /* Customize the label (the container) */

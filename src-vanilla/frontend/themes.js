@@ -9,15 +9,41 @@ var allThemes = {
   light: {
     radio: ids.defaults.themes.radios.light,
     colors: {
-      background: "white",
-      font: "black",
+      "--colorBackgroundDefault": "white",
+      "--colorFontDefault": "black",
+      "--colorButtonBackgroundStandard": "lightblue",
+      "--colorButtonFontStandard": "black",
+      "--colorButtonStandardHovered": "lightskyblue",
+      "--colorButtonStandardSelected": "skyblue",
+      "--colorBackgroundTooltip": "lightgray",
+      "--colorBackgroundUsedAsInput": "lightgreen",   
+      "--colorBackgroundUpdatedRecently": "lightcyan",
+      "--colorBackgroundButtonProgressHover": "lightgray",
+      "--colorBorderPanel": "black",
+      "--colorBorderMenuSeparator": "black",
+      "--colorButtonBackgroundRPCInput": "#f3f3f3",
+      "--colorButtonFontRPCInput": "black",
+      "--colorButtonBackgroundHoverRPCInput": "lightcyan",
     }
   },
   dark: {
     radio: ids.defaults.themes.radios.dark,
     colors: {
-      background: "rgba(0,0,0,0.85)",
-      font: "white",
+      "--colorBackgroundDefault": "rgba(0,0,0,0.85)",
+      "--colorFontDefault": "white",
+      "--colorButtonBackgroundStandard": "darkblue",
+      "--colorButtonFontStandard": "white",
+      "--colorButtonStandardHovered": "blue",
+      "--colorButtonStandardSelected": "blue",
+      "--colorBackgroundTooltip": "white",
+      "--colorBackgroundUsedAsInput": "green",    
+      "--colorBackgroundUpdatedRecently": "blue",
+      "--colorBackgroundButtonProgressHover": "#555555",
+      "--colorBorderPanel": "white",
+      "--colorBorderMenuSeparator": "white",
+      "--colorButtonBackgroundRPCInput": "#33333",
+      "--colorButtonFontRPCInput": "white",
+      "--colorButtonBackgroundHoverRPCInput": "darkblue",
     }
   },
 };
@@ -36,8 +62,9 @@ function setTheme(themeName) {
   }
   currentThemeName = themeName;
   let root = document.documentElement;
-  root.style.setProperty("--colorBackgroundDefault", currentTheme.colors.background);
-  root.style.setProperty("--colorFontDefault", currentTheme.colors.font);
+  for (var colorLabel in currentTheme.colors) {
+    root.style.setProperty(colorLabel, currentTheme.colors[colorLabel]);
+  }
   storage.setVariable(storage.variables.theme, themeName);
 }
 
