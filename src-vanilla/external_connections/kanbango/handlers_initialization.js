@@ -334,7 +334,9 @@ NodeKanbanGo.prototype.run = function(response) {
       "--bridge.scar.address",
       initializer.smartContractId,
       "--bridge.scar.abi",
-      initializer.abiJSON
+      initializer.abiJSON,
+      "--deposit",
+      0
     );
   }
 
