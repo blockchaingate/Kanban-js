@@ -15,9 +15,6 @@ window.kanban = {
     initialization: require('./fabcoin/initialization'),
     rpc: require('./fabcoin/rpc')
   },
-  fabcoinOLD: {
-    initializationOLD: require('./fabcoin_old/fabcoin_initialization'),
-  },
   miscellaneous: require('./miscellaneous_frontend'),
   computationalEngineCalls: null,
   submitRequests: require('./submit_requests'),

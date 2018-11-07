@@ -151,6 +151,7 @@ FabcoinNode.prototype.prepareArgumentList = function () {
   this.argumentList.push(`-rpcuser=${this.configuration.RPCUser}`);
   this.argumentList.push(`-datadir=${this.paths.dataDir}`);
   this.argumentList.push(`-txindex=1`);
+  this.argumentList.push(`-logevents`);
   if (this.configuration.network !== "") {
     this.argumentList.push(this.configuration.network);
   }

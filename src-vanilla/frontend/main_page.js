@@ -1,11 +1,5 @@
 "use strict";
-const rpcCallsGeneral = require('./fabcoin_old/fabcoin_rpc_general');
-const rpcCallsNetwork = require('./fabcoin_old/fabcoin_rpc_network');
-const rpcCallsSendReceive = require('./fabcoin_old/fabcoin_rpc_send_receive');
-const rpcCallsMine = require('./fabcoin_old/fabcoin_rpc_mine');
-const rpcCallsProfiling = require('./fabcoin_old/fabcoin_rpc_profiling');
 const ids = require('./ids_dom_elements');
-const fabcoindOldRPC = require('../external_connections/fabcoin_old/rpc');
 const myNodes = require('./my_nodes');
 const kanbanRPC = require('./kanbango/rpc');
 const miscellaneousFrontEnd = require('./miscellaneous_frontend');
@@ -13,17 +7,7 @@ const storage = require('./storage').storage;
 const themes = require('./themes');
 
 function Page() {
-  this.fabcoinNetworkRadioIds = {};
-  for (var netLabel in fabcoindOldRPC.networkData) {
-    this.fabcoinNetworkRadioIds[netLabel] = ids.defaults.radioButtonsNetwork[netLabel];
-  }
-  this.kanbanNetworkRadioIds = {};
-  for (var netLabel in fabcoindOldRPC.networkDataKanban) {
-    this.kanbanNetworkRadioIds[netLabel] = ids.defaults.radioButtonsNetworkKanban[netLabel];
-  }
 
-  this.currentNetworkName = fabcoindOldRPC.networkData.testNetNoDNS.name;
-  this.currentKanbanNetworkName = fabcoindOldRPC.networkDataKanbanProofOfConcept.testKanban.name;
   this.pages = {
     fabcoinInitialization: {
       idPage: ids.defaults.pages.fabcoin.initialization,
@@ -56,26 +40,9 @@ function Page() {
       idPage: ids.defaults.pages.kanbanGO,
       updateFunction: null
     },
-    send: {
-      idPage: ids.defaults.pageSend,
-      verbosity: "0",
-      updateFunction: rpcCallsSendReceive.updateSendReceivePage
-    },
-    mine: {
-      idPage: ids.defaults.pageMine,
-      updateFunction: rpcCallsMine.updateMiningPage
-    },
-    network: {
-      idPage: ids.defaults.pageNetwork,
-      updateFunction: rpcCallsNetwork.updateNetworkPage
-    },
     testGPU: {
       idPage: ids.defaults.pageTestGPU,
       updateFunction: null
-    },
-    profiling: {
-      idPage: ids.defaults.pageProfiling,
-      updateFunction: rpcCallsProfiling.updateProfilingPage
     },
     themes: {
       idPage: ids.defaults.pages.themes
