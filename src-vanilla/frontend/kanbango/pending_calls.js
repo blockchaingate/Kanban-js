@@ -191,12 +191,12 @@ PendingCall.prototype.callbackAggregateCommitment = function(nodeId, input, outp
 }
 
 PendingCall.prototype.callbackCompileSolidity = function (nodeId, input, output) {
-  console.log(input);
+  //console.log(input);
   try {
     var parsedInput = JSON.parse(input)
     miscellaneousFrontEnd.updateValue(ids.defaults.kanbanGO.inputInitialization.contractABI, JSON.stringify(parsedInput.ABI[0]));
     miscellaneousFrontEnd.updateValue(ids.defaults.fabcoin.inputBlockInfo.contractHex, parsedInput.binaries[0]);
-    console.log(input);
+    //console.log(input);
   } catch(e) { 
     miscellaneousFrontEnd.updateInnerHtml(ids.defaults.kanbanGO.inputInitialization.contractABI, "Failed to parse ABI. ");
   }

@@ -587,6 +587,10 @@ function SolidityCode (codeBase64, basePath) {
   this.errorStream = new OutputStream();
   this.errorStream.idConsole = "[Solidity]";
   this.errorStream.colorIdConsole = "red";
+  /**@type {OutputStream} */
+  this.standardStream = new OutputStream();
+  this.standardStream.idConsole = "[Solidity]";
+  this.standardStream.colorIdConsole = "blue";
 }
 
 SolidityCode.prototype.getSourceFileNameWithPath = function () {
@@ -673,12 +677,18 @@ SolidityCode.prototype.sendResult = function() {
 }
 
 SolidityCode.prototype.readBinary = function(counter, err, dataBinary) {
+  console.log("Got to read binary result pt -1");
   if (this.responseToUser === null) {
     return;
   }
+  console.log("Got to read binary result");
   if (err) {
     this.responseContent.error = `Failed to read binary file ${this.fileNamesBinaryWithPath[counter]}. ${err}`;
     return this.sendResult();
+  }
+
+  if (this.standardStream.recentOutputs.length > 0) {
+    this.responseContent.resultHTML = this.standardStream.recentOutputs.toString();
   }
   this.responseContent.binaries[counter] = dataBinary.toString();
   this.numberOfFilesRead ++;  
@@ -704,6 +714,7 @@ SolidityCode.prototype.readABI = function(counter, err, dataABI) {
 }
 
 SolidityCode.prototype.readAndReturnBinaries = function() {
+  console.log("DEBUIG: got to this point of code.");
   if (this.errorStream.recentOutputs.length > 0) {
     this.responseToUser.writeHead(200);
     var result = {};
@@ -720,6 +731,11 @@ SolidityCode.prototype.readAndReturnBinaries = function() {
   this.responseContent.contractInheritance = this.contractParents;
   this.numberOfFilesRead = 0;
   this.totalFilesToRead = this.contractNames.length * 2;
+  if (this.fileNamesBinaryWithPath.length === 0) {
+    this.responseContent.error = "Got 0 binaries. ";
+    this.sendResult();
+    return;
+  }
   for (var i = 0; i < this.fileNamesBinaryWithPath.length; i ++) {
     //console.log(`DEBUG:reading ${this.fileNamesBinaryWithPath[i]}, ${this.fileNamesABIWithPath[i]}`);
     fs.readFile(this.fileNamesBinaryWithPath[i], this.readBinary.bind(this, i));
@@ -806,7 +822,8 @@ KanbanGoInitializer.prototype.compileSolidityPart2 = function(
     theOptions, 
     - 1, 
     solidityCode.readAndReturnBinaries.bind(solidityCode),
-    solidityCode.errorStream
+    solidityCode.errorStream,
+    solidityCode.standardStream
   );
 }
 
@@ -1017,7 +1034,7 @@ KanbanGoInitializer.prototype.runNodesDetached = function(response, queryCommand
 KanbanGoInitializer.prototype.runNodesOnFAB = function(response, queryCommand, currentNodeNotUsed) {
   this.flagGetGenesisFromFoundationChain = true;
   this.paths.nodesDir = `${this.paths.dataDir}/nodes_fab`;
-  console.log(`DBUG: this is queryCommand: ${JSON.stringify(queryCommand)}`);
+  //console.log(`DBUG: this is queryCommand: ${JSON.stringify(queryCommand)}`);
   this.smartContractId = queryCommand.contractId;
   this.abiJSON = queryCommand.abiJSON;
   this.runNodes(response, queryCommand);
@@ -1025,7 +1042,7 @@ KanbanGoInitializer.prototype.runNodesOnFAB = function(response, queryCommand, c
 
 KanbanGoInitializer.prototype.runNodes = function(response, queryCommand) {
   this.flagStartWasEverAttempted = true;
-  console.log(`DEBUIG: got to here pt 1`);
+  //console.log(`DEBUIG: got to here pt 1`);
   var candidateNumberOfNodes = Number(queryCommand.numberOfNodes);
   var maxNumberOfNodes = 100;
   if (
@@ -1046,7 +1063,7 @@ KanbanGoInitializer.prototype.runNodes = function(response, queryCommand) {
   for (var counterNode = 0; counterNode < candidateNumberOfNodes; counterNode ++) {
     this.nodes.push(new NodeKanbanGo(counterNode));
   }
-  console.log(`DEBUG: got to before loop, candidates: ${candidateNumberOfNodes}`);
+  //console.log(`DEBUG: got to before loop, candidates: ${candidateNumberOfNodes}`);
   for (var counterNode = 0; counterNode < this.nodes.length; counterNode ++) {
     var currentNode = this.nodes[counterNode]; 
     currentNode.initializeDeleteLockFile(response, currentNode.initialize2ReadKeyStore.bind(currentNode, response));
@@ -1193,7 +1210,9 @@ KanbanGoInitializer.prototype.runShell = function(
   id, 
   callbackOnExit,
   /**@type {OutputStream} */
-  errorLog
+  errorLog,
+  /**@type {OutputStream} */
+  standardLog
 ) {
   console.log(`About to execute: ${command}`.yellow);
   console.log(`Arguments: ${theArguments}`.green);
@@ -1207,10 +1226,16 @@ KanbanGoInitializer.prototype.runShell = function(
   }
   var thisContainer = this;
   child.stdout.on('data', function(data) {
-    if (currentNode !== null) {
-      currentNode.logRegular(data.toString());
+    var dataToLog = data.toString().trim();
+    if (dataToLog === "") {
+      return;
+    }
+    if (standardLog !== null && standardLog !== undefined) {
+      standardLog.append(dataToLog);
+    } else if (currentNode !== null) {
+      currentNode.logRegular(dataToLog);
     } else {
-      thisContainer.log(data.toString())
+      thisContainer.log(dataToLog)
     }
   });
   child.stderr.on('data', function(data) {
