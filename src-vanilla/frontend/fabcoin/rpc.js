@@ -54,7 +54,7 @@ function FabNode () {
     setAggregateSignatureComplete: this.getSetInputWithShortener(inputFabCryptoAggregate.aggregateSignatureComplete),
   };
 
-  this.outputOptionsStandard = {
+  this.optionsStandard = {
     transformers: {
       previousblockhash: this.transformersStandard.blockHash,
       nextblockhash: this.transformersStandard.blockHash,
@@ -73,7 +73,7 @@ function FabNode () {
       "details.${number}.vout": this.transformersStandard.setTxInputVoutNoValue,
     },
   };
-  this.outputOptionsTransaction = {
+  this.optionsTransaction = {
     transformers: {
       hash: this.transformersStandard.transactionId,
       blockhash: this.transformersStandard.blockHash,
@@ -92,7 +92,7 @@ function FabNode () {
       "vin.${number}.scriptSig.hex": this.transformersStandard.shortener,
     }
   };
-  this.outputOptionsContract = {
+  this.optionsContract = {
     transformers: {
       address: this.transformersStandard.setContractId,
       hash160: this.transformersStandard.extremeShortener,
@@ -104,7 +104,7 @@ function FabNode () {
       "executionResult.output": this.transformersStandard.shortener,
     }
   };
-  this.outputOptionsCrypto = {
+  this.optionsCrypto = {
     transformers: {
       "keccak_256": this.transformersStandard.shortener,
       "sha3_256": this.transformersStandard.shortener,
@@ -150,15 +150,22 @@ function FabNode () {
       reason: this.transformersStandard.shortener,
     },
   };
+  this.optionsInitialization = {
+    totalEntriesToDisplayAtEnds: 1000,
+    transformers: {
+      resultHTML: this.transformersStandard.shortener,
+       
+    }
+  };
   /**@type {Object.<string,{outputJSONDefault: string, outputOptionsDefault: string}>} */
   this.callTypes = {
     crypto: {
       outputJSONDefault: ids.defaults.fabcoin.outputFabcoinCrypto,
-      outputOptionsDefault: this.outputOptionsCrypto,
+      outputOptionsDefault: this.optionsCrypto,
     },
     initialization: {
       outputJSONDefault: ids.defaults.fabcoin.outputFabcoinInitialization,
-      outputOptionsDefault: this.outputOptionsCrypto,
+      outputOptionsDefault: this.optionsInitialization,
     }
   }
 
@@ -211,13 +218,13 @@ function FabNode () {
       outputs: {
         hex: inputFabBlock.txHex
       }, 
-      outputOptions: this.outputOptionsTransaction,
+      outputOptions: this.optionsTransaction,
     },
     decodeTransactionRaw: {
       inputs: {
         hexString: inputFabBlock.txHex
       },
-      outputOptions: this.outputOptionsTransaction,
+      outputOptions: this.optionsTransaction,
     },
     dumpPrivateKey: {
       inputs: {
@@ -249,20 +256,20 @@ function FabNode () {
       outputs: {
         hex: inputFabBlock.txHex,
       },
-      outputOptions: this.outputOptionsTransaction
+      outputOptions: this.optionsTransaction
     },
     sendRawTransaction: {
       inputs: {
         rawTransactionHex: inputFabBlock.txHex
       },
-      outputOptions: this.outputOptionsTransaction
+      outputOptions: this.optionsTransaction
     },
     insertAggregateSignature: {
       inputs: {
         rawTransaction: inputFabBlock.txHex,
         aggregateSignature: inputFabBlock.txAggregateSignature,
       },
-      outputOptions: this.outputOptionsTransaction
+      outputOptions: this.optionsTransaction
     },
     getRawMempool: {
       outputOptions: {
@@ -278,14 +285,14 @@ function FabNode () {
       outputs:{
         address: [inputFabBlock.contractId, inputKBGOInitialization.contractId]
       },
-      outputOptions: this.outputOptionsContract,
+      outputOptions: this.optionsContract,
     },
     callContract: {
       inputs: {
         contractId: inputFabBlock.contractId,
         data: inputFabBlock.contractData,
       },
-      outputOptions: this.outputOptionsContract,
+      outputOptions: this.optionsContract,
     },
     sendToContract: {
       inputs: {
@@ -293,7 +300,7 @@ function FabNode () {
         data: inputFabBlock.contractData,
         amount: inputFabBlock.walletAmount,
       },
-      outputOptions: this.outputOptionsContract,
+      outputOptions: this.optionsContract,
     },
     listContracts: {
       outputOptions: {
@@ -757,7 +764,7 @@ FabNode.prototype.getArguments = function(functionLabelFrontEnd, functionLabelBa
 
 FabNode.prototype.callbackAutoStartFabcoind = function(outputComponent, input, output) {
   var transformer = new jsonToHtml.JSONTransformer();
-  var extraHTML = transformer.getHtmlFromArrayOfObjects(input, this.outputOptionsStandard);
+  var extraHTML = transformer.getHtmlFromArrayOfObjects(input, this.optionsStandard);
   outputComponent.innerHTML += `<br>${extraHTML}`;
   transformer.bindButtons();
 }
@@ -766,7 +773,7 @@ FabNode.prototype.callbackStandard = function(functionLabelFrontEnd, input, outp
   //console.log(`DEBUG: Call back standard here. Input: ${input}. Fun label: ${functionLabelFrontEnd}, output: ${output}`);
   var transformer = new jsonToHtml.JSONTransformer();
   var currentFunction = this.theFunctions[functionLabelFrontEnd];
-  var currentOptions = this.outputOptionsStandard;
+  var currentOptions = this.optionsStandard;
   var currentOutputs = null;
   if (currentFunction !== undefined && currentFunction !== null) {
     if (currentFunction.outputOptions !== null && currentFunction.outputOptions !== undefined) {
