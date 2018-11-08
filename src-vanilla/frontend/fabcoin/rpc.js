@@ -106,6 +106,8 @@ function FabNode () {
   };
   this.outputOptionsCrypto = {
     transformers: {
+      "keccak_256": this.transformersStandard.shortener,
+      "sha3_256": this.transformersStandard.shortener,
       privateKeyBase58Check: this.transformersStandard.setPrivateKeySchnorr,
       privateKeyBase58WithoutCheck: this.transformersStandard.setPrivateKeySchnorr,
       privateKeyHex: this.transformersStandard.setPrivateKeySchnorr,
@@ -312,11 +314,6 @@ function FabNode () {
         message: inputFabCryptoSchnorr.messageToSha3
       },
       callType: this.callTypes.crypto,
-      outputOptions: {
-        transformers: {
-          singleEntry: this.transformersStandard.shortener,
-        }
-      }
     },
     testPrivateKeyGeneration: {
       outputs: {
