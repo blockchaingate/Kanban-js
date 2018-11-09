@@ -156,20 +156,25 @@ function hookUpHexWithStringInput(idInputNonHex, idInputHex) {
   //inputHex.addEventListener('onchange', unHexAndCopy.bind(null, inputHex, inputNonHex));
 }
 
+function modifyHeight(panel, newHeight) {
+  panel.style.maxHeight = newHeight;
+  panel.style.height = newHeight;
+}
+
 function standardExpandButtonHandler(containerId) {
   var panel = document.getElementById(containerId)
   var buttonId = panel.getAttribute("buttonExpansion");
   var button = document.getElementById(buttonId);
   var value = window.kanban.storage.getVariable(containerId);
+  var desiredHeight = null;
   if (value === "collapsed") {
-    panel.style.maxHeight = 0;
-    panel.style.display = 'none';
+    desiredHeight = "0px"
     button.innerHTML = "&#9668;";
   } else {
-    panel.style.maxHeight = "1500px";
-    panel.style.display = '';
+    desiredHeight = panel.getAttribute("originalHeight");
     button.innerHTML = "&#9660;";
   }
+  setTimeout(modifyHeight.bind(null, panel, desiredHeight), 0);
 }
 
 function toggleStandardPanel(containerId) {
@@ -186,11 +191,13 @@ function makePanel(container) {
   var expandButtonSpan = document.createElement("span");
   buttonPanelStandardCount ++;
   var buttonId = `buttonPanelStandard${buttonPanelStandardCount}`;
+  var originalHeight = window.getComputedStyle(container).height;
   expandButtonSpan.innerHTML = `<button class = "buttonRPCInput" id = "${buttonId}">&#9660;</button>`;
   var previousSibling = container.previousSibling;
   previousSibling.appendChild(expandButtonSpan);
   var theButton = document.getElementById(buttonId);
   container.setAttribute("buttonExpansion", buttonId);
+  container.setAttribute("originalHeight", originalHeight);
   theButton.addEventListener('click', toggleStandardPanel.bind(null, container.id));
 }
 

@@ -288,7 +288,7 @@ img.imgFabLogo{
 
 .inputStandard {
   transition: all 2s;
-  margin: 5px;
+  margin-top: 10px;
   color: var(--colorFontDefault);
   background: var(--colorBackgroundDefault);
 }
@@ -351,14 +351,9 @@ button.buttonRPCInput:hover{
 }
 
 .panelStandard {
-  transition: all linear 2s;
-  max-height: 0px;
-  max-width: 0px;
-  margin-top: 0px;
-  margin-bottom: 0px;
-  overflow-x: hidden;
+  transition: all linear 0.5s;
+  overflow: hidden;
   word-wrap: break-word;
-  transition: all 1s linear;
 }
 
 span.panelRPCWithExpansion {
@@ -444,7 +439,7 @@ table.tableTestKanban td, th{
 
 .form-control-placeholder {
   transition: all 0.2s;
-  margin: 5px;
+  margin-top: 10px;
   opacity: 0.5;
   position: absolute;
   left: 2px; 

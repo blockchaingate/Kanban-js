@@ -39,17 +39,17 @@
   <div class = "divControlPanelDefault">
   <table class = "tableStandardInputs"> 
   <tr><td>
-    <button class = "buttonStandard" style = "width:100%" onclick = "window.kanban.kanbanGO.rpc.theKBNodes.run('versionGO');">Version</button><br>
-    <button class = "buttonStandard" style = "width:100%" onclick = "window.kanban.kanbanGO.rpc.theKBNodes.run('getBlockByNumber');">Block by #</button><br>
-    <button class = "buttonStandard" style = "width:100%" onclick = "window.kanban.kanbanGO.rpc.theKBNodes.run('getBlockByHash');">Block by hash</button><br>
+    <button class = "buttonStandard" style = "width:100px" onclick = "window.kanban.kanbanGO.rpc.theKBNodes.run('versionGO');">Version</button><br>
+    <button class = "buttonStandard" style = "width:100px" onclick = "window.kanban.kanbanGO.rpc.theKBNodes.run('getBlockByNumber');">Block by #</button><br>
+    <button class = "buttonStandard" style = "width:100px" onclick = "window.kanban.kanbanGO.rpc.theKBNodes.run('getBlockByHash');">Block by hash</button><br>
 
-    <div class = "divLabelButtonGroup">voting</div><span id = "panelKBGOConsensusBlock" class = "panelStandard">
-    <button class = "buttonStandard" style = "width:100%" onclick = "window.kanban.kanbanGO.rpc.theKBNodes.run('round');">Round</button><br>
-    <button class = "buttonStandard" style = "width:100%" onclick = "window.kanban.kanbanGO.rpc.theKBNodes.run('validators');">Validators</button><br>
-    <button class = "buttonStandard" style = "width:100%" onclick = "window.kanban.kanbanGO.rpc.theKBNodes.run('peerView');">Peer View</button><br>
-    <button class = "buttonStandard" style = "width:100%" onclick = "window.kanban.kanbanGO.rpc.theKBNodes.run('roundChangeRequests');">Change Round</button><br>
-    </span>
-    <button class = "buttonStandard" style = "width:100%" onclick = "window.kanban.kanbanGO.rpc.theKBNodes.run('getAccountsStates');">Account States</button><br>
+    <div class = "divLabelButtonGroup">voting</div><div id = "panelKBGOConsensusBlock" class = "panelStandard">
+    <button class = "buttonStandard" style = "width:100px" onclick = "window.kanban.kanbanGO.rpc.theKBNodes.run('round');">Round</button><br>
+    <button class = "buttonStandard" style = "width:100px" onclick = "window.kanban.kanbanGO.rpc.theKBNodes.run('validators');">Validators</button><br>
+    <button class = "buttonStandard" style = "width:100px" onclick = "window.kanban.kanbanGO.rpc.theKBNodes.run('peerView');">Peer View</button><br>
+    <button class = "buttonStandard" style = "width:100px" onclick = "window.kanban.kanbanGO.rpc.theKBNodes.run('roundChangeRequests');">Change Round</button><br>
+    </div>
+    <button class = "buttonStandard" style = "width:100px" onclick = "window.kanban.kanbanGO.rpc.theKBNodes.run('getAccountsStates');">Account States</button><br>
   </td>
   <td>
     <input id = "inputKBGOBlockNumber" class = "inputStandard" size = "50" placeholder = "block number" value = "5"></input><br>
@@ -273,15 +273,15 @@
   <table class = "tableStandardInputs">
   <tr>
   <td>
-    <div class = "divLabelButtonGroup">blocks</div><span id = "panelFabcoinBlockButtons" class = "panelStandard">
+    <div class = "divLabelButtonGroup">blocks</div><div id = "panelFabcoinBlockButtons" class = "panelStandard">
     <button class = "buttonStandard" style = "width: 100px" onclick = "window.kanban.fabcoin.rpc.fabNode.run('getBlockCount')">Block count</button><br>
     <button class = "buttonStandard" style = "width: 100px" onclick = "window.kanban.fabcoin.rpc.fabNode.run('getBestBlockHash')">Best block</button><br>
     <button class = "buttonStandard" style = "width: 100px" onclick = "window.kanban.fabcoin.rpc.fabNode.run('getBlockByHeight')">Block by #</button><br>
     <button class = "buttonStandard" style = "width: 100px" onclick = "window.kanban.fabcoin.rpc.fabNode.run('getBlockByHash')">Block by hash</button><br>
     <button class = "buttonStandard" style = "width: 100px" onclick = "window.kanban.fabcoin.rpc.fabNode.run('generateBlocks')">Mine blocks</button><br>
     <button class = "buttonStandard" style = "width: 100px" onclick = "window.kanban.fabcoin.rpc.fabNode.run('getRawMempool')">Raw mempool</button><br>
-    </span>    
-    <div class = "divLabelButtonGroup">txs</div><span id = "panelFabcoinTXButtons" class = "panelStandard">
+    </div>    
+    <div class = "divLabelButtonGroup">txs</div><div id = "panelFabcoinTXButtons" class = "panelStandard">
     <button class = "buttonStandard" style = "width: 100px" onclick = "window.kanban.fabcoin.rpc.fabNode.run('getNewAddress')">New address</button><br>
     <button class = "buttonStandard" style = "width: 100px" onclick = "window.kanban.fabcoin.rpc.fabNode.run('dumpPrivateKey')"><b style = "color:red">Show private</b></button><br>
     <button class = "buttonStandard" style = "width: 100px" onclick = "window.kanban.fabcoin.rpc.fabNode.computePublicKeyFromPrivate()">Compute pub</button><br>
@@ -291,25 +291,25 @@
     <button class = "buttonStandard" style = "width: 100px" onclick = "window.kanban.fabcoin.rpc.fabNode.run('signRawTransaction')">Sign raw</button><br>
     <button class = "buttonStandard" style = "width: 100px" onclick = "window.kanban.fabcoin.rpc.fabNode.run('insertAggregateSignature')">Insert agg. sig.</button><br>
     <button class = "buttonStandard" style = "width: 100px" onclick = "window.kanban.fabcoin.rpc.fabNode.run('sendRawTransaction')"><b style = "color:red">Send raw</b></button><br>
-    </span>    
-    <div class = "divLabelButtonGroup">contracts</div><span id = "panelFabcoinSmartButtons" class = "panelStandard">
+    </div>    
+    <div class = "divLabelButtonGroup">contracts</div><div id = "panelFabcoinSmartButtons" class = "panelStandard">
     <button class = "buttonStandard" style = "width: 100px" onclick = "window.kanban.fabcoin.rpc.fabNode.run('listContracts')">List contracts</button><br>
     <button class = "buttonStandard" style = "width: 100px" onclick = "window.kanban.fabcoin.rpc.fabNode.run('createContract')">Create</button><br>
     <button class = "buttonStandard" style = "width: 100px" onclick = "window.kanban.fabcoin.rpc.fabNode.run('sendToContract')">Send to contr.</button><br>
     <button class = "buttonStandard" style = "width: 100px" onclick = "window.kanban.fabcoin.rpc.fabNode.run('callContract')">Call contract</button><br>
     <button class = "buttonStandard" style = "width: 100px" onclick = "window.kanban.kanbanGO.rpc.theKBNodes.run('fetchKanbanContract', 'initialization');">Fetch contract</button><br>
     <button class = "buttonStandard" style = "width: 100px" onclick = "window.kanban.kanbanGO.rpc.theKBNodes.run('compileSolidity', 'initialization');">Compile</button><br>
-    </span>
+    </div>
   </td>
   <td>
-    <div class = "divLabelButtonGroup">block inputs</div><span id = "panelFabcoinBlockInputs" class = "panelStandard">
+    <div class = "divLabelButtonGroup">block inputs</div><div id = "panelFabcoinBlockInputs" class = "panelStandard">
     <input type = "text" class = "inputStandard" id = "inputFabcoinBlockNumber"                size = "50" value = "77" placeholder = "block #"></input><br>
     <input type = "text" class = "inputStandard" id = "inputFabcoinBlockHash"                  size = "50" value = ""   placeholder = "block hash"></input><br>
     <input type = "text" class = "inputStandard" id = "inputFabcoinNumberOfBlocksToGenerate"   size = "50" value = ""   placeholder = "# blocks to generate"></input><br>    
     <input type = "text" class = "inputStandard" id = "inputFabcoinTransactionId"              size = "50" value = ""   placeholder = "tx id"></input><br>    
     <input type = "text" class = "inputStandard" id = "inputFabcoinTransactionHex"             size = "50" value = ""   placeholder = "tx hex"></input><br>
-    </span>
-    <div class = "divLabelButtonGroup">tx inputs</div><span id = "panelFabcoinTXInputs" class = "panelStandard">
+    </div>
+    <div class = "divLabelButtonGroup">tx inputs</div><div id = "panelFabcoinTXInputs" class = "panelStandard">
     <input type = "text" class = "inputStandard" id = "inputFabcoinPrivateKey"                 size = "50" value = ""   placeholder = "private key"></input><br>    
     <input type = "text" class = "inputStandard" id = "inputFabcoinPublicKey"                  size = "50" value = ""   placeholder = "public key"></input><br>    
     <input type = "text" class = "inputStandard" id = "inputFabcoinAddress"                    size = "50" value = ""   placeholder = "address FAB testnet"></input><br>
@@ -321,15 +321,15 @@
     <input type = "text" class = "inputStandard" id = "inputAggregateSignaturePubKeysForTx"    size = "50" value = ""   placeholder = "aggregate output public keys"  onchange = "window.kanban.fabcoin.rpc.fabNode.setTxOutput();"></input><br>
     <input type = "text" class = "inputStandard" id = "inputAggregateSignatureForTx"           size = "50" value = ""   placeholder = "aggregate output signature"></input><br>
     <input type = "text" class = "inputStandard" id = "inputFabcoinTransactionOutputs"         size = "50" value = ""   placeholder = "tx outputs"></input><br>
-    </span>
-    <div class = "divLabelButtonGroup">contract inputs</div><span id = "panelFabcoinSmartInputs" class = "panelStandard">
+    </div>
+    <div class = "divLabelButtonGroup">contract inputs</div><div id = "panelFabcoinSmartInputs" class = "panelStandard">
     <input type = "text" class = "inputStandard" id = "inputFabcoinContractHex"                size = "50" value = ""   placeholder = "contract hex"></input><br>
     <input type = "text" class = "inputStandard" id = "inputFabcoinContractId"                 size = "50" value = ""   placeholder = "contract id"></input><br>
     <input type = "text" class = "inputStandard" id = "inputSolidityFunctionName"              size = "50" value = ""   placeholder = "contract f-n name"></input><br>
     <input type = "text" class = "inputStandard" id = "inputFabcoinContractFunctionId"         size = "50" value = ""   placeholder = "contract f-n id" onchange = "window.kanban.kanbanGO.rpc.theKBNodes.computeContractData()"></input><br>
     <input type = "text" class = "inputStandard" id = "inputFabcoinContractFunctionData"       size = "50" value = ""   placeholder = "contract f-n data" onchange = "window.kanban.kanbanGO.rpc.theKBNodes.computeContractData()"></input><br>
     <input type = "text" class = "inputStandard" id = "inputFabcoinContractData"               size = "50" value = ""   placeholder = "contract function + data"></input><br>
-    </span>
+    </div>
   </td>
   <td style = "vertical-align: top"><pre id = "aceEditor"></pre><br> <div id = "outputSolidityCompilation"> </div> </td>
   </tr>
