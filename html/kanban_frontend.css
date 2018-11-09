@@ -315,7 +315,7 @@ div.divLabelButtonGroup {
   text-align: right; 
   font-size: x-small;
   width: 100%;
-  min-width: 105px;
+  min-width: 100px;
 }
 
 button.buttonJSONExpand {

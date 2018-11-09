@@ -321,7 +321,7 @@ var labelAbbreviations = {
   "transactions": "txs",
   "transactionsRoot": "txRoot",
   "aggregateSignatureStatus": "agg. status",
-  "signerIndex": "s#",
+  "signerIndex": "signInd.",
   "timerExpiresIn": "timer.exp",
   "proposerAddress": "prop.addr.",
   "proposerIndex": "prop.#",

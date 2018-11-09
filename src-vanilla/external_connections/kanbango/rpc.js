@@ -188,6 +188,11 @@ var rpcCalls = {
     method: "web3_clientVersion",
     parameters: []
   }, 
+  votingMachineStats: {
+    rpcCall: "votingMachineStats",
+    method: "pbft_votingMachineStats",
+    parameters: [],
+  }
 };
 
 module.exports = {
