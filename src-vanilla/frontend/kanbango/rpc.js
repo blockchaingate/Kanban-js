@@ -146,6 +146,12 @@ function KanbanGoNodes() {
       publicKeyHexInternal: this.transformersStandard.shortener,
     }
   };
+  this.optionsForAddressDisplay = {
+    transformers: {
+      "${label}" : this.transformersStandard.shortener,
+      "${any}.address": this.transformersStandard.shortener,
+    }
+  };
   this.optionsKanbanGOLabelContraction = {};
   this.optionsKanbanGOLabelContraction.transformers = Object.assign({}, this.optionsKanbanGOStandard.transformers);
   this.optionsKanbanGOLabelContraction.transformers["${label}"] = this.transformersStandard.shortener;
@@ -290,6 +296,9 @@ function KanbanGoNodes() {
       // optionsKanbanGOStandard will be used.
       // If the empty object {} is given, no transformations will be carried out.
       outputOptions: this.optionsKanbanGOStandard
+    },
+    getAccountsStates: {
+      outputOptions: this.optionsForAddressDisplay
     },
     getBlockByHash: {
       inputs: {

@@ -173,6 +173,11 @@ var rpcCalls = {
     method: "pbft_roundChangeRequests", //<- method name passed to kanban-go
     parameters: []
   },
+  getAccountsStates: {
+      rpcCall: "getAccountsStates",
+      method: "bridge_getAccountsStates", //<- method name passed to kanban-go
+      parameters: []
+  },
   validators: {
     rpcCall: "validators",
     method: "pbft_validators",

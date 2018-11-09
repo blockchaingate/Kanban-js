@@ -310,7 +310,7 @@ NodeKanbanGo.prototype.run = function(response) {
     4,
     "--rpc",
     "--rpcapi",
-    "db,kanban,net,web3,personal,pbft",
+    "db,kanban,net,web3,personal,pbft,bridge",
     "--kanbanstats",
     `${this.ethereumAddress}:abcd@localhost:3000`,
     "--networkid",
