@@ -151,6 +151,20 @@ SpeedReport.prototype.toString = function () {
   return result;
 }
 
+function ensureMinCharWidth(charWidth, input) {
+  if (typeof input === "number") {
+    input = input.toFixed();
+  }
+  if (typeof input !== "string") {
+    return input;
+  }
+  if (input.length < charWidth) {
+    input = "\xa0".repeat(charWidth - input.length) + input;
+  }
+  return input;
+}
+
+
 module.exports = {
   deepCopy,
   deepCopyThroughJSON,
@@ -161,5 +175,6 @@ module.exports = {
   SpeedReport, 
   removeQuotes,
   convertToIntegerIfPossible,
-  hexVeryShortDisplay
+  hexVeryShortDisplay,
+  ensureMinCharWidth,
 }

@@ -153,6 +153,7 @@ function KanbanGoNodes() {
     transformers: {
       "${number}.${label}" : this.transformersStandard.shortener,
       "${number}.${any}.address": this.transformersStandard.shortener,
+      "${number}.${any}.mainChainBalance": {transformer: miscellaneousBackend.ensureMinCharWidth.bind(null, 17)},
     }
   };
   this.optionsKanbanGOLabelContraction = {};

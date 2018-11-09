@@ -408,10 +408,11 @@ JSONTransformer.prototype.getHtmlFromArrayOfObjects = function(input, options) {
   result += clearButton;
   result += "<br>";
   if (typeof inputJSON === "object" && !Array.isArray(inputJSON)) {
-    if (options.forceRowLayout !== true) {
+    if (options.forceRowLayout !== true || inputJSON === null) {
       inputJSON = [inputJSON];
     } else {
-      var sortedKeys = Object.keys(inputJSON).sort();
+      var keys = Object.keys(inputJSON);
+      var sortedKeys = keys.sort();
       var arrayTransformer = Array(sortedKeys.length);
       for (var i = 0; i < sortedKeys.length; i ++) {
         var nextRow = {};
