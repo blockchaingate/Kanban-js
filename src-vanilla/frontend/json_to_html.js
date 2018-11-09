@@ -408,17 +408,30 @@ JSONTransformer.prototype.getHtmlFromArrayOfObjects = function(input, options) {
   result += clearButton;
   result += "<br>";
   if (typeof inputJSON === "object" && !Array.isArray(inputJSON)) {
-    inputJSON = [inputJSON];
+    if (options.forceRowLayout !== true) {
+      inputJSON = [inputJSON];
+    } else {
+      var sortedKeys = Object.keys(inputJSON).sort();
+      var arrayTransformer = Array(sortedKeys.length);
+      for (var i = 0; i < sortedKeys.length; i ++) {
+        var nextRow = {};
+        nextRow[sortedKeys[i]] = inputJSON[sortedKeys[i]];
+        arrayTransformer[i] = nextRow;
+      }
+      inputJSON = arrayTransformer;
+    }
   }
+  var shouldLayoutAsArrayTable = false;
   var shouldLayoutAsArrayOfObjects = false; 
   if (Array.isArray(inputJSON)) {
     if (inputJSON.length > 0) {
       if (typeof inputJSON[0] === "object") {
-        shouldLayoutAsArrayOfObjects = true; 
+        if (options.forceRowLayout !== true) {
+          shouldLayoutAsArrayOfObjects = true; 
+        }
       }
     }
   }
-  var shouldLayoutAsArrayTable = false;
   if (!shouldLayoutAsArrayOfObjects) {
     if (Array.isArray(inputJSON)) {
       shouldLayoutAsArrayTable = true;

@@ -101,6 +101,7 @@ function KanbanGoNodes() {
     // the modified selectors may end up selecting more than one label combination.
     // 
     transformers: {
+      error: this.transformersStandard.shortener,
       address: this.transformersStandard.shortener,
       publicKey: this.transformersStandard.shortener,
       payload: this.transformersStandard.shortener,
@@ -147,9 +148,11 @@ function KanbanGoNodes() {
     }
   };
   this.optionsForAddressDisplay = {
+    forceRowLayout: true,
+    totalEntriesToDisplayAtEnds: 1000,
     transformers: {
-      "${label}" : this.transformersStandard.shortener,
-      "${any}.address": this.transformersStandard.shortener,
+      "${number}.${label}" : this.transformersStandard.shortener,
+      "${number}.${any}.address": this.transformersStandard.shortener,
     }
   };
   this.optionsKanbanGOLabelContraction = {};
@@ -159,6 +162,7 @@ function KanbanGoNodes() {
   this.optionsInitialization = {
     totalEntriesToDisplayAtEnds: 30,
     transformers: {
+      myEnodeAddress: this.transformersStandard.shortener,
       "binaries.${number}": this.transformersStandard.contractHexSetter,
       "contractNames.${number}": this.transformersStandard.contractHexSetter,
       "ABI.${number}.${number}.name": this.transformersStandard.contractCallSetter,
@@ -281,7 +285,7 @@ function KanbanGoNodes() {
       },
     },
     getNodeInformation: {
-      
+      callType: this.callTypes.initialization
     },
     peerView: {
       outputJSON: ids.defaults.kanbanGO.outputSendReceive,
@@ -483,7 +487,7 @@ KanbanGoNodes.prototype.setContractFunctionName = function (container, content, 
     }
   }
   functionSignature += ")";
-  console.log(`DEBUG: fun signature so far: ${functionSignature}`);
+  //console.log(`DEBUG: fun signature so far: ${functionSignature}`);
   var contractIds = ids.defaults.fabcoin.inputBlockInfo; 
   if (abi.payable === false || abi.payable === "false") {
     miscellaneousFrontEnd.updateValue(contractIds.walletAmount, 0);
@@ -634,7 +638,7 @@ KanbanGoNodes.prototype.getNodeInformationCallback = function (input, output) {
     for (var counterNode = 0; counterNode < inputParsed.length; counterNode ++) {
       var currentNode = new KanbanGONode();
       currentNode.init(inputParsed[counterNode]);
-      console.log("DEBUG: This selected node: " + this.selectedNode + " id backend:  " + currentNode.idBackend);
+      //console.log("DEBUG: This selected node: " + this.selectedNode + " id backend:  " + currentNode.idBackend);
       if (this.selectedNode === currentNode.idBackend) {
         console.log("Debug: selecting node: " + currentNode.idBackend);
         currentNode.flagSelected = true;

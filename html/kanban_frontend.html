@@ -39,16 +39,17 @@
   <div class = "divControlPanelDefault">
   <table class = "tableStandardInputs"> 
   <tr><td>
-  <table>
-    <tr><td><button class = "buttonStandard" style = "width:100%" onclick = "window.kanban.kanbanGO.rpc.theKBNodes.run('versionGO');">Version</button></td></tr>
-    <tr><td><button class = "buttonStandard" style = "width:100%" onclick = "window.kanban.kanbanGO.rpc.theKBNodes.run('getBlockByNumber');">Block by #</button></td></tr>
-    <tr><td><button class = "buttonStandard" style = "width:100%" onclick = "window.kanban.kanbanGO.rpc.theKBNodes.run('getBlockByHash');">Block by hash</button></td></tr>
-    <tr><td><button class = "buttonStandard" style = "width:100%" onclick = "window.kanban.kanbanGO.rpc.theKBNodes.run('round');">Round</button></td></tr>
-    <tr><td><button class = "buttonStandard" style = "width:100%" onclick = "window.kanban.kanbanGO.rpc.theKBNodes.run('validators');">Validators</button></td></tr>
-    <tr><td><button class = "buttonStandard" style = "width:100%" onclick = "window.kanban.kanbanGO.rpc.theKBNodes.run('peerView');">Peer View</button></td></tr>
-    <tr><td><button class = "buttonStandard" style = "width:100%" onclick = "window.kanban.kanbanGO.rpc.theKBNodes.run('roundChangeRequests');">Change Round</button></td></tr>
-    <tr><td><button class = "buttonStandard" style = "width:100%" onclick = "window.kanban.kanbanGO.rpc.theKBNodes.run('getAccountsStates');">Account States</button></td></tr>
-  </table>
+    <button class = "buttonStandard" style = "width:100%" onclick = "window.kanban.kanbanGO.rpc.theKBNodes.run('versionGO');">Version</button><br>
+    <button class = "buttonStandard" style = "width:100%" onclick = "window.kanban.kanbanGO.rpc.theKBNodes.run('getBlockByNumber');">Block by #</button><br>
+    <button class = "buttonStandard" style = "width:100%" onclick = "window.kanban.kanbanGO.rpc.theKBNodes.run('getBlockByHash');">Block by hash</button><br>
+
+    <div class = "divLabelButtonGroup">voting</div><span id = "panelKBGOConsensusBlock" class = "panelStandard">
+    <button class = "buttonStandard" style = "width:100%" onclick = "window.kanban.kanbanGO.rpc.theKBNodes.run('round');">Round</button><br>
+    <button class = "buttonStandard" style = "width:100%" onclick = "window.kanban.kanbanGO.rpc.theKBNodes.run('validators');">Validators</button><br>
+    <button class = "buttonStandard" style = "width:100%" onclick = "window.kanban.kanbanGO.rpc.theKBNodes.run('peerView');">Peer View</button><br>
+    <button class = "buttonStandard" style = "width:100%" onclick = "window.kanban.kanbanGO.rpc.theKBNodes.run('roundChangeRequests');">Change Round</button><br>
+    </span>
+    <button class = "buttonStandard" style = "width:100%" onclick = "window.kanban.kanbanGO.rpc.theKBNodes.run('getAccountsStates');">Account States</button><br>
   </td>
   <td>
     <input id = "inputKBGOBlockNumber" class = "inputStandard" size = "50" placeholder = "block number" value = "5"></input><br>
