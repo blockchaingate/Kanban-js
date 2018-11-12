@@ -137,7 +137,7 @@ PendingCall.prototype.callbackStandardOneCaller = function(
 
 PendingCall.prototype.callbackRunNodes = function(nodeId, input, output) {
   this.callbackStandard(nodeId, input, output);
-  this.owner.getNodeInformation();
+  this.getNodeInformationAndRunFabcoind(output)
 }
 
 function getSignerField(input, label) {
@@ -207,11 +207,26 @@ PendingCall.prototype.callbackFetchSmartContract = function (nodeId, input, outp
   this.callbackStandard(nodeId, input, output);
 }
 
-PendingCall.prototype.callbackAutoStartKanbanGO = function(owner, outputComponent, input, output) {
+PendingCall.prototype.callbackAutoStartKanbanGO = function(outputComponent, input, output) {
   var theJSONWriter = new JSONTransformer();
-  var resultHTML = theJSONWriter.getHtmlFromArrayOfObjects(input, {});
+  var resultHTML = theJSONWriter.getHtmlFromArrayOfObjects(input, this.owner.optionsInitialization);
   outputComponent.innerHTML += resultHTML;
-  owner.getNodeInformation();
+  theJSONWriter.bindButtons();
+  this.getNodeInformationAndRunFabcoind(outputComponent);
+}
+
+PendingCall.prototype.getNodeInformationAndRunFabcoind = function(outputComponent) {
+  if (typeof outputComponent === "string") {
+    outputComponent = document.getElementById(outputComponent);
+  }
+  outputComponent.innerHTML += `<b style="color:green"> Will try to run fabcoind for you</b>`;
+
+  this.owner.getNodeInformation();
+  var initializer = window.kanban.fabcoin.initialization.initializer; 
+  var fabNode = window.kanban.fabcoin.rpc.fabNode;
+  var callbackExtra = fabNode.callbackAutoStartFabcoind.bind(fabNode, outputComponent);
+  var callStartFabcoind = initializer.run.bind(initializer, 'runFabcoind', callbackExtra);
+  setTimeout(callStartFabcoind, 0);
 }
 
 PendingCall.prototype.callbackStandard = function(nodeId, input, output) {
@@ -235,7 +250,7 @@ PendingCall.prototype.callbackStandard = function(nodeId, input, output) {
   if (this.flagFoundNotStartedError) {
     resultHTML += "<b style='color:green'> Will try to run kanbanGO for you. </b><br>"
     resultHTML += "Equivalent to pressing the 'Run on FAB' button. <br>";
-    this.owner.run('runNodesOnFAB', 'initialization', this.callbackAutoStartKanbanGO.bind(null, this.owner, output));
+    this.owner.run('runNodesOnFAB', 'initialization', this.callbackAutoStartKanbanGO.bind(this, output));
   }
   output.innerHTML = resultHTML;
   theJSONWriter.bindButtons();

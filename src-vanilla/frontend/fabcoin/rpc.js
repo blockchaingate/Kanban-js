@@ -763,6 +763,9 @@ FabNode.prototype.getArguments = function(functionLabelFrontEnd, functionLabelBa
 }
 
 FabNode.prototype.callbackAutoStartFabcoind = function(outputComponent, input, output) {
+  if (typeof outputComponent === "string") {
+    outputComponent = document.getElementById(outputComponent);
+  }
   var transformer = new jsonToHtml.JSONTransformer();
   var extraHTML = transformer.getHtmlFromArrayOfObjects(input, this.optionsStandard);
   outputComponent.innerHTML += `<br>${extraHTML}`;

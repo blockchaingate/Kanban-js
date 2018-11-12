@@ -170,6 +170,8 @@ function KanbanGoNodes() {
       "resultHTML": this.transformersStandard.shortener,
       "code": this.transformersStandard.contractSourceSetter,
       "contractInheritance.${label}": this.transformersStandard.shortener,
+      "node.${number}": this.transformersStandard.shortener,
+      "notes": this.transformersStandard.shortener,
     }
   };
   this.optionsCrypto = {
