@@ -53,6 +53,10 @@ function Page() {
 Page.prototype.initialize = function() {
   this.initializeInputPlaceholders();
   storage.variables.theme.changeValueHandler = themes.setTheme;
+  storage.variables.autostartFabcoindAfterKanbanGO.changeValueHandler = miscellaneousFrontEnd.setCheckbox.bind(
+    null,
+    ids.defaults.kanbanGO.checkboxFabcoindAutostartAfterKanbanGO
+  );
   this.initializePanels();
   storage.loadAll();
   storage.variables.currentPage.changeValueHandler = this.initializeCurrentPage.bind(this);

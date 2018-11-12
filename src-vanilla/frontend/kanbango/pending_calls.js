@@ -6,6 +6,7 @@ var JSONTransformer = jsonToHtml.JSONTransformer;
 const kanbanGO = require('../../external_connections/kanbango/rpc');
 const globals = require('../globals');
 const ids = require('../ids_dom_elements');
+const storage = require('../storage').storage;
 require('../brace/mode/solidity');
 
 function KanbanGONode() {
@@ -220,7 +221,7 @@ PendingCall.prototype.getNodeInformationAndRunFabcoind = function(outputComponen
     outputComponent = document.getElementById(outputComponent);
   }
   this.owner.getNodeInformation();
-  if (true) {
+  if (! storage.isTrueVariable(storage.variables.autostartFabcoindAfterKanbanGO)) {
     var newSpan = document.createElement("span");
     newSpan.innerHTML += `<b style="color:red"> Automated fabcoind start off: you may need to start fabcoind manually</b>`;
     outputComponent.appendChild(newSpan);

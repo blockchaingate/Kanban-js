@@ -25,6 +25,12 @@ function Storage() {
       value: null,
       changeValueHandler: null,
     },
+    autostartFabcoindAfterKanbanGO: {
+      name: "autostartFabcoindAfterKanbanGO",
+      nameLocalStorage: "autostartFabcoindAfterKanbanGO",
+      value: null,
+      changeValueHandler: null,
+    }
   };
   this.oldAnchorString = "";
   /**@type {string} */
@@ -58,6 +64,20 @@ Storage.prototype.onWindowHashChange = function () {
       this.setVariable(currentVariable, this.currentAnchorString[value], false, false);
     }
   }
+}
+
+Storage.prototype.isTrueVariable = function (
+    /**@type {string}*/
+    incomingLabel
+) {
+  var label = null;
+  if (typeof incomingLabel === "object") {
+    label = incomingLabel.name;
+  } else {
+    label = incomingLabel;
+  }
+  var currentVariable = this.variables[label];
+  return currentVariable.value === true || currentVariable.value === "true";
 }
 
 Storage.prototype.getVariable = function (
@@ -143,7 +163,7 @@ Storage.prototype.setVariable = function (
   }
   var currentVariable = this.variables[label]; 
   currentVariable.value = value;
-  var localStorageName = currentVariable.nameLocalStorage
+  var localStorageName = currentVariable.nameLocalStorage;
   if (localStorageName !== undefined && localStorageName !== null) {
     localStorage.setItem(localStorageName, value);
   } 

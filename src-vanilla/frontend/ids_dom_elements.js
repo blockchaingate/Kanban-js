@@ -71,6 +71,7 @@ var defaults = {
       contractId: "inputKBGOContractId",
       contractABI: "inputKBGOContractABI"
     },
+    checkboxFabcoindAutostartAfterKanbanGO: "checkboxFabcoindAutostartAfterKanbanGO",
     nodePanel: "spanKanbanGoNodeContainer",
     outputKBGOTest: "divOutputKBGOTest",
     outputKanbanInitialization: "divOutputMyLocalKanbanNodes",

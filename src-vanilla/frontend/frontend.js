@@ -1,5 +1,6 @@
 window.kanban = {
-  thePage: null,  rpc: {
+  thePage: null,  
+  rpc: {
     forceRPCPOST: false
   },
   kanbanJS: {

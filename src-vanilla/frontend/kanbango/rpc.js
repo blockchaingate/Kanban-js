@@ -656,6 +656,13 @@ KanbanGoNodes.prototype.getNodeInformationCallback = function (input, output) {
   nodePanel.innerHTML = this.toHTMLRadioButton();  
 }
 
+KanbanGoNodes.prototype.readFabAutostart = function() {
+  /** @type {Storage} */
+  var theStorage = window.kanban.storage;
+  var theCheckBox = document.getElementById(ids.defaults.kanbanGO.checkboxFabcoindAutostartAfterKanbanGO);
+  theStorage.setVariable(theStorage.variables.autostartFabcoindAfterKanbanGO, theCheckBox.checked);
+}
+
 var theKBNodes = new KanbanGoNodes();
 
 module.exports = {

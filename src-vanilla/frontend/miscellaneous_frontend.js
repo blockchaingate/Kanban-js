@@ -232,6 +232,20 @@ function attachModuleFullNameToHandlerNames(transformers, moduleFullName) {
   }  
 }
 
+function setCheckbox(checkboxId, value) {
+  var theCheckBox = document.getElementById(checkboxId);
+  if (value === true || value === "true") {
+    if (theCheckBox.checked !== true) {
+      theCheckBox.checked = true;
+    }
+  } else {
+    if (theCheckBox.checked !== false) {
+      theCheckBox.checked = false;
+    }
+  }
+}
+
+
 module.exports = {
   attachModuleFullNameToHandlerNames,
   revealLongWithParent,
@@ -244,4 +258,5 @@ module.exports = {
   updateFieldsRecursively,
   makePanel,
   standardExpandButtonHandler,
+  setCheckbox,
 }
