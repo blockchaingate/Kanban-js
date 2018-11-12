@@ -276,7 +276,8 @@ function labelComparisonOperator(left, right) {
   return 0;
 }
 
-function getLabelsRows(input) {
+/** @returns {{labels: String[], rows: Object[]}} */
+function getLabelsRowsFromArrayOfObjects(input) {
   var result = {
     labels: [],
     rows: []
@@ -303,6 +304,18 @@ function getLabelsRows(input) {
   }
   return result;
 }
+
+/** @returns {{labels: String[], rows: Object[]}} */
+JSONTransformer.prototype.transformObjectToRows = function(input) {
+  var result = [];
+  for (var labelRow in input) {
+    var currentInputItem = input[labelRow];
+    currentInputItem["_rowLabel"] = labelRow;
+    result.push(currentInputItem);
+  }
+  return result;
+}
+
 
 var numberCallsGetHtmlFromArrayOfObjects = 0;
 function getClearParentButton() {
@@ -369,7 +382,8 @@ function abbreviateLabel(/** @type {string}*/ header) {
   return labelAbbreviations[header];
 }
 
-JSONTransformer.prototype.getHtmlFromArrayOfObjects = function(input, options) {
+/**@returns {{inputJSON: Object, htmlSoFar: string}} */
+JSONTransformer.prototype.getHtmlPreamble = function(input, /**@type {OptionsJSON} */ options) {
   var doIncludeTogglePolling = false; 
   var doShowClearButton = true;
   if (options.flagDontShowClearButton === true) {
@@ -407,29 +421,30 @@ JSONTransformer.prototype.getHtmlFromArrayOfObjects = function(input, options) {
   result += rawButton;
   result += clearButton;
   result += "<br>";
+  return {inputJSON: inputJSON, htmlSoFar: result};
+}
+
+/**@typedef {{clickHandler: Function, transformer: Function, tooltip: string}} Transformer */
+/**@typedef {Object.<string,Transformer>} TransformerCollection */
+/**@typedef {{transformers: TransformerCollection, layoutObjectAsArray: Boolean} } OptionsJSON */
+
+JSONTransformer.prototype.getHtmlFromArrayOfObjects = function(input, /**@type {OptionsJSON} */ options) {
+  var preamble = this.getHtmlPreamble(input, options);
+  var result = "";
+  result += preamble.htmlSoFar;
+  var inputJSON = preamble.inputJSON;
+  if (options.layoutObjectAsArray) {
+    inputJSON = this.transformObjectToRows(inputJSON);
+  }
   if (typeof inputJSON === "object" && !Array.isArray(inputJSON)) {
-    if (options.forceRowLayout !== true || inputJSON === null) {
-      inputJSON = [inputJSON];
-    } else {
-      var keys = Object.keys(inputJSON);
-      var sortedKeys = keys.sort();
-      var arrayTransformer = Array(sortedKeys.length);
-      for (var i = 0; i < sortedKeys.length; i ++) {
-        var nextRow = {};
-        nextRow[sortedKeys[i]] = inputJSON[sortedKeys[i]];
-        arrayTransformer[i] = nextRow;
-      }
-      inputJSON = arrayTransformer;
-    }
+    inputJSON = [inputJSON];
   }
   var shouldLayoutAsArrayTable = false;
   var shouldLayoutAsArrayOfObjects = false; 
   if (Array.isArray(inputJSON)) {
     if (inputJSON.length > 0) {
       if (typeof inputJSON[0] === "object") {
-        if (options.forceRowLayout !== true) {
-          shouldLayoutAsArrayOfObjects = true; 
-        }
+        shouldLayoutAsArrayOfObjects = true; 
       }
     }
   }
@@ -442,7 +457,7 @@ JSONTransformer.prototype.getHtmlFromArrayOfObjects = function(input, options) {
     options.transformers = {};
   }
   if (shouldLayoutAsArrayOfObjects) {
-    var labelsRows = getLabelsRows(inputJSON);
+    var labelsRows = getLabelsRowsFromArrayOfObjects(inputJSON);
     result += "<table class='tableJSON'>";
     result += "<tr>";
     for (var counterColumn = 0; counterColumn < labelsRows.labels.length; counterColumn ++) {

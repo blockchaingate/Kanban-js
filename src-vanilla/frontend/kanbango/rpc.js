@@ -148,12 +148,12 @@ function KanbanGoNodes() {
     }
   };
   this.optionsForAddressDisplay = {
-    forceRowLayout: true,
+    layoutObjectAsArray: true,
     totalEntriesToDisplayAtEnds: 1000,
     transformers: {
-      "${number}.${label}" : this.transformersStandard.shortener,
-      "${number}.${any}.address": this.transformersStandard.shortener,
-      "${number}.${any}.mainChainBalance": {transformer: miscellaneousBackend.ensureMinCharWidth.bind(null, 17)},
+      "_rowLabel" : this.transformersStandard.shortener,
+      "address": this.transformersStandard.shortener,
+      "mainChainBalance": {transformer: miscellaneousBackend.ensureMinCharWidth.bind(null, 17)},
     }
   };
   this.optionsKanbanGOLabelContraction = {};
@@ -303,6 +303,7 @@ function KanbanGoNodes() {
       outputOptions: this.optionsKanbanGOStandard
     },
     getAccountsStates: {
+      callback: PendingCall.prototype.callbackMakeAddressTable,
       outputOptions: this.optionsForAddressDisplay
     },
     getBlockByHash: {
