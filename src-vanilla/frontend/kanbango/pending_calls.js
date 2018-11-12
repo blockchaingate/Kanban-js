@@ -219,12 +219,12 @@ PendingCall.prototype.getNodeInformationAndRunFabcoind = function(outputComponen
   if (typeof outputComponent === "string") {
     outputComponent = document.getElementById(outputComponent);
   }
+  this.owner.getNodeInformation();
   if (true) {
     outputComponent.innerHTML += `<b style="color:red"> Automated fabcoind start off: you may need to start fabcoind manually</b>`;
     return;
   }
   outputComponent.innerHTML += `<b style="color:green"> Will try to run fabcoind for you</b>`;
-  this.owner.getNodeInformation();
   var initializer = window.kanban.fabcoin.initialization.initializer; 
   var fabNode = window.kanban.fabcoin.rpc.fabNode;
   var callbackExtra = fabNode.callbackAutoStartFabcoind.bind(fabNode, outputComponent);
