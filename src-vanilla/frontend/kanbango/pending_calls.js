@@ -221,7 +221,9 @@ PendingCall.prototype.getNodeInformationAndRunFabcoind = function(outputComponen
   }
   this.owner.getNodeInformation();
   if (true) {
-    outputComponent.innerHTML += `<b style="color:red"> Automated fabcoind start off: you may need to start fabcoind manually</b>`;
+    var newSpan = document.createElement("span");
+    newSpan.innerHTML += `<b style="color:red"> Automated fabcoind start off: you may need to start fabcoind manually</b>`;
+    outputComponent.appendChild(newSpan);
     return;
   }
   outputComponent.innerHTML += `<b style="color:green"> Will try to run fabcoind for you</b>`;
