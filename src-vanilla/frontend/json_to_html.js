@@ -433,7 +433,7 @@ JSONTransformer.prototype.getHtmlFromArrayOfObjects = function(input, /**@type {
   var result = "";
   result += preamble.htmlSoFar;
   var inputJSON = preamble.inputJSON;
-  if (options.layoutObjectAsArray) {
+  if (options.layoutObjectAsArray && typeof inputJSON === "object") {
     inputJSON = this.transformObjectToRows(inputJSON);
   }
   if (typeof inputJSON === "object" && !Array.isArray(inputJSON)) {

@@ -190,7 +190,12 @@ var rpcCalls = {
   }, 
   votingMachineStats: {
     rpcCall: "votingMachineStats",
-    method: "pbft_votingMachineStats",
+    method: "pbfttest_votingMachineStats",
+    parameters: [],
+  },
+  rpcModules: {
+    rpcCall: "rpcModules",
+    method: "rpc_modules",
     parameters: [],
   }
 };

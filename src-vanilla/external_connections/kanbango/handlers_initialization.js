@@ -310,7 +310,7 @@ NodeKanbanGo.prototype.run = function(response) {
     4,
     "--rpc",
     "--rpcapi",
-    "db,kanban,net,web3,personal,pbft,bridge",
+    "db,kanban,net,web3,personal,pbft,bridge,pbfttest,cryptotest",
     "--kanbanstats",
     `${this.ethereumAddress}:abcd@localhost:3000`,
     "--networkid",
@@ -335,6 +335,7 @@ NodeKanbanGo.prototype.run = function(response) {
       initializer.smartContractId,
       "--bridge.scar.abi",
       initializer.abiJSON,
+      "--bridge.flagEnableTests",
       "--deposit",
       0
     );

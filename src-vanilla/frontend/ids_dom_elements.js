@@ -64,7 +64,9 @@ var defaults = {
     },
     inputSendReceive: {
       blockNumber: "inputKBGOBlockNumber",
-      blockHash: "inputKBGOBlockHash"
+      blockHash: "inputKBGOBlockHash",
+      messageVoteHex: "inputKBGOVoteMessageHex",
+      messageVote: "inputKBGOVoteMessage",
     },
     inputInitialization: {
       numberOfNodes: "inputKBGONumberOfGethNodes",

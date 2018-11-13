@@ -25,7 +25,7 @@
     <label class = "containerCheckbox">
       <input type = "checkbox" id = "checkboxFabcoindAutostartAfterKanbanGO" onchange = "window.kanban.kanbanGO.rpc.theKBNodes.readFabAutostart();">
       <span class = "checkMark"></span>
-      FAB autostart
+      FAB autostart after kanban
     </label><br> 
     <input id = "inputKBGONumberOfGethNodes" class = "inputStandard" size = "50" placeholder = "# nodes" value = "1"></input><br>
     <input id = "inputKBGOContractId" class = "inputStandard"        size = "50" placeholder = "contract Id" value = ""></input><br>
@@ -42,10 +42,12 @@
   <div class = "divControlPanelDefault">
   <table class = "tableStandardInputs"> 
   <tr><td>
+    <div class = "divLabelButtonGroup">block</div><div id = "panelKBGOBlockInfoButtons" class = "panelStandard">
     <button class = "buttonStandard" style = "width:100px" onclick = "window.kanban.kanbanGO.rpc.theKBNodes.run('versionGO');">Version</button><br>
+    <button class = "buttonStandard" style = "width:100px" onclick = "window.kanban.kanbanGO.rpc.theKBNodes.run('rpcModules');">RPC modules</button><br>
     <button class = "buttonStandard" style = "width:100px" onclick = "window.kanban.kanbanGO.rpc.theKBNodes.run('getBlockByNumber');">Block by #</button><br>
     <button class = "buttonStandard" style = "width:100px" onclick = "window.kanban.kanbanGO.rpc.theKBNodes.run('getBlockByHash');">Block by hash</button><br>
-
+    </div>
     <div class = "divLabelButtonGroup">block voting</div><div id = "panelKBGOConsensusBlock" class = "panelStandard">
     <button class = "buttonStandard" style = "width:100px" onclick = "window.kanban.kanbanGO.rpc.theKBNodes.run('round');">Round</button><br>
     <button class = "buttonStandard" style = "width:100px" onclick = "window.kanban.kanbanGO.rpc.theKBNodes.run('validators');">Validators</button><br>
@@ -58,9 +60,15 @@
     <button class = "buttonStandard" style = "width:100px" onclick = "window.kanban.kanbanGO.rpc.theKBNodes.run('getAccountsStates');">Account States</button><br>
   </td>
   <td>
+    <div class = "divLabelButtonGroup">block inputs</div><div id = "panelKBGOBlockInfoInputs" class = "panelStandard">
     <input id = "inputKBGOBlockNumber" class = "inputStandard" size = "50" placeholder = "block number" value = "5"></input><br>
     <input id = "inputKBGOBlockHash" class = "inputStandard"   size = "50" placeholder = "block hash"></input><br>
-  </td>
+    </div>
+    <div class = "divLabelButtonGroup">block inputs</div><div id = "panelKBGOVotingMachineInputs" class = "panelStandard">
+      <input id = "inputKBGOVoteMessage" class = "inputStandard"   size = "50" placeholder = "message to vote"></input><br>
+      <input id = "inputKBGOVoteMessageHex" class = "inputStandard"   size = "50" placeholder = "message to vote hex"></input><br>
+    </div>
+    </td>
   </tr>
   </table>
   </div>

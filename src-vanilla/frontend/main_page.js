@@ -71,6 +71,10 @@ Page.prototype.initialize = function() {
     ids.defaults.fabcoin.inputCrypto.inputAggregateSignature.message, 
     ids.defaults.fabcoin.inputCrypto.inputAggregateSignature.messageHex
   );
+  miscellaneousFrontEnd.hookUpHexWithStringInput(
+    ids.defaults.kanbanGO.inputSendReceive.messageVote,
+    ids.defaults.kanbanGO.inputSendReceive.messageVoteHex,
+  );
 }
 
 

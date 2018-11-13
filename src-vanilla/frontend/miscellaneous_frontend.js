@@ -151,8 +151,10 @@ function hookUpHexWithStringInput(idInputNonHex, idInputHex) {
   var inputNonHex = document.getElementById(idInputNonHex);
   var inputHex = document.getElementById(idInputHex);
   inputNonHex.addEventListener('keydown', transformToHexAndCopy.bind(null, inputNonHex, inputHex));
+  inputNonHex.addEventListener('keyup', transformToHexAndCopy.bind(null, inputNonHex, inputHex));
   //inputNonHex.addEventListener('onchange', transformToHexAndCopy.bind(null, inputNonHex, inputHex));
   inputHex.addEventListener('keydown', unHexAndCopy.bind(null, inputHex, inputNonHex));
+  inputHex.addEventListener('keyup', unHexAndCopy.bind(null, inputHex, inputNonHex));
   //inputHex.addEventListener('onchange', unHexAndCopy.bind(null, inputHex, inputNonHex));
 }
 
