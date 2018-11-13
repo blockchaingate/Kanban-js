@@ -174,9 +174,9 @@ var rpcCalls = {
     parameters: []
   },
   getAccountsStates: {
-      rpcCall: "getAccountsStates",
-      method: "bridge_getAccountsStates", //<- method name passed to kanban-go
-      parameters: []
+    rpcCall: "getAccountsStates",
+    method: "bridge_getAccountsStates", //<- method name passed to kanban-go
+    parameters: []
   },
   validators: {
     rpcCall: "validators",
@@ -192,6 +192,14 @@ var rpcCalls = {
     rpcCall: "votingMachineStats",
     method: "pbfttest_votingMachineStats",
     parameters: [],
+  },
+  voteMessage: {
+    rpcCall: "voteMessage",
+    method: "pbfttest_testVote",
+    mandatoryModifiableArguments: {
+      messageHex: null,
+    },
+    parameters: ["messageHex"]
   },
   rpcModules: {
     rpcCall: "rpcModules",

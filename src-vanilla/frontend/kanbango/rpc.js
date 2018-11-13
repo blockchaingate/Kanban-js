@@ -235,6 +235,10 @@ function KanbanGoNodes() {
       reason: this.transformersStandard.shortener,
     }  
   };
+  this.optionsVotingMachine = {
+    transformers: {
+    },
+  };
   this.callTypes = {
     standard: {
       jsonOptions: this.optionsKanbanGOStandard,
@@ -253,6 +257,12 @@ function KanbanGoNodes() {
       rpcCalls: kanbanGOInitialization.rpcCalls,
       idDefaultOutput: ids.defaults.kanbanGO.outputKanbanInitialization,
       url: pathnames.url.known.kanbanGO.initialization,
+    },
+    votingMachine: {
+      jsonOptions: this.optionsVotingMachine,
+      rpcCalls: kanbanGO.rpcCalls,
+      url: pathnames.url.known.kanbanGO.rpc,
+      idDefaultOutput: ids.defaults.kanbanGO.outputSendReceive,
     }
   }; 
   // if rpcCall omitted it will be assumed to be equal to the function label.
@@ -341,6 +351,14 @@ function KanbanGoNodes() {
       callType: "cryptoTest"
     },
     versionGO: {
+    },
+    votingMachineStats: {
+      callType: "votingMachine"
+    },
+    voteMessage: {
+      inputs: {
+        messageHex: ids.defaults.kanbanGO.inputSendReceive.messageVoteHex
+      }
     },
     testPrivateKeyGeneration: {
       outputs: {
