@@ -187,10 +187,15 @@ var rpcCalls = {
     rpcCall: "versionGO",
     method: "web3_clientVersion",
     parameters: []
-  }, 
+  },
   votingMachineStats: {
     rpcCall: "votingMachineStats",
     method: "pbfttest_votingMachineStats",
+    parameters: [],
+  },
+  votingNetStats: {
+    rpcCall: "votingNetStats",
+    method: "net_voteMessageNetworkStats",
     parameters: [],
   },
   voteMessage: {
