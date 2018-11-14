@@ -372,7 +372,9 @@ var labelAbbreviations = {
   "aggregateSolution": "aggSoln.",
   "knownPublicKeys": "pubKeys",
   "concatenatedPublicKeys": "concatPubK",
-  "messageDigest": "msgDgst."
+  "messageDigest": "msgDgst.",
+  "totalProcessedIncomingVoteMessages": "totalIn",
+  "totalProcessedOutgoingVoteMessages": "totalOut",
 }
 
 function abbreviateLabel(/** @type {string}*/ header) {

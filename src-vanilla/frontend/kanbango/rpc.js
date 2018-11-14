@@ -237,6 +237,7 @@ function KanbanGoNodes() {
   };
   this.optionsVotingMachine = {
     transformers: {
+      "peers.${label}": this.transformersStandard.shortener
     },
   };
   this.callTypes = {
@@ -351,6 +352,9 @@ function KanbanGoNodes() {
       callType: "cryptoTest"
     },
     versionGO: {
+    },
+    votingNetStats: {
+      callType: "votingMachine"
     },
     votingMachineStats: {
       callType: "votingMachine"
