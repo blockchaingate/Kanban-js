@@ -375,6 +375,7 @@ var labelAbbreviations = {
   "messageDigest": "msgDgst.",
   "totalProcessedIncomingVoteMessages": "totalIn",
   "totalProcessedOutgoingVoteMessages": "totalOut",
+  "totalMessagesNotSentAsTheyAreAlreadyKnown": "totalOptimizedOut",
 }
 
 function abbreviateLabel(/** @type {string}*/ header) {
