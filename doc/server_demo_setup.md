@@ -68,3 +68,11 @@ sudo chmod 744 /etc/letsencrypt/live/fabbackenddemo.pro/privkey.pem
 ```
 secrets_admin/configuration.json
 ```
+
+9. Redirect 443 ports to 52907:
+
+```
+sudo iptables -A INPUT -i eth0 -p tcp --dport 443 -j ACCEPT
+sudo iptables -A INPUT -i eth0 -p tcp --dport 52907 -j ACCEPT
+sudo iptables -A PREROUTING -t nat -i eth0 -p tcp --dport 443 -j REDIRECT --to-port 52907
+```
