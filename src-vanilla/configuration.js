@@ -8,6 +8,7 @@
 const pathnames = require('./pathnames');
 const fs = require('fs');
 
+/**@returns {Configuration} */
 function getConfiguration() {
   return global.kanban.configuration;
 }
@@ -19,21 +20,34 @@ var stringSubstitutions = {
 function Configuration () {
   //defaults below. The defaults are overridden by this.readSecretsAdmin();
   //which reads config.json from pathnames.path.configurationSecretsAdmin
-  this.labelsToRead = {
+  this.configurationsToRead = {
     kanbanGO: true,
     myNodes: true,
     fabcoin: true,
-  }
-  this.kanbanGO = {
-    gethFolder: "uninitialized",
-    dataDirName: "secrets_data_kanban_go"
-  }
-  this.fabcoin = {
-    executableFileName: `${pathnames.path.base}/fabcoin-dev-sm01/src/fabcoind`,
-    dataDir: `${pathnames.path.base}/secrets_data_fabcoin`
+    useCertbot: true,
+    certbotPrivateKeyFileName: true,
+    certbotCertificateFileName: true,
   };
-  this.myNodes = {};
-
+  this.storaLabels = {
+    lastCertificateRenewalTime: true,    
+  };
+  this.configuration = {
+    kanbanGO: {
+      gethFolder: "uninitialized",
+      dataDirName: "secrets_data_kanban_go"
+    },
+    fabcoin: {
+      executableFileName: `${pathnames.path.base}/fabcoin-dev-sm01/src/fabcoind`,
+      dataDir: `${pathnames.path.base}/secrets_data_fabcoin`
+    },
+    myNodes: {},
+    useCertbot: false,
+    certbotPrivateKeyFileName: "",
+    certbotCertificateFileName: "",
+  };
+  this.storage = {
+    lastCertificateRenewalTime: 0,
+  };
 }
 
 Configuration.prototype.processString = function(/**@type {string}*/ inputString) {
@@ -82,9 +96,9 @@ Configuration.prototype.readSecretsAdminCallback = function(err, data) {
     //console.log(`DEBUG: config content: ` + `${data}`.blue);
     var contentParsed = JSON.parse(data);
     //console.log(`DEBUG: content read: ${data}`);
-    for (var label in this.labelsToRead) {
+    for (var label in this.configurationsToRead) {
       if (label in contentParsed) {
-        this.readRecursively(this, label, contentParsed[label]);
+        this.readRecursively(this.configuration, label, contentParsed[label]);
       }
     }
   } catch (e) {
@@ -97,6 +111,28 @@ Configuration.prototype.readSecretsAdminCallback = function(err, data) {
 Configuration.prototype.readSecretsAdmin = function() {
   var data = fs.readFileSync(pathnames.pathname.configurationSecretsAdmin);
   this.readSecretsAdminCallback(null, data);
+  this.readStorage();
+}
+
+Configuration.prototype.storeStorage = function() {
+  fs.writeFile(pathnames.pathname.configurationStorageAdmin, JSON.stringify(this.storage), ()=>{});
+}
+
+Configuration.prototype.readStorage = function() {
+  var storageRaw = null;
+  try {
+    storageRaw = fs.readFileSync(pathnames.pathname.configurationStorageAdmin);
+  } catch (e) {
+    console.log("No storage file found. ");
+    this.storeStorage();
+    return;
+  }
+  var storageParsed = JSON.parse(storageRaw);
+  for (var label in this.storaLabels) {
+    if (label in storageParsed) {
+      this.readRecursively(this.storage, label, storageParsed[label]);
+    }
+  }
 }
 
 module.exports = {

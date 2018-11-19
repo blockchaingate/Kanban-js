@@ -22,12 +22,12 @@ function getFabcoinNode() {
 }
 
 function FabcoinNode() {
-  var executableName = global.kanban.configuration.fabcoin.executableFileName;
+  var executableName = global.kanban.configuration.configuration.fabcoin.executableFileName;
   var executablePath = path.dirname(executableName);
   this.paths = {
     executablePath: executablePath,
     executableFileName: executableName,
-    dataDir: global.kanban.configuration.fabcoin.dataDir
+    dataDir: global.kanban.configuration.configuration.fabcoin.dataDir
   };
   this.configuration = {
     RPCPort: 38667,

@@ -62,7 +62,6 @@ initializeOpenCLDriver.initializeOpenCLDriver();
 //<- Creates and starts the openCL driver.
 //<- At the time of writing, the driver is disabled with a hard-coded flag.
 
-
 buildFrontEnd.buildFrontEnd();
 //<- builds the frontend javascript from source using browserify.
 

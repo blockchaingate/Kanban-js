@@ -33,6 +33,7 @@ var pathname = {
   privateKey: `${path.secretsServerOnly}/private_key.pem`,
   certificate: `${path.secretsServerOnly}/certificate.pem`,
   configurationSecretsAdmin: `${path.secretsAdmin}/configuration.json`,
+  configurationStorageAdmin: `${path.secretsAdmin}/storage.json`,
   faviconIco: `${path.HTML}/favicon.ico`,
   fabcoinSvg: `${path.HTML}/fabcoin.svg`,
   frontEndBrowserifiedJS: `${path.HTML}/kanban_frontend_browserified.js`,
