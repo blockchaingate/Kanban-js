@@ -32,47 +32,55 @@ global.kanban = {
   jobs: null,
   openCLDriver: null
 };
-//The initialization order matters: some initializations depend on the previous ones. 
-//Most initializations depend on 
-//global.kanban.configuration
 
-//Server general configuration, allocate:
-global.kanban.configuration = new configuration.Configuration();
+function initializeAndRun() {
+  //The initialization order matters: some initializations depend on the previous ones. 
+  //Most initializations depend on 
+  //global.kanban.configuration
 
-//Read configuration from secreta_admin/configuration.json:
-global.kanban.configuration.readSecretsAdmin();
+  //Server general configuration, allocate:
+  global.kanban.configuration = new configuration.Configuration();
 
-//Server ssl certificates:
-global.kanban.certificateOptions = new certificateOptions.CertificateOptions();
+  //Read configuration from secreta_admin/configuration.json:
+  global.kanban.configuration.readSecretsAdmin();
 
-//Create kanban go manager:
-global.kanban.kanbanGOInitializer = new kanbanGoInitialization.KanbanGoInitializer();
+  //Server ssl certificates:
+  global.kanban.certificateOptions = new certificateOptions.CertificateOptions();
+  global.kanban.certificateOptions.computeCertificates(initializeAndRunPart2);
+}
 
-//Compute kanban go folders:
-global.kanban.kanbanGOInitializer.computePaths();
+function initializeAndRunPart2() {
+  //Create kanban go manager:
+  global.kanban.kanbanGOInitializer = new kanbanGoInitialization.KanbanGoInitializer();
 
-//Build geth executable:
-global.kanban.kanbanGOInitializer.killGethBuildGeth();
+  //Compute kanban go folders:
+  global.kanban.kanbanGOInitializer.computePaths();
 
-//Create fabcoin node container:
-//The fabcoin folders are taken from global.configuration.fabcoin
-global.fabcoinNode = new FabcoinNode();
+  //Build geth executable:
+  global.kanban.kanbanGOInitializer.killGethBuildGeth();
 
-initializeOpenCLDriver.initializeOpenCLDriver();
-//<- Creates and starts the openCL driver.
-//<- At the time of writing, the driver is disabled with a hard-coded flag.
+  //Create fabcoin node container:
+  //The fabcoin folders are taken from global.configuration.fabcoin
+  global.fabcoinNode = new FabcoinNode();
 
-buildFrontEnd.buildFrontEnd();
-//<- builds the frontend javascript from source using browserify.
+  initializeOpenCLDriver.initializeOpenCLDriver();
+  //<- Creates and starts the openCL driver.
+  //<- At the time of writing, the driver is disabled with a hard-coded flag.
 
-//console.log("DEBUG: got to here");
+  buildFrontEnd.buildFrontEnd();
+  //<- builds the frontend javascript from source using browserify.
 
-var serverHTTPS = https.createServer(certificateOptions.getOptions(), handleRequests.handleRequests);
-serverHTTPS.listen(pathnames.ports.https, function() {
-  console.log(`Listening on https port: ${pathnames.ports.https}`.green);
-});
+  //console.log("DEBUG: got to here");
 
-var serverHTTP = http.createServer(handleRequests.handleRequestsHTTP);
-serverHTTP.listen(pathnames.ports.http, function() {
-  console.log(`Listening on http port: ${pathnames.ports.http}`.yellow);
-});
+  var serverHTTPS = https.createServer(certificateOptions.getOptions(), handleRequests.handleRequests);
+  serverHTTPS.listen(pathnames.ports.https, function() {
+    console.log(`Listening on https port: ${pathnames.ports.https}`.green);
+  });
+
+  var serverHTTP = http.createServer(handleRequests.handleRequestsHTTP);
+  serverHTTP.listen(pathnames.ports.http, function() {
+    console.log(`Listening on http port: ${pathnames.ports.http}`.yellow);
+  });
+}
+
+initializeAndRun();
