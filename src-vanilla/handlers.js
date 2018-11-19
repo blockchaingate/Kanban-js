@@ -1,15 +1,13 @@
 const fs = require('fs');
-const colors = require('colors');
 const mime = require('mime-types');
 const escapeHtml = require('escape-html');
-const queryString = require('querystring');
 const url  = require('url');
 const pathnames = require('./pathnames');
-const handlersComputationalEngine = require('./external_connections/other/cpp_engine');
 const handlersKanbanGo = require('./external_connections/kanbango/handlers_rpc');
 const handlersKanbanGoInitialization = require('./external_connections/kanbango/handlers_initialization');
 const handlersFabcoinInitialization = require('./external_connections/fabcoin/handlers_initialization');
 const handlersFabcoinRPC = require('./external_connections/fabcoin/handlers_rpc');
+const handlersStandard = require('./handlers_standard');
 
 function handleRequestsHTTP(request, response) {
   if (request.url in pathnames.url.synonyms) {
@@ -60,16 +58,34 @@ function handleRequests(request, response) {
     return handleFile(request, response);
   }
   if (parsedURL.pathname === pathnames.url.known.kanbanGO.rpc) {
-    return handlersKanbanGo.handleRequest(request, response);
+    return handlersStandard.transformToQueryJSON(
+      request, 
+      response, 
+      handlersKanbanGo.handleQuery,
+    );
   }
   if (parsedURL.pathname === pathnames.url.known.kanbanGO.initialization) {
-    return handlersKanbanGoInitialization.getInitializer().handleRequest(request, response);
+    var kanbanGOInitializer = handlersKanbanGoInitialization.getInitializer();
+    return handlersStandard.transformToQueryJSON(
+      request, 
+      response,
+      kanbanGOInitializer.handleQuery.bind(kanbanGOInitializer),
+    );
   }
   if (parsedURL.pathname === pathnames.url.known.fabcoin.rpc) {
-    return handlersFabcoinRPC.handleRequest(request, response);
+    return handlersStandard.transformToQueryJSON(
+      request, 
+      response, 
+      handlersFabcoinRPC.handleQuery,
+    );
   }  
   if (parsedURL.pathname === pathnames.url.known.fabcoin.initialization) {
-    return handlersFabcoinInitialization.getFabcoinNode().handleRequest(request, response);
+    var fabNode = handlersFabcoinInitialization.getFabcoinNode();
+    return handlersStandard.transformToQueryJSON(
+      request, 
+      response, 
+      fabNode.handleQuery.bind(fabNode)
+    );
   }
   //console.log(`DEBUG: The parsed url pathname is: ${parsedURL.pathname}`.red);
   response.writeHead(200);

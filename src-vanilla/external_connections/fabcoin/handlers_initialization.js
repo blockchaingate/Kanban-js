@@ -67,15 +67,7 @@ FabcoinNode.prototype.initStreams =  function() {
   this.outputStreams.fabcoind.colorIdConsole = "blue";
 }
 
-FabcoinNode.prototype.handleRequest =  function(request, response) {
-  handlersStandard.getQueryStringFromRequest(
-    request, 
-    response, 
-    this.handleRPCURLEncodedInput.bind(this)
-  );
-}
-
-FabcoinNode.prototype.handleRPCURLEncodedInput = function(response, query) {
+FabcoinNode.prototype.handleQuery = function(response, query) {
   var queryCommand = null;
   try {
     queryCommand = JSON.parse(query.command);

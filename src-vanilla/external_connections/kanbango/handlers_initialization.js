@@ -12,21 +12,7 @@ const cryptoKanban = require('../../crypto/crypto_kanban');
 const encodingsKanban = require('../../crypto/encodings');
 var OutputStream = require('../../output_stream').OutputStream;
 require('colors');
-const handlersStandard = require('../../handlers_standard');
-
-function ResponseWrapperWithLimits(response) {
-  this.response = response;
-  getInitializer().numberRequestsRunning ++;
-}
-
-ResponseWrapperWithLimits.prototype.end = function(input) {
-  this.response.end(input);
-  getInitializer().numberRequestsRunning --;
-}
-
-ResponseWrapperWithLimits.prototype.writeHead = function(input) {
-  this.response.writeHead(input);
-}
+var ResponseWrapper = require('../../response_wrapper').ResponseWrapper;
 
 /**
  * Returns the ambient kanbanGOInitializer.
@@ -351,7 +337,7 @@ NodeKanbanGo.prototype.run = function(response) {
  * @class
  */
 function KanbanGoInitializer() {
-  this.numberRequestsRunning = 0;
+  this.numberOfRequestsRunning = 0;
   this.maxRequestsRunning = 4;
   this.flagGetGenesisFromFoundationChain = false;
   this.flagStartWasEverAttempted = false;
@@ -394,16 +380,8 @@ KanbanGoInitializer.prototype.log = function(input) {
   console.log(`[KanbanGoInitializer] `.red + `${input}`);
 }
 
-KanbanGoInitializer.prototype.handleRequest =  function(request, response) {
-  handlersStandard.getQueryStringFromRequest(
-    request, 
-    response,
-    this.handleQuery.bind(this)
-  );
-}
-
 KanbanGoInitializer.prototype.handleQuery = function(responseNoWrapper, query) {
-  var responseWithWrap = new ResponseWrapperWithLimits(responseNoWrapper);
+  var responseWithWrap = new ResponseWrapper(responseNoWrapper, this);
   var queryCommand = null;
   var queryNode = null;
   try {
@@ -573,7 +551,7 @@ function SolidityCode (codeBase64, basePath) {
   this.fileNamesABIWithPath = [];
   this.flagTokenized = false;
   this.flagContractNamesComputed = false;
-  /**@type {ResponseWrapperWithLimits} */
+  /**@type {ResponseWrapper} */
   this.responseToUser = null;
   this.responseContent = {
     ABI: null,
@@ -801,7 +779,7 @@ SolidityCode.prototype.buildSolFileKanbanGoFromCombinedFile = function(inputCode
 }
 
 KanbanGoInitializer.prototype.compileSolidityPart2 = function(
-  /**@type {ResponseWrapperWithLimits} */
+  /**@type {ResponseWrapper} */
   response,
   /**@type {SolidityCode} */
   solidityCode,
@@ -1188,11 +1166,9 @@ KanbanGoInitializer.prototype.runNodes5InitGenesis = function(response) {
     } else {
       this.nodes[counterNode].initialize9GenesisBlock(response);
     }
-  }
-  
+  }  
   this.runNodes7WriteNodeConfig();
 }
-
 
 KanbanGoInitializer.prototype.runNodes7WriteNodeConfig = function() {
   var nodeConfig = [];
@@ -1272,7 +1248,7 @@ KanbanGoInitializer.prototype.runShell = function(
 }
 
 KanbanGoInitializer.prototype.handleRPCArguments = function(
-  /**@type {ResponseWrapperWithLimits} */  
+  /**@type {ResponseWrapper} */  
   response, 
   queryCommand, 
   queryNode

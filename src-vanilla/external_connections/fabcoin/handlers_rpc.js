@@ -5,13 +5,8 @@ const http = require('http');
 const fabcoinRPC = require('./rpc');
 const fabcoinInitializationSpec = require('./initialization');
 const fabcoinInitialization = require('./handlers_initialization');
-const handlersStandard = require('../../handlers_standard');
 
-function handleRequest(request, response) {
-  handlersStandard.getQueryStringFromRequest(request, response, handleRPCURLEncodedInput);
- }
-
-function handleRPCURLEncodedInput(response, query) {
+function handleQuery(response, query) {
   var queryCommand = null;
   var queryNode = null;
   try {
@@ -227,5 +222,5 @@ function handleRPCArgumentsPartTwo(response, requestStringified) {
 }
 
 module.exports = {
-  handleRequest
+  handleQuery
 }

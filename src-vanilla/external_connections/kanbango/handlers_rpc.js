@@ -4,13 +4,8 @@ const http = require('http');
 const kanbanGORPC = require('./rpc');
 const kanabanGoInitializer = require('./handlers_initialization');
 const NodeKanbanGo = kanabanGoInitializer.NodeKanbanGo;
-const handlersStandard = require('../../handlers_standard');
 
-function handleRequest(request, response) {
-  handlersStandard.getQueryStringFromRequest(request, response, handleRPCURLEncodedInput);
-}
-
-function handleRPCURLEncodedInput(response, query) {
+function handleQuery(response, query) {
   var queryCommand = null;
   var queryNode = null;
   try {
@@ -252,5 +247,5 @@ function handleRPCArgumentsPartTwo(response, theRequestJSON, /**@type {{NodeKanb
 }
 
 module.exports = {
-  handleRequest
+  handleQuery
 }

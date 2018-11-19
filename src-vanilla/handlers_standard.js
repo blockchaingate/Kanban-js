@@ -1,8 +1,24 @@
 const url = require('url');
 const queryString = require('querystring');
-const miscellaneousBackend = require('./miscellaneous');
+var ResponseWrapper = require('./response_wrapper').ResponseWrapper;
 
-function getQueryStringFromRequest(request, response, callbackQuery) {
+function HandlerLimits() {
+  this.numberOfRequestsRunning = 0;
+  this.maximumNumberOfRequestsRunning = 30;
+}
+
+var handlerLimits = new HandlerLimits();
+
+function transformToQueryJSON(request, responseNonWrapped, callbackQuery) {
+  var response = new ResponseWrapper(responseNonWrapped, handlerLimits);
+  if (handlerLimits.numberOfRequestsRunning > handlerLimits.maximumNumberOfRequestsRunning) {
+    response.writeHead(500);
+    var result = {
+      error: `Too many simultaneous requests running (max: ${handlerLimits.maximumNumberOfRequestsRunning}): perhaps server is overloaded? `
+    };
+    return response.end(JSON.stringify(result));
+  }
+
   if (request.method === "GET") {
     return handleRPCGET(request, response, callbackQuery);
   }
@@ -32,16 +48,21 @@ function extractQuery(response, parsedURL, callbackQuery) {
   var query = null;
   try {
     query = queryString.parse(parsedURL);
-    //console.log(`DEBUG: parsed url: ${JSON.stringify(parsedURL)}`)
   } catch (e) {
     response.writeHead(400);
-    return response.end(`In handleRPCGET: bad RPC request: ${e}.`);
+    var result = {
+      error: `In handleRPCGET: bad RPC request: ${e}.`
+    };
+    return response.end(JSON.stringify(result));
   }
-  if (query === null || query === undefined) {
+  if (query === null || query === undefined || (typeof query !== "object")) {
     response.writeHead(400);
-    return response.end(`Failed to parse URL in handleRPCGET.`);
+    var result = {
+      error: `Failed to parse URL in handleRPCGET.`
+    };
+    return response.end(JSON.stringify(result));
   }
-  callbackQuery(response, query, callbackQuery);
+  callbackQuery(response, query);
 }
 
 function handleRPCPOST(request, response, callbackQuery) {
@@ -58,5 +79,5 @@ function handleRPCPOST(request, response, callbackQuery) {
 }
 
 module.exports = {
-  getQueryStringFromRequest
+  transformToQueryJSON
 }
