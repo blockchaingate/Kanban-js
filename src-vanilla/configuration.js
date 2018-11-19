@@ -42,6 +42,7 @@ function Configuration () {
     myNodes: {},
     useCertbot: false,
     certbotConfigDir: "",
+    certbotDomainName: "",
   };
   this.storage = {
     lastCertificateRenewalTime: 0,
