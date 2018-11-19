@@ -8,8 +8,7 @@
   "gethFolder": "${projectBase}/go/src/github.com/blockchaingate/kanban-go/build/bin/"
 },
 "useCertbot": false,
-"certbotPrivateKeyFileName": "${projectBase}/secrets_server_only/live/fabbackenddemo.pro/privkey.pem  <- sample entry. Not used when useCertbot is set to false, erasing this key allowed",
-"certbotCertificateFileName": "${projectBase}/secrets_server_only/live/fabbackenddemo.pro/fullchain.pem <- sample entry. Not used when useCertbot is set to false, erasing this key allowed",
+"certbotConfigDir": "${projectBase}/secrets_server_only",
 "myNodes": [
 {
 "name": "node1",

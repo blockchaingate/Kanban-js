@@ -30,10 +30,16 @@ CertificateOptions.prototype.generatePrivateKeyIfNeeded = function() {
 
 CertificateOptions.prototype.computeCertificates = function() {
   var configuration = configurationContainer.getConfiguration();
+  console.log("DEBUG: got to here");
   if (configuration.configuration.useCertbot === true) {
     pathnames.pathname.certificate = configuration.configuration.certbotCertificateFileName;
     pathnames.pathname.privateKey = configuration.configuration.certbotPrivateKeyFileName;
-    childProcess.exec(`certbot --pre-hook "sudo service ngnix stop" --post-hook "sudo nginx start"`, this.computeCertificatesPart2.bind(this));
+    console.log(`About to renew certificate. ` + `Please stop any servers listening to port 80. `.red);
+    var workDir = configuration.configuration.certbotConfigDir;
+    childProcess.exec(
+      `certbot renew --config-dir ${workDir} --work-dir ${workDir} --logs-dir ${workDir}`, 
+      this.computeCertificatesPart2.bind(this),
+    );
   } else {
     this.generatePrivateKeyIfNeeded();
     this.computeCertificatesPart2();

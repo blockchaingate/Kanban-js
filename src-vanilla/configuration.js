@@ -25,8 +25,7 @@ function Configuration () {
     myNodes: true,
     fabcoin: true,
     useCertbot: true,
-    certbotPrivateKeyFileName: true,
-    certbotCertificateFileName: true,
+    certbotConfigDir: true,
   };
   this.storaLabels = {
     lastCertificateRenewalTime: true,    
@@ -42,8 +41,7 @@ function Configuration () {
     },
     myNodes: {},
     useCertbot: false,
-    certbotPrivateKeyFileName: "",
-    certbotCertificateFileName: "",
+    certbotConfigDir: "",
   };
   this.storage = {
     lastCertificateRenewalTime: 0,
@@ -75,6 +73,10 @@ Configuration.prototype.readRecursively = function (base, label, input) {
     return;
   }
   if (typeof input === "number") {
+    base[label] = input;
+    return;
+  }
+  if (typeof input === "boolean") {
     base[label] = input;
     return;
   }
