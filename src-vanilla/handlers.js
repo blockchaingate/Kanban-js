@@ -59,132 +59,21 @@ function handleRequests(request, response) {
     //console.log(`The url is pt 3: ${request.url}`.red);
     return handleFile(request, response);
   }
-  if (parsedURL.pathname === pathnames.url.known.fabcoinOld.initialization) {
-    return handleFabcoinInitializationOLD(request, response);
-  }
-  if (parsedURL.pathname === pathnames.url.known.fabcoinOld.myNodes) {
-    return handleMyNodesCall(request, response);
-  }
-  if (parsedURL.pathname === pathnames.url.known.fabcoinOld.rpc) {
-    return handleRPC(request, response, false);
-  }
-  if (parsedURL.pathname === pathnames.url.known.kanbanCPP.rpc) {
-    return handleRPC(request, response, true);
-  }
   if (parsedURL.pathname === pathnames.url.known.kanbanGO.rpc) {
     return handlersKanbanGo.handleRequest(request, response);
   }
   if (parsedURL.pathname === pathnames.url.known.kanbanGO.initialization) {
     return handlersKanbanGoInitialization.getInitializer().handleRequest(request, response);
   }
-  if (parsedURL.pathname === pathnames.url.known.computationEngine) {
-    return handleComputationalEngineCall(request, response);
-  }
-  if (parsedURL.pathname === pathnames.url.known.fabcoin.initialization) {
-    return handlersFabcoinInitialization.getFabcoinNode().handleRequest(request, response);
-  }
   if (parsedURL.pathname === pathnames.url.known.fabcoin.rpc) {
     return handlersFabcoinRPC.handleRequest(request, response);
   }  
+  if (parsedURL.pathname === pathnames.url.known.fabcoin.initialization) {
+    return handlersFabcoinInitialization.getFabcoinNode().handleRequest(request, response);
+  }
   //console.log(`DEBUG: The parsed url pathname is: ${parsedURL.pathname}`.red);
   response.writeHead(200);
   response.end(`Uknown request ${request.url} with pathname: ${parsedURL.pathname}.`);
-}
-
-function handleFabcoinInitializationOLD(request, response) {
-  var parsedURL = null;
-  var query = null;
-  var queryCommand = null;
-  try {
-    parsedURL = url.parse(request.url);
-    query = queryString.parse(parsedURL.query);
-    queryCommand = JSON.parse(query.command);
-  } catch (e) {
-    response.writeHead(400);
-    return response.end(`Bad fab coin initialization request: ${e}`);
-  }
-  return fabcoinInitializationOld.fabcoinInitialize(request, response, queryCommand);
-}
-
-function handleRPC(request, response, isKanban) {
-  //if (isKanban) {
-  //  console.log(`DEBUG: handling Kanban request`.cyan);
-  //}
-  if (request.method === "POST") {
-    return handleRPCPOST(request, response, isKanban);
-  }
-  if (request.method === "GET") {
-    return handleRPCGET(request, response, isKanban);
-  }
-  response.writeHead(400);
-  response.end(`Uknown/unhandled request method: ${request.method}`);
-}
-
-function handleRPCPOST(request, response, isKanban) {
-  let body = [];
-  request.on('error', (err) => {
-    response.writeHead(400);
-    response.end(`Error during message body retrieval. ${err}`);
-  }).on('data', (chunk) => {
-    body.push(chunk);
-  }).on('end', () => {
-    body = Buffer.concat(body).toString();
-    return handleRPCURLEncodedInput(request, response, body, isKanban);
-  });
-}
-
-function handleRPCGET(request, response, isKanban) {
-  var parsedURL = null;
-  try {
-    parsedURL = url.parse(request.url);
-  } catch (e) {
-    response.writeHead(400);
-    return response.end(`Bad RPC request: ${e}`);
-  }
-  return handleRPCURLEncodedInput(request, response, parsedURL.query, isKanban);
-}
-
-function handleRPCURLEncodedInput(request, response, urlEncodedInput, isKanban) {
-  var query = null;
-  var queryCommand = null;
-  try {
-    query = queryString.parse(urlEncodedInput);
-    queryCommand = JSON.parse(query.command);
-  } catch (e) {
-    response.writeHead(400);
-    return response.end(`Error while handing input. ${e}`);
-  }
-  return fabCli.rpcCall(request, response, queryCommand, isKanban);
-}
-
-function handleComputationalEngineCall(request, response) {
-  var parsedURL = null;
-  var query = null;
-  var queryCommand = null;
-  try {
-    parsedURL = url.parse(request.url);
-    query = queryString.parse(parsedURL.query);
-    queryCommand = JSON.parse(query.command);
-  } catch (e) {
-    response.writeHead(400);
-    return response.end(`Bad node call request: ${e}`);
-  }
-  return handlersComputationalEngine.dispatch(request, response, queryCommand);
-}
-
-function handleMyNodesCall(request, response) {
-  var parsedURL = null;
-  var query = null;
-  var queryCommand = null;
-  try {
-    parsedURL = url.parse(request.url);
-    query = queryString.parse(parsedURL.query);
-    queryCommand = JSON.parse(query.command);
-  } catch (e) {
-    response.writeHead(400);
-    return response.end(`Bad node call request: ${e}`);
-  }
-  return handlersMyNodes.myNodeCall(request, response, queryCommand);
 }
 
 function handlePing(request, response) {
