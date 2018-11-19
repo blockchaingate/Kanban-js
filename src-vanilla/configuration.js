@@ -26,6 +26,7 @@ function Configuration () {
     fabcoin: true,
     useCertbot: true,
     certbotConfigDir: true,
+    certbotDomainName: true,
   };
   this.storaLabels = {
     lastCertificateRenewalTime: true,    
