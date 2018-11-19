@@ -32,8 +32,16 @@ CertificateOptions.prototype.computeCertificates = function(callback) {
   var configuration = configurationContainer.getConfiguration();
   //console.log("DEBUG: got to here");
   if (configuration.configuration.useCertbot === true) {
-    pathnames.pathname.privateKey = `${configuration.configuration.certbotConfigDir}/live/${configuration.configuration.certbotDomainName}/privkey.pem`;
-    pathnames.pathname.certificate = `${configuration.configuration.certbotConfigDir}/live/${configuration.configuration.certbotDomainName}/fullchain.pem`;
+    pathnames.pathname.privateKey = `${configuration.configuration.certbotConfigDir}/live/${configuration.configuration.certbotDomainName}`;
+    if (!pathnames.pathname.privateKey.endsWith('/')) {
+      pathnames.pathname.privateKey += "/";
+    }
+    pathnames.pathname.privateKey += `privkey.pem`;
+    pathnames.pathname.certificate = `${configuration.configuration.certbotConfigDir}/live/${configuration.configuration.certbotDomainName}`;
+    if (!pathnames.pathname.certificate.endsWith('/')) {
+      pathnames.pathname.certificate += "/";
+    }
+    pathnames.pathname.certificate += `fullchain.pem`;
     //console.log(`About to renew certificate. ` + `Please stop any servers listening to port 80. `.red);
     var workDir = configuration.configuration.certbotConfigDir;
     childProcess.exec(
