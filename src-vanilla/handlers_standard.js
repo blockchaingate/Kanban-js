@@ -9,7 +9,7 @@ function HandlerLimits() {
 
 var handlerLimits = new HandlerLimits();
 
-function transformToQueryJSON(request, responseNonWrapped, callbackQuery) {
+function transformToQueryJSON(request, responseNonWrapped, callbackQuery, parsedURL) {
   var response = new ResponseWrapper(responseNonWrapped, handlerLimits);
   if (handlerLimits.numberOfRequestsRunning > handlerLimits.maximumNumberOfRequestsRunning) {
     response.writeHead(500);
@@ -18,36 +18,24 @@ function transformToQueryJSON(request, responseNonWrapped, callbackQuery) {
     };
     return response.end(JSON.stringify(result));
   }
-
   if (request.method === "GET") {
-    return handleRPCGET(request, response, callbackQuery);
+    return handleRPCGET(request, response, callbackQuery, parsedURL);
   }
   if (request.method === "POST") {
-    return handleRPCPOST(request, response, callbackQuery);
+    return handleRPCPOST(request, response, callbackQuery, parsedURL);
   }
   response.writeHead(400);
   return response.end(`Method not implemented: ${request.method}. `);
 }
 
-function handleRPCGET(request, response, callbackQuery) {
-  var parsedURLobject = null;
-  try {
-    parsedURLobject = url.parse(request.url);
-    //console.log(`DEBUG: parsed url object: ${JSON.stringify(parsedURLobject)}`)
-  } catch (e) {
-    response.writeHead(400);
-    return response.end(`In handleRPCGET: bad RPC request: ${e}.`);
-  }
-  if (parsedURLobject === null || parsedURLobject === undefined) {
-    return response.end(`Failed to parse URL in handleRPCGET.`)
-  }
-  extractQuery(response, parsedURLobject.query, callbackQuery)
+function handleRPCGET(request, response, callbackQuery, parsedURL) {
+  extractQuery(response, parsedURL.query, callbackQuery, parsedURL)
 }
 
-function extractQuery(response, parsedURL, callbackQuery) {
+function extractQuery(response, queryNonParsed, callbackQuery, parsedURL) {
   var query = null;
   try {
-    query = queryString.parse(parsedURL);
+    query = queryString.parse(queryNonParsed);
   } catch (e) {
     response.writeHead(400);
     var result = {
@@ -62,10 +50,12 @@ function extractQuery(response, parsedURL, callbackQuery) {
     };
     return response.end(JSON.stringify(result));
   }
+  var hostname = parsedURL.hostname;
+  query.hostname = hostname;
   callbackQuery(response, query);
 }
 
-function handleRPCPOST(request, response, callbackQuery) {
+function handleRPCPOST(request, response, callbackQuery, parsedURL) {
   let body = [];
   request.on('error', (theError) => {
     response.writeHead(400);
@@ -74,7 +64,7 @@ function handleRPCPOST(request, response, callbackQuery) {
     body.push(chunk);
   }).on('end', () => {
     body = Buffer.concat(body).toString();
-    return extractQuery(response, body, callbackQuery);
+    return extractQuery(response, body, callbackQuery, parsedURL);
   });
 }
 

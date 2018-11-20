@@ -8,47 +8,49 @@ const handlersKanbanGoInitialization = require('./external_connections/kanbango/
 const handlersFabcoinInitialization = require('./external_connections/fabcoin/handlers_initialization');
 const handlersFabcoinRPC = require('./external_connections/fabcoin/handlers_rpc');
 const handlersStandard = require('./handlers_standard');
+const handlersLogin = require('./oauth');
 
 function handleRequestsHTTP(request, response) {
+  parseTheURL(request, response, handleRequestsHTTPPart2);
+}
+ 
+
+function handleRequestsHTTPPart2(request, response, parsedURL) {
+  response.writeHead(307, {Location: `https://${parsedURL.hostname}:${pathnames.ports.https}${parsedURL.path}`});
+  response.end();
+}
+
+function parseTheURL(request, response, callback) {
   if (request.url in pathnames.url.synonyms) {
     request.url = pathnames.url.synonyms[request.url];
   }
   var parsedURL = null;
   try {
     parsedURL = url.parse(request.url);
+    var hostname = parsedURL.hostname;
+    if (hostname === null || hostname === undefined) {
+      hostname = request.headers.host;
+      //console.log("hostname non-chopped: " + hostname);
+      if (hostname.endsWith(`:${pathnames.ports.http}`)) {
+        hostname = hostname.substring(0, hostname.length - pathnames.ports.http.toString().length - 1);
+      }
+      //console.log("hostname later: " + hostname);
+    }  
+    parsedURL.hostname = hostname;
   } catch (e) {
     response.writeHead(400, {"Content-type": "text/plain"});
     return response.end(`Bad url: ${escapeHtml(e)}`);
   }
-  if (parsedURL.pathname === pathnames.url.known.ping) {
-    return handlePing(request, response);
-  }
-  var hostname = parsedURL.hostname; 
-  //  console.log(hostname);
-  if (hostname === null || hostname === undefined) {
-    hostname = request.headers.host;
-    //console.log("hostname non-chopped: " + hostname);
-    if (hostname.endsWith(`:${pathnames.ports.http}`)) {
-      hostname = hostname.substring(0, hostname.length - pathnames.ports.http.toString().length - 1);
-    }
-    //console.log("hostname later: " + hostname);
-  }
-  response.writeHead(307, {Location: `https://${hostname}:${pathnames.ports.https}${parsedURL.path}`});
-  response.end();
+  callback(request, response, parsedURL)
 }
 
 function handleRequests(request, response) {
   //console.log(`The url is: ${request.url}`.red);
-  if (request.url in pathnames.url.synonyms) {
-    request.url = pathnames.url.synonyms[request.url];
-  }
-  var parsedURL = null;
-  try {
-    parsedURL = url.parse(request.url);
-  } catch (e) {
-    response.writeHead(400, {"Content-type": "text/plain"});
-    return response.end(`Bad url: ${escapeHtml(e)}`);
-  }
+  parseTheURL(request, response, handleRequestsPart2);
+}
+
+
+function handleRequestsPart2(request, response, parsedURL) {
   //console.log(`DEBUG: The url is pt 2: ${request.url}`.red);
   if (parsedURL.pathname === pathnames.url.known.ping) {
     return handlePing(request, response);
@@ -62,6 +64,7 @@ function handleRequests(request, response) {
       request, 
       response, 
       handlersKanbanGo.handleQuery,
+      parsedURL,
     );
   }
   if (parsedURL.pathname === pathnames.url.known.kanbanGO.initialization) {
@@ -70,6 +73,7 @@ function handleRequests(request, response) {
       request, 
       response,
       kanbanGOInitializer.handleQuery.bind(kanbanGOInitializer),
+      parsedURL,
     );
   }
   if (parsedURL.pathname === pathnames.url.known.fabcoin.rpc) {
@@ -77,6 +81,7 @@ function handleRequests(request, response) {
       request, 
       response, 
       handlersFabcoinRPC.handleQuery,
+      parsedURL,
     );
   }  
   if (parsedURL.pathname === pathnames.url.known.fabcoin.initialization) {
@@ -84,12 +89,36 @@ function handleRequests(request, response) {
     return handlersStandard.transformToQueryJSON(
       request, 
       response, 
-      fabNode.handleQuery.bind(fabNode)
+      fabNode.handleQuery.bind(fabNode),
+      parsedURL,
     );
+  }
+  if (parsedURL.pathname in pathnames.loginEndpoints) {
+    return handleLogin(parsedURL.pathname, request, response, parsedURL);
   }
   //console.log(`DEBUG: The parsed url pathname is: ${parsedURL.pathname}`.red);
   response.writeHead(200);
   response.end(`Uknown request ${request.url} with pathname: ${parsedURL.pathname}.`);
+}
+
+function handleLogin(pathname, request, response, parsedURL) {
+  var oAuthGoogle = handlersLogin.oAuthGoogle;
+  var loginUrls = pathnames.url.known.login;
+  if (pathname === loginUrls.firstUserRequestToUs) {
+    return handlersStandard.transformToQueryJSON(
+      request, 
+      response,
+      oAuthGoogle.handleLogin.bind(oAuthGoogle),
+      parsedURL,
+    );  
+  }
+
+
+  var result = {
+    error: "Programmer error: login url whitelisted but not handled. "
+  };
+  request.writeHead(500);
+  request.end(JSON.stringify(result));
 }
 
 function handlePing(request, response) {

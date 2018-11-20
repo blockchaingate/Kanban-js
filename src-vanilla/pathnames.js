@@ -72,6 +72,11 @@ var url = {
     kanbanCPP: { 
       rpc: "/kanbanCPP_RPC"
     },
+    login: {
+      firstUserRequestToUs: "/loginRequest",
+      redirectFromProviderToUs: "/loginRedirect"
+
+    },
     computationEngine: "/computation_engine",
     logFileTestNetNoDNS: "/logFileTestNetNoDNS",
     logFileTestNetNoDNSSession: "/logFileTestNetNoDNSSession",
@@ -81,9 +86,13 @@ var url = {
     logFileMainNetSession: "/logFileMainNetSession",
   },
   whiteListed: {
-
   }
 };
+
+var loginEndpoints = {};
+for (var label in url.known.login) {
+  loginEndpoints[url.known.login[label]] = true;
+}
 
 url.whiteListed = {};
 url.whiteListed[url.known.faviconIco] = pathname.faviconIco;
@@ -102,4 +111,5 @@ module.exports = {
   path,
   ports,
   url,
+  loginEndpoints
 }
