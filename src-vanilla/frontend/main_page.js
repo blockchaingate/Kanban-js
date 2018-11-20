@@ -46,7 +46,10 @@ function Page() {
     },
     themes: {
       idPage: ids.defaults.pages.themes
-    }
+    },
+    privacyPolicy: {
+      idPage: ids.defaults.pages.privacyPolicy
+    },
   }
 }
 

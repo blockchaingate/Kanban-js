@@ -19,7 +19,8 @@ var defaults = {
       smartContract: "pageFabcoinSmartContract",
       crypto: "pageFabcoinCrypto",
     },
-    themes: "pageThemes"
+    themes: "pageThemes",
+    privacyPolicy: "pagePrivacyPolicy",
   },
   themes: {
     radios: {
