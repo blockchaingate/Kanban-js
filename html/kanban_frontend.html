@@ -176,7 +176,7 @@
       <button class = "buttonStandard" style = "width: 100px" onclick = "window.kanban.kanbanGO.rpc.theKBNodes.run('testSchnorrSignature', 'cryptoTest');">Signature</button><br>
       <button class = "buttonStandard" style = "width: 100px" onclick = "window.kanban.kanbanGO.rpc.theKBNodes.run('testSchnorrVerification', 'cryptoTest');">Verify</button><br>
     </div>
-    <div class = "divLabelButtonGroup">Aggregate</div><div id = "panelAggregateKanbanGOButtons" class = "panelStandard">
+    <div class = "divLabelButtonGroup">aggregate</div><div id = "panelAggregateKanbanGOButtons" class = "panelStandard">
       <button class = "buttonStandard" style = "width: 100px" onclick = "window.kanban.kanbanGO.rpc.theKBNodes.testClear();">Clear</button><br>
       <button class = "buttonStandard" style = "width: 100px" onclick = "window.kanban.kanbanGO.rpc.theKBNodes.run('testAggregateInitialize', 'cryptoTest');">Initialize</button><br>
       <button class = "buttonStandard" style = "width: 100px" onclick = "window.kanban.kanbanGO.rpc.theKBNodes.run('testAggregateCommitment', 'cryptoTest');">Commit</button><br>
@@ -188,7 +188,7 @@
     </div>
   </td>
   <td>
-    <div class = "divLabelButtonGroup">Schnorr</div><div id = "panelSchnorrKanbanGOInputs" class = "panelStandard">
+    <div class = "divLabelButtonGroup">Schnorr inputs</div><div id = "panelSchnorrKanbanGOInputs" class = "panelStandard">
     <input type = "text" class = "inputStandard" id = "inputKBGOSchnorrMessage"    size = "50" placeholder = "message"></input><br>
     <input type = "text" class = "inputStandard" id = "inputKBGOSchnorrPrivateKey" size = "50" placeholder = "private key Schnorr"></input><br>
     <input type = "text" class = "inputStandard" id = "inputKBGOSchnorrNonce"      size = "50" placeholder = "nonce"></input><br>
@@ -196,7 +196,7 @@
     <input type = "text" class = "inputStandard" id = "inputKBGOSchnorrSignature"  size = "50" placeholder = "signature"></input><br>
     <input type = "text" class = "inputStandard" id = "inputKBGOSchnorrSha3Digest" size = "50" placeholder = "result sha3 digest"></input>
     </div>
-    <div class = "divLabelButtonGroup">Schnorr</div><div id = "panelAggregateKanbanGOInputs" class = "panelStandard">
+    <div class = "divLabelButtonGroup">aggregate inputs</div><div id = "panelAggregateKanbanGOInputs" class = "panelStandard">
     <input type = "text" class = "inputStandard" id = "inputKBGOMessage"                        size = "50" placeholder = "message"></input><br>
     <input type = "text" class = "inputStandard" id = "inputKBGONumberOfPrivateKeysToGenerate"  size = "50" placeholder = "# private keys to generate"></input><br>
     <input type = "text" class = "inputStandard" id = "inputKBGOPrivateKeys"                    size = "50" placeholder = "private keys"></input><br>
