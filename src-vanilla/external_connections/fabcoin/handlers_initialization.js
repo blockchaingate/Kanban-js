@@ -3,14 +3,10 @@ require('colors');
 const fabcoinInitializationSpec = require('./initialization');
 const fabcoinRPC = require('./rpc');
 const childProcess = require("child_process");
-const url = require('url');
-const queryString = require('querystring');
 const path = require('path');
 var OutputStream = require('../../output_stream').OutputStream;
 const crypto = require('crypto');
 const cryptoKanban = require('../../crypto/encodings');
-const handlersStandard = require('../../handlers_standard');
-const fs = require('fs');
 //const kanbanGO = require('../kanbango/handlers_initialization');
 
 /**

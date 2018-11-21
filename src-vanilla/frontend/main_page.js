@@ -5,6 +5,8 @@ const kanbanRPC = require('./kanbango/rpc');
 const miscellaneousFrontEnd = require('./miscellaneous_frontend');
 const storage = require('./storage').storage;
 const themes = require('./themes');
+const pathnames = require('../pathnames');
+const login = require('./login');
 
 function Page() {
 
@@ -50,6 +52,9 @@ function Page() {
     privacyPolicy: {
       idPage: ids.defaults.pages.privacyPolicy
     },
+    loginPage: {
+      idPage: ids.defaults.pages.login
+    }
   }
 }
 
@@ -78,8 +83,9 @@ Page.prototype.initialize = function() {
     ids.defaults.kanbanGO.inputSendReceive.messageVote,
     ids.defaults.kanbanGO.inputSendReceive.messageVoteHex,
   );
+  //Load google login:
+  gapi.load('auth2', login.login.gapiLoadCallback.bind(login.login));
 }
-
 
 Page.prototype.initializeInputPlaceholder = function (idInput) {
   var oldInput = document.getElementById(idInput);

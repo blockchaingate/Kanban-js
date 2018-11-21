@@ -72,11 +72,7 @@ var url = {
     kanbanCPP: { 
       rpc: "/kanbanCPP_RPC"
     },
-    login: {
-      firstUserRequestToUs: "/loginRequest",
-      redirectFromProviderToUs: "/loginRedirect"
-
-    },
+    login: "/login",
     computationEngine: "/computation_engine",
     logFileTestNetNoDNS: "/logFileTestNetNoDNS",
     logFileTestNetNoDNSSession: "/logFileTestNetNoDNSSession",
@@ -89,10 +85,10 @@ var url = {
   }
 };
 
-var loginEndpoints = {};
-for (var label in url.known.login) {
-  loginEndpoints[url.known.login[label]] = true;
-}
+var oauth = {
+  endPoint: `https://accounts.google.com/o/oauth2/v2/auth`,
+  clientId: `68384649778-ukgebobv1gt6rkhgs99n1h2jjgb1qo7j.apps.googleusercontent.com`,
+};
 
 url.whiteListed = {};
 url.whiteListed[url.known.faviconIco] = pathname.faviconIco;
@@ -107,9 +103,9 @@ url.synonyms = {
 };
 
 module.exports = {
+  oauth,
   pathname,
   path,
   ports,
   url,
-  loginEndpoints
 }

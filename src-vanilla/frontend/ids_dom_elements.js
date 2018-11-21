@@ -21,6 +21,7 @@ var defaults = {
     },
     themes: "pageThemes",
     privacyPolicy: "pagePrivacyPolicy",
+    login: "pageLogin",
   },
   themes: {
     radios: {
@@ -28,6 +29,8 @@ var defaults = {
       dark: "radioThemeDark",
     }
   },
+  buttonLogin: "buttonLogin",
+  divLoginWithServer: "divLoginWithServer",
   progressReport: "spanProgressReport",
   spanPingColumnHeader: "spanPingColumnHeader",
   kanbanJS: {

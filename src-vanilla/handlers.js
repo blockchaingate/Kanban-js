@@ -93,32 +93,18 @@ function handleRequestsPart2(request, response, parsedURL) {
       parsedURL,
     );
   }
-  if (parsedURL.pathname in pathnames.loginEndpoints) {
-    return handleLogin(parsedURL.pathname, request, response, parsedURL);
+  if (parsedURL.pathname === pathnames.url.known.login) {
+    var oAuthGoogle = handlersLogin.oAuthGoogle;
+    return handlersStandard.transformToQueryJSON(
+      request, 
+      response,
+      oAuthGoogle.login.bind(oAuthGoogle),
+      parsedURL,
+    );  
   }
   //console.log(`DEBUG: The parsed url pathname is: ${parsedURL.pathname}`.red);
   response.writeHead(200);
   response.end(`Uknown request ${request.url} with pathname: ${parsedURL.pathname}.`);
-}
-
-function handleLogin(pathname, request, response, parsedURL) {
-  var oAuthGoogle = handlersLogin.oAuthGoogle;
-  var loginUrls = pathnames.url.known.login;
-  if (pathname === loginUrls.firstUserRequestToUs) {
-    return handlersStandard.transformToQueryJSON(
-      request, 
-      response,
-      oAuthGoogle.handleLogin.bind(oAuthGoogle),
-      parsedURL,
-    );  
-  }
-
-
-  var result = {
-    error: "Programmer error: login url whitelisted but not handled. "
-  };
-  request.writeHead(500);
-  request.end(JSON.stringify(result));
 }
 
 function handlePing(request, response) {

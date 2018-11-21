@@ -1,5 +1,8 @@
 <html>
 <script src = '/kanban_frontend_browserified.js'></script>
+<script src = "https://apis.google.com/js/api:client.js"></script>
+<script src = "https://apis.google.com/js/platform.js"></script>
+
 <link rel = "stylesheet" type = "text/css" href = "/kanban_frontend.css">
 <body onload = "window.kanban.thePage.initialize();">
 
@@ -496,6 +499,14 @@
         </ul>
 </div>
 
+<div class = "divMainPage" id = "pageLogin">
+  <div style = "position: absolute; top: 44.5%; left: 47.5%;">
+      <div id = "buttonLogin"></div> 
+      <br>
+      <div id = "divLoginWithServer"></div>
+  </div>
+
+</div>
 <div class = "divMainPage" id = "pageThemes">
   <br>
   <label class = "containerRadioButton">
@@ -533,7 +544,7 @@
     <hr>
     <div><button class = "buttonSelectPage" onclick = "window.kanban.thePage.selectPage('privacyPolicy');">Privacy</button></div>
     <hr>
-    <div><button class = "buttonSelectPage" onclick = "window.kanban.login.loginSequenceStart()">Login</button></div>
+    <div><button class = "buttonSelectPage" onclick = "window.kanban.thePage.selectPage('loginPage');">Login</button></div>
 
     <!--div><button class = "buttonSelectPage" onclick = "window.kanban.thePage.selectPage('myNodes');">My remote nodes</button></div>
     <div><button class = "buttonSelectPage" onclick = "window.kanban.thePage.selectPage('network');">Network</button></div>
