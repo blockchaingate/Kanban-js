@@ -147,8 +147,10 @@ FabcoinNode.prototype.prepareArgumentList = function () {
 
 FabcoinNode.prototype.runFabcoind = function (response, /**@type {string[]} */ argumentsNonSplit) {
   if (this.flagStarted) {
+    var result = {}
+    result.error = "Node already started, use killaAllFabcoind to reset. ";
     response.writeHead(200);
-    response.end(`{error: "Node already started, use killaAllFabcoind to reset. " `);
+    response.end(JSON.stringify(result));
     return;
   }
   var fabcoindArguments = [];
@@ -175,6 +177,7 @@ FabcoinNode.prototype.runFabcoind = function (response, /**@type {string[]} */ a
     }
   }
   this.flagStarted = true;
+  this.flagStartWasEverAttempted = true;
   var options = {
     cwd: this.paths.executablePath,
     env: process.env
@@ -185,7 +188,7 @@ FabcoinNode.prototype.runFabcoind = function (response, /**@type {string[]} */ a
   }
   this.runShell(this.paths.executableFileName, fabcoindArguments, options, null, this.outputStreams.fabcoind);
   response.writeHead(200);
-  response.end(this.outputStreams.fabcoind.toString());
+  response.end(JSON.stringify(this.outputStreams.fabcoind.toArray()));
   return;
 }
 
@@ -195,7 +198,11 @@ FabcoinNode.prototype.killAllFabcoindCallback = function (response) {
   response.end(this.outputStreams.command.toStringWithFlush());
 }
 
-FabcoinNode.prototype.appendToOutputStream = function (data, /**@type {OutputStream} */ stream) {
+FabcoinNode.prototype.appendToOutputStream = function(
+  data, 
+  /**@type {OutputStream} */ 
+  stream
+) {
   if (! (stream instanceof OutputStream)) {
     console.log(`[non-logged command] ${data}`);
     return;

@@ -78,17 +78,11 @@ function NodeKanbanGo(inputId) {
 }
 
 NodeKanbanGo.prototype.initializeDeleteLockFile = function(response, callback) {
-  console.log(`DEBUG: got to init folders and keys`);
   fs.unlink(this.lockFileName, callback);
 }
 
 NodeKanbanGo.prototype.initialize2ReadKeyStore = function(response, error) {
-  var initializer = getInitializer();
-  if (!initializer.flagGetGenesisFromFoundationChain) {
-    fs.readdir(this.keyStoreFolder, this.initialize3SelectAddress.bind(this, response));
-  } else {
-    this.initialize4point5ReadNodeKey(response);
-  }
+  this.initialize4point5ReadNodeKey(response);
 }
 
 NodeKanbanGo.prototype.logToInitializationStream = function(input) {
@@ -99,56 +93,6 @@ NodeKanbanGo.prototype.logToInitializationStream = function(input) {
 NodeKanbanGo.prototype.logRegular = function(input) {
   this.notes += `${input}<br>\n`;
   this.outputStreams.log.append(input);
-}
-
-NodeKanbanGo.prototype.initialize3SelectAddress = function(response, error, fileNames) {
-  console.log(`DEBUIG: got to initialize3selectaddress`);
-  if (error !== null && error !== undefined) {
-    this.logToInitializationStream(`Error reading key store directory: ${this.keyStoreFolder}. ${error}`);
-    this.flagFoldersWereInitialized = false;
-  } else {
-    this.logToInitializationStream(`Successfully read key store directory: ${this.keyStoreFolder}`);
-  }
-  this.numberAttemptsToSelectAddress ++;
-  if (this.numberAttemptsToSelectAddress > this.maximumAttemptsToSelectAddress) {
-    this.logToInitializationStream(`${this.numberAttemptsToSelectAddress} failed attempts to select address: aborting.`);
-    getInitializer().runNodes2ReadConfig(response);
-    return;
-  }
-  var hasKeys = false;
-  if (fileNames !== undefined && fileNames !== null) {
-    if (fileNames.length > 0) {
-      hasKeys = true;
-    }
-  }
-  if (!hasKeys) {
-    this.logToInitializationStream(`Found no previously generated keys. Resetting all folders and keys. `);
-    this.flagFoldersWereInitialized = false;
-    this.initialize5ResetFolders(response);
-    return;
-  }
-  this.fileNameNodeAddress = `${this.keyStoreFolder}/${fileNames[0]}`;
-  fs.readFile(this.fileNameNodeAddress, this.initialize4ReadAccountAddress.bind(this, response));
-}
-
-NodeKanbanGo.prototype.initialize4ReadAccountAddress = function(response, error, data) {
-  if (error !== null && error !== undefined) {
-    this.logToInitializationStream(`Error reading stored key: ${this.fileNameNodeAddress}. ${error}`);
-    this.flagFoldersWereInitialized = false;
-    this.initialize5ResetFolders(response);
-    return;
-  }
-  try {
-    this.ethereumAddressFileContent = data;
-    this.ethereumAddressFileParsed = JSON.parse(this.ethereumAddressFileContent);
-    this.ethereumAddress = this.ethereumAddressFileParsed.address;
-    this.logToInitializationStream(`Successfully read ethereum address: ${this.ethereumAddress}`);
-  } catch (e) {
-    this.logToInitializationStream(`Error while parsing key file. ${error}. The key file content: ${data}`);
-    this.initialize5ResetFolders(response);
-    return;
-  }
-  this.initialize4point5ReadNodeKey(response);
 }
 
 NodeKanbanGo.prototype.initialize4point5ReadNodeKey = function(response) {
@@ -1044,7 +988,6 @@ KanbanGoInitializer.prototype.runNodes = function(response, queryCommand) {
   for (var counterNode = 0; counterNode < candidateNumberOfNodes; counterNode ++) {
     this.nodes.push(new NodeKanbanGo(counterNode));
   }
-  //console.log(`DEBUG: got to before loop, candidates: ${candidateNumberOfNodes}`);
   for (var counterNode = 0; counterNode < this.nodes.length; counterNode ++) {
     var currentNode = this.nodes[counterNode]; 
     currentNode.initializeDeleteLockFile(response, currentNode.initialize2ReadKeyStore.bind(currentNode, response));

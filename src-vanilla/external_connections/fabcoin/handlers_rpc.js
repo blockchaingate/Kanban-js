@@ -1,6 +1,4 @@
 "use strict";
-const url  = require('url');
-const queryString = require('querystring');
 const http = require('http');
 const fabcoinRPC = require('./rpc');
 const fabcoinInitializationSpec = require('./initialization');
