@@ -503,8 +503,6 @@
 <div class = "divMainPage" id = "pageLogin">
   <div style = "position: absolute; top: 44.5%; left: 47.5%;">
       <div id = "buttonLogin"></div> 
-      <br>
-      <div id = "divLoginWithServer"></div>
   </div>
 
 </div>
@@ -546,7 +544,13 @@
     <div><button class = "buttonSelectPage" onclick = "window.kanban.thePage.selectPage('privacyPolicy');">Privacy</button></div>
     <hr>
     <div><button class = "buttonSelectPage" onclick = "window.kanban.thePage.selectPage('loginPage');">Login</button></div>
-
+    <div style = "text-align: center; width: 100%">
+    <div class = "panelMenu">
+      <span id = "spanSignedInStatus"></span><br>
+      <span id = "spanPermissions"></span>
+      <span id = "divProfilePicture"></span>
+    </div>
+    </div>
     <!--div><button class = "buttonSelectPage" onclick = "window.kanban.thePage.selectPage('myNodes');">My remote nodes</button></div>
     <div><button class = "buttonSelectPage" onclick = "window.kanban.thePage.selectPage('network');">Network</button></div>
     <div><button class = "buttonSelectPage" onclick = "window.kanban.thePage.selectPage('send');">Send</button></div>

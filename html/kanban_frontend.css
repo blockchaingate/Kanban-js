@@ -333,6 +333,15 @@ button.buttonJSONExpand:hover {
   background-color: var(--colorBackgroundButtonProgressHover);
 }
 
+.panelMenu {
+  background-color: var(--colorButtonBackgroundStandard);
+  max-width: 125px;
+  border-radius: 2px;
+  padding: 6px;
+  text-align: center;
+  display: inline-block;
+}
+
 button.buttonRPCInput {
   background: none;
   outline: none;

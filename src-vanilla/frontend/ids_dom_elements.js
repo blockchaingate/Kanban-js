@@ -29,8 +29,12 @@ var defaults = {
       dark: "radioThemeDark",
     }
   },
-  buttonLogin: "buttonLogin",
-  divLoginWithServer: "divLoginWithServer",
+  login: {
+    spanSignedInStatus: "spanSignedInStatus",
+    spanPermissions: "spanPermissions",
+    buttonLogin: "buttonLogin",
+    divProfilePicture: "divProfilePicture",
+  },
   progressReport: "spanProgressReport",
   spanPingColumnHeader: "spanPingColumnHeader",
   kanbanJS: {
