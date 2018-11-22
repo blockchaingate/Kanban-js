@@ -1,3 +1,4 @@
+"use strict";
 window.kanban = {
   thePage: null,  
   rpc: {
@@ -29,12 +30,14 @@ window.kanban = {
     statDetails: {}
   },
   ace: {
-    ace: require('./brace'),
+    ace: null,
     editor: null
   },
   themes: require('./themes'),
   storage: require('./storage').storage,
 };
+
+window.kanban.ace.ace = ace;
 
 window.kanban.kanbanGO.rpc = require('./kanbango/rpc'); // <- function call uses window.kanban
 

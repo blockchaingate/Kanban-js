@@ -7,7 +7,7 @@ const kanbanGO = require('../../external_connections/kanbango/rpc');
 const globals = require('../globals');
 const ids = require('../ids_dom_elements');
 const storage = require('../storage').storage;
-require('../brace/mode/solidity');
+require('../solidity-ace-editor');
 
 function KanbanGONode() {
   /**@type {string} */

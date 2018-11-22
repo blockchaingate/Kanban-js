@@ -34,6 +34,7 @@ global.kanban = {
 };
 
 function initializeAndRun() {
+  console.log(`Process ${process.pid} running.`.green);
   //The initialization order matters: some initializations depend on the previous ones. 
   //Most initializations depend on 
   //global.kanban.configuration

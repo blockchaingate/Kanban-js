@@ -8,6 +8,7 @@ var ports = {
 const pathBuiltIn = require('path');
 
 var path = {
+  src: __dirname,
   base: `${__dirname}/..`,
   secretsServerOnly: `${__dirname}/../secrets_server_only`,
   secretsAdmin: `${__dirname}/../secrets_admin`,
@@ -20,6 +21,7 @@ var path = {
   fabcoinConfigurationFolder: null,
   kanbanProofOfConcentConfigurationFolder: null
 };
+
 for (var label in path) {
   //console.log(`Debug: path ${path[label]} `);
   if (path[label] === null) {
@@ -34,12 +36,8 @@ var pathname = {
   certificate: `${path.secretsServerOnly}/certificate.pem`,
   configurationSecretsAdmin: `${path.secretsAdmin}/configuration.json`,
   configurationStorageAdmin: `${path.secretsAdmin}/storage.json`,
-  faviconIco: `${path.HTML}/favicon.ico`,
-  fabcoinSvg: `${path.HTML}/fabcoin.svg`,
+  frontEndNONBrowserifiedJS: `${path.src}/frontend/frontend.js`,
   frontEndBrowserifiedJS: `${path.HTML}/kanban_frontend_browserified.js`,
-  frontEndNONBrowserifiedJS: `${__dirname}/frontend/frontend.js`,
-  frontEndHTML: `${path.HTML}/kanban_frontend.html`,
-  frontEndCSS: `${path.HTML}/kanban_frontend.css`,
   fabcoind: `${path.fabcoinSrc}/fabcoind`,
   fabcoinCli: `${path.fabcoinSrc}/fabcoin-cli`,
   kanbanCli: `${path.kanbanProofOfConceptSRC}/fabcoin-cli`,
@@ -47,20 +45,19 @@ var pathname = {
   openCLDriverExecutable: `${path.openCLDriverBuildPath}/kanban-gpu`
 };
 
-for (var label in pathname) {
-  //console.log(`Debug: path ${pathname[label]} `);
-  pathname[label] = pathBuiltIn.normalize(pathname[label]);
-  //console.log(`normalized to: ${pathname[label]}`);
-}
-  
+var frontEnd = {
+  favicon: "favicon.ico",
+  fabcoinLogoSVG: "fabcoin.svg",
+  browserifiedJS: `kanban_frontend_browserified.js`,
+  html: `kanban_frontend.html`,
+  css: `kanban_frontend.css`,
+  ace: `ace/ace.js`,
+  aceSearchBox: `ace/ext-searchbox.js`
+};
+
 var url = {
   known: {
     ping: "/ping",
-    faviconIco: "/favicon.ico",
-    fabcoinSvg: "/fabcoin.svg",
-    frontEndBrowserifiedJS: "/kanban_frontend_browserified.js",
-    frontEndHTML: "/kanban_frontend.html",
-    frontEndCSS: "/kanban_frontend.css",
     fabcoin: {
       rpc: "/fabcoin_rpc",
       initialization: "/fabcoin_initialization",
@@ -90,16 +87,16 @@ var oauth = {
   clientId: `68384649778-ukgebobv1gt6rkhgs99n1h2jjgb1qo7j.apps.googleusercontent.com`,
 };
 
-url.whiteListed = {};
-url.whiteListed[url.known.faviconIco] = pathname.faviconIco;
-url.whiteListed[url.known.fabcoinSvg] = pathname.fabcoinSvg;
-url.whiteListed[url.known.frontEndBrowserifiedJS] = pathname.frontEndBrowserifiedJS;
-url.whiteListed[url.known.frontEndHTML] = pathname.frontEndHTML;
-url.whiteListed[url.known.frontEndCSS] = pathname.frontEndCSS;
-
+for (var resourceLabel in frontEnd) {
+  var baseName = frontEnd[resourceLabel];
+  var currentLabel = `/html/${baseName}`; 
+  var currentFile = `${path.HTML}/${baseName}`;
+  url.whiteListed[currentLabel] =  currentFile;
+}
 
 url.synonyms = {
-  "/" : url.known.frontEndHTML
+  "/" : "/html/kanban_frontend.html",
+  "/favicon.ico" : "/html/favicon.ico"
 };
 
 module.exports = {

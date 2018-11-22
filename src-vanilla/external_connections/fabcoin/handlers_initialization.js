@@ -195,7 +195,7 @@ FabcoinNode.prototype.runFabcoind = function (response, /**@type {string[]} */ a
 FabcoinNode.prototype.killAllFabcoindCallback = function (response) {
   this.flagStarted = false;
   response.writeHead(200);
-  response.end(this.outputStreams.command.toStringWithFlush());
+  response.end(JSON.stringify(this.outputStreams.command.toArray()));
 }
 
 FabcoinNode.prototype.appendToOutputStream = function(

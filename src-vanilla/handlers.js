@@ -14,7 +14,6 @@ function handleRequestsHTTP(request, response) {
   parseTheURL(request, response, handleRequestsHTTPPart2);
 }
  
-
 function handleRequestsHTTPPart2(request, response, parsedURL) {
   response.writeHead(307, {Location: `https://${parsedURL.hostname}:${pathnames.ports.https}${parsedURL.path}`});
   response.end();
@@ -39,7 +38,9 @@ function parseTheURL(request, response, callback) {
     parsedURL.hostname = hostname;
   } catch (e) {
     response.writeHead(400, {"Content-type": "text/plain"});
-    return response.end(`Bad url: ${escapeHtml(e)}`);
+    var result = {};
+    result.error = `Bad url: ${escapeHtml(e)}`;
+    return response.end(JSON.stringify(result));
   }
   callback(request, response, parsedURL)
 }
@@ -104,7 +105,13 @@ function handleRequestsPart2(request, response, parsedURL) {
   }
   //console.log(`DEBUG: The parsed url pathname is: ${parsedURL.pathname}`.red);
   response.writeHead(200);
-  response.end(`Uknown request ${request.url} with pathname: ${parsedURL.pathname}.`);
+  var result = {};
+  result.error = `Uknown request ${request.url} with pathname: ${parsedURL.pathname}.`; 
+  result.whiteListedURL = []; 
+  for (var label in pathnames.url.whiteListed) {
+    result.whiteListedURL.push(label);
+  }
+  response.end(JSON.stringify(result));
 }
 
 function handlePing(request, response) {

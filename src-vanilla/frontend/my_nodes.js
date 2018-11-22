@@ -404,7 +404,7 @@ MyNodesContainer.prototype.sshNodeToOneRemoteMachineKillallFabcoind = function(c
     machineName: currentNodeLabel,
     net: globals.mainPage().getRPCNetworkOption()
   });
-  console.log("DEBUG: the url: " + theURL);
+  //console.log("DEBUG: the url: " + theURL);
   submitRequests.submitGET({
     url: theURL,
     progress: currentNode.getSpanNodeToRemoteMachineProgressId(),
