@@ -335,7 +335,7 @@ button.buttonJSONExpand:hover {
 
 .panelMenu {
   background-color: var(--colorButtonBackgroundStandard);
-  max-width: 125px;
+  max-width: 108px;
   border-radius: 2px;
   padding: 6px;
   text-align: center;

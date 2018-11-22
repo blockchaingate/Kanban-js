@@ -12,19 +12,30 @@ function LoginFrontend() {
   this.decodedToken = null;
 }
 
-LoginFrontend.prototype.signOut = function() {
+LoginFrontend.prototype.signOut = function(status) {
+  if (status === undefined) {
+    status = "logged out";
+  }
+  var loginStatus = document.getElementById(ids.defaults.login.spanSignedInStatus);
+  var spanPermissions = document.getElementById(ids.defaults.login.spanPermissions);
+  var profilePicture = document.getElementById(ids.defaults.login.divProfilePicture);
+  loginStatus.innerHTML = status;
   gapi.auth2.getAuthInstance().signOut();
   this.googleToken = "";
   this.decodedToken = null;
+  spanPermissions.innerHTML = "";
+  profilePicture.innerHTML = "";
+  document.getElementById(ids.defaults.login.anchorSignOutMenu).style.display = "none";
+  document.getElementById(ids.defaults.login.anchorSignOutPage).style.display = "none";
 }
 
 LoginFrontend.prototype.callbackLoginServer = function (input, output) {
   var inputParsed = JSON.parse(input);
-  var loginStatus = document.getElementById(ids.defaults.login.spanSignedInStatus);
-  var spanPermissions = document.getElementById(ids.defaults.login.spanPermissions);
-  var profilePicture = document.getElementById(ids.defaults.login.divProfilePicture);
   console.log(this.authReponse);
   if (inputParsed.authenticated === true) {
+    var spanPermissions = document.getElementById(ids.defaults.login.spanPermissions);
+    var profilePicture = document.getElementById(ids.defaults.login.divProfilePicture);
+    var loginStatus = document.getElementById(ids.defaults.login.spanSignedInStatus);
     loginStatus.innerHTML = `<b style = 'color:green'>Signed in</b>`;
     spanPermissions.innerHTML = `origin: <b>${inputParsed.permissions}</b>`;
     if (this.decodedToken === null) {
@@ -34,11 +45,10 @@ LoginFrontend.prototype.callbackLoginServer = function (input, output) {
     if (this.decodedToken !== null && this.decodedToken !== undefined) {
       profilePicture.innerHTML = `<img src = "${this.decodedToken.picture}"></img>`;
     }
+    document.getElementById(ids.defaults.login.anchorSignOutMenu).style.display = "";
+    document.getElementById(ids.defaults.login.anchorSignOutPage).style.display = "";  
   } else {
-    loginStatus.innerHTML = `<b style = 'color:red'>Token not verified</b>`;
-    spanPermissions.innerHTML = "";
-    profilePicture.innerHTML = "";
-    this.signOut();
+    this.signOut(`<b style = 'color:red'>Token not verified</b>`);
   }
   if (inputParsed.authenticationToken !== "" && inputParsed.authenticationToken !== null && inputParsed.authenticationToken !== undefined) {
     this.authenticationToken = inputParsed.authenticationToken;

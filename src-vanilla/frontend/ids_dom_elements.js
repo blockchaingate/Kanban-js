@@ -34,6 +34,8 @@ var defaults = {
     spanPermissions: "spanPermissions",
     buttonLogin: "buttonLogin",
     divProfilePicture: "divProfilePicture",
+    anchorSignOutMenu: "anchorSignOutMenu",
+    anchorSignOutPage: "anchorSignOutPage"
   },
   progressReport: "spanProgressReport",
   spanPingColumnHeader: "spanPingColumnHeader",
