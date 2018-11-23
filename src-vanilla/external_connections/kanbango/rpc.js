@@ -136,11 +136,11 @@ var rpcCalls = {
   getBlockByNumber: {
     rpcCall: "getBlockByNumber",
     method: "kanban_getBlockByNumber",
-    mandatoryFixedArguments: {
-      verbose: true
+    optionalArguments: {
+      blockNumber: null
     },
     mandatoryModifiableArguments: {
-      blockNumber: null
+      verbose: true,
     },
     types: {
       blockNumber: "numberHex"

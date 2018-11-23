@@ -320,6 +320,15 @@ PendingCall.prototype.runOneId = function (nodeId) {
     theArguments[inputLabel] = Buffer.from(theValue).toString('base64');
   }
   var theRPCCall = this.functionLabel;
+  var currentSpec = theRPCCalls[theRPCCall];
+  if (currentSpec.mandatoryModifiableArguments !== undefined && currentSpec.mandatoryModifiableArguments !== null) {
+    for (var label in currentSpec.mandatoryModifiableArguments) {
+      var defaultValue = currentSpec.mandatoryModifiableArguments[label];
+      if ( (!(label in theArguments)) && defaultValue !== null && defaultValue !== undefined) {
+        theArguments[label] = defaultValue;
+      }
+    }
+  }
   if (theFunction !== null) {
     if (theFunction.rpcCall !== null && theFunction.rpcCall !== undefined) {
       theRPCCall = theFunction.rpcCall;
