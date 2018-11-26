@@ -27,6 +27,9 @@ function KanbanGoNodes() {
   this.selectedNode = "none";
   
   this.transformersStandard = {
+    middleShortener: {
+      transformer: miscellaneousBackend.hexMiddleShortenerForDisplay,
+    },
     shortener: {
       transformer: miscellaneousBackend.hexShortenerForDisplay,
     },
@@ -145,6 +148,7 @@ function KanbanGoNodes() {
       inputPrivateKeyHex: this.transformersStandard.shortener,
       publicKeyHex: this.transformersStandard.shortener,
       publicKeyHexInternal: this.transformersStandard.shortener,
+      "peers.${label}": this.transformersStandard.shortener,
     }
   };
   this.optionsForAddressDisplay = {
@@ -237,7 +241,13 @@ function KanbanGoNodes() {
   };
   this.optionsVotingMachine = {
     transformers: {
-      "peers.${label}": this.transformersStandard.shortener
+      "peers.${label}": this.transformersStandard.shortener,
+      "approvedMessages.${number}.aggregateSignature": this.transformersStandard.shortener,
+      "approvedMessages.${number}.hash": this.transformersStandard.shortener,
+      "approvedMessages.${number}.payloadHash": this.transformersStandard.shortener,
+      "messages.debugStatus.lines.${number}": this.transformersStandard.middleShortener,
+      "messages.errorLog.lines.${number}": this.transformersStandard.middleShortener,
+      "messages.publicKey": this.transformersStandard.middleShortener,
     },
   };
   this.callTypes = {

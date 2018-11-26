@@ -68,15 +68,24 @@ function hexVeryShortDisplay(input) {
   return "...";
 }
 
-function hexShortenerForDisplay(input){
-  if (input.length < 10) {
+function hexShortenerForDisplay(input) {
+  return hexShortenerForDisplaySpecifyNumChars(4, input);
+}
+
+function hexMiddleShortenerForDisplay(input) {
+  return hexShortenerForDisplaySpecifyNumChars(8, input);
+}
+
+function hexShortenerForDisplaySpecifyNumChars(numChars, input){
+  if (input.length < numChars * 2 + 2) {
     return input;
   }
   if (typeof input !== "string") {
     return input;
   }
-  return `${input.substr(0, 4)}...${input.substr(input.length - 4, 4)}`;
+  return `${input.substr(0, numChars)}...${input.substr(input.length - numChars, numChars)}`;
 }
+
 
 function shortenString(input, desiredMaxSize, includeNumOmitted) {
   if (input === "") {
@@ -169,6 +178,7 @@ module.exports = {
   deepCopy,
   deepCopyThroughJSON,
   hexShortenerForDisplay,
+  hexMiddleShortenerForDisplay,
   getDurationReadableFromSeconds,
   getDurationReadableFromMilliseconds,
   shortenString,
