@@ -85,6 +85,7 @@ Page.prototype.initialize = function() {
   );
   //Load google login:
   gapi.load('auth2', login.login.gapiLoadCallback.bind(login.login));
+  kanbanRPC.theKBNodes.getNodeInformation()
 }
 
 Page.prototype.initializeInputPlaceholder = function (idInput) {

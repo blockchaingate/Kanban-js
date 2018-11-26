@@ -24,7 +24,7 @@ function KanbanGONode() {
   this.flagSelected = false; 
 }
 
-KanbanGONode.prototype.init = function (inputData) {
+KanbanGONode.prototype.init = function(inputData) {
   this.idBackend = String(inputData.id);
   this.RPCPort = inputData.id;
   this.port = inputData.port;
@@ -48,7 +48,7 @@ KanbanGONode.prototype.toHTMLRadioButton = function() {
   return result;
 }
 
-function PendingCall () {
+function PendingCall() {
   /**@type boolean */
   this.flagFoundNotStartedError = false;
   /**@type {string} */
@@ -71,7 +71,7 @@ function PendingCall () {
   this.callbackOverridesStandard = null;
 }
 
-PendingCall.prototype.run = function (functionLabel) {
+PendingCall.prototype.run = function(functionLabel) {
   this.functionLabel = functionLabel;
   for (var currentId in this.nodeCalls) {
     this.runOneId(currentId);
@@ -163,7 +163,7 @@ PendingCall.prototype.callbackAggregateSolutions = function(nodeId, input, outpu
   miscellaneousFrontEnd.updateValue(ids.defaults.kanbanGO.inputAggregateSignature.solutions, solutions.join(", "));
 }
 
-PendingCall.prototype.callbackAggregatePrivateKeyGeneration = function (nodeId, input, output) {
+PendingCall.prototype.callbackAggregatePrivateKeyGeneration = function(nodeId, input, output) {
   this.callbackStandard(nodeId, input, output);
   var inputParsed = JSON.parse(input);
   var privateKeys = [];
@@ -191,7 +191,7 @@ PendingCall.prototype.callbackAggregateCommitment = function(nodeId, input, outp
   miscellaneousFrontEnd.updateValue(ids.defaults.kanbanGO.inputAggregateSignature.nonces, nonces.join(", "));
 }
 
-PendingCall.prototype.callbackCompileSolidity = function (nodeId, input, output) {
+PendingCall.prototype.callbackCompileSolidity = function(nodeId, input, output) {
   //console.log(input);
   try {
     var parsedInput = JSON.parse(input)
@@ -204,7 +204,7 @@ PendingCall.prototype.callbackCompileSolidity = function (nodeId, input, output)
   this.callbackStandard(nodeId, input, output);
 }
 
-PendingCall.prototype.callbackFetchSmartContract = function (nodeId, input, output) {
+PendingCall.prototype.callbackFetchSmartContract = function(nodeId, input, output) {
   this.callbackStandard(nodeId, input, output);
 }
 
@@ -291,7 +291,7 @@ function getValueFromId(/**@type {string}*/ id) {
   }
 }
 
-PendingCall.prototype.runOneId = function (nodeId) {
+PendingCall.prototype.runOneId = function(nodeId) {
   var theFunction = this.owner.theFunctions[this.functionLabel];
   this.callTypeSpec = this.owner.callTypes[this.callType];
   var theRPCCalls = this.callTypeSpec.rpcCalls;
@@ -324,7 +324,7 @@ PendingCall.prototype.runOneId = function (nodeId) {
   if (currentSpec.mandatoryModifiableArguments !== undefined && currentSpec.mandatoryModifiableArguments !== null) {
     for (var label in currentSpec.mandatoryModifiableArguments) {
       var defaultValue = currentSpec.mandatoryModifiableArguments[label];
-      if ( (!(label in theArguments)) && defaultValue !== null && defaultValue !== undefined) {
+      if ((!(label in theArguments)) && defaultValue !== null && defaultValue !== undefined) {
         theArguments[label] = defaultValue;
       }
     }

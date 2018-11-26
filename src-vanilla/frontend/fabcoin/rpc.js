@@ -13,7 +13,7 @@ const cryptoKanban = require('../../crypto/crypto_kanban');
 const encodingsKanban = require('../../crypto/encodings');
 const fabcoinInitializationFrontend = require('./initialization');
 
-function FabNode () {
+function FabNode() {
   var inputFabBlock = ids.defaults.fabcoin.inputBlockInfo;
   var inputKBGOInitialization = ids.defaults.kanbanGO.inputInitialization;
   var inputFabCryptoSchnorr = ids.defaults.fabcoin.inputCrypto.inputSchnorrSignature;
@@ -440,7 +440,7 @@ function FabNode () {
 
 }
 
-FabNode.prototype.sanitizeTxOutputs = function () {
+FabNode.prototype.sanitizeTxOutputs = function() {
   var txOuts = this.getObjectFromInput(ids.defaults.fabcoin.inputBlockInfo.txOutputs);
   var isGood = true;
   if (typeof txOuts === "object") {
@@ -468,7 +468,7 @@ FabNode.prototype.getObjectFromInput = function(inputId) {
   try {
     outputObject = jsonic(rawInput);
   } catch (e) {
-    if (typeof rawInput === "string"){
+    if (typeof rawInput === "string") {
       outputObject = rawInput;
     } else {
       outputObject = {};
@@ -477,13 +477,18 @@ FabNode.prototype.getObjectFromInput = function(inputId) {
   return outputObject;
 }
 
-FabNode.prototype.combineClickHandlers = function (/**@type {function[]}*/ functionArray, container, content, extraData) {
+FabNode.prototype.combineClickHandlers = function(
+  /**@type {function[]}*/ functionArray, 
+  container, 
+  content, 
+  extraData
+) {
   for (var counterFunction = 0; counterFunction < functionArray.length; counterFunction ++) {
     functionArray[counterFunction](container, content);
   }
 }
 
-FabNode.prototype.getSetInputAndRunWithShortener = function (idOutput, functionLabelToFun, tooltip) {
+FabNode.prototype.getSetInputAndRunWithShortener = function(idOutput, functionLabelToFun, tooltip) {
   var setter = this.setInput.bind(this, idOutput);
   var runner = this.run.bind(this, functionLabelToFun);
   return {
@@ -493,20 +498,20 @@ FabNode.prototype.getSetInputAndRunWithShortener = function (idOutput, functionL
   };  
 }
 
-FabNode.prototype.getSetInputNoShortener = function (idOutput) {
+FabNode.prototype.getSetInputNoShortener = function(idOutput) {
   return {
     clickHandler: this.setInput.bind(this, idOutput)
   };  
 }
 
-FabNode.prototype.getSetInputWithShortener = function (idOutput) {
+FabNode.prototype.getSetInputWithShortener = function(idOutput) {
   return {
     clickHandler: this.setInput.bind(this, idOutput),
     transformer: miscellaneousBackend.hexShortenerForDisplay
   };  
 }
 
-FabNode.prototype.setTxOutput = function () {
+FabNode.prototype.setTxOutput = function() {
   var inputFab = ids.defaults.fabcoin.inputBlockInfo;
   var address = document.getElementById(inputFab.txOutputAddresses).value;
   var publicKeysForAggregateString = document.getElementById(inputFab.txAggregatePublicKeys).value;
@@ -556,7 +561,7 @@ FabNode.prototype.setTxOutput = function () {
   }
 }
 
-FabNode.prototype.setTxInputVoutAndValue = function (container, content, extraData) {
+FabNode.prototype.setTxInputVoutAndValue = function(container, content, extraData) {
   var inputFab = ids.defaults.fabcoin.inputBlockInfo;
   var incomingAmount = 0;
   if (extraData.labelArray[extraData.labelArray.length - 1] === "value") {
@@ -604,14 +609,14 @@ FabNode.prototype.setTxInputVoutAndValue = function (container, content, extraDa
   }
 }
 
-FabNode.prototype.setContractId = function (container, content, extraData) {
+FabNode.prototype.setContractId = function(container, content, extraData) {
   //var extraDataString = JSON.stringify(extraData);
   //console.log(`DEBUG: Content: ${content}, extra data: ${extraDataString}`);
   miscellaneousFrontEnd.updateValue(ids.defaults.fabcoin.inputBlockInfo.contractId, content);
   miscellaneousFrontEnd.updateValue(ids.defaults.kanbanGO.inputInitialization.contractId, content);
 }
 
-FabNode.prototype.setInput = function (idToSet, container, content, extraData) {
+FabNode.prototype.setInput = function(idToSet, container, content, extraData) {
   //var extraDataString = JSON.stringify(extraData);
   //console.log(`DEBUG: Content: ${content}, extra data: ${extraDataString}`);
   miscellaneousFrontEnd.updateValue(idToSet, content);
@@ -622,7 +627,7 @@ FabNode.prototype.computePublicKeyFromPrivate = function() {
   this.setPrivateKeyComputeAllElse(null, document.getElementById(ids.defaults.fabcoin.inputBlockInfo.privateKey).value);
 }
 
-FabNode.prototype.setPrivateKeyComputeAllElse = function (container, content, extraData) {
+FabNode.prototype.setPrivateKeyComputeAllElse = function(container, content, extraData) {
   var thePrivateKey = new cryptoKanban.CurveExponent();
   thePrivateKey.fromArbitrary(content);
   var thePublicKey = thePrivateKey.getExponent();

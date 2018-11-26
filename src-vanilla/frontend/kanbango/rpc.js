@@ -490,7 +490,7 @@ function KanbanGoNodes() {
   this.correctFunctions();
 }
 
-KanbanGoNodes.prototype.computeContractData = function () {
+KanbanGoNodes.prototype.computeContractData = function() {
   var contractIds = ids.defaults.fabcoin.inputBlockInfo; 
   var contractData = "";
   contractData += document.getElementById(contractIds.contractFunctionId).value;
@@ -498,7 +498,7 @@ KanbanGoNodes.prototype.computeContractData = function () {
   miscellaneousFrontEnd.updateValue(contractIds.contractData, contractData); 
 }
 
-KanbanGoNodes.prototype.setContractFunctionName = function (container, content, extraData) {
+KanbanGoNodes.prototype.setContractFunctionName = function(container, content, extraData) {
   var counterContract = extraData.labelArray[extraData.labelArray.length - 3];
   var counterFunction = extraData.labelArray[extraData.labelArray.length - 2];
   var ambientInput = extraData.ambientInput;
@@ -526,25 +526,25 @@ KanbanGoNodes.prototype.setContractFunctionName = function (container, content, 
   this.computeContractData();
 }
 
-KanbanGoNodes.prototype.setContractHex = function (container, content, extraData) {
+KanbanGoNodes.prototype.setContractHex = function(container, content, extraData) {
   var counter = extraData.labelArray[extraData.labelArray.length - 1];
   this.setInput(ids.defaults.fabcoin.inputBlockInfo.contractHex, null, extraData.ambientInput.binaries[counter]);
 }
 
-KanbanGoNodes.prototype.getSetInputWithShortener = function (idOutput) {
+KanbanGoNodes.prototype.getSetInputWithShortener = function(idOutput) {
   return {
     clickHandler: this.setInput.bind(this, idOutput),
     transformer: miscellaneousBackend.hexShortenerForDisplay
   };  
 }
 
-KanbanGoNodes.prototype.setInput = function (idToSet, container, content, extraData) {
+KanbanGoNodes.prototype.setInput = function(idToSet, container, content, extraData) {
   //var extraDataString = JSON.stringify(extraData);
   //console.log(`DEBUG: Content: ${content}, extra data: ${extraDataString}`);
   miscellaneousFrontEnd.updateValue(idToSet, content);
 }
 
-KanbanGoNodes.prototype.getBlockByHash = function (container, inputHash) {
+KanbanGoNodes.prototype.getBlockByHash = function(container, inputHash) {
   miscellaneousFrontEnd.updateValue(ids.defaults.kanbanGO.inputSendReceive.blockHash, inputHash);
   miscellaneousFrontEnd.revealLongWithParent(container, inputHash);
   this.run('getBlockByHash');
@@ -619,16 +619,16 @@ KanbanGoNodes.prototype.run = function(functionLabel, callType, callbackOverride
   currentPendingCall.run(functionLabel);
 }
 
-KanbanGoNodes.prototype.getNodeInformation = function () {
+KanbanGoNodes.prototype.getNodeInformation = function() {
   this.run('getNodeInformation', 'initialization', this.getNodeInformationCallback.bind(this));
 }
 
-KanbanGoNodes.prototype.selectRadio = function (idRadio) {
+KanbanGoNodes.prototype.selectRadio = function(idRadio) {
   this.selectedNode = idRadio;
   //console.log(`DEBUG: set this.selectedNode to: ${idRadio} `);
 }
 
-KanbanGoNodes.prototype.toHTMLRadioButton = function () {
+KanbanGoNodes.prototype.toHTMLRadioButton = function() {
   var radioButtonHTML = "";
   radioButtonHTML += `<label class = "containerRadioButton">`;
   radioButtonHTML += `<input type = "radio" name = "rpcKanbanGO" id = "kanbanGoNodeSelector_all" `;
@@ -647,7 +647,7 @@ KanbanGoNodes.prototype.toHTMLRadioButton = function () {
   return radioButtonHTML;
 }
 
-KanbanGoNodes.prototype.getNodeInformationCallback = function (input, output) {
+KanbanGoNodes.prototype.getNodeInformationCallback = function(input, output) {
   //console.log("DEBUG: Got back:" + input);
   try {
     var inputParsed = JSON.parse(input);
