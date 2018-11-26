@@ -210,6 +210,17 @@ var rpcCalls = {
     rpcCall: "rpcModules",
     method: "rpc_modules",
     parameters: [],
+  },
+  sendBenchmarkTransactions: {
+    rpcCall: "sendBenchmarkTransactions",
+    method: "kanban_sendBenchmarkTransactions",
+    mandatoryModifiableArguments: {
+        privateKey: null,
+        toAddress: null,
+        transactionNumber: null,
+        transactionValue: null,
+    },
+    parameters: ["privateKey", "toAddress", "transactionNumber", "transactionValue"]
   }
 };
 
