@@ -571,6 +571,9 @@ KanbanGoNodes.prototype.correctFunctions = function() {
       currentRPCCall = kanbanGOInitialization.rpcCalls[label];
     }
     if (currentRPCCall === undefined || currentRPCCall === null) {
+      currentRPCCall = kanbanGOInitialization.demoRPCCalls[label];
+    }
+    if (currentRPCCall === undefined || currentRPCCall === null) {
       throw(`Fatal error: the kanbanGO rpc label ${label} is not an available rpc call. `);
     }
   }

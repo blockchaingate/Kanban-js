@@ -43,12 +43,19 @@ var rpcCalls = {
   fetchKanbanContract: {
     rpcCall: "fetchKanbanContract",    
   },
+};
+
+/**
+ * @type {Object.<string,{rpcCall:string, method: string, mandatoryFixedArguments: Object, mandatoryModifiableArguments: Object, optionalArguments: Object, types: Object, parameters: string[]}>}
+ */
+var demoRPCCalls = {
   fetchDemoContract: {
     rpcCall: "fetchDemoContract",    
   }
 };
 
 module.exports = {
-  rpcCalls
+  rpcCalls,
+  demoRPCCalls,
 }
 

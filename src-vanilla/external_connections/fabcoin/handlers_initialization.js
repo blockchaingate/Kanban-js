@@ -7,7 +7,7 @@ const path = require('path');
 var OutputStream = require('../../output_stream').OutputStream;
 const crypto = require('crypto');
 const cryptoKanban = require('../../crypto/encodings');
-//const kanbanGO = require('../kanbango/handlers_initialization');
+var demo = require('./handlers_smart_contract').demo;
 
 /**
  * Returns a global FabcoinNode object
@@ -43,7 +43,6 @@ function FabcoinNode() {
   console.log(`Node.js' randomly generated password for fabcoin RPC: `+ `${this.configuration.RPCPassword}`.red);
   /**@type {string[]} */
   this.argumentList = [];
-  this.handlers = {};
   /** @type {boolean} */
   this.flagStarted = false;
   /** @type {boolean} */
@@ -69,7 +68,10 @@ FabcoinNode.prototype.handleQuery = function(response, query) {
     queryCommand = JSON.parse(query.command);
   } catch (e) {
     response.writeHead(400);
-    return response.end(`Bad fabcoin initialization input. ${e}`);
+    var result = {
+      error: `Bad fabcoin initialization input. ${e}`
+    }
+    return response.end(JSON.stringify(result));
   }
   return this.handleRPCArguments(response, queryCommand);
 }
@@ -98,33 +100,40 @@ FabcoinNode.prototype.handleRPCArguments = function(response, queryCommand) {
     throw(`Undefined response not allowed at this point of code. `);
   }
   var theCallLabel = queryCommand[fabcoinRPC.urlStrings.rpcCallLabel];
-  if (!(theCallLabel in fabcoinInitializationSpec.rpcCalls)) {
+  var theRPCSpec = null;
+  if (theCallLabel in fabcoinInitializationSpec.rpcCalls) {
+    theRPCSpec = fabcoinInitializationSpec.rpcCalls;
+  }
+  if (theCallLabel in fabcoinInitializationSpec.demoRPCCalls) {
+    theRPCSpec = fabcoinInitializationSpec.demoRPCCalls;
+  }
+  if (theRPCSpec === null) {
     response.writeHead(400);
-    return response.end(`{"error": "Fabcoin initialization call ${theCallLabel} not found. "}`);    
+    var result = {
+      error: `Fabcoin initialization call ${theCallLabel} not found. `
+    };
+    return response.end(JSON.stringify(result));    
   }
-  if (!(theCallLabel in this.handlers) && !(theCallLabel in this)) {
-    response.writeHead(200);
-    return response.end(`{"error": "No FAB handler named ${theCallLabel} found."}`);
-  }
-  var currentHandler = this.handlers[theCallLabel];
   var currentFunction = null;
-  if (currentHandler !== undefined && currentHandler !== null) {
-    currentFunction = currentHandler.handler;
-  }
+  var currentFunctionThisObject = this;
   if (currentFunction === undefined || currentFunction === null) {
     currentFunction = this[theCallLabel];
   }
-  if (currentFunction === undefined || currentFunction === null || (typeof currentFunction !== "function")) {
+  if (currentFunction === undefined || currentFunction === null) {
+    currentFunction = demo[theCallLabel];
+    currentFunctionThisObject = demo;
+  }
+  if (currentFunction === null || currentFunction === undefined || (typeof currentFunction !== "function")) {
     response.writeHead(500);
     var result = {
-      error: `Server error: handler ${theCallLabel} declared but no implementation found.`
+      error: `Function with label ${theCallLabel} was declared but no handler was found.`
     };
     return response.end(JSON.stringify(result));
   }
   /**@type {string[]} */
   var theArguments = [];
   var errors = [];
-  if (!this.getArgumentsFromSpec(fabcoinInitializationSpec.rpcCalls[theCallLabel], queryCommand, theArguments, errors)) {
+  if (!this.getArgumentsFromSpec(theRPCSpec[theCallLabel], queryCommand, theArguments, errors)) {
     response.writeHead(400);
     result = {
       error: errors[0]
@@ -133,7 +142,7 @@ FabcoinNode.prototype.handleRPCArguments = function(response, queryCommand) {
     return;
   }
   try {
-    return (currentFunction.bind(this))(response, theArguments, queryCommand);
+    return (currentFunction.bind(currentFunctionThisObject))(response, theArguments, queryCommand);
   } catch (e) {
     response.writeHead(500);
     var result = {
@@ -229,269 +238,6 @@ FabcoinNode.prototype.appendToOutputStream = function(
     return;
   }
   stream.append(data.toString());
-}
-
-function Demo () {
-  /**@type {string} */
-  this.smartContractId = "";
-  this.ABI = null;
-}
-
-var demo = new Demo();
-
-Demo.prototype.registerDefaultSmartContractAndABI = function(
-  /** @type {ResponseWrapperWithLimits} */ 
-  response, 
-  theArguments  
-) {
-  var result = {};
-  result.input = theArguments;
-  if (this.smartContractId !== "" && this.smartContractId !== null && this.smartContractId !== undefined) {
-    result.resultHTML = "";
-    result.resultHTML += `<b style = 'color:red'>Smart contract already registered. </b>`;
-    result.resultHTML += `If you want to register a new one, please restart the system manually. `;
-    result.resultHTML += `Attached are the registered contract id and ABI. `;
-    result.smartContractId = this.smartContractId;
-    result.ABI = this.ABI;
-    response.writeHead(200);    
-    response.end(JSON.stringify(result));
-    return;
-  }
-  this.smartContractId = theArguments.smartContractId;
-  try {
-    this.ABI = JSON.parse(theArguments.ABI);
-    result.smartContractId = this.smartContractId;
-    result.ABI = this.ABI;
-    solidity.contractIdDefault = this.smartContractId;
-    solidity.ABI = this.ABI;
-  } catch (e) {
-    result.error = `Failed to parse the smart contract ABI. ${e}`;
-  }
-  response.writeHead(200);
-  response.end(JSON.stringify(result));
-}
-
-Demo.prototype.isInitialized = function (response) {
-  var result = {
-    error: null,
-    help: "Please call the demoRegisterSmartContractAndABI to register a new smart contract. "
-  };
-  if (this.ABI === undefined || this.ABI === null) {
-    result.error = `ABI not intialized.`;
-  }
-  if (this.smartContractId === "" || this.smartContractId === null || this.smartContractId === undefined) {
-    result.label = "Smart contract id not initialized. ";
-  }
-  if (result.error !== null) {
-    response.writeHead(200);
-    response.end(JSON.stringify(result));
-    return false;
-  }
-  return true;
-}
-
-Demo.prototype.registerCorporation = function (
-  /** @type {ResponseWrapperWithLimits} */ 
-  response, 
-  queryCommand
-) {
-  if (! this.isInitialized(response)) {
-    return;
-  }
-  queryCommand.rpcCall = "getNewAddress";
-  getRPCHandlers().handleRPCArguments(response, queryCommand, this.demoRegisterCorporationPart2.bind(this, queryCommand));
-}
-
-Demo.prototype.demoRegisterCorporationPart2 = function (originalInput, response, dataParsed) {
-  var result = {};
-  console.log("DEBUG: got to here pt 1");
-  result.input = originalInput;
-  result.addressGenerated = {};
-  result.addressGenerated.base58 = dataParsed.result;
-  //console.log("DEBUG: got to here pt 2");
-  //console.log(`debug Data parsed: ${JSON.stringify(dataParsed.result)}`);
-  var decoded = encodingDefault.fromBase58(result.addressGenerated.base58);
-  //console.log("DEBUG: got to here pt 3");
-  var sliced = decoded.slice(1,21);
-  //console.log("DEBUG: got to here pt 4");
-  var hexed = sliced.toString('hex');
-  //console.log("DEBUG: got to here pt 5");
-  result.addressGenerated.hex = hexed;
-  //console.log("DEBUG: got to here pt 3");
-  //console.log("DEBUG: got to here pt 3");
-  originalInput["_fabAddress"]  = hexed;
-  result.abiPacking = solidity.getABIPackingForFunction("registerCompany", originalInput);
-  var sendToContract = fabcoinRPC.rpcCalls.sendToContract;
-  var newCommand = {
-    rpcCall: sendToContract.rpcCall,
-    contractId: this.smartContractId,
-    data: result.abiPacking,
-    amount: 0,
-  };
-  getRPCHandlers().handleRPCArguments(response, newCommand, this.demoRegisterCorporationPart3.bind(this, result));
-}
-
-Demo.prototype.demoRegisterCorporationPart3 = function (result, response, dataParsed) {
-  result.sendToContractResult = dataParsed;
-  var generateBlocks = fabcoinRPC.rpcCalls.generateBlocks;
-  var newCommand = {
-    rpcCall: generateBlocks.rpcCall,
-    numberOfBlocks: 1,
-  }
-  getRPCHandlers().handleRPCArguments(response, newCommand, this.demoRegisterCorporationPart4.bind(this, result));
-}
-
-Demo.prototype.demoRegisterCorporationPart4 = function(result, response, dataParsed) {
-  result.generateOneBlock = dataParsed;
-  response.writeHead(200);
-  response.end(JSON.stringify(result));
-}
-
-Demo.prototype.getNonce = function(response) {
-  if (! this.isInitialized(response)) {
-    return;
-  }
-  var result = {};
-  result.query = solidity.getQueryCallContractForFunction("getNonce", {});
-  getRPCHandlers().handleRPCArguments(response, result.query, this.getAllNoncePart2.bind(this, result));
-}
-
-Demo.prototype.getAllNoncePart2 = function(result, response, parsedData) {
-  result.parsedData = parsedData;
-  try {
-    var unpacked = solidity.unpackABIResultForFunction("getNonce", parsedData.result.executionResult.output);
-    response.writeHead(200);
-    response.end(JSON.stringify(unpacked.nonceCurrent));
-  } catch (e) {
-    result.error = `Failed to get nonce: ${e}`;
-    response.writeHead(200);
-    response.end(JSON.stringify(result));
-  }
-}
-
-Demo.prototype.issuePoints = function(response, queryCommand) {
-  if (! this.isInitialized(response)) {
-    return;
-  }
-  console.log(`DEBUG: got to here. pt 1.`)
-  var nonceQuery = solidity.getQueryCallContractForFunction("getNonce", {});
-  console.log(`DEBUG: got to here. pt 2. nonceQuery: ${JSON.stringify(nonceQuery)}`)
-  getRPCHandlers().handleRPCArguments(response, nonceQuery, this.issuePointsPart2.bind(this, queryCommand));
-}
-
-Demo.prototype.issuePointsPart2 = function(queryCommand, response, dataParsed) {
-  var result = {};
-  result.query = queryCommand;
-  console.log(`DEBUG: got to iss pts part 2. ${JSON.stringify(dataParsed)}.`)
-  result.nonce = solidity.unpackABIResultForFunction("getNonce", dataParsed.result.executionResult.output);
-  console.log(`DEBUG: got to here. nonce: ${result.nonce}.`)
-  result.nonceToNumber = Number(result.nonce);
-  console.log(`DEBUG: got to here. nonceToNumber: ${result.nonceToNumber}.`)
-  result.queryIssuePts = solidity.getQueryCallContractForFunction("getAllCompanies", {
-    nonce: result.nonceToNumber, 
-    corporationNameHex: queryCommand.corporationNameHex,
-  });
-  result.queryIssuePts = solidity.getQueryCallContractForFunction("issuePoints", queryCommand);
-  console.log("DEBUG: about to submit: " + JSON.stringify(result.queryIssuePts)); 
-  getRPCHandlers().handleRPCArguments(response, result.queryIssuePts, this.issuePointsPart3.bind(this, result));  
-}
-
-Demo.prototype.issuePointsPart3 = function(result, response, dataParsed) {
-  result.issuePointsResult = dataParsed;
-  result.aRaw =  dataParsed.result.executionResult.output;
-  result.unpackedIssuePoints = solidity.unpackABIResultForFunction("issuePoints", dataParsed.result.executionResult.output);
-  var nonKeccaked = result.query.corporationNameHex + result.query.moneySpent + JSON.stringify(result.nonce);
-  var keccakedReceipt = hashers.keccak_ToHex(nonKeccaked);
-  result.transaction = {
-    companyName: encodingDefault.fromHex(result.query.corporationNameHex).toString(),
-    amount: result.query.moneySpent,
-    nonce: keccakedReceipt,
-  };
-  result.transaction.info =`${result.transaction.companyName}, ${result.transaction.amount}, ${result.transaction.nonce.slice(0,6)}`;
-
-  //  {info: "Company, amount, hex"}
-  result.sendToContractResult = dataParsed;
-  var generateBlocks = fabcoinRPC.rpcCalls.generateBlocks;
-  var newCommand = {
-    rpcCall: generateBlocks.rpcCall,
-    numberOfBlocks: 1,
-  }
-  getRPCHandlers().handleRPCArguments(response, newCommand, this.issuePointsPart4.bind(this, result));
-}
-
-Demo.prototype.issuePointsPart4 = function(result, response, dataParsed) {
-  response.writeHead(200);
-  response.end(JSON.stringify(result.transaction));
-}
-
-Demo.prototype.getAllCorporations = function(response) {
-  if (! this.isInitialized(response)) {
-    return;
-  }
-  var result = {};
-  result.query = solidity.getQueryCallContractForFunction("getAllCompanies", {});
-  console.log(`DEBUG: Got to here: about to submit:  ${JSON.stringify(result.query)}`);
-  getRPCHandlers().handleRPCArguments(response, result.query, this.getAllCorporationsPart2.bind(this, result));
-}
-
-Demo.prototype.getAllCorporationsPart2 = function (result, response, dataParsed) {
-  console.log("DEBUG: Here I am jh ")
-  result.resultData = dataParsed;
-  var resultMinimal = {};
-  try {
-    result.unpacked = solidity.unpackABIResultForFunction("getAllCompanies", dataParsed.result.executionResult.output);
-    console.log("DEBUG: Got unpacked: " + JSON.stringify(result.unpacked));
-    var unpacked = result.unpacked;
-    for (var i = 0; i < unpacked.companyNames.length; i ++ ) {
-      console.log("DEBUG: Got to here: pt 0");
-      var currentName = encodingDefault.fromHex(unpacked.companyNames[i]).toString();
-      console.log("DEBUG: Got to here: pt 1");
-      var creationNumber = Number (unpacked.companyCreationNumbers[i]);
-      console.log("DEBUG: Got to here: pt 2");
-      resultMinimal[currentName] = {creationNumber: creationNumber}
-    }
-  } catch (e) {
-    result.error = `Error unpacking call contract result. ${e}`;
-    response.writeHead(200);
-    response.end(JSON.stringify(result));
-  }
-  response.writeHead(200);
-  response.end(JSON.stringify(resultMinimal));
-}
-
-FabcoinNode.prototype.demoRegisterCorporation = function (
-  /** @type {ResponseWrapperWithLimits} */ 
-  response, 
-  theArguments, 
-  queryCommand,
-) {
-  demo.registerCorporation(response, queryCommand);
-}
-
-FabcoinNode.prototype.demoIssuePoints = function (
-  /** @type {ResponseWrapperWithLimits} */ 
-  response, 
-  theArguments, 
-  queryCommand,
-) {
-  demo.issuePoints(response, queryCommand);
-}
-
-FabcoinNode.prototype.demoGetNonce = function (
-  /** @type {ResponseWrapperWithLimits} */ 
-  response, 
-  theArguments, 
-  queryCommand,
-) {
-  demo.getNonce(response);
-}
-
-FabcoinNode.prototype.demoRegisterSmartContractAndABI = function(response, theArguments, queryCommand) {
-  demo.registerDefaultSmartContractAndABI(response, queryCommand);
-}
-
-FabcoinNode.prototype.demoGetAllCorporations = function (response, theArguments, queryCommand) {
-  demo.getAllCorporations (response);
 }
 
 FabcoinNode.prototype.killAllFabcoind = function (response, theArguments) {

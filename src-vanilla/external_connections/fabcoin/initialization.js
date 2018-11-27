@@ -22,6 +22,9 @@ var rpcCalls = {
     rpcCall: "killAllFabcoind",
     parameters: []
   },
+};
+
+var demoRPCCalls = {
   demoRegisterSmartContractAndABI: {
     rpc: "demoRegisterSmartContractAndABI",
     mandatoryModifiableArguments: {
@@ -59,11 +62,11 @@ var rpcCalls = {
       nonce: null,
     },
     parameters: ["nonce"],
-  }
-
-}
+  },
+};
 
 module.exports = {
   rpcCalls,
+  demoRPCCalls,
   urlStrings
 }
