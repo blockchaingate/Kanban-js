@@ -248,6 +248,8 @@ function KanbanGoNodes() {
       "messages.debugStatus.lines.${number}": this.transformersStandard.middleShortener,
       "messages.errorLog.lines.${number}": this.transformersStandard.middleShortener,
       "messages.publicKey": this.transformersStandard.middleShortener,
+      "debugStatus.lines.${number}": this.transformersStandard.middleShortener,
+      "peers.${any}.debugStatus.lines.${number}": this.transformersStandard.middleShortener,
     },
   };
   this.callTypes = {

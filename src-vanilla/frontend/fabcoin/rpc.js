@@ -835,7 +835,7 @@ FabNode.prototype.callbackStandard = function(functionLabelFrontEnd, input, outp
   }
 }
 
-FabNode.prototype.run = function(functionLabelFrontEnd, callbackOverridesStandard, manualInputs) {
+FabNode.prototype.run = function(functionLabelFrontEnd, options) {
   var functionLabelBackend = functionLabelFrontEnd;
   if (functionLabelFrontEnd in this.theFunctions) {
     var rpcLabel = this.theFunctions[functionLabelFrontEnd].rpcCall; 
@@ -845,6 +845,12 @@ FabNode.prototype.run = function(functionLabelFrontEnd, callbackOverridesStandar
   }
 
   var theArguments = this.getArguments(functionLabelFrontEnd, functionLabelBackend);
+  var manualInputs = null;
+  if (typeof options === "object") {
+    if (options.manualInputs !== null && options.manualInputs !== undefined) {
+      manualInputs = options.manualInputs;
+    }
+  }
   if (manualInputs !== null && manualInputs !== undefined) {
     theArguments = Object.assign(theArguments, manualInputs);
   }
