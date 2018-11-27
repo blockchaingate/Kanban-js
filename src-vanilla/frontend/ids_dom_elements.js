@@ -10,6 +10,7 @@ var defaults = {
   pageMine: "pageMine",
   pageProfiling: "pageProfiling",
   pages: {
+    demo: "pageDemo",
     kanbanJS: "pageKanbanJS",
     kanbanGO: "pageKanbanGO",
     kanbanMyLocalNodes: "pageMyLocalKanbanNodes",
@@ -46,6 +47,25 @@ var defaults = {
       publicKey: "inputKBJSPublicKey"
     },
     outputKBJSCrypto: "divOutputKBJSCryptoTest"
+  },
+  demo: {
+    inputs: {
+      corporationName: "inputDemoCorporationName",
+      corporationNameHex: "inputDemoCorporationNameHex",
+      corporationPublicKey: "inputDemoCorporationPublicKey",
+      corporationRatio: "inputDemoCorporationRatio",
+      beneficiary: "inputDemoCorporationBeneficiary",
+      corporationSignature: "inputDemoCorporationSignature",
+      transactionHash: "inputDemoCorporationTransactionHash",
+      transferPointsFrom: "inputDemoTransferPointsFrom",
+      transferPointsTo: "inputDemoTransferPointsTo",
+      transferPointsAmount: "inputDemoTransferPointsAmount",
+      moneySpent: "inputDemoMoneySpent",
+      nonce: "inputDemoCorporationNonce"
+      
+    },
+    canvasQR: "canvasQR",
+    outputDemo: "divOutputDemo",
   },
   kanbanGO: {
     inputSchnorr: {

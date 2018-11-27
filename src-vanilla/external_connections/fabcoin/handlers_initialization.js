@@ -7,7 +7,7 @@ const path = require('path');
 var OutputStream = require('../../output_stream').OutputStream;
 const crypto = require('crypto');
 const cryptoKanban = require('../../crypto/encodings');
-//const kanbanGO = require('../kanbango/handlers_initialization');
+var demo = require('./handlers_smart_contract').demo;
 
 /**
  * Returns a global FabcoinNode object
@@ -43,7 +43,6 @@ function FabcoinNode() {
   console.log(`Node.js' randomly generated password for fabcoin RPC: `+ `${this.configuration.RPCPassword}`.red);
   /**@type {string[]} */
   this.argumentList = [];
-  this.handlers = {};
   /** @type {boolean} */
   this.flagStarted = false;
   /** @type {boolean} */
@@ -69,7 +68,10 @@ FabcoinNode.prototype.handleQuery = function(response, query) {
     queryCommand = JSON.parse(query.command);
   } catch (e) {
     response.writeHead(400);
-    return response.end(`Bad fabcoin initialization input. ${e}`);
+    var result = {
+      error: `Bad fabcoin initialization input. ${e}`
+    }
+    return response.end(JSON.stringify(result));
   }
   return this.handleRPCArguments(response, queryCommand);
 }
@@ -81,44 +83,72 @@ FabcoinNode.prototype.getArgumentsFromSpec = function(spec, queryCommand, /**@ty
       output.push(queryCommand[desiredLabel]);
     }
   }
+  var mandatoryArguments = spec.mandatoryModifiableArguments;
+  if (mandatoryArguments !== undefined && mandatoryArguments !== null) {
+    for (var label in spec.mandatoryModifiableArguments) {
+      if (!label in queryCommand) {
+        outputErrors.push(`Mandatory variable ${label} missing. `);
+        return false;
+      }
+    }
+  }
   return true;
 }
 
 FabcoinNode.prototype.handleRPCArguments = function(response, queryCommand) {
+  if (response === undefined) {
+    throw(`Undefined response not allowed at this point of code. `);
+  }
   var theCallLabel = queryCommand[fabcoinRPC.urlStrings.rpcCallLabel];
-  if (!(theCallLabel in fabcoinInitializationSpec.rpcCalls)) {
+  var theRPCSpec = null;
+  if (theCallLabel in fabcoinInitializationSpec.rpcCalls) {
+    theRPCSpec = fabcoinInitializationSpec.rpcCalls;
+  }
+  if (theCallLabel in fabcoinInitializationSpec.demoRPCCalls) {
+    theRPCSpec = fabcoinInitializationSpec.demoRPCCalls;
+  }
+  if (theRPCSpec === null) {
     response.writeHead(400);
-    return response.end(`Fabcoin initialization call ${theCallLabel} not found. `);    
+    var result = {
+      error: `Fabcoin initialization call ${theCallLabel} not found. `
+    };
+    return response.end(JSON.stringify(result));    
   }
-  if (!(theCallLabel in this.handlers) && !(theCallLabel in this)) {
-    response.writeHead(200);
-    return response.end(`{"error": "No FAB handler named ${theCallLabel} found."}`);
-  }
-  var currentHandler = this.handlers[theCallLabel];
   var currentFunction = null;
-  if (currentHandler !== undefined && currentHandler !== null) {
-    currentFunction = currentHandler.handler;
-  }
+  var currentFunctionThisObject = this;
   if (currentFunction === undefined || currentFunction === null) {
     currentFunction = this[theCallLabel];
   }
-  if (currentFunction === undefined || currentFunction === null || (typeof currentFunction !== "function")) {
+  if (currentFunction === undefined || currentFunction === null) {
+    currentFunction = demo[theCallLabel];
+    currentFunctionThisObject = demo;
+  }
+  if (currentFunction === null || currentFunction === undefined || (typeof currentFunction !== "function")) {
     response.writeHead(500);
-    return response.end(`{"error": "Server error: handler ${theCallLabel} declared but no implementation found."}`);
+    var result = {
+      error: `Function with label ${theCallLabel} was declared but no handler was found.`
+    };
+    return response.end(JSON.stringify(result));
   }
   /**@type {string[]} */
   var theArguments = [];
   var errors = [];
-  if (!this.getArgumentsFromSpec(fabcoinInitializationSpec.rpcCalls[theCallLabel], queryCommand, theArguments, errors)) {
+  if (!this.getArgumentsFromSpec(theRPCSpec[theCallLabel], queryCommand, theArguments, errors)) {
     response.writeHead(400);
-    response.end(`Error obtaining arguments. ${errors[0]}`);
+    result = {
+      error: errors[0]
+    };
+    response.end(JSON.stringify(result));
     return;
   }
   try {
-    return (currentFunction.bind(this))(response, theArguments);
+    return (currentFunction.bind(currentFunctionThisObject))(response, theArguments, queryCommand);
   } catch (e) {
     response.writeHead(500);
-    return response.end(`Server error: ${e}`);
+    var result = {
+      error: `Server error at handleRPCArguments: ${e}. Call label: ${theCallLabel}. `
+    };
+    return response.end(JSON.stringify(result));
   }
 }
 

@@ -5,7 +5,6 @@ const kanbanRPC = require('./kanbango/rpc');
 const miscellaneousFrontEnd = require('./miscellaneous_frontend');
 const storage = require('./storage').storage;
 const themes = require('./themes');
-const pathnames = require('../pathnames');
 const login = require('./login');
 
 function Page() {
@@ -49,6 +48,9 @@ function Page() {
     themes: {
       idPage: ids.defaults.pages.themes
     },
+    demoPage: {
+      idPage: ids.defaults.pages.demo
+    },
     privacyPolicy: {
       idPage: ids.defaults.pages.privacyPolicy
     },
@@ -82,6 +84,10 @@ Page.prototype.initialize = function() {
   miscellaneousFrontEnd.hookUpHexWithStringInput(
     ids.defaults.kanbanGO.inputSendReceive.messageVote,
     ids.defaults.kanbanGO.inputSendReceive.messageVoteHex,
+  );
+  miscellaneousFrontEnd.hookUpHexWithStringInput(
+    ids.defaults.demo.inputs.corporationName,
+    ids.defaults.demo.inputs.corporationNameHex,
   );
   //Load google login:
   gapi.load('auth2', login.login.gapiLoadCallback.bind(login.login));
@@ -137,6 +143,7 @@ Page.prototype.initializeInputPlaceholders = function() {
     ids.defaults.kanbanGO.inputInitialization,
     ids.defaults.fabcoin.inputInitialization,
     ids.defaults.fabcoin.inputBlockInfo,
+    ids.defaults.demo.inputs,
     ids.defaults.kanbanGO.inputBenchmarkParameters,
   ];
   for (var collectionCounter = 0; collectionCounter < collectionsToPlaceholderify.length; collectionCounter ++) {

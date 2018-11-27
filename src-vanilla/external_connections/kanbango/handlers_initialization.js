@@ -827,6 +827,19 @@ KanbanGoInitializer.prototype.fetchKanbanContract = function(
   fileCombinator.combineFiles();
 }
 
+KanbanGoInitializer.prototype.fetchDemoContract = function(  
+  response, 
+  queryCommand,
+  notUsed,
+) {
+  var fileCombinator = new SolidityBuilder();
+  fileCombinator.response = response;
+  fileCombinator.pathBase = `${pathnames.path.base}/miscellaneous/loyalpoints/`; 
+  fileCombinator.owner = this;
+  fileCombinator.combineFiles();
+}
+
+
 KanbanGoInitializer.prototype.compileSolidity = function(
   response, 
   queryCommand,

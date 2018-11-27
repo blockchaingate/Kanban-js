@@ -777,11 +777,19 @@ FabNode.prototype.callbackAutoStartFabcoind = function(outputComponent, input, o
   transformer.bindButtons();
 }
 
-FabNode.prototype.callbackStandard = function(functionLabelFrontEnd, input, output) {
+FabNode.prototype.callbackStandard = function(functionLabelFrontEnd, input, output, optionsOverrideDefault) {
   //console.log(`DEBUG: Call back standard here. Input: ${input}. Fun label: ${functionLabelFrontEnd}, output: ${output}`);
   var transformer = new jsonToHtml.JSONTransformer();
-  var currentFunction = this.theFunctions[functionLabelFrontEnd];
+  var currentFunction = null;
+  if (typeof functionLabelFrontEnd  === "string") {
+    currentFunction = this.theFunctions[functionLabelFrontEnd];
+  } else if (typeof functionLabelFrontEnd === "object"){
+    currentFunction = functionLabelFrontEnd;
+  }
   var currentOptions = this.optionsStandard;
+  if (optionsOverrideDefault !== null && optionsOverrideDefault !== undefined) {
+    currentOptions = optionsOverrideDefault
+  }
   var currentOutputs = null;
   if (currentFunction !== undefined && currentFunction !== null) {
     if (currentFunction.outputOptions !== null && currentFunction.outputOptions !== undefined) {
@@ -835,7 +843,7 @@ FabNode.prototype.callbackStandard = function(functionLabelFrontEnd, input, outp
   }
 }
 
-FabNode.prototype.run = function(functionLabelFrontEnd, callbackOverridesStandard, manualInputs) {
+FabNode.prototype.run = function(functionLabelFrontEnd, options) {
   var functionLabelBackend = functionLabelFrontEnd;
   if (functionLabelFrontEnd in this.theFunctions) {
     var rpcLabel = this.theFunctions[functionLabelFrontEnd].rpcCall; 
@@ -845,6 +853,12 @@ FabNode.prototype.run = function(functionLabelFrontEnd, callbackOverridesStandar
   }
 
   var theArguments = this.getArguments(functionLabelFrontEnd, functionLabelBackend);
+  var manualInputs = null;
+  if (typeof options === "object") {
+    if (options.manualInputs !== null && options.manualInputs !== undefined) {
+      manualInputs = options.manualInputs;
+    }
+  }
   if (manualInputs !== null && manualInputs !== undefined) {
     theArguments = Object.assign(theArguments, manualInputs);
   }
