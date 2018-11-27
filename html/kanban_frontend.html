@@ -102,6 +102,9 @@
     <button class = "buttonStandard" style = "width:100px" onclick = "window.kanban.kanbanGO.rpc.theKBNodes.run('rpcModules');">RPC modules</button><br>
     <button class = "buttonStandard" style = "width:100px" onclick = "window.kanban.kanbanGO.rpc.theKBNodes.run('getAccountsStates');">Account States</button><br>
     </div>
+    <div class = "divLabelButtonGroup">miscellaneous</div><div id = "panelKBGOBenchmarkButtons" class = "panelStandard">
+    <button class = "buttonStandard" style = "width:100px" onclick = "window.kanban.kanbanGO.rpc.theKBNodes.run('sendBenchmarkTransactions');">Benchmark TPS</button><br>
+    </div>
   </td>
   <td>
     <div class = "divLabelButtonGroup">block inputs</div><div id = "panelKBGOBlockInfoInputs" class = "panelStandard">
@@ -111,6 +114,12 @@
     <div class = "divLabelButtonGroup">vote inputs</div><div id = "panelKBGOVotingMachineInputs" class = "panelStandard">
       <input id = "inputKBGOVoteMessage" class = "inputStandard"   size = "50" placeholder = "message to vote"></input><br>
       <input id = "inputKBGOVoteMessageHex" class = "inputStandard"   size = "50" placeholder = "message to vote hex"></input><br>
+    </div>
+    <div class = "divLabelButtonGroup">benchmark inputs</div><div id = "panelKBGOBenchmarkInputs" class = "panelStandard">
+      <input id = "inputKBGOPrivateKey" class = "inputStandard"   size = "50" placeholder = "private key to sign benchmark transactions"/><br>
+      <input id = "inputKBGOToAddress" class = "inputStandard"   size = "50" placeholder = "destination address"/><br>
+      <input id = "inputKBGOTransactionNumber" class = "inputStandard"   size = "50" placeholder = "number of transactions to spam"/><br>
+      <input id = "inputKBGOTransactionValue" class = "inputStandard"   size = "50" placeholder = "value of each transaction"/><br>
     </div>
     </td>
   </tr>

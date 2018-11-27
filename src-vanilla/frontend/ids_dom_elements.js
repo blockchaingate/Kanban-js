@@ -98,6 +98,12 @@ var defaults = {
       messageVoteHex: "inputKBGOVoteMessageHex",
       messageVote: "inputKBGOVoteMessage",
     },
+    inputBenchmarkParameters: {
+      toAddress: "inputKBGOToAddress",
+      privateKey:  "inputKBGOPrivateKey" ,
+      transactionNumber:  "inputKBGOTransactionNumber" ,
+      transactionValue:  "inputKBGOTransactionValue",
+    },
     inputInitialization: {
       numberOfNodes: "inputKBGONumberOfGethNodes",
       contractId: "inputKBGOContractId",

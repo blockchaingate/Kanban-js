@@ -144,6 +144,7 @@ Page.prototype.initializeInputPlaceholders = function() {
     ids.defaults.fabcoin.inputInitialization,
     ids.defaults.fabcoin.inputBlockInfo,
     ids.defaults.demo.inputs,
+    ids.defaults.kanbanGO.inputBenchmarkParameters,
   ];
   for (var collectionCounter = 0; collectionCounter < collectionsToPlaceholderify.length; collectionCounter ++) {
     var currentCollection = collectionsToPlaceholderify[collectionCounter];

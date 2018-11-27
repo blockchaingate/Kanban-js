@@ -210,7 +210,6 @@ function KanbanGoNodes() {
       "aggregator.aggregatePublicKey": this.transformersStandard.shortener,
       "aggregator.commitments.${number}": this.transformersStandard.shortener,
       "aggregator.lockingCoefficients.${number}": this.transformersStandard.shortener,
-      "aggregator.publicKeys.${number}": this.transformersStandard.shortener,
       "aggregator.messageDigest": this.transformersStandard.shortener,
       "aggregator.aggregateSolution": this.transformersStandard.shortener,
       "aggregator.signatureNoBitmap": this.transformersStandard.setAggregateSignatureNoBitmap,
@@ -504,6 +503,14 @@ function KanbanGoNodes() {
       },
       outputJSON: ids.defaults.fabcoin.outputFabcoinBlockInfo,
       callback: PendingCall.prototype.callbackFetchSmartContract
+    },
+    sendBenchmarkTransactions: {
+      inputs: {
+        privateKey: ids.defaults.kanbanGO.inputBenchmarkParameters.privateKey,
+        toAddress: ids.defaults.kanbanGO.inputBenchmarkParameters.toAddress,
+        transactionNumber: ids.defaults.kanbanGO.inputBenchmarkParameters.transactionNumber,
+        transactionValue: ids.defaults.kanbanGO.inputBenchmarkParameters.transactionValue,
+      }
     }
   };
   this.correctFunctions();
