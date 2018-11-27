@@ -1,5 +1,9 @@
 "use strict";
 const solidity = require('./../../solidity_abi').solidity;
+const encodingDefault = require('../../crypto/encodings').encodingDefault;
+const fabcoinRPC = require('./rpc');
+const ResponseWrapper = require('../../response_wrapper').ResponseWrapper;
+var hashers = require('../../crypto/hashes').hashes;
 
 function getRPCHandlers() {
   return global.fabcoinHandlersRPC;
@@ -12,12 +16,13 @@ function Demo () {
 }
 
 Demo.prototype.demoRegisterSmartContractAndABI = function(
-  /** @type {ResponseWrapperWithLimits} */ 
+  /** @type {ResponseWrapper} */ 
   response, 
-  theArguments  
+  theArgumentsUnused,
+  queryCommand,
 ) {
   var result = {};
-  result.input = theArguments;
+  result.input = queryCommand;
   if (this.smartContractId !== "" && this.smartContractId !== null && this.smartContractId !== undefined) {
     result.resultHTML = "";
     result.resultHTML += `<b style = 'color:red'>Smart contract already registered. </b>`;
@@ -29,9 +34,11 @@ Demo.prototype.demoRegisterSmartContractAndABI = function(
     response.end(JSON.stringify(result));
     return;
   }
-  this.smartContractId = theArguments.smartContractId;
+  this.smartContractId = queryCommand.smartContractId;
   try {
-    this.ABI = JSON.parse(theArguments.ABI);
+    console.log("Incoming smart contract abi: " + queryCommand.ABI);
+    var incomingABI = unescape(queryCommand.ABI);
+    this.ABI = JSON.parse(incomingABI);
     result.smartContractId = this.smartContractId;
     result.ABI = this.ABI;
     solidity.contractIdDefault = this.smartContractId;
@@ -62,10 +69,11 @@ Demo.prototype.isInitialized = function (response) {
   return true;
 }
 
-Demo.prototype.registerCorporation = function (
-  /** @type {ResponseWrapperWithLimits} */ 
+Demo.prototype.demoRegisterCorporation = function (
+  /** @type {ResponseWrapper} */ 
   response, 
-  queryCommand
+  theArgumentsUnused,
+  queryCommand,
 ) {
   if (! this.isInitialized(response)) {
     return;
@@ -119,7 +127,7 @@ Demo.prototype.demoRegisterCorporationPart4 = function(result, response, dataPar
   response.end(JSON.stringify(result));
 }
 
-Demo.prototype.getNonce = function(response) {
+Demo.prototype.demoGetNonce = function(response) {
   if (! this.isInitialized(response)) {
     return;
   }
@@ -141,7 +149,12 @@ Demo.prototype.getAllNoncePart2 = function(result, response, parsedData) {
   }
 }
 
-Demo.prototype.issuePoints = function(response, queryCommand) {
+Demo.prototype.demoIssuePoints = function(
+  /** @type {ResponseWrapper} */
+  response, 
+  theArgumentsUnused, 
+  queryCommand,
+) {
   if (! this.isInitialized(response)) {
     return;
   }
@@ -196,7 +209,7 @@ Demo.prototype.issuePointsPart4 = function(result, response, dataParsed) {
   response.end(JSON.stringify(result.transaction));
 }
 
-Demo.prototype.getAllCorporations = function(response) {
+Demo.prototype.demoGetAllCorporations = function(response) {
   if (! this.isInitialized(response)) {
     return;
   }

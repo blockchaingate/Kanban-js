@@ -5,7 +5,6 @@ const kanbanRPC = require('./kanbango/rpc');
 const miscellaneousFrontEnd = require('./miscellaneous_frontend');
 const storage = require('./storage').storage;
 const themes = require('./themes');
-const pathnames = require('../pathnames');
 const login = require('./login');
 
 function Page() {
