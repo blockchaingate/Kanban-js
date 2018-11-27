@@ -70,7 +70,12 @@ function getRPCRequestJSON(rpcCallLabel, queryCommand, errors) {
   return result;
 }
 
-function handleRPCArguments(response, queryCommand) {
+function handleRPCArguments(response, queryCommand, callbackOverridesResponse) {
+  if (callbackOverridesResponse !== null && callbackOverridesResponse !== undefined) {
+    if (typeof callbackOverridesResponse !== "function") {
+      throw `Bad callback. ${JSON.stringify(callbackOverridesResponse)}`;
+    }
+  }
   numberRequestsRunning ++;
   if (numberRequestsRunning > maxRequestsRunning) {
     response.writeHead(500);
@@ -128,10 +133,15 @@ function handleRPCArguments(response, queryCommand) {
   //console.log("DEBUG: request stringified: " + JSON.stringify(theRequestJSON));
   var requestStringified = JSON.stringify(theRequestJSON);
   
-  return handleRPCArgumentsPartTwo(response, requestStringified);
+  return handleRPCArgumentsPartTwo(response, requestStringified, callbackOverridesResponse);
 }
 
-function handleRPCArgumentsPartTwo(response, requestStringified) {
+function handleRPCArgumentsPartTwo(response, requestStringified, callbackOverridesResponse) {
+  if (callbackOverridesResponse !== null && callbackOverridesResponse !== undefined) {
+    if (typeof callbackOverridesResponse !== "function") {
+      throw `Bad callback. ${JSON.stringify(callbackOverridesResponse)}`;
+    }
+  }
   var theNode = fabcoinInitialization.getFabcoinNode();
   var requestOptions = {
     host: '127.0.0.1',
@@ -173,22 +183,22 @@ function handleRPCArgumentsPartTwo(response, requestStringified) {
         finalData += chunk;
         //console.log(`DEBUG: got data chunk: ${chunk}`)
       });
-      theHTTPresponse.on('error', function(yetAnotherError){
+      theHTTPresponse.on('error', function(yetAnotherError) {
         response.writeHead(500);
         numberRequestsRunning --;
         var result =  {
           error: `Eror during commmunication with rpc server. ${yetAnotherError}. `,
-        }
+        };
         response.end(JSON.stringify(result));
         //console.log(`Eror during commmunication with rpc server. ${yetAnotherError}. `);  
       });
       theHTTPresponse.on('end', function() {
         numberRequestsRunning --;
         //console.log(`DEBUG: about to respond with status code: ${theHTTPresponse.statusCode}. Final data: ${finalData}`);
-        if (theHTTPresponse.statusCode !== 200) {
-          response.writeHead(theHTTPresponse.statusCode);
-          return response.end(finalData);
-        }
+        //if (theHTTPresponse.statusCode !== 200) {
+        //  response.writeHead(theHTTPresponse.statusCode);
+        //  return response.end(finalData);
+        //}
         try {
           //console.log("DEBUG: Parsing: " + finalData + " typeof final data: " + (typeof finalData));
           var dataParsed = JSON.parse(finalData);
@@ -197,6 +207,13 @@ function handleRPCArgumentsPartTwo(response, requestStringified) {
             response.writeHead(200);
             return response.end(dataParsed.error);
           }
+          if (callbackOverridesResponse !== null && callbackOverridesResponse !== undefined) {
+            if (typeof callbackOverridesResponse !== "function") {
+              throw `Callback not of type function: callback: ${callbackOverridesResponse}`;
+            }
+            callbackOverridesResponse(response, dataParsed);
+            return;
+          }
           response.writeHead(200);
           return response.end(JSON.stringify(dataParsed.result));
         } catch (errorParsing) {
@@ -204,7 +221,7 @@ function handleRPCArgumentsPartTwo(response, requestStringified) {
           var result = {
             error: errorParsing,
             kanbanGOResult: dataParsed,            
-          }
+          };
           return response.end(JSON.stringify(result));
         }
       });
@@ -219,6 +236,16 @@ function handleRPCArgumentsPartTwo(response, requestStringified) {
   }
 }
 
+function ExportedFunction() {
+  global.fabcoinHandlersRPC = this;
+  this.handleRPCArgumentsPartTwo = handleRPCArgumentsPartTwo;
+  this.handleRPCArguments = handleRPCArguments;
+  this.getRPCRequestJSON = getRPCRequestJSON;
+}
+
+var fabcoinHandlersRPC = new ExportedFunction();
+
 module.exports = {
-  handleQuery
+  handleQuery,
+  fabcoinHandlersRPC,
 }

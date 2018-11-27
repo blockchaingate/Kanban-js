@@ -49,6 +49,9 @@ function Page() {
     themes: {
       idPage: ids.defaults.pages.themes
     },
+    demoPage: {
+      idPage: ids.defaults.pages.demo
+    },
     privacyPolicy: {
       idPage: ids.defaults.pages.privacyPolicy
     },
@@ -82,6 +85,10 @@ Page.prototype.initialize = function() {
   miscellaneousFrontEnd.hookUpHexWithStringInput(
     ids.defaults.kanbanGO.inputSendReceive.messageVote,
     ids.defaults.kanbanGO.inputSendReceive.messageVoteHex,
+  );
+  miscellaneousFrontEnd.hookUpHexWithStringInput(
+    ids.defaults.demo.inputs.corporationName,
+    ids.defaults.demo.inputs.corporationNameHex,
   );
   //Load google login:
   gapi.load('auth2', login.login.gapiLoadCallback.bind(login.login));
@@ -137,6 +144,7 @@ Page.prototype.initializeInputPlaceholders = function() {
     ids.defaults.kanbanGO.inputInitialization,
     ids.defaults.fabcoin.inputInitialization,
     ids.defaults.fabcoin.inputBlockInfo,
+    ids.defaults.demo.inputs,
   ];
   for (var collectionCounter = 0; collectionCounter < collectionsToPlaceholderify.length; collectionCounter ++) {
     var currentCollection = collectionsToPlaceholderify[collectionCounter];

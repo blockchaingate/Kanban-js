@@ -42,6 +42,9 @@ var rpcCalls = {
   },
   fetchKanbanContract: {
     rpcCall: "fetchKanbanContract",    
+  },
+  fetchDemoContract: {
+    rpcCall: "fetchDemoContract",    
   }
 };
 

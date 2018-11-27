@@ -5,14 +5,79 @@ const pathnames = require('../../pathnames');
 const globals = require('../globals');
 const submitRequests = require('../submit_requests');
 const jsonToHtml = require('../json_to_html');
+const miscellaneousBackend = require('../../miscellaneous');
+const solidity = require('../../solidity_abi').solidity;
+var QRCode = require('qrcode');
 
 function FabcoinNodeInitializer() {
+  global.initializer = this;
   this.idOutput = ids.defaults.outputFabcoinInitialization;
   var inputInitialization = ids.defaults.fabcoin.inputInitialization;
+  this.transformersStandard = {
+    shortener: {
+      transformer: miscellaneousBackend.hexShortenerForDisplay
+    },
+  };
+  
+  this.optionsDemo = {
+    transformers: {
+      abiPacking: this.transformersStandard.shortener,
+      "generateOneBlock.result.${number}": this.transformersStandard.shortener,
+      "input.corporationName": this.transformersStandard.shortener,
+      "query.contractId": this.transformersStandard.shortener,
+      "resultData.result.address": this.transformersStandard.shortener,
+      "resultData.result.executionResult.newAddress": this.transformersStandard.shortener,
+      "resultData.result.executionResult.output": this.transformersStandard.shortener,
+      "resultData.result.transactionReceipt.stateRoot": this.transformersStandard.shortener,
+      "resultData.result.transactionReceipt.bloom": this.transformersStandard.shortener,
+    }
+  };
+  this.callTypes = {
+    demo: {
+      outputJSONDefault: ids.defaults.demo.outputDemo,
+      outputOptionsDefault: this.optionsDemo
+    }
+  };  
   this.theFunctions = {
     runFabcoind: {
       inputs: {
         arguments: inputInitialization.fabcoindArguments
+      },
+      outputJSON: null,
+    },
+    demoRegisterCorporation: {
+      inputs: {
+        corporationNameHex: ids.defaults.demo.inputs.corporationNameHex
+      },
+      callType: this.callTypes.demo,
+    },
+    demoRegisterSmartContractAndABI: {
+      inputs: {
+        smartContractId: ids.defaults.kanbanGO.inputInitialization.contractId,
+        ABI: ids.defaults.kanbanGO.inputInitialization.contractABI,
+      },
+      callType: this.callTypes.demo,
+    },
+    demoGetAllCorporations: {
+      callType: this.callTypes.demo,
+    },
+    demoGetNonce: {
+      callType: this.callTypes.demo,
+    },
+    demoIssuePoints: {
+      callType: this.callTypes.demo,
+      inputs: {
+        corporationNameHex: ids.defaults.demo.inputs.corporationNameHex,
+        moneySpent: ids.defaults.demo.inputs.moneySpent,
+      },
+      outputs: {
+        nonce: ids.defaults.demo.inputs.nonce,
+      }
+    },
+    demoRedeemPoints: {
+      callType: this.callTypes.demo,
+      inputs: {
+        nonce: ids.defaults.demo.inputs.nonce,
       }
     },
   };
@@ -20,8 +85,21 @@ function FabcoinNodeInitializer() {
 
 var optionsForKanbanGOStandard = {};
 FabcoinNodeInitializer.prototype.callbackStandard = function(functionLabel, input, output) {
-  var transformer = new jsonToHtml.JSONTransformer();
-  transformer.writeJSONtoDOMComponent(input, output, optionsForKanbanGOStandard);
+  try{
+    if (functionLabel === "demoIssuePoints") {
+      var inputParsed = JSON.parse(input);
+      var canvas = document.getElementById(ids.defaults.demo.canvasQR);
+      QRCode.toCanvas(canvas, inputParsed.info, function (error) {
+        if (error) { 
+          console.error(error);
+        }
+        console.log('success!');
+      })
+    } 
+  } catch (e) {
+
+  } 
+  window.kanban.fabcoin.rpc.fabNode.callbackStandard(this.theFunctions[functionLabel], input, output, this.optionsDemo);
 }
 
 FabcoinNodeInitializer.prototype.getArguments = function(functionLabel) {
@@ -45,6 +123,33 @@ FabcoinNodeInitializer.prototype.getArguments = function(functionLabel) {
   return theArguments;
 }
 
+FabcoinNodeInitializer.prototype.demoGetPossibleArgumentCalls = function (ABI, inputValues) {
+  var possibleArgumentCalls = {};
+  for (var i = 0; i < ABI.length; i ++) {
+    var currentFunctionSpec = ABI[i];
+    possibleArgumentCalls[currentFunctionSpec.name] = solidity.getABIPacking(currentFunctionSpec, inputValues);
+    //console.log("DEBUG: current function spec: " + JSON.stringify(currentFunctionSpec));
+  }
+  return possibleArgumentCalls;
+}
+
+FabcoinNodeInitializer.prototype.demoPackArguments = function () {
+  var inputsDemo = ids.defaults.demo.inputs;
+  var result = { 
+    possibleArgumentCalls: null,
+    inputValues: {},
+  };
+  for (var label in inputsDemo) {
+    var currentValue = document.getElementById(inputsDemo[label]).value;
+    result.inputValues[label] = currentValue; 
+  }
+  var ABIcontent = document.getElementById(ids.defaults.kanbanGO.inputInitialization.contractABI).value;
+  var ABI = JSON.parse(ABIcontent);
+  result.possibleArgumentCalls = this.demoGetPossibleArgumentCalls(ABI, result.inputValues);
+  var transformer = new jsonToHtml.JSONTransformer();
+  transformer.writeJSONtoDOMComponent(result, ids.defaults.demo.outputDemo, this.optionsDemo);
+}
+
 FabcoinNodeInitializer.prototype.run = function(functionLabel, callbackOverridesStandard, manualInputs) {
   //console.log(`DEBUG: running ${functionLabel}. `);
   var theArguments = this.getArguments(functionLabel);
@@ -54,6 +159,28 @@ FabcoinNodeInitializer.prototype.run = function(functionLabel, callbackOverrides
   var messageBody = fabcoinRPC.getPOSTBodyFromRPCLabel(functionLabel, theArguments);
   var theURL = `${pathnames.url.known.fabcoin.initialization}`;
   var currentResult = ids.defaults.fabcoin.outputFabcoinInitialization;
+  var theFunction = null;
+  var callType = null;
+  if (functionLabel in this.theFunctions) {
+    theFunction = this.theFunctions[functionLabel];
+    if (theFunction.callType !== null && theFunction.callType !== undefined) {
+      callType = theFunction.callType;
+      if (typeof callType === "string") {
+        callType = theFunction.callType[callType];
+      }
+    }
+  }
+  if (callType !== null && callType !== undefined) {
+    if (callType.outputJSONDefault !== null && callType.outputJSONDefault !== undefined) {
+      currentResult = callType.outputJSONDefault;
+    }
+  }
+  if (theFunction !== null) {
+    if (theFunction.outputJSON !== null && theFunction.outputJSON !== undefined) {
+      currentResult = theFunction.outputJSON;
+    }
+  }
+
   var currentProgress = globals.spanProgress();
   var callbackCurrent = this.callbackStandard;
   var functionFrontend = this.theFunctions[functionLabel];

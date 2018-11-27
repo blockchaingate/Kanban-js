@@ -497,6 +497,13 @@ function KanbanGoNodes() {
       },
       outputJSON: ids.defaults.fabcoin.outputFabcoinBlockInfo,
       callback: PendingCall.prototype.callbackFetchSmartContract
+    },
+    fetchDemoContract: {
+      outputs: {
+        code: ids.defaults.fabcoin.inputBlockInfo.solidityInput
+      },
+      outputJSON: ids.defaults.fabcoin.outputFabcoinBlockInfo,
+      callback: PendingCall.prototype.callbackFetchSmartContract
     }
   };
   this.correctFunctions();
@@ -515,16 +522,7 @@ KanbanGoNodes.prototype.setContractFunctionName = function(container, content, e
   var counterFunction = extraData.labelArray[extraData.labelArray.length - 2];
   var ambientInput = extraData.ambientInput;
   var abi = extraData.ambientInput.ABI[counterContract][counterFunction];
-  var functionSignature = "";
-  functionSignature += abi.name;
-  functionSignature += "(";
-  for (var counterType = 0; counterType < abi.inputs.length; counterType ++) {
-    functionSignature += abi.inputs[counterType].type;
-    if (counterType !== abi.inputs.length - 1) {
-      functionSignature += ",";
-    }
-  }
-  functionSignature += ")";
+  var keccakFirst8Hex = cryptoKanbanHashes.hashes.solidityGet8byteHexFromFunctionSpec(abi);
   //console.log(`DEBUG: fun signature so far: ${functionSignature}`);
   var contractIds = ids.defaults.fabcoin.inputBlockInfo; 
   if (abi.payable === false || abi.payable === "false") {
@@ -532,9 +530,7 @@ KanbanGoNodes.prototype.setContractFunctionName = function(container, content, e
   }
   miscellaneousFrontEnd.updateValue(contractIds.contractHex, ambientInput.binaries[counterContract]);
   miscellaneousFrontEnd.updateValue(contractIds.contractFunctionName, content);
-  var keccak = cryptoKanbanHashes.hashes.keccak_ToHex(functionSignature);
-  var keccakFirstFour = keccak.slice(0, 8);
-  miscellaneousFrontEnd.updateValue(contractIds.contractFunctionId, keccakFirstFour);
+  miscellaneousFrontEnd.updateValue(contractIds.contractFunctionId, keccakFirst8Hex);
   this.computeContractData();
 }
 

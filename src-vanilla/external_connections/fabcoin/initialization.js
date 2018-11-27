@@ -21,7 +21,46 @@ var rpcCalls = {
   killAllFabcoind: {
     rpcCall: "killAllFabcoind",
     parameters: []
+  },
+  demoRegisterSmartContractAndABI: {
+    rpc: "demoRegisterSmartContractAndABI",
+    mandatoryModifiableArguments: {
+      smartContractId: null,
+      ABI: null,
+    },
+    parameters: ["smartContractId", "ABI"],
+  },
+  demoRegisterCorporation: {
+    rpcCall: "demoRegisterCorporation",
+    mandatoryModifiableArguments: {
+      corporationNameHex: null
+    },
+    parameters: ["corporationNameHex"]
+  },
+  demoGetAllCorporations: {
+    rpcCall: "demoGetAllCorporations",
+    parameters: [],
+  },
+  demoGetNonce: {
+    rpcCall: "demoGetNonce",
+    parameters: [],
+  },
+  demoIssuePoints: {
+    rpcCall: "demoIssuePoints",
+    mandatoryModifiableArguments: {
+      corporationNameHex: null,
+      moneySpent: null,
+    },
+    parameters: ["corporationNameHex", "moneySpent"],
+  },
+  demoRedeemPoints: {
+    rpcCall: "demoRedeemPoints",
+    mandatoryModifiableArguments: {
+      nonce: null,
+    },
+    parameters: ["nonce"],
   }
+
 }
 
 module.exports = {

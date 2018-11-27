@@ -777,11 +777,19 @@ FabNode.prototype.callbackAutoStartFabcoind = function(outputComponent, input, o
   transformer.bindButtons();
 }
 
-FabNode.prototype.callbackStandard = function(functionLabelFrontEnd, input, output) {
+FabNode.prototype.callbackStandard = function(functionLabelFrontEnd, input, output, optionsOverrideDefault) {
   //console.log(`DEBUG: Call back standard here. Input: ${input}. Fun label: ${functionLabelFrontEnd}, output: ${output}`);
   var transformer = new jsonToHtml.JSONTransformer();
-  var currentFunction = this.theFunctions[functionLabelFrontEnd];
+  var currentFunction = null;
+  if (typeof functionLabelFrontEnd  === "string") {
+    currentFunction = this.theFunctions[functionLabelFrontEnd];
+  } else if (typeof functionLabelFrontEnd === "object"){
+    currentFunction = functionLabelFrontEnd;
+  }
   var currentOptions = this.optionsStandard;
+  if (optionsOverrideDefault !== null && optionsOverrideDefault !== undefined) {
+    currentOptions = optionsOverrideDefault
+  }
   var currentOutputs = null;
   if (currentFunction !== undefined && currentFunction !== null) {
     if (currentFunction.outputOptions !== null && currentFunction.outputOptions !== undefined) {

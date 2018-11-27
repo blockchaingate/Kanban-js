@@ -44,6 +44,23 @@ Hashers.prototype.sha256 = function (input) {
   return crypto.createHash('sha256').update(input).digest();
 }
 
+Hashers.prototype.solidityGet8byteHexFromFunctionSpec = function(abi) {
+  var functionSignature = "";
+  functionSignature += abi.name;
+  functionSignature += "(";
+  for (var counterType = 0; counterType < abi.inputs.length; counterType ++) {
+    functionSignature += abi.inputs[counterType].type;
+    if (counterType !== abi.inputs.length - 1) {
+      functionSignature += ",";
+    }
+  }
+  functionSignature += ")";
+  var keccak = this.keccak_ToHex(functionSignature);
+  var keccakFirst8Hex = keccak.slice(0, 8);
+  return keccakFirst8Hex
+}
+
+
 var hashes = new Hashers();  
 
 module.exports = {
