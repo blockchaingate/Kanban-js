@@ -67,9 +67,9 @@
       <span class = "checkMark"></span>
       FAB autostart after kanban
     </label><br> 
-    <input id = "inputKBGONumberOfGethNodes" class = "inputStandard" size = "50" placeholder = "# nodes" value = "1"></input><br>
-    <input id = "inputKBGOContractId" class = "inputStandard"        size = "50" placeholder = "contract Id" value = ""></input><br>
-    <input id = "inputKBGOContractABI" class = "inputStandard"       size = "50" placeholder = "contract ABI" value = ""></input><br>
+    <input id = "inputKBGONumberOfGethNodes" class = "inputStandard" size = "50" placeholder = "# nodes"      value = "1"></input><br>
+    <input id = "inputKBGOContractId"        class = "inputStandard" size = "50" placeholder = "contract Id"  value = ""></input><br>
+    <input id = "inputKBGOContractABI"       class = "inputStandard" size = "50" placeholder = "contract ABI" value = ""></input><br>
   </td>
   </tr>
   </table>
@@ -305,11 +305,13 @@
     <button class = "buttonStandard" style = "width: 100px" onclick = "window.kanban.fabcoin.initialization.initializer.run('runFabcoind')">start fabcoind</button><br>
     <button class = "buttonStandard" style = "width: 100px" onclick = "window.kanban.fabcoin.initialization.initializer.run('killAllFabcoind')"><b style = "color:red">kill all fab</b></button><br>
     <button class = "buttonStandard" style = "width: 100px" onclick = "window.kanban.fabcoin.initialization.initializer.run('showLogFabcoind')">fab stdout</button><br>
-    <button class = "buttonStandard" style = "width: 100px" onclick = "window.kanban.fabcoin.rpc.fabNode.run('showLogFile', {manualInputs:{ logFile: 'myEvm'}})"> myEvm.log</button><br>
-    <button class = "buttonStandard" style = "width: 100px" onclick = "window.kanban.fabcoin.rpc.fabNode.run('showLogFile', {manualInputs:{ logFile: 'debug'}})"> debug.log</button><br>
+    <button class = "buttonStandard" style = "width: 100px" onclick = "window.kanban.fabcoin.rpc.fabNode.run('getLogFile', {manualInputs:{ logFile: 'myEvm'}})"> myEvm.log</button><br>
+    <button class = "buttonStandard" style = "width: 100px" onclick = "window.kanban.fabcoin.rpc.fabNode.run('getLogFile', {manualInputs:{ logFile: 'debug'}})"> debug.log</button><br>
   </td>
   <td>
-  <input type = "text" class = "inputStandard" id = "inputFabcoindArguments" size = "50" value = "-regtest -printtoconsole" placeholder = "arguments"></input><br>
+
+    <input type = "text" class = "inputStandard" id = "inputFabcoindArguments" size = "50" value = "-regtest -printtoconsole" placeholder = "arguments"></input><br>
+    <input type = "text" class = "inputStandard" id = "inputFabcoindSmartContract" size = "50" value = "" placeholder = "smart contract id"></input><br>
   </td>
   </tr>
   </table>

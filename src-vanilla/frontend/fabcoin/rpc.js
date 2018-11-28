@@ -282,8 +282,12 @@ function FabNode() {
       inputs: {
         contractHex: inputFabBlock.contractHex
       },
-      outputs:{
-        address: [inputFabBlock.contractId, inputKBGOInitialization.contractId]
+      outputs: {
+        address: [
+          inputFabBlock.contractId, 
+          inputKBGOInitialization.contractId, 
+          ids.defaults.fabcoin.inputInitialization.smartContractId,
+        ],
       },
       outputOptions: this.optionsContract,
     },
@@ -433,7 +437,7 @@ function FabNode() {
       },
       callType: this.callTypes.crypto,
     },
-    showLogFile: {
+    getLogFile: {
       callType: this.callTypes.initialization,
     },
   };
@@ -614,6 +618,7 @@ FabNode.prototype.setContractId = function(container, content, extraData) {
   //console.log(`DEBUG: Content: ${content}, extra data: ${extraDataString}`);
   miscellaneousFrontEnd.updateValue(ids.defaults.fabcoin.inputBlockInfo.contractId, content);
   miscellaneousFrontEnd.updateValue(ids.defaults.kanbanGO.inputInitialization.contractId, content);
+  miscellaneousFrontEnd.updateValue(ids.defaults.fabcoin.inputInitialization.smartContractId, content)
 }
 
 FabNode.prototype.setInput = function(idToSet, container, content, extraData) {

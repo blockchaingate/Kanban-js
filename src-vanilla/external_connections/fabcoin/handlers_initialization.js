@@ -76,7 +76,13 @@ FabcoinNode.prototype.handleQuery = function(response, query) {
   return this.handleRPCArguments(response, queryCommand);
 }
 
-FabcoinNode.prototype.getArgumentsFromSpec = function(spec, queryCommand, /**@type {Array}*/output, outputErrors) {
+FabcoinNode.prototype.getArgumentsFromSpec = function(
+  spec, 
+  queryCommand, 
+  /**@type {Array}*/ 
+  output, 
+  outputErrors,
+) {
   for (var counterParameter = 0; counterParameter < spec.parameters.length; counterParameter ++) {
     var desiredLabel = spec.parameters[counterParameter]; 
     if (queryCommand[desiredLabel] !== undefined && queryCommand[desiredLabel] !== null) {
@@ -85,8 +91,8 @@ FabcoinNode.prototype.getArgumentsFromSpec = function(spec, queryCommand, /**@ty
   }
   var mandatoryArguments = spec.mandatoryModifiableArguments;
   if (mandatoryArguments !== undefined && mandatoryArguments !== null) {
-    for (var label in spec.mandatoryModifiableArguments) {
-      if (!label in queryCommand) {
+    for (var label in mandatoryArguments) {
+      if (!(label in queryCommand)) {
         outputErrors.push(`Mandatory variable ${label} missing. `);
         return false;
       }
@@ -154,39 +160,23 @@ FabcoinNode.prototype.handleRPCArguments = function(response, queryCommand) {
 
 FabcoinNode.prototype.showLogFabcoind = function(response, theArguments) {
   response.writeHead(200);
-  response.end(this.outputStreams.fabcoind.toString());
+  response.end(JSON.stringify(this.outputStreams.fabcoind.toArray()));
 }
 
-FabcoinNode.prototype.prepareArgumentList = function () {
-  this.argumentList = [];
-
-  this.argumentList.push(`-rpcpassword=${this.configuration.RPCPassword}`);
-  //var initializer = global.kanban.kanbanGOInitializer;
-  //console.log(`Initializer: ${JSON.stringify(initializer.paths)}`);
-  //var outputPath = `${initializer.paths.gethProjectBase}/fabcoind_rpc_password`; 
-  //console.log(`DEBUG: About to write ${this.configuration.RPCPassword} to file: ${outputPath}`);
-  //fs.writeFile(outputPath, this.configuration.RPCPassword, (err)=>{});
-  this.argumentList.push(`-rpcuser=${this.configuration.RPCUser}`);
-  this.argumentList.push(`-datadir=${this.paths.dataDir}`);
-  this.argumentList.push(`-txindex=1`);
-  this.argumentList.push(`-logevents`);
-  if (this.configuration.network !== "") {
-    this.argumentList.push(this.configuration.network);
-  }
-}
-
-FabcoinNode.prototype.runFabcoind = function (response, /**@type {string[]} */ argumentsNonSplit) {
+FabcoinNode.prototype.runFabcoind = function (response, argumentsNonSplitUnused, queryCommand) {
   if (this.flagStarted) {
-    var result = {}
-    result.error = "Node already started, use killaAllFabcoind to reset. ";
+    var result = {
+      error: "Node already started, use killaAllFabcoind to reset. ",
+    }
     response.writeHead(200);
     response.end(JSON.stringify(result));
     return;
   }
-  var fabcoindArguments = [];
   this.flagPrintingToConsole = false;
-  for (var i = 0; i < argumentsNonSplit.length; i ++) {
-    var currentArguments = argumentsNonSplit[i].split(' ');
+  this.argumentList = [];
+  var argumentsNonSplit = queryCommand.arguments;
+  if (typeof argumentsNonSplit === "string" && argumentsNonSplit !== "") {
+    var currentArguments = argumentsNonSplit.split(' ');
     for (var j = 0; j < currentArguments.length; j ++) {
       var current = currentArguments[j].trim(); 
       if (current === "") {
@@ -201,10 +191,19 @@ FabcoinNode.prototype.runFabcoind = function (response, /**@type {string[]} */ a
           this.configuration.network = "-regtest";
           break;
         default:
-          fabcoindArguments.push(current);
+        this.argumentList.push(current);
           break;
       }
     }
+  }
+  this.outputStreams.fabcoind.log(`DEBUG: input queryCommand: ${JSON.stringify(queryCommand)}`);
+  this.argumentList.push(`-rpcpassword=${this.configuration.RPCPassword}`);
+  this.argumentList.push(`-rpcuser=${this.configuration.RPCUser}`);
+  this.argumentList.push(`-datadir=${this.paths.dataDir}`);
+  this.argumentList.push(`-txindex=1`);
+  this.argumentList.push(`-logevents`);
+  if (typeof queryCommand.smartContractId === "string" && queryCommand.smartContractId !== "") {
+    this.argumentList.push(`-kanbanSmartContractId=${queryCommand.smartContractId}`);
   }
   this.flagStarted = true;
   this.flagStartWasEverAttempted = true;
@@ -212,11 +211,10 @@ FabcoinNode.prototype.runFabcoind = function (response, /**@type {string[]} */ a
     cwd: this.paths.executablePath,
     env: process.env
   };
-  this.prepareArgumentList();
-  for (var i = 0; i < this.argumentList.length; i ++) {
-    fabcoindArguments.push(this.argumentList[i]);
+  if (this.configuration.network !== "") {
+    this.argumentList.push(this.configuration.network);
   }
-  this.runShell(this.paths.executableFileName, fabcoindArguments, options, null, this.outputStreams.fabcoind);
+  this.runShell(this.paths.executableFileName, this.argumentList, options, null, this.outputStreams.fabcoind);
   response.writeHead(200);
   response.end(JSON.stringify(this.outputStreams.fabcoind.toArray()));
   return;

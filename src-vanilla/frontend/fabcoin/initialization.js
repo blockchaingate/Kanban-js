@@ -18,7 +18,6 @@ function FabcoinNodeInitializer() {
       transformer: miscellaneousBackend.hexShortenerForDisplay
     },
   };
-  
   this.optionsDemo = {
     transformers: {
       abiPacking: this.transformersStandard.shortener,
@@ -30,24 +29,25 @@ function FabcoinNodeInitializer() {
       "resultData.result.executionResult.output": this.transformersStandard.shortener,
       "resultData.result.transactionReceipt.stateRoot": this.transformersStandard.shortener,
       "resultData.result.transactionReceipt.bloom": this.transformersStandard.shortener,
-    }
+    },
   };
   this.callTypes = {
     demo: {
       outputJSONDefault: ids.defaults.demo.outputDemo,
-      outputOptionsDefault: this.optionsDemo
+      outputOptionsDefault: this.optionsDemo,
     }
   };  
   this.theFunctions = {
     runFabcoind: {
       inputs: {
-        arguments: inputInitialization.fabcoindArguments
+        arguments: inputInitialization.fabcoindArguments,
+        smartContractId: inputInitialization.smartContractId,
       },
       outputJSON: null,
     },
     demoRegisterCorporation: {
       inputs: {
-        corporationNameHex: ids.defaults.demo.inputs.corporationNameHex
+        corporationNameHex: ids.defaults.demo.inputs.corporationNameHex,
       },
       callType: this.callTypes.demo,
     },
@@ -83,7 +83,6 @@ function FabcoinNodeInitializer() {
   };
 }
 
-var optionsForKanbanGOStandard = {};
 FabcoinNodeInitializer.prototype.callbackStandard = function(functionLabel, input, output) {
   try{
     if (functionLabel === "demoIssuePoints") {

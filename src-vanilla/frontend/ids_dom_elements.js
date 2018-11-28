@@ -145,7 +145,8 @@ var defaults = {
   },
   fabcoin: {
     inputInitialization: {
-      fabcoindArguments: "inputFabcoindArguments"
+      fabcoindArguments: "inputFabcoindArguments",
+      smartContractId: "inputFabcoindSmartContract",
     },
     inputBlockInfo: {
       blockNumber: "inputFabcoinBlockNumber",

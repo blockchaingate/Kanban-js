@@ -302,8 +302,8 @@ var rpcCalls = {
     },
     parameters: ["signature", "publicKey", "message"]
   },
-  showLogFile: {
-    rpcCall: "showLogFile",
+  getLogFile: {
+    rpcCall: "getLogFile",
     method: "getlogfile",
     mandatoryModifiableArguments: {
       logFile: null,

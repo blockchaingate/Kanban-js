@@ -10,17 +10,18 @@ var rpcCalls = {
     mandatoryFixedArguments: { //<- values give defaults, null for none
     },
     mandatoryModifiableArguments: { //<- values give defaults, null for none
-      arguments: null
+      arguments: null,
+      smartContractId: null,
     },
-    parameters: ["arguments"]
+    parameters: ["arguments", "smartContractId"],
   },
   showLogFabcoind: {
     rpcCall: "showLogFabcoind",
-    parameters: []
+    parameters: [],
   },
   killAllFabcoind: {
     rpcCall: "killAllFabcoind",
-    parameters: []
+    parameters: [],
   },
 };
 
@@ -38,7 +39,7 @@ var demoRPCCalls = {
     mandatoryModifiableArguments: {
       corporationNameHex: null
     },
-    parameters: ["corporationNameHex"]
+    parameters: ["corporationNameHex"],
   },
   demoGetAllCorporations: {
     rpcCall: "demoGetAllCorporations",
