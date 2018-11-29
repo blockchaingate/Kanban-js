@@ -189,6 +189,12 @@ FabcoinNode.prototype.runFabcoind = function (response, argumentsNonSplitUnused,
         case "-regtest":
         case "--regtest":
           this.configuration.network = "-regtest";
+          this.configuration.RPCPort = 38667;
+          break;
+        case "-regtestwithnet":
+        case "--regtestwithnet":
+          this.configuration.network = "-regtestwithnet";
+          this.configuration.RPCPort = 40667;
           break;
         default:
         this.argumentList.push(current);

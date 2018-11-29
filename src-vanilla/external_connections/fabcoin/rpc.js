@@ -310,6 +310,11 @@ var rpcCalls = {
     },
     parameters: ["logFile"],
   },
+  getPeerInfo: {
+    rpcCall: "getPeerInfo",
+    method: "getpeerinfo",
+    parameters: []
+  }
 };
 
 function getPOSTBodyFromRPCLabel(theRPCLabel, theArguments) {

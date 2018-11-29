@@ -440,6 +440,9 @@ function FabNode() {
     getLogFile: {
       callType: this.callTypes.initialization,
     },
+    getPeerInfo: {
+      callType: this.callTypes.initialization,
+    }
   };
 
 }
