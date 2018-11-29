@@ -37,9 +37,10 @@ var demoRPCCalls = {
   demoRegisterCorporation: {
     rpcCall: "demoRegisterCorporation",
     mandatoryModifiableArguments: {
-      corporationNameHex: null
+      corporationNameHex: null,
+      corporationPublicKey: null,
     },
-    parameters: ["corporationNameHex"],
+    parameters: ["corporationNameHex", "corporationPublicKey"],
   },
   demoGetAllCorporations: {
     rpcCall: "demoGetAllCorporations",

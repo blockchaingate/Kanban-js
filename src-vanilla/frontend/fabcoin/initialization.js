@@ -29,6 +29,8 @@ function FabcoinNodeInitializer() {
       "resultData.result.executionResult.output": this.transformersStandard.shortener,
       "resultData.result.transactionReceipt.stateRoot": this.transformersStandard.shortener,
       "resultData.result.transactionReceipt.bloom": this.transformersStandard.shortener,
+      "requestStringified": this.transformersStandard.shortener,
+      "nonce": this.transformersStandard.shortener,
     },
   };
   this.callTypes = {
@@ -48,6 +50,7 @@ function FabcoinNodeInitializer() {
     demoRegisterCorporation: {
       inputs: {
         corporationNameHex: ids.defaults.demo.inputs.corporationNameHex,
+        corporationPublicKey: ids.defaults.demo.inputs.corporationPublicKey
       },
       callType: this.callTypes.demo,
     },
@@ -83,8 +86,13 @@ function FabcoinNodeInitializer() {
   };
 }
 
+FabcoinNodeInitializer.prototype.clearQRCode = function() {
+  var canvas = document.getElementById(ids.defaults.demo.canvasQR);
+  canvas.getContext('2d').clearRect(0, 0, 500, 500);
+}
+
 FabcoinNodeInitializer.prototype.callbackStandard = function(functionLabel, input, output) {
-  try{
+  try {
     if (functionLabel === "demoIssuePoints") {
       var inputParsed = JSON.parse(input);
       var canvas = document.getElementById(ids.defaults.demo.canvasQR);

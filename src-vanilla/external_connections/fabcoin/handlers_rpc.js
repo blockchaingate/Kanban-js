@@ -10,8 +10,9 @@ function handleQuery(response, query) {
     queryCommand = JSON.parse(query.command);
   } catch (e) {
     response.writeHead(400);
-    var result = {};
-    result.error = `Bad fabcoin RPC input. ${e}`;
+    var result = {
+      error: `Bad fabcoin RPC input. ${e}`,
+    };
     result.input = query;
     return response.end(JSON.stringify(result));
   }
@@ -95,7 +96,7 @@ function handleRPCArguments(response, queryCommand, callbackOverridesResponse) {
   if (!(theCallLabel in callCollection)) {
     response.writeHead(400);
     var result = {
-      error: `RPC call label ${theCallLabel} not found. `
+      error: `Fabcoin rpc calls: call label ${theCallLabel} not found. `
     };
     return response.end(JSON.stringify(result));    
   }

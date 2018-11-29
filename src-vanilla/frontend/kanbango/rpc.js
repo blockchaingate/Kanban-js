@@ -51,7 +51,7 @@ function KanbanGoNodes() {
     },
     contractSourceSetter: {
       clickHandler: this.setInput.bind(this, ids.defaults.fabcoin.inputBlockInfo.solidityInput),
-      transformer: miscellaneousBackend.hexShortenerForDisplay,
+      transformer: miscellaneousBackend.hexVeryShortDisplay,
     },
     setPrivateKeySchnorr: this.getSetInputWithShortener(inputSchnorr.privateKey),
     setPublicKeySchnorr: this.getSetInputWithShortener(inputSchnorr.publicKey),
@@ -275,6 +275,12 @@ function KanbanGoNodes() {
       rpcCalls: kanbanGO.rpcCalls,
       url: pathnames.url.known.kanbanGO.rpc,
       idDefaultOutput: ids.defaults.kanbanGO.outputSendReceive,
+    },
+    demo: {
+      jsonOptions: this.optionsInitialization,
+      idDefaultOutput: ids.defaults.kanbanGO.outputSendReceive,
+      rpcCalls: kanbanGOInitialization.demoRPCCalls,
+      url: pathnames.url.known.kanbanGO.initialization,
     }
   }; 
   // if rpcCall omitted it will be assumed to be equal to the function label.
@@ -501,6 +507,7 @@ function KanbanGoNodes() {
       outputs: {
         code: ids.defaults.fabcoin.inputBlockInfo.solidityInput
       },
+      callType: this.callTypes.demo,
       outputJSON: ids.defaults.fabcoin.outputFabcoinBlockInfo,
       callback: PendingCall.prototype.callbackFetchSmartContract
     },
@@ -603,16 +610,20 @@ KanbanGoNodes.prototype.testClear = function() {
 }
 
 KanbanGoNodes.prototype.run = function(functionLabel, callType, callbackOverridesStandard) {
-  if (callType === undefined) {
+  var callTypeSpec = callType;
+  if (callTypeSpec === undefined) {
     if (functionLabel in this.theFunctions) {
-      callType = this.theFunctions[functionLabel].callType;
+      callTypeSpec = this.theFunctions[functionLabel].callType;
     }
-    if (callType === null || callType === undefined) {
-      callType = "standard";
+    if (callTypeSpec === null || callTypeSpec === undefined) {
+      callTypeSpec = "standard";
     }
   }
-  if (!(callType in this.callTypes)) {
-    throw `Call type not among the allowed call types: ${Object.keys(this.callTypes)}`;
+  if (typeof callTypeSpec === "string") {
+    callTypeSpec = this.callTypes[callTypeSpec];
+  }
+  if (typeof callTypeSpec !== "object") {
+    throw `Was not able to extract call type from: ${JSON.stringify(callTypeSpec)}`;
   }
   var currentId = this.selectedNode;
   if (functionLabel in this.theFunctions) {
@@ -631,7 +642,7 @@ KanbanGoNodes.prototype.run = function(functionLabel, callType, callbackOverride
   }
   currentPendingCall.id = this.numberOfCalls;
   currentPendingCall.owner = this;
-  currentPendingCall.callType = callType;
+  currentPendingCall.callTypeSpec = callTypeSpec;
   currentPendingCall.callbackOverridesStandard = callbackOverridesStandard;
   this.pendingCalls[this.numberOfCalls] = currentPendingCall;
   currentPendingCall.run(functionLabel);

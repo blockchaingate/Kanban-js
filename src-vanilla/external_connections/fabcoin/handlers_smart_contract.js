@@ -4,6 +4,7 @@ const encodingDefault = require('../../crypto/encodings').encodingDefault;
 const fabcoinRPC = require('./rpc');
 const ResponseWrapper = require('../../response_wrapper').ResponseWrapper;
 var hashers = require('../../crypto/hashes').hashes;
+var cryptoKanban = require('../../crypto/crypto_kanban');
 
 function getRPCHandlers() {
   return global.fabcoinHandlersRPC;
@@ -78,29 +79,38 @@ Demo.prototype.demoRegisterCorporation = function (
   if (! this.isInitialized(response)) {
     return;
   }
-  queryCommand.rpcCall = "getNewAddress";
-  getRPCHandlers().handleRPCArguments(response, queryCommand, this.demoRegisterCorporationPart2.bind(this, queryCommand));
+  var result = {};
+  result.input = queryCommand;
+  var curvePoint = new cryptoKanban.CurvePoint();
+  try {
+    curvePoint.fromArbitrary(queryCommand.corporationPublicKey);
+  } catch (e) {
+    result.error = `Failed to extract public key from your input ${queryCommand.corporationPublicKey}`;
+    response.writeHead(400);
+    return response.end(JSON.stringify(result));
+  }
+  result.input.publicKeyPrefix = curvePoint.toBytes().slice(0, 1).toString('hex');
+  result.input.publicKeyCurvePoint = curvePoint.toBytes().slice(1).toString('hex');
+  var fabAddressBytes = curvePoint.computeFABAddressTestnetBytes();
+  result.input.fabAddress = fabAddressBytes.toString('hex');
+  result.input.fabAddressBase58 = encodingDefault.toBase58Check(fabAddressBytes);
+
+  var newCommand = {
+    rpcCall: fabcoinRPC.rpcCalls.dumpPrivateKey.rpcCall,
+    address: result.input.fabAddressBase58,
+  };
+
+  getRPCHandlers().handleRPCArguments(response, newCommand, this.demoRegisterCorporationPart2.bind(this, result));
 }
 
-Demo.prototype.demoRegisterCorporationPart2 = function (originalInput, response, dataParsed) {
-  var result = {};
-  console.log("DEBUG: got to here pt 1");
-  result.input = originalInput;
-  result.addressGenerated = {};
-  result.addressGenerated.base58 = dataParsed.result;
-  //console.log("DEBUG: got to here pt 2");
-  //console.log(`debug Data parsed: ${JSON.stringify(dataParsed.result)}`);
-  var decoded = encodingDefault.fromBase58(result.addressGenerated.base58);
-  //console.log("DEBUG: got to here pt 3");
-  var sliced = decoded.slice(1,21);
-  //console.log("DEBUG: got to here pt 4");
-  var hexed = sliced.toString('hex');
-  //console.log("DEBUG: got to here pt 5");
-  result.addressGenerated.hex = hexed;
-  //console.log("DEBUG: got to here pt 3");
-  //console.log("DEBUG: got to here pt 3");
-  originalInput["_fabAddress"]  = hexed;
-  result.abiPacking = solidity.getABIPackingForFunction("registerCompany", originalInput);
+Demo.prototype.demoRegisterCorporationPart2 = function (result, response, dataParsed) {
+  result.privateKeyResponse = dataParsed;
+  if (result.privateKeyResponse.result === null || result.privateKeyResponse.result === "null") {
+    result.error = `Error: I do not know the secret for the given public key. `;
+    response.writeHead(200);
+    return response.end(JSON.stringify(result));
+  }
+  result.abiPacking = solidity.getABIPackingForFunction("registerCompany", result.input);
   var sendToContract = fabcoinRPC.rpcCalls.sendToContract;
   var newCommand = {
     rpcCall: sendToContract.rpcCall,
@@ -167,41 +177,40 @@ Demo.prototype.demoIssuePoints = function(
 Demo.prototype.issuePointsPart2 = function(queryCommand, response, dataParsed) {
   var result = {};
   result.query = queryCommand;
-  console.log(`DEBUG: got to iss pts part 2. ${JSON.stringify(dataParsed)}.`)
   result.nonce = solidity.unpackABIResultForFunction("getNonce", dataParsed.result.executionResult.output);
-  console.log(`DEBUG: got to here. nonce: ${result.nonce}.`)
   result.nonceToNumber = Number(result.nonce);
-  console.log(`DEBUG: got to here. nonceToNumber: ${result.nonceToNumber}.`)
-  result.queryIssuePts = solidity.getQueryCallContractForFunction("getAllCompanies", {
-    nonce: result.nonceToNumber, 
-    corporationNameHex: queryCommand.corporationNameHex,
-  });
-  result.queryIssuePts = solidity.getQueryCallContractForFunction("issuePoints", queryCommand);
-  console.log("DEBUG: about to submit: " + JSON.stringify(result.queryIssuePts)); 
-  getRPCHandlers().handleRPCArguments(response, result.queryIssuePts, this.issuePointsPart3.bind(this, result));  
+  result.publicKey = dataParsed.result.publicKey
+
+  this.demoGetAllCorporations(response, this.issuePointsPart3.bind(this, result))
 }
 
 Demo.prototype.issuePointsPart3 = function(result, response, dataParsed) {
-  result.issuePointsResult = dataParsed;
-  result.aRaw =  dataParsed.result.executionResult.output;
-  result.unpackedIssuePoints = solidity.unpackABIResultForFunction("issuePoints", dataParsed.result.executionResult.output);
-  var nonKeccaked = result.query.corporationNameHex + result.query.moneySpent + JSON.stringify(result.nonce);
-  var keccakedReceipt = hashers.keccak_ToHex(nonKeccaked);
-  result.transaction = {
-    companyName: encodingDefault.fromHex(result.query.corporationNameHex).toString(),
-    amount: result.query.moneySpent,
-    nonce: keccakedReceipt,
-  };
-  result.transaction.info =`${result.transaction.companyName}, ${result.transaction.amount}, ${result.transaction.nonce.slice(0,6)}`;
+  result.getAllCorporationsResult = dataParsed;
+  result.corporationName = encodingDefault.fromHex(result.query.corporationNameHex);
+  
 
-  //  {info: "Company, amount, hex"}
-  result.sendToContractResult = dataParsed;
-  var generateBlocks = fabcoinRPC.rpcCalls.generateBlocks;
-  var newCommand = {
-    rpcCall: generateBlocks.rpcCall,
-    numberOfBlocks: 1,
-  }
-  getRPCHandlers().handleRPCArguments(response, newCommand, this.issuePointsPart4.bind(this, result));
+
+//  result.aRaw =  dataParsed.result.executionResult.output;
+//  result.unpackedIssuePoints = solidity.unpackABIResultForFunction("issuePoints", dataParsed.result.executionResult.output);
+//
+//  var nonKeccaked = result.query.corporationNameHex + result.query.moneySpent + JSON.stringify(result.nonce);
+//  var keccakedReceipt = hashers.keccak_ToHex(nonKeccaked);
+//  result.transaction = {
+//    companyName: encodingDefault.fromHex(result.query.corporationNameHex).toString(),
+//    amount: result.query.moneySpent,
+//    nonce: keccakedReceipt,
+//    getAllCompaniesResult: dataParsed,
+//  };
+//  result.transaction.info =`${result.transaction.companyName}, ${result.transaction.amount}, ${result.transaction.nonce.slice(0, 6)}`;
+//
+//  //  {info: "Company, amount, hex"}
+//  result.sendToContractResult = dataParsed;
+//  var generateBlocks = fabcoinRPC.rpcCalls.generateBlocks;
+//  var newCommand = {
+//    rpcCall: generateBlocks.rpcCall,
+//    numberOfBlocks: 1,
+//  };
+//  getRPCHandlers().handleRPCArguments(response, newCommand, this.issuePointsPart4.bind(this, result));
 }
 
 Demo.prototype.issuePointsPart4 = function(result, response, dataParsed) {
@@ -209,17 +218,17 @@ Demo.prototype.issuePointsPart4 = function(result, response, dataParsed) {
   response.end(JSON.stringify(result.transaction));
 }
 
-Demo.prototype.demoGetAllCorporations = function(response) {
+Demo.prototype.demoGetAllCorporations = function(response, callbackOverridesResponse) {
   if (! this.isInitialized(response)) {
     return;
   }
-  var result = {};
+  var  result = {};
   result.query = solidity.getQueryCallContractForFunction("getAllCompanies", {});
   console.log(`DEBUG: Got to here: about to submit:  ${JSON.stringify(result.query)}`);
-  getRPCHandlers().handleRPCArguments(response, result.query, this.getAllCorporationsPart2.bind(this, result));
+  getRPCHandlers().handleRPCArguments(response, result.query, this.getAllCorporationsPart2.bind(this, result, callbackOverridesResponse));
 }
 
-Demo.prototype.getAllCorporationsPart2 = function (result, response, dataParsed) {
+Demo.prototype.getAllCorporationsPart2 = function (result, callbackOverridesResponse, response, dataParsed) {
   console.log("DEBUG: Here I am jh ")
   result.resultData = dataParsed;
   var resultMinimal = {};
@@ -228,17 +237,21 @@ Demo.prototype.getAllCorporationsPart2 = function (result, response, dataParsed)
     console.log("DEBUG: Got unpacked: " + JSON.stringify(result.unpacked));
     var unpacked = result.unpacked;
     for (var i = 0; i < unpacked.companyNames.length; i ++ ) {
-      console.log("DEBUG: Got to here: pt 0");
       var currentName = encodingDefault.fromHex(unpacked.companyNames[i]).toString();
-      console.log("DEBUG: Got to here: pt 1");
       var creationNumber = Number (unpacked.companyCreationNumbers[i]);
-      console.log("DEBUG: Got to here: pt 2");
-      resultMinimal[currentName] = {creationNumber: creationNumber}
+      var publicKey = unpacked.publicKeyPrefixes[i].slice(0, 2) + unpacked.publicKeyCurvePoints[i];
+      resultMinimal[currentName] = {
+        creationNumber: creationNumber,
+        publicKey: publicKey,
+      }
     }
   } catch (e) {
     result.error = `Error unpacking call contract result. ${e}`;
     response.writeHead(200);
     response.end(JSON.stringify(result));
+  }
+  if (typeof callbackOverridesResponse === "function") {
+    return callbackOverridesResponse(response, resultMinimal);
   }
   response.writeHead(200);
   response.end(JSON.stringify(resultMinimal));

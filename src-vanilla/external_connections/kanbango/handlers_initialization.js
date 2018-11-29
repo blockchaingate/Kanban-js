@@ -253,8 +253,6 @@ function KanbanGoInitializer() {
   this.numberOfRequestsRunning = 0;
   this.maxRequestsRunning = 4;
   this.flagStartWasEverAttempted = false;
-  this.handlers = {
-  };
   this.colors = ["yellow", "green", "blue", "cyan", "magenta"];
   this.paths = {
     geth: "",
@@ -942,12 +940,18 @@ KanbanGoInitializer.prototype.runNodes = function(response, queryCommand) {
     Number.isNaN(candidateNumberOfNodes)
   ) {
     response.writeHead(400);
-    response.end(`Bad number of nodes: ${candidateNumberOfNodes}. I expected a number between 1 and ${maxNumberOfNodes}.`);
+    var result = {
+      error: `Bad number of nodes: ${candidateNumberOfNodes}. I expected a number between 1 and ${maxNumberOfNodes}.`
+    };
+    response.end(JSON.stringify(result));
     return;
   }
   if (this.nodes.length > 0) {
     response.writeHead(200);
-    response.end(`${this.nodes.length} nodes already spawned. Restart node.js if you want a new number of nodes. `);
+    var result = {
+      error: `${this.nodes.length} nodes already spawned. Restart node.js if you want a new number of nodes. `
+    };
+    response.end(JSON.stringify(result));
     return;
   }
   for (var counterNode = 0; counterNode < candidateNumberOfNodes; counterNode ++) {
@@ -1089,24 +1093,37 @@ KanbanGoInitializer.prototype.handleRPCArguments = function(
   //console.log(`DEBUG: this.paths: ${this.paths}.`);
   if (this.numberRequestsRunning > this.maxRequestsRunning) {
     response.writeHead(500);
-    return response.end(`Too many (${this.numberRequestsRunning}) requests running, maximum allowed: ${this.maxRequestsRunning}. `);
+    var result = {
+      error: `Too many (${this.numberRequestsRunning}) requests running, maximum allowed: ${this.maxRequestsRunning}. `,
+    };
+    return response.end(JSON.stringify(result));
   }
   var theCallLabel = queryCommand[kanbanGORPC.urlStrings.rpcCallLabel];
-  if (!(theCallLabel in kanbanGOInitialization.rpcCalls)) {
-    response.writeHead(400);
-    return response.end(`KanbanGO initialization call label ${theCallLabel} not found. `);    
+  var callsToSearch = [kanbanGOInitialization.rpcCalls, kanbanGOInitialization.demoRPCCalls];
+  var rpcCalls = null;
+  for (var i = 0; i < callsToSearch.length; i ++) {
+    if (theCallLabel in callsToSearch[i]) {
+      rpcCalls = callsToSearch[i];
+      break;
+    }
   }
-  if (!(theCallLabel in this.handlers) && !(kanbanGOInitialization.rpcCalls)) {
-    response.writeHead(200);
-    return response.end(`{"error": "No KB handler named ${theCallLabel} found."} `);
+  if (rpcCalls === null) {
+    response.writeHead(400);
+    var result = {
+      error: `KanbanGO initialization call label ${theCallLabel} not found. `
+    };
+    return response.end(JSON.stringify(result));    
   }
   var currentNode = null;
   try {
-    if (queryNode !== null){
+    if (queryNode !== null) {
       var currentNodeId = queryNode.id;
       if (currentNodeId === undefined || currentNodeId === null) {
         response.writeHead(400);
-        return response.end(`Node is missing the id variable. `);        
+        var result = {
+          error: `Node is missing the id variable. `,
+        };
+        return response.end(JSON.stringify(result));
       }
       if (currentNodeId === "none" || currentNodeId === "all") {
         currentNode = null;
@@ -1115,32 +1132,40 @@ KanbanGoInitializer.prototype.handleRPCArguments = function(
         currentNode = this.nodes[currentNodeIdNumber];
         if (currentNode === undefined || currentNode === null) {
           response.writeHead(400);
-          return response.end(`KanbanGoInitializer: failed to extract node id from ${currentNodeId}.`);          
+          var result = {
+            error: `KanbanGoInitializer: failed to extract node id from ${currentNodeId}. `
+          };
+          return response.end(JSON.stringify(result));          
         }
       }
     }
   } catch (e) {
     response.writeHead(200);
-    return response.end(`{"error": "Failed to process node info. ${e}"} `);
+    var result = {
+      error: `Failed to process node info. ${e} `
+    };
+    return response.end(JSON.stringify(result));
   }
 
   var currentFunction = null;
-  if (theCallLabel in this.handlers) { 
-    var currentHandler = this.handlers[theCallLabel];
-    currentFunction = currentHandler.handler;
-  }
   if (currentFunction === undefined || currentFunction === null) {
     currentFunction = this[theCallLabel];
   }
   if (currentFunction === undefined || currentFunction === null || (typeof currentFunction !== "function")) {
     response.writeHead(500);
-    return response.end(`{"error": "Server error: handler ${theCallLabel} declared but no implementation found."} `);
+    var result = {
+      error: `Server error: handler ${theCallLabel} declared but no implementation found. `,
+    };
+    return response.end(JSON.stringify(result));
   }
   try {
     return (currentFunction.bind(this))(response, queryCommand, currentNode);
   } catch (e) {
     response.writeHead(500);
-    return response.end(`Server error: ${e}`);
+    var result = {
+      error: `Server error: ${e}`,
+    };
+    return response.end(JSON.stringify(result));
   }
 }
 

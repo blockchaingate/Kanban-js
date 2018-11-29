@@ -144,7 +144,7 @@ function handleRPCArguments(response, queryCommand, queryNode) {
     response.writeHead(400);
     numberRequestsRunning --;
     var reponseJSON = {
-      error: `RPC call label ${theCallLabel} not found. `
+      error: `Kanban go RPC handler: call label ${theCallLabel} not found. `
     };
     return response.end(JSON.stringify(reponseJSON));    
   }

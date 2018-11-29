@@ -51,8 +51,6 @@ KanbanGONode.prototype.toHTMLRadioButton = function() {
 function PendingCall() {
   /**@type boolean */
   this.flagFoundNotStartedError = false;
-  /**@type {string} */
-  this.callType = "";
   /**@type {{jsonOptions: Object, idDefaultOutput: string, rpcCalls: Object, url: string}} */
   this.callTypeSpec = null;
   /** @type {number} */
@@ -293,7 +291,6 @@ function getValueFromId(/**@type {string}*/ id) {
 
 PendingCall.prototype.runOneId = function(nodeId) {
   var theFunction = this.owner.theFunctions[this.functionLabel];
-  this.callTypeSpec = this.owner.callTypes[this.callType];
   var theRPCCalls = this.callTypeSpec.rpcCalls;
   if (theFunction === null || theFunction === undefined) {
     if (this.functionLabel in theRPCCalls) {

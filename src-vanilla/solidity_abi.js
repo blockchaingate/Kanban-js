@@ -5,18 +5,20 @@ var bigInt = require("big-integer");
 
 function Solidity() {
   this.mapArgumentNamesToInputLabels = {
-    "_transactionHash": {name: "transactionHash", encoding: "hex"},
-    "_beneficiary":     {name: "beneficiary", encoding: "hex"},
-    "_from":            {name: "transferPointsFrom", encoding: "none"},
-    "_to":              {name: "transferPointsTo", encoding: "none"},
-    "_amount":          {name: "transferPointsAmount", encoding: "number"},
-    "_company":         {name: "corporationNameHex", encoding: "none"},
-    "_companyName":     {name: "corporationNameHex", encoding: "none"},
-    "_moneySpent":      {name: "moneySpent", encoding: "number"},
-    "_nonce":           {name: "nonce", encoding: "number"},
-    "_signature":       {name: "corporationSignature", encoding: "none" },
-    "_rewardRatio":     {name: "corporationRatio", encoding: "number"},
-    "_fabAddress":      {name: "fabAddress", encoding: "none"}
+    "_transactionHash":     {name: "transactionHash", encoding: "hex"},
+    "_beneficiary":         {name: "beneficiary", encoding: "hex"},
+    "_from":                {name: "transferPointsFrom", encoding: "none"},
+    "_to":                  {name: "transferPointsTo", encoding: "none"},
+    "_amount":              {name: "transferPointsAmount", encoding: "number"},
+    "_company":             {name: "corporationNameHex", encoding: "none"},
+    "_companyName":         {name: "corporationNameHex", encoding: "none"},
+    "_moneySpent":          {name: "moneySpent", encoding: "number"},
+    "_nonce":               {name: "nonce", encoding: "number"},
+    "_signature":           {name: "corporationSignature", encoding: "none" },
+    "_rewardRatio":         {name: "corporationRatio", encoding: "number"},
+    "_fabAddress":          {name: "fabAddress", encoding: "none"},
+    "_publicKeyPrefix":     {name: "publicKeyPrefix", encoding: "none"},
+    "_publicKeyCurvePoint": {name: "publicKeyCurvePoint", encoding: "none"},
   };
   this.commonTypeLengthsInBytes = {
     "bytes1": 1,

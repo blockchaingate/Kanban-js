@@ -34,10 +34,13 @@
       <input id = "inputDemoCorporationBeneficiary"     class = "inputStandard" size = "50" placeholder = "beneficiary"></input><br>
       <input id = "inputDemoCorporationNonce"           class = "inputStandard" size = "50" placeholder = "nonce"></input><br>
       <input id = "inputDemoCorporationSignature"       class = "inputStandard" size = "50" placeholder = "corporation signature"></input><br>
+
+      <div class = "divLabelButtonGroup">tx details</div><div id = "panelFabcoinDemoTxDetails" class = "panelStandard">
       <input id = "inputDemoCorporationTransactionHash" class = "inputStandard" size = "50" placeholder = "tx hash"></input><br>
       <input id = "inputDemoTransferPointsFrom"         class = "inputStandard" size = "50" placeholder = "transfer points from"></input><br>
       <input id = "inputDemoTransferPointsTo"           class = "inputStandard" size = "50" placeholder = "transfer points to"></input><br>
       <input id = "inputDemoTransferPointsAmount"       class = "inputStandard" size = "50" placeholder = "transfer points amount"></input><br>
+      </div>
       <input id = "inputDemoMoneySpent"                 class = "inputStandard" size = "50" placeholder = "money spent"></input><br>
     </td>
     </tr>
@@ -47,6 +50,8 @@
     <div class = "divControlPanelDefault" id = "divOutputDemo"></div><!--divFabcoinInitialization-->
     <br>
     <canvas id = "canvasQR" style = "width: 300px; height: 300px;" ></canvas>
+    <br>
+    <button class = "buttonProgress" onclick = "window.kanban.fabcoin.initialization.initializer.clearQRCode()">clear QR</button>
 
 </div>
 
@@ -351,7 +356,7 @@
     <button class = "buttonStandard" style = "width: 100px" onclick = "window.kanban.fabcoin.rpc.fabNode.run('sendToContract')">Send to contr.</button><br>
     <button class = "buttonStandard" style = "width: 100px" onclick = "window.kanban.fabcoin.rpc.fabNode.run('callContract')">Call contract</button><br>
     <button class = "buttonStandard" style = "width: 100px" onclick = "window.kanban.kanbanGO.rpc.theKBNodes.run('fetchKanbanContract', 'initialization');">Fetch contract</button><br>
-    <button class = "buttonStandard" style = "width: 100px" onclick = "window.kanban.kanbanGO.rpc.theKBNodes.run('fetchDemoContract', 'initialization');">Fetch demo</button><br>
+    <button class = "buttonStandard" style = "width: 100px" onclick = "window.kanban.kanbanGO.rpc.theKBNodes.run('fetchDemoContract');">Fetch demo</button><br>
     <button class = "buttonStandard" style = "width: 100px" onclick = "window.kanban.kanbanGO.rpc.theKBNodes.run('compileSolidity', 'initialization');">Compile</button><br>
     </div>
   </td>
