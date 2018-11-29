@@ -186,20 +186,20 @@ Demo.prototype.issuePointsPart2 = function(queryCommand, response, dataParsed) {
 }
 
 Demo.prototype.issuePointsPart3 = function(result, response) {
-  result.getAllCorporationsResult = dataParsed;
+  result.getAllCorporationsResult = result;
 
   var nonKeccaked = result.query.corporationNameHex + result.query.moneySpent + JSON.stringify(result.nonce) + crypto.randomBytes(5) ;
+  var signature = "65" + crypto.randomBytes(64).toString('hex');
   var keccakedReceipt = hashers.keccak_ToHex(nonKeccaked);
   result.transaction = {
     companyName: encodingDefault.fromHex(result.query.corporationNameHex).toString(),
     amount: result.query.moneySpent,
     nonce: keccakedReceipt,
-    getAllCompaniesResult: dataParsed,
+    signature: signature
   };
   result.transaction.info =`${result.transaction.companyName}, ${result.transaction.amount}, ${result.transaction.nonce.slice(0, 6)}`;
 
   //  {info: "Company, amount, hex"}
-  result.sendToContractResult = dataParsed;
   var generateBlocks = fabcoinRPC.rpcCalls.generateBlocks;
   var newCommand = {
     rpcCall: generateBlocks.rpcCall,

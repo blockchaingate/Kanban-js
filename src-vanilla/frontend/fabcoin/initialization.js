@@ -26,6 +26,11 @@ function FabcoinNodeInitializer() {
       transformer: miscellaneousBackend.hexShortenerForDisplay,
       clickHandler: this.setInput.bind(this, ids.defaults.demo.inputs.corporationPublicKey),
       tooltip: "Public key of organization. "
+    },
+    setDemoSignature: {
+      transformer: miscellaneousBackend.hexShortenerForDisplay,
+      clickHandler: this.setInput.bind(this, ids.defaults.demo.inputs.corporationSignature),
+      tooltip: "Signature of organization. "
     }
   };
   this.optionsDemo = {
@@ -41,7 +46,8 @@ function FabcoinNodeInitializer() {
       "resultData.result.transactionReceipt.bloom": this.transformersStandard.shortener,
       "requestStringified": this.transformersStandard.shortener,
       "nonce": this.transformersStandard.shortener,
-      "${any}.publicKey": this.transformersStandard.setDemoPublicKey, //set in FabcoinNode initialization
+      "${any}.publicKey": this.transformersStandard.setDemoPublicKey, 
+      "signature": this.transformersStandard.setDemoSignature,
     },
   };
 
