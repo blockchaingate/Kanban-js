@@ -6,8 +6,13 @@ const globals = require('../globals');
 const submitRequests = require('../submit_requests');
 const jsonToHtml = require('../json_to_html');
 const miscellaneousBackend = require('../../miscellaneous');
+const miscellaneousFrontEnd = require('../miscellaneous_frontend');
 const solidity = require('../../solidity_abi').solidity;
 var QRCode = require('qrcode');
+
+function getFabNodeRPC() {
+  return window.kanban.fabcoin.rpc.fabNode;
+}
 
 function FabcoinNodeInitializer() {
   global.initializer = this;
@@ -17,6 +22,11 @@ function FabcoinNodeInitializer() {
     shortener: {
       transformer: miscellaneousBackend.hexShortenerForDisplay
     },
+    setDemoPublicKey: {
+      transformer: miscellaneousBackend.hexShortenerForDisplay,
+      clickHandler: this.setInput.bind(this, ids.defaults.demo.inputs.corporationPublicKey),
+      tooltip: "Public key of organization. "
+    }
   };
   this.optionsDemo = {
     transformers: {
@@ -31,8 +41,10 @@ function FabcoinNodeInitializer() {
       "resultData.result.transactionReceipt.bloom": this.transformersStandard.shortener,
       "requestStringified": this.transformersStandard.shortener,
       "nonce": this.transformersStandard.shortener,
+      "${any}.publicKey": this.transformersStandard.setDemoPublicKey, //set in FabcoinNode initialization
     },
   };
+
   this.callTypes = {
     demo: {
       outputJSONDefault: ids.defaults.demo.outputDemo,
@@ -86,6 +98,19 @@ function FabcoinNodeInitializer() {
   };
 }
 
+FabcoinNodeInitializer.prototype.setInput = function(idToSet, container, content, extraData) {
+  //var extraDataString = JSON.stringify(extraData);
+  //console.log(`DEBUG: Content: ${content}, extra data: ${extraDataString}`);
+  miscellaneousFrontEnd.updateValue(idToSet, content);
+}
+
+FabcoinNodeInitializer.prototype.getSetInputWithShortener = function(idOutput) {
+  return {
+    clickHandler: this.setInput.bind(this, idOutput),
+    transformer: miscellaneousBackend.hexShortenerForDisplay
+  };  
+}
+
 FabcoinNodeInitializer.prototype.clearQRCode = function() {
   var canvas = document.getElementById(ids.defaults.demo.canvasQR);
   canvas.getContext('2d').clearRect(0, 0, 500, 500);
@@ -106,7 +131,7 @@ FabcoinNodeInitializer.prototype.callbackStandard = function(functionLabel, inpu
   } catch (e) {
 
   } 
-  window.kanban.fabcoin.rpc.fabNode.callbackStandard(this.theFunctions[functionLabel], input, output, this.optionsDemo);
+  getFabNodeRPC().callbackStandard(this.theFunctions[functionLabel], input, output, this.optionsDemo);
 }
 
 FabcoinNodeInitializer.prototype.getArguments = function(functionLabel) {

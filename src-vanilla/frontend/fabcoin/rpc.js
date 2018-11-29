@@ -18,6 +18,7 @@ function FabNode() {
   var inputKBGOInitialization = ids.defaults.kanbanGO.inputInitialization;
   var inputFabCryptoSchnorr = ids.defaults.fabcoin.inputCrypto.inputSchnorrSignature;
   var inputFabCryptoAggregate = ids.defaults.fabcoin.inputCrypto.inputAggregateSignature;
+  var initializer = fabcoinInitializationFrontend.initializer;
   this.transformersStandard = {
     blockHash: this.getSetInputAndRunWithShortener(inputFabBlock.blockHash, "getBlockByHash", "Sets the block hash field &amp; and fetches the block info. "),
     shortener: {
