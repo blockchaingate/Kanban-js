@@ -487,6 +487,8 @@ SolidityCode.prototype.extractTokens = function() {
       var currentCandidate = currentLine[j].trim(); 
       if (currentCandidate !== "") {
         this.tokens.push(currentCandidate);
+      } else {
+        this.tokens.push(" ");
       }
     }
     this.tokens.push("\n");
@@ -685,7 +687,7 @@ KanbanGoInitializer.prototype.compileSolidityPart2 = function(
   var theArguments = [
     "--bin",
     "--abi",
-    solidityCode.getSourceFileName()
+    solidityCode.getSourceFileName(),
   ];
   var theOptions = {
     cwd: this.paths.solidityDir,
@@ -848,7 +850,10 @@ KanbanGoInitializer.prototype.compileSolidity = function(
     var solidityCode = new SolidityCode(queryCommand.code, this.paths.solidityDir);
     if (solidityCode.code.length > 100000) {
       response.writeHead(200);
-      response.end(`Code too large: ${solidityCode.code.length}`);
+      var result = {
+        error: `Code too large: ${solidityCode.code.length}`
+      };
+      response.end(JSON.stringify(result));
       return;
     }
     fs.writeFile(
@@ -858,7 +863,10 @@ KanbanGoInitializer.prototype.compileSolidity = function(
     );
   } catch (e) {
     response.writeHead(200);
-    response.end(`Failed to extract code from ${queryCommand.code}. ${e}`);
+    var result = {
+      error: `Failed to extract code from ${queryCommand.code}. ${e}`
+    };
+    response.end(JSON.stringify(result));
     return;
   }
 }
