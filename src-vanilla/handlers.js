@@ -46,7 +46,8 @@ function parseTheURL(request, response, callback) {
 }
 
 function handleRequests(request, response) {
-  //console.log(`The url is: ${request.url}`.red);
+    //console.log(`The url is: ${request.url}`.red);
+    //console.log(`The url is: ${request.url}`.red);
   parseTheURL(request, response, handleRequestsPart2);
 }
 

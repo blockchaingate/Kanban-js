@@ -146,7 +146,10 @@ function submitGET(inputObject) {
  *
  * inputObject.messageBody: content of the message to send.
  */
-function submitPOST(inputObject) {
+function submitPOST(
+/** @type {{url: string, progress: string, result: string, callback: function, messageBody: string}}*/
+    inputObject
+) {
   var theAddress = inputObject.url;
   var progress = inputObject.progress;
   var result = inputObject.result;

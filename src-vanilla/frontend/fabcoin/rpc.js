@@ -871,7 +871,7 @@ FabNode.prototype.run = function(functionLabelFrontEnd, options) {
   if (manualInputs !== null && manualInputs !== undefined) {
     theArguments = Object.assign(theArguments, manualInputs);
   }
-  var messageBody = fabRPCSpec.getPOSTBodyFromRPCLabel(functionLabelBackend, theArguments);
+  var queryParameters = fabRPCSpec.getPOSTBodyFromRPCLabel(functionLabelBackend, theArguments);
   var theURL = `${pathnames.url.known.fabcoin.rpc}`;
   var currentResult = null;
 
@@ -895,13 +895,24 @@ FabNode.prototype.run = function(functionLabelFrontEnd, options) {
     currentResult = ids.defaults.fabcoin.outputFabcoinBlockInfo;
   }
   callbackCurrent = callbackCurrent.bind(this, functionLabelFrontEnd);
-  theURL += `?${fabRPCSpec.urlStrings.command}=${messageBody}`;
-  submitRequests.submitGET({
-    url: theURL,
-    progress: currentProgress,
-    callback: callbackCurrent,
-    result: currentResult
-  });
+  var messageBody = `${fabRPCSpec.urlStrings.command}=${queryParameters}`;
+  if (messageBody.length < 1000) {
+      theURL += `?${messageBody}`;
+      submitRequests.submitGET({
+          url: theURL,
+          progress: currentProgress,
+          callback: callbackCurrent,
+          result: currentResult
+      });
+  } else {
+    submitRequests.submitPOST({
+      url:  theURL,
+      progress: currentProgress,
+      callback: callbackCurrent,
+      result: currentResult,
+      messageBody: messageBody,
+    });
+  }
 }
 
 FabNode.prototype.handleSolidityInput = function () {
