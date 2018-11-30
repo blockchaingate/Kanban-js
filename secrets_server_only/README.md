@@ -1,7 +1,7 @@
 # Server-only secrets
 
 This folder is to contain server-only secrets. 
-Except for the present readme and a sample (fake) config file, 
+Except for the present readme, 
 no other files should be present in the repository. 
 Should you change the secrets set up, please update this file.
 
@@ -14,6 +14,5 @@ Unlike the secrets in folder secrets_admin admin secrets, the contents in this f
 
 The following secrets are to be located here.
 1. Kanban ssl certificates.
-2. Config file with server password. 
-
+2. Certbot folders.
 
