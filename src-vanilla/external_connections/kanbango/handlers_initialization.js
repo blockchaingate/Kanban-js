@@ -871,7 +871,27 @@ KanbanGoInitializer.prototype.compileSolidity = function(
   }
 }
 
+KanbanGoInitializer.prototype.fetchNodeConfig = function(
+  /** @type {ResponseWrapper} */
+  response, 
+  queryCommand,
+  /**@type {NodeKanbanGo} */ 
+  currentNode
+) {
+  fs.readFile(this.paths.nodeConfiguration, (err, data)=>{
+    var result = {};
+    if (err !== null && err !== undefined) {
+      result.error = JSON.stringify(err);
+      response.writeHead(500);
+      return response.end(JSON.stringify(result));
+    }
+    response.writeHead(200);
+    response.end(data);
+  });  
+}
+
 KanbanGoInitializer.prototype.killAllGeth = function(
+  /** @type {ResponseWrapper} */
   response, 
   queryCommand,
   /**@type {NodeKanbanGo} */ 
