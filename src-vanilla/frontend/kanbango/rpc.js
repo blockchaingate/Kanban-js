@@ -47,7 +47,7 @@ function KanbanGoNodes() {
     },
     contractCallSetter: {
       clickHandler: this.setContractFunctionName.bind(this),
-      transformer: miscellaneousBackend.hexShortenerForDisplay,
+      transformer: miscellaneousBackend.hexMiddleShortenerForDisplay,
     },
     contractSourceSetter: {
       clickHandler: this.setInput.bind(this, ids.defaults.fabcoin.inputBlockInfo.solidityInput),
@@ -494,14 +494,16 @@ function KanbanGoNodes() {
         code: ids.defaults.fabcoin.inputBlockInfo.solidityInput
       },
       outputJSON: ids.defaults.fabcoin.outputSolidityCompilation,
-      callback: PendingCall.prototype.callbackCompileSolidity
+      callback: PendingCall.prototype.callbackCompileSolidity,
+      useOneNode: true,
     }, 
     fetchKanbanContract: {
       outputs: {
         code: ids.defaults.fabcoin.inputBlockInfo.solidityInput
       },
       outputJSON: ids.defaults.fabcoin.outputFabcoinBlockInfo,
-      callback: PendingCall.prototype.callbackFetchSmartContract
+      callback: PendingCall.prototype.callbackFetchSmartContract,
+      useOneNode: true,
     },
     fetchDemoContract: {
       outputs: {

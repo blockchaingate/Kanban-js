@@ -59,22 +59,32 @@
   <div class = "divControlPanelDefault">
   <table class = "tableStandardInputs"> 
     <tr><td>
-      <button class = "buttonStandard"   style = "width:100px" onclick = "window.kanban.kanbanGO.rpc.theKBNodes.run('runNodesOnFAB', 'initialization');">Run on FAB</button><br>
-        <button class = "buttonStandard" style = "width:100px" onclick = "window.kanban.kanbanGO.rpc.theKBNodes.run('killAllGeth', 'initialization')"><b style = "color:red">kill all geth</b></button><br>
-        <button class = "buttonStandard" style = "width:100px" onclick = "window.kanban.kanbanGO.rpc.theKBNodes.run('getNodeInformation', 'initialization')">Node info</button><br>
-        <!--tr><td><button class = "buttonStandard" style = "width:100%" onclick = "window.kanban.kanbanGO.rpc.theKBNodes.run('runNodesDetached', 'initialization');">Run detached</button></td></tr-->
-        <button class = "buttonStandard" style = "width:100px" onclick = "window.kanban.kanbanGO.rpc.theKBNodes.run('getLogFile', 'initialization');">Logs</button><br>
-        <button class = "buttonStandard" style = "width:100px" onclick = "window.kanban.kanbanGO.rpc.theKBNodes.run('getRPCLogFile', 'initialization');">RPC logs</button><br>
+      <div class = "divLabelButtonGroup">break KB</div><div id = "panelKBGODangerous" class = "panelStandard">
+      <button class = "buttonStandard"   style = "width:100px" onclick = "window.kanban.kanbanGO.rpc.theKBNodes.run('fetchNodeConfig', 'initialization');"><b style = "color:red">Get config</b></button><br>
+      <button class = "buttonStandard"   style = "width:100px" onclick = "window.kanban.kanbanGO.rpc.theKBNodes.run('regenerateNodeConfig', 'initialization');">Regen config</button><br>
+      <button class = "buttonStandard" style = "width:100px" onclick = "window.kanban.kanbanGO.rpc.theKBNodes.run('killAllGeth', 'initialization')"><b style = "color:red">kill all geth</b></button><br>
+      </div>
+      <div class = "divLabelButtonGroup">run</div><div id = "panelKBGORun" class = "panelStandard">
+      <button class = "buttonStandard"   style = "width:100px" onclick = "window.kanban.kanbanGO.rpc.theKBNodes.run('runNodesOnFAB', 'initialization');">Run</button><br>
+      <button class = "buttonStandard" style = "width:100px" onclick = "window.kanban.kanbanGO.rpc.theKBNodes.run('getNodeInformation', 'initialization')">Node info</button><br>
+      <!--tr><td><button class = "buttonStandard" style = "width:100%" onclick = "window.kanban.kanbanGO.rpc.theKBNodes.run('runNodesDetached', 'initialization');">Run detached</button></td></tr-->
+      <button class = "buttonStandard" style = "width:100px" onclick = "window.kanban.kanbanGO.rpc.theKBNodes.run('getLogFile', 'initialization');">Logs</button><br>
+      <button class = "buttonStandard" style = "width:100px" onclick = "window.kanban.kanbanGO.rpc.theKBNodes.run('getRPCLogFile', 'initialization');">RPC logs</button><br>
+      </div>
     </td>
   <td>
+    <div class = "divLabelButtonGroup">break KB</div><div id = "panelKBGODangerousInputs" class = "panelStandard">
+      <input id = "inputKBGONumberOfGethNodes" class = "inputStandard" size = "50" placeholder = "# nodes"      value = "1"></input><br>
+      <input id = "inputKBGOContractId"        class = "inputStandard" size = "50" placeholder = "contract Id"  value = ""></input><br>
+      <input id = "inputKBGOContractABI"       class = "inputStandard" size = "50" placeholder = "contract ABI" value = ""></input><br>
+    </div>
+    <div class = "divLabelButtonGroup">run inputs</div><div id = "panelKBGOInputs" class = "panelStandard">
     <label class = "containerCheckbox">
       <input type = "checkbox" id = "checkboxFabcoindAutostartAfterKanbanGO" onchange = "window.kanban.kanbanGO.rpc.theKBNodes.readFabAutostart();">
       <span class = "checkMark"></span>
-      FAB autostart after kanban
+      <b style='color:green'>FAB autostart</b> after kanban, <b style='color:green'>safe</b> if FAB already running
     </label><br> 
-    <input id = "inputKBGONumberOfGethNodes" class = "inputStandard" size = "50" placeholder = "# nodes"      value = "1"></input><br>
-    <input id = "inputKBGOContractId"        class = "inputStandard" size = "50" placeholder = "contract Id"  value = ""></input><br>
-    <input id = "inputKBGOContractABI"       class = "inputStandard" size = "50" placeholder = "contract ABI" value = ""></input><br>
+    </div>
   </td>
   </tr>
   </table>

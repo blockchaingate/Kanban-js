@@ -1,7 +1,7 @@
 "use strict";
 
 /**
- * @type {Object.<string,{rpcCall:string, method: string, mandatoryFixedArguments: Object, mandatoryModifiableArguments: Object, optionalArguments: Object, types: Object, parameters: string[]}>}
+ * @type {Object.<string,{rpcCall:string, method: string, mandatoryFixedArguments: Object, mandatoryModifiableArguments: Object, optionalArguments: Object, types: Object, parameters: string[], callOnOneNodeOnly: boolean}>}
  */
 var rpcCalls = {
   runNodesDetached: {
@@ -41,7 +41,7 @@ var rpcCalls = {
     }
   },
   fetchKanbanContract: {
-    rpcCall: "fetchKanbanContract",    
+    rpcCall: "fetchKanbanContract",
   },
 };
 
