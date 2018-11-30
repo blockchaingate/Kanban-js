@@ -7,23 +7,14 @@ Some quick reference links follow.
 
 [development machine setup](doc/development_machine_setup.md)
 
-2. For system architecture, see
+2. When complete, our system architecture will be desribed in the doc folder of the project.
 
-[system architecture](doc/architecture.md)
+Until then, please refer to the white paper on our website:
 
-Please bear in mind that this is work in progress.
+https://fabcoin.co/
+
 
 ## Development roadmap/features
-At the moment, Kanban is under intense development; its features are likely to change significantly. In the present section, we describe our immediate goals for the near future. 
+At the moment, Kanban is under intense development; its features are likely to change significantly. 
 
-By design, Kanban is expected to implement only a few limited blockchain operations at the maximum possible speed. Kanban can be ran as an application alongside fabcoin core or as a standalone executable. Kanban should carry out the following operations. Please note that the list below is expected to change rapidly as our work progresses. 
-
-- Verify basic transaction consistency (signatures, transaction validity, etc.).
-
-- Verify transactions against the rules of SCAR.
-
-- Verify transactions against the table of transaction address balances.
-
-- Sign verified transactions.
-
-- Dispatch verified transactions to the open storage network and to the main blockchain.
+Stay tuned for more information as the project progresses. 
