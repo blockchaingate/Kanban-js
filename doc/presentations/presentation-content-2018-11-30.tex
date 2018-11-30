@@ -1,0 +1,68 @@
+\section{Node.js}
+\begin{frame}[fragile]
+\frametitle{Node.js summary}
+\begin{itemize}
+\item Node.js progress.
+\begin{itemize}
+\item Automated Jacks' smart contract deployment.
+\item Automated KanbanGO deployment on regtest.
+\item Work on a smart-contract middleware mechanism: goal: smart contract calls made through human-readable api. Work in progress.
+\item Deployed demo system on London \& Mumbai AWS machine.
+\end{itemize}
+\item Node.js: to do.
+\begin{itemize}
+\item Automate KanbanGO deployment on \verb|regtestwithnetwork|.
+\end{itemize}
+\end{itemize}
+\end{frame}
+
+\section{Fabcoind}
+\begin{frame}[fragile]
+\frametitle{Fabcoind summary}
+\begin{itemize}
+\item Fabcoind progress.
+\begin{itemize}
+\item Aggregate signature fully supported via a new opcode \verb|OP_AGGREGATEVERIFY|.
+\item Created restricted regtest-with-network [test before testnet].
+\item Deployed regtest-with network on London and Mumbai AWS.
+\item Implement.: \url{https://github.com/tmilev/fabcoin-dev}
+\end{itemize}
+\item Fabcoind: to do.
+\begin{itemize}
+\item Design \& code: kanbanGO write mechanism, foundation chain.
+\end{itemize} 
+\end{itemize}
+\end{frame}
+
+\section{KanbanGo}
+\begin{frame}[fragile]
+\frametitle{KanbanGo summary}
+\begin{itemize}
+\item KanbanGo: progress.
+\begin{itemize}
+\item Implemented: general-purpose voting (consensus) machine for asynchronous message signing. \item Voting machine: used to write on foundation chain.
+\end{itemize}
+\item KanbanGO: to do.
+\begin{itemize}
+\item Hook up voting machine to write mechanism on found. chain.
+\item Hook up voting machine \& secure to Kanban Chain.
+\end{itemize}
+\end{itemize}
+
+\end{frame}
+
+
+\begin{frame}[fragile]
+\frametitle{Fabcoind progress}
+\begin{itemize}
+\item Fabcoind progress:
+\begin{itemize}
+\item Opcode: \verb|OP_AGGREGATEVERIFY| works fully. Can send from any unlock script to and from an aggregate signature.
+\end{itemize}
+\item Fabcoind to do:
+\begin{itemize}
+\item Design and implement write mechanism from kanbanGO to foundation chain.
+\end{itemize}
+\end{itemize}
+\end{frame}
+
