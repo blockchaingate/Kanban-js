@@ -88,6 +88,7 @@ function NodeKanbanGo(
 }
 
 NodeKanbanGo.prototype.initializeDeleteLockFile = function(response, callback) {
+  this.outputStreams.initialization.log(`Deleting lock file: ${this.lockFileName}`);
   fs.unlink(this.lockFileName, callback);
 }
 
@@ -121,33 +122,7 @@ NodeKanbanGo.prototype.initialize4point5ReadNodeKey = function(response) {
 }
 
 NodeKanbanGo.prototype.initialize5ResetFolders = function(response) {
-  rimraf(this.dataDir, this.initialize6CreateFolders.bind(this, response));
-}
-
-NodeKanbanGo.prototype.initialize6CreateFolders = function(response, error) {
-  if (error !== null && error !== undefined) {
-    this.logToInitializationStream(`Error while deleting folder: ${this.dataDir}. ${error}`);
-  } else {
-    this.logToInitializationStream(`Deleted folder: ${this.dataDir}.`);
-  }
-  this.logToInitializationStream(`Proceding to create account for new node.`);
-  var initializer = getInitializer(); 
-  var theOptions = {
-    cwd: initializer.paths.gethPath,
-    env: process.env
-  };
-  this.flagFoldersWereInitialized = false;
-  var theArguments = [
-    "--datadir",
-    this.dataDir,
-    "--networkid",
-    initializer.chainId,
-    "account",
-    "new",
-    "--password",
-    initializer.paths.passwordEmptyFile
-  ];
-  initializer.runShell(initializer.paths.geth, theArguments, theOptions, this.id, this.initialize7GenerateKey.bind(this, response));
+  rimraf(this.dataDir, this.initialize7GenerateKey.bind(this, response));
 }
 
 NodeKanbanGo.prototype.computeNodeInfo = function () {
@@ -277,6 +252,7 @@ NodeKanbanGo.prototype.run = function(response) {
  * @class
  */
 function KanbanGoInitializer() {
+  this.numberOfKanbanGORuns = 0;
   this.numberOfRequestsRunning = 0;
   this.maxRequestsRunning = 4;
   this.flagStartWasEverAttempted = false;
@@ -972,11 +948,6 @@ KanbanGoInitializer.prototype.getRPCLogFile = function(
   response.end(JSON.stringify(result));
 }
 
-KanbanGoInitializer.prototype.runNodesDetached = function(response, queryCommand, currentNodeNotUsed) {
-  this.paths.nodesDir = `${this.paths.dataDir}/nodes_detached`;
-  this.runNodes(response, queryCommand);
-}
-
 KanbanGoInitializer.prototype.runNodesOnFAB = function(response, queryCommand, currentNodeNotUsed) {
   this.paths.nodesDir = `${this.paths.dataDir}/nodes_fab`;
   //console.log(`DBUG: this is queryCommand: ${JSON.stringify(queryCommand)}`);
@@ -1005,6 +976,8 @@ KanbanGoInitializer.prototype.runNodesOnFAB = function(response, queryCommand, c
 
 KanbanGoInitializer.prototype.runNodes = function(response, queryCommand) {
   this.flagStartWasEverAttempted = true;
+  this.numberOfKanbanGORuns ++;
+  this.log(`${this.numberOfKanbanGORuns} attempts to initialize KanbanGO so far. `);
   //console.log(`DEBUIG: got to here pt 1`);
   var candidateNumberOfNodes = Number(queryCommand.numberOfNodes);
   var maxNumberOfNodes = 100;
@@ -1058,23 +1031,7 @@ KanbanGoInitializer.prototype.runNodes2ReadConfig = function(response) {
       return;
     }
   }
-  this.runNodes3ParseConfigRunNodes(response)
-}
-
-KanbanGoInitializer.prototype.runNodes3ParseConfigRunNodes = function(response, error, data) {
   this.runNodes5InitGenesis(response);
-  this.numberOfInitializedGenesis = this.nodes.length - 1;
-  this.runNodes6DoRunNodes(response);
-}
-
-KanbanGoInitializer.prototype.runNodes6DoRunNodes = function(response) {
-  this.numberOfInitializedGenesis ++;
-  if (this.numberOfInitializedGenesis < this.nodes.length) {
-    return;
-  }
-  for (var counterNode = 0; counterNode < this.nodes.length; counterNode ++) {
-    this.nodes[counterNode].run(response);
-  }
 }
 
 KanbanGoInitializer.prototype.runNodes5InitGenesis = function(response) {
@@ -1082,9 +1039,20 @@ KanbanGoInitializer.prototype.runNodes5InitGenesis = function(response) {
     this.nodes[counterNode].computeMyEnodeAddress();
   }
   for (var counterNode = 0; counterNode < this.nodes.length; counterNode ++) {
-      this.nodes[counterNode].initialize10WriteNodeConnections(response);
+    this.nodes[counterNode].initialize10WriteNodeConnections(response);
   }  
   this.runNodes7WriteNodeConfig();
+}
+
+KanbanGoInitializer.prototype.runNodes6DoRunNodes = function(response) {
+  this.numberOfInitializedGenesis ++;
+  if (this.numberOfInitializedGenesis < this.nodes.length) {
+    return;
+  }
+  this.log(`DEBUG: about to run: ${this.nodeInformation.length} nodes. ` );
+  for (var counterNode = 0; counterNode < this.nodes.length; counterNode ++) {
+    this.nodes[counterNode].run(response);
+  }
 }
 
 KanbanGoInitializer.prototype.runNodes7WriteNodeConfig = function() {
@@ -1093,7 +1061,7 @@ KanbanGoInitializer.prototype.runNodes7WriteNodeConfig = function() {
     this.nodes[i].computeNodeInfo()
     nodeConfig.push(this.nodes[i].nodeSensitiveInformation);
   }
-  console.log(`Proceeding to write node config to: ${this.paths.nodesDir}`);
+  this.log(`Proceeding to write node config to: ${this.paths.nodeConfiguration}`);
   fs.writeFile(this.paths.nodeConfiguration, JSON.stringify(nodeConfig, null, 2),()=>{});
 }
 

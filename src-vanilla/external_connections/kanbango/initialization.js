@@ -4,14 +4,6 @@
  * @type {Object.<string,{rpcCall:string, method: string, mandatoryFixedArguments: Object, mandatoryModifiableArguments: Object, optionalArguments: Object, types: Object, parameters: string[], callOnOneNodeOnly: boolean}>}
  */
 var rpcCalls = {
-  runNodesDetached: {
-    rpcCall: "runNodesDetached",
-    mandatoryFixedArguments: { //<- values give defaults, null for none
-    },
-    mandatoryModifiableArguments: { //<- values give defaults, null for none
-      numberOfNodes: null
-    },
-  },
   runNodesOnFAB: {
     rpcCall: "runNodesOnFAB",
     mandatoryFixedArguments: { //<- values give defaults, null for none

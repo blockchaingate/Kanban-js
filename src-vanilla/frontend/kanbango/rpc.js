@@ -286,13 +286,6 @@ function KanbanGoNodes() {
   // if rpcCall omitted it will be assumed to be equal to the function label.
   /**@type {Object.<string, rpcCall: string, output: string, outputs: Object, outputOptions: Object, inputs: Object, callback: Object, useOneNode: boolean>} */
   this.theFunctions  = {
-    runNodesDetached: {
-      inputs: {
-        numberOfNodes: inputInitialization.numberOfNodes
-      },
-      callback: PendingCall.prototype.callbackRunNodes,
-      useOneNode: true
-    },
     runNodesOnFAB: {
       inputs: {
         numberOfNodes: inputInitialization.numberOfNodes,
@@ -521,7 +514,10 @@ function KanbanGoNodes() {
         transactionNumber: ids.defaults.kanbanGO.inputBenchmarkParameters.transactionNumber,
         transactionValue: ids.defaults.kanbanGO.inputBenchmarkParameters.transactionValue,
       }
-    }
+    },
+    fetchNodeConfig: {
+      useOneNode: true,
+    },  
   };
   this.correctFunctions();
 }

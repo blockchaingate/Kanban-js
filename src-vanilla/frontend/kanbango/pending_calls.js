@@ -136,7 +136,12 @@ PendingCall.prototype.callbackStandardOneCaller = function(
 
 PendingCall.prototype.callbackRunNodes = function(nodeId, input, output) {
   this.callbackStandard(nodeId, input, output);
-  this.getNodeInformationAndRunFabcoind(output)
+  if (typeof output === "string") {
+    output = document.getElementById(output);
+  }
+  var outputRunfabcoind = document.createElement("div");
+  output.appendChild(outputRunfabcoind);
+  this.getNodeInformationAndRunFabcoind(outputRunfabcoind);
 }
 
 function getSignerField(input, label) {
@@ -206,12 +211,17 @@ PendingCall.prototype.callbackFetchSmartContract = function(nodeId, input, outpu
   this.callbackStandard(nodeId, input, output);
 }
 
+var counterCallBackAutostartExtraComponent = 0;
+
 PendingCall.prototype.callbackAutoStartKanbanGO = function(outputComponent, input, output) {
   var theJSONWriter = new JSONTransformer();
   var resultHTML = theJSONWriter.getHtmlFromArrayOfObjects(input, this.owner.optionsInitialization);
+  var extraId = `autostartKanbanMoreOutput${counterCallBackAutostartExtraComponent}`;
+  result += `<span id = "${extraId}"></span>`;
   outputComponent.innerHTML += resultHTML;
   theJSONWriter.bindButtons();
-  this.getNodeInformationAndRunFabcoind(outputComponent);
+  var moreOutput = document.getElementById(extraId);
+  this.getNodeInformationAndRunFabcoind(moreOutput);
 }
 
 PendingCall.prototype.getNodeInformationAndRunFabcoind = function(outputComponent) {
