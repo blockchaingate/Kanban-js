@@ -297,7 +297,8 @@ function KanbanGoNodes() {
       inputs: {
         numberOfNodes: inputInitialization.numberOfNodes,
         abiJSON: inputInitialization.contractABI,
-        contractId: inputInitialization.contractId
+        contractId: inputInitialization.contractId,
+        connectKanbansInALine: ids.defaults.kanbanGO.checkboxConnectKanbansInALine,
       },
       callback: PendingCall.prototype.callbackRunNodes,
       useOneNode: true
@@ -709,11 +710,21 @@ KanbanGoNodes.prototype.getNodeInformationCallback = function(input, output) {
   nodePanel.innerHTML = this.toHTMLRadioButton();  
 }
 
-KanbanGoNodes.prototype.readFabAutostart = function() {
-  /** @type {Storage} */
-  var theStorage = window.kanban.storage;
-  var theCheckBox = document.getElementById(ids.defaults.kanbanGO.checkboxFabcoindAutostartAfterKanbanGO);
-  theStorage.setVariable(theStorage.variables.autostartFabcoindAfterKanbanGO, theCheckBox.checked);
+KanbanGoNodes.prototype.readCheckboxesConfiguration = function() {
+  /** @type {StorageKanban} */
+  var storageKanban = window.kanban.storageKanban;
+  var idCheckboxPairs = [[
+      storageKanban.variables.autostartFabcoindAfterKanbanGO, 
+      ids.defaults.kanbanGO.checkboxFabcoindAutostartAfterKanbanGO,
+    ], [
+      storageKanban.variables.connectKanbansInALine,
+      ids.defaults.kanbanGO.checkboxConnectKanbansInALine,
+    ],
+  ];
+  for (var i = 0; i < idCheckboxPairs.length; i ++) {
+    var checkBox = document.getElementById(idCheckboxPairs[i][1]);
+    storageKanban.setVariable(idCheckboxPairs[i][0], checkBox.checked);
+  }
 }
 
 var theKBNodes = new KanbanGoNodes();

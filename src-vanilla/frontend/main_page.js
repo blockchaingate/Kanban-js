@@ -3,7 +3,7 @@ const ids = require('./ids_dom_elements');
 const myNodes = require('./my_nodes');
 const kanbanRPC = require('./kanbango/rpc');
 const miscellaneousFrontEnd = require('./miscellaneous_frontend');
-const storage = require('./storage').storage;
+const storageKanban = require('./storage').storageKanban;
 const themes = require('./themes');
 const login = require('./login');
 
@@ -60,18 +60,32 @@ function Page() {
   }
 }
 
+Page.prototype.initializeCheckBoxes = function() {
+  storageKanban.variables.theme.changeValueHandler = themes.setTheme;
+  var checkboxBindingsWithId = [[
+      storageKanban.variables.autostartFabcoindAfterKanbanGO,
+      ids.defaults.kanbanGO.checkboxFabcoindAutostartAfterKanbanGO,
+    ], [
+      storageKanban.variables.connectKanbansInALine,
+      ids.defaults.kanbanGO.checkboxConnectKanbansInALine,
+    ]
+  ];
+  for (var i = 0; i < checkboxBindingsWithId.length; i ++) {
+    checkboxBindingsWithId[i][0].changeValueHandler = miscellaneousFrontEnd.setCheckbox.bind(
+      null,
+      checkboxBindingsWithId[i][1] 
+    );
+  }
+}
+
 Page.prototype.initialize = function() {
   this.initializeInputPlaceholders();
-  storage.variables.theme.changeValueHandler = themes.setTheme;
-  storage.variables.autostartFabcoindAfterKanbanGO.changeValueHandler = miscellaneousFrontEnd.setCheckbox.bind(
-    null,
-    ids.defaults.kanbanGO.checkboxFabcoindAutostartAfterKanbanGO
-  );
+  this.initializeCheckBoxes();
   this.initializePanels();
-  storage.loadAll();
-  storage.variables.currentPage.changeValueHandler = this.initializeCurrentPage.bind(this);
+  storageKanban.loadAll();
+  storageKanban.variables.currentPage.changeValueHandler = this.initializeCurrentPage.bind(this);
   this.initializeCurrentPage();
-  window.onhashchange = storage.onWindowHashChange.bind(storage);
+  window.onhashchange = storageKanban.onWindowHashChange.bind(storageKanban);
   if (window.kanban.ace.editor === null) {
     window.kanban.ace.editor = window.kanban.ace.ace.edit('aceEditor');
     window.kanban.ace.editor.getSession().setMode('ace/mode/solidity');
@@ -110,8 +124,8 @@ Page.prototype.initializeInputPlaceholder = function (idInput) {
   groupContainer.appendChild(theInput);
   groupContainer.appendChild(label);
   theParent.replaceChild(groupContainer, oldInput);
-  theInput.addEventListener('change', storage.storeInputChange.bind(storage, theInput));
-  theInput.addEventListener('keydown', storage.storeInputChange.bind(storage, theInput));
+  theInput.addEventListener('change', storageKanban.storeInputChange.bind(storageKanban, theInput));
+  theInput.addEventListener('keydown', storageKanban.storeInputChange.bind(storageKanban, theInput));
 }
 
 Page.prototype.initializePanels = function() {
@@ -120,10 +134,10 @@ Page.prototype.initializePanels = function() {
     var currentPanel = standardPanels[i];
     miscellaneousFrontEnd.makePanel(currentPanel);
     var currentId = currentPanel.id; 
-    if (currentId in storage.variables) {
+    if (currentId in storageKanban.variables) {
       throw (`Id ${currentId} already registered. `);
     }
-    storage.variables[currentId] = {
+    storageKanban.variables[currentId] = {
       name: currentId,
       nameLocalStorage: currentId,
       value: null,
@@ -150,7 +164,7 @@ Page.prototype.initializeInputPlaceholders = function() {
     var currentCollection = collectionsToPlaceholderify[collectionCounter];
     for (var label in currentCollection) {
       this.initializeInputPlaceholder(currentCollection[label]);
-      storage.registerInputBox(currentCollection[label]);
+      storageKanban.registerInputBox(currentCollection[label]);
     }
   }
 }
@@ -160,7 +174,7 @@ Page.prototype.initializeCurrentPage = function() {
     var pageId = this.pages[label].idPage;
     document.getElementById(pageId).style.display = "none";
   }
-  var currentPageLabel = storage.getVariable(storage.variables.currentPage);
+  var currentPageLabel = storageKanban.getVariable(storageKanban.variables.currentPage);
   if (currentPageLabel in this.pages) {
     var pageId = this.pages[currentPageLabel].idPage;
     document.getElementById(pageId).style.display = "";
@@ -172,7 +186,7 @@ Page.prototype.initializeCurrentPage = function() {
 }
 
 Page.prototype.selectPage = function(pageLabel) {
-  storage.setVariable(storage.variables.currentPage, pageLabel, false);
+  storageKanban.setVariable(storageKanban.variables.currentPage, pageLabel, false);
 }
 
 function getPage() {

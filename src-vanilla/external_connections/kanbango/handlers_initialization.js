@@ -22,8 +22,25 @@ function getInitializer() {
   return global.kanban.kanbanGOInitializer;
 }
 
-function NodeKanbanGo(inputId) {
-  this.id = inputId;
+function NodeKanbanGo(
+  /**@type {{id: String, contractId: String, connectInALine: boolean, numberOfNodes: Number}} */
+  inputData
+) {
+  /**@type {Number} */
+  this.id = inputData.id;
+  /**@type {String} */
+  this.contractId = inputData.contractId;
+  /**@type {Boolean} */
+  this.flagConnectInALine = inputData.connectInALine;
+  /**@type {Number} */
+  this.numberOfNodes = inputData.numberOfNodes;
+  this.basePath = `${getInitializer().paths.nodesDir}/${this.numberOfNodes}nodes`;
+  if (this.flagConnectInALine) {
+    this.basePath += "_line";
+  } else {
+    this.basePath += "_full_graph";
+  }
+  this.basePath += `_${inputData.contractId}`;
   this.notes = "";
   this.fileNameNodeAddress = null;
   this.nodePrivateKey = new cryptoKanban.CurveExponent();
@@ -35,7 +52,7 @@ function NodeKanbanGo(inputId) {
   this.nodeAddressHex = null;
   /** @type {string[]} */
   this.nodeConnections = [];
-  this.dataDir = `${getInitializer().paths.nodesDir}/node${this.id}`;
+  this.dataDir = `${this.basePath}/node${this.id}`;
   this.lockFileName = `${this.dataDir}/geth/LOCK`;
   this.keyStoreFolder = `${this.dataDir}/keystore`;
   this.nodeKeyDir = `${this.dataDir}/geth`;
@@ -174,7 +191,17 @@ NodeKanbanGo.prototype.computeMyEnodeAddress = function (){
 NodeKanbanGo.prototype.initialize10WriteNodeConnections = function(response) {
   var initializer = getInitializer();
   this.nodeConnections = [];
-  var idsToConnectTo = [this.id - 1, this.id + 1];
+  var idsToConnectTo = [];
+  if (this.flagConnectInALine) {
+    idsToConnectTo = [this.id - 1, this.id + 1];
+  } else {
+    for (var i = 0; i < this.numberOfNodes; i ++) {
+      if (i === this.id) {
+        continue;
+      }
+      idsToConnectTo.push(i);
+    }
+  }
   for (var counterId = 0; counterId < idsToConnectTo.length; counterId ++) {
     var currentId = idsToConnectTo[counterId];
     if (currentId < 0 || currentId >= initializer.nodes.length) {
@@ -276,6 +303,8 @@ function KanbanGoInitializer() {
   this.nodeInformation = [];
   this.smartContractId = "";
   this.abiJSON = "";
+  /**@type {boolean} */
+  this.flagConnectKanbansInALine = true;
 }
 
 KanbanGoInitializer.prototype.log = function(input) {
@@ -951,8 +980,26 @@ KanbanGoInitializer.prototype.runNodesDetached = function(response, queryCommand
 KanbanGoInitializer.prototype.runNodesOnFAB = function(response, queryCommand, currentNodeNotUsed) {
   this.paths.nodesDir = `${this.paths.dataDir}/nodes_fab`;
   //console.log(`DBUG: this is queryCommand: ${JSON.stringify(queryCommand)}`);
+  if (
+    queryCommand.abiJSON === null || queryCommand.abiJSON === undefined || 
+    queryCommand.abiJSON === "" || queryCommand.abiJSON === "undefined"
+  ) {
+    var result = {
+      error: `Unrecognized ABI format: abiJSON: ${queryCommand.abiJSON}`
+    };
+    response.writeHead(400);
+    return response.end(JSON.stringify(result));
+  }
+  if (typeof this.smartContractId !== "string") {
+    var result = {
+      error: `smartContractId expected to be a string, instead received: ${queryCommand.smartContractId}`
+    };
+    response.writeHead(400);
+    return response.end(JSON.stringify(result));
+  }
   this.smartContractId = queryCommand.contractId;
   this.abiJSON = queryCommand.abiJSON;
+  this.flagConnectKanbansInALine = queryCommand.connectKanbansInALine;
   this.runNodes(response, queryCommand);
 }
 
@@ -983,7 +1030,12 @@ KanbanGoInitializer.prototype.runNodes = function(response, queryCommand) {
     return;
   }
   for (var counterNode = 0; counterNode < candidateNumberOfNodes; counterNode ++) {
-    this.nodes.push(new NodeKanbanGo(counterNode));
+    this.nodes.push(new NodeKanbanGo({
+      id: counterNode,
+      contractId: this.smartContractId,
+      connectInALine: this.flagConnectKanbansInALine,
+      numberOfNodes: candidateNumberOfNodes
+    }));
   }
   for (var counterNode = 0; counterNode < this.nodes.length; counterNode ++) {
     var currentNode = this.nodes[counterNode]; 

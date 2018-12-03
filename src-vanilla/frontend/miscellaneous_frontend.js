@@ -114,7 +114,7 @@ function updateValue(id, content) {
   theElement.value = content;
   theElement.classList.add(highlightName);
   setTimeout(removeUpdateHighlight.bind(null, id, highlightName), 1000);
-  window.kanban.storage.storeInputChange(id);
+  window.kanban.storageKanban.storeInputChange(id);
 }
 
 function updateInnerHtml(id, content) {
@@ -167,7 +167,7 @@ function standardExpandButtonHandler(containerId) {
   var panel = document.getElementById(containerId)
   var buttonId = panel.getAttribute("buttonExpansion");
   var button = document.getElementById(buttonId);
-  var value = window.kanban.storage.getVariable(containerId);
+  var value = window.kanban.storageKanban.getVariable(containerId);
   var desiredHeight = null;
   if (value === "collapsed") {
     desiredHeight = "0px"
@@ -180,11 +180,11 @@ function standardExpandButtonHandler(containerId) {
 }
 
 function toggleStandardPanel(containerId) {
-  var currentValue = window.kanban.storage.getVariable(containerId);
+  var currentValue = window.kanban.storageKanban.getVariable(containerId);
   if (currentValue === "expanded") {
-    window.kanban.storage.setVariable(containerId, "collapsed");
+    window.kanban.storageKanban.setVariable(containerId, "collapsed");
   } else {
-    window.kanban.storage.setVariable(containerId, "expanded");
+    window.kanban.storageKanban.setVariable(containerId, "expanded");
   }
 }
 

@@ -6,7 +6,7 @@ var JSONTransformer = jsonToHtml.JSONTransformer;
 const kanbanGO = require('../../external_connections/kanbango/rpc');
 const globals = require('../globals');
 const ids = require('../ids_dom_elements');
-const storage = require('../storage').storage;
+const storageKanban = require('../storage').storageKanban;
 require('../solidity-ace-editor');
 
 function KanbanGONode() {
@@ -219,7 +219,7 @@ PendingCall.prototype.getNodeInformationAndRunFabcoind = function(outputComponen
     outputComponent = document.getElementById(outputComponent);
   }
   this.owner.getNodeInformation();
-  if (! storage.isTrueVariable(storage.variables.autostartFabcoindAfterKanbanGO)) {
+  if (!storageKanban.isTrueVariable(storageKanban.variables.autostartFabcoindAfterKanbanGO)) {
     var newSpan = document.createElement("span");
     newSpan.innerHTML += `<b style="color:red"> Automated fabcoind start off: you may need to start fabcoind manually</b>`;
     outputComponent.appendChild(newSpan);
@@ -282,6 +282,9 @@ function getValueFromId(/**@type {string}*/ id) {
     return null;
   }
   if (domElement.tagName === "INPUT") {
+    if (domElement.type === "checkbox") {
+      return domElement.checked;
+    }
     return domElement.value;
   }
   if (domElement.tagName === "TEXTAREA") {
@@ -289,16 +292,9 @@ function getValueFromId(/**@type {string}*/ id) {
   }
 }
 
-PendingCall.prototype.runOneId = function(nodeId) {
-  var theFunction = this.owner.theFunctions[this.functionLabel];
-  var theRPCCalls = this.callTypeSpec.rpcCalls;
-  if (theFunction === null || theFunction === undefined) {
-    if (this.functionLabel in theRPCCalls) {
-      theFunction = null;
-    } else {
-      throw (`Unknown function call label: ${this.functionLabel}`);
-    }
-  }
+PendingCall.prototype.getArguments = function(
+  theFunction, theRPCCalls
+) {
   var theArguments = {};
   var currentInputs = null;
   var currentInputsBase64 = null;
@@ -316,8 +312,7 @@ PendingCall.prototype.runOneId = function(nodeId) {
     var theValue = getValueFromId(currentInputsBase64[inputLabel]);
     theArguments[inputLabel] = Buffer.from(theValue).toString('base64');
   }
-  var theRPCCall = this.functionLabel;
-  var currentSpec = theRPCCalls[theRPCCall];
+  var currentSpec = theRPCCalls[this.functionLabel];
   if (currentSpec.mandatoryModifiableArguments !== undefined && currentSpec.mandatoryModifiableArguments !== null) {
     for (var label in currentSpec.mandatoryModifiableArguments) {
       var defaultValue = currentSpec.mandatoryModifiableArguments[label];
@@ -326,13 +321,21 @@ PendingCall.prototype.runOneId = function(nodeId) {
       }
     }
   }
-  if (theFunction !== null) {
-    if (theFunction.rpcCall !== null && theFunction.rpcCall !== undefined) {
-      theRPCCall = theFunction.rpcCall;
-    }
-  } 
+  return theArguments;
+}
 
-  var messageBody = `command=${getPOSTBodyFromKanbanRPCLabel(theRPCCall, theArguments)}`;
+PendingCall.prototype.runOneId = function(nodeId) {
+  var theFunction = this.owner.theFunctions[this.functionLabel];
+  var theRPCCalls = this.callTypeSpec.rpcCalls;
+  if (theFunction === null || theFunction === undefined) {
+    if (this.functionLabel in theRPCCalls) {
+      theFunction = null;
+    } else {
+      throw (`Unknown function call label: ${this.functionLabel}`);
+    }
+  }
+  var theArguments = this.getArguments(theFunction, theRPCCalls);
+  var messageBody = `command=${getPOSTBodyFromKanbanRPCLabel(this.functionLabel, theArguments)}`;
   var nodeObject = {
     id: nodeId
   };

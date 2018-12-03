@@ -71,7 +71,7 @@ div.divControlPanelNetwork{
 div.divControlPanelDefault{
   margin: 6px;
   padding: 6px;
-  transition: all 3s;
+  transition: all 1s;
   border: 1px solid var(--colorBorderPanel);
   display: inline-block;
 }
@@ -360,7 +360,7 @@ button.buttonRPCInput:hover{
 }
 
 .panelStandard {
-  transition: all linear 0.5s;
+  transition: all 0.6s;
   overflow: hidden;
   word-wrap: break-word;
 }
@@ -472,7 +472,7 @@ span.panelRevealedContent {
   margin-bottom: 0px;
   overflow-x: hidden;
   word-wrap: break-word;
-  transition: all 1s linear;
+  transition: all 1s;
   opacity: 0;
 }
 

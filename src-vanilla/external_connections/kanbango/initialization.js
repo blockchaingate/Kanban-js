@@ -20,6 +20,7 @@ var rpcCalls = {
       numberOfNodes: null,
       abiJSON: null,
       contractId: null,
+      connectKanbansInALine: null,
     },
   },
   killAllGeth: {

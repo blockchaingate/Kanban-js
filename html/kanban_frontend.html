@@ -61,7 +61,7 @@
     <tr><td>
       <div class = "divLabelButtonGroup">break KB</div><div id = "panelKBGODangerous" class = "panelStandard">
       <button class = "buttonStandard"   style = "width:100px" onclick = "window.kanban.kanbanGO.rpc.theKBNodes.run('fetchNodeConfig', 'initialization');"><b style = "color:red">Get config</b></button><br>
-      <button class = "buttonStandard"   style = "width:100px" onclick = "window.kanban.kanbanGO.rpc.theKBNodes.run('regenerateNodeConfig', 'initialization');">Regen config</button><br>
+      <!--button class = "buttonStandard"   style = "width:100px" onclick = "window.kanban.kanbanGO.rpc.theKBNodes.run('regenerateNodeConfig', 'initialization');">Regen config</button><br-->
       <button class = "buttonStandard" style = "width:100px" onclick = "window.kanban.kanbanGO.rpc.theKBNodes.run('killAllGeth', 'initialization')"><b style = "color:red">kill all geth</b></button><br>
       </div>
       <div class = "divLabelButtonGroup">run</div><div id = "panelKBGORun" class = "panelStandard">
@@ -79,8 +79,13 @@
       <input id = "inputKBGOContractABI"       class = "inputStandard" size = "50" placeholder = "contract ABI" value = ""></input><br>
     </div>
     <div class = "divLabelButtonGroup">run inputs</div><div id = "panelKBGOInputs" class = "panelStandard">
+      <label class = "containerCheckbox">
+        <input type = "checkbox" id = "checkboxConnectKanbansInALine" onchange = "window.kanban.kanbanGO.rpc.theKBNodes.readCheckboxesConfiguration();">
+        <span class = "checkMark"></span>
+        Connect Kanbans in a line
+      </label><br> 
     <label class = "containerCheckbox">
-      <input type = "checkbox" id = "checkboxFabcoindAutostartAfterKanbanGO" onchange = "window.kanban.kanbanGO.rpc.theKBNodes.readFabAutostart();">
+      <input type = "checkbox" id = "checkboxFabcoindAutostartAfterKanbanGO" onchange = "window.kanban.kanbanGO.rpc.theKBNodes.readCheckboxesConfiguration();">
       <span class = "checkMark"></span>
       <b style='color:green'>FAB autostart</b> after kanban, <b style='color:green'>safe</b> if FAB already running
     </label><br> 
