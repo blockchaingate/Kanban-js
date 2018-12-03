@@ -1049,7 +1049,7 @@ KanbanGoInitializer.prototype.runNodes6DoRunNodes = function(response) {
   if (this.numberOfInitializedGenesis < this.nodes.length) {
     return;
   }
-  this.log(`DEBUG: about to run: ${this.nodeInformation.length} nodes. ` );
+  this.log(`DEBUG: about to run: ${this.nodes.length} nodes. ` );
   for (var counterNode = 0; counterNode < this.nodes.length; counterNode ++) {
     this.nodes[counterNode].run(response);
   }

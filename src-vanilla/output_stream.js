@@ -65,7 +65,11 @@ OutputStream.prototype.log = function (data) {
 }
 
 OutputStream.prototype.append = function (data) {
-  console.log(this.idConsole[this.colorIdConsole] + data);
+  var dataToLog = this.idConsole[this.colorIdConsole] + data;
+  if (dataToLog.endsWith("\n")) {
+    dataToLog = dataToLog.slice(0, dataToLog.length - 1);
+  }
+  console.log(dataToLog);
   if (this.recentOutputs.length >= this.maximumLength ) {
     var oldOutputs = this.recentOutputs;
     this.recentOutputs = [];

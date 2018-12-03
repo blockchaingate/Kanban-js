@@ -202,7 +202,7 @@ FabcoinNode.prototype.runFabcoind = function (response, argumentsNonSplitUnused,
       }
     }
   }
-  this.outputStreams.fabcoind.log(`DEBUG: input queryCommand: ${JSON.stringify(queryCommand)}`);
+  //this.outputStreams.fabcoind.log(`DEBUG: input queryCommand: ${JSON.stringify(queryCommand)}`);
   this.argumentList.push(`-rpcpassword=${this.configuration.RPCPassword}`);
   this.argumentList.push(`-rpcuser=${this.configuration.RPCUser}`);
   this.argumentList.push(`-datadir=${this.paths.dataDir}`);
