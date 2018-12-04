@@ -72,6 +72,7 @@ OutputStream.prototype.append = function (data) {
   dataToLog = dataToLog.replace("error", "error".bold.red);
   dataToLog = dataToLog.replace("Error", "Error".bold.red);
   dataToLog = dataToLog.replace("ERROR", "ERROR".bold.red);
+  dataToLog = dataToLog.replace("HIGHLIGHT", "HIGHLIGHT".red.bold);
   console.log(dataToLog);
   if (this.recentOutputs.length >= this.maximumLength ) {
     var oldOutputs = this.recentOutputs;

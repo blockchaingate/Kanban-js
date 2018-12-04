@@ -36,11 +36,15 @@ function NodeKanbanGo(
   this.numberOfNodes = inputData.numberOfNodes;
   this.basePath = `${getInitializer().paths.nodesDir}/${this.numberOfNodes}nodes`;
   if (this.flagConnectInALine) {
-    this.basePath += "_line";
+    this.basePath += "l";
   } else {
-    this.basePath += "_full_graph";
+    this.basePath += "fg";
   }
-  this.basePath += `_${inputData.contractId}`;
+  if (this.contractId.length > 30) {
+    this.basePath += `_${this.contractId.slice(0, this.contractId.length - 30)}`;
+  } else {
+    this.basePath += `_${this.contractId}`;
+  }
   this.notes = "";
   this.fileNameNodeAddress = null;
   this.nodePrivateKey = new cryptoKanban.CurveExponent();
@@ -974,7 +978,10 @@ KanbanGoInitializer.prototype.runNodesOnFAB = function(response, queryCommand, c
   this.runNodes(response, queryCommand);
 }
 
-KanbanGoInitializer.prototype.runNodes = function(response, queryCommand) {
+KanbanGoInitializer.prototype.runNodes = function(
+  /**@type {ResponseWrapper} */
+  response, queryCommand
+) {
   this.flagStartWasEverAttempted = true;
   this.numberOfKanbanGORuns ++;
   this.log(`${this.numberOfKanbanGORuns} attempts to initialize KanbanGO so far. `);
@@ -1003,12 +1010,24 @@ KanbanGoInitializer.prototype.runNodes = function(response, queryCommand) {
     return;
   }
   for (var counterNode = 0; counterNode < candidateNumberOfNodes; counterNode ++) {
-    this.nodes.push(new NodeKanbanGo({
+    var currentNode = new NodeKanbanGo({
       id: counterNode,
       contractId: this.smartContractId,
       connectInALine: this.flagConnectKanbansInALine,
       numberOfNodes: candidateNumberOfNodes
-    }));
+    });
+    this.nodes.push(currentNode);
+    if (currentNode.nodeKeyFileName.length > 100) {
+      var errorString = `Computed node key file name: ${currentNode.nodeKeyFileName} too long (${currentNode.nodeKeyFileName.length} characters). `;
+      errorString += `This breaks the kanbanGO ipc endpoint, which has a size limit of 100 chars due to unix file socket limitations. `;
+      errorString += `Please move your kanban installation in a folder of smaller length, or write us an angry email to fix this. `;
+      var result = {
+        error: errorString        
+      };
+      response.writeHead(500);
+      return response.end(JSON.stringify(result));
+    }
+
   }
   for (var counterNode = 0; counterNode < this.nodes.length; counterNode ++) {
     var currentNode = this.nodes[counterNode]; 
