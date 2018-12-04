@@ -59,6 +59,9 @@ function KanbanGoNodes() {
     setAggregateSignatureNoBitmap: this.getSetInputWithShortener(inputAggregate.aggregateSignature),
     setAggregateSignatureUncompressed: this.getSetInputWithShortener(inputAggregate.aggregateSignatureUncompressed),
     setAggregateSignatureComplete: this.getSetInputWithShortener(inputAggregate.aggregateSignatureComplete),
+    highlightErrorWords: {
+      transformer: miscellaneousFrontEnd.highlightErrorWords
+    }
   };
   // Specifies options for rpc kanban rpc output display.
   this.optionsKanbanGOStandard = {
@@ -176,6 +179,7 @@ function KanbanGoNodes() {
       "contractInheritance.${label}": this.transformersStandard.shortener,
       "node.${number}": this.transformersStandard.shortener,
       "notes": this.transformersStandard.shortener,
+      "${number}": this.transformersStandard.highlightErrorWords,
     }
   };
   this.optionsCrypto = {
@@ -302,7 +306,10 @@ function KanbanGoNodes() {
     getLogFile: {
       outputOptions: {
         totalEntriesToDisplayAtEnds: 1000,
-      },
+        transformers: {
+          "${number}": this.transformersStandard.highlightErrorWords
+        }
+      }
     },
     getRPCLogFile: {
       outputOptions: {

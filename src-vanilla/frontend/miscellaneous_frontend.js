@@ -247,6 +247,28 @@ function setCheckbox(checkboxId, value) {
   }
 }
 
+var errorWordsWithSettings = {
+  "error": {color: "red"},
+  "Error": {color: "red"},
+  "ERROR": {color: "red"},
+  "fatal": {color: "red"},
+  "Fatal": {color: "red"},
+  "FATAL": {color: "red"},
+  "panic": {color: "red"},
+  "Panic": {color: "red"},
+};
+
+function highlightErrorWords(input) {
+  if (typeof input !== "string") {
+    return input;
+  }
+  var result = input;
+  for (var label in errorWordsWithSettings) {
+    result = result.replace(label, `<b style = "color: ${errorWordsWithSettings[label].color}">${label}</b>`);
+  } 
+  return result;
+}
+
 
 module.exports = {
   attachModuleFullNameToHandlerNames,
@@ -261,4 +283,5 @@ module.exports = {
   makePanel,
   standardExpandButtonHandler,
   setCheckbox,
+  highlightErrorWords,
 }
