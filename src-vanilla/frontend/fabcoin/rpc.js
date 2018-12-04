@@ -448,33 +448,11 @@ function FabNode() {
 
 }
 
-FabNode.prototype.sanitizeTxOutputs = function() {
-  var txOuts = this.getObjectFromInput(ids.defaults.fabcoin.inputBlockInfo.txOutputs);
-  var isGood = true;
-  if (typeof txOuts === "object") {
-    if (Object.keys(txOuts).length <= 0) {
-      isGood = false;
-    }
-  } else {
-    isGood = false;
-  }
-  if (isGood) {
-    return;
-  }
-  var sanitizedTxOuts = {};
-  if (typeof txOuts !== "string") {
-    miscellaneousFrontEnd.highlightError(ids.defaults.fabcoin.inputBlockInfo.txOutputs);
-    return;
-  }
-  sanitizedTxOuts[txOuts] = 0;
-  miscellaneousFrontEnd.updateValue(ids.defaults.fabcoin.inputBlockInfo.txOutputs, jsonic.stringify(sanitizedTxOuts));
-}
-
 FabNode.prototype.getObjectFromInput = function(inputId) {
   var rawInput = document.getElementById(inputId).value;
   var outputObject = null;
   try {
-    outputObject = jsonic(rawInput);
+    outputObject = JSON.parse(rawInput);
   } catch (e) {
     if (typeof rawInput === "string") {
       outputObject = rawInput;
@@ -519,54 +497,39 @@ FabNode.prototype.getSetInputWithShortener = function(idOutput) {
   };  
 }
 
-FabNode.prototype.setTxOutput = function() {
+FabNode.prototype.computeTxInsAndOuts = function() {
   var inputFab = ids.defaults.fabcoin.inputBlockInfo;
-  var address = document.getElementById(inputFab.txOutputAddresses).value;
-  var publicKeysForAggregateString = document.getElementById(inputFab.txAggregatePublicKeys).value;
-  var amount = document.getElementById(inputFab.walletAmount).value;
-  var isGood = true;
-  if (address === "" || address === null || address === undefined) {
-    miscellaneousFrontEnd.highlightError(inputFab.txOutputAddresses);
-    isGood = false;
+  var incomingIds = document.getElementById(inputFab.txInIds).value;
+  var incomingNOuts = document.getElementById(inputFab.txInNOuts).value;
+  var incomingIdArray = miscellaneousBackend.splitMultipleDelimiters(incomingIds, ", \t");
+  var incomingNOutArray = miscellaneousBackend.splitMultipleDelimiters(incomingNOuts, ", \t");
+  var resultIn = [];
+  var resultOut = {};
+  for (var i = 0; i < incomingIdArray.length; i ++) {
+    resultIn.push({
+      txid: incomingIdArray[i],
+      vout: Number(incomingNOutArray[i]),
+    });
   }
-  var publicKeysForAggregate = null;
-  if (publicKeysForAggregateString.trim() !== "") {
-    try {
-      publicKeysForAggregate = JSON.parse(publicKeysForAggregateString);
-      isGood = true;
-    } catch (e) {
-      console.log("Error parsing public keys for aggregate signature. ");
-      publicKeysForAggregate = null;
-    }
+  var incomingOutAddresses = document.getElementById(inputFab.txBeneficiaryAddresses).value;
+  var incomingAmounts = document.getElementById(inputFab.txBeneficiaryAmounts).value;
+  var incomingOutAddressArray = miscellaneousBackend.splitMultipleDelimiters(incomingOutAddresses, ", \t");
+  var incomingOutAmountArray = miscellaneousBackend.splitMultipleDelimiters(incomingAmounts, ", \t");
+
+  var amountCounter = 0;
+  miscellaneousFrontEnd.updateValue(inputFab.txInputs, JSON.stringify(resultIn));
+  var aggregatePubKeys = document.getElementById(inputFab.txAggregatePublicKeys).value;
+  if (aggregatePubKeys !== "" && typeof aggregatePubKeys === "string") {
+    resultOut.aggregateSignature = {
+      publicKeysHex: aggregatePubKeys,
+      amount: Number(incomingOutAddressArray[amountCounter]),
+    };
+    amountCounter ++;
   }
-  if (amount === "" || amount === null || amount === undefined) {
-    miscellaneousFrontEnd.highlightError(inputFab.walletAmount);
-    isGood = false;
+  for (; amountCounter < incomingOutAddressArray.length; amountCounter ++) {
+    resultOut[incomingOutAddressArray[amountCounter]] = Number(incomingOutAmountArray[amountCounter]);
   }
-  if (!isGood) {
-    return;
-  }
-  var currentOutputsRaw;
-  var currentOutputs; 
-  try {
-    currentOutputsRaw = document.getElementById(inputFab.txOutputs).value;
-    currentOutputs = jsonic(currentOutputsRaw);
-    if (address !== null && address !== undefined && address !== "") {
-      currentOutputs[address] = amount;
-      amount = 0;
-    }
-    if (publicKeysForAggregate !== null) {
-      currentOutputs.aggregateSignature = {
-        publicKeys: publicKeysForAggregate,
-        amount: amount,
-      };
-    }
-    miscellaneousFrontEnd.updateValue(inputFab.txOutputs, JSON.stringify(currentOutputs));
-  } catch (e) {
-    console.log(`Failed to parse your current transaction inputs. Inputs raw: ${currentOutputsRaw}. Inputs parsed: ${JSON.stringify(currentOutputs)}. ${e}`);
-    miscellaneousFrontEnd.highlightError(inputFab.txOutputs);
-    return;    
-  }
+  miscellaneousFrontEnd.updateValue(inputFab.txOutputs, JSON.stringify(resultOut));
 }
 
 FabNode.prototype.setTxInputVoutAndValue = function(container, content, extraData) {
@@ -579,48 +542,18 @@ FabNode.prototype.setTxInputVoutAndValue = function(container, content, extraDat
     incomingFees = 1;
   }
   var incomingId = extraData.ambientInput.txid;
-  var incomingVout = extraData.labelArray[extraData.labelArray.length - 2];
+  var incomingNOut = extraData.labelArray[extraData.labelArray.length - 2];
+
+  miscellaneousFrontEnd.updateValue(inputFab.txInIds, incomingId);
+  miscellaneousFrontEnd.updateValue(inputFab.txInNOuts, incomingNOut);
+  miscellaneousFrontEnd.updateValue(inputFab.txBeneficiaryAmounts, incomingAmount)
+  miscellaneousFrontEnd.updateValue(inputFab.txFee, incomingFees)
+
   miscellaneousFrontEnd.updateValue(inputKanban.txInId, incomingId);
-  miscellaneousFrontEnd.updateValue(inputKanban.txInVout, incomingVout);
+  miscellaneousFrontEnd.updateValue(inputKanban.txInNOut, incomingNOut);
+  miscellaneousFrontEnd.updateValue(inputKanban.beneficiaryAmount, incomingAmount);
   miscellaneousFrontEnd.updateValue(inputKanban.fees, incomingFees);
-  var addressVout = null;
-  try {
-    addressVout = extraData.ambientInput.vout[incomingVout].scriptPubKey.addresses[0];
-  } catch (e) {
-  }
-  /**@type {string} */
-  var currentInputsRaw;
-  var currentInputs;
-  try {
-    currentInputsRaw = document.getElementById(inputFab.txInputs).value;
-    if (currentInputsRaw.trim() === "") {
-      currentInputs = [];
-    } else {
-      currentInputs = jsonic(currentInputsRaw);
-    }
-    var found = false;
-    for (var counterInputs = 0; counterInputs < currentInputs.length; counterInputs ++) {
-      var currentIn = currentInputs[counterInputs];
-      if (currentIn.txid === incomingId) {
-        currentIn.vout = incomingVout
-        found = true;
-        break;
-      }
-    }
-    if (!found) {
-      currentInputs.push({txid: incomingId, vout: incomingVout });
-    }
-    miscellaneousFrontEnd.updateValue(inputFab.txInputs, jsonic.stringify(currentInputs));
-    if (addressVout !== null) {
-      miscellaneousFrontEnd.updateValue(inputFab.address, addressVout);
-    }
-    miscellaneousFrontEnd.updateValue(inputFab.walletAmount, incomingAmount);
-    this.setTxOutput();
-  } catch (e) {
-    console.log(`Failed to parse your current transaction inputs. Inputs raw: ${currentInputsRaw}. Inputs parsed: ${JSON.stringify(currentInputs)}. ${e}`);
-    miscellaneousFrontEnd.highlightError(inputFab.txInputs);
-    return;
-  }
+  this.computeTxInsAndOuts();
 }
 
 FabNode.prototype.setContractId = function(container, content, extraData) {

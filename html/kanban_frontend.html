@@ -16,79 +16,77 @@
 
 <div class = "divMainPage" id = "pageDemo">
   <div class = "divControlPanelDefault">
-    <table class = "tableStandardInputs"> 
-    <tr><td>
-      <button class = "buttonStandard" style = "width:100px" onclick = "window.kanban.fabcoin.initialization.initializer.run('demoRegisterSmartContractAndABI');">Set contract</button><br>
-      <button class = "buttonStandard" style = "width:100px" onclick = "window.kanban.fabcoin.initialization.initializer.run('demoRegisterCorporation');">Register</button><br>
-      <button class = "buttonStandard" style = "width:100px" onclick = "window.kanban.fabcoin.initialization.initializer.run('demoGetAllCorporations');">List registered</button><br>
-      <button class = "buttonStandard" style = "width:100px" onclick = "window.kanban.fabcoin.initialization.initializer.run('demoGetNonce');">Get nonce</button><br>
-      <button class = "buttonStandard" style = "width:100px" onclick = "window.kanban.fabcoin.initialization.initializer.run('demoIssuePoints');"><b style='color:green'>issue pts</b></button><br>
-      <button class = "buttonStandard" style = "width:100px" onclick = "window.kanban.fabcoin.initialization.initializer.run('redeemPoints');"><b style='color:red'>redeem</b></button><br>
-      <button class = "buttonStandard" style = "width:100px" onclick = "window.kanban.fabcoin.initialization.initializer.demoPackArguments();">Pack args</button><br>
-    </td>
-    <td>
-      <input id = "inputDemoCorporationName"            class = "inputStandard" size = "50" placeholder = "corporation name"></input><br>
-      <input id = "inputDemoCorporationNameHex"         class = "inputStandard" size = "50" placeholder = "corporation name hex"></input><br>
-      <input id = "inputDemoCorporationPublicKey"       class = "inputStandard" size = "50" placeholder = "corporation pubkey hex"></input><br>
-      <input id = "inputDemoCorporationRatio"           class = "inputStandard" size = "50" placeholder = "ratio"></input><br>
-      <input id = "inputDemoCorporationBeneficiary"     class = "inputStandard" size = "50" placeholder = "beneficiary"></input><br>
-      <input id = "inputDemoCorporationNonce"           class = "inputStandard" size = "50" placeholder = "nonce"></input><br>
-      <input id = "inputDemoCorporationSignature"       class = "inputStandard" size = "50" placeholder = "corporation signature"></input><br>
-
-      <div class = "divLabelButtonGroup">tx details</div><div id = "panelFabcoinDemoTxDetails" class = "panelStandard">
-      <input id = "inputDemoCorporationTransactionHash" class = "inputStandard" size = "50" placeholder = "tx hash"></input><br>
-      <input id = "inputDemoTransferPointsFrom"         class = "inputStandard" size = "50" placeholder = "transfer points from"></input><br>
-      <input id = "inputDemoTransferPointsTo"           class = "inputStandard" size = "50" placeholder = "transfer points to"></input><br>
-      <input id = "inputDemoTransferPointsAmount"       class = "inputStandard" size = "50" placeholder = "transfer points amount"></input><br>
-      </div>
-      <input id = "inputDemoMoneySpent"                 class = "inputStandard" size = "50" placeholder = "money spent"></input><br>
-    </td>
-    </tr>
-    </table>
+  <table class = "tableStandardInputs"> 
+  <tr><td>
+    <button class = "buttonStandard" style = "width:100px" onclick = "window.kanban.fabcoin.initialization.initializer.run('demoRegisterSmartContractAndABI');">Set contract</button><br>
+    <button class = "buttonStandard" style = "width:100px" onclick = "window.kanban.fabcoin.initialization.initializer.run('demoRegisterCorporation');">Register</button><br>
+    <button class = "buttonStandard" style = "width:100px" onclick = "window.kanban.fabcoin.initialization.initializer.run('demoGetAllCorporations');">List registered</button><br>
+    <button class = "buttonStandard" style = "width:100px" onclick = "window.kanban.fabcoin.initialization.initializer.run('demoGetNonce');">Get nonce</button><br>
+    <button class = "buttonStandard" style = "width:100px" onclick = "window.kanban.fabcoin.initialization.initializer.run('demoIssuePoints');"><b style='color:green'>issue pts</b></button><br>
+    <button class = "buttonStandard" style = "width:100px" onclick = "window.kanban.fabcoin.initialization.initializer.run('redeemPoints');"><b style='color:red'>redeem</b></button><br>
+    <button class = "buttonStandard" style = "width:100px" onclick = "window.kanban.fabcoin.initialization.initializer.demoPackArguments();">Pack args</button><br>
+  </td>
+  <td>
+    <input id = "inputDemoCorporationName"            class = "inputStandard" size = "50" placeholder = "corporation name"></input><br>
+    <input id = "inputDemoCorporationNameHex"         class = "inputStandard" size = "50" placeholder = "corporation name hex"></input><br>
+    <input id = "inputDemoCorporationPublicKey"       class = "inputStandard" size = "50" placeholder = "corporation pubkey hex"></input><br>
+    <input id = "inputDemoCorporationRatio"           class = "inputStandard" size = "50" placeholder = "ratio"></input><br>
+    <input id = "inputDemoCorporationBeneficiary"     class = "inputStandard" size = "50" placeholder = "beneficiary"></input><br>
+    <input id = "inputDemoCorporationNonce"           class = "inputStandard" size = "50" placeholder = "nonce"></input><br>
+    <input id = "inputDemoCorporationSignature"       class = "inputStandard" size = "50" placeholder = "corporation signature"></input><br>
+    <div class = "divLabelButtonGroup">tx details</div><div id = "panelFabcoinDemoTxDetails" class = "panelStandard">
+    <input id = "inputDemoCorporationTransactionHash" class = "inputStandard" size = "50" placeholder = "tx hash"></input><br>
+    <input id = "inputDemoTransferPointsFrom"         class = "inputStandard" size = "50" placeholder = "transfer points from"></input><br>
+    <input id = "inputDemoTransferPointsTo"           class = "inputStandard" size = "50" placeholder = "transfer points to"></input><br>
+    <input id = "inputDemoTransferPointsAmount"       class = "inputStandard" size = "50" placeholder = "transfer points amount"></input><br>
     </div>
-    <br>
-    <div class = "divControlPanelDefault" id = "divOutputDemo"></div><!--divFabcoinInitialization-->
-    <br>
-    <canvas id = "canvasQR" style = "width: 300px; height: 300px;" ></canvas>
-    <br>
-    <button class = "buttonProgress" onclick = "window.kanban.fabcoin.initialization.initializer.clearQRCode()">clear QR</button>
-
+    <input id = "inputDemoMoneySpent"                 class = "inputStandard" size = "50" placeholder = "money spent"></input><br>
+  </td>
+  </tr>
+  </table>
+  </div>
+  <br>
+  <div class = "divControlPanelDefault" id = "divOutputDemo"></div><!--divFabcoinInitialization-->
+  <br>
+  <canvas id = "canvasQR" style = "width: 300px; height: 300px;" ></canvas>
+  <br>
+  <button class = "buttonProgress" onclick = "window.kanban.fabcoin.initialization.initializer.clearQRCode()">clear QR</button>
 </div>
 
 <div class = "divMainPage" id = "pageMyLocalKanbanNodes">
   <div class = "divControlPanelDefault">
   <table class = "tableStandardInputs"> 
-    <tr><td>
-      <div class = "divLabelButtonGroup">break KB</div><div id = "panelKBGODangerous" class = "panelStandard">
-      <button class = "buttonStandard" style = "width:100px" onclick = "window.kanban.kanbanGO.rpc.theKBNodes.run('fetchNodeConfig', 'initialization');"><b style = "color:red">Get config</b></button><br>
-      <!--button class = "buttonStandard"   style = "width:100px" onclick = "window.kanban.kanbanGO.rpc.theKBNodes.run('regenerateNodeConfig', 'initialization');">Regen config</button><br-->
-      <button class = "buttonStandard" style = "width:100px" onclick = "window.kanban.kanbanGO.rpc.theKBNodes.run('killAllGeth', 'initialization')"><b style = "color:red">kill all geth</b></button><br>
-      </div>
-      <div class = "divLabelButtonGroup">run</div><div id = "panelKBGORun" class = "panelStandard">
-      <button class = "buttonStandard" style = "width:100px" onclick = "window.kanban.kanbanGO.rpc.theKBNodes.run('runNodesOnFAB', 'initialization');">Run</button><br>
-      <button class = "buttonStandard" style = "width:100px" onclick = "window.kanban.kanbanGO.rpc.theKBNodes.run('getNodeInformation', 'initialization')">Node info</button><br>
-      <button class = "buttonStandard" style = "width:100px" onclick = "window.kanban.kanbanGO.rpc.theKBNodes.run('getLogFile', 'initialization');">Logs</button><br>
-      <button class = "buttonStandard" style = "width:100px" onclick = "window.kanban.kanbanGO.rpc.theKBNodes.run('getRPCLogFile', 'initialization');">RPC logs</button><br>
-      </div>
-    </td>
+  <tr><td>
+  <div class = "divLabelButtonGroup">break KB</div><div id = "panelKBGODangerous" class = "panelStandard">
+  <button class = "buttonStandard" style = "width:100px" onclick = "window.kanban.kanbanGO.rpc.theKBNodes.run('fetchNodeConfig', 'initialization');"><b style = "color:red">Get config</b></button><br>
+  <!--button class = "buttonStandard"   style = "width:100px" onclick = "window.kanban.kanbanGO.rpc.theKBNodes.run('regenerateNodeConfig', 'initialization');">Regen config</button><br-->
+  <button class = "buttonStandard" style = "width:100px" onclick = "window.kanban.kanbanGO.rpc.theKBNodes.run('killAllGeth', 'initialization')"><b style = "color:red">kill all geth</b></button><br>
+  </div>
+  <div class = "divLabelButtonGroup">run</div><div id = "panelKBGORun" class = "panelStandard">
+  <button class = "buttonStandard" style = "width:100px" onclick = "window.kanban.kanbanGO.rpc.theKBNodes.run('runNodesOnFAB', 'initialization');">Run</button><br>
+  <button class = "buttonStandard" style = "width:100px" onclick = "window.kanban.kanbanGO.rpc.theKBNodes.run('getNodeInformation', 'initialization')">Node info</button><br>
+  <button class = "buttonStandard" style = "width:100px" onclick = "window.kanban.kanbanGO.rpc.theKBNodes.run('getLogFile', 'initialization');">Logs</button><br>
+  <button class = "buttonStandard" style = "width:100px" onclick = "window.kanban.kanbanGO.rpc.theKBNodes.run('getRPCLogFile', 'initialization');">RPC logs</button><br>
+  </div>
+  </td>
   <td>
-    <div class = "divLabelButtonGroup">break KB</div><div id = "panelKBGODangerousInputs" class = "panelStandard">
-      <input id = "inputKBGONumberOfGethNodes" class = "inputStandard" size = "50" placeholder = "# nodes"      value = "1"></input><br>
-      <input id = "inputKBGOContractId"        class = "inputStandard" size = "50" placeholder = "contract Id"  value = ""></input><br>
-      <input id = "inputKBGOContractABI"       class = "inputStandard" size = "50" placeholder = "contract ABI" value = ""></input><br>
-    </div>
-    <div class = "divLabelButtonGroup">run inputs</div><div id = "panelKBGOInputs" class = "panelStandard">
-      <label class = "containerCheckbox">
-        <input type = "checkbox" id = "checkboxConnectKanbansInALine" onchange = "window.kanban.kanbanGO.rpc.theKBNodes.readCheckboxesConfiguration();">
-        <span class = "checkMark"></span>
-        Connect Kanbans in a line
-      </label><br> 
-    <label class = "containerCheckbox">
-      <input type = "checkbox" id = "checkboxFabcoindAutostartAfterKanbanGO" onchange = "window.kanban.kanbanGO.rpc.theKBNodes.readCheckboxesConfiguration();">
-      <span class = "checkMark"></span>
-      <b style='color:green'>FAB autostart</b> after kanban, <b style='color:green'>safe</b> if FAB already running
-    </label><br> 
-    </div>
+  <div class = "divLabelButtonGroup">break KB</div><div id = "panelKBGODangerousInputs" class = "panelStandard">
+  <input id = "inputKBGONumberOfGethNodes" class = "inputStandard" size = "50" placeholder = "# nodes"      value = "1"></input><br>
+  <input id = "inputKBGOContractId"        class = "inputStandard" size = "50" placeholder = "contract Id"  value = ""></input><br>
+  <input id = "inputKBGOContractABI"       class = "inputStandard" size = "50" placeholder = "contract ABI" value = ""></input><br>
+  </div>
+  <div class = "divLabelButtonGroup">run inputs</div><div id = "panelKBGOInputs" class = "panelStandard">
+  <label class = "containerCheckbox">
+    <input type = "checkbox" id = "checkboxConnectKanbansInALine" onchange = "window.kanban.kanbanGO.rpc.theKBNodes.readCheckboxesConfiguration();">
+    <span class = "checkMark"></span>
+    Connect Kanbans in a line
+  </label><br> 
+  <label class = "containerCheckbox">
+  <input type = "checkbox" id = "checkboxFabcoindAutostartAfterKanbanGO" onchange = "window.kanban.kanbanGO.rpc.theKBNodes.readCheckboxesConfiguration();">
+  <span class = "checkMark"></span>
+  <b style='color:green'>FAB autostart</b> after kanban, <b style='color:green'>safe</b> if FAB already running
+  </label><br> 
+  </div>
   </td>
   </tr>
   </table>
@@ -135,19 +133,19 @@
     <input id = "inputKBGOBlockHash"   class = "inputStandard" size = "50" placeholder = "block hash"></input><br>
     </div>
     <div class = "divLabelButtonGroup">vote inputs</div><div id = "panelKBGOVotingMachineInputs" class = "panelStandard">
-      <input id = "inputKBGOVoteMessage"    class = "inputStandard" size = "50" placeholder = "message to vote"></input><br>
-      <input id = "inputKBGOVoteMessageHex" class = "inputStandard" size = "50" placeholder = "message to vote hex"></input><br>
+    <input id = "inputKBGOVoteMessage"    class = "inputStandard" size = "50" placeholder = "message to vote"></input><br>
+    <input id = "inputKBGOVoteMessageHex" class = "inputStandard" size = "50" placeholder = "message to vote hex"></input><br>
     </div>
     <div class = "divLabelButtonGroup">benchmark inputs</div><div id = "panelKBGOBenchmarkInputs" class = "panelStandard">
-      <input id = "inputKBGOPrivateKey"        class = "inputStandard" size = "50" placeholder = "private key to sign benchmark transactions"/><br>
-      <input id = "inputKBGOToAddress"         class = "inputStandard" size = "50" placeholder = "destination address"/><br>
-      <input id = "inputKBGOTransactionNumber" class = "inputStandard" size = "50" placeholder = "number of transactions to spam"/><br>
-      <input id = "inputKBGOTransactionValue"  class = "inputStandard" size = "50" placeholder = "value of each transaction"/><br>
+    <input id = "inputKBGOPrivateKey"        class = "inputStandard" size = "50" placeholder = "private key to sign benchmark transactions"/><br>
+    <input id = "inputKBGOToAddress"         class = "inputStandard" size = "50" placeholder = "destination address"/><br>
+    <input id = "inputKBGOTransactionNumber" class = "inputStandard" size = "50" placeholder = "number of transactions to spam"/><br>
+    <input id = "inputKBGOTransactionValue"  class = "inputStandard" size = "50" placeholder = "value of each transaction"/><br>
     </div>
     <div class = "divLabelButtonGroup">tx inputs</div><div id = "panelKBGOTransactionBuilderInputs" class = "panelStandard">
     <input id = "inputKBGOSecretIn"                      class = "inputStandard" size = "50" placeholder = "secret in"/><br>
     <input id = "inputKBGOTransactionInId"               class = "inputStandard" size = "50" placeholder = "transaction in"/><br>
-    <input id = "inputKBGOTransactionInVout"             class = "inputStandard" size = "50" placeholder = "vout to spend"/><br>
+    <input id = "inputKBGOTransactionInNOut"             class = "inputStandard" size = "50" placeholder = "vout to spend"/><br>
     <input id = "inputKBGOTransactionBeneficiaryAddress" class = "inputStandard" size = "50" placeholder = "beneficiary address"/><br>
     <input id = "inputKBGOTransactionBeneficiaryAmount"  class = "inputStandard" size = "50" placeholder = "beneficiary amount"/><br>
     <input id = "inputKBGOTransactionChangeAddress"      class = "inputStandard" size = "50" placeholder = "change"/><br>
@@ -201,14 +199,14 @@
     <button class = "buttonStandard" style = "width: 100px" onclick = "window.kanban.fabcoin.rpc.fabNode.run('testSchnorrSignatureVerify');">Verify</button><br>
     </div>
     <div class = "divLabelButtonGroup">aggregate</div><div id = "panelAggregateFabcoindButtons" class = "panelStandard">
-    <button class = "buttonStandard"      style = "width: 100px" onclick = "window.kanban.fabcoin.rpc.fabNode.testAggregateSignatureClear();">Clear</button><br>
-    <button class = "buttonStandard"      style = "width: 100px" onclick = "window.kanban.fabcoin.rpc.fabNode.run('testAggregateSignatureInitialize');">Initialize</button><br>
-    <button class = "buttonStandard"      style = "width: 100px" onclick = "window.kanban.fabcoin.rpc.fabNode.run('testAggregateSignatureCommitment');">Commit</button><br>
-    <button class = "buttonStandard"      style = "width: 100px" onclick = "window.kanban.fabcoin.rpc.fabNode.run('testAggregateSignatureChallenge');">Challenge</button><br>
-    <button class = "buttonStandard"      style = "width: 100px" onclick = "window.kanban.fabcoin.rpc.fabNode.run('testAggregateSignatureSolutions');">Solutions</button><br>
-    <button class = "buttonStandard"      style = "width: 100px" onclick = "window.kanban.fabcoin.rpc.fabNode.run('testAggregateSignatureAggregation');">Aggregate</button><br>
-    <button class = "buttonStandard"      style = "width: 100px" onclick = "window.kanban.fabcoin.rpc.fabNode.run('testAggregateVerification');">Verify</button><br>
-    <button class = "buttonStandard"      style = "width: 100px" onclick = "window.kanban.fabcoin.rpc.fabNode.run('testAggregateVerificationComplete');">Ver. complete</button><br>
+    <button class = "buttonStandard" style = "width: 100px" onclick = "window.kanban.fabcoin.rpc.fabNode.testAggregateSignatureClear();">Clear</button><br>
+    <button class = "buttonStandard" style = "width: 100px" onclick = "window.kanban.fabcoin.rpc.fabNode.run('testAggregateSignatureInitialize');">Initialize</button><br>
+    <button class = "buttonStandard" style = "width: 100px" onclick = "window.kanban.fabcoin.rpc.fabNode.run('testAggregateSignatureCommitment');">Commit</button><br>
+    <button class = "buttonStandard" style = "width: 100px" onclick = "window.kanban.fabcoin.rpc.fabNode.run('testAggregateSignatureChallenge');">Challenge</button><br>
+    <button class = "buttonStandard" style = "width: 100px" onclick = "window.kanban.fabcoin.rpc.fabNode.run('testAggregateSignatureSolutions');">Solutions</button><br>
+    <button class = "buttonStandard" style = "width: 100px" onclick = "window.kanban.fabcoin.rpc.fabNode.run('testAggregateSignatureAggregation');">Aggregate</button><br>
+    <button class = "buttonStandard" style = "width: 100px" onclick = "window.kanban.fabcoin.rpc.fabNode.run('testAggregateVerification');">Verify</button><br>
+    <button class = "buttonStandard" style = "width: 100px" onclick = "window.kanban.fabcoin.rpc.fabNode.run('testAggregateVerificationComplete');">Ver. complete</button><br>
     </div>
   </td>
   <td>
@@ -314,10 +312,10 @@
     <button class = "buttonStandard" style = "width: 100px" onclick = "window.kanban.kanbanJS.crypto.testFunctions.run('testRipemd160')">Ripemd 160</button><br>
     </div>
     <div class = "divLabelButtonGroup">Schnorr</div><div id = "panelSchnorrKanbanJSButtons" class = "panelStandard">
-      <button class = "buttonStandard" style = "width: 100px" onclick = "window.kanban.kanbanJS.crypto.testFunctions.run('testPrivateKeyGeneration')"><b style = 'color: red'>Private key</b></button><br>
-      <button class = "buttonStandard" style = "width: 100px" onclick = "window.kanban.kanbanJS.crypto.testFunctions.run('testPublicKeyFromPrivate')">Public key</button><br>
-      <button class = "buttonStandard" style = "width: 100px" onclick = "window.kanban.kanbanJS.crypto.testFunctions.run('testEthereumAddress')">Eth. address</button><br>
-      <button class = "buttonStandard" style = "width: 100px" onclick = "window.kanban.kanbanJS.crypto.testFunctions.run('testFABAddress')">FAB address</button><br>
+    <button class = "buttonStandard" style = "width: 100px" onclick = "window.kanban.kanbanJS.crypto.testFunctions.run('testPrivateKeyGeneration')"><b style = 'color: red'>Private key</b></button><br>
+    <button class = "buttonStandard" style = "width: 100px" onclick = "window.kanban.kanbanJS.crypto.testFunctions.run('testPublicKeyFromPrivate')">Public key</button><br>
+    <button class = "buttonStandard" style = "width: 100px" onclick = "window.kanban.kanbanJS.crypto.testFunctions.run('testEthereumAddress')">Eth. address</button><br>
+    <button class = "buttonStandard" style = "width: 100px" onclick = "window.kanban.kanbanJS.crypto.testFunctions.run('testFABAddress')">FAB address</button><br>
     </div>
   </td>
   <td>
@@ -346,7 +344,6 @@
     <button class = "buttonStandard" style = "width: 100px" onclick = "window.kanban.fabcoin.rpc.fabNode.run('getLogFile', {manualInputs:{ logFile: 'debug'}})"> debug.log</button><br>
   </td>
   <td>
-
     <input type = "text" class = "inputStandard" id = "inputFabcoindArguments"     size = "50" value = "-regtestwithnet -printtoconsole" placeholder = "arguments"></input><br>
     <input type = "text" class = "inputStandard" id = "inputFabcoindSmartContract" size = "50" value = ""                                placeholder = "smart contract id"></input><br>
   </td>
@@ -370,13 +367,15 @@
     <button class = "buttonStandard" style = "width: 100px" onclick = "window.kanban.fabcoin.rpc.fabNode.run('generateBlocks')">Mine blocks</button><br>
     <button class = "buttonStandard" style = "width: 100px" onclick = "window.kanban.fabcoin.rpc.fabNode.run('getRawMempool')">Raw mempool</button><br>
     </div>    
-    <div class = "divLabelButtonGroup">txs</div><div id = "panelFabcoinTXButtons" class = "panelStandard">
+    <div class = "divLabelButtonGroup">key inputs</div><div id = "panelFabcoinKeys" class = "panelStandard">
     <button class = "buttonStandard" style = "width: 100px" onclick = "window.kanban.fabcoin.rpc.fabNode.run('getNewAddress')">New address</button><br>
     <button class = "buttonStandard" style = "width: 100px" onclick = "window.kanban.fabcoin.rpc.fabNode.run('dumpPrivateKey')"><b style = "color:red">Show private</b></button><br>
     <button class = "buttonStandard" style = "width: 100px" onclick = "window.kanban.fabcoin.rpc.fabNode.computePublicKeyFromPrivate()">Compute pub</button><br>
+    </div>
+    <div class = "divLabelButtonGroup">txs</div><div id = "panelFabcoinTXButtons" class = "panelStandard">
     <button class = "buttonStandard" style = "width: 100px" onclick = "window.kanban.fabcoin.rpc.fabNode.run('getTransactionById')">Get tx</button><br>
     <button class = "buttonStandard" style = "width: 100px" onclick = "window.kanban.fabcoin.rpc.fabNode.run('decodeTransactionRaw')">Decode txHex</button><br>
-    <button class = "buttonStandard" style = "width: 100px" onclick = "window.kanban.fabcoin.rpc.fabNode.sanitizeTxOutputs(); window.kanban.fabcoin.rpc.fabNode.run('createRawTransaction')">Create raw</button><br>
+    <button class = "buttonStandard" style = "width: 100px" onclick = "window.kanban.fabcoin.rpc.fabNode.computeTxInsAndOuts(); window.kanban.fabcoin.rpc.fabNode.run('createRawTransaction')">Create raw</button><br>
     <button class = "buttonStandard" style = "width: 100px" onclick = "window.kanban.fabcoin.rpc.fabNode.run('signRawTransaction')">Sign raw</button><br>
     <button class = "buttonStandard" style = "width: 100px" onclick = "window.kanban.fabcoin.rpc.fabNode.run('insertAggregateSignature')">Insert agg. sig.</button><br>
     <button class = "buttonStandard" style = "width: 100px" onclick = "window.kanban.fabcoin.rpc.fabNode.run('sendRawTransaction')"><b style = "color:red">Send raw</b></button><br>
@@ -393,32 +392,41 @@
   </td>
   <td>
     <div class = "divLabelButtonGroup">block inputs</div><div id = "panelFabcoinBlockInputs" class = "panelStandard">
-    <input type = "text" class = "inputStandard" id = "inputFabcoinBlockNumber"                size = "50" value = "77" placeholder = "block #"></input><br>
-    <input type = "text" class = "inputStandard" id = "inputFabcoinBlockHash"                  size = "50" value = ""   placeholder = "block hash"></input><br>
-    <input type = "text" class = "inputStandard" id = "inputFabcoinNumberOfBlocksToGenerate"   size = "50" value = ""   placeholder = "# blocks to generate"></input><br>    
-    <input type = "text" class = "inputStandard" id = "inputFabcoinTransactionId"              size = "50" value = ""   placeholder = "tx id"></input><br>    
-    <input type = "text" class = "inputStandard" id = "inputFabcoinTransactionHex"             size = "50" value = ""   placeholder = "tx hex"></input><br>
+    <input type = "text" class = "inputStandard" id = "inputFabcoinBlockNumber"                size = "50" value = "" placeholder = "block #"></input><br>
+    <input type = "text" class = "inputStandard" id = "inputFabcoinBlockHash"                  size = "50" value = "" placeholder = "block hash"></input><br>
+    <input type = "text" class = "inputStandard" id = "inputFabcoinNumberOfBlocksToGenerate"   size = "50" value = "" placeholder = "# blocks to generate"></input><br>    
+    </div>
+    <div class = "divLabelButtonGroup">key inputs</div><div id = "panelFabcoinKeysInputs" class = "panelStandard">
+    <input type = "text" class = "inputStandard" id = "inputFabcoinPrivateKey"                 size = "50" value = "" placeholder = "private key"></input><br>    
+    <input type = "text" class = "inputStandard" id = "inputFabcoinPublicKey"                  size = "50" value = "" placeholder = "public key"></input><br>    
+    <input type = "text" class = "inputStandard" id = "inputFabcoinAddress"                    size = "50" value = "" placeholder = "address FAB testnet"></input><br>
+    <input type = "text" class = "inputStandard" id = "inputFabcoinAddressMainnet"             size = "50" value = "" placeholder = "address FAB mainnet"></input><br>
+    <input type = "text" class = "inputStandard" id = "inputEthereumAddress"                   size = "50" value = "" placeholder = "address Ethereum"></input><br>
     </div>
     <div class = "divLabelButtonGroup">tx inputs</div><div id = "panelFabcoinTXInputs" class = "panelStandard">
-    <input type = "text" class = "inputStandard" id = "inputFabcoinPrivateKey"                 size = "50" value = ""   placeholder = "private key"></input><br>    
-    <input type = "text" class = "inputStandard" id = "inputFabcoinPublicKey"                  size = "50" value = ""   placeholder = "public key"></input><br>    
-    <input type = "text" class = "inputStandard" id = "inputFabcoinAddress"                    size = "50" value = ""   placeholder = "address FAB testnet"></input><br>
-    <input type = "text" class = "inputStandard" id = "inputFabcoinAddressMainnet"             size = "50" value = ""   placeholder = "address FAB mainnet"></input><br>
-    <input type = "text" class = "inputStandard" id = "inputEthereumAddress"                   size = "50" value = ""   placeholder = "address Ethereum"></input><br>
-    <input type = "text" class = "inputStandard" id = "inputFabcoinTransactionInputs"          size = "50" value = ""   placeholder = "tx inputs"></input><br>  
-    <input type = "text" class = "inputStandard" id = "inputFabcoinWalletAmount"               size = "50" value = ""   placeholder = "amount (wallet)" onchange = "window.kanban.fabcoin.rpc.fabNode.setTxOutput();"></input><br>
-    <input type = "text" class = "inputStandard" id = "inputFabcoinTransactionOutputAddresses" size = "50" value = ""   placeholder = "outputs address(es)" onchange = "window.kanban.fabcoin.rpc.fabNode.setTxOutput();"></input><br>
-    <input type = "text" class = "inputStandard" id = "inputAggregateSignaturePubKeysForTx"    size = "50" value = ""   placeholder = "aggregate output public keys"  onchange = "window.kanban.fabcoin.rpc.fabNode.setTxOutput();"></input><br>
-    <input type = "text" class = "inputStandard" id = "inputAggregateSignatureForTx"           size = "50" value = ""   placeholder = "aggregate output signature"></input><br>
-    <input type = "text" class = "inputStandard" id = "inputFabcoinTransactionOutputs"         size = "50" value = ""   placeholder = "tx outputs"></input><br>
+    <input type = "text" class = "inputStandard" id = "inputFabcoinTransactionId"              size = "50" value = "" placeholder = "tx id"></input><br>    
+    <input type = "text" class = "inputStandard" id = "inputFabcoinTransactionHex"             size = "50" value = "" placeholder = "tx hex"></input><br>
+
+    <input type = "text" class = "inputStandard" id = "inputFabcoinTxInIds"                    size = "50" value = "" placeholder = "tx in id(s)"></input><br>    
+    <input type = "text" class = "inputStandard" id = "inputFabcoinTxInNOuts"                  size = "50" value = "" placeholder = "tx in n out(s)"></input><br>    
+
+    <input type = "text" class = "inputStandard" id = "inputFabcoinBeneficiaryAddresses"       size = "50" value = "" placeholder = "addresses"                                                                onchange = "window.kanban.fabcoin.rpc.fabNode.computeTxInsAndOuts();" onkeydown = "window.kanban.fabcoin.rpc.fabNode.computeTxInsAndOuts();"></input><br>
+    <input type = "text" class = "inputStandard" id = "inputFabcoinBeneficiaryAmounts"         size = "50" value = "" placeholder = "amounts (aggregate, if any, first, then amount per beneficiary in order)" onchange = "window.kanban.fabcoin.rpc.fabNode.computeTxInsAndOuts();" onkeydown = "window.kanban.fabcoin.rpc.fabNode.computeTxInsAndOuts();"></input><br>
+    <input type = "text" class = "inputStandard" id = "inputFabcoinFee"                        size = "50" value = "" placeholder = "fee"                                                                      onchange = "window.kanban.fabcoin.rpc.fabNode.computeTxInsAndOuts();" onkeydown = "window.kanban.fabcoin.rpc.fabNode.computeTxInsAndOuts();"></input><br>
+  
+    <input type = "text" class = "inputStandard" id = "inputAggregateSignaturePubKeysForTx"    size = "50" value = "" placeholder = "aggregate output public keys"                                             onchange = "window.kanban.fabcoin.rpc.fabNode.computeTxInsAndOuts();" onkeydown = "window.kanban.fabcoin.rpc.fabNode.computeTxInsAndOuts();"></input><br>
+    <input type = "text" class = "inputStandard" id = "inputAggregateSignatureForTx"           size = "50" value = "" placeholder = "aggregate output signature"></input><br>
+
+    <input type = "text" class = "inputStandard" id = "inputFabcoinTransactionInputs"          size = "50" value = "" placeholder = "tx inputs"></input><br>
+    <input type = "text" class = "inputStandard" id = "inputFabcoinTransactionOutputs"         size = "50" value = "" placeholder = "tx outputs"></input><br>
     </div>
     <div class = "divLabelButtonGroup">contract inputs</div><div id = "panelFabcoinSmartInputs" class = "panelStandard">
-    <input type = "text" class = "inputStandard" id = "inputFabcoinContractHex"                size = "50" value = ""   placeholder = "contract hex"></input><br>
-    <input type = "text" class = "inputStandard" id = "inputFabcoinContractId"                 size = "50" value = ""   placeholder = "contract id"></input><br>
-    <input type = "text" class = "inputStandard" id = "inputSolidityFunctionName"              size = "50" value = ""   placeholder = "contract f-n name"></input><br>
-    <input type = "text" class = "inputStandard" id = "inputFabcoinContractFunctionId"         size = "50" value = ""   placeholder = "contract f-n id" onchange = "window.kanban.kanbanGO.rpc.theKBNodes.computeContractData()"></input><br>
-    <input type = "text" class = "inputStandard" id = "inputFabcoinContractFunctionData"       size = "50" value = ""   placeholder = "contract f-n data" onchange = "window.kanban.kanbanGO.rpc.theKBNodes.computeContractData()"></input><br>
-    <input type = "text" class = "inputStandard" id = "inputFabcoinContractData"               size = "50" value = ""   placeholder = "contract function + data"></input><br>
+    <input type = "text" class = "inputStandard" id = "inputFabcoinContractHex"                size = "50" value = "" placeholder = "contract hex"></input><br>
+    <input type = "text" class = "inputStandard" id = "inputFabcoinContractId"                 size = "50" value = "" placeholder = "contract id"></input><br>
+    <input type = "text" class = "inputStandard" id = "inputSolidityFunctionName"              size = "50" value = "" placeholder = "contract f-n name"></input><br>
+    <input type = "text" class = "inputStandard" id = "inputFabcoinContractFunctionId"         size = "50" value = "" placeholder = "contract f-n id" onchange = "window.kanban.kanbanGO.rpc.theKBNodes.computeContractData()"></input><br>
+    <input type = "text" class = "inputStandard" id = "inputFabcoinContractFunctionData"       size = "50" value = "" placeholder = "contract f-n data" onchange = "window.kanban.kanbanGO.rpc.theKBNodes.computeContractData()"></input><br>
+    <input type = "text" class = "inputStandard" id = "inputFabcoinContractData"               size = "50" value = "" placeholder = "contract function + data"></input><br>
     </div>
   </td>
   <td style = "vertical-align: top"><pre id = "aceEditor"></pre><br> <div id = "outputSolidityCompilation"> </div> </td>
@@ -542,7 +550,6 @@
     <a href = '#' style = "display:none" id = "anchorSignOutPage" onclick = "window.kanban.login.signOut()">sign out</a>
     </div>
   </div>
-
 </div>
 <div class = "divMainPage" id = "pageThemes">
   <br>
@@ -558,10 +565,6 @@
     Dark
   </label>  
 </div>
-
-
-
-
 <div class = "divMenu">
   <div style = "text-align:center">
     <img alt = "FAB Coin" src = "/html/fabcoin.svg" class = "imgFabLogo">
@@ -586,7 +589,6 @@
     <div style = "text-align: center; width: 100%">
     <div class = "panelMenu">
       <span id = "spanSignedInStatus"></span><br>
-
       <span id = "spanPermissions"></span>
       <span id = "divProfilePicture"></span>
       <a href = '#' style = "display:none" id = "anchorSignOutMenu" onclick = "window.kanban.login.signOut()">sign out</a>
