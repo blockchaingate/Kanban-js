@@ -217,7 +217,7 @@ PendingCall.prototype.callbackAutoStartKanbanGO = function(outputComponent, inpu
   var theJSONWriter = new JSONTransformer();
   var resultHTML = theJSONWriter.getHtmlFromArrayOfObjects(input, this.owner.optionsInitialization);
   var extraId = `autostartKanbanMoreOutput${counterCallBackAutostartExtraComponent}`;
-  result += `<span id = "${extraId}"></span>`;
+  resultHTML += `<span id = "${extraId}"></span>`;
   outputComponent.innerHTML += resultHTML;
   theJSONWriter.bindButtons();
   var moreOutput = document.getElementById(extraId);

@@ -571,14 +571,20 @@ FabNode.prototype.setTxOutput = function() {
 
 FabNode.prototype.setTxInputVoutAndValue = function(container, content, extraData) {
   var inputFab = ids.defaults.fabcoin.inputBlockInfo;
+  var inputKanban = ids.defaults.kanbanGO.inputSendReceive;
   var incomingAmount = 0;
+  var incomingFees = 0;
   if (extraData.labelArray[extraData.labelArray.length - 1] === "value") {
     incomingAmount = content - 1;
+    incomingFees = 1;
   }
   var incomingId = extraData.ambientInput.txid;
   var incomingVout = extraData.labelArray[extraData.labelArray.length - 2];
+  miscellaneousFrontEnd.updateValue(inputKanban.txInId, incomingId);
+  miscellaneousFrontEnd.updateValue(inputKanban.txInVout, incomingVout);
+  miscellaneousFrontEnd.updateValue(inputKanban.fees, incomingFees);
   var addressVout = null;
-  try{
+  try {
     addressVout = extraData.ambientInput.vout[incomingVout].scriptPubKey.addresses[0];
   } catch (e) {
   }

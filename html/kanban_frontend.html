@@ -60,7 +60,7 @@
   <table class = "tableStandardInputs"> 
     <tr><td>
       <div class = "divLabelButtonGroup">break KB</div><div id = "panelKBGODangerous" class = "panelStandard">
-      <button class = "buttonStandard"   style = "width:100px" onclick = "window.kanban.kanbanGO.rpc.theKBNodes.run('fetchNodeConfig', 'initialization');"><b style = "color:red">Get config</b></button><br>
+      <button class = "buttonStandard" style = "width:100px" onclick = "window.kanban.kanbanGO.rpc.theKBNodes.run('fetchNodeConfig', 'initialization');"><b style = "color:red">Get config</b></button><br>
       <!--button class = "buttonStandard"   style = "width:100px" onclick = "window.kanban.kanbanGO.rpc.theKBNodes.run('regenerateNodeConfig', 'initialization');">Regen config</button><br-->
       <button class = "buttonStandard" style = "width:100px" onclick = "window.kanban.kanbanGO.rpc.theKBNodes.run('killAllGeth', 'initialization')"><b style = "color:red">kill all geth</b></button><br>
       </div>
@@ -121,26 +121,43 @@
     <button class = "buttonStandard" style = "width:100px" onclick = "window.kanban.kanbanGO.rpc.theKBNodes.run('rpcModules');">RPC modules</button><br>
     <button class = "buttonStandard" style = "width:100px" onclick = "window.kanban.kanbanGO.rpc.theKBNodes.run('getAccountsStates');">Account States</button><br>
     </div>
-    <div class = "divLabelButtonGroup">miscellaneous</div><div id = "panelKBGOBenchmarkButtons" class = "panelStandard">
+    <div class = "divLabelButtonGroup">benchmark</div><div id = "panelKBGOBenchmarkButtons" class = "panelStandard">
     <button class = "buttonStandard" style = "width:100px" onclick = "window.kanban.kanbanGO.rpc.theKBNodes.run('sendBenchmarkTransactions');">Benchmark TPS</button><br>
     </div>
-  </td>
+    <div class = "divLabelButtonGroup">tx builder</div><div id = "panelKBGOTransactionBuilder" class = "panelStandard">
+    <button class = "buttonStandard" style = "width:100px" onclick = "window.kanban.kanbanGO.rpc.theKBNodes.run('testCreateTransactionStandard');">Create tx</button><br>
+    <button class = "buttonStandard" style = "width:100px" onclick = "window.kanban.kanbanGO.rpc.theKBNodes.run('testCreateContractCall');">Create call</button><br>
+    </div>
+    </td>
   <td>
     <div class = "divLabelButtonGroup">block inputs</div><div id = "panelKBGOBlockInfoInputs" class = "panelStandard">
     <input id = "inputKBGOBlockNumber" class = "inputStandard" size = "50" placeholder = "block number" value = "5"></input><br>
-    <input id = "inputKBGOBlockHash" class = "inputStandard"   size = "50" placeholder = "block hash"></input><br>
+    <input id = "inputKBGOBlockHash"   class = "inputStandard" size = "50" placeholder = "block hash"></input><br>
     </div>
     <div class = "divLabelButtonGroup">vote inputs</div><div id = "panelKBGOVotingMachineInputs" class = "panelStandard">
-      <input id = "inputKBGOVoteMessage" class = "inputStandard"   size = "50" placeholder = "message to vote"></input><br>
-      <input id = "inputKBGOVoteMessageHex" class = "inputStandard"   size = "50" placeholder = "message to vote hex"></input><br>
+      <input id = "inputKBGOVoteMessage"    class = "inputStandard" size = "50" placeholder = "message to vote"></input><br>
+      <input id = "inputKBGOVoteMessageHex" class = "inputStandard" size = "50" placeholder = "message to vote hex"></input><br>
     </div>
     <div class = "divLabelButtonGroup">benchmark inputs</div><div id = "panelKBGOBenchmarkInputs" class = "panelStandard">
-      <input id = "inputKBGOPrivateKey" class = "inputStandard"   size = "50" placeholder = "private key to sign benchmark transactions"/><br>
-      <input id = "inputKBGOToAddress" class = "inputStandard"   size = "50" placeholder = "destination address"/><br>
-      <input id = "inputKBGOTransactionNumber" class = "inputStandard"   size = "50" placeholder = "number of transactions to spam"/><br>
-      <input id = "inputKBGOTransactionValue" class = "inputStandard"   size = "50" placeholder = "value of each transaction"/><br>
+      <input id = "inputKBGOPrivateKey"        class = "inputStandard" size = "50" placeholder = "private key to sign benchmark transactions"/><br>
+      <input id = "inputKBGOToAddress"         class = "inputStandard" size = "50" placeholder = "destination address"/><br>
+      <input id = "inputKBGOTransactionNumber" class = "inputStandard" size = "50" placeholder = "number of transactions to spam"/><br>
+      <input id = "inputKBGOTransactionValue"  class = "inputStandard" size = "50" placeholder = "value of each transaction"/><br>
     </div>
-    </td>
+    <div class = "divLabelButtonGroup">tx inputs</div><div id = "panelKBGOTransactionBuilderInputs" class = "panelStandard">
+    <input id = "inputKBGOSecretIn"                      class = "inputStandard" size = "50" placeholder = "secret in"/><br>
+    <input id = "inputKBGOTransactionInId"               class = "inputStandard" size = "50" placeholder = "transaction in"/><br>
+    <input id = "inputKBGOTransactionInVout"             class = "inputStandard" size = "50" placeholder = "vout to spend"/><br>
+    <input id = "inputKBGOTransactionBeneficiaryAddress" class = "inputStandard" size = "50" placeholder = "beneficiary address"/><br>
+    <input id = "inputKBGOTransactionBeneficiaryAmount"  class = "inputStandard" size = "50" placeholder = "beneficiary amount"/><br>
+    <input id = "inputKBGOTransactionChangeAddress"      class = "inputStandard" size = "50" placeholder = "change"/><br>
+    <input id = "inputKBGOTransactionChangeAmount"       class = "inputStandard" size = "50" placeholder = "change amount"/><br>
+    <input id = "inputKBGOTransactionFees"               class = "inputStandard" size = "50" placeholder = "fees"/><br>
+    <input id = "inputKBGOSmartContractId"               class = "inputStandard" size = "50" placeholder = "contract id"/><br>
+    <input id = "inputKBGOSmartContractFunction"         class = "inputStandard" size = "50" placeholder = "contract f-n"/><br>
+    <input id = "inputKBGOSmartContractData"             class = "inputStandard" size = "50" placeholder = "contract data"/><br>
+    </div>
+  </td>
   </tr>
   </table>
   </div>
@@ -330,8 +347,8 @@
   </td>
   <td>
 
-    <input type = "text" class = "inputStandard" id = "inputFabcoindArguments" size = "50" value = "-regtestwithnet -printtoconsole" placeholder = "arguments"></input><br>
-    <input type = "text" class = "inputStandard" id = "inputFabcoindSmartContract" size = "50" value = "" placeholder = "smart contract id"></input><br>
+    <input type = "text" class = "inputStandard" id = "inputFabcoindArguments"     size = "50" value = "-regtestwithnet -printtoconsole" placeholder = "arguments"></input><br>
+    <input type = "text" class = "inputStandard" id = "inputFabcoindSmartContract" size = "50" value = ""                                placeholder = "smart contract id"></input><br>
   </td>
   </tr>
   </table>
@@ -411,55 +428,6 @@
   <br>
   <div class = "divControlPanelDefault" style = "font-family:'Courier New', Courier, monospace" id = "divOutputFabcoinBlockInfo"></div><!--divFabcoinInitialization-->
 </div><!--pageFabcoinSmartContract-->
-
-<div class = "divMainPage" id = "pageTestGPU">
-  <div class = "divControlPanelDefault">
-    <table class = "tableTestComputationEngine">
-      <tr>
-        <th>Command</th><th></th>
-      </tr>
-      <tr>
-        <td>CPP &#8644; GPU [Sha256] </td>
-        <td><button class = "buttonStandard" onclick = "window.kanban.computationalEngineCalls.testBackEndEngineSha256();">go</button></td>
-      </tr>
-    </table>
-  </div>
-  <br>
-  <div class = "divControlPanelDefault">
-    <input type = "text" id = "inputComputationalEngineCallTestMessage" placeholder = "message"></input>
-    <input type = "text" id = "inputComputationalEngineCallTestNonce" placeholder = "nonce" value = ""></input>
-    <input type = "text" id = "inputComputationalEngineCallTestSecretKey" placeholder = "secret key" value = ""></input>
-    <input type = "text" id = "inputComputationalEngineCallTestPublicKey" placeholder = "public key" value = ""></input>
-    <input type = "text" id = "inputComputationalEngineCallTestSignature" placeholder = "signature" value = ""></input>
-    <table class = "tableTestKanban">
-      <tr><th>Command</th> <th>Input one test</th> <th></th> <th></th></tr>
-      <tr>
-        <td>Browser &#8644; node &#8644; CPP &#8644; GPU [SHA256]</td> 
-        <td>message</td>
-        <td><button class = "buttonStandard" onclick = "window.kanban.computationalEngineCalls.testBackEndSha256OneMessage();">one</button></td>
-        <td><button class = "buttonStandard" onclick = "window.kanban.computationalEngineCalls.testBackEndSha256Multiple();">multiple</button></td>
-      </tr>
-      <tr>
-        <td>Browser &#8644; node &#8644; CPP &#8644; GPU[do nothing]</td>
-        <td>-</td>
-        <td><button class = "buttonStandard" onclick = "window.kanban.computationalEngineCalls.testBackEndPipeOneMessage();">one</button></td>
-        <td><button class = "buttonStandard" onclick = "window.kanban.computationalEngineCalls.testBackEndPipeMultiple();">multiple</button></td>
-      </tr>
-      <tr>
-        <td>Browser &#8644; node &#8644; CPP &#8644; GPU[sign]</td>
-        <td>message, nonce, secret</td>
-        <td>
-        <button class = "buttonStandard" onclick = "window.kanban.computationalEngineCalls.testBackEndSignOneMessage();">one</button> 
-        </td>
-        <td><button class = "buttonStandard" onclick = "window.kanban.computationalEngineCalls.testBackEndSignMultipleMessages();">multiple</button></td>
-      </tr>
-    </table>    
-  </div><!--divControlPanelDefault-->
-  <br>
-  <div class = "divControlPanelDefault">
-    <div id = "divGPUTestOutput"></div>    
-  </div><!--divControlPanelDefault-->
-</div><!--pageTestGPU-->
 
 <div class = "divMainPage" id = "pagePrivacyPolicy">
   <h1>Privacy Policy</h1>

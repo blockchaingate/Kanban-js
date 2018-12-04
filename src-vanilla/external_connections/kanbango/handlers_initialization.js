@@ -310,7 +310,7 @@ KanbanGoInitializer.prototype.handleQuery = function(responseNoWrapper, query) {
 }
 
 KanbanGoInitializer.prototype.computePaths = function() {
-  /** @type {string} */
+  /** @type {String} */
   var startingPath = global.kanban.configuration.configuration.kanbanGO.gethFolder;
   if (!startingPath.endsWith("/")){
     startingPath += "/";
@@ -322,7 +322,7 @@ KanbanGoInitializer.prototype.computePaths = function() {
   var currentPath = startingPath;
   var maxNumRuns = 100;
   var numRuns = 0;
-  /** @type {string} */
+  /** @type {String} */
   var kanbanDataDirName = global.kanban.configuration.configuration.kanbanGO.dataDirName;
   //console.log(`DEBUG: searching for geth executable. Searched directories along: ${startingPath}`.red);
   while (currentPath !== "/") {
@@ -382,7 +382,7 @@ KanbanGoInitializer.prototype.killGeth = function() {
     env: process.env
   };
   this.log(`Killing geth ... `);
-  this.runShell("killall ", ["geth"], theOptions, - 1,()=>{
+  this.runShell("killall ", ["geth"], theOptions, - 1, ()=>{
     this.log(`Geth kill command exit.`);
   });
 }
@@ -565,7 +565,6 @@ SolidityCode.prototype.sendResult = function() {
 }
 
 SolidityCode.prototype.readBinary = function(counter, err, dataBinary) {
-  //console.log("Got to read binary result pt -1");
   if (this.responseToUser === null) {
     return;
   }
@@ -602,7 +601,6 @@ SolidityCode.prototype.readABI = function(counter, err, dataABI) {
 }
 
 SolidityCode.prototype.readAndReturnBinaries = function() {
-  //console.log("DEBUIG: got to this point of code.");
   if (this.errorStream.recentOutputs.length > 0) {
     this.responseToUser.writeHead(200);
     var result = {};
@@ -611,7 +609,6 @@ SolidityCode.prototype.readAndReturnBinaries = function() {
     this.responseToUser.end(JSON.stringify(result));
     return;
   }
-  //console.log("DEBUG: exectuing readAndReturnBinaries");
   this.computeContractNames();
   this.responseContent.ABI = [];
   this.responseContent.binaries = [];
@@ -625,7 +622,6 @@ SolidityCode.prototype.readAndReturnBinaries = function() {
     return;
   }
   for (var i = 0; i < this.fileNamesBinaryWithPath.length; i ++) {
-    //console.log(`DEBUG:reading ${this.fileNamesBinaryWithPath[i]}, ${this.fileNamesABIWithPath[i]}`);
     fs.readFile(this.fileNamesBinaryWithPath[i], this.readBinary.bind(this, i));
     fs.readFile(this.fileNamesABIWithPath[i], this.readABI.bind(this, i));
   }
@@ -715,7 +711,7 @@ KanbanGoInitializer.prototype.compileSolidityPart2 = function(
   );
 }
 
-function SolidityBuilder (){
+function SolidityBuilder () {
   this.fileNames = [];
   this.fileContents = [];
   /**@type {Array.<SolidityCode>} */
@@ -786,7 +782,7 @@ SolidityBuilder.prototype.respond = function () {
     return;
   }
   this.sortCode();
-  this.response.writeHead (200);
+  this.response.writeHead(200);
   var solidityMassage = new SolidityCode("", "");
   var joinedCode = this.fileContentsSorted.join("");
   this.result.code = solidityMassage.buildSolFileKanbanGoFromCombinedFile(joinedCode);
@@ -925,7 +921,7 @@ KanbanGoInitializer.prototype.getLogFile = function(
   if (currentNode === null || currentNode === undefined || !(currentNode instanceof NodeKanbanGo)) {
     response.writeHead(400);
     var result = {
-      error: `Bad node id. Current node: ${currentNode} `
+      error: `Bad node id. Current node: ${currentNode}. `
     };
     response.end(JSON.stringify(result));
   }
@@ -943,7 +939,7 @@ KanbanGoInitializer.prototype.getRPCLogFile = function(
   if (currentNode === null || currentNode === undefined || !(currentNode instanceof NodeKanbanGo)) {
     response.writeHead(400);
     var result = {
-      error: `Bad node id. Current node: ${currentNode} `
+      error: `Bad node id. Current node: ${currentNode}. `
     };
     response.end(JSON.stringify(result));
   }
@@ -996,7 +992,7 @@ KanbanGoInitializer.prototype.runNodes = function(
   ) {
     response.writeHead(400);
     var result = {
-      error: `Bad number of nodes: ${candidateNumberOfNodes}. I expected a number between 1 and ${maxNumberOfNodes}.`
+      error: `Bad number of nodes: ${candidateNumberOfNodes}. I expected a number between 1 and ${maxNumberOfNodes}. `
     };
     response.end(JSON.stringify(result));
     return;
@@ -1068,7 +1064,7 @@ KanbanGoInitializer.prototype.runNodes6DoRunNodes = function(response) {
   if (this.numberOfInitializedGenesis < this.nodes.length) {
     return;
   }
-  this.log(`DEBUG: about to run: ${this.nodes.length} nodes. ` );
+  //this.log(`DEBUG: about to run: ${this.nodes.length} nodes. ` );
   for (var counterNode = 0; counterNode < this.nodes.length; counterNode ++) {
     this.nodes[counterNode].run(response);
   }

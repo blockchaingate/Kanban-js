@@ -41,10 +41,6 @@ function Page() {
       idPage: ids.defaults.pages.kanbanGO,
       updateFunction: null
     },
-    testGPU: {
-      idPage: ids.defaults.pageTestGPU,
-      updateFunction: null
-    },
     themes: {
       idPage: ids.defaults.pages.themes
     },

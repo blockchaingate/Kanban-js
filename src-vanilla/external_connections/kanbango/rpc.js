@@ -204,7 +204,7 @@ var rpcCalls = {
     mandatoryModifiableArguments: {
       messageHex: null,
     },
-    parameters: ["messageHex"]
+    parameters: ["messageHex"],
   },
   rpcModules: {
     rpcCall: "rpcModules",
@@ -221,10 +221,24 @@ var rpcCalls = {
         transactionValue: null,
     },
     parameters: ["privateKey", "toAddress", "transactionNumber", "transactionValue"]
-  }
+  },
+  testCreateTransactionStandard: {
+    rpcCall: "testCreateTransactionStandard",
+    method: "pbfttest_testCreateTransactionStandard",
+    mandatoryModifiableArguments: {
+    },
+    parameters: [],
+  },
+  testCreateContractCall: {
+    rpcCall: "testCreateContractCall",
+    method: "pbfttest_testCreateContractCall",
+    mandatoryModifiableArguments: {
+    },
+    parameters: [],
+  },
 };
 
 module.exports = {
   urlStrings,
-  rpcCalls
+  rpcCalls,
 }

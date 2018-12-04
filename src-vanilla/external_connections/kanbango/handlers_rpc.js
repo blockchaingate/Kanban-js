@@ -1,5 +1,4 @@
 "use strict";
-const queryString = require('querystring');
 const http = require('http');
 const kanbanGORPC = require('./rpc');
 const kanabanGoInitializer = require('./handlers_initialization');
@@ -17,9 +16,6 @@ function handleQuery(response, query) {
   }
   return handleRPCArguments(response, queryCommand, queryNode);
 }
-
-var numberRequestsRunning = 0;
-var maxRequestsRunning = 20;
 
 function getParameterFromType(input, type) {
   if (type === "number") {
@@ -88,65 +84,55 @@ function getRPCRequestJSON(rpcCallLabel, queryCommand, errors) {
 }
 
 function handleRPCArguments(response, queryCommand, queryNode) {
-  numberRequestsRunning ++;
-  if (numberRequestsRunning > maxRequestsRunning) {
-    response.writeHead(500);
-    numberRequestsRunning --;
-    var reponseJSON = {
-      error: `Too many (${numberRequestsRunning}) requests running, maximum allowed: ${maxRequestsRunning}`
-    };
-    return response.end(JSON.stringify(reponseJSON));
-  }
+  /**@type {NodeKanbanGo} */ 
   var currentNode = null;
   try {
     if (queryCommand[kanbanGORPC.urlStrings.rpcCallLabel] === undefined) {
       response.writeHead(400);
-      numberRequestsRunning --;
-      var reponseJSON = {
-        error: `Command is missing the ${kanbanGORPC.urlStrings.rpcCallLabel} entry. `
+      var result = {
+        error: `KanbanGO command is missing the ${kanbanGORPC.urlStrings.rpcCallLabel} entry. `
       };
-      return response.end(JSON.stringify(reponseJSON));        
+      return response.end(JSON.stringify(result));        
     }
     var currentNodeId = queryNode.id;
-    //if (currentNodeId === "none") {
-    //  currentNodeId = 0;
-    //}
+    if (currentNodeId === "none") {
+      currentNodeId = 0;
+    }
     if (currentNodeId === undefined || currentNodeId === null) {
       response.writeHead(400);
-      numberRequestsRunning --;
-      var reponseJSON = {
-        error: `Node is missing the id variable. `
+      var result = {
+        error: `KanbanGO node is missing the id variable. `
       };
-      return response.end(JSON.stringify(reponseJSON));        
+      return response.end(JSON.stringify(result));        
     }
     var currentNodeIdNumber = Number(currentNodeId);
     var initializer = kanabanGoInitializer.getInitializer(); 
     currentNode = initializer.nodes[currentNodeIdNumber];
     if (currentNode === undefined || currentNode === null) {
       response.writeHead(400);
-      numberRequestsRunning --;
-      var reponseJSON = {
-        error: `Failed to extract node id from ${currentNodeId}.`
+      var result = {
+        error: `Failed to extract kanbanGO node id from ${currentNodeId}.`
       };
       if (!initializer.flagStartWasEverAttempted) {
-        reponseJSON.error = kanbanGORPC.urlStrings.errorKanbanNodeStartWasNeverAttempted;        
+        result.error = kanbanGORPC.urlStrings.errorKanbanNodeStartWasNeverAttempted;        
       }
-      return response.end(JSON.stringify(reponseJSON));          
+      return response.end(JSON.stringify(result));          
     }
   } catch (e) {
     response.writeHead(400);
-    numberRequestsRunning --;
-    return response.end(`Failed to extract node id. ${e}`);        
+    var result = {
+      error: `Failed to extract kanbanGO node id. ${e}`
+    };
+    return response.end(JSON.stringify(result));        
   }
   var theCallLabel = queryCommand[kanbanGORPC.urlStrings.rpcCallLabel];
   var callCollection = kanbanGORPC.rpcCalls;
   if (!(theCallLabel in callCollection)) {
     response.writeHead(400);
-    numberRequestsRunning --;
-    var reponseJSON = {
-      error: `Kanban go RPC handler: call label ${theCallLabel} not found. `
+    var result = {
+      error: `KanbanGO RPC handler: call label ${theCallLabel} not found. `
     };
-    return response.end(JSON.stringify(reponseJSON));    
+    return response.end(JSON.stringify(result));    
   }
   var currentCall = callCollection[theCallLabel];
   if (currentCall.easyAccessControlOrigin === true) {
@@ -157,13 +143,17 @@ function handleRPCArguments(response, queryCommand, queryNode) {
   var theRequestJSON = getRPCRequestJSON(theCallLabel, queryCommand, errors);
   if (errors.length > 0) {
     response.writeHead(400);
-    numberRequestsRunning --;
     return response.end(JSON.stringify({error: errors[0]}));
   }
   return handleRPCArgumentsPartTwo(response, theRequestJSON, currentNode);
 }
 
-function handleRPCArgumentsPartTwo(response, theRequestJSON, /**@type {{NodeKanbanGo}} */ currentNode) {
+function handleRPCArgumentsPartTwo(
+  response, 
+  theRequestJSON, 
+  /**@type {NodeKanbanGo} */ 
+  currentNode
+) {
   var requestStringified = JSON.stringify(theRequestJSON);
   var requestOptions = {
     host: '127.0.0.1',
@@ -192,9 +182,11 @@ function handleRPCArgumentsPartTwo(response, theRequestJSON, /**@type {{NodeKanb
     //console.log("DEBUG: got to here");
     theHTTPrequest.on('error', function(theError) {
       response.writeHead(500);
-      numberRequestsRunning --;
-      response.end(`Eror during commmunication with rpc server. ${theError}. `);
-      console.log(`Eror during commmunication with rpc server. ${theError}. `);
+      var result = {
+        error: `Eror during commmunication with kanbanGO server. ${theError}. ` 
+      };
+      response.end(JSON.stringify(result));
+      console.log(result.error);
     }); 
     theHTTPrequest.on('response', function(theHTTPresponse) {
       var finalData = "";
@@ -205,12 +197,13 @@ function handleRPCArgumentsPartTwo(response, theRequestJSON, /**@type {{NodeKanb
       });
       theHTTPresponse.on('error', function(yetAnotherError){
         response.writeHead(500);
-        numberRequestsRunning --;
-        response.end(`Eror during commmunication with rpc server. ${yetAnotherError}. `);
+        var result = {
+          error: `Eror during commmunication with kanbanGO server. ${yetAnotherError}. ` 
+        };
+        response.end(JSON.stringify(result));
         //console.log(`Eror during commmunication with rpc server. ${yetAnotherError}. `);  
       });
       theHTTPresponse.on('end', function() {
-        numberRequestsRunning --;
         //console.log(`DEBUG: about to respond with status code: ${theHTTPresponse.statusCode}. Final data: ${finalData}`);
         if (theHTTPresponse.statusCode !== 200) {
           response.writeHead(theHTTPresponse.statusCode);
@@ -231,7 +224,7 @@ function handleRPCArgumentsPartTwo(response, theRequestJSON, /**@type {{NodeKanb
           var result = {
             error: `Error parsing kanbanGO's output. Error message: ${errorParsing}. `,
             kanbanGoData: finalData
-          }
+          };
           return response.end(JSON.stringify(result));
         }
       });
@@ -240,9 +233,11 @@ function handleRPCArgumentsPartTwo(response, theRequestJSON, /**@type {{NodeKanb
     theHTTPrequest.end(requestStringified);
   } catch (e) {
     response.writeHead(500);
-    numberRequestsRunning --;
-    response.end(`Eror spawning fabcoin-cli process. ${escapeHtml(e)}. `);
-    console.log(`Eror spawning process fabcoin-cli. ${e}`);
+    var result = {
+      error: `Eror connecting to kanbanGO. ${e}. `
+    };
+    response.end(JSON.stringify(result));
+    console.log(result.error);
   }
 }
 

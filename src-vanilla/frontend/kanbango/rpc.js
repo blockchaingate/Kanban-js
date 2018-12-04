@@ -524,7 +524,19 @@ function KanbanGoNodes() {
     },
     fetchNodeConfig: {
       useOneNode: true,
-    },  
+    },
+    testCreateTransactionStandard: {
+      inputs: {
+        input: ids.defaults.kanbanGO.inputSendReceive.transactionBuilderInputs,
+      },
+      useOneNode: true,
+    },
+    testCreateContractCall: {
+      inputs: {
+        input: ids.defaults.kanbanGO.inputSendReceive.transactionBuilderInputs,
+      },
+      useOneNode: true,
+    }
   };
   this.correctFunctions();
 }
