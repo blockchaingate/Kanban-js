@@ -22,8 +22,29 @@ function getInitializer() {
   return global.kanban.kanbanGOInitializer;
 }
 
-function NodeKanbanGo(inputId) {
-  this.id = inputId;
+function NodeKanbanGo(
+  /**@type {{id: String, contractId: String, connectInALine: boolean, numberOfNodes: Number}} */
+  inputData
+) {
+  /**@type {Number} */
+  this.id = inputData.id;
+  /**@type {String} */
+  this.contractId = inputData.contractId;
+  /**@type {Boolean} */
+  this.flagConnectInALine = inputData.connectInALine;
+  /**@type {Number} */
+  this.numberOfNodes = inputData.numberOfNodes;
+  this.basePath = `${getInitializer().paths.nodesDir}/${this.numberOfNodes}nodes`;
+  if (this.flagConnectInALine) {
+    this.basePath += "l";
+  } else {
+    this.basePath += "fg";
+  }
+  if (this.contractId.length > 30) {
+    this.basePath += `_${this.contractId.slice(0, this.contractId.length - 30)}`;
+  } else {
+    this.basePath += `_${this.contractId}`;
+  }
   this.notes = "";
   this.fileNameNodeAddress = null;
   this.nodePrivateKey = new cryptoKanban.CurveExponent();
@@ -35,7 +56,7 @@ function NodeKanbanGo(inputId) {
   this.nodeAddressHex = null;
   /** @type {string[]} */
   this.nodeConnections = [];
-  this.dataDir = `${getInitializer().paths.nodesDir}/node${this.id}`;
+  this.dataDir = `${this.basePath}/node${this.id}`;
   this.lockFileName = `${this.dataDir}/geth/LOCK`;
   this.keyStoreFolder = `${this.dataDir}/keystore`;
   this.nodeKeyDir = `${this.dataDir}/geth`;
@@ -71,6 +92,7 @@ function NodeKanbanGo(inputId) {
 }
 
 NodeKanbanGo.prototype.initializeDeleteLockFile = function(response, callback) {
+  this.outputStreams.initialization.log(`Deleting lock file: ${this.lockFileName}`);
   fs.unlink(this.lockFileName, callback);
 }
 
@@ -104,33 +126,7 @@ NodeKanbanGo.prototype.initialize4point5ReadNodeKey = function(response) {
 }
 
 NodeKanbanGo.prototype.initialize5ResetFolders = function(response) {
-  rimraf(this.dataDir, this.initialize6CreateFolders.bind(this, response));
-}
-
-NodeKanbanGo.prototype.initialize6CreateFolders = function(response, error) {
-  if (error !== null && error !== undefined) {
-    this.logToInitializationStream(`Error while deleting folder: ${this.dataDir}. ${error}`);
-  } else {
-    this.logToInitializationStream(`Deleted folder: ${this.dataDir}.`);
-  }
-  this.logToInitializationStream(`Proceding to create account for new node.`);
-  var initializer = getInitializer(); 
-  var theOptions = {
-    cwd: initializer.paths.gethPath,
-    env: process.env
-  };
-  this.flagFoldersWereInitialized = false;
-  var theArguments = [
-    "--datadir",
-    this.dataDir,
-    "--networkid",
-    initializer.chainId,
-    "account",
-    "new",
-    "--password",
-    initializer.paths.passwordEmptyFile
-  ];
-  initializer.runShell(initializer.paths.geth, theArguments, theOptions, this.id, this.initialize7GenerateKey.bind(this, response));
+  rimraf(this.dataDir, this.initialize7GenerateKey.bind(this, response));
 }
 
 NodeKanbanGo.prototype.computeNodeInfo = function () {
@@ -174,7 +170,17 @@ NodeKanbanGo.prototype.computeMyEnodeAddress = function (){
 NodeKanbanGo.prototype.initialize10WriteNodeConnections = function(response) {
   var initializer = getInitializer();
   this.nodeConnections = [];
-  var idsToConnectTo = [this.id - 1, this.id + 1];
+  var idsToConnectTo = [];
+  if (this.flagConnectInALine) {
+    idsToConnectTo = [this.id - 1, this.id + 1];
+  } else {
+    for (var i = 0; i < this.numberOfNodes; i ++) {
+      if (i === this.id) {
+        continue;
+      }
+      idsToConnectTo.push(i);
+    }
+  }
   for (var counterId = 0; counterId < idsToConnectTo.length; counterId ++) {
     var currentId = idsToConnectTo[counterId];
     if (currentId < 0 || currentId >= initializer.nodes.length) {
@@ -250,6 +256,7 @@ NodeKanbanGo.prototype.run = function(response) {
  * @class
  */
 function KanbanGoInitializer() {
+  this.numberOfKanbanGORuns = 0;
   this.numberOfRequestsRunning = 0;
   this.maxRequestsRunning = 4;
   this.flagStartWasEverAttempted = false;
@@ -276,6 +283,8 @@ function KanbanGoInitializer() {
   this.nodeInformation = [];
   this.smartContractId = "";
   this.abiJSON = "";
+  /**@type {boolean} */
+  this.flagConnectKanbansInALine = true;
 }
 
 KanbanGoInitializer.prototype.log = function(input) {
@@ -301,7 +310,7 @@ KanbanGoInitializer.prototype.handleQuery = function(responseNoWrapper, query) {
 }
 
 KanbanGoInitializer.prototype.computePaths = function() {
-  /** @type {string} */
+  /** @type {String} */
   var startingPath = global.kanban.configuration.configuration.kanbanGO.gethFolder;
   if (!startingPath.endsWith("/")){
     startingPath += "/";
@@ -313,7 +322,7 @@ KanbanGoInitializer.prototype.computePaths = function() {
   var currentPath = startingPath;
   var maxNumRuns = 100;
   var numRuns = 0;
-  /** @type {string} */
+  /** @type {String} */
   var kanbanDataDirName = global.kanban.configuration.configuration.kanbanGO.dataDirName;
   //console.log(`DEBUG: searching for geth executable. Searched directories along: ${startingPath}`.red);
   while (currentPath !== "/") {
@@ -373,7 +382,7 @@ KanbanGoInitializer.prototype.killGeth = function() {
     env: process.env
   };
   this.log(`Killing geth ... `);
-  this.runShell("killall ", ["geth"], theOptions, - 1,()=>{
+  this.runShell("killall ", ["geth"], theOptions, - 1, ()=>{
     this.log(`Geth kill command exit.`);
   });
 }
@@ -556,7 +565,6 @@ SolidityCode.prototype.sendResult = function() {
 }
 
 SolidityCode.prototype.readBinary = function(counter, err, dataBinary) {
-  //console.log("Got to read binary result pt -1");
   if (this.responseToUser === null) {
     return;
   }
@@ -593,7 +601,6 @@ SolidityCode.prototype.readABI = function(counter, err, dataABI) {
 }
 
 SolidityCode.prototype.readAndReturnBinaries = function() {
-  //console.log("DEBUIG: got to this point of code.");
   if (this.errorStream.recentOutputs.length > 0) {
     this.responseToUser.writeHead(200);
     var result = {};
@@ -602,7 +609,6 @@ SolidityCode.prototype.readAndReturnBinaries = function() {
     this.responseToUser.end(JSON.stringify(result));
     return;
   }
-  //console.log("DEBUG: exectuing readAndReturnBinaries");
   this.computeContractNames();
   this.responseContent.ABI = [];
   this.responseContent.binaries = [];
@@ -616,7 +622,6 @@ SolidityCode.prototype.readAndReturnBinaries = function() {
     return;
   }
   for (var i = 0; i < this.fileNamesBinaryWithPath.length; i ++) {
-    //console.log(`DEBUG:reading ${this.fileNamesBinaryWithPath[i]}, ${this.fileNamesABIWithPath[i]}`);
     fs.readFile(this.fileNamesBinaryWithPath[i], this.readBinary.bind(this, i));
     fs.readFile(this.fileNamesABIWithPath[i], this.readABI.bind(this, i));
   }
@@ -706,7 +711,7 @@ KanbanGoInitializer.prototype.compileSolidityPart2 = function(
   );
 }
 
-function SolidityBuilder (){
+function SolidityBuilder () {
   this.fileNames = [];
   this.fileContents = [];
   /**@type {Array.<SolidityCode>} */
@@ -777,7 +782,7 @@ SolidityBuilder.prototype.respond = function () {
     return;
   }
   this.sortCode();
-  this.response.writeHead (200);
+  this.response.writeHead(200);
   var solidityMassage = new SolidityCode("", "");
   var joinedCode = this.fileContentsSorted.join("");
   this.result.code = solidityMassage.buildSolFileKanbanGoFromCombinedFile(joinedCode);
@@ -871,7 +876,27 @@ KanbanGoInitializer.prototype.compileSolidity = function(
   }
 }
 
+KanbanGoInitializer.prototype.fetchNodeConfig = function(
+  /** @type {ResponseWrapper} */
+  response, 
+  queryCommand,
+  /**@type {NodeKanbanGo} */ 
+  currentNode
+) {
+  fs.readFile(this.paths.nodeConfiguration, (err, data)=>{
+    var result = {};
+    if (err !== null && err !== undefined) {
+      result.error = JSON.stringify(err);
+      response.writeHead(500);
+      return response.end(JSON.stringify(result));
+    }
+    response.writeHead(200);
+    response.end(data);
+  });  
+}
+
 KanbanGoInitializer.prototype.killAllGeth = function(
+  /** @type {ResponseWrapper} */
   response, 
   queryCommand,
   /**@type {NodeKanbanGo} */ 
@@ -896,7 +921,7 @@ KanbanGoInitializer.prototype.getLogFile = function(
   if (currentNode === null || currentNode === undefined || !(currentNode instanceof NodeKanbanGo)) {
     response.writeHead(400);
     var result = {
-      error: `Bad node id. Current node: ${currentNode} `
+      error: `Bad node id. Current node: ${currentNode}. `
     };
     response.end(JSON.stringify(result));
   }
@@ -914,7 +939,7 @@ KanbanGoInitializer.prototype.getRPCLogFile = function(
   if (currentNode === null || currentNode === undefined || !(currentNode instanceof NodeKanbanGo)) {
     response.writeHead(400);
     var result = {
-      error: `Bad node id. Current node: ${currentNode} `
+      error: `Bad node id. Current node: ${currentNode}. `
     };
     response.end(JSON.stringify(result));
   }
@@ -923,21 +948,39 @@ KanbanGoInitializer.prototype.getRPCLogFile = function(
   response.end(JSON.stringify(result));
 }
 
-KanbanGoInitializer.prototype.runNodesDetached = function(response, queryCommand, currentNodeNotUsed) {
-  this.paths.nodesDir = `${this.paths.dataDir}/nodes_detached`;
-  this.runNodes(response, queryCommand);
-}
-
 KanbanGoInitializer.prototype.runNodesOnFAB = function(response, queryCommand, currentNodeNotUsed) {
   this.paths.nodesDir = `${this.paths.dataDir}/nodes_fab`;
   //console.log(`DBUG: this is queryCommand: ${JSON.stringify(queryCommand)}`);
+  if (
+    queryCommand.abiJSON === null || queryCommand.abiJSON === undefined || 
+    queryCommand.abiJSON === "" || queryCommand.abiJSON === "undefined"
+  ) {
+    var result = {
+      error: `Unrecognized ABI format: abiJSON: ${queryCommand.abiJSON}`
+    };
+    response.writeHead(400);
+    return response.end(JSON.stringify(result));
+  }
+  if (typeof this.smartContractId !== "string") {
+    var result = {
+      error: `smartContractId expected to be a string, instead received: ${queryCommand.smartContractId}`
+    };
+    response.writeHead(400);
+    return response.end(JSON.stringify(result));
+  }
   this.smartContractId = queryCommand.contractId;
   this.abiJSON = queryCommand.abiJSON;
+  this.flagConnectKanbansInALine = queryCommand.connectKanbansInALine;
   this.runNodes(response, queryCommand);
 }
 
-KanbanGoInitializer.prototype.runNodes = function(response, queryCommand) {
+KanbanGoInitializer.prototype.runNodes = function(
+  /**@type {ResponseWrapper} */
+  response, queryCommand
+) {
   this.flagStartWasEverAttempted = true;
+  this.numberOfKanbanGORuns ++;
+  this.log(`${this.numberOfKanbanGORuns} attempts to initialize KanbanGO so far. `);
   //console.log(`DEBUIG: got to here pt 1`);
   var candidateNumberOfNodes = Number(queryCommand.numberOfNodes);
   var maxNumberOfNodes = 100;
@@ -949,7 +992,7 @@ KanbanGoInitializer.prototype.runNodes = function(response, queryCommand) {
   ) {
     response.writeHead(400);
     var result = {
-      error: `Bad number of nodes: ${candidateNumberOfNodes}. I expected a number between 1 and ${maxNumberOfNodes}.`
+      error: `Bad number of nodes: ${candidateNumberOfNodes}. I expected a number between 1 and ${maxNumberOfNodes}. `
     };
     response.end(JSON.stringify(result));
     return;
@@ -963,7 +1006,24 @@ KanbanGoInitializer.prototype.runNodes = function(response, queryCommand) {
     return;
   }
   for (var counterNode = 0; counterNode < candidateNumberOfNodes; counterNode ++) {
-    this.nodes.push(new NodeKanbanGo(counterNode));
+    var currentNode = new NodeKanbanGo({
+      id: counterNode,
+      contractId: this.smartContractId,
+      connectInALine: this.flagConnectKanbansInALine,
+      numberOfNodes: candidateNumberOfNodes
+    });
+    this.nodes.push(currentNode);
+    if (currentNode.nodeKeyFileName.length > 100) {
+      var errorString = `Computed node key file name: ${currentNode.nodeKeyFileName} too long (${currentNode.nodeKeyFileName.length} characters). `;
+      errorString += `This breaks the kanbanGO ipc endpoint, which has a size limit of 100 chars due to unix file socket limitations. `;
+      errorString += `Please move your kanban installation in a folder of smaller length, or write us an angry email to fix this. `;
+      var result = {
+        error: errorString        
+      };
+      response.writeHead(500);
+      return response.end(JSON.stringify(result));
+    }
+
   }
   for (var counterNode = 0; counterNode < this.nodes.length; counterNode ++) {
     var currentNode = this.nodes[counterNode]; 
@@ -986,23 +1046,7 @@ KanbanGoInitializer.prototype.runNodes2ReadConfig = function(response) {
       return;
     }
   }
-  this.runNodes3ParseConfigRunNodes(response)
-}
-
-KanbanGoInitializer.prototype.runNodes3ParseConfigRunNodes = function(response, error, data) {
   this.runNodes5InitGenesis(response);
-  this.numberOfInitializedGenesis = this.nodes.length - 1;
-  this.runNodes6DoRunNodes(response);
-}
-
-KanbanGoInitializer.prototype.runNodes6DoRunNodes = function(response) {
-  this.numberOfInitializedGenesis ++;
-  if (this.numberOfInitializedGenesis < this.nodes.length) {
-    return;
-  }
-  for (var counterNode = 0; counterNode < this.nodes.length; counterNode ++) {
-    this.nodes[counterNode].run(response);
-  }
 }
 
 KanbanGoInitializer.prototype.runNodes5InitGenesis = function(response) {
@@ -1010,9 +1054,20 @@ KanbanGoInitializer.prototype.runNodes5InitGenesis = function(response) {
     this.nodes[counterNode].computeMyEnodeAddress();
   }
   for (var counterNode = 0; counterNode < this.nodes.length; counterNode ++) {
-      this.nodes[counterNode].initialize10WriteNodeConnections(response);
+    this.nodes[counterNode].initialize10WriteNodeConnections(response);
   }  
   this.runNodes7WriteNodeConfig();
+}
+
+KanbanGoInitializer.prototype.runNodes6DoRunNodes = function(response) {
+  this.numberOfInitializedGenesis ++;
+  if (this.numberOfInitializedGenesis < this.nodes.length) {
+    return;
+  }
+  //this.log(`DEBUG: about to run: ${this.nodes.length} nodes. ` );
+  for (var counterNode = 0; counterNode < this.nodes.length; counterNode ++) {
+    this.nodes[counterNode].run(response);
+  }
 }
 
 KanbanGoInitializer.prototype.runNodes7WriteNodeConfig = function() {
@@ -1021,7 +1076,7 @@ KanbanGoInitializer.prototype.runNodes7WriteNodeConfig = function() {
     this.nodes[i].computeNodeInfo()
     nodeConfig.push(this.nodes[i].nodeSensitiveInformation);
   }
-  console.log(`Proceeding to write node config to: ${this.paths.nodesDir}`);
+  this.log(`Proceeding to write node config to: ${this.paths.nodeConfiguration}`);
   fs.writeFile(this.paths.nodeConfiguration, JSON.stringify(nodeConfig, null, 2),()=>{});
 }
 

@@ -47,7 +47,7 @@ function KanbanGoNodes() {
     },
     contractCallSetter: {
       clickHandler: this.setContractFunctionName.bind(this),
-      transformer: miscellaneousBackend.hexShortenerForDisplay,
+      transformer: miscellaneousBackend.hexMiddleShortenerForDisplay,
     },
     contractSourceSetter: {
       clickHandler: this.setInput.bind(this, ids.defaults.fabcoin.inputBlockInfo.solidityInput),
@@ -59,6 +59,9 @@ function KanbanGoNodes() {
     setAggregateSignatureNoBitmap: this.getSetInputWithShortener(inputAggregate.aggregateSignature),
     setAggregateSignatureUncompressed: this.getSetInputWithShortener(inputAggregate.aggregateSignatureUncompressed),
     setAggregateSignatureComplete: this.getSetInputWithShortener(inputAggregate.aggregateSignatureComplete),
+    highlightErrorWords: {
+      transformer: miscellaneousFrontEnd.highlightErrorWords
+    }
   };
   // Specifies options for rpc kanban rpc output display.
   this.optionsKanbanGOStandard = {
@@ -176,6 +179,7 @@ function KanbanGoNodes() {
       "contractInheritance.${label}": this.transformersStandard.shortener,
       "node.${number}": this.transformersStandard.shortener,
       "notes": this.transformersStandard.shortener,
+      "${number}": this.transformersStandard.highlightErrorWords,
     }
   };
   this.optionsCrypto = {
@@ -286,18 +290,12 @@ function KanbanGoNodes() {
   // if rpcCall omitted it will be assumed to be equal to the function label.
   /**@type {Object.<string, rpcCall: string, output: string, outputs: Object, outputOptions: Object, inputs: Object, callback: Object, useOneNode: boolean>} */
   this.theFunctions  = {
-    runNodesDetached: {
-      inputs: {
-        numberOfNodes: inputInitialization.numberOfNodes
-      },
-      callback: PendingCall.prototype.callbackRunNodes,
-      useOneNode: true
-    },
     runNodesOnFAB: {
       inputs: {
         numberOfNodes: inputInitialization.numberOfNodes,
         abiJSON: inputInitialization.contractABI,
-        contractId: inputInitialization.contractId
+        contractId: inputInitialization.contractId,
+        connectKanbansInALine: ids.defaults.kanbanGO.checkboxConnectKanbansInALine,
       },
       callback: PendingCall.prototype.callbackRunNodes,
       useOneNode: true
@@ -308,7 +306,10 @@ function KanbanGoNodes() {
     getLogFile: {
       outputOptions: {
         totalEntriesToDisplayAtEnds: 1000,
-      },
+        transformers: {
+          "${number}": this.transformersStandard.highlightErrorWords
+        }
+      }
     },
     getRPCLogFile: {
       outputOptions: {
@@ -494,14 +495,16 @@ function KanbanGoNodes() {
         code: ids.defaults.fabcoin.inputBlockInfo.solidityInput
       },
       outputJSON: ids.defaults.fabcoin.outputSolidityCompilation,
-      callback: PendingCall.prototype.callbackCompileSolidity
+      callback: PendingCall.prototype.callbackCompileSolidity,
+      useOneNode: true,
     }, 
     fetchKanbanContract: {
       outputs: {
         code: ids.defaults.fabcoin.inputBlockInfo.solidityInput
       },
       outputJSON: ids.defaults.fabcoin.outputFabcoinBlockInfo,
-      callback: PendingCall.prototype.callbackFetchSmartContract
+      callback: PendingCall.prototype.callbackFetchSmartContract,
+      useOneNode: true,
     },
     fetchDemoContract: {
       outputs: {
@@ -518,6 +521,21 @@ function KanbanGoNodes() {
         transactionNumber: ids.defaults.kanbanGO.inputBenchmarkParameters.transactionNumber,
         transactionValue: ids.defaults.kanbanGO.inputBenchmarkParameters.transactionValue,
       }
+    },
+    fetchNodeConfig: {
+      useOneNode: true,
+    },
+    testCreateTransactionStandard: {
+      inputs: {
+        input: ids.defaults.kanbanGO.inputSendReceive.transactionBuilderInputs,
+      },
+      useOneNode: true,
+    },
+    testCreateContractCall: {
+      inputs: {
+        input: ids.defaults.kanbanGO.inputSendReceive.transactionBuilderInputs,
+      },
+      useOneNode: true,
     }
   };
   this.correctFunctions();
@@ -707,11 +725,21 @@ KanbanGoNodes.prototype.getNodeInformationCallback = function(input, output) {
   nodePanel.innerHTML = this.toHTMLRadioButton();  
 }
 
-KanbanGoNodes.prototype.readFabAutostart = function() {
-  /** @type {Storage} */
-  var theStorage = window.kanban.storage;
-  var theCheckBox = document.getElementById(ids.defaults.kanbanGO.checkboxFabcoindAutostartAfterKanbanGO);
-  theStorage.setVariable(theStorage.variables.autostartFabcoindAfterKanbanGO, theCheckBox.checked);
+KanbanGoNodes.prototype.readCheckboxesConfiguration = function() {
+  /** @type {StorageKanban} */
+  var storageKanban = window.kanban.storageKanban;
+  var idCheckboxPairs = [[
+      storageKanban.variables.autostartFabcoindAfterKanbanGO, 
+      ids.defaults.kanbanGO.checkboxFabcoindAutostartAfterKanbanGO,
+    ], [
+      storageKanban.variables.connectKanbansInALine,
+      ids.defaults.kanbanGO.checkboxConnectKanbansInALine,
+    ],
+  ];
+  for (var i = 0; i < idCheckboxPairs.length; i ++) {
+    var checkBox = document.getElementById(idCheckboxPairs[i][1]);
+    storageKanban.setVariable(idCheckboxPairs[i][0], checkBox.checked);
+  }
 }
 
 var theKBNodes = new KanbanGoNodes();

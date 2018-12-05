@@ -2,7 +2,7 @@
 
 const miscellaneousFrontEnd = require('./miscellaneous_frontend');
 
-function Storage() {
+function StorageKanban() {
 
   /**@type {Object.<string,{name: string, nameURL: string, nameLocalStorage: string, value: string, changeValueHandler: function}>} 
    * Variables are read off the url and the local storage. 
@@ -30,7 +30,13 @@ function Storage() {
       nameLocalStorage: "autostartFabcoindAfterKanbanGO",
       value: null,
       changeValueHandler: null,
-    }
+    },
+    connectKanbansInALine: {
+      name: "connectKanbansInALine",
+      nameLocalStorage: "connectKanbansInALine",
+      value: null,
+      changeValueHandler: null,
+    },
   };
   this.oldAnchorString = "";
   /**@type {string} */
@@ -39,7 +45,7 @@ function Storage() {
   this.computeCurentAnchor();  
 }
 
-Storage.prototype.computeCurentAnchor = function () {
+StorageKanban.prototype.computeCurentAnchor = function () {
   this.currentAnchorString = window.location.hash;
   if (this.currentAnchorString.startsWith('#')) {
     this.currentAnchorString = this.currentAnchorString.slice(1);
@@ -53,7 +59,7 @@ Storage.prototype.computeCurentAnchor = function () {
   }
 }
 
-Storage.prototype.onWindowHashChange = function () {
+StorageKanban.prototype.onWindowHashChange = function () {
   this.computeCurentAnchor();
   for (var label in this.currentAnchor) {
     if (!(label in this.variables)) {
@@ -66,7 +72,7 @@ Storage.prototype.onWindowHashChange = function () {
   }
 }
 
-Storage.prototype.isTrueVariable = function (
+StorageKanban.prototype.isTrueVariable = function (
     /**@type {string}*/
     incomingLabel
 ) {
@@ -80,7 +86,7 @@ Storage.prototype.isTrueVariable = function (
   return currentVariable.value === true || currentVariable.value === "true";
 }
 
-Storage.prototype.getVariable = function (
+StorageKanban.prototype.getVariable = function (
   /**@type {string}*/
   incomingLabel
 ) {
@@ -94,7 +100,7 @@ Storage.prototype.getVariable = function (
   return currentVariable.value;
 }
 
-Storage.prototype.loadVariable = function (incomingLabel) {
+StorageKanban.prototype.loadVariable = function (incomingLabel) {
   var label = null;
   if (typeof incomingLabel === "object") {
     label = incomingLabel.name;
@@ -131,7 +137,7 @@ Storage.prototype.loadVariable = function (incomingLabel) {
   }
 }
 
-Storage.prototype.storeInputChange = function (input) {
+StorageKanban.prototype.storeInputChange = function (input) {
   var id = null;
   var theInput = null;
   if (typeof input === "string") {
@@ -144,7 +150,7 @@ Storage.prototype.storeInputChange = function (input) {
   this.setVariable(id, theInput.value, true);
 }
 
-Storage.prototype.setVariable = function (
+StorageKanban.prototype.setVariable = function (
   /**@type{string} */
   incomingLabel,
   /**@type{string} */
@@ -188,7 +194,7 @@ Storage.prototype.setVariable = function (
   return value;
 }
 
-Storage.prototype.registerInputBox = function (
+StorageKanban.prototype.registerInputBox = function (
   variableName
 ) {
   if (variableName in this.variables) {
@@ -202,14 +208,14 @@ Storage.prototype.registerInputBox = function (
   }; 
 }
 
-Storage.prototype.loadAll = function () {
+StorageKanban.prototype.loadAll = function () {
   for (var label in this.variables) {
     this.loadVariable(label);
   }
 }
 
-var storage = new Storage();
+var storageKanban = new StorageKanban();
 
 module.exports = {
-  storage
+  storageKanban
 }

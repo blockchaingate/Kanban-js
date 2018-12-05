@@ -34,7 +34,7 @@ window.kanban = {
     editor: null
   },
   themes: require('./themes'),
-  storage: require('./storage').storage,
+  storageKanban: require('./storage').storageKanban,
 };
 
 window.kanban.ace.ace = ace;

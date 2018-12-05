@@ -1,6 +1,6 @@
 "use strict";
 const ids = require('./ids_dom_elements');
-const storage = require('./storage').storage;
+const storageKanban = require('./storage').storageKanban;
 
 var currentThemeName = "Light";
 
@@ -65,7 +65,7 @@ function setTheme(themeName) {
   for (var colorLabel in currentTheme.colors) {
     root.style.setProperty(colorLabel, currentTheme.colors[colorLabel]);
   }
-  storage.setVariable(storage.variables.theme, themeName);
+  storageKanban.setVariable(storageKanban.variables.theme, themeName);
 }
 
 module.exports = {

@@ -86,7 +86,6 @@ function hexShortenerForDisplaySpecifyNumChars(numChars, input){
   return `${input.substr(0, numChars)}...${input.substr(input.length - numChars, numChars)}`;
 }
 
-
 function shortenString(input, desiredMaxSize, includeNumOmitted) {
   if (input === "") {
     return input;
@@ -173,6 +172,32 @@ function ensureMinCharWidth(charWidth, input) {
   return input;
 }
 
+function splitMultipleDelimiters(
+  /**@type {String} */
+  input, 
+  delimiters,
+) {
+  var delimiterObject = {};
+  for (var i = 0; i < delimiters.length; i ++) {
+    delimiterObject[delimiters[i]] = true;
+  }
+  var currentWord = "";
+  var result = [];
+  for (var i = 0; i < input.length; i ++) {
+    if (input[i] in delimiterObject) {
+      if (currentWord !== "") {
+        result.push(currentWord);
+      }
+      currentWord = "";
+      continue;
+    }
+    currentWord += input[i];
+  }
+  if (currentWord !== "") {
+    result.push(currentWord);
+  }
+  return result;
+}
 
 module.exports = {
   deepCopy,
@@ -187,4 +212,5 @@ module.exports = {
   convertToIntegerIfPossible,
   hexVeryShortDisplay,
   ensureMinCharWidth,
+  splitMultipleDelimiters,
 }
