@@ -28,26 +28,29 @@ function KanbanGoNodes() {
   
   this.transformersStandard = {
     middleShortener: {
-      transformer: miscellaneousBackend.hexMiddleShortenerForDisplay,
+      transformer: miscellaneousBackend.hexShortener8Chars,
     },
     shortener: {
-      transformer: miscellaneousBackend.hexShortenerForDisplay,
+      transformer: miscellaneousBackend.hexShortener4Chars,
+    },
+    shortener16: {
+      transformer: miscellaneousBackend.hexShortener16Chars,
     },
     veryShort: {
       transformer: miscellaneousBackend.hexVeryShortDisplay,
     },
     blockHash: {
       clickHandler: this.getBlockByHash.bind(this),
-      transformer: miscellaneousBackend.hexShortenerForDisplay,
+      transformer: miscellaneousBackend.hexShortener4Chars,
       tooltip: "Sets the block hash field &amp; and fetches the block info. "
     },
     contractHexSetter: {
       clickHandler: this.setContractHex.bind(this),
-      transformer: miscellaneousBackend.hexShortenerForDisplay,
+      transformer: miscellaneousBackend.hexShortener4Chars,
     },
     contractCallSetter: {
       clickHandler: this.setContractFunctionName.bind(this),
-      transformer: miscellaneousBackend.hexMiddleShortenerForDisplay,
+      transformer: miscellaneousBackend.hexShortener8Chars,
     },
     contractSourceSetter: {
       clickHandler: this.setInput.bind(this, ids.defaults.fabcoin.inputBlockInfo.solidityInput),
@@ -170,7 +173,9 @@ function KanbanGoNodes() {
   this.optionsInitialization = {
     totalEntriesToDisplayAtEnds: 30,
     transformers: {
-      myEnodeAddress: this.transformersStandard.shortener,
+      myEnodeAddress: this.transformersStandard.shortener16,
+      "myConnections.${number}": this.transformersStandard.shortener16,
+      "secretKey": this.transformersStandard.shortener,
       "binaries.${number}": this.transformersStandard.contractHexSetter,
       "contractNames.${number}": this.transformersStandard.contractHexSetter,
       "ABI.${number}.${number}.name": this.transformersStandard.contractCallSetter,
@@ -527,7 +532,8 @@ function KanbanGoNodes() {
     },
     testCreateTransactionStandard: {
       inputs: {
-        input: ids.defaults.kanbanGO.inputSendReceive.transactionBuilderInputs,
+        inputs: ids.defaults.kanbanGO.inputSendReceive.txInputs,
+        outputs: ids.defaults.kanbanGO.inputSendReceive.txOutputs,
       },
       useOneNode: true,
     },
@@ -574,7 +580,7 @@ KanbanGoNodes.prototype.setContractHex = function(container, content, extraData)
 KanbanGoNodes.prototype.getSetInputWithShortener = function(idOutput) {
   return {
     clickHandler: this.setInput.bind(this, idOutput),
-    transformer: miscellaneousBackend.hexShortenerForDisplay
+    transformer: miscellaneousBackend.hexShortener4Chars
   };  
 }
 

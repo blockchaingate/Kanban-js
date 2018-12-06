@@ -68,15 +68,19 @@ function hexVeryShortDisplay(input) {
   return "...";
 }
 
-function hexShortenerForDisplay(input) {
-  return hexShortenerForDisplaySpecifyNumChars(4, input);
+function hexShortener4Chars(input) {
+  return hexShortenerNumChars(4, input);
 }
 
-function hexMiddleShortenerForDisplay(input) {
-  return hexShortenerForDisplaySpecifyNumChars(8, input);
+function hexShortener8Chars(input) {
+  return hexShortenerNumChars(8, input);
 }
 
-function hexShortenerForDisplaySpecifyNumChars(numChars, input){
+function hexShortener16Chars(input) {
+  return hexShortenerNumChars(16, input);
+}
+
+function hexShortenerNumChars(numChars, input){
   if (input.length < numChars * 2 + 2) {
     return input;
   }
@@ -202,8 +206,9 @@ function splitMultipleDelimiters(
 module.exports = {
   deepCopy,
   deepCopyThroughJSON,
-  hexShortenerForDisplay,
-  hexMiddleShortenerForDisplay,
+  hexShortener4Chars,
+  hexShortener8Chars,
+  hexShortener16Chars,
   getDurationReadableFromSeconds,
   getDurationReadableFromMilliseconds,
   shortenString,

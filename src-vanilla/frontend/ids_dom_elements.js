@@ -98,13 +98,16 @@ var defaults = {
       messageVoteHex: "inputKBGOVoteMessageHex",
       messageVote: "inputKBGOVoteMessage",
       secretIn: "inputKBGOSecretIn",
-      txInId: "inputKBGOTransactionInId",
-      txInNOut: "inputKBGOTransactionInNOut",
-      beneficiaryAddress: "inputKBGOTransactionBeneficiaryAddress",
-      beneficiaryAmount: "inputKBGOTransactionBeneficiaryAmount",
-      changeAddress: "inputKBGOTransactionChangeAddress",
-      changeAmount: "inputKBGOTransactionChangeAmount",
-      fees: "inputKBGOTransactionFees",
+      txHex: "inputKBGOTransactionHex",
+      // The following labels must match those in the fab page
+      txInIds: "inputKBGOTransactionInId",
+      txInNOuts: "inputKBGOTransactionInNOut",
+      txBeneficiaryAddresses: "inputKBGOTransactionBeneficiaryAddress",
+      txBeneficiaryAmounts: "inputKBGOTransactionBeneficiaryAmount",
+      txFee: "inputKBGOTransactionFees",
+      txInputs: "inputKBGOTransactionInputs",
+      txOutputs: "inputKBGOTransactionOutputs",
+      // end of matching 
       smartContractId: "inputKBGOSmartContractId",
       smartContractFunction: "inputKBGOSmartContractFunction",
       smartContractData: "inputKBGOSmartContractData",
@@ -169,9 +172,10 @@ var defaults = {
       addressEthereum: "inputEthereumAddress",
       publicKey: "inputFabcoinPublicKey",
       privateKey: "inputFabcoinPrivateKey",
-
       txid: "inputFabcoinTransactionId",
       txHex: "inputFabcoinTransactionHex",
+
+      // The following labels must match those in the kanbabGO page
       txInIds: "inputFabcoinTxInIds",
       txInNOuts: "inputFabcoinTxInNOuts",
       txBeneficiaryAddresses: "inputFabcoinBeneficiaryAddresses",
@@ -179,6 +183,7 @@ var defaults = {
       txFee: "inputFabcoinFee",
       txInputs: "inputFabcoinTransactionInputs",
       txOutputs: "inputFabcoinTransactionOutputs",
+      // end of matching 
       txAggregatePublicKeys: "inputAggregateSignaturePubKeysForTx",
       txAggregateSignature: "inputAggregateSignatureForTx",
 

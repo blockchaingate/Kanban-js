@@ -20,15 +20,15 @@ function FabcoinNodeInitializer() {
   var inputInitialization = ids.defaults.fabcoin.inputInitialization;
   this.transformersStandard = {
     shortener: {
-      transformer: miscellaneousBackend.hexShortenerForDisplay
+      transformer: miscellaneousBackend.hexShortener4Chars
     },
     setDemoPublicKey: {
-      transformer: miscellaneousBackend.hexShortenerForDisplay,
+      transformer: miscellaneousBackend.hexShortener4Chars,
       clickHandler: this.setInput.bind(this, ids.defaults.demo.inputs.corporationPublicKey),
       tooltip: "Public key of organization. "
     },
     setDemoSignature: {
-      transformer: miscellaneousBackend.hexShortenerForDisplay,
+      transformer: miscellaneousBackend.hexShortener4Chars,
       clickHandler: this.setInput.bind(this, ids.defaults.demo.inputs.corporationSignature),
       tooltip: "Signature of organization. "
     }
@@ -113,7 +113,7 @@ FabcoinNodeInitializer.prototype.setInput = function(idToSet, container, content
 FabcoinNodeInitializer.prototype.getSetInputWithShortener = function(idOutput) {
   return {
     clickHandler: this.setInput.bind(this, idOutput),
-    transformer: miscellaneousBackend.hexShortenerForDisplay
+    transformer: miscellaneousBackend.hexShortener4Chars
   };  
 }
 

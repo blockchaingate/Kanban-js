@@ -22,7 +22,7 @@ function FabNode() {
   this.transformersStandard = {
     blockHash: this.getSetInputAndRunWithShortener(inputFabBlock.blockHash, "getBlockByHash", "Sets the block hash field &amp; and fetches the block info. "),
     shortener: {
-      transformer: miscellaneousBackend.hexShortenerForDisplay
+      transformer: miscellaneousBackend.hexShortener4Chars
     },
     extremeShortener: {
       transformer: miscellaneousBackend.hexVeryShortDisplay
@@ -32,7 +32,7 @@ function FabNode() {
     setAddress: this.getSetInputWithShortener(inputFabBlock.address),
     setPrivateKey: {
       clickHandler: this.setPrivateKeyComputeAllElse.bind(this),
-      transformer: miscellaneousBackend.hexShortenerForDisplay,
+      transformer: miscellaneousBackend.hexShortener4Chars,
     },
     setPrivateKeySchnorr: this.getSetInputWithShortener(inputFabCryptoSchnorr.privateKey),
     setNonceSchnorr: this.getSetInputWithShortener(inputFabCryptoSchnorr.nonce),
@@ -47,7 +47,7 @@ function FabNode() {
     },
     setContractId: {
       clickHandler: this.setContractId.bind(this),
-      transformer: miscellaneousBackend.hexShortenerForDisplay
+      transformer: miscellaneousBackend.hexShortener4Chars
     },
     setSchnorrSignature: this.getSetInputWithShortener(inputFabCryptoSchnorr.signature),
     setAggregateSignature: this.getSetInputWithShortener(inputFabCryptoAggregate.theAggregation),
@@ -479,7 +479,7 @@ FabNode.prototype.getSetInputAndRunWithShortener = function(idOutput, functionLa
   var runner = this.run.bind(this, functionLabelToFun);
   return {
     clickHandler: this.combineClickHandlers.bind(this, [setter, runner]),
-    transformer: miscellaneousBackend.hexShortenerForDisplay,
+    transformer: miscellaneousBackend.hexShortener4Chars,
     tooltip: tooltip
   };  
 }
@@ -493,16 +493,38 @@ FabNode.prototype.getSetInputNoShortener = function(idOutput) {
 FabNode.prototype.getSetInputWithShortener = function(idOutput) {
   return {
     clickHandler: this.setInput.bind(this, idOutput),
-    transformer: miscellaneousBackend.hexShortenerForDisplay
+    transformer: miscellaneousBackend.hexShortener4Chars
   };  
 }
 
-FabNode.prototype.computeTxInsAndOuts = function() {
+FabNode.prototype.computeTxInsAndOuts = function(sourceIsFabPage) {
   var inputFab = ids.defaults.fabcoin.inputBlockInfo;
-  var incomingIds = document.getElementById(inputFab.txInIds).value;
-  var incomingNOuts = document.getElementById(inputFab.txInNOuts).value;
+  var inputKB = ids.defaults.kanbanGO.inputSendReceive;
+  var incomingIds;
+  var incomingNOuts;
+  var incomingOutAddresses;
+  var incomingAmounts;
+  var inputIdContainer;
+  var otherIdContainer;
+  var aggregatePubKeys; 
+  if (sourceIsFabPage) {
+    inputIdContainer = inputFab;
+    otherIdContainer = inputKB;
+  } else  {
+    inputIdContainer = inputKB;
+    otherIdContainer = inputFab;
+  }
+  incomingIds = document.getElementById(inputIdContainer.txInIds).value;
+  incomingNOuts = document.getElementById(inputIdContainer.txInNOuts).value;
+  incomingOutAddresses = document.getElementById(inputIdContainer.txBeneficiaryAddresses).value;
+  incomingAmounts = document.getElementById(inputIdContainer.txBeneficiaryAmounts).value;
+  aggregatePubKeys = document.getElementById(inputFab.txAggregatePublicKeys).value;
+
+
   var incomingIdArray = miscellaneousBackend.splitMultipleDelimiters(incomingIds, ", \t");
   var incomingNOutArray = miscellaneousBackend.splitMultipleDelimiters(incomingNOuts, ", \t");
+
+
   var resultIn = [];
   var resultOut = {};
   for (var i = 0; i < incomingIdArray.length; i ++) {
@@ -511,14 +533,10 @@ FabNode.prototype.computeTxInsAndOuts = function() {
       vout: Number(incomingNOutArray[i]),
     });
   }
-  var incomingOutAddresses = document.getElementById(inputFab.txBeneficiaryAddresses).value;
-  var incomingAmounts = document.getElementById(inputFab.txBeneficiaryAmounts).value;
   var incomingOutAddressArray = miscellaneousBackend.splitMultipleDelimiters(incomingOutAddresses, ", \t");
   var incomingOutAmountArray = miscellaneousBackend.splitMultipleDelimiters(incomingAmounts, ", \t");
 
   var amountCounter = 0;
-  miscellaneousFrontEnd.updateValue(inputFab.txInputs, JSON.stringify(resultIn));
-  var aggregatePubKeys = document.getElementById(inputFab.txAggregatePublicKeys).value;
   if (aggregatePubKeys !== "" && typeof aggregatePubKeys === "string") {
     resultOut.aggregateSignature = {
       publicKeysHex: aggregatePubKeys,
@@ -527,9 +545,22 @@ FabNode.prototype.computeTxInsAndOuts = function() {
     amountCounter ++;
   }
   for (; amountCounter < incomingOutAddressArray.length; amountCounter ++) {
-    resultOut[incomingOutAddressArray[amountCounter]] = Number(incomingOutAmountArray[amountCounter]);
+    resultOut[incomingOutAddressArray[amountCounter]] = incomingOutAmountArray[amountCounter];
   }
+  miscellaneousFrontEnd.updateValue(otherIdContainer.txInIds, incomingIds);
+  miscellaneousFrontEnd.updateValue(otherIdContainer.txInNOuts, incomingNOuts);
+  miscellaneousFrontEnd.updateValue(otherIdContainer.txBeneficiaryAddresses, incomingOutAddresses);
+  miscellaneousFrontEnd.updateValue(otherIdContainer.txBeneficiaryAmounts, incomingAmounts);
+
+  incomingIds = document.getElementById(inputIdContainer.txInIds).value;
+  incomingNOuts = document.getElementById(inputIdContainer.txInNOuts).value;
+  incomingOutAddresses = document.getElementById(inputIdContainer.txBeneficiaryAddresses).value;
+  incomingAmounts = document.getElementById(inputIdContainer.txBeneficiaryAmounts).value;
+
+  miscellaneousFrontEnd.updateValue(inputFab.txInputs, JSON.stringify(resultIn));
   miscellaneousFrontEnd.updateValue(inputFab.txOutputs, JSON.stringify(resultOut));
+  miscellaneousFrontEnd.updateValue(inputKB.txInputs, JSON.stringify(resultIn));
+  miscellaneousFrontEnd.updateValue(inputKB.txOutputs, JSON.stringify(resultOut));
 }
 
 FabNode.prototype.setTxInputVoutAndValue = function(container, content, extraData) {

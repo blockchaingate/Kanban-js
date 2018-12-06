@@ -25,15 +25,15 @@ var optionsForKanbanPlusPlusGeneralStandard = {
   transformers: {
     address : {
       handlerName: setAddress.name,
-      transformer: miscellaneous.hexShortenerForDisplay
+      transformer: miscellaneous.hexShortener4Chars
     },
     signatureSchnorrBase58: {
       handlerName: setSignatureSchnorr.name,
-      transformer: miscellaneous.hexShortenerForDisplay
+      transformer: miscellaneous.hexShortener4Chars
     },
     nonceSchnorrBase58Check: {
       handlerName: setNonceSchnorr.name,
-      transformer: miscellaneous.hexShortenerForDisplay
+      transformer: miscellaneous.hexShortener4Chars
     }
   }
 }
