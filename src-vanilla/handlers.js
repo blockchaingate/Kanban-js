@@ -8,6 +8,7 @@ const handlersKanbanGoInitialization = require('./external_connections/kanbango/
 const handlersFabcoinInitialization = require('./external_connections/fabcoin/handlers_initialization');
 const handlersFabcoinRPC = require('./external_connections/fabcoin/handlers_rpc');
 const handlersStandard = require('./handlers_standard');
+require('./external_connections/kanbango/handlers_my_nodes');
 const handlersLogin = require('./oauth');
 
 function handleRequestsHTTP(request, response) {

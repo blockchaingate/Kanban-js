@@ -27,8 +27,7 @@ function Page() {
       updateFunction: kanbanRPC.theKBNodes.getNodeInformation.bind(kanbanRPC.theKBNodes)
     },
     myNodes: {
-      idPage: ids.defaults.pageMyNodes,
-      updateFunction: myNodes.updateMyNodes
+      idPage: ids.defaults.pages.myNodes,
     },
     kanbanJS: {
       idPage: ids.defaults.pages.kanbanJS,

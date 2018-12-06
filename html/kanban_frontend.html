@@ -58,7 +58,7 @@
   <table class = "tableStandardInputs"> 
   <tr><td>
   <div class = "divLabelButtonGroup">break KB</div><div id = "panelKBGODangerous" class = "panelStandard">
-  <button class = "buttonStandard" style = "width:100px" onclick = "window.kanban.kanbanGO.rpc.theKBNodes.run('fetchNodeConfig', 'initialization');"><b style = "color:red">Get config</b></button><br>
+  <button class = "buttonStandard" style = "width:100px" onclick = "window.kanban.kanbanGO.rpc.theKBNodes.run('fetchLocalRegtestNodeConfig', 'initialization');"><b style = "color:red">Get config</b></button><br>
   <!--button class = "buttonStandard"   style = "width:100px" onclick = "window.kanban.kanbanGO.rpc.theKBNodes.run('regenerateNodeConfig', 'initialization');">Regen config</button><br-->
   <button class = "buttonStandard" style = "width:100px" onclick = "window.kanban.kanbanGO.rpc.theKBNodes.run('killAllGeth', 'initialization')"><b style = "color:red">kill all geth</b></button><br>
   </div>
@@ -167,25 +167,22 @@
 
 <div class = "divMainPage" id = "pageMyNodes">
   <div class = "divControlPanelDefault">
-    <b>All Browser &#8644; remote nodejs</b><br>
-    <button class = "buttonStandard" onclick = "window.kanban.allMyNodes.browserToAllRemoteNodePing();">ping</button>
-    <button class = "buttonStandard" onclick = "window.kanban.allMyNodes.browserToAllRemoteMempoolArrivalTimes();">mempool arrivals</button>
-    <button class = "buttonStandard" onclick = "window.kanban.allMyNodes.browserToAllRemoteMiningInfo();">mine info</button>
-  </div><!--divControlPanelDefault-->
-  <br>
-  <div class = "divControlPanelDefault">
-    <b>All local node &#8644; remote machine</b><br>
-    <button class = "buttonStandard" onclick = "window.kanban.allMyNodes.sshNodeToAllRemoteMachineGitPull();">update</button>
-    <button class = "buttonStandard" onclick = "window.kanban.allMyNodes.sshNodeToAllRemoteMachineNodeRestart();">restart</button>
-    <button class = "buttonStandard" onclick = "window.kanban.allMyNodes.sshNodeToAllRemoteMachineKillallFabcoind();">kill fab</button>
-    <button class = "buttonStandard" onclick = "window.kanban.allMyNodes.sshNodeToAllRemoteMachineDeleteFabcoinConfiguration();">del .fab</button>
-    <button class = "buttonStandard" onclick = "window.kanban.allMyNodes.sshNodeToAllRemoteMachineGitPullMakeFab();">make fab</button>
-    <button class = "buttonStandard" onclick = "window.kanban.allMyNodes.sshNodeToAllRemoteMachineFabcoindStart();">start fab</button>
+  <table>
+    <tr>
+    <td>
+    <div class = "divLabelButtonGroup">basic</div><div id = "panelKBGOMyNodesBasic" class = "panelStandard">
+    <button class = "buttonStandard"  style = "width:100px" onclick = "window.kanban.kanbanGO.rpc.theKBNodes.run('fetchMyNodesInfo', 'myNodes');">Fetch info</button>
+    </div>
+    </td>
+    <td>
+      
+    </td>
+    </tr>
+  </table>
   </div><!--divControlPanelDefault-->
   <br>
   <div class = "divControlPanelDefault">  
-  <div id = "divMyNodesOutput">
-  </div><!--divMyNodesOutput-->
+  <div id = "divMyNodesOutput"> </div><!--divMyNodesOutput-->
   </div><!--divControlPanelDefault-->
 </div> <!--pageMyNodes-->
 <div class = "divMainPage" id = "pageFabcoinCrypto">
@@ -578,6 +575,8 @@
     <hr>
     <div><button class = "buttonSelectPage" onclick = "window.kanban.thePage.selectPage('fabcoinInitialization');">fabcoin start</button></div>
     <div><button class = "buttonSelectPage" onclick = "window.kanban.thePage.selectPage('fabcoinSmartContract');">fabcoin smart</button></div>
+    <hr>
+    <div><button class = "buttonSelectPage" onclick = "window.kanban.thePage.selectPage('myNodes');">My nodes</button></div>
     <hr>
     <div><button class = "buttonSelectPage" onclick = "window.kanban.thePage.selectPage('kanbanGO');">CryptoGO</button></div>
     <div><button class = "buttonSelectPage" onclick = "window.kanban.thePage.selectPage('fabcoinCrypto');">Crypto++</button></div>

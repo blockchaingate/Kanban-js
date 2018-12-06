@@ -5,7 +5,6 @@ var defaults = {
   pageTXInfo: "pageTXInfo",
   pageNetwork: "pageNetwork",
   pageTestGPU: "pageTestGPU",
-  pageMyNodes: "pageMyNodes",
   pageSend: "pageSend",
   pageMine: "pageMine",
   pageProfiling: "pageProfiling",
@@ -20,6 +19,7 @@ var defaults = {
       smartContract: "pageFabcoinSmartContract",
       crypto: "pageFabcoinCrypto",
     },
+    myNodes: "pageMyNodes",
     themes: "pageThemes",
     privacyPolicy: "pagePrivacyPolicy",
     login: "pageLogin",
@@ -128,7 +128,8 @@ var defaults = {
     nodePanel: "spanKanbanGoNodeContainer",
     outputKBGOTest: "divOutputKBGOTest",
     outputKanbanInitialization: "divOutputMyLocalKanbanNodes",
-    outputSendReceive: "divOutputKBGOSendReceive"
+    outputSendReceive: "divOutputKBGOSendReceive",
+    outputMyNodes: "divMyNodesOutput",
   },
   kanbanPlusPlus: {
     inputSchnorrSignature: {
@@ -250,7 +251,6 @@ var defaults = {
   outputTransactionsButtons: "divTransactionsOutputButtons",
   outputRPCNetwork: "divKanbanRPCOutputNetwork",
   outputGPUTest: "divGPUTestOutput",
-  outputMyNodes: "divMyNodesOutput",
   outputSendReceiveRadio: "divSendReceiveOutputRadio",
   outputSendReceiveButtons: "divSendReceiveOutputButtons",
   outputSendReceiveBulkOutputButtons: "divSendReceiveBulkOutputButtons",

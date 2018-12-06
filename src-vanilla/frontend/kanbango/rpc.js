@@ -290,6 +290,12 @@ function KanbanGoNodes() {
       idDefaultOutput: ids.defaults.kanbanGO.outputSendReceive,
       rpcCalls: kanbanGOInitialization.demoRPCCalls,
       url: pathnames.url.known.kanbanGO.initialization,
+    },
+    myNodes: {
+      jsonOptions: this.optionsMyNodes,
+      idDefaultOutput: ids.defaults.kanbanGO.outputMyNodes,
+      rpcCalls: kanbanGOInitialization.rpcCalls,
+      url: pathnames.url.known.kanbanGO.initialization,
     }
   }; 
   // if rpcCall omitted it will be assumed to be equal to the function label.
@@ -527,7 +533,7 @@ function KanbanGoNodes() {
         transactionValue: ids.defaults.kanbanGO.inputBenchmarkParameters.transactionValue,
       }
     },
-    fetchNodeConfig: {
+    fetchLocalRegtestNodeConfig: {
       useOneNode: true,
     },
     testCreateTransactionStandard: {
@@ -540,6 +546,9 @@ function KanbanGoNodes() {
       inputs: {
         input: ids.defaults.kanbanGO.inputSendReceive.transactionBuilderInputs,
       },
+    },
+    fetchMyNodesInfo: {
+      callType: this.callTypes.myNodes,
     }
   };
   this.correctFunctions();
