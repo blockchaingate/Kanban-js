@@ -232,7 +232,7 @@ NodeKanbanGo.prototype.run = function(response) {
   ];
   theArguments.push(
     "--bridge.chainnet",
-    "reg",
+    "regnet",
     "--bridge.attachtorunning",
     "--bridge.rpcuser",
     global.fabcoinNode.configuration.RPCUser,
