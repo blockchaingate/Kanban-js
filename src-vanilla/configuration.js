@@ -129,6 +129,10 @@ Configuration.prototype.readStorage = function() {
   } catch (e) {
     storageRaw = null;
   }
+  if (storageRaw.length <= 5) {
+    console.log("Storage file is too short. Rewriting. ".red);
+    storageRaw = null;
+  }
   if (storageRaw === undefined || storageRaw === null) {
     console.log(`Did not find`.yellow + ` storage file (used for cerbot...) at ` + `${pathnames.pathname.configurationStorageAdmin}`.red);
     console.log(`Creating it for you. `);
