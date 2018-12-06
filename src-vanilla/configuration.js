@@ -127,10 +127,19 @@ Configuration.prototype.readStorage = function() {
   try {
     storageRaw = fs.readFileSync(pathnames.pathname.configurationStorageAdmin);
   } catch (e) {
-    console.log("No storage file found. ");
+    storageRaw = null;
+  }
+  if (storageRaw.length <= 5) {
+    console.log("Storage file is too short. Rewriting. ".red);
+    storageRaw = null;
+  }
+  if (storageRaw === undefined || storageRaw === null) {
+    console.log(`Did not find`.yellow + ` storage file (used for cerbot...) at ` + `${pathnames.pathname.configurationStorageAdmin}`.red);
+    console.log(`Creating it for you. `);
     this.storeStorage();
     return;
   }
+  console.log(`Read storage file: ` + `${pathnames.pathname.configurationStorageAdmin}`.blue);
   var storageParsed = JSON.parse(storageRaw);
   for (var label in this.storaLabels) {
     if (label in storageParsed) {
