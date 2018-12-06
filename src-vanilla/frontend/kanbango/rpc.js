@@ -535,13 +535,11 @@ function KanbanGoNodes() {
         inputs: ids.defaults.kanbanGO.inputSendReceive.txInputs,
         outputs: ids.defaults.kanbanGO.inputSendReceive.txOutputs,
       },
-      useOneNode: true,
     },
     testCreateContractCall: {
       inputs: {
         input: ids.defaults.kanbanGO.inputSendReceive.transactionBuilderInputs,
       },
-      useOneNode: true,
     }
   };
   this.correctFunctions();
