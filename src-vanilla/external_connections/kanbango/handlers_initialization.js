@@ -215,10 +215,12 @@ NodeKanbanGo.prototype.run = function(response) {
     "--verbosity",
     4,
     "--rpc",
+    "--rpcaddr",
+    "0.0.0.0",
     "--rpcapi",
-    "db,kanban,net,web3,personal,pbft,bridge,pbfttest,cryptotest",
+    "db,kanban,net,web3,personal,pbft,bridge,pbfttest,cryptotest,admin",
     "--kanbanstats",
-    `${this.nodePublicKeyHex}:abcd@localhost:3000`,
+    `${this.nodePublicKeyHex}:abcd@169.45.42.100:3000`,
     "--identity",
     `${this.nodePublicKeyHex}`,
     "--networkid",
@@ -232,7 +234,7 @@ NodeKanbanGo.prototype.run = function(response) {
   ];
   theArguments.push(
     "--bridge.chainnet",
-    "reg",
+    "regnet",
     "--bridge.attachtorunning",
     "--bridge.rpcuser",
     global.fabcoinNode.configuration.RPCUser,

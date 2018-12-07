@@ -126,11 +126,11 @@ Configuration.prototype.readStorage = function() {
   var storageRaw = null;
   try {
     storageRaw = fs.readFileSync(pathnames.pathname.configurationStorageAdmin);
+    if (storageRaw.length <= 5) {
+      console.log("Storage file is too short. Rewriting. ".red);
+      storageRaw = null;
+    }
   } catch (e) {
-    storageRaw = null;
-  }
-  if (storageRaw.length <= 5) {
-    console.log("Storage file is too short. Rewriting. ".red);
     storageRaw = null;
   }
   if (storageRaw === undefined || storageRaw === null) {
