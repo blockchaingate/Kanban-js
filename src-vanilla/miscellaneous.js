@@ -68,15 +68,19 @@ function hexVeryShortDisplay(input) {
   return "...";
 }
 
-function hexShortenerForDisplay(input) {
-  return hexShortenerForDisplaySpecifyNumChars(4, input);
+function hexShortener4Chars(input) {
+  return hexShortenerNumChars(4, input);
 }
 
-function hexMiddleShortenerForDisplay(input) {
-  return hexShortenerForDisplaySpecifyNumChars(8, input);
+function hexShortener8Chars(input) {
+  return hexShortenerNumChars(8, input);
 }
 
-function hexShortenerForDisplaySpecifyNumChars(numChars, input){
+function hexShortener16Chars(input) {
+  return hexShortenerNumChars(16, input);
+}
+
+function hexShortenerNumChars(numChars, input){
   if (input.length < numChars * 2 + 2) {
     return input;
   }
@@ -98,13 +102,25 @@ function shortenString(input, desiredMaxSize, includeNumOmitted) {
   if (numOmittedChars <= 0) {
     return input;
   }
+  return trimStringAtEnds(input, numEndChars, numEndChars, includeNumOmitted)
+}
+
+
+function trimStringAtEnds(input, charsToDisplayLeft, charsToDisplayRight, includeNumOmitted) {
+  if (typeof input !== "string") {
+    input = JSON.stringify(input);
+  }
+  if (charsToDisplayLeft + charsToDisplayRight >= input.length) {
+    return input;
+  }
   if (includeNumOmitted === undefined || includeNumOmitted === null) {
     includeNumOmitted = true;
   }
   if (!includeNumOmitted) {
-    return `${input.slice(0, numEndChars)}...${input.slice(input.length-numEndChars, input.length)}`; 
+    return `${input.slice(0, charsToDisplayLeft)}...${input.slice(input.length-charsToDisplayRight, input.length)}`; 
   }
-  return `${input.slice(0, numEndChars)}...(${numOmittedChars} out of ${input.length} omitted)...${input.slice(input.length-numEndChars, input.length)}`; 
+  var numOmittedChars = input.length - charsToDisplayLeft - charsToDisplayRight; 
+  return `${input.slice(0, charsToDisplayLeft)}...(${numOmittedChars} out of ${input.length} omitted)...${input.slice(input.length-charsToDisplayRight, input.length)}`; 
 }
 
 function removeQuotes(input) {
@@ -202,11 +218,13 @@ function splitMultipleDelimiters(
 module.exports = {
   deepCopy,
   deepCopyThroughJSON,
-  hexShortenerForDisplay,
-  hexMiddleShortenerForDisplay,
+  hexShortener4Chars,
+  hexShortener8Chars,
+  hexShortener16Chars,
   getDurationReadableFromSeconds,
   getDurationReadableFromMilliseconds,
   shortenString,
+  trimStringAtEnds,
   SpeedReport, 
   removeQuotes,
   convertToIntegerIfPossible,

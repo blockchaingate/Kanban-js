@@ -876,7 +876,7 @@ KanbanGoInitializer.prototype.compileSolidity = function(
   }
 }
 
-KanbanGoInitializer.prototype.fetchNodeConfig = function(
+KanbanGoInitializer.prototype.fetchLocalRegtestNodeConfig = function(
   /** @type {ResponseWrapper} */
   response, 
   queryCommand,
@@ -1211,10 +1211,14 @@ KanbanGoInitializer.prototype.handleRPCArguments = function(
   }
 
   var currentFunction = null;
-  if (currentFunction === undefined || currentFunction === null) {
-    currentFunction = this[theCallLabel];
+  var objectsToSearchForImplementation = [this, global.nodeManager];
+  for (var i = 0; i < objectsToSearchForImplementation.length; i ++) {
+    currentFunction = objectsToSearchForImplementation[i][theCallLabel];
+    if (typeof currentFunction === "function") {
+      break;
+    }
   }
-  if (currentFunction === undefined || currentFunction === null || (typeof currentFunction !== "function")) {
+  if (typeof currentFunction !== "function") {
     response.writeHead(500);
     var result = {
       error: `Server error: handler ${theCallLabel} declared but no implementation found. `,

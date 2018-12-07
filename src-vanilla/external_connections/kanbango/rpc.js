@@ -20,7 +20,7 @@ var rpcCalls = {
     mandatoryFixedArguments: { //<- values give defaults, null for none
     },
     mandatoryModifiableArguments: { //<- values give defaults, null for none
-      message: null
+      message: null,
     },
     optionalArguments: {
     },
@@ -37,7 +37,7 @@ var rpcCalls = {
     rpcCall: "testPublicKeyFromPrivate",
     method: "cryptotest_testPublicKeyFromPrivate", 
     mandatoryModifiableArguments: {
-      privateKey: null
+      privateKey: null,
     },
     parameters: ["privateKey"]
   },
@@ -46,7 +46,7 @@ var rpcCalls = {
     method: "cryptotest_testSchnorrSignature",
     mandatoryModifiableArguments: {
       privateKey: null,
-      messageBase64: null
+      messageBase64: null,
     },
     parameters: ["privateKey", "messageBase64"]
   },
@@ -100,7 +100,7 @@ var rpcCalls = {
       committedSigners: null,
       digest: null,
       aggregateCommitment: null,
-      aggregatePublicKey: null
+      aggregatePublicKey: null,
     },
     parameters: ["committedSigners", "digest", "aggregateCommitment", "aggregatePublicKey"]    
   },
@@ -137,7 +137,7 @@ var rpcCalls = {
     rpcCall: "getBlockByNumber",
     method: "kanban_getBlockByNumber",
     optionalArguments: {
-      blockNumber: null
+      blockNumber: null,
     },
     mandatoryModifiableArguments: {
       verbose: true,
@@ -226,8 +226,10 @@ var rpcCalls = {
     rpcCall: "testCreateTransactionStandard",
     method: "pbfttest_testCreateTransactionStandard",
     mandatoryModifiableArguments: {
+      inputs: null,
+      outputs: null,
     },
-    parameters: [],
+    parameters: ["inputs", "outputs"],
   },
   testCreateContractCall: {
     rpcCall: "testCreateContractCall",

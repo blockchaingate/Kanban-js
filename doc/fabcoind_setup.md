@@ -59,6 +59,8 @@ sudo apt-get install libdb4.8-dev libdb4.8++-dev
 
 ```
 sudo apt-get install build-essential libtool autotools-dev automake pkg-config libssl-dev libevent-dev bsdmainutils python3
+
+sudo apt-get install libssl-dev
 ```
 
 7. Libevent.
