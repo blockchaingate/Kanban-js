@@ -215,6 +215,8 @@ NodeKanbanGo.prototype.run = function(response) {
     "--verbosity",
     4,
     "--rpc",
+    "--rpcaddr",
+    "0.0.0.0",
     "--rpcapi",
     "db,kanban,net,web3,personal,pbft,bridge,pbfttest,cryptotest,admin",
     "--kanbanstats",
