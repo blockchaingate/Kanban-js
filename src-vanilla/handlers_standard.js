@@ -1,3 +1,4 @@
+"use strict";
 const url = require('url');
 const queryString = require('querystring');
 var ResponseWrapper = require('./response_wrapper').ResponseWrapper;
@@ -9,7 +10,7 @@ function HandlerLimits() {
 
 var handlerLimits = new HandlerLimits();
 
-function transformToQueryJSON(request, responseNonWrapped, callbackQuery, parsedURL) {
+function transformToQueryJSON(request, responseNonWrapped, callbackQueryCommand, parsedURL) {
   var response = new ResponseWrapper(responseNonWrapped, handlerLimits);
   if (handlerLimits.numberOfRequestsRunning > handlerLimits.maximumNumberOfRequestsRunning) {
     response.writeHead(500);
@@ -19,20 +20,19 @@ function transformToQueryJSON(request, responseNonWrapped, callbackQuery, parsed
     return response.end(JSON.stringify(result));
   }
   if (request.method === "GET") {
-    return handleRPCGET(request, response, callbackQuery, parsedURL);
+    return extractQuery(response, parsedURL.query, callbackQueryCommand, parsedURL);
   }
   if (request.method === "POST") {
-    return handleRPCPOST(request, response, callbackQuery, parsedURL);
+    return handleRPCPOST(request, response, callbackQueryCommand, parsedURL);
   }
   response.writeHead(400);
-  return response.end(`Method not implemented: ${request.method}. `);
+  var result = {
+    error: `Method not implemented: ${request.method}. `
+  };
+  return response.end(JSON.stringify(result));
 }
 
-function handleRPCGET(request, response, callbackQuery, parsedURL) {
-  extractQuery(response, parsedURL.query, callbackQuery, parsedURL)
-}
-
-function extractQuery(response, queryNonParsed, callbackQuery, parsedURL) {
+function extractQuery(response, queryNonParsed, callbackQueryCommand, parsedURL) {
   var query = null;
   try {
     query = queryString.parse(queryNonParsed);
@@ -52,10 +52,33 @@ function extractQuery(response, queryNonParsed, callbackQuery, parsedURL) {
   }
   var hostname = parsedURL.hostname;
   query.hostname = hostname;
-  callbackQuery(response, query);
+  var queryCommand = null;
+  try {
+    console.log("DEBUG: query.command is: " + query.command);
+    queryCommand = JSON.parse(query.command);
+    console.log("DEBUG: parsed to: " + JSON.stringify(queryCommand));
+  } catch (e) {
+    response.writeHead(400);
+    var result = {
+      error: `Bad fabcoin RPC input. ${e}`,
+    };
+    result.input = query;
+    return response.end(JSON.stringify(result));
+  }
+  for (var label in query) {
+    if (label in queryCommand) {
+      response.writeHead(400);
+      result = {
+        error : `Label ${label} specified both as a query parameter and as an entry in the command json. `
+      };
+      return response.end(JSON.stringify(result));
+    }
+    queryCommand[label] = query[label];
+  }
+  callbackQueryCommand(response, queryCommand);
 }
 
-function handleRPCPOST(request, response, callbackQuery, parsedURL) {
+function handleRPCPOST(request, response, callbackQueryCommand, parsedURL) {
   let body = [];
   request.on('error', (theError) => {
     response.writeHead(400);
@@ -64,7 +87,7 @@ function handleRPCPOST(request, response, callbackQuery, parsedURL) {
     body.push(chunk);
   }).on('end', () => {
     body = Buffer.concat(body).toString();
-    return extractQuery(response, body, callbackQuery, parsedURL);
+    return extractQuery(response, body, callbackQueryCommand, parsedURL);
   });
 }
 

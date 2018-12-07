@@ -5,17 +5,6 @@ const kanabanGoInitializer = require('./handlers_initialization');
 const NodeKanbanGo = kanabanGoInitializer.NodeKanbanGo;
 const ResponseWrapper = require('../../response_wrapper').ResponseWrapper;
 
-function handleQuery(response, query) {
-  var queryCommand = null;
-  try {
-    queryCommand = JSON.parse(query.command);
-  } catch (e) {
-    response.writeHead(400);
-    return response.end(`Bad KanbanGO RPC input. ${e}`);
-  }
-  return handleRPCArguments(response, queryCommand);
-}
-
 function getParameterFromType(input, type) {
   if (type === "number") {
     return Number(input);
@@ -228,5 +217,5 @@ function handleRPCArgumentsPartTwo(
 }
 
 module.exports = {
-  handleQuery
+  handleRPCArguments
 }

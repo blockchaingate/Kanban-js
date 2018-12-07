@@ -62,20 +62,6 @@ FabcoinNode.prototype.initStreams =  function() {
   this.outputStreams.fabcoind.colorIdConsole = "blue";
 }
 
-FabcoinNode.prototype.handleQuery = function(response, query) {
-  var queryCommand = null;
-  try {
-    queryCommand = JSON.parse(query.command);
-  } catch (e) {
-    response.writeHead(400);
-    var result = {
-      error: `Bad fabcoin initialization input. ${e}`
-    }
-    return response.end(JSON.stringify(result));
-  }
-  return this.handleRPCArguments(response, queryCommand);
-}
-
 FabcoinNode.prototype.getArgumentsFromSpec = function(
   spec, 
   queryCommand, 

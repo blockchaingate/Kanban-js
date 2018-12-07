@@ -60,9 +60,8 @@ NodeManager.prototype.executeOverSSH = function (
   /** @type {ResponseWrapper} */
   response, 
   queryCommand,
-  notUsed,
 ) {
-  
+  var machi
 
   if (!(machineName in configuration.getConfiguration().myNodes)) {
     response.writeHead(200);

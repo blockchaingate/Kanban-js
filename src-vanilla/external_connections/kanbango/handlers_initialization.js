@@ -292,23 +292,6 @@ KanbanGoInitializer.prototype.log = function(input) {
   console.log(`[KanbanGoInitializer] `.red + `${input}`);
 }
 
-KanbanGoInitializer.prototype.handleQuery = function(responseNoWrapper, query) {
-  var responseWithWrap = new ResponseWrapper(responseNoWrapper, this);
-  var queryCommand = null;
-  var queryNode = null;
-  try {
-    queryCommand = JSON.parse(query.command);
-    var nodeJSON = query[kanbanGORPC.urlStrings.node];
-    if (nodeJSON !== null && nodeJSON !== undefined) {
-      queryNode = JSON.parse(nodeJSON);
-    }
-  } catch (e) {
-    responseWithWrap.writeHead(400);
-    return response.end(`Bad kanbanGO initialization input: ${JSON.stringify(query)}. ${e}`);
-  }
-  return this.handleRPCArguments(responseWithWrap, queryCommand, queryNode);
-}
-
 KanbanGoInitializer.prototype.computePaths = function() {
   /** @type {String} */
   var startingPath = global.kanban.configuration.configuration.kanbanGO.gethFolder;
@@ -1166,8 +1149,16 @@ KanbanGoInitializer.prototype.extractCurrentServiceFromKanbanLocal = function(
       return false;
     }
     if (currentNodeId === "none" || currentNodeId === "all") {
-      output.service = null;
-      return true;
+      if (this.nodes.length > 0) {
+        output.service = this.nodes[0];
+        return true;
+      }
+      response.writeHead(400);
+      var result = {
+        error: `Failed to select node ${currentNodeId}: ${this.nodeInformation.length} nodes running. `
+      };
+      response.end(JSON.stringify(result));
+      return false;
     }
     var currentNodeIdNumber = Number(currentNodeId);
     output.service = this.nodes[currentNodeIdNumber];
@@ -1217,8 +1208,7 @@ KanbanGoInitializer.prototype.extractCurrentService = function(
 KanbanGoInitializer.prototype.handleRPCArguments = function(
   /**@type {ResponseWrapper} */  
   response, 
-  queryCommand, 
-  queryNode
+  queryCommand
 ) {
   //console.log(`DEBUG: this.paths: ${this.paths}.`);
   if (this.numberRequestsRunning > this.maxRequestsRunning) {
@@ -1229,6 +1219,13 @@ KanbanGoInitializer.prototype.handleRPCArguments = function(
     return response.end(JSON.stringify(result));
   }
   var theCallLabel = queryCommand[kanbanGORPC.urlStrings.rpcCallLabel];
+  if (theCallLabel === null || theCallLabel === undefined) {
+    response.writeHead(400);
+    var result = {
+      error: `The ${kanbanGORPC.urlStrings.rpcCallLabel} entry appears to be missing from your command: ${JSON.stringify(queryCommand)} `
+    };
+    return response.end(JSON.stringify(result));    
+  }  
   var callsToSearch = [kanbanGOInitialization.rpcCalls, kanbanGOInitialization.demoRPCCalls];
   var rpcCalls = null;
   for (var i = 0; i < callsToSearch.length; i ++) {
@@ -1245,7 +1242,7 @@ KanbanGoInitializer.prototype.handleRPCArguments = function(
     return response.end(JSON.stringify(result));    
   }
   var serviceWrapper = {};
-  if (!this.extractCurrentService(response, queryNode, serviceWrapper)) {
+  if (!this.extractCurrentService(response, queryCommand, serviceWrapper)) {
     return;
   }
   var currentService = serviceWrapper.service;

@@ -66,7 +66,7 @@ function handleRequestsPart2(request, response, parsedURL) {
     return handlersStandard.transformToQueryJSON(
       request, 
       response, 
-      handlersKanbanGo.handleQuery,
+      handlersKanbanGo.handleRPCArguments,
       parsedURL,
     );
   }
@@ -75,15 +75,16 @@ function handleRequestsPart2(request, response, parsedURL) {
     return handlersStandard.transformToQueryJSON(
       request, 
       response,
-      kanbanGOInitializer.handleQuery.bind(kanbanGOInitializer),
+      kanbanGOInitializer.handleRPCArguments.bind(kanbanGOInitializer),
       parsedURL,
     );
   }
   if (parsedURL.pathname === pathnames.url.known.fabcoin.rpc) {
+    var fabRPCHandler = handlersFabcoinRPC.fabcoinHandlersRPC;
     return handlersStandard.transformToQueryJSON(
       request, 
       response, 
-      handlersFabcoinRPC.handleQuery,
+      fabRPCHandler.handleRPCArguments.bind(fabRPCHandler),
       parsedURL,
     );
   }  
@@ -92,7 +93,7 @@ function handleRequestsPart2(request, response, parsedURL) {
     return handlersStandard.transformToQueryJSON(
       request, 
       response, 
-      fabNode.handleQuery.bind(fabNode),
+      fabNode.handleRPCArguments.bind(fabNode),
       parsedURL,
     );
   }
