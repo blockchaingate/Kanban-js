@@ -216,7 +216,7 @@ NodeKanbanGo.prototype.run = function(response) {
     4,
     "--rpc",
     "--rpcapi",
-    "db,kanban,net,web3,personal,pbft,bridge,pbfttest,cryptotest",
+    "db,kanban,net,web3,personal,pbft,bridge,pbfttest,cryptotest,admin",
     "--kanbanstats",
     `${this.nodePublicKeyHex}:abcd@169.45.42.100:3000`,
     "--identity",
