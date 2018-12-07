@@ -900,18 +900,14 @@ KanbanGoInitializer.prototype.killAllGeth = function(
 KanbanGoInitializer.prototype.getLogFile = function(
   response, 
   queryCommand,
-  /**@type {NodeKanbanGo} */ 
-  currentNode
 ) {
-  if (currentNode === null || currentNode === undefined || !(currentNode instanceof NodeKanbanGo)) {
-    response.writeHead(400);
-    var result = {
-      error: `Bad node id. Current node: ${currentNode}. `
-    };
-    response.end(JSON.stringify(result));
+  var serviceWrapper = {};
+  if (! this.extractCurrentServiceFromKanbanLocal(response, queryCommand, serviceWrapper)) {
+    return false;
   }
-  response.writeHead(200);
+  var currentNode = serviceWrapper.service;
   var result = currentNode.outputStreams.log.toArray();
+  response.writeHead(200);
   response.end(JSON.stringify(result));
 }
 
@@ -921,15 +917,13 @@ KanbanGoInitializer.prototype.getRPCLogFile = function(
   /**@type {NodeKanbanGo} */ 
   currentNode
 ) {
-  if (currentNode === null || currentNode === undefined || !(currentNode instanceof NodeKanbanGo)) {
-    response.writeHead(400);
-    var result = {
-      error: `Bad node id. Current node: ${currentNode}. `
-    };
-    response.end(JSON.stringify(result));
+  var serviceWrapper = {};
+  if (! this.extractCurrentServiceFromKanbanLocal(response, queryCommand, serviceWrapper)) {
+    return false;
   }
-  response.writeHead(200);
+  var currentNode = serviceWrapper.service;
   var result = currentNode.outputStreams.rpcCalls.toArray();
+  response.writeHead(200);
   response.end(JSON.stringify(result));
 }
 
