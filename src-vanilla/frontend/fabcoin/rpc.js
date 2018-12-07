@@ -303,7 +303,7 @@ function FabNode() {
       inputs: {
         contractId: inputFabBlock.contractId,
         data: inputFabBlock.contractData,
-        amount: inputFabBlock.walletAmount,
+        amount: inputFabBlock.txBeneficiaryAmounts,
       },
       outputOptions: this.optionsContract,
     },
