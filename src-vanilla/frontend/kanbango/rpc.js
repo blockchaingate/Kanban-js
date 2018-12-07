@@ -571,7 +571,7 @@ KanbanGoNodes.prototype.setContractFunctionName = function(container, content, e
   //console.log(`DEBUG: fun signature so far: ${functionSignature}`);
   var contractIds = ids.defaults.fabcoin.inputBlockInfo; 
   if (abi.payable === false || abi.payable === "false") {
-    miscellaneousFrontEnd.updateValue(contractIds.walletAmount, 0);
+    miscellaneousFrontEnd.updateValue(ids.defaults.fabcoin.inputBlockInfo.txBeneficiaryAmounts, 0);
   }
   miscellaneousFrontEnd.updateValue(contractIds.contractHex, ambientInput.binaries[counterContract]);
   miscellaneousFrontEnd.updateValue(contractIds.contractFunctionName, content);

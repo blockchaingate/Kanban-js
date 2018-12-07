@@ -150,7 +150,7 @@ JSONTransformer.prototype.getClickableEntryUsingTransformer = function(input, in
     transformedContent = processInputStringStandard(inputHTML);
   }
   if (transformedContent === inputHTML) {
-    return transformedContent;
+    idExpandButton = "";
   }
   if (currentId === "" || typeof currentId !== "string" ) {
     throw(`Invalid currentId: ${currentId}`);

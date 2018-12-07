@@ -102,13 +102,25 @@ function shortenString(input, desiredMaxSize, includeNumOmitted) {
   if (numOmittedChars <= 0) {
     return input;
   }
+  return trimStringAtEnds(input, numEndChars, numEndChars, includeNumOmitted)
+}
+
+
+function trimStringAtEnds(input, charsToDisplayLeft, charsToDisplayRight, includeNumOmitted) {
+  if (typeof input !== "string") {
+    input = JSON.stringify(input);
+  }
+  if (charsToDisplayLeft + charsToDisplayRight >= input.length) {
+    return input;
+  }
   if (includeNumOmitted === undefined || includeNumOmitted === null) {
     includeNumOmitted = true;
   }
   if (!includeNumOmitted) {
-    return `${input.slice(0, numEndChars)}...${input.slice(input.length-numEndChars, input.length)}`; 
+    return `${input.slice(0, charsToDisplayLeft)}...${input.slice(input.length-charsToDisplayRight, input.length)}`; 
   }
-  return `${input.slice(0, numEndChars)}...(${numOmittedChars} out of ${input.length} omitted)...${input.slice(input.length-numEndChars, input.length)}`; 
+  var numOmittedChars = input.length - charsToDisplayLeft - charsToDisplayRight; 
+  return `${input.slice(0, charsToDisplayLeft)}...(${numOmittedChars} out of ${input.length} omitted)...${input.slice(input.length-charsToDisplayRight, input.length)}`; 
 }
 
 function removeQuotes(input) {
@@ -212,6 +224,7 @@ module.exports = {
   getDurationReadableFromSeconds,
   getDurationReadableFromMilliseconds,
   shortenString,
+  trimStringAtEnds,
   SpeedReport, 
   removeQuotes,
   convertToIntegerIfPossible,
