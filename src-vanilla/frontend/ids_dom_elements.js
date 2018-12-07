@@ -129,7 +129,6 @@ var defaults = {
     outputKBGOTest: "divOutputKBGOTest",
     outputKanbanInitialization: "divOutputMyLocalKanbanNodes",
     outputSendReceive: "divOutputKBGOSendReceive",
-    outputMyNodes: "divMyNodesOutput",
   },
   kanbanPlusPlus: {
     inputSchnorrSignature: {
@@ -158,6 +157,14 @@ var defaults = {
     outputKanbanPlusPlusGeneral: "divKanbanPlusPlusOutput",
     outputKanbanPlusPlusSecond: "divKanbanPlusPlusOutputSecond",
     divKanbanPlusPlusOutputThird: "divKanbanPlusPlusOutputThird"
+  },
+  myNodes: {
+    outputMyNodes: "divMyNodesOutput",
+    inputSSH: {
+      machineNames: "inputMyNodeNames",
+      command: "inputMyNodesCommand",
+    },
+
   },
   fabcoin: {
     inputInitialization: {

@@ -1147,6 +1147,73 @@ KanbanGoInitializer.prototype.runShell = function(
   return child;
 }
 
+/** @returns {Boolean} */
+KanbanGoInitializer.prototype.extractCurrentServiceFromKanbanLocal = function(
+  /**@type {ResponseWrapper} */  
+  response, 
+  queryCommand,
+  output,
+) {
+  try {
+    var serviceObject = queryCommand[kanbanGORPC.urlStrings.serviceLabelReserved];
+    var currentNodeId = serviceObject[kanbanGORPC.urlStrings.nodeId];
+    if (currentNodeId === undefined || currentNodeId === null) {
+      response.writeHead(400);
+      var result = {
+        error: `Node is missing the ${kanbanGORPC.urlStrings.serviceLabelReserved}.${kanbanGORPC.urlStrings.nodeId} variable. `,
+      };
+      response.end(JSON.stringify(result));
+      return false;
+    }
+    if (currentNodeId === "none" || currentNodeId === "all") {
+      output.service = null;
+      return true;
+    }
+    var currentNodeIdNumber = Number(currentNodeId);
+    output.service = this.nodes[currentNodeIdNumber];
+    if (output.service === undefined || output.service === null) {
+      response.writeHead(400);
+      var result = {
+        error: `KanbanGoInitializer: failed to extract node id from ${currentNodeId}. `
+      };
+      response.end(JSON.stringify(result));          
+      return false;
+    }
+    return true;
+  } catch (e) {
+    response.writeHead(200);
+    var result = {
+      error: `Failed to process node info. ${e} `
+    };
+    response.end(JSON.stringify(result));
+    return false;
+  }
+}
+
+KanbanGoInitializer.prototype.extractCurrentService = function(  
+  /**@type {ResponseWrapper} */  
+  response, 
+  queryNode,
+  output,
+) {
+  output.service = null;
+  if (queryNode === null) {
+    return true;
+  } 
+  if (typeof queryNode !== "object") {
+    response.writeHead(400);
+    var result = {
+      error: `queryNode object expected to be of type object, got ${typeof queryNode} instead.`
+    };
+    response.end(JSON.stringify(result));
+    return false;
+  }
+  if (queryNode.type === "kanbanLocal") {
+    return this.extractCurrentServiceFromKanbanLocal(response, queryNode, output);
+  }
+  return true;
+}
+
 KanbanGoInitializer.prototype.handleRPCArguments = function(
   /**@type {ResponseWrapper} */  
   response, 
@@ -1177,39 +1244,11 @@ KanbanGoInitializer.prototype.handleRPCArguments = function(
     };
     return response.end(JSON.stringify(result));    
   }
-  var currentNode = null;
-  try {
-    if (queryNode !== null) {
-      var currentNodeId = queryNode.id;
-      if (currentNodeId === undefined || currentNodeId === null) {
-        response.writeHead(400);
-        var result = {
-          error: `Node is missing the id variable. `,
-        };
-        return response.end(JSON.stringify(result));
-      }
-      if (currentNodeId === "none" || currentNodeId === "all") {
-        currentNode = null;
-      } else {
-        var currentNodeIdNumber = Number(currentNodeId);
-        currentNode = this.nodes[currentNodeIdNumber];
-        if (currentNode === undefined || currentNode === null) {
-          response.writeHead(400);
-          var result = {
-            error: `KanbanGoInitializer: failed to extract node id from ${currentNodeId}. `
-          };
-          return response.end(JSON.stringify(result));          
-        }
-      }
-    }
-  } catch (e) {
-    response.writeHead(200);
-    var result = {
-      error: `Failed to process node info. ${e} `
-    };
-    return response.end(JSON.stringify(result));
+  var serviceWrapper = {};
+  if (!this.extractCurrentService(response, queryNode, serviceWrapper)) {
+    return;
   }
-
+  var currentService = serviceWrapper.service;
   var currentFunction = null;
   var objectsToSearchForImplementation = [this, global.nodeManager];
   for (var i = 0; i < objectsToSearchForImplementation.length; i ++) {
@@ -1226,7 +1265,7 @@ KanbanGoInitializer.prototype.handleRPCArguments = function(
     return response.end(JSON.stringify(result));
   }
   try {
-    return (currentFunction.bind(this))(response, queryCommand, currentNode);
+    return (currentFunction.bind(this))(response, queryCommand, currentService);
   } catch (e) {
     response.writeHead(500);
     var result = {

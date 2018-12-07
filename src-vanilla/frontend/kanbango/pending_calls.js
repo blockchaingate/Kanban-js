@@ -345,12 +345,18 @@ PendingCall.prototype.runOneId = function(nodeId) {
     }
   }
   var theArguments = this.getArguments(theFunction, theRPCCalls);
-  var messageBody = `command=${getPOSTBodyFromKanbanRPCLabel(this.functionLabel, theArguments)}`;
-  var nodeObject = {
-    id: nodeId
+  if (theArguments[kanbanGO.urlStrings.serviceLabelReserved] !== undefined) {
+    throw (`The argument ${serviceLabelReserved} name is reserved, please use another variable name. `);
+  }
+  theArguments[kanbanGO.urlStrings.serviceLabelReserved] = {
+    type: callType,
+    nodeId: nodeId
   };
-  messageBody += `&node=${escape(JSON.stringify(nodeObject))}`;
-
+  var messageBody = `command=${getPOSTBodyFromKanbanRPCLabel(this.functionLabel, theArguments)}`;
+  var callType = this.callTypeSpec.callType;
+  if (callType === undefined || callType === null) {
+    callType = "undefined";
+  }
   var theURL = this.callTypeSpec.url;
   var currentResult = this.callTypeSpec.idDefaultOutput;
   if (theFunction !== null) {

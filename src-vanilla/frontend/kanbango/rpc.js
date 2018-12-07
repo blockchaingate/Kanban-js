@@ -262,24 +262,28 @@ function KanbanGoNodes() {
   };
   this.callTypes = {
     standard: {
+      callType: "kanbanLocal",
       jsonOptions: this.optionsKanbanGOStandard,
       idDefaultOutput: ids.defaults.kanbanGO.outputSendReceive,
       rpcCalls: kanbanGO.rpcCalls,
       url: pathnames.url.known.kanbanGO.rpc,
     },
     cryptoTest: {
+      callType: "kanbanLocal",
       jsonOptions: this.optionsCrypto,
       idDefaultOutput: ids.defaults.kanbanGO.outputKBGOTest,
       rpcCalls: kanbanGO.rpcCalls,
       url: pathnames.url.known.kanbanGO.rpc,
     },
     initialization: {
+      callType: "kanbanLocal",
       jsonOptions: this.optionsInitialization,
       rpcCalls: kanbanGOInitialization.rpcCalls,
       idDefaultOutput: ids.defaults.kanbanGO.outputKanbanInitialization,
       url: pathnames.url.known.kanbanGO.initialization,
     },
     votingMachine: {
+      callType: "kanbanLocal",
       jsonOptions: this.optionsVotingMachine,
       rpcCalls: kanbanGO.rpcCalls,
       url: pathnames.url.known.kanbanGO.rpc,
@@ -292,8 +296,9 @@ function KanbanGoNodes() {
       url: pathnames.url.known.kanbanGO.initialization,
     },
     myNodes: {
+      callType: "myNodesSSH",
       jsonOptions: this.optionsMyNodes,
-      idDefaultOutput: ids.defaults.kanbanGO.outputMyNodes,
+      idDefaultOutput: ids.defaults.myNodes.outputMyNodes,
       rpcCalls: kanbanGOInitialization.rpcCalls,
       url: pathnames.url.known.kanbanGO.initialization,
     }
@@ -549,6 +554,12 @@ function KanbanGoNodes() {
     },
     fetchMyNodesInfo: {
       callType: this.callTypes.myNodes,
+    },
+    executeOverSSH: {
+      callType: this.callTypes.myNodes,
+      inputs: {
+        command: ids.defaults.myNodes.inputSSH.command
+      }
     }
   };
   this.correctFunctions();
@@ -640,6 +651,49 @@ KanbanGoNodes.prototype.testClear = function() {
   this.run('testAggregateGeneratePrivateKeys', 'cryptoTest');
 }
 
+KanbanGoNodes.prototype.computeNodeIds = function(functionLabel, callTypeSpec, currentPendingCall) {
+  this.numberOfCalls ++;
+  if (functionLabel in this.theFunctions) {
+    if (this.theFunctions[functionLabel].useOneNode) {
+      currentPendingCall.nodeCalls["none"] = {result: null};
+      return;
+    }
+  }
+  var callType = callTypeSpec.callType;
+  if (callType === undefined || callType === null) {
+    callType = "kanbanLocal"
+  } 
+  if (callType === "kanbanLocal" ) {
+    return this.computeNodeIdsForKanban(currentPendingCall);
+  }
+  if (callType === "myNodesSSH") {
+    return this.computeNodeIdsForSSH(currentPendingCall);
+  }
+  throw(`Uknown call type ${callType}`);
+}
+
+KanbanGoNodes.prototype.computeNodeIdsForSSH = function(currentPendingCall) {
+  var machineNamesRaw = document.getElementById(ids.defaults.myNodes.inputSSH.machineNames).value;
+  var machineNames = miscellaneousBackend.splitMultipleDelimiters(machineNamesRaw, " ,\t;");
+  if (machineNames.length <= 0) {
+    machineNames.push("no_machine_name_specified");
+  }  
+  for (var i = 0; i < machineNames.length; i ++) {
+    currentPendingCall.nodeCalls[machineNames[i]] = {result: null};
+  }
+}
+
+KanbanGoNodes.prototype.computeNodeIdsForKanban = function(currentPendingCall) {
+  var currentId = this.selectedNode;
+  if (currentId !== "all") {
+    currentPendingCall.nodeCalls[currentId] = {result: null};
+    return;
+  } 
+  for (var i = 0; i < this.nodes.length; i ++) {
+    currentPendingCall.nodeCalls[this.nodes[i].idBackend] = {result: null};
+  }
+}
+
 KanbanGoNodes.prototype.run = function(functionLabel, callType, callbackOverridesStandard) {
   var callTypeSpec = callType;
   if (callTypeSpec === undefined) {
@@ -656,21 +710,8 @@ KanbanGoNodes.prototype.run = function(functionLabel, callType, callbackOverride
   if (typeof callTypeSpec !== "object") {
     throw `Was not able to extract call type from: ${JSON.stringify(callTypeSpec)}`;
   }
-  var currentId = this.selectedNode;
-  if (functionLabel in this.theFunctions) {
-    if (this.theFunctions[functionLabel].useOneNode) {
-      currentId = "none";
-    }
-  }
-  this.numberOfCalls ++;
   var currentPendingCall = new PendingCall();
-  if (currentId !== "all") {
-    currentPendingCall.nodeCalls[currentId] = {result: null};
-  } else {
-    for (var i = 0; i < this.nodes.length; i ++) {
-      currentPendingCall.nodeCalls[this.nodes[i].idBackend] = {result: null};
-    }
-  }
+  this.computeNodeIds(functionLabel, callTypeSpec, currentPendingCall);
   currentPendingCall.id = this.numberOfCalls;
   currentPendingCall.owner = this;
   currentPendingCall.callTypeSpec = callTypeSpec;

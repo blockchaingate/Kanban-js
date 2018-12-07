@@ -167,15 +167,19 @@
 
 <div class = "divMainPage" id = "pageMyNodes">
   <div class = "divControlPanelDefault">
-  <table>
+  <table class = "tableStandardInputs">
     <tr>
     <td>
     <div class = "divLabelButtonGroup">basic</div><div id = "panelKBGOMyNodesBasic" class = "panelStandard">
+    <button class = "buttonStandard"  style = "width:100px" onclick = "window.kanban.kanbanGO.rpc.theKBNodes.run('executeOverSSH', 'myNodes');"><b style='color:red'>Execute [ssh]</b></button><br>
     <button class = "buttonStandard"  style = "width:100px" onclick = "window.kanban.kanbanGO.rpc.theKBNodes.run('fetchMyNodesInfo', 'myNodes');">Fetch info</button>
     </div>
     </td>
     <td>
-      
+    <div class = "divLabelButtonGroup">basic</div><div id = "panelKBGOMyNodesBasicInputs" class = "panelStandard">
+    <input id = "inputMyNodeNames"  class = "inputStandard" size = "50" placeholder = "nodes to command"/><br>
+    <input id = "inputMyNodesCommand"  class = "inputStandard" size = "50" placeholder = "ssh tunnel command"/><br>
+  </div>
     </td>
     </tr>
   </table>
