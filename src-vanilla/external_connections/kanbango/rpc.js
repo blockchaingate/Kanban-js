@@ -1,7 +1,9 @@
 "use strict";
 
 var urlStrings = {
-  node: "node",
+  serviceLabelReserved: "serviceLabelReserved",
+  callType: "callType",
+  nodeId: "nodeId",
   rpcCallLabel: "rpcCall",
   errorKanbanNodeStartWasNeverAttempted: "KanbanGo start was never attempted. ",
 };

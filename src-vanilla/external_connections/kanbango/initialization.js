@@ -42,6 +42,12 @@ var rpcCalls = {
   fetchMyNodesInfo: {
     rpcCall: "fetchMyNodesInfo",
   },
+  executeOverSSH: {
+    rpcCall: "executeOverSSH",
+    mandatoryModifiableArguments: {
+      command: null,
+    },
+  },
 };
 
 /**

@@ -294,23 +294,6 @@ KanbanGoInitializer.prototype.log = function(input) {
   console.log(`[KanbanGoInitializer] `.red + `${input}`);
 }
 
-KanbanGoInitializer.prototype.handleQuery = function(responseNoWrapper, query) {
-  var responseWithWrap = new ResponseWrapper(responseNoWrapper, this);
-  var queryCommand = null;
-  var queryNode = null;
-  try {
-    queryCommand = JSON.parse(query.command);
-    var nodeJSON = query[kanbanGORPC.urlStrings.node];
-    if (nodeJSON !== null && nodeJSON !== undefined) {
-      queryNode = JSON.parse(nodeJSON);
-    }
-  } catch (e) {
-    responseWithWrap.writeHead(400);
-    return response.end(`Bad kanbanGO initialization input: ${JSON.stringify(query)}. ${e}`);
-  }
-  return this.handleRPCArguments(responseWithWrap, queryCommand, queryNode);
-}
-
 KanbanGoInitializer.prototype.computePaths = function() {
   /** @type {String} */
   var startingPath = global.kanban.configuration.configuration.kanbanGO.gethFolder;
@@ -917,18 +900,14 @@ KanbanGoInitializer.prototype.killAllGeth = function(
 KanbanGoInitializer.prototype.getLogFile = function(
   response, 
   queryCommand,
-  /**@type {NodeKanbanGo} */ 
-  currentNode
 ) {
-  if (currentNode === null || currentNode === undefined || !(currentNode instanceof NodeKanbanGo)) {
-    response.writeHead(400);
-    var result = {
-      error: `Bad node id. Current node: ${currentNode}. `
-    };
-    response.end(JSON.stringify(result));
+  var serviceWrapper = {};
+  if (! this.extractCurrentServiceFromKanbanLocal(response, queryCommand, serviceWrapper)) {
+    return false;
   }
-  response.writeHead(200);
+  var currentNode = serviceWrapper.service;
   var result = currentNode.outputStreams.log.toArray();
+  response.writeHead(200);
   response.end(JSON.stringify(result));
 }
 
@@ -938,15 +917,13 @@ KanbanGoInitializer.prototype.getRPCLogFile = function(
   /**@type {NodeKanbanGo} */ 
   currentNode
 ) {
-  if (currentNode === null || currentNode === undefined || !(currentNode instanceof NodeKanbanGo)) {
-    response.writeHead(400);
-    var result = {
-      error: `Bad node id. Current node: ${currentNode}. `
-    };
-    response.end(JSON.stringify(result));
+  var serviceWrapper = {};
+  if (! this.extractCurrentServiceFromKanbanLocal(response, queryCommand, serviceWrapper)) {
+    return false;
   }
-  response.writeHead(200);
+  var currentNode = serviceWrapper.service;
   var result = currentNode.outputStreams.rpcCalls.toArray();
+  response.writeHead(200);
   response.end(JSON.stringify(result));
 }
 
@@ -1149,11 +1126,85 @@ KanbanGoInitializer.prototype.runShell = function(
   return child;
 }
 
+/** @returns {Boolean} */
+KanbanGoInitializer.prototype.extractCurrentServiceFromKanbanLocal = function(
+  /**@type {ResponseWrapper} */  
+  response, 
+  queryCommand,
+  output,
+) {
+  try {
+    var serviceObject = queryCommand[kanbanGORPC.urlStrings.serviceLabelReserved];
+    var currentNodeId = serviceObject[kanbanGORPC.urlStrings.nodeId];
+    if (currentNodeId === undefined || currentNodeId === null) {
+      response.writeHead(400);
+      var result = {
+        error: `Node is missing the ${kanbanGORPC.urlStrings.serviceLabelReserved}.${kanbanGORPC.urlStrings.nodeId} variable. `,
+      };
+      response.end(JSON.stringify(result));
+      return false;
+    }
+    if (currentNodeId === "none" || currentNodeId === "all") {
+      if (this.nodes.length > 0) {
+        output.service = this.nodes[0];
+        return true;
+      }
+      response.writeHead(400);
+      var result = {
+        error: `Failed to select node ${currentNodeId}: ${this.nodeInformation.length} nodes running. `
+      };
+      response.end(JSON.stringify(result));
+      return false;
+    }
+    var currentNodeIdNumber = Number(currentNodeId);
+    output.service = this.nodes[currentNodeIdNumber];
+    if (output.service === undefined || output.service === null) {
+      response.writeHead(400);
+      var result = {
+        error: `KanbanGoInitializer: failed to extract node id from ${currentNodeId}. `
+      };
+      response.end(JSON.stringify(result));          
+      return false;
+    }
+    return true;
+  } catch (e) {
+    response.writeHead(200);
+    var result = {
+      error: `Failed to process node info. ${e} `
+    };
+    response.end(JSON.stringify(result));
+    return false;
+  }
+}
+
+KanbanGoInitializer.prototype.extractCurrentService = function(  
+  /**@type {ResponseWrapper} */  
+  response, 
+  queryNode,
+  output,
+) {
+  output.service = null;
+  if (queryNode === null) {
+    return true;
+  } 
+  if (typeof queryNode !== "object") {
+    response.writeHead(400);
+    var result = {
+      error: `queryNode object expected to be of type object, got ${typeof queryNode} instead.`
+    };
+    response.end(JSON.stringify(result));
+    return false;
+  }
+  if (queryNode.type === "kanbanLocal") {
+    return this.extractCurrentServiceFromKanbanLocal(response, queryNode, output);
+  }
+  return true;
+}
+
 KanbanGoInitializer.prototype.handleRPCArguments = function(
   /**@type {ResponseWrapper} */  
   response, 
-  queryCommand, 
-  queryNode
+  queryCommand
 ) {
   //console.log(`DEBUG: this.paths: ${this.paths}.`);
   if (this.numberRequestsRunning > this.maxRequestsRunning) {
@@ -1164,6 +1215,13 @@ KanbanGoInitializer.prototype.handleRPCArguments = function(
     return response.end(JSON.stringify(result));
   }
   var theCallLabel = queryCommand[kanbanGORPC.urlStrings.rpcCallLabel];
+  if (theCallLabel === null || theCallLabel === undefined) {
+    response.writeHead(400);
+    var result = {
+      error: `The ${kanbanGORPC.urlStrings.rpcCallLabel} entry appears to be missing from your command: ${JSON.stringify(queryCommand)} `
+    };
+    return response.end(JSON.stringify(result));    
+  }  
   var callsToSearch = [kanbanGOInitialization.rpcCalls, kanbanGOInitialization.demoRPCCalls];
   var rpcCalls = null;
   for (var i = 0; i < callsToSearch.length; i ++) {
@@ -1179,39 +1237,11 @@ KanbanGoInitializer.prototype.handleRPCArguments = function(
     };
     return response.end(JSON.stringify(result));    
   }
-  var currentNode = null;
-  try {
-    if (queryNode !== null) {
-      var currentNodeId = queryNode.id;
-      if (currentNodeId === undefined || currentNodeId === null) {
-        response.writeHead(400);
-        var result = {
-          error: `Node is missing the id variable. `,
-        };
-        return response.end(JSON.stringify(result));
-      }
-      if (currentNodeId === "none" || currentNodeId === "all") {
-        currentNode = null;
-      } else {
-        var currentNodeIdNumber = Number(currentNodeId);
-        currentNode = this.nodes[currentNodeIdNumber];
-        if (currentNode === undefined || currentNode === null) {
-          response.writeHead(400);
-          var result = {
-            error: `KanbanGoInitializer: failed to extract node id from ${currentNodeId}. `
-          };
-          return response.end(JSON.stringify(result));          
-        }
-      }
-    }
-  } catch (e) {
-    response.writeHead(200);
-    var result = {
-      error: `Failed to process node info. ${e} `
-    };
-    return response.end(JSON.stringify(result));
+  var serviceWrapper = {};
+  if (!this.extractCurrentService(response, queryCommand, serviceWrapper)) {
+    return;
   }
-
+  var currentService = serviceWrapper.service;
   var currentFunction = null;
   var objectsToSearchForImplementation = [this, global.nodeManager];
   for (var i = 0; i < objectsToSearchForImplementation.length; i ++) {
@@ -1228,7 +1258,7 @@ KanbanGoInitializer.prototype.handleRPCArguments = function(
     return response.end(JSON.stringify(result));
   }
   try {
-    return (currentFunction.bind(this))(response, queryCommand, currentNode);
+    return (currentFunction.bind(this))(response, queryCommand, currentService);
   } catch (e) {
     response.writeHead(500);
     var result = {

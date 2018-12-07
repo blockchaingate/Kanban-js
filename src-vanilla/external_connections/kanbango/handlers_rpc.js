@@ -3,19 +3,7 @@ const http = require('http');
 const kanbanGORPC = require('./rpc');
 const kanabanGoInitializer = require('./handlers_initialization');
 const NodeKanbanGo = kanabanGoInitializer.NodeKanbanGo;
-
-function handleQuery(response, query) {
-  var queryCommand = null;
-  var queryNode = null;
-  try {
-    queryCommand = JSON.parse(query.command);
-    queryNode = JSON.parse(query[kanbanGORPC.urlStrings.node]);    
-  } catch (e) {
-    response.writeHead(400);
-    return response.end(`Bad KanbanGO RPC input. ${e}`);
-  }
-  return handleRPCArguments(response, queryCommand, queryNode);
-}
+const ResponseWrapper = require('../../response_wrapper').ResponseWrapper;
 
 function getParameterFromType(input, type) {
   if (type === "number") {
@@ -83,47 +71,34 @@ function getRPCRequestJSON(rpcCallLabel, queryCommand, errors) {
   return result;
 }
 
-function handleRPCArguments(response, queryCommand, queryNode) {
-  /**@type {NodeKanbanGo} */ 
-  var currentNode = null;
-  try {
-    if (queryCommand[kanbanGORPC.urlStrings.rpcCallLabel] === undefined) {
-      response.writeHead(400);
-      var result = {
-        error: `KanbanGO command is missing the ${kanbanGORPC.urlStrings.rpcCallLabel} entry. `
-      };
-      return response.end(JSON.stringify(result));        
-    }
-    var currentNodeId = queryNode.id;
-    if (currentNodeId === "none") {
-      currentNodeId = 0;
-    }
-    if (currentNodeId === undefined || currentNodeId === null) {
-      response.writeHead(400);
-      var result = {
-        error: `KanbanGO node is missing the id variable. `
-      };
-      return response.end(JSON.stringify(result));        
-    }
-    var currentNodeIdNumber = Number(currentNodeId);
-    var initializer = kanabanGoInitializer.getInitializer(); 
-    currentNode = initializer.nodes[currentNodeIdNumber];
-    if (currentNode === undefined || currentNode === null) {
-      response.writeHead(400);
-      var result = {
-        error: `Failed to extract kanbanGO node id from ${currentNodeId}.`
-      };
-      if (!initializer.flagStartWasEverAttempted) {
-        result.error = kanbanGORPC.urlStrings.errorKanbanNodeStartWasNeverAttempted;        
-      }
-      return response.end(JSON.stringify(result));          
-    }
-  } catch (e) {
+function handleRPCArguments(
+  /** @type {ResponseWrapper} */
+  response, 
+  queryCommand,
+) {
+  var initializer = kanabanGoInitializer.getInitializer(); 
+  if (!initializer.flagStartWasEverAttempted) {
+    var result = {
+      error: kanbanGORPC.urlStrings.errorKanbanNodeStartWasNeverAttempted
+    };
+    response.writeHead(400);
+    return response.end(JSON.stringify(result));          
+  }
+  if (typeof queryCommand !== "object") {
     response.writeHead(400);
     var result = {
-      error: `Failed to extract kanbanGO node id. ${e}`
+      error: `Your kanbanGO RPC command is not an object as expected. `
     };
     return response.end(JSON.stringify(result));        
+  }
+  var nodeWrapper = {};
+  if (!initializer.extractCurrentServiceFromKanbanLocal(response, queryCommand, nodeWrapper)) {
+    return;
+  }
+  /**@type {NodeKanbanGo} */ 
+  var currentNode = nodeWrapper.service;
+  if (currentNode === undefined || currentNode === null) {
+    throw (`currentNode not allowed to be undefined at this point of code.`);
   }
   var theCallLabel = queryCommand[kanbanGORPC.urlStrings.rpcCallLabel];
   var callCollection = kanbanGORPC.rpcCalls;
@@ -242,5 +217,5 @@ function handleRPCArgumentsPartTwo(
 }
 
 module.exports = {
-  handleQuery
+  handleRPCArguments
 }

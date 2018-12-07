@@ -497,10 +497,6 @@ function myNodesOutputCallback(input, outputComponent) {
   }
 }
 
-function getMyNodesOutput() { 
-  return document.getElementById(ids.defaults.outputMyNodes);
-}
-
 function updateMyNodes() {
   var theURL = pathnames.getURLFromMyNodesCall(pathnames.myNodesCommands.fetchNodeInfo.myNodesCommand, {});
   submitRequests.submitGET({
