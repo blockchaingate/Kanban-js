@@ -108,9 +108,11 @@ var defaults = {
       txInputs: "inputKBGOTransactionInputs",
       txOutputs: "inputKBGOTransactionOutputs",
       // end of matching 
-      smartContractId: "inputKBGOSmartContractId",
-      smartContractFunction: "inputKBGOSmartContractFunction",
-      smartContractData: "inputKBGOSmartContractData",
+      contractId: "inputKBGOSmartContractId",
+      contractFunctionName: "inputKBGOSmartContractFunctionName",
+      contractFunctionId: "inputKBGOSmartContractFunctionId",
+      contractFunctionArguments: "inputKBGOSmartContractFunctionArguments",
+      contractData: "inputKBGOSmartContractData",
     },
     inputBenchmarkParameters: {
       toAddress: "inputKBGOToAddress",
@@ -124,6 +126,8 @@ var defaults = {
       contractId: "inputKBGOContractId",
       contractABI: "inputKBGOContractABI"
     },
+    checkboxKanbanIncludeContractCalls: "checkboxKanbanIncludeContractCalls",
+    checkboxKanbanSendToContract: "checkboxKanbanSendToContract",
     checkboxConnectKanbansInALine: "checkboxConnectKanbansInALine",
     checkboxFabcoindAutostartAfterKanbanGO: "checkboxFabcoindAutostartAfterKanbanGO",
     nodePanel: "spanKanbanGoNodeContainer",
@@ -199,11 +203,13 @@ var defaults = {
       contractHex: "inputFabcoinContractHex",
       contractId: "inputFabcoinContractId",
       contractData: "inputFabcoinContractData",
-      contractFunctionData: "inputFabcoinContractFunctionData",
+      contractFunctionArguments: "inputFabcoinContractFunctionArguments",
       contractFunctionId: "inputFabcoinContractFunctionId",
       solidityInput: "aceEditor",
       contractFunctionName: "inputSolidityFunctionName",
     },
+    checkboxFabcoinIncludeContractCalls: "checkboxFabcoinIncludeContractCalls",
+    checkboxFabcoinSendToContract: "checkboxFabcoinSendToContract",
     inputCrypto: {
       inputSchnorrSignature: {
         publicKey: "inputPublicKeyDefault",

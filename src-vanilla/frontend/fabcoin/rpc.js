@@ -257,36 +257,37 @@ function FabNode() {
       outputs: {
         hex: inputFabBlock.txHex,
       },
-      outputOptions: this.optionsTransaction
+      outputOptions: this.optionsTransaction,
     },
     sendRawTransaction: {
       inputs: {
         rawTransactionHex: inputFabBlock.txHex
       },
-      outputOptions: this.optionsTransaction
+      outputOptions: this.optionsTransaction,
     },
     insertAggregateSignature: {
       inputs: {
         rawTransaction: inputFabBlock.txHex,
         aggregateSignature: inputFabBlock.txAggregateSignature,
       },
-      outputOptions: this.optionsTransaction
+      outputOptions: this.optionsTransaction,
     },
     getRawMempool: {
       outputOptions: {
         transformers: {
-          "${number}" : this.transformersStandard.transactionId
+          "${number}" : this.transformersStandard.transactionId,
         }
       }
     },
     createContract: {
       inputs: {
-        contractHex: inputFabBlock.contractHex
+        contractHex: inputFabBlock.contractHex,
       },
       outputs: {
         address: [
           inputFabBlock.contractId, 
           inputKBGOInitialization.contractId, 
+          ids.defaults.kanbanGO.inputSendReceive.contractId,
           ids.defaults.fabcoin.inputInitialization.smartContractId,
         ],
       },
@@ -310,37 +311,37 @@ function FabNode() {
     listContracts: {
       outputOptions: {
         transformers: {
-          "${label}" : this.transformersStandard.setContractId
+          "${label}" : this.transformersStandard.setContractId,
         }
       }
     },
     getNewAddress: {
       outputOptions: {
         transformers: {
-          singleEntry: this.transformersStandard.setAddress
+          singleEntry: this.transformersStandard.setAddress,
         }
       }
     },
     testSha3: {
       inputsBase64: {
-        message: inputFabCryptoSchnorr.messageToSha3
+        message: inputFabCryptoSchnorr.messageToSha3,
       },
       callType: this.callTypes.crypto,
     },
     testPrivateKeyGeneration: {
       outputs: {
-        privateKeyBase58Check: inputFabCryptoSchnorr.privateKey
+        privateKeyBase58Check: inputFabCryptoSchnorr.privateKey,
       },
       callType: this.callTypes.crypto,
     },
     testPublicKeyFromPrivate: {
       inputs: {
-        privateKey: inputFabCryptoSchnorr.privateKey
+        privateKey: inputFabCryptoSchnorr.privateKey,
       },
       callType: this.callTypes.crypto,
       outputs: {
-        publicKeyHexCompressed: inputFabCryptoSchnorr.publicKey
-      }
+        publicKeyHexCompressed: inputFabCryptoSchnorr.publicKey,
+      },
     },
     testSchnorrSignature: {
       inputs: {
@@ -505,26 +506,40 @@ FabNode.prototype.computeTxInsAndOuts = function(sourceIsFabPage) {
   var incomingOutAddresses;
   var incomingAmounts;
   var inputIdContainer;
+  var smartContractId;
+  var smartContractData;
   var otherIdContainer;
-  var aggregatePubKeys; 
+  var aggregatePubKeys;
+  var currentSmartContractCheckBoxId;
+  var otherSmartContractCheckBoxId;
+  var currentSmartContractAmountCheckBoxId;
+  var otherSmartContractAmountCheckBoxId;
   if (sourceIsFabPage) {
-    inputIdContainer = inputFab;
-    otherIdContainer = inputKB;
+    inputIdContainer                      = inputFab;
+    otherIdContainer                      = inputKB;
+    currentSmartContractCheckBoxId        = ids.defaults.fabcoin.checkboxFabcoinIncludeContractCalls;
+    currentSmartContractAmountCheckBoxId  = ids.defaults.fabcoin.checkboxFabcoinSendToContract;
+    otherSmartContractCheckBoxId          = ids.defaults.kanbanGO.checkboxKanbanIncludeContractCalls;
+    otherSmartContractAmountCheckBoxId    = ids.defaults.kanbanGO.checkboxKanbanSendToContract;
   } else  {
-    inputIdContainer = inputKB;
-    otherIdContainer = inputFab;
+    inputIdContainer                      = inputKB;
+    otherIdContainer                      = inputFab;
+    currentSmartContractCheckBoxId        = ids.defaults.kanbanGO.checkboxKanbanIncludeContractCalls;
+    currentSmartContractAmountCheckBoxId  = ids.defaults.kanbanGO.checkboxKanbanSendToContract;
+    otherSmartContractCheckBoxId          = ids.defaults.fabcoin.checkboxFabcoinIncludeContractCalls;
+    otherSmartContractAmountCheckBoxId    = ids.defaults.fabcoin.checkboxFabcoinSendToContract;
   }
   incomingIds = document.getElementById(inputIdContainer.txInIds).value;
   incomingNOuts = document.getElementById(inputIdContainer.txInNOuts).value;
   incomingOutAddresses = document.getElementById(inputIdContainer.txBeneficiaryAddresses).value;
   incomingAmounts = document.getElementById(inputIdContainer.txBeneficiaryAmounts).value;
+  smartContractId = document.getElementById(inputIdContainer.contractId).value;
+  smartContractData = document.getElementById(inputIdContainer.contractData).value;
   aggregatePubKeys = document.getElementById(inputFab.txAggregatePublicKeys).value;
-
-
+  var useSmartContract = document.getElementById(currentSmartContractCheckBoxId).checked;
+  var doSendToContract = document.getElementById(currentSmartContractAmountCheckBoxId).checked;
   var incomingIdArray = miscellaneousBackend.splitMultipleDelimiters(incomingIds, ", \t");
   var incomingNOutArray = miscellaneousBackend.splitMultipleDelimiters(incomingNOuts, ", \t");
-
-
   var resultIn = [];
   var resultOut = {};
   for (var i = 0; i < incomingIdArray.length; i ++) {
@@ -540,13 +555,25 @@ FabNode.prototype.computeTxInsAndOuts = function(sourceIsFabPage) {
   if (aggregatePubKeys !== "" && typeof aggregatePubKeys === "string") {
     resultOut.aggregateSignature = {
       publicKeysHex: aggregatePubKeys,
-      amount: Number(incomingOutAddressArray[amountCounter]),
+      amount: Number(incomingOutAmountArray[amountCounter]),
     };
     amountCounter ++;
+  }
+  if (useSmartContract) {
+    resultOut.contract = {};
+    resultOut.contract.contractAddress = smartContractId;
+    resultOut.contract.data = smartContractData;
+    if (doSendToContract) {
+      resultOut.amount = Number(incomingOutAmountArray[amountCounter]);
+      amountCounter ++;
+    }
   }
   for (; amountCounter < incomingOutAddressArray.length; amountCounter ++) {
     resultOut[incomingOutAddressArray[amountCounter]] = incomingOutAmountArray[amountCounter];
   }
+  miscellaneousFrontEnd.updateValue(otherIdContainer.contractId, smartContractId);
+  miscellaneousFrontEnd.updateValue(otherIdContainer.contractData, smartContractData);
+
   miscellaneousFrontEnd.updateValue(otherIdContainer.txInIds, incomingIds);
   miscellaneousFrontEnd.updateValue(otherIdContainer.txInNOuts, incomingNOuts);
   miscellaneousFrontEnd.updateValue(otherIdContainer.txBeneficiaryAddresses, incomingOutAddresses);
@@ -561,6 +588,8 @@ FabNode.prototype.computeTxInsAndOuts = function(sourceIsFabPage) {
   miscellaneousFrontEnd.updateValue(inputFab.txOutputs, JSON.stringify(resultOut));
   miscellaneousFrontEnd.updateValue(inputKB.txInputs, JSON.stringify(resultIn));
   miscellaneousFrontEnd.updateValue(inputKB.txOutputs, JSON.stringify(resultOut));
+  document.getElementById(otherSmartContractCheckBoxId).checked = useSmartContract;
+  document.getElementById(otherSmartContractAmountCheckBoxId).checked = doSendToContract;
 }
 
 FabNode.prototype.setTxInputVoutAndValue = function(container, content, extraData) {
@@ -577,13 +606,13 @@ FabNode.prototype.setTxInputVoutAndValue = function(container, content, extraDat
 
   miscellaneousFrontEnd.updateValue(inputFab.txInIds, incomingId);
   miscellaneousFrontEnd.updateValue(inputFab.txInNOuts, incomingNOut);
-  miscellaneousFrontEnd.updateValue(inputFab.txBeneficiaryAmounts, incomingAmount)
-  miscellaneousFrontEnd.updateValue(inputFab.txFee, incomingFees)
+  miscellaneousFrontEnd.updateValue(inputFab.txBeneficiaryAmounts, incomingAmount);
+  miscellaneousFrontEnd.updateValue(inputFab.txFee, incomingFees);
 
-  miscellaneousFrontEnd.updateValue(inputKanban.txInId, incomingId);
-  miscellaneousFrontEnd.updateValue(inputKanban.txInNOut, incomingNOut);
-  miscellaneousFrontEnd.updateValue(inputKanban.beneficiaryAmount, incomingAmount);
-  miscellaneousFrontEnd.updateValue(inputKanban.fees, incomingFees);
+  miscellaneousFrontEnd.updateValue(inputKanban.txInIds, incomingId);
+  miscellaneousFrontEnd.updateValue(inputKanban.txInNOuts, incomingNOut);
+  miscellaneousFrontEnd.updateValue(inputKanban.txBeneficiaryAmounts, incomingAmount);
+  miscellaneousFrontEnd.updateValue(inputKanban.txFee, incomingFees);
   this.computeTxInsAndOuts();
 }
 

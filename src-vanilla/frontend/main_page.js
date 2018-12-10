@@ -63,7 +63,19 @@ Page.prototype.initializeCheckBoxes = function() {
     ], [
       storageKanban.variables.connectKanbansInALine,
       ids.defaults.kanbanGO.checkboxConnectKanbansInALine,
-    ]
+    ], [
+      storageKanban.variables.includeFabcoinContractCallsInTransactionOutputs,
+      ids.defaults.fabcoin.checkboxFabcoinIncludeContractCalls,
+    ], [
+      storageKanban.variables.includeKanbanGoContractCallsInTransactionOutputs,
+      ids.defaults.kanbanGO.checkboxKanbanIncludeContractCalls,
+    ], [
+      storageKanban.variables.includeFabcoinAmountInTransactionOutputs,
+      ids.defaults.fabcoin.checkboxFabcoinSendToContract,
+    ], [
+      storageKanban.variables.includeKanbanGoAmountInTransactionOutputs,
+      ids.defaults.kanbanGO.checkboxKanbanSendToContract,
+    ],
   ];
   for (var i = 0; i < checkboxBindingsWithId.length; i ++) {
     checkboxBindingsWithId[i][0].changeValueHandler = miscellaneousFrontEnd.setCheckbox.bind(

@@ -71,7 +71,7 @@
   </td>
   <td>
   <div class = "divLabelButtonGroup">break KB</div><div id = "panelKBGODangerousInputs" class = "panelStandard">
-  <input id = "inputKBGOBridgeChainNet" class = "inputStandard" size = "50" placeholder = "Bridge chain network"      value = "regnet"></input><br>
+  <input id = "inputKBGOBridgeChainNet"    class = "inputStandard" size = "50" placeholder = "Bridge chain network"   value = "regnet"></input><br>
   <input id = "inputKBGONumberOfGethNodes" class = "inputStandard" size = "50" placeholder = "# nodes"                value = "1"></input><br>
   <input id = "inputKBGOContractId"        class = "inputStandard" size = "50" placeholder = "contract Id"            value = ""></input><br>
   <input id = "inputKBGOContractABI"       class = "inputStandard" size = "50" placeholder = "contract ABI"           value = ""></input><br>
@@ -144,19 +144,30 @@
     <input id = "inputKBGOTransactionValue"  class = "inputStandard" size = "50" placeholder = "value of each transaction"/><br>
     </div>
     <div class = "divLabelButtonGroup">tx inputs</div><div id = "panelKBGOTransactionBuilderInputs" class = "panelStandard">
-    <input id = "inputKBGOSecretIn"                      class = "inputStandard" size = "50" placeholder = "secret in"/><br>
-    <input id = "inputKBGOTransactionHex"                         class = "inputStandard" size = "50" placeholder = "tx hex"/><br>
-    <input id = "inputKBGOTransactionInId"               class = "inputStandard" size = "50" placeholder = "transaction in"/><br>
-    <input id = "inputKBGOTransactionInNOut"             class = "inputStandard" size = "50" placeholder = "tx in n out to spend"/><br>
-    <input id = "inputKBGOTransactionBeneficiaryAddress" class = "inputStandard" size = "50" placeholder = "beneficiary address(es)"/><br>
-    <input id = "inputKBGOTransactionBeneficiaryAmount"  class = "inputStandard" size = "50" placeholder = "beneficiary amount(s)"/><br>
-    <input id = "inputKBGOTransactionFees"               class = "inputStandard" size = "50" placeholder = "fee"/><br>
-    <input id = "inputKBGOTransactionInputs"             class = "inputStandard" size = "50" placeholder = "tx inputs"></input><br>
-    <input id = "inputKBGOTransactionOutputs"            class = "inputStandard" size = "50" placeholder = "tx outputs"></input><br>
-
-    <input id = "inputKBGOSmartContractId"               class = "inputStandard" size = "50" placeholder = "contract id"/><br>
-    <input id = "inputKBGOSmartContractFunction"         class = "inputStandard" size = "50" placeholder = "contract f-n"/><br>
-    <input id = "inputKBGOSmartContractData"             class = "inputStandard" size = "50" placeholder = "contract data"/><br>
+    <input id = "inputKBGOSecretIn"                       class = "inputStandard" size = "50" placeholder = "secret in"/><br>
+    <input id = "inputKBGOTransactionHex"                 class = "inputStandard" size = "50" placeholder = "tx hex"/><br>
+    <input id = "inputKBGOTransactionInId"                class = "inputStandard" size = "50" placeholder = "transaction in"/><br>
+    <input id = "inputKBGOTransactionInNOut"              class = "inputStandard" size = "50" placeholder = "tx in n out to spend"/><br>
+    <input id = "inputKBGOTransactionBeneficiaryAddress"  class = "inputStandard" size = "50" placeholder = "beneficiary address(es)" onkeydown = "window.kanban.fabcoin.rpc.fabNode.computeTxInsAndOuts(false);" onkeypress = "window.kanban.fabcoin.rpc.fabNode.computeTxInsAndOuts(false);"/><br>
+    <input id = "inputKBGOTransactionBeneficiaryAmount"   class = "inputStandard" size = "50" placeholder = "amount(s) in order: aggregate, smart, beneficiary(ies)"   onkeydown = "window.kanban.fabcoin.rpc.fabNode.computeTxInsAndOuts(false);" onkeypress = "window.kanban.fabcoin.rpc.fabNode.computeTxInsAndOuts(false);"/><br>
+    <input id = "inputKBGOTransactionFees"                class = "inputStandard" size = "50" placeholder = "fee"/><br>
+    <input id = "inputKBGOTransactionInputs"              class = "inputStandard" size = "50" placeholder = "tx inputs"></input><br>
+    <input id = "inputKBGOTransactionOutputs"             class = "inputStandard" size = "50" placeholder = "tx outputs"></input><br>
+    <label class = "containerCheckbox">
+    <input type = "checkbox" id = "checkboxKanbanIncludeContractCalls" onchange = "window.kanban.kanbanGO.rpc.theKBNodes.readCheckboxesConfiguration(); window.kanban.fabcoin.rpc.fabNode.computeTxInsAndOuts(false);">
+    <span class = "checkMark"></span>
+    Include contract call in transaction outputs
+    </label><br>     
+    <label class = "containerCheckbox">
+    <input type = "checkbox" id = "checkboxKanbanSendToContract" onchange = "window.kanban.kanbanGO.rpc.theKBNodes.readCheckboxesConfiguration(); window.kanban.fabcoin.rpc.fabNode.computeTxInsAndOuts(false);">
+    <span class = "checkMark"></span>
+    Send to contract
+    </label><br>     
+    <input id = "inputKBGOSmartContractId"                class = "inputStandard" size = "50" placeholder = "contract id"/><br>
+    <input id = "inputKBGOSmartContractFunctionName"      class = "inputStandard" size = "50" placeholder = "contract f-n"/><br>
+    <input id = "inputKBGOSmartContractFunctionId"        class = "inputStandard" size = "50" placeholder = "contract f-n id"/><br>
+    <input id = "inputKBGOSmartContractFunctionArguments" class = "inputStandard" size = "50" placeholder = "contract f-n arguments"/><br>
+    <input id = "inputKBGOSmartContractData"              class = "inputStandard" size = "50" placeholder = "contract final input"/><br>
     </div>
   </td>
   </tr>
@@ -415,7 +426,7 @@
     <input type = "text" class = "inputStandard" id = "inputFabcoinTxInNOuts"                  size = "50" value = "" placeholder = "tx in n out(s)"></input><br>    
 
     <input type = "text" class = "inputStandard" id = "inputFabcoinBeneficiaryAddresses"       size = "50" value = "" placeholder = "beneficiary address(es)"                                                    onchange = "window.kanban.fabcoin.rpc.fabNode.computeTxInsAndOuts(true);" onkeydown = "window.kanban.fabcoin.rpc.fabNode.computeTxInsAndOuts(true);"></input><br>
-    <input type = "text" class = "inputStandard" id = "inputFabcoinBeneficiaryAmounts"         size = "50" value = "" placeholder = "amount(s) (aggregate, if any, first, then amount per beneficiary in order)" onchange = "window.kanban.fabcoin.rpc.fabNode.computeTxInsAndOuts(true);" onkeydown = "window.kanban.fabcoin.rpc.fabNode.computeTxInsAndOuts(true);"></input><br>
+    <input type = "text" class = "inputStandard" id = "inputFabcoinBeneficiaryAmounts"         size = "50" value = "" placeholder = "amount(s) in order: aggregate, smart, beneficiary(ies)" onchange = "window.kanban.fabcoin.rpc.fabNode.computeTxInsAndOuts(true);" onkeydown = "window.kanban.fabcoin.rpc.fabNode.computeTxInsAndOuts(true);"></input><br>
     <input type = "text" class = "inputStandard" id = "inputFabcoinFee"                        size = "50" value = "" placeholder = "fee"                                                                        onchange = "window.kanban.fabcoin.rpc.fabNode.computeTxInsAndOuts(true);" onkeydown = "window.kanban.fabcoin.rpc.fabNode.computeTxInsAndOuts(true);"></input><br>
   
     <input type = "text" class = "inputStandard" id = "inputAggregateSignaturePubKeysForTx"    size = "50" value = "" placeholder = "aggregate output public keys"                                               onchange = "window.kanban.fabcoin.rpc.fabNode.computeTxInsAndOuts(true);" onkeydown = "window.kanban.fabcoin.rpc.fabNode.computeTxInsAndOuts(true);"></input><br>
@@ -425,11 +436,21 @@
     <input type = "text" class = "inputStandard" id = "inputFabcoinTransactionOutputs"         size = "50" value = "" placeholder = "tx outputs"></input><br>
     </div>
     <div class = "divLabelButtonGroup">contract inputs</div><div id = "panelFabcoinSmartInputs" class = "panelStandard">
+    <label class = "containerCheckbox">
+    <input type = "checkbox" id = "checkboxFabcoinIncludeContractCalls" onchange = "window.kanban.kanbanGO.rpc.theKBNodes.readCheckboxesConfiguration(); window.kanban.fabcoin.rpc.fabNode.computeTxInsAndOuts(true);">
+    <span class = "checkMark"></span>
+    Include contract call in transaction outputs
+    </label><br>     
+    <label class = "containerCheckbox">
+    <input type = "checkbox" id = "checkboxFabcoinSendToContract" onchange = "window.kanban.kanbanGO.rpc.theKBNodes.readCheckboxesConfiguration(); window.kanban.fabcoin.rpc.fabNode.computeTxInsAndOuts(true);">
+    <span class = "checkMark"></span>
+    Send to contract
+    </label><br>     
     <input type = "text" class = "inputStandard" id = "inputFabcoinContractHex"                size = "50" value = "" placeholder = "contract hex"></input><br>
     <input type = "text" class = "inputStandard" id = "inputFabcoinContractId"                 size = "50" value = "" placeholder = "contract id"></input><br>
     <input type = "text" class = "inputStandard" id = "inputSolidityFunctionName"              size = "50" value = "" placeholder = "contract f-n name"></input><br>
-    <input type = "text" class = "inputStandard" id = "inputFabcoinContractFunctionId"         size = "50" value = "" placeholder = "contract f-n id"   onchange = "window.kanban.kanbanGO.rpc.theKBNodes.computeContractData()"></input><br>
-    <input type = "text" class = "inputStandard" id = "inputFabcoinContractFunctionData"       size = "50" value = "" placeholder = "contract f-n data" onchange = "window.kanban.kanbanGO.rpc.theKBNodes.computeContractData()"></input><br>
+    <input type = "text" class = "inputStandard" id = "inputFabcoinContractFunctionId"         size = "50" value = "" placeholder = "contract f-n id"   onchange = "window.kanban.kanbanGO.rpc.theKBNodes.computeContractData();" onkeydown = "window.kanban.kanbanGO.rpc.theKBNodes.computeContractData();"></input><br>
+    <input type = "text" class = "inputStandard" id = "inputFabcoinContractFunctionArguments"  size = "50" value = "" placeholder = "contract f-n data" onchange = "window.kanban.kanbanGO.rpc.theKBNodes.computeContractData();" onkeydown = "window.kanban.kanbanGO.rpc.theKBNodes.computeContractData();"></input><br>
     <input type = "text" class = "inputStandard" id = "inputFabcoinContractData"               size = "50" value = "" placeholder = "contract function + data"></input><br>
     </div>
   </td>
