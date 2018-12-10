@@ -13,6 +13,7 @@ var rpcCalls = {
       abiJSON: null,
       contractId: null,
       connectKanbansInALine: null,
+      bridgeChainnet: null,
     },
   },
   killAllGeth: {
