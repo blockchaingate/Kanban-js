@@ -234,7 +234,7 @@ NodeKanbanGo.prototype.run = function(response) {
   ];
   theArguments.push(
     "--bridge.chainnet",
-    "regnet",
+    initializer.bridgeChainnet,
     "--bridge.attachtorunning",
     "--bridge.rpcuser",
     global.fabcoinNode.configuration.RPCUser,
@@ -278,6 +278,9 @@ function KanbanGoInitializer() {
   this.nodes = [];
   /** @type {string} */
   this.notes = "";
+  /** @type {String} */
+  this.bridgeChainnet = "reg";
+
   this.numberOfInitializedFolders = 0;
   this.numberOfInitializedGenesis = 0;
   this.numberOfStartedNodes = 0;
@@ -943,6 +946,19 @@ KanbanGoInitializer.prototype.runNodesOnFAB = function(response, queryCommand, c
   if (typeof this.smartContractId !== "string") {
     var result = {
       error: `smartContractId expected to be a string, instead received: ${queryCommand.smartContractId}`
+    };
+    response.writeHead(400);
+    return response.end(JSON.stringify(result));
+  }
+  this.bridgeChainnet = queryCommand.bridgeChainnet;
+  var allowedNets = {
+    reg: true, 
+    regnet: true
+  };
+  if (! (this.bridgeChainnet in allowedNets)) {
+    var result = {
+      error: `Could not determine the bridgeChain net. Your input was: ${this.bridgeChainnet}. The allowed values are: ${Object.keys(allowedNets)}`,
+      allowedBridgeChainnets: allowedNets,
     };
     response.writeHead(400);
     return response.end(JSON.stringify(result));

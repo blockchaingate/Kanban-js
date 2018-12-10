@@ -119,6 +119,7 @@ var defaults = {
       transactionValue:  "inputKBGOTransactionValue",
     },
     inputInitialization: {
+      bridgeChainnet: "inputKBGOBridgeChainNet",
       numberOfNodes: "inputKBGONumberOfGethNodes",
       contractId: "inputKBGOContractId",
       contractABI: "inputKBGOContractABI"

@@ -312,6 +312,7 @@ function KanbanGoNodes() {
         abiJSON: inputInitialization.contractABI,
         contractId: inputInitialization.contractId,
         connectKanbansInALine: ids.defaults.kanbanGO.checkboxConnectKanbansInALine,
+        bridgeChainnet: inputInitialization.bridgeChainnet,
       },
       callback: PendingCall.prototype.callbackRunNodes,
       useOneNode: true
