@@ -164,8 +164,8 @@
     Send to contract
     </label><br>     
     <input id = "inputKBGOSmartContractId"                class = "inputStandard" size = "50" placeholder = "contract id"/><br>
-    <input id = "inputKBGOGasLimit"                    class = "inputStandard" size = "50" placeholder = "gas limit"></input><br>
-    <input id = "inputKBGOGasPrice"                    class = "inputStandard" size = "50" placeholder = "gas price"></input><br>
+    <input id = "inputKBGOGasLimit"                       class = "inputStandard" size = "50" placeholder = "gas limit"></input><br>
+    <input id = "inputKBGOGasPrice"                       class = "inputStandard" size = "50" placeholder = "gas price"></input><br>
     <input id = "inputKBGOSmartContractFunctionName"      class = "inputStandard" size = "50" placeholder = "contract f-n"/><br>
     <input id = "inputKBGOSmartContractFunctionId"        class = "inputStandard" size = "50" placeholder = "contract f-n id"/><br>
     <input id = "inputKBGOSmartContractFunctionArguments" class = "inputStandard" size = "50" placeholder = "contract f-n arguments"/><br>
@@ -392,7 +392,7 @@
     <div class = "divLabelButtonGroup">txs</div><div id = "panelFabcoinTXButtons" class = "panelStandard">
     <button class = "buttonStandard" style = "width: 100px" onclick = "window.kanban.fabcoin.rpc.fabNode.run('getTransactionById')">Get tx</button><br>
     <button class = "buttonStandard" style = "width: 100px" onclick = "window.kanban.fabcoin.rpc.fabNode.run('decodeTransactionRaw')">Decode txHex</button><br>
-    <button class = "buttonStandard" style = "width: 100px" onclick = "window.kanban.fabcoin.rpc.fabNode.computeTxInsAndOuts(); window.kanban.fabcoin.rpc.fabNode.run('createRawTransaction')">Create raw</button><br>
+    <button class = "buttonStandard" style = "width: 100px" onclick = "window.kanban.fabcoin.rpc.fabNode.computeTxInsAndOuts(true); window.kanban.fabcoin.rpc.fabNode.run('createRawTransaction')">Create raw</button><br>
     <button class = "buttonStandard" style = "width: 100px" onclick = "window.kanban.fabcoin.rpc.fabNode.run('signRawTransaction')">Sign raw</button><br>
     <button class = "buttonStandard" style = "width: 100px" onclick = "window.kanban.fabcoin.rpc.fabNode.run('insertAggregateSignature')">Insert agg. sig.</button><br>
     <button class = "buttonStandard" style = "width: 100px" onclick = "window.kanban.fabcoin.rpc.fabNode.run('sendRawTransaction')"><b style = "color:red">Send raw</b></button><br>

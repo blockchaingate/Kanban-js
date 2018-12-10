@@ -573,7 +573,7 @@ FabNode.prototype.computeTxInsAndOuts = function(sourceIsFabPage) {
         resultOut.contract.gasLimit = Number(incomingGasLimit);
       }
       if (incomingGasPrice !== "" && incomingGasPrice !== null && incomingGasPrice !== undefined) {
-        resultOut.contract.gasPrice = Number(incomingGasPrice);
+        resultOut.contract.gasPrice = incomingGasPrice;
       }
       amountCounter ++;
     }
@@ -625,7 +625,7 @@ FabNode.prototype.setTxInputVoutAndValue = function(container, content, extraDat
   miscellaneousFrontEnd.updateValue(inputKanban.txInNOuts, incomingNOut);
   miscellaneousFrontEnd.updateValue(inputKanban.txBeneficiaryAmounts, incomingAmount);
   miscellaneousFrontEnd.updateValue(inputKanban.txFee, incomingFees);
-  this.computeTxInsAndOuts();
+  this.computeTxInsAndOuts(true);
 }
 
 FabNode.prototype.setContractId = function(container, content, extraData) {
