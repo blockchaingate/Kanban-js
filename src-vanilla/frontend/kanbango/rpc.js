@@ -155,6 +155,11 @@ function KanbanGoNodes() {
       publicKeyHex: this.transformersStandard.shortener,
       publicKeyHexInternal: this.transformersStandard.shortener,
       "peers.${label}": this.transformersStandard.shortener,
+      "comments.decodedInputs.${number}.txid": this.transformersStandard.shortener,
+      "comments.decodedOutputs.contract.contractAddress": this.transformersStandard.shortener,
+      "comments.decodedOutputs.contract.data": this.transformersStandard.shortener,
+      "input.txInputs" : this.transformersStandard.shortener,
+      "input.txOutputs": this.transformersStandard.shortener,
     }
   };
   this.optionsForAddressDisplay = {

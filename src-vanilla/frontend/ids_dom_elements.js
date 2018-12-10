@@ -107,12 +107,14 @@ var defaults = {
       txFee: "inputKBGOTransactionFees",
       txInputs: "inputKBGOTransactionInputs",
       txOutputs: "inputKBGOTransactionOutputs",
-      // end of matching 
       contractId: "inputKBGOSmartContractId",
       contractFunctionName: "inputKBGOSmartContractFunctionName",
+      gasLimit: "inputKBGOGasLimit",
+      gasPrice: "inputKBGOGasPrice",
       contractFunctionId: "inputKBGOSmartContractFunctionId",
       contractFunctionArguments: "inputKBGOSmartContractFunctionArguments",
       contractData: "inputKBGOSmartContractData",
+      // end of matching 
     },
     inputBenchmarkParameters: {
       toAddress: "inputKBGOToAddress",
@@ -196,15 +198,16 @@ var defaults = {
       txFee: "inputFabcoinFee",
       txInputs: "inputFabcoinTransactionInputs",
       txOutputs: "inputFabcoinTransactionOutputs",
-      // end of matching 
-      txAggregatePublicKeys: "inputAggregateSignaturePubKeysForTx",
-      txAggregateSignature: "inputAggregateSignatureForTx",
-
       contractHex: "inputFabcoinContractHex",
       contractId: "inputFabcoinContractId",
+      gasLimit: "inputFabcoinGasLimit",
+      gasPrice: "inputFabcoinGasPrice",
       contractData: "inputFabcoinContractData",
       contractFunctionArguments: "inputFabcoinContractFunctionArguments",
       contractFunctionId: "inputFabcoinContractFunctionId",
+      // end of matching 
+      txAggregatePublicKeys: "inputAggregateSignaturePubKeysForTx",
+      txAggregateSignature: "inputAggregateSignatureForTx",
       solidityInput: "aceEditor",
       contractFunctionName: "inputSolidityFunctionName",
     },

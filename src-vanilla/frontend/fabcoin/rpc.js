@@ -506,6 +506,8 @@ FabNode.prototype.computeTxInsAndOuts = function(sourceIsFabPage) {
   var incomingOutAddresses;
   var incomingAmounts;
   var inputIdContainer;
+  var incomingGasPrice;
+  var incomingGasLimit;
   var smartContractId;
   var smartContractData;
   var otherIdContainer;
@@ -533,6 +535,8 @@ FabNode.prototype.computeTxInsAndOuts = function(sourceIsFabPage) {
   incomingNOuts = document.getElementById(inputIdContainer.txInNOuts).value;
   incomingOutAddresses = document.getElementById(inputIdContainer.txBeneficiaryAddresses).value;
   incomingAmounts = document.getElementById(inputIdContainer.txBeneficiaryAmounts).value;
+  incomingGasPrice = document.getElementById(inputIdContainer.gasPrice).value;
+  incomingGasLimit = document.getElementById(inputIdContainer.gasLimit).value;
   smartContractId = document.getElementById(inputIdContainer.contractId).value;
   smartContractData = document.getElementById(inputIdContainer.contractData).value;
   aggregatePubKeys = document.getElementById(inputFab.txAggregatePublicKeys).value;
@@ -564,7 +568,13 @@ FabNode.prototype.computeTxInsAndOuts = function(sourceIsFabPage) {
     resultOut.contract.contractAddress = smartContractId;
     resultOut.contract.data = smartContractData;
     if (doSendToContract) {
-      resultOut.amount = Number(incomingOutAmountArray[amountCounter]);
+      resultOut.contract.amount = Number(incomingOutAmountArray[amountCounter]);
+      if (incomingGasLimit !== "" && incomingGasLimit !== null && incomingGasLimit !== undefined) {
+        resultOut.contract.gasLimit = Number(incomingGasLimit);
+      }
+      if (incomingGasPrice !== "" && incomingGasPrice !== null && incomingGasPrice !== undefined) {
+        resultOut.contract.gasPrice = Number(incomingGasPrice);
+      }
       amountCounter ++;
     }
   }
@@ -578,6 +588,8 @@ FabNode.prototype.computeTxInsAndOuts = function(sourceIsFabPage) {
   miscellaneousFrontEnd.updateValue(otherIdContainer.txInNOuts, incomingNOuts);
   miscellaneousFrontEnd.updateValue(otherIdContainer.txBeneficiaryAddresses, incomingOutAddresses);
   miscellaneousFrontEnd.updateValue(otherIdContainer.txBeneficiaryAmounts, incomingAmounts);
+  miscellaneousFrontEnd.updateValue(otherIdContainer.gasPrice, incomingGasPrice);
+  miscellaneousFrontEnd.updateValue(otherIdContainer.gasLimit, incomingGasLimit);
 
   incomingIds = document.getElementById(inputIdContainer.txInIds).value;
   incomingNOuts = document.getElementById(inputIdContainer.txInNOuts).value;
