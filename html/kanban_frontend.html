@@ -71,10 +71,10 @@
   </td>
   <td>
   <div class = "divLabelButtonGroup">break KB</div><div id = "panelKBGODangerousInputs" class = "panelStandard">
-  <input id = "inputKBGOBridgeChainNet" class = "inputStandard" size = "50" placeholder = "Bridge chain network"      value = "regnet"></input><br>
-  <input id = "inputKBGONumberOfGethNodes" class = "inputStandard" size = "50" placeholder = "# nodes"                value = "1"></input><br>
-  <input id = "inputKBGOContractId"        class = "inputStandard" size = "50" placeholder = "contract Id"            value = ""></input><br>
-  <input id = "inputKBGOContractABI"       class = "inputStandard" size = "50" placeholder = "contract ABI"           value = ""></input><br>
+  <input id = "inputKBGOBridgeChainNet"    class = "inputStandard" size = "50" placeholder = "Bridge chain network" value = "regnet"></input><br>
+  <input id = "inputKBGONumberOfGethNodes" class = "inputStandard" size = "50" placeholder = "# nodes"              value = "1"></input><br>
+  <input id = "inputKBGOContractId"        class = "inputStandard" size = "50" placeholder = "contract Id"          value = ""></input><br>
+  <input id = "inputKBGOContractABI"       class = "inputStandard" size = "50" placeholder = "contract ABI"         value = ""></input><br>
   </div>
   <div class = "divLabelButtonGroup">run inputs</div><div id = "panelKBGOInputs" class = "panelStandard">
   <label class = "containerCheckbox">
@@ -145,18 +145,31 @@
     </div>
     <div class = "divLabelButtonGroup">tx inputs</div><div id = "panelKBGOTransactionBuilderInputs" class = "panelStandard">
     <input id = "inputKBGOSecretIn"                      class = "inputStandard" size = "50" placeholder = "secret in"/><br>
-    <input id = "inputKBGOTransactionHex"                         class = "inputStandard" size = "50" placeholder = "tx hex"/><br>
+    <input id = "inputKBGOTransactionHex"                class = "inputStandard" size = "50" placeholder = "tx hex"/><br>
     <input id = "inputKBGOTransactionInId"               class = "inputStandard" size = "50" placeholder = "transaction in"/><br>
     <input id = "inputKBGOTransactionInNOut"             class = "inputStandard" size = "50" placeholder = "tx in n out to spend"/><br>
-    <input id = "inputKBGOTransactionBeneficiaryAddress" class = "inputStandard" size = "50" placeholder = "beneficiary address(es)"/><br>
-    <input id = "inputKBGOTransactionBeneficiaryAmount"  class = "inputStandard" size = "50" placeholder = "beneficiary amount(s)"/><br>
+    <input id = "inputKBGOTransactionBeneficiaryAddress" class = "inputStandard" size = "50" placeholder = "beneficiary address(es)" onkeydown = "window.kanban.fabcoin.rpc.fabNode.computeTxInsAndOuts(false);" onkeypress = "window.kanban.fabcoin.rpc.fabNode.computeTxInsAndOuts(false);"/><br>
+    <input id = "inputKBGOTransactionBeneficiaryAmount"  class = "inputStandard" size = "50" placeholder = "amount(s) in order: aggregate, smart, beneficiary(ies)"   onkeydown = "window.kanban.fabcoin.rpc.fabNode.computeTxInsAndOuts(false);" onkeypress = "window.kanban.fabcoin.rpc.fabNode.computeTxInsAndOuts(false);"/><br>
     <input id = "inputKBGOTransactionFees"               class = "inputStandard" size = "50" placeholder = "fee"/><br>
     <input id = "inputKBGOTransactionInputs"             class = "inputStandard" size = "50" placeholder = "tx inputs"></input><br>
     <input id = "inputKBGOTransactionOutputs"            class = "inputStandard" size = "50" placeholder = "tx outputs"></input><br>
-
-    <input id = "inputKBGOSmartContractId"               class = "inputStandard" size = "50" placeholder = "contract id"/><br>
-    <input id = "inputKBGOSmartContractFunction"         class = "inputStandard" size = "50" placeholder = "contract f-n"/><br>
-    <input id = "inputKBGOSmartContractData"             class = "inputStandard" size = "50" placeholder = "contract data"/><br>
+    <label class = "containerCheckbox">
+    <input type = "checkbox" id = "checkboxKanbanIncludeContractCalls" onchange = "window.kanban.kanbanGO.rpc.theKBNodes.readCheckboxesConfiguration(); window.kanban.fabcoin.rpc.fabNode.computeTxInsAndOuts(false);">
+    <span class = "checkMark"></span>
+    Include contract call in transaction outputs
+    </label><br>     
+    <label class = "containerCheckbox">
+    <input type = "checkbox" id = "checkboxKanbanSendToContract" onchange = "window.kanban.kanbanGO.rpc.theKBNodes.readCheckboxesConfiguration(); window.kanban.fabcoin.rpc.fabNode.computeTxInsAndOuts(false);">
+    <span class = "checkMark"></span>
+    Send to contract
+    </label><br>     
+    <input id = "inputKBGOSmartContractId"                class = "inputStandard" size = "50" placeholder = "contract id"/><br>
+    <input id = "inputKBGOGasLimit"                       class = "inputStandard" size = "50" placeholder = "gas limit"></input><br>
+    <input id = "inputKBGOGasPrice"                       class = "inputStandard" size = "50" placeholder = "gas price"></input><br>
+    <input id = "inputKBGOSmartContractFunctionName"      class = "inputStandard" size = "50" placeholder = "contract f-n"/><br>
+    <input id = "inputKBGOSmartContractFunctionId"        class = "inputStandard" size = "50" placeholder = "contract f-n id"/><br>
+    <input id = "inputKBGOSmartContractFunctionArguments" class = "inputStandard" size = "50" placeholder = "contract f-n arguments"/><br>
+    <input id = "inputKBGOSmartContractData"              class = "inputStandard" size = "50" placeholder = "contract final input"/><br>
     </div>
   </td>
   </tr>
@@ -172,7 +185,7 @@
     <tr>
     <td>
     <div class = "divLabelButtonGroup">basic</div><div id = "panelKBGOMyNodesBasic" class = "panelStandard">
-    <button class = "buttonStandard"  style = "width:100px" onclick = "window.kanban.kanbanGO.rpc.theKBNodes.run('executeOverSSH', 'myNodes');"><b style='color:red'>Execute [ssh]</b></button><br>
+    <button class = "buttonStandard"  style = "width:100px" onclick = "window.kanban.kanbanGO.rpc.theKBNodes.run('executeOverSSH', 'myNodes');"><b style = 'color:red'>Execute [ssh]</b></button><br>
     <button class = "buttonStandard"  style = "width:100px" onclick = "window.kanban.kanbanGO.rpc.theKBNodes.run('fetchMyNodesInfo', 'myNodes');">Fetch info</button>
     </div>
     </td>
@@ -244,7 +257,7 @@
   </div> <!--divControlPanelDefault-->
   <br>
     <div class = "divControlPanelDefault">
-      <div id = "divFabcoinCryptoOutput" style = "font-family:'Courier New', Courier, monospace"></div>
+    <div id = "divFabcoinCryptoOutput" style = "font-family:'Courier New', Courier, monospace"></div>
     </div><!--divControlPanelDefault-->
 </div><!--pageFabcoinCrypto-->
 
@@ -379,7 +392,7 @@
     <div class = "divLabelButtonGroup">txs</div><div id = "panelFabcoinTXButtons" class = "panelStandard">
     <button class = "buttonStandard" style = "width: 100px" onclick = "window.kanban.fabcoin.rpc.fabNode.run('getTransactionById')">Get tx</button><br>
     <button class = "buttonStandard" style = "width: 100px" onclick = "window.kanban.fabcoin.rpc.fabNode.run('decodeTransactionRaw')">Decode txHex</button><br>
-    <button class = "buttonStandard" style = "width: 100px" onclick = "window.kanban.fabcoin.rpc.fabNode.computeTxInsAndOuts(); window.kanban.fabcoin.rpc.fabNode.run('createRawTransaction')">Create raw</button><br>
+    <button class = "buttonStandard" style = "width: 100px" onclick = "window.kanban.fabcoin.rpc.fabNode.computeTxInsAndOuts(true); window.kanban.fabcoin.rpc.fabNode.run('createRawTransaction')">Create raw</button><br>
     <button class = "buttonStandard" style = "width: 100px" onclick = "window.kanban.fabcoin.rpc.fabNode.run('signRawTransaction')">Sign raw</button><br>
     <button class = "buttonStandard" style = "width: 100px" onclick = "window.kanban.fabcoin.rpc.fabNode.run('insertAggregateSignature')">Insert agg. sig.</button><br>
     <button class = "buttonStandard" style = "width: 100px" onclick = "window.kanban.fabcoin.rpc.fabNode.run('sendRawTransaction')"><b style = "color:red">Send raw</b></button><br>
@@ -396,41 +409,53 @@
   </td>
   <td>
     <div class = "divLabelButtonGroup">block inputs</div><div id = "panelFabcoinBlockInputs" class = "panelStandard">
-    <input type = "text" class = "inputStandard" id = "inputFabcoinBlockNumber"                size = "50" value = "" placeholder = "block #"></input><br>
-    <input type = "text" class = "inputStandard" id = "inputFabcoinBlockHash"                  size = "50" value = "" placeholder = "block hash"></input><br>
-    <input type = "text" class = "inputStandard" id = "inputFabcoinNumberOfBlocksToGenerate"   size = "50" value = "" placeholder = "# blocks to generate"></input><br>    
+    <input type = "text" class = "inputStandard" id = "inputFabcoinBlockNumber"              size = "50" value = "" placeholder = "block #"></input><br>
+    <input type = "text" class = "inputStandard" id = "inputFabcoinBlockHash"                size = "50" value = "" placeholder = "block hash"></input><br>
+    <input type = "text" class = "inputStandard" id = "inputFabcoinNumberOfBlocksToGenerate" size = "50" value = "" placeholder = "# blocks to generate"></input><br>    
     </div>
     <div class = "divLabelButtonGroup">key inputs</div><div id = "panelFabcoinKeysInputs" class = "panelStandard">
-    <input type = "text" class = "inputStandard" id = "inputFabcoinPrivateKey"                 size = "50" value = "" placeholder = "private key"></input><br>    
-    <input type = "text" class = "inputStandard" id = "inputFabcoinPublicKey"                  size = "50" value = "" placeholder = "public key"></input><br>    
-    <input type = "text" class = "inputStandard" id = "inputFabcoinAddress"                    size = "50" value = "" placeholder = "address FAB testnet"></input><br>
-    <input type = "text" class = "inputStandard" id = "inputFabcoinAddressMainnet"             size = "50" value = "" placeholder = "address FAB mainnet"></input><br>
-    <input type = "text" class = "inputStandard" id = "inputEthereumAddress"                   size = "50" value = "" placeholder = "address Ethereum"></input><br>
+    <input type = "text" class = "inputStandard" id = "inputFabcoinPrivateKey"               size = "50" value = "" placeholder = "private key"></input><br>    
+    <input type = "text" class = "inputStandard" id = "inputFabcoinPublicKey"                size = "50" value = "" placeholder = "public key"></input><br>    
+    <input type = "text" class = "inputStandard" id = "inputFabcoinAddress"                  size = "50" value = "" placeholder = "address FAB testnet"></input><br>
+    <input type = "text" class = "inputStandard" id = "inputFabcoinAddressMainnet"           size = "50" value = "" placeholder = "address FAB mainnet"></input><br>
+    <input type = "text" class = "inputStandard" id = "inputEthereumAddress"                 size = "50" value = "" placeholder = "address Ethereum"></input><br>
     </div>
     <div class = "divLabelButtonGroup">tx inputs</div><div id = "panelFabcoinTXInputs" class = "panelStandard">
-    <input type = "text" class = "inputStandard" id = "inputFabcoinTransactionId"              size = "50" value = "" placeholder = "tx id"></input><br>    
-    <input type = "text" class = "inputStandard" id = "inputFabcoinTransactionHex"             size = "50" value = "" placeholder = "tx hex"></input><br>
+    <input type = "text" class = "inputStandard" id = "inputFabcoinTransactionId"            size = "50" value = "" placeholder = "tx id"></input><br>    
+    <input type = "text" class = "inputStandard" id = "inputFabcoinTransactionHex"           size = "50" value = "" placeholder = "tx hex"></input><br>
 
-    <input type = "text" class = "inputStandard" id = "inputFabcoinTxInIds"                    size = "50" value = "" placeholder = "tx in id(s)"></input><br>    
-    <input type = "text" class = "inputStandard" id = "inputFabcoinTxInNOuts"                  size = "50" value = "" placeholder = "tx in n out(s)"></input><br>    
+    <input type = "text" class = "inputStandard" id = "inputFabcoinTxInIds"                  size = "50" value = "" placeholder = "tx in id(s)"></input><br>    
+    <input type = "text" class = "inputStandard" id = "inputFabcoinTxInNOuts"                size = "50" value = "" placeholder = "tx in n out(s)"></input><br>    
 
-    <input type = "text" class = "inputStandard" id = "inputFabcoinBeneficiaryAddresses"       size = "50" value = "" placeholder = "beneficiary address(es)"                                                    onchange = "window.kanban.fabcoin.rpc.fabNode.computeTxInsAndOuts(true);" onkeydown = "window.kanban.fabcoin.rpc.fabNode.computeTxInsAndOuts(true);"></input><br>
-    <input type = "text" class = "inputStandard" id = "inputFabcoinBeneficiaryAmounts"         size = "50" value = "" placeholder = "amount(s) (aggregate, if any, first, then amount per beneficiary in order)" onchange = "window.kanban.fabcoin.rpc.fabNode.computeTxInsAndOuts(true);" onkeydown = "window.kanban.fabcoin.rpc.fabNode.computeTxInsAndOuts(true);"></input><br>
-    <input type = "text" class = "inputStandard" id = "inputFabcoinFee"                        size = "50" value = "" placeholder = "fee"                                                                        onchange = "window.kanban.fabcoin.rpc.fabNode.computeTxInsAndOuts(true);" onkeydown = "window.kanban.fabcoin.rpc.fabNode.computeTxInsAndOuts(true);"></input><br>
+    <input type = "text" class = "inputStandard" id = "inputFabcoinBeneficiaryAddresses"     size = "50" value = "" placeholder = "beneficiary address(es)"                                                    onchange = "window.kanban.fabcoin.rpc.fabNode.computeTxInsAndOuts(true);" onkeydown = "window.kanban.fabcoin.rpc.fabNode.computeTxInsAndOuts(true);"></input><br>
+    <input type = "text" class = "inputStandard" id = "inputFabcoinBeneficiaryAmounts"       size = "50" value = "" placeholder = "amount(s) in order: aggregate, smart, beneficiary(ies)" onchange = "window.kanban.fabcoin.rpc.fabNode.computeTxInsAndOuts(true);" onkeydown = "window.kanban.fabcoin.rpc.fabNode.computeTxInsAndOuts(true);"></input><br>
+    <input type = "text" class = "inputStandard" id = "inputFabcoinFee"                      size = "50" value = "" placeholder = "fee"                                                                        onchange = "window.kanban.fabcoin.rpc.fabNode.computeTxInsAndOuts(true);" onkeydown = "window.kanban.fabcoin.rpc.fabNode.computeTxInsAndOuts(true);"></input><br>
   
-    <input type = "text" class = "inputStandard" id = "inputAggregateSignaturePubKeysForTx"    size = "50" value = "" placeholder = "aggregate output public keys"                                               onchange = "window.kanban.fabcoin.rpc.fabNode.computeTxInsAndOuts(true);" onkeydown = "window.kanban.fabcoin.rpc.fabNode.computeTxInsAndOuts(true);"></input><br>
-    <input type = "text" class = "inputStandard" id = "inputAggregateSignatureForTx"           size = "50" value = "" placeholder = "aggregate output signature"></input><br>
+    <input type = "text" class = "inputStandard" id = "inputAggregateSignaturePubKeysForTx"  size = "50" value = "" placeholder = "aggregate output public keys"                                               onchange = "window.kanban.fabcoin.rpc.fabNode.computeTxInsAndOuts(true);" onkeydown = "window.kanban.fabcoin.rpc.fabNode.computeTxInsAndOuts(true);"></input><br>
+    <input type = "text" class = "inputStandard" id = "inputAggregateSignatureForTx"         size = "50" value = "" placeholder = "aggregate output signature"></input><br>
 
-    <input type = "text" class = "inputStandard" id = "inputFabcoinTransactionInputs"          size = "50" value = "" placeholder = "tx inputs"></input><br>
-    <input type = "text" class = "inputStandard" id = "inputFabcoinTransactionOutputs"         size = "50" value = "" placeholder = "tx outputs"></input><br>
+    <input type = "text" class = "inputStandard" id = "inputFabcoinTransactionInputs"        size = "50" value = "" placeholder = "tx inputs"></input><br>
+    <input type = "text" class = "inputStandard" id = "inputFabcoinTransactionOutputs"       size = "50" value = "" placeholder = "tx outputs"></input><br>
     </div>
     <div class = "divLabelButtonGroup">contract inputs</div><div id = "panelFabcoinSmartInputs" class = "panelStandard">
-    <input type = "text" class = "inputStandard" id = "inputFabcoinContractHex"                size = "50" value = "" placeholder = "contract hex"></input><br>
-    <input type = "text" class = "inputStandard" id = "inputFabcoinContractId"                 size = "50" value = "" placeholder = "contract id"></input><br>
-    <input type = "text" class = "inputStandard" id = "inputSolidityFunctionName"              size = "50" value = "" placeholder = "contract f-n name"></input><br>
-    <input type = "text" class = "inputStandard" id = "inputFabcoinContractFunctionId"         size = "50" value = "" placeholder = "contract f-n id"   onchange = "window.kanban.kanbanGO.rpc.theKBNodes.computeContractData()"></input><br>
-    <input type = "text" class = "inputStandard" id = "inputFabcoinContractFunctionData"       size = "50" value = "" placeholder = "contract f-n data" onchange = "window.kanban.kanbanGO.rpc.theKBNodes.computeContractData()"></input><br>
-    <input type = "text" class = "inputStandard" id = "inputFabcoinContractData"               size = "50" value = "" placeholder = "contract function + data"></input><br>
+    <label class = "containerCheckbox">
+    <input type = "checkbox" id = "checkboxFabcoinIncludeContractCalls" onchange = "window.kanban.kanbanGO.rpc.theKBNodes.readCheckboxesConfiguration(); window.kanban.fabcoin.rpc.fabNode.computeTxInsAndOuts(true);">
+    <span class = "checkMark"></span>
+    Include contract call in transaction outputs
+    </label><br>     
+    <label class = "containerCheckbox">
+    <input type = "checkbox" id = "checkboxFabcoinSendToContract" onchange = "window.kanban.kanbanGO.rpc.theKBNodes.readCheckboxesConfiguration(); window.kanban.fabcoin.rpc.fabNode.computeTxInsAndOuts(true);">
+    <span class = "checkMark"></span>
+    Send to contract
+    </label><br>     
+    <input type = "text" class = "inputStandard" id = "inputFabcoinContractHex"               size = "50" value = "" placeholder = "contract hex"></input><br>
+    <input type = "text" class = "inputStandard" id = "inputFabcoinContractId"                size = "50" value = "" placeholder = "contract id"></input><br>
+    <input type = "text" class = "inputStandard" id = "inputFabcoinGasLimit"                  size = "50" value = "" placeholder = "gas limit"></input><br>
+    <input type = "text" class = "inputStandard" id = "inputFabcoinGasPrice"                  size = "50" value = "" placeholder = "gas price"></input><br>
+    <input type = "text" class = "inputStandard" id = "inputSolidityFunctionName"             size = "50" value = "" placeholder = "contract f-n name"></input><br>
+    <input type = "text" class = "inputStandard" id = "inputFabcoinContractFunctionId"        size = "50" value = "" placeholder = "contract f-n id"   onchange = "window.kanban.kanbanGO.rpc.theKBNodes.computeContractData();" onkeydown = "window.kanban.kanbanGO.rpc.theKBNodes.computeContractData();"></input><br>
+    <input type = "text" class = "inputStandard" id = "inputFabcoinContractFunctionArguments" size = "50" value = "" placeholder = "contract f-n data" onchange = "window.kanban.kanbanGO.rpc.theKBNodes.computeContractData();" onkeydown = "window.kanban.kanbanGO.rpc.theKBNodes.computeContractData();"></input><br>
+    <input type = "text" class = "inputStandard" id = "inputFabcoinContractData"              size = "50" value = "" placeholder = "contract function + data"></input><br>
     </div>
   </td>
   <td style = "vertical-align: top"><pre id = "aceEditor"></pre><br> <div id = "outputSolidityCompilation"> </div> </td>
@@ -442,7 +467,7 @@
 </div><!--pageFabcoinSmartContract-->
 
 <div class = "divMainPage" id = "pagePrivacyPolicy">
-  <h1>Privacy Policy</h1>
+<h1>Privacy Policy</h1>
 
 
 <p>Effective date: November 20, 2018</p>
@@ -479,22 +504,22 @@
 <p>You can instruct your browser to refuse all cookies or to indicate when a cookie is being sent. However, if you do not accept cookies, you may not be able to use some portions of our Service.</p>
 <p>Examples of Cookies we use:</p>
 <ul>
-    <li><strong>Session Cookies.</strong> We use Session Cookies to operate our Service.</li>
-    <li><strong>Preference Cookies.</strong> We use Preference Cookies to remember your preferences and various settings.</li>
-    <li><strong>Security Cookies.</strong> We use Security Cookies for security purposes.</li>
+  <li><strong>Session Cookies.</strong> We use Session Cookies to operate our Service.</li>
+  <li><strong>Preference Cookies.</strong> We use Preference Cookies to remember your preferences and various settings.</li>
+  <li><strong>Security Cookies.</strong> We use Security Cookies for security purposes.</li>
 </ul>
 
 <h2>Use of Data</h2>
     
 <p>Fab backend demo uses the collected data for various purposes:</p>    
 <ul>
-    <li>To provide and maintain the Service</li>
-    <li>To notify you about changes to our Service</li>
-    <li>To allow you to participate in interactive features of our Service when you choose to do so</li>
-    <li>To provide customer care and support</li>
-    <li>To provide analysis or valuable information so that we can improve the Service</li>
-    <li>To monitor the usage of the Service</li>
-    <li>To detect, prevent and address technical issues</li>
+  <li>To provide and maintain the Service</li>
+  <li>To notify you about changes to our Service</li>
+  <li>To allow you to participate in interactive features of our Service when you choose to do so</li>
+  <li>To provide customer care and support</li>
+  <li>To provide analysis or valuable information so that we can improve the Service</li>
+  <li>To monitor the usage of the Service</li>
+  <li>To detect, prevent and address technical issues</li>
 </ul>
 
 <h2>Transfer Of Data</h2>
@@ -508,11 +533,11 @@
 <h3>Legal Requirements</h3>
 <p>Fab backend demo may disclose your Personal Data in the good faith belief that such action is necessary to:</p>
 <ul>
-    <li>To comply with a legal obligation</li>
-    <li>To protect and defend the rights or property of Fab backend demo</li>
-    <li>To prevent or investigate possible wrongdoing in connection with the Service</li>
-    <li>To protect the personal safety of users of the Service or the public</li>
-    <li>To protect against legal liability</li>
+  <li>To comply with a legal obligation</li>
+  <li>To protect and defend the rights or property of Fab backend demo</li>
+  <li>To prevent or investigate possible wrongdoing in connection with the Service</li>
+  <li>To protect the personal safety of users of the Service or the public</li>
+  <li>To protect against legal liability</li>
 </ul>
 
 <h2>Security Of Data</h2>

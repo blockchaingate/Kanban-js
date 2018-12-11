@@ -155,6 +155,11 @@ function KanbanGoNodes() {
       publicKeyHex: this.transformersStandard.shortener,
       publicKeyHexInternal: this.transformersStandard.shortener,
       "peers.${label}": this.transformersStandard.shortener,
+      "comments.decodedInputs.${number}.txid": this.transformersStandard.shortener,
+      "comments.decodedOutputs.contract.contractAddress": this.transformersStandard.shortener,
+      "comments.decodedOutputs.contract.data": this.transformersStandard.shortener,
+      "input.txInputs" : this.transformersStandard.shortener,
+      "input.txOutputs": this.transformersStandard.shortener,
     }
   };
   this.optionsForAddressDisplay = {
@@ -570,8 +575,13 @@ KanbanGoNodes.prototype.computeContractData = function() {
   var contractIds = ids.defaults.fabcoin.inputBlockInfo; 
   var contractData = "";
   contractData += document.getElementById(contractIds.contractFunctionId).value;
-  contractData += document.getElementById(contractIds.contractFunctionData).value;
+  contractData += document.getElementById(contractIds.contractFunctionArguments).value;
   miscellaneousFrontEnd.updateValue(contractIds.contractData, contractData); 
+  var contractIdsKanbanGo = ids.defaults.kanbanGO.inputSendReceive; 
+  contractData = "";
+  contractData += document.getElementById(contractIdsKanbanGo.contractFunctionId).value;
+  contractData += document.getElementById(contractIdsKanbanGo.contractFunctionArguments).value;
+  miscellaneousFrontEnd.updateValue(contractIdsKanbanGo.contractData, contractData); 
 }
 
 KanbanGoNodes.prototype.setContractFunctionName = function(container, content, extraData) {
@@ -581,13 +591,17 @@ KanbanGoNodes.prototype.setContractFunctionName = function(container, content, e
   var abi = extraData.ambientInput.ABI[counterContract][counterFunction];
   var keccakFirst8Hex = cryptoKanbanHashes.hashes.solidityGet8byteHexFromFunctionSpec(abi);
   //console.log(`DEBUG: fun signature so far: ${functionSignature}`);
-  var contractIds = ids.defaults.fabcoin.inputBlockInfo; 
+  var inputsFab = ids.defaults.fabcoin.inputBlockInfo; 
+  var inputsKanbanGo = ids.defaults.kanbanGO.inputSendReceive;
   if (abi.payable === false || abi.payable === "false") {
-    miscellaneousFrontEnd.updateValue(ids.defaults.fabcoin.inputBlockInfo.txBeneficiaryAmounts, 0);
+    miscellaneousFrontEnd.updateValue(inputsFab.txBeneficiaryAmounts, 0);
+    miscellaneousFrontEnd.updateValue(inputsKanbanGo.txBeneficiaryAmounts, 0);
   }
-  miscellaneousFrontEnd.updateValue(contractIds.contractHex, ambientInput.binaries[counterContract]);
-  miscellaneousFrontEnd.updateValue(contractIds.contractFunctionName, content);
-  miscellaneousFrontEnd.updateValue(contractIds.contractFunctionId, keccakFirst8Hex);
+  miscellaneousFrontEnd.updateValue(inputsFab.contractHex, ambientInput.binaries[counterContract]);
+  miscellaneousFrontEnd.updateValue(inputsFab.contractFunctionName, content);
+  miscellaneousFrontEnd.updateValue(inputsKanbanGo.contractFunctionName, content);
+  miscellaneousFrontEnd.updateValue(inputsFab.contractFunctionId, keccakFirst8Hex);
+  miscellaneousFrontEnd.updateValue(inputsKanbanGo.contractFunctionId, keccakFirst8Hex);
   this.computeContractData();
 }
 
@@ -789,6 +803,18 @@ KanbanGoNodes.prototype.readCheckboxesConfiguration = function() {
     ], [
       storageKanban.variables.connectKanbansInALine,
       ids.defaults.kanbanGO.checkboxConnectKanbansInALine,
+    ], [
+      storageKanban.variables.includeFabcoinContractCallsInTransactionOutputs,
+      ids.defaults.fabcoin.checkboxFabcoinIncludeContractCalls,
+    ], [
+      storageKanban.variables.includeKanbanGoContractCallsInTransactionOutputs,
+      ids.defaults.kanbanGO.checkboxKanbanIncludeContractCalls,
+    ], [
+      storageKanban.variables.includeFabcoinAmountInTransactionOutputs,
+      ids.defaults.fabcoin.checkboxFabcoinSendToContract,
+    ], [
+      storageKanban.variables.includeKanbanGoAmountInTransactionOutputs,
+      ids.defaults.kanbanGO.checkboxKanbanSendToContract,
     ],
   ];
   for (var i = 0; i < idCheckboxPairs.length; i ++) {
