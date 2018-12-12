@@ -61,6 +61,18 @@ function StorageKanban() {
       value: null,
       changeValueHandler: null,
     },
+    includeFabcoinContractCallsInInputs: {
+      name: "includeFabcoinContractCallsInInputs",
+      nameLocalStorage: "includeFabcoinContractCallsInInputs",
+      value: null,
+      changeValueHandler: null,
+    },
+    includeKanbanContractCallsInInputs: {
+      name: "includeKanbanContractCallsInInputs",
+      nameLocalStorage: "includeKanbanContractCallsInInputs",
+      value: null,
+      changeValueHandler: null,
+    },
   };
   this.oldAnchorString = "";
   /**@type {string} */

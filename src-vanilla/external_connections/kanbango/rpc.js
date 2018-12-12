@@ -43,14 +43,33 @@ var rpcCalls = {
     },
     parameters: ["privateKey"]
   },
+  testECDSASignature: {
+    rpcCall: "testECDSASignature",
+    method: "cryptotest_testECDSASignature",
+    mandatoryModifiableArguments: {
+      privateKey: null,
+      messageHex: null,
+    },
+    parameters: ["privateKey", "messageHex"]
+  },
+  testECDSAVerification: {
+    rpcCall: "testECDSAVerification",
+    method: "cryptotest_testECDSAVerification",
+    mandatoryModifiableArguments: {
+      signature: null,
+      publicKey: null,
+      messageHex: null,
+    },
+    parameters: ["signature", "publicKey", "messageHex"]
+  },
   testSchnorrSignature: {
     rpcCall: "testSchnorrSignature", 
     method: "cryptotest_testSchnorrSignature",
     mandatoryModifiableArguments: {
       privateKey: null,
-      messageBase64: null,
+      messageHex: null,
     },
-    parameters: ["privateKey", "messageBase64"]
+    parameters: ["privateKey", "messageHex"]
   },
   testSchnorrVerification: {
     rpcCall: "testSchnorrVerification",
@@ -58,9 +77,9 @@ var rpcCalls = {
     mandatoryModifiableArguments: {
       signature: null,
       publicKey: null,
-      messageBase64: null,
+      messageHex: null,
     },
-    parameters: ["signature", "publicKey", "messageBase64"]
+    parameters: ["signature", "publicKey", "messageHex"]
   },
   testAggregateGeneratePrivateKeys: {
     rpcCall: "testAggregateGeneratePrivateKeys", 

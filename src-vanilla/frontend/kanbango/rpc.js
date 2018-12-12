@@ -158,6 +158,7 @@ function KanbanGoNodes() {
       "comments.decodedInputs.${number}.txid": this.transformersStandard.shortener,
       "comments.decodedOutputs.contract.contractAddress": this.transformersStandard.shortener,
       "comments.decodedOutputs.contract.data": this.transformersStandard.shortener,
+      "hex": this.transformersStandard.shortener,
       "input.txInputs" : this.transformersStandard.shortener,
       "input.txOutputs": this.transformersStandard.shortener,
     }
@@ -782,7 +783,7 @@ KanbanGoNodes.prototype.getNodeInformationCallback = function(input, output) {
       currentNode.init(inputParsed[counterNode]);
       //console.log("DEBUG: This selected node: " + this.selectedNode + " id backend:  " + currentNode.idBackend);
       if (this.selectedNode === currentNode.idBackend) {
-        console.log("Debug: selecting node: " + currentNode.idBackend);
+        //console.log("Debug: selecting node: " + currentNode.idBackend);
         currentNode.flagSelected = true;
       }
       this.nodes.push(currentNode);
@@ -797,26 +798,7 @@ KanbanGoNodes.prototype.getNodeInformationCallback = function(input, output) {
 KanbanGoNodes.prototype.readCheckboxesConfiguration = function() {
   /** @type {StorageKanban} */
   var storageKanban = window.kanban.storageKanban;
-  var idCheckboxPairs = [[
-      storageKanban.variables.autostartFabcoindAfterKanbanGO, 
-      ids.defaults.kanbanGO.checkboxFabcoindAutostartAfterKanbanGO,
-    ], [
-      storageKanban.variables.connectKanbansInALine,
-      ids.defaults.kanbanGO.checkboxConnectKanbansInALine,
-    ], [
-      storageKanban.variables.includeFabcoinContractCallsInTransactionOutputs,
-      ids.defaults.fabcoin.checkboxFabcoinIncludeContractCalls,
-    ], [
-      storageKanban.variables.includeKanbanGoContractCallsInTransactionOutputs,
-      ids.defaults.kanbanGO.checkboxKanbanIncludeContractCalls,
-    ], [
-      storageKanban.variables.includeFabcoinAmountInTransactionOutputs,
-      ids.defaults.fabcoin.checkboxFabcoinSendToContract,
-    ], [
-      storageKanban.variables.includeKanbanGoAmountInTransactionOutputs,
-      ids.defaults.kanbanGO.checkboxKanbanSendToContract,
-    ],
-  ];
+  var idCheckboxPairs = window.kanban.thePage.checkboxBindingsWithId;
   for (var i = 0; i < idCheckboxPairs.length; i ++) {
     var checkBox = document.getElementById(idCheckboxPairs[i][1]);
     storageKanban.setVariable(idCheckboxPairs[i][0], checkBox.checked);
