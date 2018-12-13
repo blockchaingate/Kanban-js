@@ -213,11 +213,15 @@ function KanbanGoNodes() {
       inputPrivateKeys: this.transformersStandard.shortener,
       publicKeyHex: this.transformersStandard.setPublicKeySchnorr,
       publicKeyHexInternal: this.transformersStandard.setPublicKeySchnorr,
+      inputMessageHex: this.transformersStandard.shortener,
       inputPublicKeyHex: this.transformersStandard.setPublicKeySchnorr,
       inputPublicKeyHexRecoded: this.transformersStandard.setPublicKeySchnorr,
       inputSignatureBase58: this.transformersStandard.setSignatureSchnorr,
       inputSignatureBase58Recoded: this.transformersStandard.setSignatureSchnorr,
       signatureBase58: this.transformersStandard.setSignatureSchnorr,
+      signatureHex: this.transformersStandard.shortener,
+      inputSignatureHexRecoded: this.transformersStandard.shortener,
+      inputSignatureHex: this.transformersStandard.shortener,
       inputSignature: this.transformersStandard.shortener,
       "privateKeys.${number}": this.transformersStandard.setPrivateKeySchnorr,
       "aggregator.publicKeys.${number}": this.transformersStandard.shortener,
@@ -385,6 +389,13 @@ function KanbanGoNodes() {
       outputJSON: ids.defaults.kanbanGO.outputSendReceive,
       outputOptions: this.optionsKanbanGOLabelContraction
     },
+    testSha2: {
+      //if rpcCall omitted it will be assumed to be equal to the function label.
+      inputs: {
+        messageHex: inputSchnorr.messageHex
+      },
+      callType: "cryptoTest"
+    },
     testSha3 : {
       //if rpcCall omitted it will be assumed to be equal to the function label.
       inputsBase64: {
@@ -417,6 +428,22 @@ function KanbanGoNodes() {
       outputs: {
         publicKeyHex: inputSchnorr.publicKey
       }
+    },
+    testECDSASignature: {
+      inputs: {
+        privateKey: inputSchnorr.privateKey,
+        messageHex: inputSchnorr.messageHex
+      },
+      outputs: {
+        signatureHex: inputSchnorr.signature
+      }
+    },
+    testECDSAVerification: {
+      inputs: {
+        publicKey: inputSchnorr.publicKey,
+        signature: inputSchnorr.signature,
+        messageHex: inputSchnorr.messageHex
+      },
     },
     testSchnorrSignature: {
       inputs: {
@@ -548,15 +575,10 @@ function KanbanGoNodes() {
     fetchLocalRegtestNodeConfig: {
       useOneNode: true,
     },
-    testCreateTransactionStandard: {
+    testCreateAndSignTransactionStandard: {
       inputs: {
         inputs: ids.defaults.kanbanGO.inputSendReceive.txInputs,
         outputs: ids.defaults.kanbanGO.inputSendReceive.txOutputs,
-      },
-    },
-    testCreateContractCall: {
-      inputs: {
-        input: ids.defaults.kanbanGO.inputSendReceive.transactionBuilderInputs,
       },
     },
     fetchMyNodesInfo: {

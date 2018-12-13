@@ -134,6 +134,7 @@ var defaults = {
         contractCallsInInputs: "checkboxKanbanIncludeContract_CallsInInputs",
         contractCallsInOutputs: "checkboxKanbanIncludeContractCalls",
         sendToContract: "checkboxKanbanSendToContract",
+        secretSignsPubkeyNoHash: "checkboxKanbanSecretSignsPubkeyNoHash"
       },
     },
     checkboxConnectKanbansInALine: "checkboxConnectKanbansInALine",
@@ -194,6 +195,7 @@ var defaults = {
         contractCallsInInputs: "checkboxFabcoinIncludeContract_CallsInInputs",
         contractCallsInOutputs: "checkboxFabcoinIncludeContractCalls",
         sendToContract: "checkboxFabcoinSendToContract",
+        secretSignsPubkeyNoHash: "checkboxFabcoinSecretSignsPubkeyNoHash",
       },
     },
     inputCrypto: {

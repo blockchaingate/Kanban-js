@@ -91,6 +91,7 @@ function FabNode() {
       "vin.${number}.txid": this.transformersStandard.transactionId,
       "vin.${number}.scriptSig.asm": this.transformersStandard.shortener,
       "vin.${number}.scriptSig.hex": this.transformersStandard.shortener,
+      comments: this.transformersStandard.shortener,
     }
   };
   this.optionsContract = {
@@ -534,15 +535,18 @@ FabNode.prototype.computeTxInsAndOuts = function(sourceIsFabPage) {
   smartContractId = document.getElementById(inputIdContainer.contractId).value;
   smartContractData = document.getElementById(inputIdContainer.contractData).value;
   aggregatePubKeys = document.getElementById(inputFab.txAggregatePublicKeys).value;
-  var secretIn = document.getElementById(inputIdContainer.secretIn).value;
+  var secretInString = document.getElementById(inputIdContainer.secretIn).value;
 
   var smartContractInOutputs = document.getElementById(currentCheckboxIds.contractCallsInOutputs).checked;
   var smartContractInInputs = document.getElementById(currentCheckboxIds.contractCallsInInputs).checked; 
+  var usePayToPubkeyWithoutHash = document.getElementById(currentCheckboxIds.secretSignsPubkeyNoHash).checked;
   var doSendToContract = document.getElementById(currentCheckboxIds.sendToContract).checked;
   var incomingIdArray = miscellaneousBackend.splitMultipleDelimiters(incomingIds, ", \t");
   var incomingNOutArray = miscellaneousBackend.splitMultipleDelimiters(incomingNOuts, ", \t");
+  var sercretInArray = miscellaneousBackend.splitMultipleDelimiters(incomingIdArray, ", \t");
   var resultIn = [];
-
+  var counterSecret = 0;
+  
   if (smartContractInInputs) {
     var contractObject = {
       txid: "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
@@ -551,8 +555,9 @@ FabNode.prototype.computeTxInsAndOuts = function(sourceIsFabPage) {
         contractAddress: smartContractId,
         data: smartContractData,
       },
-      sercretIn: secretIn,
+      sercretIn: sercretInArray[counterSecret],
     };
+    counterSecret ++;
     resultIn.push(contractObject)
   }
   var resultOut = {};
@@ -561,6 +566,11 @@ FabNode.prototype.computeTxInsAndOuts = function(sourceIsFabPage) {
       txid: incomingIdArray[i],
       vout: Number(incomingNOutArray[i]),
     };
+    if (counterSecret < sercretInArray.length) {
+      incomingIn.secretIn = sercretInArray[counterSecret];
+      incomingIn.inputIsPayToPublicWithoutHash = usePayToPubkeyWithoutHash;
+      counterSecret ++;
+    }
     resultIn.push(incomingIn);
   }
   var incomingOutAddressArray = miscellaneousBackend.splitMultipleDelimiters(incomingOutAddresses, ", \t");
@@ -600,7 +610,7 @@ FabNode.prototype.computeTxInsAndOuts = function(sourceIsFabPage) {
   miscellaneousFrontEnd.updateValue(otherIdContainer.contractId, smartContractId);
   miscellaneousFrontEnd.updateValue(otherIdContainer.contractData, smartContractData);
 
-  miscellaneousFrontEnd.updateValue(otherIdContainer.secretIn, secretIn);
+  miscellaneousFrontEnd.updateValue(otherIdContainer.secretIn, secretInString);
   miscellaneousFrontEnd.updateValue(otherIdContainer.txInIds, incomingIds);
   miscellaneousFrontEnd.updateValue(otherIdContainer.txInNOuts, incomingNOuts);
   miscellaneousFrontEnd.updateValue(otherIdContainer.txBeneficiaryAddresses, incomingOutAddresses);

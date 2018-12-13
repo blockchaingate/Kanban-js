@@ -30,6 +30,14 @@ var rpcCalls = {
     },
     parameters: ["message"]
   },
+  testSha2: {
+    rpcCall: "testSha2", //must be same as rpc label, used for autocomplete
+    method: "cryptotest_testSha2", //<- name of go's RPC method 
+    mandatoryModifiableArguments: { //<- values give defaults, null for none
+      messageHex: null,
+    },
+    parameters: ["messageHex"]
+  },
   testPrivateKeyGeneration: {
     rpcCall: "testPrivateKeyGeneration",
     method: "cryptotest_testPrivateKeyGeneration",
@@ -56,7 +64,7 @@ var rpcCalls = {
     rpcCall: "testECDSAVerification",
     method: "cryptotest_testECDSAVerification",
     mandatoryModifiableArguments: {
-      signature: null,
+      signatureHex: null,
       publicKey: null,
       messageHex: null,
     },
@@ -243,21 +251,14 @@ var rpcCalls = {
     },
     parameters: ["privateKey", "toAddress", "transactionNumber", "transactionValue"]
   },
-  testCreateTransactionStandard: {
-    rpcCall: "testCreateTransactionStandard",
-    method: "pbfttest_testCreateTransactionStandard",
+  testCreateAndSignTransactionStandard: {
+    rpcCall: "testCreateAndSignTransactionStandard",
+    method: "pbfttest_testCreateAndSignTransactionStandard",
     mandatoryModifiableArguments: {
       inputs: null,
       outputs: null,
     },
     parameters: ["inputs", "outputs"],
-  },
-  testCreateContractCall: {
-    rpcCall: "testCreateContractCall",
-    method: "pbfttest_testCreateContractCall",
-    mandatoryModifiableArguments: {
-    },
-    parameters: [],
   },
 };
 

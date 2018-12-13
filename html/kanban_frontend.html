@@ -124,8 +124,7 @@
     <button class = "buttonStandard" style = "width:100px" onclick = "window.kanban.kanbanGO.rpc.theKBNodes.run('sendBenchmarkTransactions');">Benchmark TPS</button><br>
     </div>
     <div class = "divLabelButtonGroup">tx builder</div><div id = "panelKBGOTransactionBuilder" class = "panelStandard">
-    <button class = "buttonStandard" style = "width:100px" onclick = "window.kanban.kanbanGO.rpc.theKBNodes.run('testCreateTransactionStandard');">Create tx raw</button><br>
-    <!--button class = "buttonStandard" style = "width:100px" onclick = "window.kanban.kanbanGO.rpc.theKBNodes.run('testCreateContractCall');">Create call</button><br-->
+    <button class = "buttonStandard" style = "width:100px" onclick = "window.kanban.kanbanGO.rpc.theKBNodes.run('testCreateAndSignTransactionStandard');">Create &amp; sign</button><br>
     </div>
     </td>
   <td>
@@ -144,6 +143,11 @@
     <input id = "inputKBGOTransactionValue"  class = "inputStandard" size = "50" placeholder = "value of each transaction"/><br>
     </div>
     <div class = "divLabelButtonGroup">tx inputs</div><div id = "panelKBGOTransactionBuilderInputs" class = "panelStandard">
+    <label class = "containerCheckbox">
+    <input type = "checkbox" id = "checkboxKanbanSecretSignsPubkeyNoHash" onchange = "window.kanban.kanbanGO.rpc.theKBNodes.readCheckboxesConfiguration(); window.kanban.fabcoin.rpc.fabNode.computeTxInsAndOuts(false);">
+    <span class = "checkMark"></span>
+    Secret signs pubkey <b>without hash</b>
+    </label><br>     
     <input id = "inputKBGOSecretIn"                      class = "inputStandard" size = "50" placeholder = "secret in"/><br>
     <input id = "inputKBGOTransactionHex"                class = "inputStandard" size = "50" placeholder = "tx hex"/><br>
     <input id = "inputKBGOTransactionInId"               class = "inputStandard" size = "50" placeholder = "transaction in"/><br>
@@ -276,6 +280,7 @@
   <tr>
   <td>
     <div class = "divLabelButtonGroup">Schnorr</div><div id = "panelSchnorrKanbanGOButtons" class = "panelStandard">
+      <button class = "buttonStandard" style = "width: 100px" onclick = "window.kanban.kanbanGO.rpc.theKBNodes.run('testSha2', 'cryptoTest')">Sha2 256</button><br>
       <button class = "buttonStandard" style = "width: 100px" onclick = "window.kanban.kanbanGO.rpc.theKBNodes.run('testSha3', 'cryptoTest')">Sha3 256</button><br>
       <button class = "buttonStandard" style = "width: 100px" onclick = "window.kanban.kanbanGO.rpc.theKBNodes.run('testPrivateKeyGeneration', 'cryptoTest');"><b style = "color:red">Private key</b></button><br>
       <button class = "buttonStandard" style = "width: 100px" onclick = "window.kanban.kanbanGO.rpc.theKBNodes.run('testPublicKeyFromPrivate', 'cryptoTest');">Public key</button><br>
@@ -436,7 +441,12 @@
     </div>
     <div class = "divLabelButtonGroup">tx inputs</div><div id = "panelFabcoinTXInputs" class = "panelStandard">
     <input class = "inputStandard" id = "inputFabcoinTransactionId"            size = "50" placeholder = "tx id"></input><br>    
-    <input class = "inputStandard" id = "inputFabcoinSecretIn"                    size = "50" placeholder = "secret in"></input><br>
+    <label class = "containerCheckbox">
+    <input type = "checkbox" id = "checkboxFabcoinSecretSignsPubkeyNoHash" onchange = "window.kanban.kanbanGO.rpc.theKBNodes.readCheckboxesConfiguration(); window.kanban.fabcoin.rpc.fabNode.computeTxInsAndOuts(true);">
+    <span class = "checkMark"></span>
+    Secret signs pubkey <b>without hash</b>
+    </label><br>         
+    <input class = "inputStandard" id = "inputFabcoinSecretIn"                 size = "50" placeholder = "secret in"></input><br>
     <input class = "inputStandard" id = "inputFabcoinTransactionHex"           size = "50" placeholder = "tx hex"></input><br>
 
     <input class = "inputStandard" id = "inputFabcoinTxInIds"                  size = "50" placeholder = "tx in id(s)"></input><br>    
@@ -452,33 +462,38 @@
     <input class = "inputStandard" id = "inputFabcoinTransactionInputs"        size = "50" placeholder = "tx inputs"></input><br>
     <input class = "inputStandard" id = "inputFabcoinTransactionOutputs"       size = "50" placeholder = "tx outputs"></input><br>
     </div>
-    <div class = "divLabelButtonGroup">contract inputs</div><div id = "panelFabcoinSmartInputs" class = "panelStandard">
-    <label class = "containerCheckbox">
-    <input type = "checkbox" id = "checkboxFabcoinIncludeContract_CallsInInputs" onchange = "window.kanban.kanbanGO.rpc.theKBNodes.readCheckboxesConfiguration(); window.kanban.fabcoin.rpc.fabNode.computeTxInsAndOuts(false);">
-    <span class = "checkMark"></span>
-    Contract call in inputs
-    </label><br>     
-    <label class = "containerCheckbox">
-    <input type = "checkbox" id = "checkboxFabcoinIncludeContractCalls" onchange = "window.kanban.kanbanGO.rpc.theKBNodes.readCheckboxesConfiguration(); window.kanban.fabcoin.rpc.fabNode.computeTxInsAndOuts(true);">
-    <span class = "checkMark"></span>
-    Contract call in outputs
-    </label><br>     
-    <label class = "containerCheckbox">
-    <input type = "checkbox" id = "checkboxFabcoinSendToContract" onchange = "window.kanban.kanbanGO.rpc.theKBNodes.readCheckboxesConfiguration(); window.kanban.fabcoin.rpc.fabNode.computeTxInsAndOuts(true);">
-    <span class = "checkMark"></span>
-    Send to contract
-    </label><br>     
-    <input type = "text" class = "inputStandard" id = "inputFabcoinContractHex"               size = "50" value = "" placeholder = "contract hex"></input><br>
-    <input type = "text" class = "inputStandard" id = "inputFabcoinContractId"                size = "50" value = "" placeholder = "contract id"></input><br>
-    <input type = "text" class = "inputStandard" id = "inputFabcoinGasLimit"                  size = "50" value = "" placeholder = "gas limit"></input><br>
-    <input type = "text" class = "inputStandard" id = "inputFabcoinGasPrice"                  size = "50" value = "" placeholder = "gas price"></input><br>
-    <input type = "text" class = "inputStandard" id = "inputSolidityFunctionName"             size = "50" value = "" placeholder = "contract f-n name"></input><br>
-    <input type = "text" class = "inputStandard" id = "inputFabcoinContractFunctionId"        size = "50" value = "" placeholder = "contract f-n id"   onchange = "window.kanban.kanbanGO.rpc.theKBNodes.computeContractData();" onkeydown = "window.kanban.kanbanGO.rpc.theKBNodes.computeContractData();"></input><br>
-    <input type = "text" class = "inputStandard" id = "inputFabcoinContractFunctionArguments" size = "50" value = "" placeholder = "contract f-n data" onchange = "window.kanban.kanbanGO.rpc.theKBNodes.computeContractData();" onkeydown = "window.kanban.kanbanGO.rpc.theKBNodes.computeContractData();"></input><br>
-    <input type = "text" class = "inputStandard" id = "inputFabcoinContractData"              size = "50" value = "" placeholder = "contract function + data"></input><br>
-    </div>
   </td>
-  <td style = "vertical-align: top"><pre id = "aceEditor"></pre><br> <div id = "outputSolidityCompilation"> </div> </td>
+  <td>
+  <div class = "divLabelButtonGroup">contract inputs</div><div id = "panelFabcoinSmartInputs" class = "panelStandard">
+  <label class = "containerCheckbox">
+  <input type = "checkbox" id = "checkboxFabcoinIncludeContract_CallsInInputs" onchange = "window.kanban.kanbanGO.rpc.theKBNodes.readCheckboxesConfiguration(); window.kanban.fabcoin.rpc.fabNode.computeTxInsAndOuts(true);">
+  <span class = "checkMark"></span>
+  Contract call in inputs
+  </label><br>     
+  <label class = "containerCheckbox">
+  <input type = "checkbox" id = "checkboxFabcoinIncludeContractCalls" onchange = "window.kanban.kanbanGO.rpc.theKBNodes.readCheckboxesConfiguration(); window.kanban.fabcoin.rpc.fabNode.computeTxInsAndOuts(true);">
+  <span class = "checkMark"></span>
+  Contract call in outputs
+  </label><br>     
+  <label class = "containerCheckbox">
+  <input type = "checkbox" id = "checkboxFabcoinSendToContract" onchange = "window.kanban.kanbanGO.rpc.theKBNodes.readCheckboxesConfiguration(); window.kanban.fabcoin.rpc.fabNode.computeTxInsAndOuts(true);">
+  <span class = "checkMark"></span>
+  Send to contract
+  </label><br>     
+  <input type = "text" class = "inputStandard" id = "inputFabcoinContractHex"               size = "50" value = "" placeholder = "contract hex"></input><br>
+  <input type = "text" class = "inputStandard" id = "inputFabcoinContractId"                size = "50" value = "" placeholder = "contract id"></input><br>
+  <input type = "text" class = "inputStandard" id = "inputFabcoinGasLimit"                  size = "50" value = "" placeholder = "gas limit"></input><br>
+  <input type = "text" class = "inputStandard" id = "inputFabcoinGasPrice"                  size = "50" value = "" placeholder = "gas price"></input><br>
+  <input type = "text" class = "inputStandard" id = "inputSolidityFunctionName"             size = "50" value = "" placeholder = "contract f-n name"></input><br>
+  <input type = "text" class = "inputStandard" id = "inputFabcoinContractFunctionId"        size = "50" value = "" placeholder = "contract f-n id"   onchange = "window.kanban.kanbanGO.rpc.theKBNodes.computeContractData();" onkeydown = "window.kanban.kanbanGO.rpc.theKBNodes.computeContractData();"></input><br>
+  <input type = "text" class = "inputStandard" id = "inputFabcoinContractFunctionArguments" size = "50" value = "" placeholder = "contract f-n data" onchange = "window.kanban.kanbanGO.rpc.theKBNodes.computeContractData();" onkeydown = "window.kanban.kanbanGO.rpc.theKBNodes.computeContractData();"></input><br>
+  <input type = "text" class = "inputStandard" id = "inputFabcoinContractData"              size = "50" value = "" placeholder = "contract function + data"></input><br>
+  </div>
+  <div class = "divLabelButtonGroup">contract code</div><div id = "panelAceEditor" class = "panelStandard">
+  <pre id = "aceEditor"></pre><br>
+  <div id = "outputSolidityCompilation"></div> 
+  </div>
+  </td>
   </tr>
   </table>
   </div>

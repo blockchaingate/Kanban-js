@@ -77,7 +77,13 @@ function Page() {
     ], [
       storageKanban.variables.includeKanbanContractCallsInInputs,
       ids.defaults.kanbanGO.checkboxes.transactions.contractCallsInInputs,
-    ],
+    ], [
+      storageKanban.variables.secretSignsPublicKeyWithoutHashFabcoin,
+      ids.defaults.fabcoin.checkboxes.transactions.secretSignsPubkeyNoHash,
+    ], [
+      storageKanban.variables.secretSignsPublicKeyWithoutHashKanban,
+      ids.defaults.kanbanGO.checkboxes.transactions.secretSignsPubkeyNoHash,
+    ], 
   ];
 }
 
