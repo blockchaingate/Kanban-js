@@ -2,6 +2,7 @@
 const ids = require('./ids_dom_elements');
 const myNodes = require('./my_nodes');
 const kanbanRPC = require('./kanbango/rpc');
+const fabcoinInitialization = require('./fabcoin/initialization');
 const miscellaneousFrontEnd = require('./miscellaneous_frontend');
 const storageKanban = require('./storage').storageKanban;
 const themes = require('./themes');
@@ -51,6 +52,10 @@ function Page() {
     },
     loginPage: {
       idPage: ids.defaults.pages.login
+    },
+    serverStatus: {
+      idPage: ids.defaults.pages.serverStatus,
+      updateFunction: fabcoinInitialization.initializer.getServerInformation.bind(fabcoinInitialization.initializer),
     }
   };
   this.checkboxBindingsWithId = [[

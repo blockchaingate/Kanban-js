@@ -322,7 +322,7 @@ var rpcCalls = {
     rpcCall: "getPeerInfo",
     method: "getpeerinfo",
     parameters: []
-  }
+  },
 };
 
 function getPOSTBodyFromRPCLabel(theRPCLabel, theArguments) {

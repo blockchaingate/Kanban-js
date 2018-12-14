@@ -8,6 +8,8 @@ var OutputStream = require('../../output_stream').OutputStream;
 const crypto = require('crypto');
 const cryptoKanban = require('../../crypto/encodings');
 var demo = require('./handlers_smart_contract').demo;
+const responseWrapperLib = require('../../response_wrapper');
+const ResponseWrapper = responseWrapperLib.ResponseWrapper;
 
 /**
  * Returns a global FabcoinNode object
@@ -142,6 +144,19 @@ FabcoinNode.prototype.handleRPCArguments = function(response, queryCommand) {
     };
     return response.end(JSON.stringify(result));
   }
+}
+
+FabcoinNode.prototype.getServerInformation = function (
+  /**@type {ResponseWrapper} */
+  response, 
+  theArguments, 
+  queryCommand,
+) {
+  response.writeHead(200);
+  var result = {};
+  result.memoryUsage = process.memoryUsage();
+  result.requests = responseWrapperLib.responseStatsGlobal.toJSON();
+  response.end(JSON.stringify(result));
 }
 
 FabcoinNode.prototype.showLogFabcoind = function(response, theArguments) {

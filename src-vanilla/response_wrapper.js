@@ -1,6 +1,18 @@
 "use strict";
 require('colors');
 
+function ResponseStatsGlobal () {
+  this.requestsReceived = 0;
+  this.requestsClosed = 0;
+}
+
+ResponseStatsGlobal.prototype.toJSON = function() {
+  var result = {};
+  result.requestsReceived = this.requestsReceived;
+  result.requestsClosed = this.requestsClosed;
+  return result;
+}
+
 function ResponseWrapper(response, inputOwner) {
   this.response = response;
   this.owner = inputOwner;
@@ -12,11 +24,13 @@ function ResponseWrapper(response, inputOwner) {
     this.owner.numberOfRequestsRunning = 0;
   } 
   this.owner.numberOfRequestsRunning ++;
+  responseStatsGlobal.requestsReceived ++;
 }
 
 ResponseWrapper.prototype.end = function(input) {
   this.response.end(input);
   this.owner.numberOfRequestsRunning --;
+  this.response.requestsClosed ++;
 }
 
 ResponseWrapper.prototype.writeHead = function(
@@ -26,6 +40,9 @@ ResponseWrapper.prototype.writeHead = function(
   this.response.writeHead(input);
 }
 
+var responseStatsGlobal = new ResponseStatsGlobal();
+
 module.exports = {
   ResponseWrapper,
+  responseStatsGlobal,
 }

@@ -23,6 +23,7 @@ var defaults = {
     themes: "pageThemes",
     privacyPolicy: "pagePrivacyPolicy",
     login: "pageLogin",
+    serverStatus: "pageServerStatus",
   },
   themes: {
     radios: {
@@ -143,6 +144,9 @@ var defaults = {
     outputKBGOTest: "divOutputKBGOTest",
     outputKanbanInitialization: "divOutputMyLocalKanbanNodes",
     outputSendReceive: "divOutputKBGOSendReceive",
+  },
+  serverStatus: {
+    outputServerStatus: "divOutputServerStatus",
   },
   myNodes: {
     outputMyNodes: "divMyNodesOutput",

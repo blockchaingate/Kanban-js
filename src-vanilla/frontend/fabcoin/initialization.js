@@ -1,6 +1,7 @@
 "use strict";
 const ids = require('../ids_dom_elements');
 const fabcoinRPC = require('../../external_connections/fabcoin/rpc');
+const fabcoinInitializationSpec = require('../../external_connections/fabcoin/initialization');
 const pathnames = require('../../pathnames');
 const globals = require('../globals');
 const submitRequests = require('../submit_requests');
@@ -50,11 +51,19 @@ function FabcoinNodeInitializer() {
       "signature": this.transformersStandard.setDemoSignature,
     },
   };
+  this.optionsServerInformation = {
+    transformers: {
 
+    }
+  };
   this.callTypes = {
     demo: {
       outputJSONDefault: ids.defaults.demo.outputDemo,
       outputOptionsDefault: this.optionsDemo,
+    },
+    serverInformation: {
+      outputJSONDefault: ids.defaults.serverStatus.outputServerStatus,
+      outputOptionsDefault: this.optionsServerInformation,
     }
   };  
   this.theFunctions = {
@@ -101,6 +110,9 @@ function FabcoinNodeInitializer() {
         nonce: ids.defaults.demo.inputs.nonce,
       }
     },
+    getServerInformation: {
+      callType: this.callTypes.serverInformation,
+    }
   };
 }
 
@@ -239,6 +251,10 @@ FabcoinNodeInitializer.prototype.run = function(functionLabel, callbackOverrides
     callback: callbackCurrent,
     result: currentResult
   });
+}
+
+FabcoinNodeInitializer.prototype.getServerInformation = function() {
+  this.run(fabcoinInitializationSpec.rpcCalls.getServerInformation.rpcCall);
 }
 
 var initializer = new FabcoinNodeInitializer();
