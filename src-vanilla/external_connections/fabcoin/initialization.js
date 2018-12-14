@@ -23,6 +23,10 @@ var rpcCalls = {
     rpcCall: "killAllFabcoind",
     parameters: [],
   },
+  getServerInformation: {
+    rpcCall: "getServerInformation",
+    parameters: [],
+  },
 };
 
 var demoRPCCalls = {
