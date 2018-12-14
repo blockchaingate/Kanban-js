@@ -70,6 +70,7 @@ var defaults = {
   kanbanGO: {
     inputSchnorr: {
       message: "inputKBGOSchnorrMessage",
+      messageHex: "inputKBGOSchnorrMessageHex",
       privateKey: "inputKBGOSchnorrPrivateKey",
       nonce: "inputKBGOSchnorrNonce",
       publicKey: "inputKBGOSchnorrPublicKey",
@@ -97,9 +98,9 @@ var defaults = {
       blockHash: "inputKBGOBlockHash",
       messageVoteHex: "inputKBGOVoteMessageHex",
       messageVote: "inputKBGOVoteMessage",
+      // The following labels must match those in the fab page
       secretIn: "inputKBGOSecretIn",
       txHex: "inputKBGOTransactionHex",
-      // The following labels must match those in the fab page
       txInIds: "inputKBGOTransactionInId",
       txInNOuts: "inputKBGOTransactionInNOut",
       txBeneficiaryAddresses: "inputKBGOTransactionBeneficiaryAddress",
@@ -128,42 +129,20 @@ var defaults = {
       contractId: "inputKBGOContractId",
       contractABI: "inputKBGOContractABI"
     },
-    checkboxKanbanIncludeContractCalls: "checkboxKanbanIncludeContractCalls",
-    checkboxKanbanSendToContract: "checkboxKanbanSendToContract",
+    checkboxes: {
+      transactions: {
+        contractCallsInInputs: "checkboxKanbanIncludeContract_CallsInInputs",
+        contractCallsInOutputs: "checkboxKanbanIncludeContractCalls",
+        sendToContract: "checkboxKanbanSendToContract",
+        secretSignsPubkeyNoHash: "checkboxKanbanSecretSignsPubkeyNoHash"
+      },
+    },
     checkboxConnectKanbansInALine: "checkboxConnectKanbansInALine",
     checkboxFabcoindAutostartAfterKanbanGO: "checkboxFabcoindAutostartAfterKanbanGO",
     nodePanel: "spanKanbanGoNodeContainer",
     outputKBGOTest: "divOutputKBGOTest",
     outputKanbanInitialization: "divOutputMyLocalKanbanNodes",
     outputSendReceive: "divOutputKBGOSendReceive",
-  },
-  kanbanPlusPlus: {
-    inputSchnorrSignature: {
-      publicKey: "inputPublicKeyDefault",
-      privateKey: "inputPrivateKeySchnorrDefault",
-      messageToSha3: "inputMessageToSha3",
-      nonce: "inputNoncesDefault",
-      signature: "inputSignatureDefault",
-    },
-    inputAggregateSignature: {
-      message: "inputAggregateSignatureMessage",
-      commitments: "inputAggregateSignatureCommitments",
-      numberOfPrivateKeysToGenerate: "inputAggregateSignatureNumberOfPrivateKeysToGenerate",
-      privateKeys: "inputAggregateSignaturePrivateKeys",
-      publicKeys: "inputAggregateSignaturePublicKeys",
-      committedSignersBitmap: "inputAggregateSignatureCommittedSignersBitmap",
-      messageDigest: "inputAggregateSignatureMessageDigest",
-      aggregatePubkey: "inputAggregateSignatureAggregatePubkey",    
-      aggregateCommitment: "inputAggregateSignatureAggregateCommitment",
-      solutions: "inputAggregateSignaturesSolutions",
-      nonces: "inputAggregateSignatureNonces",
-      theAggregation: "inputAggregateSignaturesTheAggregation",
-      aggregateSignatureComplete: "inputAggregateSignatureComplete",
-    },
-    inputAddressDefault: "inputAddressDefault",
-    outputKanbanPlusPlusGeneral: "divKanbanPlusPlusOutput",
-    outputKanbanPlusPlusSecond: "divKanbanPlusPlusOutputSecond",
-    divKanbanPlusPlusOutputThird: "divKanbanPlusPlusOutputThird"
   },
   myNodes: {
     outputMyNodes: "divMyNodesOutput",
@@ -188,9 +167,9 @@ var defaults = {
       publicKey: "inputFabcoinPublicKey",
       privateKey: "inputFabcoinPrivateKey",
       txid: "inputFabcoinTransactionId",
-      txHex: "inputFabcoinTransactionHex",
-
       // The following labels must match those in the kanbabGO page
+      txHex: "inputFabcoinTransactionHex",
+      secretIn: "inputFabcoinSecretIn",
       txInIds: "inputFabcoinTxInIds",
       txInNOuts: "inputFabcoinTxInNOuts",
       txBeneficiaryAddresses: "inputFabcoinBeneficiaryAddresses",
@@ -211,13 +190,19 @@ var defaults = {
       solidityInput: "aceEditor",
       contractFunctionName: "inputSolidityFunctionName",
     },
-    checkboxFabcoinIncludeContractCalls: "checkboxFabcoinIncludeContractCalls",
-    checkboxFabcoinSendToContract: "checkboxFabcoinSendToContract",
+    checkboxes: {
+      transactions: {
+        contractCallsInInputs: "checkboxFabcoinIncludeContract_CallsInInputs",
+        contractCallsInOutputs: "checkboxFabcoinIncludeContractCalls",
+        sendToContract: "checkboxFabcoinSendToContract",
+        secretSignsPubkeyNoHash: "checkboxFabcoinSecretSignsPubkeyNoHash",
+      },
+    },
     inputCrypto: {
       inputSchnorrSignature: {
         publicKey: "inputPublicKeyDefault",
         privateKey: "inputPrivateKeySchnorrDefault",
-        messageToSha3: "inputMessageToSha3",
+        messageToSha3: "inputFabcoinSchnorrMessage",
         nonce: "inputNoncesDefault",
         signature: "inputSignatureDefault",
       },

@@ -91,6 +91,7 @@ function FabNode() {
       "vin.${number}.txid": this.transformersStandard.transactionId,
       "vin.${number}.scriptSig.asm": this.transformersStandard.shortener,
       "vin.${number}.scriptSig.hex": this.transformersStandard.shortener,
+      comments: this.transformersStandard.shortener,
     }
   };
   this.optionsContract = {
@@ -512,24 +513,18 @@ FabNode.prototype.computeTxInsAndOuts = function(sourceIsFabPage) {
   var smartContractData;
   var otherIdContainer;
   var aggregatePubKeys;
-  var currentSmartContractCheckBoxId;
-  var otherSmartContractCheckBoxId;
-  var currentSmartContractAmountCheckBoxId;
-  var otherSmartContractAmountCheckBoxId;
+  var currentCheckboxIds;
+  var otherCheckboxIds;
   if (sourceIsFabPage) {
-    inputIdContainer                      = inputFab;
-    otherIdContainer                      = inputKB;
-    currentSmartContractCheckBoxId        = ids.defaults.fabcoin.checkboxFabcoinIncludeContractCalls;
-    currentSmartContractAmountCheckBoxId  = ids.defaults.fabcoin.checkboxFabcoinSendToContract;
-    otherSmartContractCheckBoxId          = ids.defaults.kanbanGO.checkboxKanbanIncludeContractCalls;
-    otherSmartContractAmountCheckBoxId    = ids.defaults.kanbanGO.checkboxKanbanSendToContract;
+    inputIdContainer    = inputFab;
+    otherIdContainer    = inputKB;
+    currentCheckboxIds  = ids.defaults.fabcoin.checkboxes.transactions;
+    otherCheckboxIds    = ids.defaults.kanbanGO.checkboxes.transactions;
   } else  {
-    inputIdContainer                      = inputKB;
-    otherIdContainer                      = inputFab;
-    currentSmartContractCheckBoxId        = ids.defaults.kanbanGO.checkboxKanbanIncludeContractCalls;
-    currentSmartContractAmountCheckBoxId  = ids.defaults.kanbanGO.checkboxKanbanSendToContract;
-    otherSmartContractCheckBoxId          = ids.defaults.fabcoin.checkboxFabcoinIncludeContractCalls;
-    otherSmartContractAmountCheckBoxId    = ids.defaults.fabcoin.checkboxFabcoinSendToContract;
+    inputIdContainer    = inputKB;
+    otherIdContainer    = inputFab;
+    currentCheckboxIds  = ids.defaults.kanbanGO.checkboxes.transactions;
+    otherCheckboxIds    = ids.defaults.fabcoin.checkboxes.transactions;
   }
   incomingIds = document.getElementById(inputIdContainer.txInIds).value;
   incomingNOuts = document.getElementById(inputIdContainer.txInNOuts).value;
@@ -540,17 +535,43 @@ FabNode.prototype.computeTxInsAndOuts = function(sourceIsFabPage) {
   smartContractId = document.getElementById(inputIdContainer.contractId).value;
   smartContractData = document.getElementById(inputIdContainer.contractData).value;
   aggregatePubKeys = document.getElementById(inputFab.txAggregatePublicKeys).value;
-  var useSmartContract = document.getElementById(currentSmartContractCheckBoxId).checked;
-  var doSendToContract = document.getElementById(currentSmartContractAmountCheckBoxId).checked;
+  var secretInString = document.getElementById(inputIdContainer.secretIn).value;
+
+  var smartContractInOutputs = document.getElementById(currentCheckboxIds.contractCallsInOutputs).checked;
+  var smartContractInInputs = document.getElementById(currentCheckboxIds.contractCallsInInputs).checked; 
+  var usePayToPubkeyWithoutHash = document.getElementById(currentCheckboxIds.secretSignsPubkeyNoHash).checked;
+  var doSendToContract = document.getElementById(currentCheckboxIds.sendToContract).checked;
   var incomingIdArray = miscellaneousBackend.splitMultipleDelimiters(incomingIds, ", \t");
   var incomingNOutArray = miscellaneousBackend.splitMultipleDelimiters(incomingNOuts, ", \t");
+  var sercretInArray = miscellaneousBackend.splitMultipleDelimiters(secretInString, ", \t");
   var resultIn = [];
+  var counterSecret = 0;
+  
+  if (smartContractInInputs) {
+    var contractObject = {
+      txid: "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
+      vout: 0,
+      contract: {
+        contractAddress: smartContractId,
+        data: smartContractData,
+      },
+      sercretIn: sercretInArray[counterSecret],
+    };
+    counterSecret ++;
+    resultIn.push(contractObject)
+  }
   var resultOut = {};
   for (var i = 0; i < incomingIdArray.length; i ++) {
-    resultIn.push({
+    var incomingIn = {
       txid: incomingIdArray[i],
       vout: Number(incomingNOutArray[i]),
-    });
+    };
+    if (counterSecret < sercretInArray.length) {
+      incomingIn.secretIn = sercretInArray[counterSecret];
+      incomingIn.isPayToPublicWithoutHash = usePayToPubkeyWithoutHash;
+      counterSecret ++;
+    }
+    resultIn.push(incomingIn);
   }
   var incomingOutAddressArray = miscellaneousBackend.splitMultipleDelimiters(incomingOutAddresses, ", \t");
   var incomingOutAmountArray = miscellaneousBackend.splitMultipleDelimiters(incomingAmounts, ", \t");
@@ -563,7 +584,7 @@ FabNode.prototype.computeTxInsAndOuts = function(sourceIsFabPage) {
     };
     amountCounter ++;
   }
-  if (useSmartContract) {
+  if (smartContractInOutputs) {
     resultOut.contract = {};
     resultOut.contract.contractAddress = smartContractId;
     resultOut.contract.data = smartContractData;
@@ -578,12 +599,18 @@ FabNode.prototype.computeTxInsAndOuts = function(sourceIsFabPage) {
       amountCounter ++;
     }
   }
-  for (; amountCounter < incomingOutAddressArray.length; amountCounter ++) {
-    resultOut[incomingOutAddressArray[amountCounter]] = incomingOutAmountArray[amountCounter];
+  for (var i = 0; i < incomingOutAddressArray.length; i ++) {
+    var incomingAmount = incomingOutAmountArray[amountCounter];
+    if (incomingAmount === undefined) {
+      console.log("Not enough amount values listed. ");
+    }
+    resultOut[incomingOutAddressArray[i]] = incomingAmount;
+    amountCounter ++;
   }
   miscellaneousFrontEnd.updateValue(otherIdContainer.contractId, smartContractId);
   miscellaneousFrontEnd.updateValue(otherIdContainer.contractData, smartContractData);
 
+  miscellaneousFrontEnd.updateValue(otherIdContainer.secretIn, secretInString);
   miscellaneousFrontEnd.updateValue(otherIdContainer.txInIds, incomingIds);
   miscellaneousFrontEnd.updateValue(otherIdContainer.txInNOuts, incomingNOuts);
   miscellaneousFrontEnd.updateValue(otherIdContainer.txBeneficiaryAddresses, incomingOutAddresses);
@@ -600,8 +627,9 @@ FabNode.prototype.computeTxInsAndOuts = function(sourceIsFabPage) {
   miscellaneousFrontEnd.updateValue(inputFab.txOutputs, JSON.stringify(resultOut));
   miscellaneousFrontEnd.updateValue(inputKB.txInputs, JSON.stringify(resultIn));
   miscellaneousFrontEnd.updateValue(inputKB.txOutputs, JSON.stringify(resultOut));
-  document.getElementById(otherSmartContractCheckBoxId).checked = useSmartContract;
-  document.getElementById(otherSmartContractAmountCheckBoxId).checked = doSendToContract;
+  for (var label in currentCheckboxIds) {
+    document.getElementById(otherCheckboxIds[label]).checked = document.getElementById(currentCheckboxIds[label]).checked;
+  }
 }
 
 FabNode.prototype.setTxInputVoutAndValue = function(container, content, extraData) {

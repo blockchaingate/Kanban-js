@@ -54,9 +54,9 @@ function extractQuery(response, queryNonParsed, callbackQueryCommand, parsedURL)
   query.hostname = hostname;
   var queryCommand = null;
   try {
-    console.log("DEBUG: query.command is: " + query.command);
+    //console.log("DEBUG: query.command is: " + query.command);
     queryCommand = JSON.parse(query.command);
-    console.log("DEBUG: parsed to: " + JSON.stringify(queryCommand));
+    //console.log("DEBUG: parsed to: " + JSON.stringify(queryCommand));
   } catch (e) {
     response.writeHead(400);
     var result = {

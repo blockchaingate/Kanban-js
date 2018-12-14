@@ -30,6 +30,22 @@ var rpcCalls = {
     },
     parameters: ["message"]
   },
+  testSha2: {
+    rpcCall: "testSha2", //must be same as rpc label, used for autocomplete
+    method: "cryptotest_testSha2", //<- name of go's RPC method 
+    mandatoryModifiableArguments: { //<- values give defaults, null for none
+      messageHex: null,
+    },
+    parameters: ["messageHex"]
+  },
+  testSha2Squared: {
+    rpcCall: "testSha2Squared", //must be same as rpc label, used for autocomplete
+    method: "cryptotest_testSha2Squared", //<- name of go's RPC method 
+    mandatoryModifiableArguments: { //<- values give defaults, null for none
+      messageHex: null,
+    },
+    parameters: ["messageHex"]
+  },
   testPrivateKeyGeneration: {
     rpcCall: "testPrivateKeyGeneration",
     method: "cryptotest_testPrivateKeyGeneration",
@@ -43,14 +59,33 @@ var rpcCalls = {
     },
     parameters: ["privateKey"]
   },
+  testECDSASignature: {
+    rpcCall: "testECDSASignature",
+    method: "cryptotest_testECDSASignature",
+    mandatoryModifiableArguments: {
+      privateKey: null,
+      messageHex: null,
+    },
+    parameters: ["privateKey", "messageHex"]
+  },
+  testECDSAVerification: {
+    rpcCall: "testECDSAVerification",
+    method: "cryptotest_testECDSAVerification",
+    mandatoryModifiableArguments: {
+      signatureHex: null,
+      publicKey: null,
+      messageHex: null,
+    },
+    parameters: ["signature", "publicKey", "messageHex"]
+  },
   testSchnorrSignature: {
     rpcCall: "testSchnorrSignature", 
     method: "cryptotest_testSchnorrSignature",
     mandatoryModifiableArguments: {
       privateKey: null,
-      messageBase64: null,
+      messageHex: null,
     },
-    parameters: ["privateKey", "messageBase64"]
+    parameters: ["privateKey", "messageHex"]
   },
   testSchnorrVerification: {
     rpcCall: "testSchnorrVerification",
@@ -58,9 +93,9 @@ var rpcCalls = {
     mandatoryModifiableArguments: {
       signature: null,
       publicKey: null,
-      messageBase64: null,
+      messageHex: null,
     },
-    parameters: ["signature", "publicKey", "messageBase64"]
+    parameters: ["signature", "publicKey", "messageHex"]
   },
   testAggregateGeneratePrivateKeys: {
     rpcCall: "testAggregateGeneratePrivateKeys", 
@@ -224,21 +259,14 @@ var rpcCalls = {
     },
     parameters: ["privateKey", "toAddress", "transactionNumber", "transactionValue"]
   },
-  testCreateTransactionStandard: {
-    rpcCall: "testCreateTransactionStandard",
-    method: "pbfttest_testCreateTransactionStandard",
+  testCreateAndSignTransactionStandard: {
+    rpcCall: "testCreateAndSignTransactionStandard",
+    method: "pbfttest_testCreateAndSignTransactionStandard",
     mandatoryModifiableArguments: {
       inputs: null,
       outputs: null,
     },
     parameters: ["inputs", "outputs"],
-  },
-  testCreateContractCall: {
-    rpcCall: "testCreateContractCall",
-    method: "pbfttest_testCreateContractCall",
-    mandatoryModifiableArguments: {
-    },
-    parameters: [],
   },
 };
 

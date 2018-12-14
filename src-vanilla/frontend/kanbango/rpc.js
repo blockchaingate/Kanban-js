@@ -158,8 +158,10 @@ function KanbanGoNodes() {
       "comments.decodedInputs.${number}.txid": this.transformersStandard.shortener,
       "comments.decodedOutputs.contract.contractAddress": this.transformersStandard.shortener,
       "comments.decodedOutputs.contract.data": this.transformersStandard.shortener,
+      "hex": this.transformersStandard.shortener,
       "input.txInputs" : this.transformersStandard.shortener,
       "input.txOutputs": this.transformersStandard.shortener,
+      "comments.bytesToSign.${number}": this.transformersStandard.shortener,
     }
   };
   this.optionsForAddressDisplay = {
@@ -212,11 +214,15 @@ function KanbanGoNodes() {
       inputPrivateKeys: this.transformersStandard.shortener,
       publicKeyHex: this.transformersStandard.setPublicKeySchnorr,
       publicKeyHexInternal: this.transformersStandard.setPublicKeySchnorr,
+      inputMessageHex: this.transformersStandard.shortener,
       inputPublicKeyHex: this.transformersStandard.setPublicKeySchnorr,
       inputPublicKeyHexRecoded: this.transformersStandard.setPublicKeySchnorr,
       inputSignatureBase58: this.transformersStandard.setSignatureSchnorr,
       inputSignatureBase58Recoded: this.transformersStandard.setSignatureSchnorr,
       signatureBase58: this.transformersStandard.setSignatureSchnorr,
+      signatureHex: this.transformersStandard.shortener,
+      inputSignatureHexRecoded: this.transformersStandard.shortener,
+      inputSignatureHex: this.transformersStandard.shortener,
       inputSignature: this.transformersStandard.shortener,
       "privateKeys.${number}": this.transformersStandard.setPrivateKeySchnorr,
       "aggregator.publicKeys.${number}": this.transformersStandard.shortener,
@@ -384,6 +390,20 @@ function KanbanGoNodes() {
       outputJSON: ids.defaults.kanbanGO.outputSendReceive,
       outputOptions: this.optionsKanbanGOLabelContraction
     },
+    testSha2: {
+      //if rpcCall omitted it will be assumed to be equal to the function label.
+      inputs: {
+        messageHex: inputSchnorr.messageHex
+      },
+      callType: "cryptoTest"
+    },
+    testSha2Squared: {
+      //if rpcCall omitted it will be assumed to be equal to the function label.
+      inputs: {
+        messageHex: inputSchnorr.messageHex
+      },
+      callType: "cryptoTest"
+    },
     testSha3 : {
       //if rpcCall omitted it will be assumed to be equal to the function label.
       inputsBase64: {
@@ -416,6 +436,22 @@ function KanbanGoNodes() {
       outputs: {
         publicKeyHex: inputSchnorr.publicKey
       }
+    },
+    testECDSASignature: {
+      inputs: {
+        privateKey: inputSchnorr.privateKey,
+        messageHex: inputSchnorr.messageHex
+      },
+      outputs: {
+        signatureHex: inputSchnorr.signature
+      }
+    },
+    testECDSAVerification: {
+      inputs: {
+        publicKey: inputSchnorr.publicKey,
+        signature: inputSchnorr.signature,
+        messageHex: inputSchnorr.messageHex
+      },
     },
     testSchnorrSignature: {
       inputs: {
@@ -547,15 +583,10 @@ function KanbanGoNodes() {
     fetchLocalRegtestNodeConfig: {
       useOneNode: true,
     },
-    testCreateTransactionStandard: {
+    testCreateAndSignTransactionStandard: {
       inputs: {
         inputs: ids.defaults.kanbanGO.inputSendReceive.txInputs,
         outputs: ids.defaults.kanbanGO.inputSendReceive.txOutputs,
-      },
-    },
-    testCreateContractCall: {
-      inputs: {
-        input: ids.defaults.kanbanGO.inputSendReceive.transactionBuilderInputs,
       },
     },
     fetchMyNodesInfo: {
@@ -782,7 +813,7 @@ KanbanGoNodes.prototype.getNodeInformationCallback = function(input, output) {
       currentNode.init(inputParsed[counterNode]);
       //console.log("DEBUG: This selected node: " + this.selectedNode + " id backend:  " + currentNode.idBackend);
       if (this.selectedNode === currentNode.idBackend) {
-        console.log("Debug: selecting node: " + currentNode.idBackend);
+        //console.log("Debug: selecting node: " + currentNode.idBackend);
         currentNode.flagSelected = true;
       }
       this.nodes.push(currentNode);
@@ -797,26 +828,7 @@ KanbanGoNodes.prototype.getNodeInformationCallback = function(input, output) {
 KanbanGoNodes.prototype.readCheckboxesConfiguration = function() {
   /** @type {StorageKanban} */
   var storageKanban = window.kanban.storageKanban;
-  var idCheckboxPairs = [[
-      storageKanban.variables.autostartFabcoindAfterKanbanGO, 
-      ids.defaults.kanbanGO.checkboxFabcoindAutostartAfterKanbanGO,
-    ], [
-      storageKanban.variables.connectKanbansInALine,
-      ids.defaults.kanbanGO.checkboxConnectKanbansInALine,
-    ], [
-      storageKanban.variables.includeFabcoinContractCallsInTransactionOutputs,
-      ids.defaults.fabcoin.checkboxFabcoinIncludeContractCalls,
-    ], [
-      storageKanban.variables.includeKanbanGoContractCallsInTransactionOutputs,
-      ids.defaults.kanbanGO.checkboxKanbanIncludeContractCalls,
-    ], [
-      storageKanban.variables.includeFabcoinAmountInTransactionOutputs,
-      ids.defaults.fabcoin.checkboxFabcoinSendToContract,
-    ], [
-      storageKanban.variables.includeKanbanGoAmountInTransactionOutputs,
-      ids.defaults.kanbanGO.checkboxKanbanSendToContract,
-    ],
-  ];
+  var idCheckboxPairs = window.kanban.thePage.checkboxBindingsWithId;
   for (var i = 0; i < idCheckboxPairs.length; i ++) {
     var checkBox = document.getElementById(idCheckboxPairs[i][1]);
     storageKanban.setVariable(idCheckboxPairs[i][0], checkBox.checked);

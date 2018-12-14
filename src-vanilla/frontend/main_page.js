@@ -52,12 +52,8 @@ function Page() {
     loginPage: {
       idPage: ids.defaults.pages.login
     }
-  }
-}
-
-Page.prototype.initializeCheckBoxes = function() {
-  storageKanban.variables.theme.changeValueHandler = themes.setTheme;
-  var checkboxBindingsWithId = [[
+  };
+  this.checkboxBindingsWithId = [[
       storageKanban.variables.autostartFabcoindAfterKanbanGO,
       ids.defaults.kanbanGO.checkboxFabcoindAutostartAfterKanbanGO,
     ], [
@@ -65,22 +61,38 @@ Page.prototype.initializeCheckBoxes = function() {
       ids.defaults.kanbanGO.checkboxConnectKanbansInALine,
     ], [
       storageKanban.variables.includeFabcoinContractCallsInTransactionOutputs,
-      ids.defaults.fabcoin.checkboxFabcoinIncludeContractCalls,
+      ids.defaults.fabcoin.checkboxes.transactions.contractCallsInOutputs,
     ], [
       storageKanban.variables.includeKanbanGoContractCallsInTransactionOutputs,
-      ids.defaults.kanbanGO.checkboxKanbanIncludeContractCalls,
+      ids.defaults.kanbanGO.checkboxes.transactions.contractCallsInOutputs,
     ], [
       storageKanban.variables.includeFabcoinAmountInTransactionOutputs,
-      ids.defaults.fabcoin.checkboxFabcoinSendToContract,
+      ids.defaults.fabcoin.checkboxes.transactions.sendToContract,
     ], [
       storageKanban.variables.includeKanbanGoAmountInTransactionOutputs,
-      ids.defaults.kanbanGO.checkboxKanbanSendToContract,
-    ],
+      ids.defaults.kanbanGO.checkboxes.transactions.sendToContract,
+    ], [
+      storageKanban.variables.includeFabcoinContractCallsInInputs,
+      ids.defaults.fabcoin.checkboxes.transactions.contractCallsInInputs,
+    ], [
+      storageKanban.variables.includeKanbanContractCallsInInputs,
+      ids.defaults.kanbanGO.checkboxes.transactions.contractCallsInInputs,
+    ], [
+      storageKanban.variables.secretSignsPublicKeyWithoutHashFabcoin,
+      ids.defaults.fabcoin.checkboxes.transactions.secretSignsPubkeyNoHash,
+    ], [
+      storageKanban.variables.secretSignsPublicKeyWithoutHashKanban,
+      ids.defaults.kanbanGO.checkboxes.transactions.secretSignsPubkeyNoHash,
+    ], 
   ];
-  for (var i = 0; i < checkboxBindingsWithId.length; i ++) {
-    checkboxBindingsWithId[i][0].changeValueHandler = miscellaneousFrontEnd.setCheckbox.bind(
+}
+
+Page.prototype.initializeCheckBoxes = function() {
+  storageKanban.variables.theme.changeValueHandler = themes.setTheme;
+  for (var i = 0; i < this.checkboxBindingsWithId.length; i ++) {
+    this.checkboxBindingsWithId[i][0].changeValueHandler = miscellaneousFrontEnd.setCheckbox.bind(
       null,
-      checkboxBindingsWithId[i][1] 
+      this.checkboxBindingsWithId[i][1] 
     );
   }
 }
@@ -109,6 +121,10 @@ Page.prototype.initialize = function() {
   miscellaneousFrontEnd.hookUpHexWithStringInput(
     ids.defaults.demo.inputs.corporationName,
     ids.defaults.demo.inputs.corporationNameHex,
+  );
+  miscellaneousFrontEnd.hookUpHexWithStringInput(
+    ids.defaults.kanbanGO.inputSchnorr.message,
+    ids.defaults.kanbanGO.inputSchnorr.messageHex,
   );
   //Load google login:
   gapi.load('auth2', login.login.gapiLoadCallback.bind(login.login));
