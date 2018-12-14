@@ -1,7 +1,5 @@
 "use strict"
 const memWatch = require('memwatch-next');
-memWatch.on('leak', memoryWatcher.recordLeakSuspicion.bind(memoryWatcher));
-memWatch.on('stats', memoryWatcher.recordStats.bind(memoryWatcher));
 
 function MemoryWatcher () {
   this.leakSuspicions = new Array(10);
@@ -21,6 +19,8 @@ MemoryWatcher.prototype.recordStats = function (stats) {
 }
 
 var memoryWatcher = new MemoryWatcher();
+memWatch.on('leak', memoryWatcher.recordLeakSuspicion.bind(memoryWatcher));
+memWatch.on('stats', memoryWatcher.recordStats.bind(memoryWatcher));
 
 module.exports = {
   memoryWatcher
