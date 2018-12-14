@@ -165,12 +165,20 @@ var rpcCalls = {
   sendToContract: {
     rpcCall: "sendToContract",
     method: "sendtocontract",
+    types: {
+      gasLimit: "number",
+    },
+    optionalArguments:{
+      senderAddress: null,
+    },
     mandatoryModifiableArguments: {
       contractId: null,
       data: null,
       amount: 0,
+      gasLimit: 250000,
+      gasPrice: 40,
     },
-    parameters: ["contractId", "data", "amount"]
+    parameters: ["contractId", "data", "amount", "gasLimit", "gasPrice", "senderAddress"]
   },
   callContract: {
     rpcCall: "callContract",

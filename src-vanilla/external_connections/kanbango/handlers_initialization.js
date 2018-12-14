@@ -220,7 +220,7 @@ NodeKanbanGo.prototype.run = function(response) {
     "--rpcapi",
     "db,kanban,net,web3,personal,pbft,bridge,pbfttest,cryptotest,admin",
     "--kanbanstats",
-    `${this.nodePublicKeyHex}:abcd@169.45.42.100:3000`,
+    `${this.nodePublicKeyHex}:abcd@localhost:3000`,
     "--identity",
     `${this.nodePublicKeyHex}`,
     "--networkid",

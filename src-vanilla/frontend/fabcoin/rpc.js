@@ -306,6 +306,9 @@ function FabNode() {
         contractId: inputFabBlock.contractId,
         data: inputFabBlock.contractData,
         amount: inputFabBlock.txBeneficiaryAmounts,
+        gasLimit: inputFabBlock.gasLimit,
+        gasPrice: inputFabBlock.gasPrice,
+        senderAddress: inputFabBlock.address
       },
       outputOptions: this.optionsContract,
     },
@@ -801,6 +804,9 @@ FabNode.prototype.getArguments = function(functionLabelFrontEnd, functionLabelBa
     } else if (typeof inputObject === "function"){
       //inputObject is a function that returns the raw input
       rawInput = inputObject();
+    }
+    if (rawInput === null || rawInput === undefined || rawInput === "") {
+      continue;
     }
     theArguments[inputLabel] = this.convertToCorrectType(functionLabelBackend, inputLabel, rawInput);
   }
