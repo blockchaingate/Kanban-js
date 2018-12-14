@@ -543,7 +543,7 @@ FabNode.prototype.computeTxInsAndOuts = function(sourceIsFabPage) {
   var doSendToContract = document.getElementById(currentCheckboxIds.sendToContract).checked;
   var incomingIdArray = miscellaneousBackend.splitMultipleDelimiters(incomingIds, ", \t");
   var incomingNOutArray = miscellaneousBackend.splitMultipleDelimiters(incomingNOuts, ", \t");
-  var sercretInArray = miscellaneousBackend.splitMultipleDelimiters(incomingIdArray, ", \t");
+  var sercretInArray = miscellaneousBackend.splitMultipleDelimiters(secretInString, ", \t");
   var resultIn = [];
   var counterSecret = 0;
   
@@ -568,7 +568,7 @@ FabNode.prototype.computeTxInsAndOuts = function(sourceIsFabPage) {
     };
     if (counterSecret < sercretInArray.length) {
       incomingIn.secretIn = sercretInArray[counterSecret];
-      incomingIn.inputIsPayToPublicWithoutHash = usePayToPubkeyWithoutHash;
+      incomingIn.isPayToPublicWithoutHash = usePayToPubkeyWithoutHash;
       counterSecret ++;
     }
     resultIn.push(incomingIn);

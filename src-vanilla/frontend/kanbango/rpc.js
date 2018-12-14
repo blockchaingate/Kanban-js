@@ -161,6 +161,7 @@ function KanbanGoNodes() {
       "hex": this.transformersStandard.shortener,
       "input.txInputs" : this.transformersStandard.shortener,
       "input.txOutputs": this.transformersStandard.shortener,
+      "comments.bytesToSign.${number}": this.transformersStandard.shortener,
     }
   };
   this.optionsForAddressDisplay = {
