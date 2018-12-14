@@ -10,6 +10,7 @@ const cryptoKanban = require('../../crypto/encodings');
 var demo = require('./handlers_smart_contract').demo;
 const responseWrapperLib = require('../../response_wrapper');
 const ResponseWrapper = responseWrapperLib.ResponseWrapper;
+const memoryWatch = require('../../memory_watch');
 
 /**
  * Returns a global FabcoinNode object
@@ -156,6 +157,8 @@ FabcoinNode.prototype.getServerInformation = function (
   var result = {};
   result.memoryUsage = process.memoryUsage();
   result.requests = responseWrapperLib.responseStatsGlobal.toJSON();
+  result.leakSuspicions = memoryWatch.memoryWatcher.leakSuspicions;
+  result.memoryWatchStatistics = memoryWatch.memoryWatcher.latestStats;
   response.end(JSON.stringify(result));
 }
 
