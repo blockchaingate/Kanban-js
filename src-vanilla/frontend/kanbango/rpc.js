@@ -397,6 +397,13 @@ function KanbanGoNodes() {
       },
       callType: "cryptoTest"
     },
+    testSha2Squared: {
+      //if rpcCall omitted it will be assumed to be equal to the function label.
+      inputs: {
+        messageHex: inputSchnorr.messageHex
+      },
+      callType: "cryptoTest"
+    },
     testSha3 : {
       //if rpcCall omitted it will be assumed to be equal to the function label.
       inputsBase64: {

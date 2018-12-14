@@ -38,6 +38,14 @@ var rpcCalls = {
     },
     parameters: ["messageHex"]
   },
+  testSha2Squared: {
+    rpcCall: "testSha2Squared", //must be same as rpc label, used for autocomplete
+    method: "cryptotest_testSha2Squared", //<- name of go's RPC method 
+    mandatoryModifiableArguments: { //<- values give defaults, null for none
+      messageHex: null,
+    },
+    parameters: ["messageHex"]
+  },
   testPrivateKeyGeneration: {
     rpcCall: "testPrivateKeyGeneration",
     method: "cryptotest_testPrivateKeyGeneration",
