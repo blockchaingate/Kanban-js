@@ -30,7 +30,7 @@ function ResponseWrapper(response, inputOwner) {
 ResponseWrapper.prototype.end = function(input) {
   this.response.end(input);
   this.owner.numberOfRequestsRunning --;
-  this.response.requestsClosed ++;
+  responseStatsGlobal.requestsClosed ++;
 }
 
 ResponseWrapper.prototype.writeHead = function(
