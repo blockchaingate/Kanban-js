@@ -269,6 +269,8 @@ function KanbanGoNodes() {
       "messages.publicKey": this.transformersStandard.middleShortener,
       "debugStatus.lines.${number}": this.transformersStandard.middleShortener,
       "peers.${any}.debugStatus.lines.${number}": this.transformersStandard.middleShortener,
+      "inputHex": this.transformersStandard.shortener,
+      "payloadHash": this.transformersStandard.shortener,
     },
   };
   this.callTypes = {
@@ -422,7 +424,8 @@ function KanbanGoNodes() {
     voteMessage: {
       inputs: {
         messageHex: ids.defaults.kanbanGO.inputSendReceive.messageVoteHex
-      }
+      },
+      callType: this.callTypes.votingMachine
     },
     testPrivateKeyGeneration: {
       outputs: {
@@ -557,6 +560,14 @@ function KanbanGoNodes() {
       useOneNode: true,
     }, 
     fetchKanbanContract: {
+      outputs: {
+        code: ids.defaults.fabcoin.inputBlockInfo.solidityInput
+      },
+      outputJSON: ids.defaults.fabcoin.outputFabcoinBlockInfo,
+      callback: PendingCall.prototype.callbackFetchSmartContract,
+      useOneNode: true,
+    },
+    fetchKanbanContractTwo: {
       outputs: {
         code: ids.defaults.fabcoin.inputBlockInfo.solidityInput
       },

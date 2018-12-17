@@ -314,8 +314,9 @@ function FabNode() {
     },
     listContracts: {
       outputOptions: {
+        layoutObjectAsArray: true,
         transformers: {
-          "${label}" : this.transformersStandard.setContractId,
+          "_rowLabel" : this.transformersStandard.setContractId,
         }
       }
     },

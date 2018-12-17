@@ -37,6 +37,9 @@ var rpcCalls = {
   fetchKanbanContract: {
     rpcCall: "fetchKanbanContract",
   },
+  fetchKanbanContractTwo: {
+    rpcCall: "fetchKanbanContractTwo",
+  },
   fetchLocalRegtestNodeConfig: {
     rpcCall: "fetchLocalRegtestNodeConfig",
   },

@@ -802,6 +802,19 @@ SolidityBuilder.prototype.callbackReadFile = function(counter, error, content) {
   }
 }
 
+KanbanGoInitializer.prototype.fetchKanbanContractTwo = function(  
+  response, 
+  queryCommand,
+  notUsed,
+) {
+  var fileCombinator = new SolidityBuilder();
+  fileCombinator.response = response;
+  fileCombinator.pathBase = `${pathnames.path.base}/miscellaneous/feeAccepter`; 
+  fileCombinator.owner = this;
+  fileCombinator.combineFiles();
+}
+
+
 KanbanGoInitializer.prototype.fetchKanbanContract = function(  
   response, 
   queryCommand,

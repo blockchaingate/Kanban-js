@@ -316,6 +316,9 @@ JSONTransformer.prototype.transformObjectToRows = function(input) {
   var result = [];
   for (var labelRow in input) {
     var currentInputItem = input[labelRow];
+    if (typeof currentInputItem !== "object") {
+      currentInputItem = {value: currentInputItem};
+    }
     currentInputItem["_rowLabel"] = labelRow;
     result.push(currentInputItem);
   }
@@ -382,6 +385,8 @@ var labelAbbreviations = {
   "totalProcessedIncomingVoteMessages": "totalIn",
   "totalProcessedOutgoingVoteMessages": "totalOut",
   "totalMessagesNotSentAsTheyAreAlreadyKnown": "totalOptimizedOut",
+  "numberOfRecentlyApprovedMessages": "num. approved",
+  "numberOfBusySlots": "busy slots"
 }
 
 function abbreviateLabel(/** @type {string}*/ header) {
