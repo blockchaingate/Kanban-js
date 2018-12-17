@@ -189,7 +189,7 @@ function KanbanGoNodes() {
       "resultHTML": this.transformersStandard.shortener,
       "code": this.transformersStandard.contractSourceSetter,
       "contractInheritance.${label}": this.transformersStandard.shortener,
-      "node.${number}": this.transformersStandard.shortener,
+      "node.${number}.${number}": this.transformersStandard.shortener16,
       "notes": this.transformersStandard.shortener,
       "${number}": this.transformersStandard.highlightErrorWords,
     }

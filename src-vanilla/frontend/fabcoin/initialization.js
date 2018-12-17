@@ -51,6 +51,11 @@ function FabcoinNodeInitializer() {
       "signature": this.transformersStandard.setDemoSignature,
     },
   };
+  this.optionsInitialization = {
+    transformers: {
+      "${number}": this.transformersStandard.shortener
+    },
+  };
   this.optionsServerInformation = {
     transformers: {
 
@@ -64,6 +69,10 @@ function FabcoinNodeInitializer() {
     serverInformation: {
       outputJSONDefault: ids.defaults.serverStatus.outputServerStatus,
       outputOptionsDefault: this.optionsServerInformation,
+    },
+    initialization: {
+      outputJSONDefault: ids.defaults.fabcoin.outputFabcoinInitialization,
+      outputOptionsDefault: this.optionsInitialization,
     }
   };  
   this.theFunctions = {
@@ -73,6 +82,7 @@ function FabcoinNodeInitializer() {
         smartContractId: inputInitialization.smartContractId,
       },
       outputJSON: null,
+      callType: this.callTypes.initialization,
     },
     demoRegisterCorporation: {
       inputs: {

@@ -45,7 +45,6 @@ function NodeKanbanGo(
   } else {
     this.basePath += `_${this.contractId}`;
   }
-  this.notes = "";
   this.fileNameNodeAddress = null;
   this.nodePrivateKey = new cryptoKanban.CurveExponent();
   /** @type {string} */
@@ -97,12 +96,10 @@ NodeKanbanGo.prototype.initializeDeleteLockFile = function(response, callback) {
 }
 
 NodeKanbanGo.prototype.logToInitializationStream = function(input) {
-  this.notes += `${input}<br>\n`;
   this.outputStreams.initialization.append(input);
 }
 
 NodeKanbanGo.prototype.logRegular = function(input) {
-  this.notes += `${input}<br>\n`;
   this.outputStreams.log.append(input);
 }
 
@@ -276,8 +273,11 @@ function KanbanGoInitializer() {
   this.chainId = 211;
   /** @type {NodeKanbanGo[]} */
   this.nodes = [];
-  /** @type {string} */
-  this.notes = "";
+  /** @type {OutputStream} */
+  this.notesStream = new OutputStream();
+  this.notesStream.idConsole = "[KanbanGoInitializer]";
+  this.notesStream.colorIdConsole = "red";
+
   /** @type {String} */
   this.bridgeChainnet = "reg";
 
@@ -293,8 +293,7 @@ function KanbanGoInitializer() {
 }
 
 KanbanGoInitializer.prototype.log = function(input) {
-  this.notes += `${input}<br>\n`;
-  console.log(`[KanbanGoInitializer] `.red + `${input}`);
+  this.notesStream.append(input);
 }
 
 KanbanGoInitializer.prototype.computePaths = function() {
@@ -398,15 +397,10 @@ KanbanGoInitializer.prototype.runNodesFinish = function(response) {
   result.result = `Spawned ${this.nodes.length} nodes.`;
   var nodeNotes = [];
   for (var counterNodes = 0; counterNodes < this.nodes.length; counterNodes ++) {
-    if (this.nodes[counterNodes].notes !== "") {
-      nodeNotes[counterNodes] = this.nodes[counterNodes].notes;
-    }
+    nodeNotes[counterNodes] = this.nodes[counterNodes].outputStreams.initialization.toArray();
   }
   if (nodeNotes.length > 0) {
     result.node = nodeNotes;
-  }
-  if (this.notes !== "") {
-    result.notes = this.notes;
   }
   response.writeHead(200);
   response.end(JSON.stringify(result));
@@ -1035,7 +1029,7 @@ KanbanGoInitializer.prototype.runNodes2ReadConfig = function(response) {
     if (!currentNode.flagFoldersInitialized) {
       var result = {};
       result.error = `Failed to initilize folders for node: ${counterNode}`;
-      result.notes = currentNode.notes;
+      result.notes = currentNode.outputStreams.initialization.toArray();
       response.writeHead(200);
       response.end(JSON.stringify(result));
       return;
@@ -1107,7 +1101,7 @@ KanbanGoInitializer.prototype.runShell = function(
     } else if (currentNode !== null) {
       currentNode.logRegular(dataToLog);
     } else {
-      thisContainer.log(dataToLog)
+      thisContainer.log(dataToLog);
     }
   });
   child.stderr.on('data', function(data) {
