@@ -111,6 +111,7 @@ function handleRequestsPart2(request, response, parsedURL) {
     );  
   }
   //console.log(`DEBUG: The parsed url pathname is: ${parsedURL.pathname}`.red);
+  responseStats.requestTypes.numberOfRejectedURLS ++;
   response.writeHead(200);
   var result = {};
   result.error = `Uknown request ${request.url} with pathname: ${parsedURL.pathname}.`; 
@@ -118,6 +119,7 @@ function handleRequestsPart2(request, response, parsedURL) {
   for (var label in pathnames.url.whiteListed) {
     result.whiteListedURL.push(label);
   }
+  result.knownServices = pathnames.url.known;
   response.end(JSON.stringify(result));
 }
 

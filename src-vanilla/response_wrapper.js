@@ -8,6 +8,7 @@ function ResponseStatsGlobal () {
     httpRequestsRedirectedToHttps: 0,
     numberOfFailuresToParseURL: 0,
     numberOfPings: 0, 
+    numberOfRejectedURLS: 0,
   };  
   this.requestsReceived = 0;
   this.requestsClosed = 0;
