@@ -1,5 +1,6 @@
 "use strict";
 require('colors');
+const configuration = require('./configuration');
 
 function OutputStream() {
   /**@type {string[]} */
@@ -74,6 +75,10 @@ OutputStream.prototype.append = function (data) {
   dataToLog = dataToLog.replace("ERROR", "ERROR".bold.red);
   dataToLog = dataToLog.replace("HIGHLIGHT", "HIGHLIGHT".red.bold);
   console.log(dataToLog);
+  if (configuration.getConfiguration().configuration.noLogFiles) {
+    //console.log("DEBUG: got to this important line of code!!!!!!");
+    return;
+  }
   if (this.recentOutputs.length >= this.maximumLength ) {
     var oldOutputs = this.recentOutputs;
     this.recentOutputs = [];

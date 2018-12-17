@@ -18,19 +18,20 @@ var stringSubstitutions = {
 };
 
 function Configuration () {
-  //defaults below. The defaults are overridden by this.readSecretsAdmin();
-  //which reads config.json from pathnames.path.configurationSecretsAdmin
   this.configurationsToRead = {
     kanbanGO: true,
     myNodes: true,
     fabcoin: true,
     useCertbot: true,
+    noLogFiles: true,
     certbotConfigDir: true,
     certbotDomainName: true,
   };
   this.storaLabels = {
     lastCertificateRenewalTime: true,    
   };
+  //defaults below. The defaults are overridden by this.readSecretsAdmin();
+  //which reads config.json from pathnames.path.configurationSecretsAdmin
   this.configuration = {
     kanbanGO: {
       gethFolder: "uninitialized",
@@ -40,6 +41,7 @@ function Configuration () {
       executableFileName: `${pathnames.path.base}/fabcoin-dev-sm01/src/fabcoind`,
       dataDir: `${pathnames.path.base}/secrets_data_fabcoin`
     },
+    noLogFiles: false,
     myNodes: {},
     useCertbot: false,
     certbotConfigDir: "",
@@ -99,7 +101,7 @@ Configuration.prototype.readSecretsAdminCallback = function(err, data) {
     console.log(`Configuration file name: ` + `${pathnames.pathname.configurationSecretsAdmin}`.blue);
     //console.log(`DEBUG: config content: ` + `${data}`.blue);
     var contentParsed = JSON.parse(data);
-    //console.log(`DEBUG: content read: ${data}`);
+    //console.log(`DEBUG: content read: ${JSON.stringify(contentParsed)}`);
     for (var label in this.configurationsToRead) {
       if (label in contentParsed) {
         this.readRecursively(this.configuration, label, contentParsed[label]);
@@ -108,6 +110,7 @@ Configuration.prototype.readSecretsAdminCallback = function(err, data) {
   } catch (e) {
     console.log(`Failed to read file: ${pathnames.pathname.configurationSecretsAdmin}. Error: ${e}`.red);
   }
+  //console.log("DEBUG: final configuration read: " + JSON.stringify(this.configuration));
 }
 
 //Reads json entries from config.json in pathnames.path.configurationSecretsAdmin
