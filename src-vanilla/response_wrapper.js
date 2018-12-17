@@ -3,12 +3,13 @@ require('colors');
 
 function ResponseStatsGlobal () {
   this.requestTypes = {
-    apiRequests: 0,
+    apiRequestsProcessed: 0,
+    apiRequestsDropped: 0,
     fileRequests: 0,
     httpRequestsRedirectedToHttps: 0,
     numberOfFailuresToParseURL: 0,
     numberOfPings: 0, 
-    numberOfRejectedURLS: 0,
+    numberOfRejectedURLs: 0,
   };  
   this.requestsReceived = 0;
   this.requestsClosed = 0;

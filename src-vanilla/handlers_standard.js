@@ -14,14 +14,15 @@ function transformToQueryJSON(
   if (!(response instanceof ResponseWrapper)) {
     throw ("Fatal: response object not of the expected type. ");
   }
-  responseStats.requestTypes.apiRequests ++;
   if (responseStats.numberOfRequestsRunning > responseStats.maximumNumberOfRequestsRunning) {
+    responseStats.requestTypes.apiRequestsDropped ++;
     response.writeHead(500);
     var result = {
       error: `Too many simultaneous requests running (max: ${responseStats.maximumNumberOfRequestsRunning}): perhaps the server is overloaded? `
     };
     return response.end(JSON.stringify(result));
   }
+  responseStats.requestTypes.apiRequestsProcessed ++;
   if (request.method === "GET") {
     return extractQuery(response, parsedURL.query, callbackQueryCommand, parsedURL);
   }
