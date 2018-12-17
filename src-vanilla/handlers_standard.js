@@ -2,20 +2,23 @@
 const url = require('url');
 const queryString = require('querystring');
 var ResponseWrapper = require('./response_wrapper').ResponseWrapper;
+var responseStats = require('./response_wrapper').responseStatsGlobal;
 
-function HandlerLimits() {
-  this.numberOfRequestsRunning = 0;
-  this.maximumNumberOfRequestsRunning = 30;
-}
-
-var handlerLimits = new HandlerLimits();
-
-function transformToQueryJSON(request, responseNonWrapped, callbackQueryCommand, parsedURL) {
-  var response = new ResponseWrapper(responseNonWrapped, handlerLimits);
-  if (handlerLimits.numberOfRequestsRunning > handlerLimits.maximumNumberOfRequestsRunning) {
+function transformToQueryJSON(
+  request, 
+  /**@type {ResponseWrapper} */
+  response, 
+  callbackQueryCommand, 
+  parsedURL,
+) {
+  if (!(response instanceof ResponseWrapper)) {
+    throw ("Fatal: response object not of the expected type. ");
+  }
+  responseStats.requestTypes.apiRequests ++;
+  if (responseStats.numberOfRequestsRunning > responseStats.maximumNumberOfRequestsRunning) {
     response.writeHead(500);
     var result = {
-      error: `Too many simultaneous requests running (max: ${handlerLimits.maximumNumberOfRequestsRunning}): perhaps server is overloaded? `
+      error: `Too many simultaneous requests running (max: ${responseStats.maximumNumberOfRequestsRunning}): perhaps the server is overloaded? `
     };
     return response.end(JSON.stringify(result));
   }
