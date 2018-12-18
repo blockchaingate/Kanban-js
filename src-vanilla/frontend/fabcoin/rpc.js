@@ -547,7 +547,7 @@ FabNode.prototype.computeTxInsAndOuts = function(sourceIsFabPage) {
   var doSendToContract = document.getElementById(currentCheckboxIds.sendToContract).checked;
   var incomingIdArray = miscellaneousBackend.splitMultipleDelimiters(incomingIds, ", \t");
   var incomingNOutArray = miscellaneousBackend.splitMultipleDelimiters(incomingNOuts, ", \t");
-  var sercretInArray = miscellaneousBackend.splitMultipleDelimiters(secretInString, ", \t");
+  var secretInArray = miscellaneousBackend.splitMultipleDelimiters(secretInString, ", \t");
   var resultIn = [];
   var counterSecret = 0;
   
@@ -559,7 +559,8 @@ FabNode.prototype.computeTxInsAndOuts = function(sourceIsFabPage) {
         contractAddress: smartContractId,
         data: smartContractData,
       },
-      sercretIn: sercretInArray[counterSecret],
+      secretIn: secretInArray[counterSecret],
+      isPayToPublicWithoutHash: usePayToPubkeyWithoutHash,
     };
     counterSecret ++;
     resultIn.push(contractObject)
@@ -570,8 +571,8 @@ FabNode.prototype.computeTxInsAndOuts = function(sourceIsFabPage) {
       txid: incomingIdArray[i],
       vout: Number(incomingNOutArray[i]),
     };
-    if (counterSecret < sercretInArray.length) {
-      incomingIn.secretIn = sercretInArray[counterSecret];
+    if (counterSecret < secretInArray.length) {
+      incomingIn.secretIn = secretInArray[counterSecret];
       incomingIn.isPayToPublicWithoutHash = usePayToPubkeyWithoutHash;
       counterSecret ++;
     }

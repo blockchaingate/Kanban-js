@@ -162,6 +162,7 @@ function KanbanGoNodes() {
       "input.txInputs" : this.transformersStandard.shortener,
       "input.txOutputs": this.transformersStandard.shortener,
       "comments.bytesToSign.${number}": this.transformersStandard.shortener,
+      "comments.builder.inputs.${number}.unlockScript": this.transformersStandard.shortener,
     }
   };
   this.optionsForAddressDisplay = {
