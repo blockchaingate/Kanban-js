@@ -132,7 +132,7 @@ var defaults = {
     },
     checkboxes: {
       transactions: {
-        contractCallsInInputs: "checkboxKanbanIncludeContract_CallsInInputs",
+        fullSignatureInInputs: "checkboxKanbanIncludeFullSignatureInInputs",
         contractCallsInOutputs: "checkboxKanbanIncludeContractCalls",
         sendToContract: "checkboxKanbanSendToContract",
         secretSignsPubkeyNoHash: "checkboxKanbanSecretSignsPubkeyNoHash"
@@ -196,7 +196,7 @@ var defaults = {
     },
     checkboxes: {
       transactions: {
-        contractCallsInInputs: "checkboxFabcoinIncludeContract_CallsInInputs",
+        fullSignatureInInputs: "checkboxFabcoinIncludeFullSignatureInInputs",
         contractCallsInOutputs: "checkboxFabcoinIncludeContractCalls",
         sendToContract: "checkboxFabcoinSendToContract",
         secretSignsPubkeyNoHash: "checkboxFabcoinSecretSignsPubkeyNoHash",
@@ -207,6 +207,7 @@ var defaults = {
         publicKey: "inputPublicKeyDefault",
         privateKey: "inputPrivateKeySchnorrDefault",
         messageToSha3: "inputFabcoinSchnorrMessage",
+        messageToSha3Hex: "inputFabcoinSchnorrMessageHex",
         nonce: "inputNoncesDefault",
         signature: "inputSignatureDefault",
       },

@@ -8,7 +8,7 @@ const submitRequests = require('../submit_requests');
 const jsonToHtml = require('../json_to_html');
 const miscellaneousBackend = require('../../miscellaneous');
 const miscellaneousFrontEnd = require('../miscellaneous_frontend');
-const jsonic = require('jsonic');
+//const jsonic = require('jsonic');
 const cryptoKanban = require('../../crypto/crypto_kanban');
 const encodingsKanban = require('../../crypto/encodings');
 const fabcoinInitializationFrontend = require('./initialization');
@@ -18,7 +18,7 @@ function FabNode() {
   var inputKBGOInitialization = ids.defaults.kanbanGO.inputInitialization;
   var inputFabCryptoSchnorr = ids.defaults.fabcoin.inputCrypto.inputSchnorrSignature;
   var inputFabCryptoAggregate = ids.defaults.fabcoin.inputCrypto.inputAggregateSignature;
-  var initializer = fabcoinInitializationFrontend.initializer;
+  //var initializer = fabcoinInitializationFrontend.initializer;
   this.transformersStandard = {
     blockHash: this.getSetInputAndRunWithShortener(inputFabBlock.blockHash, "getBlockByHash", "Sets the block hash field &amp; and fetches the block info. "),
     shortener: {
@@ -370,6 +370,24 @@ function FabNode() {
       },
       callType: this.callTypes.crypto
     },
+    testECDSASignature: {
+      inputs: {
+        privateKey: inputFabCryptoSchnorr.privateKey,
+        messageHex: inputFabCryptoSchnorr.messageToSha3Hex
+      },
+      outputs: {
+        signatureSchnorrBase58: inputFabCryptoSchnorr.signature
+      },
+      callType: this.callTypes.crypto,
+    },
+    testECDSASignatureVerify: {
+      inputs: {
+        signature: inputFabCryptoSchnorr.signature,
+        publicKey: inputFabCryptoSchnorr.publicKey,
+        messageHex: inputFabCryptoSchnorr.messageToSha3Hex
+      },
+      callType: this.callTypes.crypto
+    },
     testAggregateSignatureGeneratePrivateKeys: {
       inputs: {
         numberOfPrivateKeysToGenerate: inputFabCryptoAggregate.numberOfPrivateKeysToGenerate,
@@ -542,7 +560,7 @@ FabNode.prototype.computeTxInsAndOuts = function(sourceIsFabPage) {
   var secretInString = document.getElementById(inputIdContainer.secretIn).value;
 
   var smartContractInOutputs = document.getElementById(currentCheckboxIds.contractCallsInOutputs).checked;
-  var smartContractInInputs = document.getElementById(currentCheckboxIds.contractCallsInInputs).checked; 
+  var fullSignatureInInputs = document.getElementById(currentCheckboxIds.fullSignatureInInputs).checked; 
   var usePayToPubkeyWithoutHash = document.getElementById(currentCheckboxIds.secretSignsPubkeyNoHash).checked;
   var doSendToContract = document.getElementById(currentCheckboxIds.sendToContract).checked;
   var incomingIdArray = miscellaneousBackend.splitMultipleDelimiters(incomingIds, ", \t");
@@ -551,14 +569,10 @@ FabNode.prototype.computeTxInsAndOuts = function(sourceIsFabPage) {
   var resultIn = [];
   var counterSecret = 0;
   
-  if (smartContractInInputs) {
+  if (fullSignatureInInputs) {
     var contractObject = {
       txid: "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
       vout: 0,
-      contract: {
-        contractAddress: smartContractId,
-        data: smartContractData,
-      },
       secretIn: secretInArray[counterSecret],
       isPayToPublicWithoutHash: usePayToPubkeyWithoutHash,
     };
@@ -593,6 +607,7 @@ FabNode.prototype.computeTxInsAndOuts = function(sourceIsFabPage) {
     resultOut.contract = {};
     resultOut.contract.contractAddress = smartContractId;
     resultOut.contract.data = smartContractData;
+    resultOut.contract.coverFees = false;
     if (doSendToContract) {
       resultOut.contract.amount = Number(incomingOutAmountArray[amountCounter]);
       if (incomingGasLimit !== "" && incomingGasLimit !== null && incomingGasLimit !== undefined) {
@@ -602,7 +617,9 @@ FabNode.prototype.computeTxInsAndOuts = function(sourceIsFabPage) {
         resultOut.contract.gasPrice = incomingGasPrice;
       }
       amountCounter ++;
-    }
+    } else {
+      resultOut.contract.coverFees = true;
+    } 
   }
   for (var i = 0; i < incomingOutAddressArray.length; i ++) {
     var incomingAmount = incomingOutAmountArray[amountCounter];

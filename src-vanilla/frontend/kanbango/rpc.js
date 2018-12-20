@@ -600,6 +600,9 @@ function KanbanGoNodes() {
         inputs: ids.defaults.kanbanGO.inputSendReceive.txInputs,
         outputs: ids.defaults.kanbanGO.inputSendReceive.txOutputs,
       },
+      outputs: {
+        hex: [ids.defaults.kanbanGO.inputSendReceive.txHex, ids.defaults.fabcoin.inputBlockInfo.txHex],
+      },
     },
     fetchMyNodesInfo: {
       callType: this.callTypes.myNodes,

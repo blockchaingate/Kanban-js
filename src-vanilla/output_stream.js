@@ -1,6 +1,7 @@
 "use strict";
 require('colors');
 const configuration = require('./configuration');
+const miscelaneous = require('./miscellaneous');
 
 function OutputStream() {
   /**@type {string[]} */
@@ -13,6 +14,7 @@ function OutputStream() {
   this.colorIdConsole = "white";
   /**@type {string[]} */
   this.idHTML = "";
+  this.flagBounceCopyToConsole = true;
 }
 
 /**
@@ -67,16 +69,15 @@ OutputStream.prototype.log = function (data) {
 
 OutputStream.prototype.append = function (data) {
   var dataToLog = this.idConsole[this.colorIdConsole] + data;
-  if (dataToLog.endsWith("\n")) {
-    dataToLog = dataToLog.slice(0, dataToLog.length - 1);
-  }
+  dataToLog = miscelaneous.trimeWhiteSpaceAtEnds(dataToLog);
   dataToLog = dataToLog.replace("error", "error".bold.red);
   dataToLog = dataToLog.replace("Error", "Error".bold.red);
   dataToLog = dataToLog.replace("ERROR", "ERROR".bold.red);
   dataToLog = dataToLog.replace("HIGHLIGHT", "HIGHLIGHT".red.bold);
-  console.log(dataToLog);
+  if (this.flagBounceCopyToConsole) {
+    console.log(dataToLog);
+  }
   if (configuration.getConfiguration().configuration.noLogFiles) {
-    //console.log("DEBUG: got to this important line of code!!!!!!");
     return;
   }
   if (this.recentOutputs.length >= this.maximumLength ) {

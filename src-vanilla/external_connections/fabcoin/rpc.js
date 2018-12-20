@@ -310,6 +310,28 @@ var rpcCalls = {
     },
     parameters: ["signature", "publicKey", "message"]
   },
+  testECDSASignature: {
+    rpcCall: "testECDSASignature",
+    method: "testecdsasignature",
+    mandatoryModifiableArguments: {
+      privateKey: null,
+      messageHex: null,
+    },
+    optionalArguments: {
+      nonce: null
+    },
+    parameters: ["privateKey", "messageHex", "nonce"]
+  },
+  testECDSASignatureVerify: {
+    rpcCall: "testECDSASignatureVerify", 
+    method: "testecdsasignatureverify",
+    mandatoryModifiableArguments: {
+      signature: null,
+      publicKey: null,
+      messageHex: null
+    },
+    parameters: ["signature", "publicKey", "messageHex"]
+  },
   getLogFile: {
     rpcCall: "getLogFile",
     method: "getlogfile",

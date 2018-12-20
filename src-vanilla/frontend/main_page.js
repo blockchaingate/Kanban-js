@@ -77,11 +77,11 @@ function Page() {
       storageKanban.variables.includeKanbanGoAmountInTransactionOutputs,
       ids.defaults.kanbanGO.checkboxes.transactions.sendToContract,
     ], [
-      storageKanban.variables.includeFabcoinContractCallsInInputs,
-      ids.defaults.fabcoin.checkboxes.transactions.contractCallsInInputs,
+      storageKanban.variables.fullSignatureInInputsFabcoin,
+      ids.defaults.fabcoin.checkboxes.transactions.fullSignatureInInputs,
     ], [
-      storageKanban.variables.includeKanbanContractCallsInInputs,
-      ids.defaults.kanbanGO.checkboxes.transactions.contractCallsInInputs,
+      storageKanban.variables.fullSignatureInInputsKanban,
+      ids.defaults.kanbanGO.checkboxes.transactions.fullSignatureInInputs,
     ], [
       storageKanban.variables.secretSignsPublicKeyWithoutHashFabcoin,
       ids.defaults.fabcoin.checkboxes.transactions.secretSignsPubkeyNoHash,
@@ -130,6 +130,10 @@ Page.prototype.initialize = function() {
   miscellaneousFrontEnd.hookUpHexWithStringInput(
     ids.defaults.kanbanGO.inputSchnorr.message,
     ids.defaults.kanbanGO.inputSchnorr.messageHex,
+  );
+  miscellaneousFrontEnd.hookUpHexWithStringInput(
+    ids.defaults.fabcoin.inputCrypto.inputSchnorrSignature.messageToSha3,
+    ids.defaults.fabcoin.inputCrypto.inputSchnorrSignature.messageToSha3Hex,
   );
   //Load google login:
   gapi.load('auth2', login.login.gapiLoadCallback.bind(login.login));

@@ -215,6 +215,32 @@ function splitMultipleDelimiters(
   return result;
 }
 
+var whiteSpaceString = "\n\r\t ";
+var whiteSpaceObject = {};
+for (var i = 0; i < whiteSpaceString.length; i ++) {
+  whiteSpaceObject[whiteSpaceString[i]] = true;
+}
+
+/**@returns {String} */
+function trimeWhiteSpaceAtEnds(
+  /**@type {String} */ 
+  input,
+) {
+  var left = 0; 
+  var right = input.length - 1;
+  for (; left < input.length; left ++) {
+    if (!whiteSpaceObject[input[left]]) {
+      break;
+    }
+  }
+  for (; right >= 0; right --) {
+    if (!whiteSpaceObject[input[right]]) {
+      break;
+    }
+  }
+  return input.slice(left, right + 1);  
+}
+
 module.exports = {
   deepCopy,
   deepCopyThroughJSON,
@@ -225,6 +251,7 @@ module.exports = {
   getDurationReadableFromMilliseconds,
   shortenString,
   trimStringAtEnds,
+  trimeWhiteSpaceAtEnds,
   SpeedReport, 
   removeQuotes,
   convertToIntegerIfPossible,

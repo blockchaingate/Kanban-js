@@ -63,6 +63,7 @@ FabcoinNode.prototype.initStreams =  function() {
   this.outputStreams.command.colorIdConsole = "red";
   this.outputStreams.fabcoind.idConsole = "[fabcoind] ";
   this.outputStreams.fabcoind.colorIdConsole = "blue";
+  this.outputStreams.fabcoind.flagBounceCopyToConsole = true;
 }
 
 FabcoinNode.prototype.getArgumentsFromSpec = function(
@@ -157,8 +158,8 @@ FabcoinNode.prototype.getServerInformation = function (
   var result = {};
   result.memoryUsage = process.memoryUsage();
   result.requests = responseWrapperLib.responseStatsGlobal.toJSON();
-  result.leakSuspicions = memoryWatch.memoryWatcher.leakSuspicions;
-  result.memoryWatchStatistics = memoryWatch.memoryWatcher.latestStats;
+  //result.leakSuspicions = memoryWatch.memoryWatcher.leakSuspicions;
+  //result.memoryWatchStatistics = memoryWatch.memoryWatcher.latestStats;
   response.end(JSON.stringify(result));
 }
 
@@ -176,7 +177,7 @@ FabcoinNode.prototype.runFabcoind = function (response, argumentsNonSplitUnused,
     response.end(JSON.stringify(result));
     return;
   }
-  this.flagPrintingToConsole = false;
+  this.configuration.flagPrintingToConsole = false;
   this.argumentList = [];
   var argumentsNonSplit = queryCommand.arguments;
   if (typeof argumentsNonSplit === "string" && argumentsNonSplit !== "") {
@@ -223,6 +224,9 @@ FabcoinNode.prototype.runFabcoind = function (response, argumentsNonSplitUnused,
   };
   if (this.configuration.network !== "") {
     this.argumentList.push(this.configuration.network);
+  }
+  if (this.configuration.flagPrintingToConsole) {
+    this.argumentList.push("-printtoconsole");
   }
   this.runShell(this.paths.executableFileName, this.argumentList, options, null, this.outputStreams.fabcoind);
   response.writeHead(200);

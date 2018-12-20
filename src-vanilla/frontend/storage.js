@@ -61,15 +61,15 @@ function StorageKanban() {
       value: null,
       changeValueHandler: null,
     },
-    includeFabcoinContractCallsInInputs: {
-      name: "includeFabcoinContractCallsInInputs",
-      nameLocalStorage: "includeFabcoinContractCallsInInputs",
+    fullSignatureInInputsFabcoin: {
+      name: "fullSignatureInInputsFabcoin",
+      nameLocalStorage: "fullSignatureInInputsFabcoin",
       value: null,
       changeValueHandler: null,
     },
-    includeKanbanContractCallsInInputs: {
-      name: "includeKanbanContractCallsInInputs",
-      nameLocalStorage: "includeKanbanContractCallsInInputs",
+    fullSignatureInInputsKanban: {
+      name: "fullSignatureInInputsKanban",
+      nameLocalStorage: "fullSignatureInInputsKanban",
       value: null,
       changeValueHandler: null,
     },

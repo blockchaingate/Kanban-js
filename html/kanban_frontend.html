@@ -163,9 +163,9 @@
   <td>
   <div class = "divLabelButtonGroup">smart contract info</div><div id = "panelKBGOSmartcontractTransactionBuilder" class = "panelStandard">
     <label class = "containerCheckbox">
-    <input type = "checkbox" id = "checkboxKanbanIncludeContract_CallsInInputs" onchange = "window.kanban.kanbanGO.rpc.theKBNodes.readCheckboxesConfiguration(); window.kanban.fabcoin.rpc.fabNode.computeTxInsAndOuts(false);">
+    <input type = "checkbox" id = "checkboxKanbanIncludeFullSignatureInInputs" onchange = "window.kanban.kanbanGO.rpc.theKBNodes.readCheckboxesConfiguration(); window.kanban.fabcoin.rpc.fabNode.computeTxInsAndOuts(false);">
     <span class = "checkMark"></span>
-    Contract call in inputs
+    Full signature in inputs
     </label><br>     
     <label class = "containerCheckbox">
     <input type = "checkbox" id = "checkboxKanbanIncludeContractCalls" onchange = "window.kanban.kanbanGO.rpc.theKBNodes.readCheckboxesConfiguration(); window.kanban.fabcoin.rpc.fabNode.computeTxInsAndOuts(false);">
@@ -270,9 +270,9 @@
   <td>
   <div class = "divLabelButtonGroup">contract inputs</div><div id = "panelFabcoinSmartInputs" class = "panelStandard">
   <label class = "containerCheckbox">
-  <input type = "checkbox" id = "checkboxFabcoinIncludeContract_CallsInInputs" onchange = "window.kanban.kanbanGO.rpc.theKBNodes.readCheckboxesConfiguration(); window.kanban.fabcoin.rpc.fabNode.computeTxInsAndOuts(true);">
+  <input type = "checkbox" id = "checkboxFabcoinIncludeFullSignatureInInputs" onchange = "window.kanban.kanbanGO.rpc.theKBNodes.readCheckboxesConfiguration(); window.kanban.fabcoin.rpc.fabNode.computeTxInsAndOuts(true);">
   <span class = "checkMark"></span>
-  Contract call in inputs
+  Full signature in inputs
   </label><br>     
   <label class = "containerCheckbox">
   <input type = "checkbox" id = "checkboxFabcoinIncludeContractCalls" onchange = "window.kanban.kanbanGO.rpc.theKBNodes.readCheckboxesConfiguration(); window.kanban.fabcoin.rpc.fabNode.computeTxInsAndOuts(true);">
@@ -349,6 +349,10 @@
     <button class = "buttonStandard" style = "width: 100px" onclick = "window.kanban.fabcoin.rpc.fabNode.run('testSchnorrSignature');">Signature</button><br>
     <button class = "buttonStandard" style = "width: 100px" onclick = "window.kanban.fabcoin.rpc.fabNode.run('testSchnorrSignatureVerify');">Verify</button><br>
     </div>
+    <div class = "divLabelButtonGroup">ECDSA</div><div id = "panelECDSAFabcoindButtons" class = "panelStandard">
+    <button class = "buttonStandard" style = "width: 100px" onclick = "window.kanban.fabcoin.rpc.fabNode.run('testECDSASignature');">Signature</button><br>
+    <button class = "buttonStandard" style = "width: 100px" onclick = "window.kanban.fabcoin.rpc.fabNode.run('testECDSASignatureVerify');">Verify</button><br>
+    </div>
     <div class = "divLabelButtonGroup">aggregate</div><div id = "panelAggregateFabcoindButtons" class = "panelStandard">
     <button class = "buttonStandard" style = "width: 100px" onclick = "window.kanban.fabcoin.rpc.fabNode.testAggregateSignatureClear();">Clear</button><br>
     <button class = "buttonStandard" style = "width: 100px" onclick = "window.kanban.fabcoin.rpc.fabNode.run('testAggregateSignatureInitialize');">Initialize</button><br>
@@ -363,6 +367,7 @@
   <td>
   <div class = "divLabelButtonGroup">Schnorr inputs</div><div id = "panelSchnorrFabcoindInputs" class = "panelStandard">
     <input type = "text" class = "inputStandard" id = "inputFabcoinSchnorrMessage"    size = "50" placeholder = "message"></input><br>
+    <input type = "text" class = "inputStandard" id = "inputFabcoinSchnorrMessageHex"    size = "50" placeholder = "message hex"></input><br>
     <input type = "text" class = "inputStandard" id = "inputAddressDefault"           size = "50" placeholder = "fab address"></input><br>
     <input type = "text" class = "inputStandard" id = "inputPrivateKeySchnorrDefault" size = "50" placeholder = "private key Schnorr"></input><br>
     <input type = "text" class = "inputStandard" id = "inputNoncesDefault"            size = "50" placeholder = "nonce"></input><br>
