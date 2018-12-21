@@ -70,13 +70,6 @@ var url = {
       rpc: "/kanbanCPP_RPC"
     },
     login: "/login",
-    computationEngine: "/computation_engine",
-    logFileTestNetNoDNS: "/logFileTestNetNoDNS",
-    logFileTestNetNoDNSSession: "/logFileTestNetNoDNSSession",
-    logFileTestNet: "/logFileTestNet",
-    logFileTestNetSession: "/logFileTestNetSession",
-    logFileMainNet: "/logFileMainNet",
-    logFileMainNetSession: "/logFileMainNetSession",
   },
   whiteListed: {
   }

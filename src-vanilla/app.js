@@ -45,6 +45,10 @@ function initializeAndRun() {
   //Read configuration from secreta_admin/configuration.json:
   global.kanban.configuration.readSecretsAdmin();
 
+  if (global.kanban.configuration.configuration.noLogFiles) {
+    console.log("Console logs are discarded after first flush".red);
+  }
+
   //Server ssl certificates:
   global.kanban.certificateOptions = new certificateOptions.CertificateOptions();
   global.kanban.certificateOptions.computeCertificates(initializeAndRunPart2);

@@ -6,7 +6,7 @@
 
 "use strict";
 const daemon = require('daemonize2').setup({
-  main: "app.js",
+  main: "app_monitor.js",
   name: "kanban",
   pidfile: "../kanban.pid"
 });
@@ -22,3 +22,4 @@ switch (process.argv[2]) {
     console.log("Usage: [start|stop]");
     break;
 }
+

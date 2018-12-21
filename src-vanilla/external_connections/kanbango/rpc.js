@@ -1,7 +1,9 @@
 "use strict";
 
 var urlStrings = {
-  node: "node",
+  serviceLabelReserved: "serviceLabelReserved",
+  callType: "callType",
+  nodeId: "nodeId",
   rpcCallLabel: "rpcCall",
   errorKanbanNodeStartWasNeverAttempted: "KanbanGo start was never attempted. ",
 };
@@ -20,13 +22,29 @@ var rpcCalls = {
     mandatoryFixedArguments: { //<- values give defaults, null for none
     },
     mandatoryModifiableArguments: { //<- values give defaults, null for none
-      message: null
+      message: null,
     },
     optionalArguments: {
     },
     allowedArgumentValues: {
     },
     parameters: ["message"]
+  },
+  testSha2: {
+    rpcCall: "testSha2", //must be same as rpc label, used for autocomplete
+    method: "cryptotest_testSha2", //<- name of go's RPC method 
+    mandatoryModifiableArguments: { //<- values give defaults, null for none
+      messageHex: null,
+    },
+    parameters: ["messageHex"]
+  },
+  testSha2Squared: {
+    rpcCall: "testSha2Squared", //must be same as rpc label, used for autocomplete
+    method: "cryptotest_testSha2Squared", //<- name of go's RPC method 
+    mandatoryModifiableArguments: { //<- values give defaults, null for none
+      messageHex: null,
+    },
+    parameters: ["messageHex"]
   },
   testPrivateKeyGeneration: {
     rpcCall: "testPrivateKeyGeneration",
@@ -37,18 +55,37 @@ var rpcCalls = {
     rpcCall: "testPublicKeyFromPrivate",
     method: "cryptotest_testPublicKeyFromPrivate", 
     mandatoryModifiableArguments: {
-      privateKey: null
+      privateKey: null,
     },
     parameters: ["privateKey"]
+  },
+  testECDSASignature: {
+    rpcCall: "testECDSASignature",
+    method: "cryptotest_testECDSASignature",
+    mandatoryModifiableArguments: {
+      privateKey: null,
+      messageHex: null,
+    },
+    parameters: ["privateKey", "messageHex"]
+  },
+  testECDSAVerification: {
+    rpcCall: "testECDSAVerification",
+    method: "cryptotest_testECDSAVerification",
+    mandatoryModifiableArguments: {
+      signatureHex: null,
+      publicKey: null,
+      messageHex: null,
+    },
+    parameters: ["signature", "publicKey", "messageHex"]
   },
   testSchnorrSignature: {
     rpcCall: "testSchnorrSignature", 
     method: "cryptotest_testSchnorrSignature",
     mandatoryModifiableArguments: {
       privateKey: null,
-      messageBase64: null
+      messageHex: null,
     },
-    parameters: ["privateKey", "messageBase64"]
+    parameters: ["privateKey", "messageHex"]
   },
   testSchnorrVerification: {
     rpcCall: "testSchnorrVerification",
@@ -56,9 +93,9 @@ var rpcCalls = {
     mandatoryModifiableArguments: {
       signature: null,
       publicKey: null,
-      messageBase64: null,
+      messageHex: null,
     },
-    parameters: ["signature", "publicKey", "messageBase64"]
+    parameters: ["signature", "publicKey", "messageHex"]
   },
   testAggregateGeneratePrivateKeys: {
     rpcCall: "testAggregateGeneratePrivateKeys", 
@@ -100,7 +137,7 @@ var rpcCalls = {
       committedSigners: null,
       digest: null,
       aggregateCommitment: null,
-      aggregatePublicKey: null
+      aggregatePublicKey: null,
     },
     parameters: ["committedSigners", "digest", "aggregateCommitment", "aggregatePublicKey"]    
   },
@@ -137,7 +174,7 @@ var rpcCalls = {
     rpcCall: "getBlockByNumber",
     method: "kanban_getBlockByNumber",
     optionalArguments: {
-      blockNumber: null
+      blockNumber: null,
     },
     mandatoryModifiableArguments: {
       verbose: true,
@@ -204,7 +241,7 @@ var rpcCalls = {
     mandatoryModifiableArguments: {
       messageHex: null,
     },
-    parameters: ["messageHex"]
+    parameters: ["messageHex"],
   },
   rpcModules: {
     rpcCall: "rpcModules",
@@ -221,10 +258,19 @@ var rpcCalls = {
         transactionValue: null,
     },
     parameters: ["privateKey", "toAddress", "transactionNumber", "transactionValue"]
-  }
+  },
+  testCreateAndSignTransactionStandard: {
+    rpcCall: "testCreateAndSignTransactionStandard",
+    method: "pbfttest_testCreateAndSignTransactionStandard",
+    mandatoryModifiableArguments: {
+      inputs: null,
+      outputs: null,
+    },
+    parameters: ["inputs", "outputs"],
+  },
 };
 
 module.exports = {
   urlStrings,
-  rpcCalls
+  rpcCalls,
 }

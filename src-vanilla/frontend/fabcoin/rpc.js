@@ -8,7 +8,7 @@ const submitRequests = require('../submit_requests');
 const jsonToHtml = require('../json_to_html');
 const miscellaneousBackend = require('../../miscellaneous');
 const miscellaneousFrontEnd = require('../miscellaneous_frontend');
-const jsonic = require('jsonic');
+//const jsonic = require('jsonic');
 const cryptoKanban = require('../../crypto/crypto_kanban');
 const encodingsKanban = require('../../crypto/encodings');
 const fabcoinInitializationFrontend = require('./initialization');
@@ -18,11 +18,11 @@ function FabNode() {
   var inputKBGOInitialization = ids.defaults.kanbanGO.inputInitialization;
   var inputFabCryptoSchnorr = ids.defaults.fabcoin.inputCrypto.inputSchnorrSignature;
   var inputFabCryptoAggregate = ids.defaults.fabcoin.inputCrypto.inputAggregateSignature;
-  var initializer = fabcoinInitializationFrontend.initializer;
+  //var initializer = fabcoinInitializationFrontend.initializer;
   this.transformersStandard = {
     blockHash: this.getSetInputAndRunWithShortener(inputFabBlock.blockHash, "getBlockByHash", "Sets the block hash field &amp; and fetches the block info. "),
     shortener: {
-      transformer: miscellaneousBackend.hexShortenerForDisplay
+      transformer: miscellaneousBackend.hexShortener4Chars
     },
     extremeShortener: {
       transformer: miscellaneousBackend.hexVeryShortDisplay
@@ -32,7 +32,7 @@ function FabNode() {
     setAddress: this.getSetInputWithShortener(inputFabBlock.address),
     setPrivateKey: {
       clickHandler: this.setPrivateKeyComputeAllElse.bind(this),
-      transformer: miscellaneousBackend.hexShortenerForDisplay,
+      transformer: miscellaneousBackend.hexShortener4Chars,
     },
     setPrivateKeySchnorr: this.getSetInputWithShortener(inputFabCryptoSchnorr.privateKey),
     setNonceSchnorr: this.getSetInputWithShortener(inputFabCryptoSchnorr.nonce),
@@ -47,7 +47,7 @@ function FabNode() {
     },
     setContractId: {
       clickHandler: this.setContractId.bind(this),
-      transformer: miscellaneousBackend.hexShortenerForDisplay
+      transformer: miscellaneousBackend.hexShortener4Chars
     },
     setSchnorrSignature: this.getSetInputWithShortener(inputFabCryptoSchnorr.signature),
     setAggregateSignature: this.getSetInputWithShortener(inputFabCryptoAggregate.theAggregation),
@@ -91,6 +91,7 @@ function FabNode() {
       "vin.${number}.txid": this.transformersStandard.transactionId,
       "vin.${number}.scriptSig.asm": this.transformersStandard.shortener,
       "vin.${number}.scriptSig.hex": this.transformersStandard.shortener,
+      comments: this.transformersStandard.shortener,
     }
   };
   this.optionsContract = {
@@ -257,36 +258,37 @@ function FabNode() {
       outputs: {
         hex: inputFabBlock.txHex,
       },
-      outputOptions: this.optionsTransaction
+      outputOptions: this.optionsTransaction,
     },
     sendRawTransaction: {
       inputs: {
         rawTransactionHex: inputFabBlock.txHex
       },
-      outputOptions: this.optionsTransaction
+      outputOptions: this.optionsTransaction,
     },
     insertAggregateSignature: {
       inputs: {
         rawTransaction: inputFabBlock.txHex,
         aggregateSignature: inputFabBlock.txAggregateSignature,
       },
-      outputOptions: this.optionsTransaction
+      outputOptions: this.optionsTransaction,
     },
     getRawMempool: {
       outputOptions: {
         transformers: {
-          "${number}" : this.transformersStandard.transactionId
+          "${number}" : this.transformersStandard.transactionId,
         }
       }
     },
     createContract: {
       inputs: {
-        contractHex: inputFabBlock.contractHex
+        contractHex: inputFabBlock.contractHex,
       },
       outputs: {
         address: [
           inputFabBlock.contractId, 
           inputKBGOInitialization.contractId, 
+          ids.defaults.kanbanGO.inputSendReceive.contractId,
           ids.defaults.fabcoin.inputInitialization.smartContractId,
         ],
       },
@@ -303,44 +305,48 @@ function FabNode() {
       inputs: {
         contractId: inputFabBlock.contractId,
         data: inputFabBlock.contractData,
-        amount: inputFabBlock.walletAmount,
+        amount: inputFabBlock.txBeneficiaryAmounts,
+        gasLimit: inputFabBlock.gasLimit,
+        gasPrice: inputFabBlock.gasPrice,
+        senderAddress: inputFabBlock.address
       },
       outputOptions: this.optionsContract,
     },
     listContracts: {
       outputOptions: {
+        layoutObjectAsArray: true,
         transformers: {
-          "${label}" : this.transformersStandard.setContractId
+          "_rowLabel" : this.transformersStandard.setContractId,
         }
       }
     },
     getNewAddress: {
       outputOptions: {
         transformers: {
-          singleEntry: this.transformersStandard.setAddress
+          singleEntry: this.transformersStandard.setAddress,
         }
       }
     },
     testSha3: {
       inputsBase64: {
-        message: inputFabCryptoSchnorr.messageToSha3
+        message: inputFabCryptoSchnorr.messageToSha3,
       },
       callType: this.callTypes.crypto,
     },
     testPrivateKeyGeneration: {
       outputs: {
-        privateKeyBase58Check: inputFabCryptoSchnorr.privateKey
+        privateKeyBase58Check: inputFabCryptoSchnorr.privateKey,
       },
       callType: this.callTypes.crypto,
     },
     testPublicKeyFromPrivate: {
       inputs: {
-        privateKey: inputFabCryptoSchnorr.privateKey
+        privateKey: inputFabCryptoSchnorr.privateKey,
       },
       callType: this.callTypes.crypto,
       outputs: {
-        publicKeyHexCompressed: inputFabCryptoSchnorr.publicKey
-      }
+        publicKeyHexCompressed: inputFabCryptoSchnorr.publicKey,
+      },
     },
     testSchnorrSignature: {
       inputs: {
@@ -361,6 +367,24 @@ function FabNode() {
       },
       inputsBase64: {
         message: inputFabCryptoSchnorr.messageToSha3
+      },
+      callType: this.callTypes.crypto
+    },
+    testECDSASignature: {
+      inputs: {
+        privateKey: inputFabCryptoSchnorr.privateKey,
+        messageHex: inputFabCryptoSchnorr.messageToSha3Hex
+      },
+      outputs: {
+        signatureSchnorrBase58: inputFabCryptoSchnorr.signature
+      },
+      callType: this.callTypes.crypto,
+    },
+    testECDSASignatureVerify: {
+      inputs: {
+        signature: inputFabCryptoSchnorr.signature,
+        publicKey: inputFabCryptoSchnorr.publicKey,
+        messageHex: inputFabCryptoSchnorr.messageToSha3Hex
       },
       callType: this.callTypes.crypto
     },
@@ -448,33 +472,11 @@ function FabNode() {
 
 }
 
-FabNode.prototype.sanitizeTxOutputs = function() {
-  var txOuts = this.getObjectFromInput(ids.defaults.fabcoin.inputBlockInfo.txOutputs);
-  var isGood = true;
-  if (typeof txOuts === "object") {
-    if (Object.keys(txOuts).length <= 0) {
-      isGood = false;
-    }
-  } else {
-    isGood = false;
-  }
-  if (isGood) {
-    return;
-  }
-  var sanitizedTxOuts = {};
-  if (typeof txOuts !== "string") {
-    miscellaneousFrontEnd.highlightError(ids.defaults.fabcoin.inputBlockInfo.txOutputs);
-    return;
-  }
-  sanitizedTxOuts[txOuts] = 0;
-  miscellaneousFrontEnd.updateValue(ids.defaults.fabcoin.inputBlockInfo.txOutputs, jsonic.stringify(sanitizedTxOuts));
-}
-
 FabNode.prototype.getObjectFromInput = function(inputId) {
   var rawInput = document.getElementById(inputId).value;
   var outputObject = null;
   try {
-    outputObject = jsonic(rawInput);
+    outputObject = JSON.parse(rawInput);
   } catch (e) {
     if (typeof rawInput === "string") {
       outputObject = rawInput;
@@ -501,7 +503,7 @@ FabNode.prototype.getSetInputAndRunWithShortener = function(idOutput, functionLa
   var runner = this.run.bind(this, functionLabelToFun);
   return {
     clickHandler: this.combineClickHandlers.bind(this, [setter, runner]),
-    transformer: miscellaneousBackend.hexShortenerForDisplay,
+    transformer: miscellaneousBackend.hexShortener4Chars,
     tooltip: tooltip
   };  
 }
@@ -515,106 +517,165 @@ FabNode.prototype.getSetInputNoShortener = function(idOutput) {
 FabNode.prototype.getSetInputWithShortener = function(idOutput) {
   return {
     clickHandler: this.setInput.bind(this, idOutput),
-    transformer: miscellaneousBackend.hexShortenerForDisplay
+    transformer: miscellaneousBackend.hexShortener4Chars
   };  
 }
 
-FabNode.prototype.setTxOutput = function() {
+FabNode.prototype.computeTxInsAndOuts = function(sourceIsFabPage) {
   var inputFab = ids.defaults.fabcoin.inputBlockInfo;
-  var address = document.getElementById(inputFab.txOutputAddresses).value;
-  var publicKeysForAggregateString = document.getElementById(inputFab.txAggregatePublicKeys).value;
-  var amount = document.getElementById(inputFab.walletAmount).value;
-  var isGood = true;
-  if (address === "" || address === null || address === undefined) {
-    miscellaneousFrontEnd.highlightError(inputFab.txOutputAddresses);
-    isGood = false;
+  var inputKB = ids.defaults.kanbanGO.inputSendReceive;
+  var incomingIds;
+  var incomingNOuts;
+  var incomingOutAddresses;
+  var incomingAmounts;
+  var inputIdContainer;
+  var incomingGasPrice;
+  var incomingGasLimit;
+  var smartContractId;
+  var smartContractData;
+  var otherIdContainer;
+  var aggregatePubKeys;
+  var currentCheckboxIds;
+  var otherCheckboxIds;
+  if (sourceIsFabPage) {
+    inputIdContainer    = inputFab;
+    otherIdContainer    = inputKB;
+    currentCheckboxIds  = ids.defaults.fabcoin.checkboxes.transactions;
+    otherCheckboxIds    = ids.defaults.kanbanGO.checkboxes.transactions;
+  } else  {
+    inputIdContainer    = inputKB;
+    otherIdContainer    = inputFab;
+    currentCheckboxIds  = ids.defaults.kanbanGO.checkboxes.transactions;
+    otherCheckboxIds    = ids.defaults.fabcoin.checkboxes.transactions;
   }
-  var publicKeysForAggregate = null;
-  if (publicKeysForAggregateString.trim() !== "") {
-    try {
-      publicKeysForAggregate = JSON.parse(publicKeysForAggregateString);
-      isGood = true;
-    } catch (e) {
-      console.log("Error parsing public keys for aggregate signature. ");
-      publicKeysForAggregate = null;
+  incomingIds = document.getElementById(inputIdContainer.txInIds).value;
+  incomingNOuts = document.getElementById(inputIdContainer.txInNOuts).value;
+  incomingOutAddresses = document.getElementById(inputIdContainer.txBeneficiaryAddresses).value;
+  incomingAmounts = document.getElementById(inputIdContainer.txBeneficiaryAmounts).value;
+  incomingGasPrice = document.getElementById(inputIdContainer.gasPrice).value;
+  incomingGasLimit = document.getElementById(inputIdContainer.gasLimit).value;
+  smartContractId = document.getElementById(inputIdContainer.contractId).value;
+  smartContractData = document.getElementById(inputIdContainer.contractData).value;
+  aggregatePubKeys = document.getElementById(inputFab.txAggregatePublicKeys).value;
+  var secretInString = document.getElementById(inputIdContainer.secretIn).value;
+
+  var smartContractInOutputs = document.getElementById(currentCheckboxIds.contractCallsInOutputs).checked;
+  var fullSignatureInInputs = document.getElementById(currentCheckboxIds.fullSignatureInInputs).checked; 
+  var usePayToPubkeyWithoutHash = document.getElementById(currentCheckboxIds.secretSignsPubkeyNoHash).checked;
+  var doSendToContract = document.getElementById(currentCheckboxIds.sendToContract).checked;
+  var incomingIdArray = miscellaneousBackend.splitMultipleDelimiters(incomingIds, ", \t");
+  var incomingNOutArray = miscellaneousBackend.splitMultipleDelimiters(incomingNOuts, ", \t");
+  var secretInArray = miscellaneousBackend.splitMultipleDelimiters(secretInString, ", \t");
+  var resultIn = [];
+  var counterSecret = 0;
+  
+  if (fullSignatureInInputs) {
+    var contractObject = {
+      txid: "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
+      vout: 0,
+      secretIn: secretInArray[counterSecret],
+      isPayToPublicWithoutHash: usePayToPubkeyWithoutHash,
+    };
+    counterSecret ++;
+    resultIn.push(contractObject)
+  }
+  var resultOut = {};
+  for (var i = 0; i < incomingIdArray.length; i ++) {
+    var incomingIn = {
+      txid: incomingIdArray[i],
+      vout: Number(incomingNOutArray[i]),
+    };
+    if (counterSecret < secretInArray.length) {
+      incomingIn.secretIn = secretInArray[counterSecret];
+      incomingIn.isPayToPublicWithoutHash = usePayToPubkeyWithoutHash;
+      counterSecret ++;
     }
+    resultIn.push(incomingIn);
   }
-  if (amount === "" || amount === null || amount === undefined) {
-    miscellaneousFrontEnd.highlightError(inputFab.walletAmount);
-    isGood = false;
+  var incomingOutAddressArray = miscellaneousBackend.splitMultipleDelimiters(incomingOutAddresses, ", \t");
+  var incomingOutAmountArray = miscellaneousBackend.splitMultipleDelimiters(incomingAmounts, ", \t");
+
+  var amountCounter = 0;
+  if (aggregatePubKeys !== "" && typeof aggregatePubKeys === "string") {
+    resultOut.aggregateSignature = {
+      publicKeysHex: aggregatePubKeys,
+      amount: Number(incomingOutAmountArray[amountCounter]),
+    };
+    amountCounter ++;
   }
-  if (!isGood) {
-    return;
+  if (smartContractInOutputs) {
+    resultOut.contract = {};
+    resultOut.contract.contractAddress = smartContractId;
+    resultOut.contract.data = smartContractData;
+    resultOut.contract.coverFees = false;
+    if (doSendToContract) {
+      resultOut.contract.amount = Number(incomingOutAmountArray[amountCounter]);
+      if (incomingGasLimit !== "" && incomingGasLimit !== null && incomingGasLimit !== undefined) {
+        resultOut.contract.gasLimit = Number(incomingGasLimit);
+      }
+      if (incomingGasPrice !== "" && incomingGasPrice !== null && incomingGasPrice !== undefined) {
+        resultOut.contract.gasPrice = incomingGasPrice;
+      }
+      amountCounter ++;
+    } else {
+      resultOut.contract.coverFees = true;
+    } 
   }
-  var currentOutputsRaw;
-  var currentOutputs; 
-  try {
-    currentOutputsRaw = document.getElementById(inputFab.txOutputs).value;
-    currentOutputs = jsonic(currentOutputsRaw);
-    if (address !== null && address !== undefined && address !== "") {
-      currentOutputs[address] = amount;
-      amount = 0;
+  for (var i = 0; i < incomingOutAddressArray.length; i ++) {
+    var incomingAmount = incomingOutAmountArray[amountCounter];
+    if (incomingAmount === undefined) {
+      console.log("Not enough amount values listed. ");
     }
-    if (publicKeysForAggregate !== null) {
-      currentOutputs.aggregateSignature = {
-        publicKeys: publicKeysForAggregate,
-        amount: amount,
-      };
-    }
-    miscellaneousFrontEnd.updateValue(inputFab.txOutputs, JSON.stringify(currentOutputs));
-  } catch (e) {
-    console.log(`Failed to parse your current transaction inputs. Inputs raw: ${currentOutputsRaw}. Inputs parsed: ${JSON.stringify(currentOutputs)}. ${e}`);
-    miscellaneousFrontEnd.highlightError(inputFab.txOutputs);
-    return;    
+    resultOut[incomingOutAddressArray[i]] = incomingAmount;
+    amountCounter ++;
+  }
+  miscellaneousFrontEnd.updateValue(otherIdContainer.contractId, smartContractId);
+  miscellaneousFrontEnd.updateValue(otherIdContainer.contractData, smartContractData);
+
+  miscellaneousFrontEnd.updateValue(otherIdContainer.secretIn, secretInString);
+  miscellaneousFrontEnd.updateValue(otherIdContainer.txInIds, incomingIds);
+  miscellaneousFrontEnd.updateValue(otherIdContainer.txInNOuts, incomingNOuts);
+  miscellaneousFrontEnd.updateValue(otherIdContainer.txBeneficiaryAddresses, incomingOutAddresses);
+  miscellaneousFrontEnd.updateValue(otherIdContainer.txBeneficiaryAmounts, incomingAmounts);
+  miscellaneousFrontEnd.updateValue(otherIdContainer.gasPrice, incomingGasPrice);
+  miscellaneousFrontEnd.updateValue(otherIdContainer.gasLimit, incomingGasLimit);
+
+  incomingIds = document.getElementById(inputIdContainer.txInIds).value;
+  incomingNOuts = document.getElementById(inputIdContainer.txInNOuts).value;
+  incomingOutAddresses = document.getElementById(inputIdContainer.txBeneficiaryAddresses).value;
+  incomingAmounts = document.getElementById(inputIdContainer.txBeneficiaryAmounts).value;
+
+  miscellaneousFrontEnd.updateValue(inputFab.txInputs, JSON.stringify(resultIn));
+  miscellaneousFrontEnd.updateValue(inputFab.txOutputs, JSON.stringify(resultOut));
+  miscellaneousFrontEnd.updateValue(inputKB.txInputs, JSON.stringify(resultIn));
+  miscellaneousFrontEnd.updateValue(inputKB.txOutputs, JSON.stringify(resultOut));
+  for (var label in currentCheckboxIds) {
+    document.getElementById(otherCheckboxIds[label]).checked = document.getElementById(currentCheckboxIds[label]).checked;
   }
 }
 
 FabNode.prototype.setTxInputVoutAndValue = function(container, content, extraData) {
   var inputFab = ids.defaults.fabcoin.inputBlockInfo;
+  var inputKanban = ids.defaults.kanbanGO.inputSendReceive;
   var incomingAmount = 0;
+  var incomingFees = 0;
   if (extraData.labelArray[extraData.labelArray.length - 1] === "value") {
     incomingAmount = content - 1;
+    incomingFees = 1;
   }
   var incomingId = extraData.ambientInput.txid;
-  var incomingVout = extraData.labelArray[extraData.labelArray.length - 2];
-  var addressVout = null;
-  try{
-    addressVout = extraData.ambientInput.vout[incomingVout].scriptPubKey.addresses[0];
-  } catch (e) {
-  }
-  /**@type {string} */
-  var currentInputsRaw;
-  var currentInputs;
-  try {
-    currentInputsRaw = document.getElementById(inputFab.txInputs).value;
-    if (currentInputsRaw.trim() === "") {
-      currentInputs = [];
-    } else {
-      currentInputs = jsonic(currentInputsRaw);
-    }
-    var found = false;
-    for (var counterInputs = 0; counterInputs < currentInputs.length; counterInputs ++) {
-      var currentIn = currentInputs[counterInputs];
-      if (currentIn.txid === incomingId) {
-        currentIn.vout = incomingVout
-        found = true;
-        break;
-      }
-    }
-    if (!found) {
-      currentInputs.push({txid: incomingId, vout: incomingVout });
-    }
-    miscellaneousFrontEnd.updateValue(inputFab.txInputs, jsonic.stringify(currentInputs));
-    if (addressVout !== null) {
-      miscellaneousFrontEnd.updateValue(inputFab.address, addressVout);
-    }
-    miscellaneousFrontEnd.updateValue(inputFab.walletAmount, incomingAmount);
-    this.setTxOutput();
-  } catch (e) {
-    console.log(`Failed to parse your current transaction inputs. Inputs raw: ${currentInputsRaw}. Inputs parsed: ${JSON.stringify(currentInputs)}. ${e}`);
-    miscellaneousFrontEnd.highlightError(inputFab.txInputs);
-    return;
-  }
+  var incomingNOut = extraData.labelArray[extraData.labelArray.length - 2];
+
+  miscellaneousFrontEnd.updateValue(inputFab.txInIds, incomingId);
+  miscellaneousFrontEnd.updateValue(inputFab.txInNOuts, incomingNOut);
+  miscellaneousFrontEnd.updateValue(inputFab.txBeneficiaryAmounts, incomingAmount);
+  miscellaneousFrontEnd.updateValue(inputFab.txFee, incomingFees);
+
+  miscellaneousFrontEnd.updateValue(inputKanban.txInIds, incomingId);
+  miscellaneousFrontEnd.updateValue(inputKanban.txInNOuts, incomingNOut);
+  miscellaneousFrontEnd.updateValue(inputKanban.txBeneficiaryAmounts, incomingAmount);
+  miscellaneousFrontEnd.updateValue(inputKanban.txFee, incomingFees);
+  this.computeTxInsAndOuts(true);
 }
 
 FabNode.prototype.setContractId = function(container, content, extraData) {
@@ -762,6 +823,9 @@ FabNode.prototype.getArguments = function(functionLabelFrontEnd, functionLabelBa
     } else if (typeof inputObject === "function"){
       //inputObject is a function that returns the raw input
       rawInput = inputObject();
+    }
+    if (rawInput === null || rawInput === undefined || rawInput === "") {
+      continue;
     }
     theArguments[inputLabel] = this.convertToCorrectType(functionLabelBackend, inputLabel, rawInput);
   }

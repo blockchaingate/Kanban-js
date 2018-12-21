@@ -5,7 +5,6 @@ var defaults = {
   pageTXInfo: "pageTXInfo",
   pageNetwork: "pageNetwork",
   pageTestGPU: "pageTestGPU",
-  pageMyNodes: "pageMyNodes",
   pageSend: "pageSend",
   pageMine: "pageMine",
   pageProfiling: "pageProfiling",
@@ -20,9 +19,11 @@ var defaults = {
       smartContract: "pageFabcoinSmartContract",
       crypto: "pageFabcoinCrypto",
     },
+    myNodes: "pageMyNodes",
     themes: "pageThemes",
     privacyPolicy: "pagePrivacyPolicy",
     login: "pageLogin",
+    serverStatus: "pageServerStatus",
   },
   themes: {
     radios: {
@@ -70,6 +71,7 @@ var defaults = {
   kanbanGO: {
     inputSchnorr: {
       message: "inputKBGOSchnorrMessage",
+      messageHex: "inputKBGOSchnorrMessageHex",
       privateKey: "inputKBGOSchnorrPrivateKey",
       nonce: "inputKBGOSchnorrNonce",
       publicKey: "inputKBGOSchnorrPublicKey",
@@ -97,6 +99,24 @@ var defaults = {
       blockHash: "inputKBGOBlockHash",
       messageVoteHex: "inputKBGOVoteMessageHex",
       messageVote: "inputKBGOVoteMessage",
+      // The following labels must match those in the fab page
+      secretIn: "inputKBGOSecretIn",
+      txHex: "inputKBGOTransactionHex",
+      txInIds: "inputKBGOTransactionInId",
+      txInNOuts: "inputKBGOTransactionInNOut",
+      txBeneficiaryAddresses: "inputKBGOTransactionBeneficiaryAddress",
+      txBeneficiaryAmounts: "inputKBGOTransactionBeneficiaryAmount",
+      txFee: "inputKBGOTransactionFees",
+      txInputs: "inputKBGOTransactionInputs",
+      txOutputs: "inputKBGOTransactionOutputs",
+      contractId: "inputKBGOSmartContractId",
+      contractFunctionName: "inputKBGOSmartContractFunctionName",
+      gasLimit: "inputKBGOGasLimit",
+      gasPrice: "inputKBGOGasPrice",
+      contractFunctionId: "inputKBGOSmartContractFunctionId",
+      contractFunctionArguments: "inputKBGOSmartContractFunctionArguments",
+      contractData: "inputKBGOSmartContractData",
+      // end of matching 
     },
     inputBenchmarkParameters: {
       toAddress: "inputKBGOToAddress",
@@ -105,43 +125,36 @@ var defaults = {
       transactionValue:  "inputKBGOTransactionValue",
     },
     inputInitialization: {
+      bridgeChainnet: "inputKBGOBridgeChainNet",
       numberOfNodes: "inputKBGONumberOfGethNodes",
       contractId: "inputKBGOContractId",
       contractABI: "inputKBGOContractABI"
     },
+    checkboxes: {
+      transactions: {
+        fullSignatureInInputs: "checkboxKanbanIncludeFullSignatureInInputs",
+        contractCallsInOutputs: "checkboxKanbanIncludeContractCalls",
+        sendToContract: "checkboxKanbanSendToContract",
+        secretSignsPubkeyNoHash: "checkboxKanbanSecretSignsPubkeyNoHash"
+      },
+    },
+    checkboxConnectKanbansInALine: "checkboxConnectKanbansInALine",
     checkboxFabcoindAutostartAfterKanbanGO: "checkboxFabcoindAutostartAfterKanbanGO",
     nodePanel: "spanKanbanGoNodeContainer",
     outputKBGOTest: "divOutputKBGOTest",
     outputKanbanInitialization: "divOutputMyLocalKanbanNodes",
-    outputSendReceive: "divOutputKBGOSendReceive"
+    outputSendReceive: "divOutputKBGOSendReceive",
   },
-  kanbanPlusPlus: {
-    inputSchnorrSignature: {
-      publicKey: "inputPublicKeyDefault",
-      privateKey: "inputPrivateKeySchnorrDefault",
-      messageToSha3: "inputMessageToSha3",
-      nonce: "inputNoncesDefault",
-      signature: "inputSignatureDefault",
+  serverStatus: {
+    outputServerStatus: "divOutputServerStatus",
+  },
+  myNodes: {
+    outputMyNodes: "divMyNodesOutput",
+    inputSSH: {
+      machineNames: "inputMyNodeNames",
+      command: "inputMyNodesCommand",
     },
-    inputAggregateSignature: {
-      message: "inputAggregateSignatureMessage",
-      commitments: "inputAggregateSignatureCommitments",
-      numberOfPrivateKeysToGenerate: "inputAggregateSignatureNumberOfPrivateKeysToGenerate",
-      privateKeys: "inputAggregateSignaturePrivateKeys",
-      publicKeys: "inputAggregateSignaturePublicKeys",
-      committedSignersBitmap: "inputAggregateSignatureCommittedSignersBitmap",
-      messageDigest: "inputAggregateSignatureMessageDigest",
-      aggregatePubkey: "inputAggregateSignatureAggregatePubkey",    
-      aggregateCommitment: "inputAggregateSignatureAggregateCommitment",
-      solutions: "inputAggregateSignaturesSolutions",
-      nonces: "inputAggregateSignatureNonces",
-      theAggregation: "inputAggregateSignaturesTheAggregation",
-      aggregateSignatureComplete: "inputAggregateSignatureComplete",
-    },
-    inputAddressDefault: "inputAddressDefault",
-    outputKanbanPlusPlusGeneral: "divKanbanPlusPlusOutput",
-    outputKanbanPlusPlusSecond: "divKanbanPlusPlusOutputSecond",
-    divKanbanPlusPlusOutputThird: "divKanbanPlusPlusOutputThird"
+
   },
   fabcoin: {
     inputInitialization: {
@@ -152,32 +165,49 @@ var defaults = {
       blockNumber: "inputFabcoinBlockNumber",
       blockHash: "inputFabcoinBlockHash",
       numberOfBlocksToGenerate: "inputFabcoinNumberOfBlocksToGenerate",
-      txid: "inputFabcoinTransactionId",
-      txHex: "inputFabcoinTransactionHex",
       address: "inputFabcoinAddress",
       addressMainnet: "inputFabcoinAddressMainnet",
       addressEthereum: "inputEthereumAddress",
       publicKey: "inputFabcoinPublicKey",
       privateKey: "inputFabcoinPrivateKey",
-      txOutputs: "inputFabcoinTransactionOutputs",
-      txOutputAddresses: "inputFabcoinTransactionOutputAddresses",
+      txid: "inputFabcoinTransactionId",
+      // The following labels must match those in the kanbabGO page
+      txHex: "inputFabcoinTransactionHex",
+      secretIn: "inputFabcoinSecretIn",
+      txInIds: "inputFabcoinTxInIds",
+      txInNOuts: "inputFabcoinTxInNOuts",
+      txBeneficiaryAddresses: "inputFabcoinBeneficiaryAddresses",
+      txBeneficiaryAmounts: "inputFabcoinBeneficiaryAmounts",
+      txFee: "inputFabcoinFee",
       txInputs: "inputFabcoinTransactionInputs",
-      txAggregatePublicKeys: "inputAggregateSignaturePubKeysForTx",
-      txAggregateSignature: "inputAggregateSignatureForTx",
+      txOutputs: "inputFabcoinTransactionOutputs",
       contractHex: "inputFabcoinContractHex",
       contractId: "inputFabcoinContractId",
+      gasLimit: "inputFabcoinGasLimit",
+      gasPrice: "inputFabcoinGasPrice",
       contractData: "inputFabcoinContractData",
-      contractFunctionData: "inputFabcoinContractFunctionData",
+      contractFunctionArguments: "inputFabcoinContractFunctionArguments",
       contractFunctionId: "inputFabcoinContractFunctionId",
-      walletAmount: "inputFabcoinWalletAmount",
+      // end of matching 
+      txAggregatePublicKeys: "inputAggregateSignaturePubKeysForTx",
+      txAggregateSignature: "inputAggregateSignatureForTx",
       solidityInput: "aceEditor",
       contractFunctionName: "inputSolidityFunctionName",
+    },
+    checkboxes: {
+      transactions: {
+        fullSignatureInInputs: "checkboxFabcoinIncludeFullSignatureInInputs",
+        contractCallsInOutputs: "checkboxFabcoinIncludeContractCalls",
+        sendToContract: "checkboxFabcoinSendToContract",
+        secretSignsPubkeyNoHash: "checkboxFabcoinSecretSignsPubkeyNoHash",
+      },
     },
     inputCrypto: {
       inputSchnorrSignature: {
         publicKey: "inputPublicKeyDefault",
         privateKey: "inputPrivateKeySchnorrDefault",
-        messageToSha3: "inputMessageToSha3",
+        messageToSha3: "inputFabcoinSchnorrMessage",
+        messageToSha3Hex: "inputFabcoinSchnorrMessageHex",
         nonce: "inputNoncesDefault",
         signature: "inputSignatureDefault",
       },
@@ -228,7 +258,6 @@ var defaults = {
   outputTransactionsButtons: "divTransactionsOutputButtons",
   outputRPCNetwork: "divKanbanRPCOutputNetwork",
   outputGPUTest: "divGPUTestOutput",
-  outputMyNodes: "divMyNodesOutput",
   outputSendReceiveRadio: "divSendReceiveOutputRadio",
   outputSendReceiveButtons: "divSendReceiveOutputButtons",
   outputSendReceiveBulkOutputButtons: "divSendReceiveBulkOutputButtons",

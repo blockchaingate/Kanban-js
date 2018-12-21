@@ -143,6 +143,15 @@ JSONTransformer.prototype.getClickableEntryUsingTransformer = function(input, in
   if (theTransformer.transformer !== undefined && theTransformer.transformer !== null) {
     idExpandButton = `JSONExpandButton${totalClickableEntries}`;
   }
+  var transformedContent;
+  if (theTransformer.transformer !== undefined && theTransformer.transformer !== null) {
+    transformedContent = theTransformer.transformer(inputHTML);
+  } else {
+    transformedContent = processInputStringStandard(inputHTML);
+  }
+  if (transformedContent === inputHTML) {
+    idExpandButton = "";
+  }
   if (currentId === "" || typeof currentId !== "string" ) {
     throw(`Invalid currentId: ${currentId}`);
   }
@@ -156,6 +165,7 @@ JSONTransformer.prototype.getClickableEntryUsingTransformer = function(input, in
     labelArray: labelArray.slice(),
     ambientInput: this.originalInputs[this.originalInputs.length - 1]
   };
+
   var result = "";
   if (idExpandButton !== "") {
     result += `<span class = "panelRPCWithExpansion">`;
@@ -167,11 +177,7 @@ JSONTransformer.prototype.getClickableEntryUsingTransformer = function(input, in
     }
     result += `<button class = "buttonRPCInput${tooltipClass}" id = "${currentId}">`; 
   }
-  if (theTransformer.transformer !== undefined && theTransformer.transformer !== null) {
-    result += theTransformer.transformer(inputHTML);
-  } else {
-    result += processInputStringStandard(inputHTML);
-  }
+  result += transformedContent;
   if (theTransformer.clickHandler !== null && theTransformer.clickHandler !== undefined) {
     if (theTransformer.tooltip !== undefined && theTransformer.tooltip !== null) {
       result += `<span class = "tooltiptext">${theTransformer.tooltip}</span>`;
@@ -310,6 +316,9 @@ JSONTransformer.prototype.transformObjectToRows = function(input) {
   var result = [];
   for (var labelRow in input) {
     var currentInputItem = input[labelRow];
+    if (typeof currentInputItem !== "object") {
+      currentInputItem = {value: currentInputItem};
+    }
     currentInputItem["_rowLabel"] = labelRow;
     result.push(currentInputItem);
   }
@@ -376,6 +385,8 @@ var labelAbbreviations = {
   "totalProcessedIncomingVoteMessages": "totalIn",
   "totalProcessedOutgoingVoteMessages": "totalOut",
   "totalMessagesNotSentAsTheyAreAlreadyKnown": "totalOptimizedOut",
+  "numberOfRecentlyApprovedMessages": "num. approved",
+  "numberOfBusySlots": "busy slots"
 }
 
 function abbreviateLabel(/** @type {string}*/ header) {

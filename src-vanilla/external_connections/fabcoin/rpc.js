@@ -165,12 +165,20 @@ var rpcCalls = {
   sendToContract: {
     rpcCall: "sendToContract",
     method: "sendtocontract",
+    types: {
+      gasLimit: "number",
+    },
+    optionalArguments:{
+      senderAddress: null,
+    },
     mandatoryModifiableArguments: {
       contractId: null,
       data: null,
       amount: 0,
+      gasLimit: 250000,
+      gasPrice: 40,
     },
-    parameters: ["contractId", "data", "amount"]
+    parameters: ["contractId", "data", "amount", "gasLimit", "gasPrice", "senderAddress"]
   },
   callContract: {
     rpcCall: "callContract",
@@ -302,6 +310,28 @@ var rpcCalls = {
     },
     parameters: ["signature", "publicKey", "message"]
   },
+  testECDSASignature: {
+    rpcCall: "testECDSASignature",
+    method: "testecdsasignature",
+    mandatoryModifiableArguments: {
+      privateKey: null,
+      messageHex: null,
+    },
+    optionalArguments: {
+      nonce: null
+    },
+    parameters: ["privateKey", "messageHex", "nonce"]
+  },
+  testECDSASignatureVerify: {
+    rpcCall: "testECDSASignatureVerify", 
+    method: "testecdsasignatureverify",
+    mandatoryModifiableArguments: {
+      signature: null,
+      publicKey: null,
+      messageHex: null
+    },
+    parameters: ["signature", "publicKey", "messageHex"]
+  },
   getLogFile: {
     rpcCall: "getLogFile",
     method: "getlogfile",
@@ -314,7 +344,7 @@ var rpcCalls = {
     rpcCall: "getPeerInfo",
     method: "getpeerinfo",
     parameters: []
-  }
+  },
 };
 
 function getPOSTBodyFromRPCLabel(theRPCLabel, theArguments) {

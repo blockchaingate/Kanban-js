@@ -22,8 +22,7 @@ window.kanban = {
   computationalEngineCalls: null,
   submitRequests: require('./submit_requests'),
   ids: require('./ids_dom_elements'),
-  myNodes: require('./my_nodes'),
-  allMyNodes: null,
+  myNodes: require('./my_nodes').myNodes,
   profiling: {
     memoryPoolArrivalTimes: null,
     statistics: {},
@@ -34,7 +33,7 @@ window.kanban = {
     editor: null
   },
   themes: require('./themes'),
-  storage: require('./storage').storage,
+  storageKanban: require('./storage').storageKanban,
 };
 
 window.kanban.ace.ace = ace;

@@ -1,6 +1,7 @@
 "use strict";
 const ids = require('../ids_dom_elements');
 const fabcoinRPC = require('../../external_connections/fabcoin/rpc');
+const fabcoinInitializationSpec = require('../../external_connections/fabcoin/initialization');
 const pathnames = require('../../pathnames');
 const globals = require('../globals');
 const submitRequests = require('../submit_requests');
@@ -20,15 +21,15 @@ function FabcoinNodeInitializer() {
   var inputInitialization = ids.defaults.fabcoin.inputInitialization;
   this.transformersStandard = {
     shortener: {
-      transformer: miscellaneousBackend.hexShortenerForDisplay
+      transformer: miscellaneousBackend.hexShortener4Chars
     },
     setDemoPublicKey: {
-      transformer: miscellaneousBackend.hexShortenerForDisplay,
+      transformer: miscellaneousBackend.hexShortener4Chars,
       clickHandler: this.setInput.bind(this, ids.defaults.demo.inputs.corporationPublicKey),
       tooltip: "Public key of organization. "
     },
     setDemoSignature: {
-      transformer: miscellaneousBackend.hexShortenerForDisplay,
+      transformer: miscellaneousBackend.hexShortener4Chars,
       clickHandler: this.setInput.bind(this, ids.defaults.demo.inputs.corporationSignature),
       tooltip: "Signature of organization. "
     }
@@ -50,11 +51,28 @@ function FabcoinNodeInitializer() {
       "signature": this.transformersStandard.setDemoSignature,
     },
   };
+  this.optionsInitialization = {
+    transformers: {
+      "${number}": this.transformersStandard.shortener
+    },
+  };
+  this.optionsServerInformation = {
+    transformers: {
 
+    }
+  };
   this.callTypes = {
     demo: {
       outputJSONDefault: ids.defaults.demo.outputDemo,
       outputOptionsDefault: this.optionsDemo,
+    },
+    serverInformation: {
+      outputJSONDefault: ids.defaults.serverStatus.outputServerStatus,
+      outputOptionsDefault: this.optionsServerInformation,
+    },
+    initialization: {
+      outputJSONDefault: ids.defaults.fabcoin.outputFabcoinInitialization,
+      outputOptionsDefault: this.optionsInitialization,
     }
   };  
   this.theFunctions = {
@@ -64,6 +82,7 @@ function FabcoinNodeInitializer() {
         smartContractId: inputInitialization.smartContractId,
       },
       outputJSON: null,
+      callType: this.callTypes.initialization,
     },
     demoRegisterCorporation: {
       inputs: {
@@ -101,6 +120,9 @@ function FabcoinNodeInitializer() {
         nonce: ids.defaults.demo.inputs.nonce,
       }
     },
+    getServerInformation: {
+      callType: this.callTypes.serverInformation,
+    }
   };
 }
 
@@ -113,7 +135,7 @@ FabcoinNodeInitializer.prototype.setInput = function(idToSet, container, content
 FabcoinNodeInitializer.prototype.getSetInputWithShortener = function(idOutput) {
   return {
     clickHandler: this.setInput.bind(this, idOutput),
-    transformer: miscellaneousBackend.hexShortenerForDisplay
+    transformer: miscellaneousBackend.hexShortener4Chars
   };  
 }
 
@@ -239,6 +261,10 @@ FabcoinNodeInitializer.prototype.run = function(functionLabel, callbackOverrides
     callback: callbackCurrent,
     result: currentResult
   });
+}
+
+FabcoinNodeInitializer.prototype.getServerInformation = function() {
+  this.run(fabcoinInitializationSpec.rpcCalls.getServerInformation.rpcCall);
 }
 
 var initializer = new FabcoinNodeInitializer();

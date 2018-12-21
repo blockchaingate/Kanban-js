@@ -68,15 +68,19 @@ function hexVeryShortDisplay(input) {
   return "...";
 }
 
-function hexShortenerForDisplay(input) {
-  return hexShortenerForDisplaySpecifyNumChars(4, input);
+function hexShortener4Chars(input) {
+  return hexShortenerNumChars(4, input);
 }
 
-function hexMiddleShortenerForDisplay(input) {
-  return hexShortenerForDisplaySpecifyNumChars(8, input);
+function hexShortener8Chars(input) {
+  return hexShortenerNumChars(8, input);
 }
 
-function hexShortenerForDisplaySpecifyNumChars(numChars, input){
+function hexShortener16Chars(input) {
+  return hexShortenerNumChars(16, input);
+}
+
+function hexShortenerNumChars(numChars, input){
   if (input.length < numChars * 2 + 2) {
     return input;
   }
@@ -85,7 +89,6 @@ function hexShortenerForDisplaySpecifyNumChars(numChars, input){
   }
   return `${input.substr(0, numChars)}...${input.substr(input.length - numChars, numChars)}`;
 }
-
 
 function shortenString(input, desiredMaxSize, includeNumOmitted) {
   if (input === "") {
@@ -99,13 +102,25 @@ function shortenString(input, desiredMaxSize, includeNumOmitted) {
   if (numOmittedChars <= 0) {
     return input;
   }
+  return trimStringAtEnds(input, numEndChars, numEndChars, includeNumOmitted)
+}
+
+
+function trimStringAtEnds(input, charsToDisplayLeft, charsToDisplayRight, includeNumOmitted) {
+  if (typeof input !== "string") {
+    input = JSON.stringify(input);
+  }
+  if (charsToDisplayLeft + charsToDisplayRight >= input.length) {
+    return input;
+  }
   if (includeNumOmitted === undefined || includeNumOmitted === null) {
     includeNumOmitted = true;
   }
   if (!includeNumOmitted) {
-    return `${input.slice(0, numEndChars)}...${input.slice(input.length-numEndChars, input.length)}`; 
+    return `${input.slice(0, charsToDisplayLeft)}...${input.slice(input.length-charsToDisplayRight, input.length)}`; 
   }
-  return `${input.slice(0, numEndChars)}...(${numOmittedChars} out of ${input.length} omitted)...${input.slice(input.length-numEndChars, input.length)}`; 
+  var numOmittedChars = input.length - charsToDisplayLeft - charsToDisplayRight; 
+  return `${input.slice(0, charsToDisplayLeft)}...(${numOmittedChars} out of ${input.length} omitted)...${input.slice(input.length-charsToDisplayRight, input.length)}`; 
 }
 
 function removeQuotes(input) {
@@ -173,18 +188,74 @@ function ensureMinCharWidth(charWidth, input) {
   return input;
 }
 
+function splitMultipleDelimiters(
+  /**@type {String} */
+  input, 
+  delimiters,
+) {
+  var delimiterObject = {};
+  for (var i = 0; i < delimiters.length; i ++) {
+    delimiterObject[delimiters[i]] = true;
+  }
+  var currentWord = "";
+  var result = [];
+  for (var i = 0; i < input.length; i ++) {
+    if (input[i] in delimiterObject) {
+      if (currentWord !== "") {
+        result.push(currentWord);
+      }
+      currentWord = "";
+      continue;
+    }
+    currentWord += input[i];
+  }
+  if (currentWord !== "") {
+    result.push(currentWord);
+  }
+  return result;
+}
+
+var whiteSpaceString = "\n\r\t ";
+var whiteSpaceObject = {};
+for (var i = 0; i < whiteSpaceString.length; i ++) {
+  whiteSpaceObject[whiteSpaceString[i]] = true;
+}
+
+/**@returns {String} */
+function trimeWhiteSpaceAtEnds(
+  /**@type {String} */ 
+  input,
+) {
+  var left = 0; 
+  var right = input.length - 1;
+  for (; left < input.length; left ++) {
+    if (!whiteSpaceObject[input[left]]) {
+      break;
+    }
+  }
+  for (; right >= 0; right --) {
+    if (!whiteSpaceObject[input[right]]) {
+      break;
+    }
+  }
+  return input.slice(left, right + 1);  
+}
 
 module.exports = {
   deepCopy,
   deepCopyThroughJSON,
-  hexShortenerForDisplay,
-  hexMiddleShortenerForDisplay,
+  hexShortener4Chars,
+  hexShortener8Chars,
+  hexShortener16Chars,
   getDurationReadableFromSeconds,
   getDurationReadableFromMilliseconds,
   shortenString,
+  trimStringAtEnds,
+  trimeWhiteSpaceAtEnds,
   SpeedReport, 
   removeQuotes,
   convertToIntegerIfPossible,
   hexVeryShortDisplay,
   ensureMinCharWidth,
+  splitMultipleDelimiters,
 }

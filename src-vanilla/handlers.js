@@ -8,13 +8,19 @@ const handlersKanbanGoInitialization = require('./external_connections/kanbango/
 const handlersFabcoinInitialization = require('./external_connections/fabcoin/handlers_initialization');
 const handlersFabcoinRPC = require('./external_connections/fabcoin/handlers_rpc');
 const handlersStandard = require('./handlers_standard');
+const ResponseWrapperLib = require('./response_wrapper');
+const ResponseWrapper = ResponseWrapperLib.ResponseWrapper;
+var responseStats = ResponseWrapperLib.responseStatsGlobal;
+require('./external_connections/kanbango/handlers_my_nodes');
 const handlersLogin = require('./oauth');
 
-function handleRequestsHTTP(request, response) {
+function handleRequestsHTTP(request, responseNonWrapped) {
+  var response = new ResponseWrapper(responseNonWrapped, responseStats);
   parseTheURL(request, response, handleRequestsHTTPPart2);
 }
  
 function handleRequestsHTTPPart2(request, response, parsedURL) {
+  responseStats.requestTypes.httpRequestsRedirectedToHttps ++;
   response.writeHead(307, {Location: `https://${parsedURL.hostname}:${pathnames.ports.https}${parsedURL.path}`});
   response.end();
 }
@@ -37,6 +43,7 @@ function parseTheURL(request, response, callback) {
     }  
     parsedURL.hostname = hostname;
   } catch (e) {
+    responseStats.requestTypes.numberOfFailuresToParseURL ++;
     response.writeHead(400, {"Content-type": "text/plain"});
     var result = {};
     result.error = `Bad url: ${escapeHtml(e)}`;
@@ -45,12 +52,10 @@ function parseTheURL(request, response, callback) {
   callback(request, response, parsedURL)
 }
 
-function handleRequests(request, response) {
-    //console.log(`The url is: ${request.url}`.red);
-    //console.log(`The url is: ${request.url}`.red);
+function handleRequests(request, responseNonWrapped) {
+  var response = new ResponseWrapper(responseNonWrapped, responseStats); 
   parseTheURL(request, response, handleRequestsPart2);
 }
-
 
 function handleRequestsPart2(request, response, parsedURL) {
   //console.log(`DEBUG: The url is pt 2: ${request.url}`.red);
@@ -65,7 +70,7 @@ function handleRequestsPart2(request, response, parsedURL) {
     return handlersStandard.transformToQueryJSON(
       request, 
       response, 
-      handlersKanbanGo.handleQuery,
+      handlersKanbanGo.handleRPCArguments,
       parsedURL,
     );
   }
@@ -74,15 +79,16 @@ function handleRequestsPart2(request, response, parsedURL) {
     return handlersStandard.transformToQueryJSON(
       request, 
       response,
-      kanbanGOInitializer.handleQuery.bind(kanbanGOInitializer),
+      kanbanGOInitializer.handleRPCArguments.bind(kanbanGOInitializer),
       parsedURL,
     );
   }
   if (parsedURL.pathname === pathnames.url.known.fabcoin.rpc) {
+    var fabRPCHandler = handlersFabcoinRPC.fabcoinHandlersRPC;
     return handlersStandard.transformToQueryJSON(
       request, 
       response, 
-      handlersFabcoinRPC.handleQuery,
+      fabRPCHandler.handleRPCArguments.bind(fabRPCHandler),
       parsedURL,
     );
   }  
@@ -91,7 +97,7 @@ function handleRequestsPart2(request, response, parsedURL) {
     return handlersStandard.transformToQueryJSON(
       request, 
       response, 
-      fabNode.handleQuery.bind(fabNode),
+      fabNode.handleRPCArguments.bind(fabNode),
       parsedURL,
     );
   }
@@ -105,6 +111,7 @@ function handleRequestsPart2(request, response, parsedURL) {
     );  
   }
   //console.log(`DEBUG: The parsed url pathname is: ${parsedURL.pathname}`.red);
+  responseStats.requestTypes.numberOfRejectedURLS ++;
   response.writeHead(200);
   var result = {};
   result.error = `Uknown request ${request.url} with pathname: ${parsedURL.pathname}.`; 
@@ -112,10 +119,12 @@ function handleRequestsPart2(request, response, parsedURL) {
   for (var label in pathnames.url.whiteListed) {
     result.whiteListedURL.push(label);
   }
+  result.knownServices = pathnames.url.known;
   response.end(JSON.stringify(result));
 }
 
 function handlePing(request, response) {
+  responseStats.requestTypes.numberOfPings ++;
   response.writeHead('200', {
     'Access-Control-Allow-Origin': '*'
   });
@@ -123,6 +132,7 @@ function handlePing(request, response) {
 }
 
 function handleFile(request, response) {
+  responseStats.requestTypes.fileRequests ++;
   var thePathName = pathnames.url.whiteListed[request.url];
   var mimeType = mime.lookup(thePathName);
   if (!mimeType) {

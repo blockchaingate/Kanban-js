@@ -28,26 +28,29 @@ function KanbanGoNodes() {
   
   this.transformersStandard = {
     middleShortener: {
-      transformer: miscellaneousBackend.hexMiddleShortenerForDisplay,
+      transformer: miscellaneousBackend.hexShortener8Chars,
     },
     shortener: {
-      transformer: miscellaneousBackend.hexShortenerForDisplay,
+      transformer: miscellaneousBackend.hexShortener4Chars,
+    },
+    shortener16: {
+      transformer: miscellaneousBackend.hexShortener16Chars,
     },
     veryShort: {
       transformer: miscellaneousBackend.hexVeryShortDisplay,
     },
     blockHash: {
       clickHandler: this.getBlockByHash.bind(this),
-      transformer: miscellaneousBackend.hexShortenerForDisplay,
+      transformer: miscellaneousBackend.hexShortener4Chars,
       tooltip: "Sets the block hash field &amp; and fetches the block info. "
     },
     contractHexSetter: {
       clickHandler: this.setContractHex.bind(this),
-      transformer: miscellaneousBackend.hexShortenerForDisplay,
+      transformer: miscellaneousBackend.hexShortener4Chars,
     },
     contractCallSetter: {
       clickHandler: this.setContractFunctionName.bind(this),
-      transformer: miscellaneousBackend.hexShortenerForDisplay,
+      transformer: miscellaneousBackend.hexShortener8Chars,
     },
     contractSourceSetter: {
       clickHandler: this.setInput.bind(this, ids.defaults.fabcoin.inputBlockInfo.solidityInput),
@@ -59,6 +62,9 @@ function KanbanGoNodes() {
     setAggregateSignatureNoBitmap: this.getSetInputWithShortener(inputAggregate.aggregateSignature),
     setAggregateSignatureUncompressed: this.getSetInputWithShortener(inputAggregate.aggregateSignatureUncompressed),
     setAggregateSignatureComplete: this.getSetInputWithShortener(inputAggregate.aggregateSignatureComplete),
+    highlightErrorWords: {
+      transformer: miscellaneousFrontEnd.highlightErrorWords
+    }
   };
   // Specifies options for rpc kanban rpc output display.
   this.optionsKanbanGOStandard = {
@@ -149,6 +155,14 @@ function KanbanGoNodes() {
       publicKeyHex: this.transformersStandard.shortener,
       publicKeyHexInternal: this.transformersStandard.shortener,
       "peers.${label}": this.transformersStandard.shortener,
+      "comments.decodedInputs.${number}.txid": this.transformersStandard.shortener,
+      "comments.decodedOutputs.contract.contractAddress": this.transformersStandard.shortener,
+      "comments.decodedOutputs.contract.data": this.transformersStandard.shortener,
+      "hex": this.transformersStandard.shortener,
+      "input.txInputs" : this.transformersStandard.shortener,
+      "input.txOutputs": this.transformersStandard.shortener,
+      "comments.bytesToSign.${number}": this.transformersStandard.shortener,
+      "comments.builder.inputs.${number}.unlockScript": this.transformersStandard.shortener,
     }
   };
   this.optionsForAddressDisplay = {
@@ -167,15 +181,18 @@ function KanbanGoNodes() {
   this.optionsInitialization = {
     totalEntriesToDisplayAtEnds: 30,
     transformers: {
-      myEnodeAddress: this.transformersStandard.shortener,
+      myEnodeAddress: this.transformersStandard.shortener16,
+      "myConnections.${number}": this.transformersStandard.shortener16,
+      "secretKey": this.transformersStandard.shortener,
       "binaries.${number}": this.transformersStandard.contractHexSetter,
       "contractNames.${number}": this.transformersStandard.contractHexSetter,
       "ABI.${number}.${number}.name": this.transformersStandard.contractCallSetter,
       "resultHTML": this.transformersStandard.shortener,
       "code": this.transformersStandard.contractSourceSetter,
       "contractInheritance.${label}": this.transformersStandard.shortener,
-      "node.${number}": this.transformersStandard.shortener,
+      "node.${number}.${number}": this.transformersStandard.shortener16,
       "notes": this.transformersStandard.shortener,
+      "${number}": this.transformersStandard.highlightErrorWords,
     }
   };
   this.optionsCrypto = {
@@ -198,11 +215,15 @@ function KanbanGoNodes() {
       inputPrivateKeys: this.transformersStandard.shortener,
       publicKeyHex: this.transformersStandard.setPublicKeySchnorr,
       publicKeyHexInternal: this.transformersStandard.setPublicKeySchnorr,
+      inputMessageHex: this.transformersStandard.shortener,
       inputPublicKeyHex: this.transformersStandard.setPublicKeySchnorr,
       inputPublicKeyHexRecoded: this.transformersStandard.setPublicKeySchnorr,
       inputSignatureBase58: this.transformersStandard.setSignatureSchnorr,
       inputSignatureBase58Recoded: this.transformersStandard.setSignatureSchnorr,
       signatureBase58: this.transformersStandard.setSignatureSchnorr,
+      signatureHex: this.transformersStandard.shortener,
+      inputSignatureHexRecoded: this.transformersStandard.shortener,
+      inputSignatureHex: this.transformersStandard.shortener,
       inputSignature: this.transformersStandard.shortener,
       "privateKeys.${number}": this.transformersStandard.setPrivateKeySchnorr,
       "aggregator.publicKeys.${number}": this.transformersStandard.shortener,
@@ -249,28 +270,34 @@ function KanbanGoNodes() {
       "messages.publicKey": this.transformersStandard.middleShortener,
       "debugStatus.lines.${number}": this.transformersStandard.middleShortener,
       "peers.${any}.debugStatus.lines.${number}": this.transformersStandard.middleShortener,
+      "inputHex": this.transformersStandard.shortener,
+      "payloadHash": this.transformersStandard.shortener,
     },
   };
   this.callTypes = {
     standard: {
+      callType: "kanbanLocal",
       jsonOptions: this.optionsKanbanGOStandard,
       idDefaultOutput: ids.defaults.kanbanGO.outputSendReceive,
       rpcCalls: kanbanGO.rpcCalls,
       url: pathnames.url.known.kanbanGO.rpc,
     },
     cryptoTest: {
+      callType: "kanbanLocal",
       jsonOptions: this.optionsCrypto,
       idDefaultOutput: ids.defaults.kanbanGO.outputKBGOTest,
       rpcCalls: kanbanGO.rpcCalls,
       url: pathnames.url.known.kanbanGO.rpc,
     },
     initialization: {
+      callType: "kanbanLocal",
       jsonOptions: this.optionsInitialization,
       rpcCalls: kanbanGOInitialization.rpcCalls,
       idDefaultOutput: ids.defaults.kanbanGO.outputKanbanInitialization,
       url: pathnames.url.known.kanbanGO.initialization,
     },
     votingMachine: {
+      callType: "kanbanLocal",
       jsonOptions: this.optionsVotingMachine,
       rpcCalls: kanbanGO.rpcCalls,
       url: pathnames.url.known.kanbanGO.rpc,
@@ -281,23 +308,25 @@ function KanbanGoNodes() {
       idDefaultOutput: ids.defaults.kanbanGO.outputSendReceive,
       rpcCalls: kanbanGOInitialization.demoRPCCalls,
       url: pathnames.url.known.kanbanGO.initialization,
+    },
+    myNodes: {
+      callType: "myNodesSSH",
+      jsonOptions: this.optionsMyNodes,
+      idDefaultOutput: ids.defaults.myNodes.outputMyNodes,
+      rpcCalls: kanbanGOInitialization.rpcCalls,
+      url: pathnames.url.known.kanbanGO.initialization,
     }
   }; 
   // if rpcCall omitted it will be assumed to be equal to the function label.
   /**@type {Object.<string, rpcCall: string, output: string, outputs: Object, outputOptions: Object, inputs: Object, callback: Object, useOneNode: boolean>} */
   this.theFunctions  = {
-    runNodesDetached: {
-      inputs: {
-        numberOfNodes: inputInitialization.numberOfNodes
-      },
-      callback: PendingCall.prototype.callbackRunNodes,
-      useOneNode: true
-    },
     runNodesOnFAB: {
       inputs: {
         numberOfNodes: inputInitialization.numberOfNodes,
         abiJSON: inputInitialization.contractABI,
-        contractId: inputInitialization.contractId
+        contractId: inputInitialization.contractId,
+        connectKanbansInALine: ids.defaults.kanbanGO.checkboxConnectKanbansInALine,
+        bridgeChainnet: inputInitialization.bridgeChainnet,
       },
       callback: PendingCall.prototype.callbackRunNodes,
       useOneNode: true
@@ -308,7 +337,10 @@ function KanbanGoNodes() {
     getLogFile: {
       outputOptions: {
         totalEntriesToDisplayAtEnds: 1000,
-      },
+        transformers: {
+          "${number}": this.transformersStandard.highlightErrorWords
+        }
+      }
     },
     getRPCLogFile: {
       outputOptions: {
@@ -361,6 +393,20 @@ function KanbanGoNodes() {
       outputJSON: ids.defaults.kanbanGO.outputSendReceive,
       outputOptions: this.optionsKanbanGOLabelContraction
     },
+    testSha2: {
+      //if rpcCall omitted it will be assumed to be equal to the function label.
+      inputs: {
+        messageHex: inputSchnorr.messageHex
+      },
+      callType: "cryptoTest"
+    },
+    testSha2Squared: {
+      //if rpcCall omitted it will be assumed to be equal to the function label.
+      inputs: {
+        messageHex: inputSchnorr.messageHex
+      },
+      callType: "cryptoTest"
+    },
     testSha3 : {
       //if rpcCall omitted it will be assumed to be equal to the function label.
       inputsBase64: {
@@ -379,7 +425,8 @@ function KanbanGoNodes() {
     voteMessage: {
       inputs: {
         messageHex: ids.defaults.kanbanGO.inputSendReceive.messageVoteHex
-      }
+      },
+      callType: this.callTypes.votingMachine
     },
     testPrivateKeyGeneration: {
       outputs: {
@@ -393,6 +440,22 @@ function KanbanGoNodes() {
       outputs: {
         publicKeyHex: inputSchnorr.publicKey
       }
+    },
+    testECDSASignature: {
+      inputs: {
+        privateKey: inputSchnorr.privateKey,
+        messageHex: inputSchnorr.messageHex
+      },
+      outputs: {
+        signatureHex: inputSchnorr.signature
+      }
+    },
+    testECDSAVerification: {
+      inputs: {
+        publicKey: inputSchnorr.publicKey,
+        signature: inputSchnorr.signature,
+        messageHex: inputSchnorr.messageHex
+      },
     },
     testSchnorrSignature: {
       inputs: {
@@ -494,14 +557,24 @@ function KanbanGoNodes() {
         code: ids.defaults.fabcoin.inputBlockInfo.solidityInput
       },
       outputJSON: ids.defaults.fabcoin.outputSolidityCompilation,
-      callback: PendingCall.prototype.callbackCompileSolidity
+      callback: PendingCall.prototype.callbackCompileSolidity,
+      useOneNode: true,
     }, 
     fetchKanbanContract: {
       outputs: {
         code: ids.defaults.fabcoin.inputBlockInfo.solidityInput
       },
       outputJSON: ids.defaults.fabcoin.outputFabcoinBlockInfo,
-      callback: PendingCall.prototype.callbackFetchSmartContract
+      callback: PendingCall.prototype.callbackFetchSmartContract,
+      useOneNode: true,
+    },
+    fetchKanbanContractTwo: {
+      outputs: {
+        code: ids.defaults.fabcoin.inputBlockInfo.solidityInput
+      },
+      outputJSON: ids.defaults.fabcoin.outputFabcoinBlockInfo,
+      callback: PendingCall.prototype.callbackFetchSmartContract,
+      useOneNode: true,
     },
     fetchDemoContract: {
       outputs: {
@@ -518,6 +591,27 @@ function KanbanGoNodes() {
         transactionNumber: ids.defaults.kanbanGO.inputBenchmarkParameters.transactionNumber,
         transactionValue: ids.defaults.kanbanGO.inputBenchmarkParameters.transactionValue,
       }
+    },
+    fetchLocalRegtestNodeConfig: {
+      useOneNode: true,
+    },
+    testCreateAndSignTransactionStandard: {
+      inputs: {
+        inputs: ids.defaults.kanbanGO.inputSendReceive.txInputs,
+        outputs: ids.defaults.kanbanGO.inputSendReceive.txOutputs,
+      },
+      outputs: {
+        hex: [ids.defaults.kanbanGO.inputSendReceive.txHex, ids.defaults.fabcoin.inputBlockInfo.txHex],
+      },
+    },
+    fetchMyNodesInfo: {
+      callType: this.callTypes.myNodes,
+    },
+    executeOverSSH: {
+      callType: this.callTypes.myNodes,
+      inputs: {
+        command: ids.defaults.myNodes.inputSSH.command
+      }
     }
   };
   this.correctFunctions();
@@ -527,8 +621,13 @@ KanbanGoNodes.prototype.computeContractData = function() {
   var contractIds = ids.defaults.fabcoin.inputBlockInfo; 
   var contractData = "";
   contractData += document.getElementById(contractIds.contractFunctionId).value;
-  contractData += document.getElementById(contractIds.contractFunctionData).value;
+  contractData += document.getElementById(contractIds.contractFunctionArguments).value;
   miscellaneousFrontEnd.updateValue(contractIds.contractData, contractData); 
+  var contractIdsKanbanGo = ids.defaults.kanbanGO.inputSendReceive; 
+  contractData = "";
+  contractData += document.getElementById(contractIdsKanbanGo.contractFunctionId).value;
+  contractData += document.getElementById(contractIdsKanbanGo.contractFunctionArguments).value;
+  miscellaneousFrontEnd.updateValue(contractIdsKanbanGo.contractData, contractData); 
 }
 
 KanbanGoNodes.prototype.setContractFunctionName = function(container, content, extraData) {
@@ -538,13 +637,17 @@ KanbanGoNodes.prototype.setContractFunctionName = function(container, content, e
   var abi = extraData.ambientInput.ABI[counterContract][counterFunction];
   var keccakFirst8Hex = cryptoKanbanHashes.hashes.solidityGet8byteHexFromFunctionSpec(abi);
   //console.log(`DEBUG: fun signature so far: ${functionSignature}`);
-  var contractIds = ids.defaults.fabcoin.inputBlockInfo; 
+  var inputsFab = ids.defaults.fabcoin.inputBlockInfo; 
+  var inputsKanbanGo = ids.defaults.kanbanGO.inputSendReceive;
   if (abi.payable === false || abi.payable === "false") {
-    miscellaneousFrontEnd.updateValue(contractIds.walletAmount, 0);
+    miscellaneousFrontEnd.updateValue(inputsFab.txBeneficiaryAmounts, 0);
+    miscellaneousFrontEnd.updateValue(inputsKanbanGo.txBeneficiaryAmounts, 0);
   }
-  miscellaneousFrontEnd.updateValue(contractIds.contractHex, ambientInput.binaries[counterContract]);
-  miscellaneousFrontEnd.updateValue(contractIds.contractFunctionName, content);
-  miscellaneousFrontEnd.updateValue(contractIds.contractFunctionId, keccakFirst8Hex);
+  miscellaneousFrontEnd.updateValue(inputsFab.contractHex, ambientInput.binaries[counterContract]);
+  miscellaneousFrontEnd.updateValue(inputsFab.contractFunctionName, content);
+  miscellaneousFrontEnd.updateValue(inputsKanbanGo.contractFunctionName, content);
+  miscellaneousFrontEnd.updateValue(inputsFab.contractFunctionId, keccakFirst8Hex);
+  miscellaneousFrontEnd.updateValue(inputsKanbanGo.contractFunctionId, keccakFirst8Hex);
   this.computeContractData();
 }
 
@@ -556,7 +659,7 @@ KanbanGoNodes.prototype.setContractHex = function(container, content, extraData)
 KanbanGoNodes.prototype.getSetInputWithShortener = function(idOutput) {
   return {
     clickHandler: this.setInput.bind(this, idOutput),
-    transformer: miscellaneousBackend.hexShortenerForDisplay
+    transformer: miscellaneousBackend.hexShortener4Chars
   };  
 }
 
@@ -609,6 +712,49 @@ KanbanGoNodes.prototype.testClear = function() {
   this.run('testAggregateGeneratePrivateKeys', 'cryptoTest');
 }
 
+KanbanGoNodes.prototype.computeNodeIds = function(functionLabel, callTypeSpec, currentPendingCall) {
+  this.numberOfCalls ++;
+  if (functionLabel in this.theFunctions) {
+    if (this.theFunctions[functionLabel].useOneNode) {
+      currentPendingCall.nodeCalls["none"] = {result: null};
+      return;
+    }
+  }
+  var callType = callTypeSpec.callType;
+  if (callType === undefined || callType === null) {
+    callType = "kanbanLocal"
+  } 
+  if (callType === "kanbanLocal" ) {
+    return this.computeNodeIdsForKanban(currentPendingCall);
+  }
+  if (callType === "myNodesSSH") {
+    return this.computeNodeIdsForSSH(currentPendingCall);
+  }
+  throw(`Uknown call type ${callType}`);
+}
+
+KanbanGoNodes.prototype.computeNodeIdsForSSH = function(currentPendingCall) {
+  var machineNamesRaw = document.getElementById(ids.defaults.myNodes.inputSSH.machineNames).value;
+  var machineNames = miscellaneousBackend.splitMultipleDelimiters(machineNamesRaw, " ,\t;");
+  if (machineNames.length <= 0) {
+    machineNames.push("no_machine_name_specified");
+  }  
+  for (var i = 0; i < machineNames.length; i ++) {
+    currentPendingCall.nodeCalls[machineNames[i]] = {result: null};
+  }
+}
+
+KanbanGoNodes.prototype.computeNodeIdsForKanban = function(currentPendingCall) {
+  var currentId = this.selectedNode;
+  if (currentId !== "all") {
+    currentPendingCall.nodeCalls[currentId] = {result: null};
+    return;
+  } 
+  for (var i = 0; i < this.nodes.length; i ++) {
+    currentPendingCall.nodeCalls[this.nodes[i].idBackend] = {result: null};
+  }
+}
+
 KanbanGoNodes.prototype.run = function(functionLabel, callType, callbackOverridesStandard) {
   var callTypeSpec = callType;
   if (callTypeSpec === undefined) {
@@ -625,21 +771,8 @@ KanbanGoNodes.prototype.run = function(functionLabel, callType, callbackOverride
   if (typeof callTypeSpec !== "object") {
     throw `Was not able to extract call type from: ${JSON.stringify(callTypeSpec)}`;
   }
-  var currentId = this.selectedNode;
-  if (functionLabel in this.theFunctions) {
-    if (this.theFunctions[functionLabel].useOneNode) {
-      currentId = "none";
-    }
-  }
-  this.numberOfCalls ++;
   var currentPendingCall = new PendingCall();
-  if (currentId !== "all") {
-    currentPendingCall.nodeCalls[currentId] = {result: null};
-  } else {
-    for (var i = 0; i < this.nodes.length; i ++) {
-      currentPendingCall.nodeCalls[this.nodes[i].idBackend] = {result: null};
-    }
-  }
+  this.computeNodeIds(functionLabel, callTypeSpec, currentPendingCall);
   currentPendingCall.id = this.numberOfCalls;
   currentPendingCall.owner = this;
   currentPendingCall.callTypeSpec = callTypeSpec;
@@ -695,7 +828,7 @@ KanbanGoNodes.prototype.getNodeInformationCallback = function(input, output) {
       currentNode.init(inputParsed[counterNode]);
       //console.log("DEBUG: This selected node: " + this.selectedNode + " id backend:  " + currentNode.idBackend);
       if (this.selectedNode === currentNode.idBackend) {
-        console.log("Debug: selecting node: " + currentNode.idBackend);
+        //console.log("Debug: selecting node: " + currentNode.idBackend);
         currentNode.flagSelected = true;
       }
       this.nodes.push(currentNode);
@@ -707,11 +840,14 @@ KanbanGoNodes.prototype.getNodeInformationCallback = function(input, output) {
   nodePanel.innerHTML = this.toHTMLRadioButton();  
 }
 
-KanbanGoNodes.prototype.readFabAutostart = function() {
-  /** @type {Storage} */
-  var theStorage = window.kanban.storage;
-  var theCheckBox = document.getElementById(ids.defaults.kanbanGO.checkboxFabcoindAutostartAfterKanbanGO);
-  theStorage.setVariable(theStorage.variables.autostartFabcoindAfterKanbanGO, theCheckBox.checked);
+KanbanGoNodes.prototype.readCheckboxesConfiguration = function() {
+  /** @type {StorageKanban} */
+  var storageKanban = window.kanban.storageKanban;
+  var idCheckboxPairs = window.kanban.thePage.checkboxBindingsWithId;
+  for (var i = 0; i < idCheckboxPairs.length; i ++) {
+    var checkBox = document.getElementById(idCheckboxPairs[i][1]);
+    storageKanban.setVariable(idCheckboxPairs[i][0], checkBox.checked);
+  }
 }
 
 var theKBNodes = new KanbanGoNodes();

@@ -8,6 +8,9 @@ var OutputStream = require('../../output_stream').OutputStream;
 const crypto = require('crypto');
 const cryptoKanban = require('../../crypto/encodings');
 var demo = require('./handlers_smart_contract').demo;
+const responseWrapperLib = require('../../response_wrapper');
+const ResponseWrapper = responseWrapperLib.ResponseWrapper;
+const memoryWatch = require('../../memory_watch');
 
 /**
  * Returns a global FabcoinNode object
@@ -60,20 +63,7 @@ FabcoinNode.prototype.initStreams =  function() {
   this.outputStreams.command.colorIdConsole = "red";
   this.outputStreams.fabcoind.idConsole = "[fabcoind] ";
   this.outputStreams.fabcoind.colorIdConsole = "blue";
-}
-
-FabcoinNode.prototype.handleQuery = function(response, query) {
-  var queryCommand = null;
-  try {
-    queryCommand = JSON.parse(query.command);
-  } catch (e) {
-    response.writeHead(400);
-    var result = {
-      error: `Bad fabcoin initialization input. ${e}`
-    }
-    return response.end(JSON.stringify(result));
-  }
-  return this.handleRPCArguments(response, queryCommand);
+  this.outputStreams.fabcoind.flagBounceCopyToConsole = true;
 }
 
 FabcoinNode.prototype.getArgumentsFromSpec = function(
@@ -158,6 +148,21 @@ FabcoinNode.prototype.handleRPCArguments = function(response, queryCommand) {
   }
 }
 
+FabcoinNode.prototype.getServerInformation = function (
+  /**@type {ResponseWrapper} */
+  response, 
+  theArguments, 
+  queryCommand,
+) {
+  response.writeHead(200);
+  var result = {};
+  result.memoryUsage = process.memoryUsage();
+  result.requests = responseWrapperLib.responseStatsGlobal.toJSON();
+  //result.leakSuspicions = memoryWatch.memoryWatcher.leakSuspicions;
+  //result.memoryWatchStatistics = memoryWatch.memoryWatcher.latestStats;
+  response.end(JSON.stringify(result));
+}
+
 FabcoinNode.prototype.showLogFabcoind = function(response, theArguments) {
   response.writeHead(200);
   response.end(JSON.stringify(this.outputStreams.fabcoind.toArray()));
@@ -172,7 +177,7 @@ FabcoinNode.prototype.runFabcoind = function (response, argumentsNonSplitUnused,
     response.end(JSON.stringify(result));
     return;
   }
-  this.flagPrintingToConsole = false;
+  this.configuration.flagPrintingToConsole = false;
   this.argumentList = [];
   var argumentsNonSplit = queryCommand.arguments;
   if (typeof argumentsNonSplit === "string" && argumentsNonSplit !== "") {
@@ -202,7 +207,7 @@ FabcoinNode.prototype.runFabcoind = function (response, argumentsNonSplitUnused,
       }
     }
   }
-  this.outputStreams.fabcoind.log(`DEBUG: input queryCommand: ${JSON.stringify(queryCommand)}`);
+  //this.outputStreams.fabcoind.log(`DEBUG: input queryCommand: ${JSON.stringify(queryCommand)}`);
   this.argumentList.push(`-rpcpassword=${this.configuration.RPCPassword}`);
   this.argumentList.push(`-rpcuser=${this.configuration.RPCUser}`);
   this.argumentList.push(`-datadir=${this.paths.dataDir}`);
@@ -219,6 +224,9 @@ FabcoinNode.prototype.runFabcoind = function (response, argumentsNonSplitUnused,
   };
   if (this.configuration.network !== "") {
     this.argumentList.push(this.configuration.network);
+  }
+  if (this.configuration.flagPrintingToConsole) {
+    this.argumentList.push("-printtoconsole");
   }
   this.runShell(this.paths.executableFileName, this.argumentList, options, null, this.outputStreams.fabcoind);
   response.writeHead(200);

@@ -1,5 +1,7 @@
 "use strict";
 require('colors');
+const configuration = require('./configuration');
+const miscelaneous = require('./miscellaneous');
 
 function OutputStream() {
   /**@type {string[]} */
@@ -12,6 +14,7 @@ function OutputStream() {
   this.colorIdConsole = "white";
   /**@type {string[]} */
   this.idHTML = "";
+  this.flagBounceCopyToConsole = true;
 }
 
 /**
@@ -65,7 +68,18 @@ OutputStream.prototype.log = function (data) {
 }
 
 OutputStream.prototype.append = function (data) {
-  console.log(this.idConsole[this.colorIdConsole] + data);
+  var dataToLog = this.idConsole[this.colorIdConsole] + data;
+  dataToLog = miscelaneous.trimeWhiteSpaceAtEnds(dataToLog);
+  dataToLog = dataToLog.replace("error", "error".bold.red);
+  dataToLog = dataToLog.replace("Error", "Error".bold.red);
+  dataToLog = dataToLog.replace("ERROR", "ERROR".bold.red);
+  dataToLog = dataToLog.replace("HIGHLIGHT", "HIGHLIGHT".red.bold);
+  if (this.flagBounceCopyToConsole) {
+    console.log(dataToLog);
+  }
+  if (configuration.getConfiguration().configuration.noLogFiles) {
+    return;
+  }
   if (this.recentOutputs.length >= this.maximumLength ) {
     var oldOutputs = this.recentOutputs;
     this.recentOutputs = [];

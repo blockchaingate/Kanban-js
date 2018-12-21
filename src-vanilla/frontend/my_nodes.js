@@ -195,7 +195,7 @@ MyNode.prototype.toHTMLasTRelement = function () {
 } 
 
 function MyNodesContainer(inputJSON) {
-  this.nodesRaw = JSON.parse(inputJSON).myNodes;
+/*  this.nodesRaw = JSON.parse(inputJSON).myNodes;
   this.myNodes = {};
   this.myNodesBrowserToRemoteResult = {};
   this.myNodesNodeToRemoteMachine = {};
@@ -206,7 +206,7 @@ function MyNodesContainer(inputJSON) {
     this.myNodesBrowserToRemoteResult[this.myNodes[currentName].getSpanBrowserToRemoteResultId()] = currentName;
     this.myNodesNodeToRemoteMachine[this.myNodes[currentName].getSpanNodeToRemoteMachineResultId()] = currentName;
     this.nodeNamesOrdered.push(currentName);
-  }
+  }*/
 }
 
 MyNodesContainer.prototype.toHTML = function () {
@@ -497,10 +497,6 @@ function myNodesOutputCallback(input, outputComponent) {
   }
 }
 
-function getMyNodesOutput() { 
-  return document.getElementById(ids.defaults.outputMyNodes);
-}
-
 function updateMyNodes() {
   var theURL = pathnames.getURLFromMyNodesCall(pathnames.myNodesCommands.fetchNodeInfo.myNodesCommand, {});
   submitRequests.submitGET({
@@ -511,6 +507,8 @@ function updateMyNodes() {
   });  
 }
 
+var myNodes = new MyNodesContainer();
+
 module.exports = {
-  updateMyNodes
+  myNodes
 }

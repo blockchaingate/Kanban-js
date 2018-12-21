@@ -3,21 +3,7 @@ const http = require('http');
 const fabcoinRPC = require('./rpc');
 const fabcoinInitializationSpec = require('./initialization');
 const fabcoinInitialization = require('./handlers_initialization');
-
-function handleQuery(response, query) {
-  var queryCommand = null;
-  try {
-    queryCommand = JSON.parse(query.command);
-  } catch (e) {
-    response.writeHead(400);
-    var result = {
-      error: `Bad fabcoin RPC input. ${e}`,
-    };
-    result.input = query;
-    return response.end(JSON.stringify(result));
-  }
-  return handleRPCArguments(response, queryCommand);
-}
+const ResponseWrapper = require('../../response_wrapper').ResponseWrapper;
 
 function getRPCRequestJSON(rpcCallLabel, queryCommand, errors) {
   /**@type {{rpcCall: string, method: string, mandatoryFixedArguments: Object,  mandatoryModifiableArguments: Object,  optionalArguments: Object, allowedArgumentValues: Object, parameters: string[]}}*/
@@ -69,7 +55,12 @@ function getRPCRequestJSON(rpcCallLabel, queryCommand, errors) {
   return result;
 }
 
-function handleRPCArguments(response, queryCommand, callbackOverridesResponse) {
+function handleRPCArguments(
+  /**@type {ResponseWrapper} */
+  response, 
+  queryCommand, 
+  callbackOverridesResponse,
+) {
   if (callbackOverridesResponse !== null && callbackOverridesResponse !== undefined) {
     if (typeof callbackOverridesResponse !== "function") {
       console.trace("Callback not a function. ");
@@ -230,6 +221,5 @@ function ExportedFunctions() {
 var fabcoinHandlersRPC = new ExportedFunctions();
 
 module.exports = {
-  handleQuery,
   fabcoinHandlersRPC,
 }

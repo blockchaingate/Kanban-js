@@ -1,17 +1,9 @@
 "use strict";
 
 /**
- * @type {Object.<string,{rpcCall:string, method: string, mandatoryFixedArguments: Object, mandatoryModifiableArguments: Object, optionalArguments: Object, types: Object, parameters: string[]}>}
+ * @type {Object.<string,{rpcCall:string, method: string, mandatoryFixedArguments: Object, mandatoryModifiableArguments: Object, optionalArguments: Object, types: Object, parameters: string[], callOnOneNodeOnly: boolean}>}
  */
 var rpcCalls = {
-  runNodesDetached: {
-    rpcCall: "runNodesDetached",
-    mandatoryFixedArguments: { //<- values give defaults, null for none
-    },
-    mandatoryModifiableArguments: { //<- values give defaults, null for none
-      numberOfNodes: null
-    },
-  },
   runNodesOnFAB: {
     rpcCall: "runNodesOnFAB",
     mandatoryFixedArguments: { //<- values give defaults, null for none
@@ -20,6 +12,8 @@ var rpcCalls = {
       numberOfNodes: null,
       abiJSON: null,
       contractId: null,
+      connectKanbansInALine: null,
+      bridgeChainnet: null,
     },
   },
   killAllGeth: {
@@ -41,7 +35,22 @@ var rpcCalls = {
     }
   },
   fetchKanbanContract: {
-    rpcCall: "fetchKanbanContract",    
+    rpcCall: "fetchKanbanContract",
+  },
+  fetchKanbanContractTwo: {
+    rpcCall: "fetchKanbanContractTwo",
+  },
+  fetchLocalRegtestNodeConfig: {
+    rpcCall: "fetchLocalRegtestNodeConfig",
+  },
+  fetchMyNodesInfo: {
+    rpcCall: "fetchMyNodesInfo",
+  },
+  executeOverSSH: {
+    rpcCall: "executeOverSSH",
+    mandatoryModifiableArguments: {
+      command: null,
+    },
   },
 };
 
