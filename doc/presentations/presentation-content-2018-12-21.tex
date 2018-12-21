@@ -1,0 +1,58 @@
+\begin{frame}
+\begin{itemize}
+\item Node.js. 
+\begin{itemize}
+\item Work done.
+\begin{itemize}
+\item Fixed memory leak in server.
+\item Fixed bug: fabcoind logs were not showing correctly.
+\item Added monitoring infrastructure to help prevent a future leak.
+\item Log files.
+\item Reworked transaction builder user inteface: fabcoind and kanbanGO.
+\end{itemize}
+\item To do.
+\begin{itemize}
+\item Create an ssh tunnel user interface.
+\end{itemize}
+\end{itemize}
+\item KanbanGO: work done.
+\begin{itemize}
+\item Fixed a flexible transaction format for SCAR write operations. New coinbase-like transaction \& new opcode.
+\item Transaction builder now signs the input transactions.
+\item KanbabGO $SHA256^{\circ 2}$ ECDSA implementation. 
+\item KanbanGO: one private key now supports Schnorr, ECDSA $SHA256^{\circ 2}$ and ECDSA keccak signatures.
+\item RPC calls for testing the above.
+\end{itemize}
+\item KanbanGO: to do.
+\begin{itemize}
+\item Ensure transaction built in KanbanGO passes through fabcoind.
+\end{itemize}
+\end{itemize}
+\end{frame}
+
+\begin{frame}[fragile]
+\frametitle{Fabcoind}
+\begin{itemize}
+\item Work done.
+\begin{itemize}
+\item New function \verb|CScript::FitsOpCodePattern|.
+\item Added human-readable reports to the internals of the system.
+\item Bug fixes in debug-session logs. 
+\item New opcode : \verb|OP_CONTRACTCOVERSFEES|.
+\item New transaction type \verb|contract_covers_fees|. 
+\item New coinbase-like transaction txid.
+\end{itemize}
+\item To do.
+\begin{itemize}
+\item Insert code to accept \verb|OP_CONTRACTCOVERSFEES|. 
+\item Insert code to accept the new coinbase-like transaction txid.
+\item Both of these require modifications of:
+\begin{itemize}
+\item Memory pool acceptance code.
+\item Block verification code.
+\item ... and possibly more?
+\end{itemize}
+\end{itemize}
+\end{itemize}
+
+\end{frame}
