@@ -324,7 +324,7 @@ var rpcCalls = {
   },
   testECDSASignatureVerify: {
     rpcCall: "testECDSASignatureVerify", 
-    method: "testecdsasignatureverify",
+    method: "testecdsaverification",
     mandatoryModifiableArguments: {
       signature: null,
       publicKey: null,

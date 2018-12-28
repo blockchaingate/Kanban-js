@@ -76,7 +76,7 @@ LoginFrontend.prototype.callbackLoginGoogleError = function (error) {
 }
 
 LoginFrontend.prototype.gapiLoadCallback = function() {
-  console.log("Got to gapi ...");
+  console.log("DEBUG: Got to gapi ...");
   this.googleAuth = gapi.auth2.init({
     client_id: pathnames.oauth.clientId,
     cookiepolicy: 'single_host_origin',

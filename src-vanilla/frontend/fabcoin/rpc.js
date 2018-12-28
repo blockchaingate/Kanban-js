@@ -120,6 +120,9 @@ function FabNode() {
       nonceSchnorrBase58Check: this.transformersStandard.shortener,
       signatureSchnorrBase58Check: this.transformersStandard.shortener,
       signatureSchnorrBase58: this.transformersStandard.setSchnorrSignature,
+      signature: this.transformersStandard.setSchnorrSignature,
+      signatureBase58: this.transformersStandard.setSchnorrSignature,
+      signatureBase58Check: this.transformersStandard.setSchnorrSignature,
       solutionBase58Check: this.transformersStandard.shortener,
       publicKeyHex: this.transformersStandard.setPublicKeySchnorr,
       "privateKeys.${number}": this.transformersStandard.setPrivateKeySchnorr,
@@ -351,12 +354,10 @@ function FabNode() {
     testSchnorrSignature: {
       inputs: {
         privateKey: inputFabCryptoSchnorr.privateKey,
-      },
-      inputsBase64: {
-        message: inputFabCryptoSchnorr.messageToSha3
+        message: inputFabCryptoSchnorr.messageToSha3Hex,
       },
       outputs: {
-        signatureSchnorrBase58: inputFabCryptoSchnorr.signature
+        signatureBase58: inputFabCryptoSchnorr.signature
       },
       callType: this.callTypes.crypto,
     },
@@ -364,9 +365,7 @@ function FabNode() {
       inputs: {
         signature: inputFabCryptoSchnorr.signature,
         publicKey: inputFabCryptoSchnorr.publicKey,
-      },
-      inputsBase64: {
-        message: inputFabCryptoSchnorr.messageToSha3
+        message: inputFabCryptoSchnorr.messageToSha3Hex
       },
       callType: this.callTypes.crypto
     },
@@ -376,7 +375,7 @@ function FabNode() {
         messageHex: inputFabCryptoSchnorr.messageToSha3Hex
       },
       outputs: {
-        signatureSchnorrBase58: inputFabCryptoSchnorr.signature
+        signature: inputFabCryptoSchnorr.signature
       },
       callType: this.callTypes.crypto,
     },
@@ -782,7 +781,7 @@ FabNode.prototype.callbackAggregateSignatureSolutions = function(functionLabelFr
     var currentSigner = inputParsed.signers[counterKeyPairs]; 
     solutions.push(currentSigner.mySolution);
   }
-  miscellaneousFrontEnd.updateValue(ids.defaults.kanbanPlusPlus.inputAggregateSignature.solutions, solutions.join(", "));
+  miscellaneousFrontEnd.updateValue(ids.defaults.fabcoin.inputCrypto.inputAggregateSignature.solutions, solutions.join(", "));
 }
 
 FabNode.prototype.convertToCorrectType = function(functionLabelBackend, variableName, inputRaw) {
