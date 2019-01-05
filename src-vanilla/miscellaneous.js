@@ -10,7 +10,7 @@ function deepCopy (input, recursionDepth) {
   if (recursionDepth === undefined || recursionDepth === null) {
     recursionDepth = 0;
   }
-  if (recursionDepth >= maxDeepCopyDepth) {;
+  if (recursionDepth >= maxDeepCopyDepth) {
     throw(`Deep copy reached max copy depth. ${maxDeepCopyDepth}`)
   }
   if (Array.isArray(input)) {
@@ -31,8 +31,9 @@ function deepCopy (input, recursionDepth) {
 }
 
 function getDurationReadableFromMilliseconds(inputMilliseconds) {
-  if (inputMilliseconds > 1500)
+  if (inputMilliseconds > 1500) {
     return getDurationReadableFromSeconds(inputMilliseconds / 1000);
+  }
   return `${inputMilliseconds} ms`;
 }
 
@@ -80,7 +81,7 @@ function hexShortener16Chars(input) {
   return hexShortenerNumChars(16, input);
 }
 
-function hexShortenerNumChars(numChars, input){
+function hexShortenerNumChars(numChars, input) {
   if (input.length < numChars * 2 + 2) {
     return input;
   }
