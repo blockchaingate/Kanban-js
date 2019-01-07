@@ -398,16 +398,6 @@ function abbreviateLabel(/** @type {string}*/ header) {
 
 /**@returns {{inputJSON: Object, htmlSoFar: string}} */
 JSONTransformer.prototype.getHtmlPreamble = function(input, /**@type {OptionsJSON} */ options) {
-  var doIncludeTogglePolling = false; 
-  var doShowClearButton = true;
-  if (options.flagDontShowClearButton === true) {
-    doShowClearButton = false;
-  }
-  var outputPolling = null; 
-  if (options.polling !== undefined && options.polling !== null) {
-    doIncludeTogglePolling = options.polling.doPoll;
-    outputPolling = options.polling.output;
-  }
   var inputJSON = input;
   if (typeof inputJSON === "string") {
     inputJSON = input.replace(/[\r\n]/g, " "); 
@@ -423,24 +413,24 @@ JSONTransformer.prototype.getHtmlPreamble = function(input, /**@type {OptionsJSO
   this.originalInputs.push(miscellaneousBackEnd.deepCopy(inputJSON, 0));
   var rawButton = "";
   var clearButton = "";
-  if (doIncludeTogglePolling === true) {
-    rawButton = submitRequests.getToggleButtonPausePolling({label: "raw", content: JSON.stringify(input), output: outputPolling});
-  } else {
+  if (options.flagDontShowRawButton !== true) {
     rawButton = submitRequests.getToggleButton({label: "raw", content: JSON.stringify(input)});
   }
-  if (doShowClearButton) {
+  if (options.flagDontShowClearButton !== true) {
     clearButton = getClearParentButton();
   }
   var result = "";
   result += rawButton;
   result += clearButton;
-  result += "<br>";
+  if (result !== "") {
+    result += "<br>";
+  }
   return {inputJSON: inputJSON, htmlSoFar: result};
 }
 
 /**@typedef {{clickHandler: Function, transformer: Function, tooltip: string}} Transformer */
 /**@typedef {Object.<string,Transformer>} TransformerCollection */
-/**@typedef {{transformers: TransformerCollection, layoutObjectAsArray: Boolean} } OptionsJSON */
+/**@typedef {{transformers: TransformerCollection, layoutObjectAsArray: Boolean, flagDontShowClearButton: Boolean, flagDontShowRawButton: Boolean} } OptionsJSON */
 
 JSONTransformer.prototype.getHtmlFromArrayOfObjects = function(input, /**@type {OptionsJSON} */ options) {
   var preamble = this.getHtmlPreamble(input, options);

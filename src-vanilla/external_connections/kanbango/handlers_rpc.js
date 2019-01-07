@@ -127,7 +127,7 @@ function handleRPCArgumentsPartTwo(
   response, 
   theRequestJSON, 
   /**@type {NodeKanbanGo} */ 
-  currentNode
+  currentNode,
 ) {
   var requestStringified = JSON.stringify(theRequestJSON);
   var requestOptions = {

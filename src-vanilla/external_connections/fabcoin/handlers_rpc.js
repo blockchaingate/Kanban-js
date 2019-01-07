@@ -148,20 +148,20 @@ function handleRPCArgumentsPartTwo(response, requestStringified, callbackOverrid
       response.writeHead(500);
       var result =  {
         error: `Eror during commmunication with rpc server. ${theError}. `,
-      }
+      };
       response.end(JSON.stringify(result));
       console.log(JSON.stringify(result));
     }); 
     theHTTPrequest.on('response', function(theHTTPresponse) {
       var finalData = "";
       //console.log("DEBUG: got response!")
-      theHTTPresponse.on ('data', function (chunk) {
+      theHTTPresponse.on('data', function (chunk) {
         finalData += chunk;
         //console.log(`DEBUG: got data chunk: ${chunk}`)
       });
       theHTTPresponse.on('error', function(yetAnotherError) {
         response.writeHead(500);
-        var result =  {
+        var result = {
           error: `Eror during commmunication with rpc server. ${yetAnotherError}. `,
         };
         response.end(JSON.stringify(result));
@@ -174,12 +174,14 @@ function handleRPCArgumentsPartTwo(response, requestStringified, callbackOverrid
         //  return response.end(finalData);
         //}
         try {
-          //console.log("DEBUG: Parsing: " + finalData + " typeof final data: " + (typeof finalData));
           var dataParsed = JSON.parse(finalData);
           if (dataParsed.error !== null && dataParsed.error !== "" && dataParsed.error !== undefined) {
             //console.log("DEBUG: Data parsed error:" + dataParsed.error);
             response.writeHead(200);
-            return response.end(dataParsed.error);
+            var result = {
+              error: dataParsed.error,
+            };
+            return response.end(JSON.stringify(result));
           }
           if (callbackOverridesResponse !== null && callbackOverridesResponse !== undefined) {
             if (typeof callbackOverridesResponse !== "function") {
@@ -192,6 +194,7 @@ function handleRPCArgumentsPartTwo(response, requestStringified, callbackOverrid
           return response.end(JSON.stringify(dataParsed.result));
         } catch (errorParsing) {
           response.writeHead(500);
+          console.log("DEBUG: errorParsing: " + errorParsing);
           var result = {
             error: `Error parsing result ${errorParsing}.`,
             finalData: finalData,

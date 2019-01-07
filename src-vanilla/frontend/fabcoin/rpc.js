@@ -891,9 +891,10 @@ FabNode.prototype.callbackStandard = function(functionLabelFrontEnd, input, outp
       resultHTML = inputParsed.resultHTML + "<br>" + resultHTML;
     }
     if (inputParsed.error !== undefined && inputParsed.error !== null) {
-      var errorMessage = inputParsed.error
+      var errorMessage = inputParsed.error;
       if (typeof errorMessage === "object") {
-        errorMessage = JSON.stringify(errorMessage);
+        var errorTransformer = new jsonToHtml.JSONTransformer(); 
+        errorMessage = errorTransformer.getHtmlFromArrayOfObjects(errorMessage, {flagDontShowRawButton: true, flagDontShowClearButton: true});
       }
       resultHTML = `<b style= 'color:red'>Error:</b> ${errorMessage}<br>` + resultHTML;
       if (inputParsed.error === fabInitializationSpec.urlStrings.errorFabNeverStarted) {
