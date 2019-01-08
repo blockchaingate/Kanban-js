@@ -269,6 +269,12 @@ function highlightErrorWords(input) {
   return result;
 }
 
+function replaceNewLinesWithBr(input) {
+  if (typeof input !== "string") {
+    return input;
+  }
+  return input.replace(/\n/g, "<br>");
+}
 
 module.exports = {
   attachModuleFullNameToHandlerNames,
@@ -284,4 +290,5 @@ module.exports = {
   standardExpandButtonHandler,
   setCheckbox,
   highlightErrorWords,
-}
+  replaceNewLinesWithBr,
+};

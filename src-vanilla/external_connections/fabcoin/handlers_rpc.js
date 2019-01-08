@@ -134,8 +134,8 @@ function handleRPCArgumentsPartTwo(response, requestStringified, callbackOverrid
     //agent: false,
     //rejectUnauthorized: this.opts.ssl && this.opts.sslStrict !== false
   };
-  //console.log ("DEBUG: options for request: " + JSON.stringify(requestOptions));
-  //console.log (`DEBUG: about to submit request: ${requestStringified}`.green);
+  console.log ("DEBUG: options for request: " + JSON.stringify(requestOptions));
+  console.log (`DEBUG: about to submit request: ${requestStringified}`.green);
   //console.log (`DEBUG: submit options: ${JSON.stringify(requestOptions)}`.green);
   //console.log (`DEBUG: submit body: ${requestStringified}`);
   //console.log ("DEBUG: request object: " + JSON.stringify(RPCRequestObject));

@@ -217,5 +217,5 @@ module.exports = {
   testBackEndSignOneMessage,
   testBackEndSignMultipleMessages,
   pollServerDoStart,
-  clearPollId
-}
+  clearPollId,
+};

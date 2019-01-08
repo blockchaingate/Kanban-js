@@ -53,6 +53,9 @@ function FabNode() {
     setAggregateSignature: this.getSetInputWithShortener(inputFabCryptoAggregate.theAggregation),
     setAggregateSignatureUncompressed: this.getSetInputWithShortener(inputFabCryptoAggregate.aggregateSignatureUncompressed),
     setAggregateSignatureComplete: this.getSetInputWithShortener(inputFabCryptoAggregate.aggregateSignatureComplete),
+    replaceNewLinesWithBr: {
+      transformer: miscellaneousFrontEnd.replaceNewLinesWithBr
+    },
   };
 
   this.optionsStandard = {
@@ -160,6 +163,13 @@ function FabNode() {
     transformers: {
       resultHTML: this.transformersStandard.shortener,
        
+    }
+  };
+  this.optionsErrors = {
+    flagDontShowRawButton: true, 
+    flagDontShowClearButton: true,
+    transformers: {
+      message: this.transformersStandard.replaceNewLinesWithBr,
     }
   };
   /**@type {Object.<string,{outputJSONDefault: string, outputOptionsDefault: string}>} */
@@ -894,7 +904,7 @@ FabNode.prototype.callbackStandard = function(functionLabelFrontEnd, input, outp
       var errorMessage = inputParsed.error;
       if (typeof errorMessage === "object") {
         var errorTransformer = new jsonToHtml.JSONTransformer(); 
-        errorMessage = errorTransformer.getHtmlFromArrayOfObjects(errorMessage, {flagDontShowRawButton: true, flagDontShowClearButton: true});
+        errorMessage = errorTransformer.getHtmlFromArrayOfObjects(errorMessage, this.optionsErrors);
       }
       resultHTML = `<b style= 'color:red'>Error:</b> ${errorMessage}<br>` + resultHTML;
       if (inputParsed.error === fabInitializationSpec.urlStrings.errorFabNeverStarted) {
@@ -988,4 +998,4 @@ var fabNode = new FabNode();
 
 module.exports = {
   fabNode
-}
+};
