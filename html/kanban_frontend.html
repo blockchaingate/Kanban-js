@@ -203,7 +203,8 @@
     <button class = "buttonStandard" style = "width: 100px" onclick = "window.kanban.fabcoin.rpc.fabNode.run('getBlockByHeight')">Block by #</button><br>
     <button class = "buttonStandard" style = "width: 100px" onclick = "window.kanban.fabcoin.rpc.fabNode.run('getBlockByHash')">Block by hash</button><br>
     <button class = "buttonStandard" style = "width: 100px" onclick = "window.kanban.fabcoin.rpc.fabNode.run('generateBlocks')">Mine blocks</button><br>
-    <button class = "buttonStandard" style = "width: 100px" onclick = "window.kanban.fabcoin.rpc.fabNode.run('getRawMempool')">Raw mempool</button><br>
+    <button class = "buttonStandard" style = "width: 100px" onclick = "window.kanban.fabcoin.rpc.fabNode.run('getRawMempool')">Mempool</button><br>
+    <button class = "buttonStandard" style = "width: 100px" onclick = "window.kanban.fabcoin.rpc.fabNode.run('getRawMempool',{manualInputs:{ verbose: true}})">Mempool verb.</button><br>
     </div>    
     <div class = "divLabelButtonGroup">key inputs</div><div id = "panelFabcoinKeys" class = "panelStandard">
     <button class = "buttonStandard" style = "width: 100px" onclick = "window.kanban.fabcoin.rpc.fabNode.run('getNewAddress')">New address</button><br>

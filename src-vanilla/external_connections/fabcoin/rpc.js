@@ -149,8 +149,8 @@ var rpcCalls = {
   getRawMempool: {
     rpcCall: "getRawMempool",
     method: "getrawmempool",
-    mandatoryFixedArguments: {
-      verbose: null
+    mandatoryModifiableArguments: {
+      verbose: false
     },
     parameters: ["verbose"]
   },

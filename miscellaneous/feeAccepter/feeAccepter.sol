@@ -4,7 +4,7 @@ contract FeeAccepter {
         require(address(this).balance >= 100, "Insufficient funds");        
         bytes32 acceptString = bytes32("__________________Fees accepted.");
         log0(acceptString);
-        log0(100);
+        log0(500);
         return true;
     }
     function sendToContract() public payable {

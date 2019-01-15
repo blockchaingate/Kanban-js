@@ -93,6 +93,7 @@ function handleRPCArguments(
   }
   var errors = [];
   var theRequestJSON = getRPCRequestJSON(theCallLabel, queryCommand, errors);
+  //console.log("DEBUG: request json: " + JSON.stringify(theRequestJSON));
   if (errors.length > 0) {
     response.writeHead(400);
     return response.end(JSON.stringify({error: errors[0]}));
@@ -134,8 +135,8 @@ function handleRPCArgumentsPartTwo(response, requestStringified, callbackOverrid
     //agent: false,
     //rejectUnauthorized: this.opts.ssl && this.opts.sslStrict !== false
   };
-  console.log ("DEBUG: options for request: " + JSON.stringify(requestOptions));
-  console.log (`DEBUG: about to submit request: ${requestStringified}`.green);
+  //console.log ("DEBUG: options for request: " + JSON.stringify(requestOptions));
+  //console.log (`DEBUG: about to submit request: ${requestStringified}`.green);
   //console.log (`DEBUG: submit options: ${JSON.stringify(requestOptions)}`.green);
   //console.log (`DEBUG: submit body: ${requestStringified}`);
   //console.log ("DEBUG: request object: " + JSON.stringify(RPCRequestObject));
