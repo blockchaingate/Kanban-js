@@ -106,7 +106,6 @@ function shortenString(input, desiredMaxSize, includeNumOmitted) {
   return trimStringAtEnds(input, numEndChars, numEndChars, includeNumOmitted)
 }
 
-
 function trimStringAtEnds(input, charsToDisplayLeft, charsToDisplayRight, includeNumOmitted) {
   if (typeof input !== "string") {
     input = JSON.stringify(input);
@@ -242,6 +241,16 @@ function trimeWhiteSpaceAtEnds(
   return input.slice(left, right + 1);  
 }
 
+/**@returns {String} */
+function numberFormatterExact(
+  input
+) {
+  if (typeof input !== "number") {
+    return input;
+  }
+  return input + '';
+}
+
 module.exports = {
   deepCopy,
   deepCopyThroughJSON,
@@ -257,6 +266,7 @@ module.exports = {
   removeQuotes,
   convertToIntegerIfPossible,
   hexVeryShortDisplay,
+  numberFormatterExact,
   ensureMinCharWidth,
   splitMultipleDelimiters,
 }

@@ -27,6 +27,9 @@ function FabNode() {
     extremeShortener: {
       transformer: miscellaneousBackend.hexVeryShortDisplay
     },
+    numberFormatterExact: {
+      transformer: miscellaneousBackend.numberFormatterExact
+    },
     transactionId: this.getSetInputAndRunWithShortener(inputFabBlock.txid, "getTransactionById", "Sets the transaction id field, fetches and decodes the transaction. "),
     transactionHexDecoder: this.getSetInputAndRunWithShortener(inputFabBlock.txHex, "decodeTransactionRaw", "Sets the transaction hex field and decodes the tx."),
     setAddress: this.getSetInputWithShortener(inputFabBlock.address),
@@ -203,7 +206,8 @@ function FabNode() {
       },
       outputOptions: {
         transformers: {
-          "${number}": this.transformersStandard.blockHash
+          "hash": this.transformersStandard.blockHash,
+          "comments": this.transformersStandard.replaceNewLinesWithBr,
         }
       }
     },
@@ -290,6 +294,9 @@ function FabNode() {
       outputOptions: {
         transformers: {
           "${number}" : this.transformersStandard.transactionId,
+          "${label}": this.transformersStandard.shortener,
+          "${any}.fee": this.transformersStandard.numberFormatterExact,
+          "${any}.modifiedfee": this.transformersStandard.numberFormatterExact,
         }
       }
     },
@@ -900,6 +907,9 @@ FabNode.prototype.callbackStandard = function(functionLabelFrontEnd, input, outp
     if (inputParsed.resultHTML !== undefined && inputParsed.resultHTML !== undefined) {
       resultHTML = inputParsed.resultHTML + "<br>" + resultHTML;
     }
+    if (inputParsed.comments !== undefined && inputParsed.comments !== undefined) {
+      resultHTML = miscellaneousFrontEnd.replaceNewLinesWithBr(inputParsed.comments) + resultHTML;
+    }
     if (inputParsed.error !== undefined && inputParsed.error !== null) {
       var errorMessage = inputParsed.error;
       if (typeof errorMessage === "object") {
@@ -909,7 +919,7 @@ FabNode.prototype.callbackStandard = function(functionLabelFrontEnd, input, outp
       resultHTML = `<b style= 'color:red'>Error:</b> ${errorMessage}<br>` + resultHTML;
       if (inputParsed.error === fabInitializationSpec.urlStrings.errorFabNeverStarted) {
         triggerFabcoindStart = true;
-        resultHTML += "<b style='color:green'> Will start fabcoind for you. </b><br>"
+        resultHTML += "<b style='color:green'> Will start fabcoind for you. </b><br>";
         resultHTML += "Equivalent to pressing the start fabcoind button. <br>";
       }
     }
