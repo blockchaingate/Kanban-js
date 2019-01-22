@@ -23,7 +23,7 @@ function CertificateOptions() {
 CertificateOptions.prototype.generatePrivateKeyIfNeeded = function(callback) {
   if (!fs.existsSync(pathnames.pathname.privateKey)) {
     console.log(`Private key file: ` + `${pathnames.pathname.privateKey}`.red + ` appears not to exist. Let me create that for you. `);
-    execSync(`openssl req -new -newkey rsa:2048 -days 3000 -nodes -x509 -subj "/C=CA/ST=ON/L=Markham/O=FA Enterprise System/CN=none" -keyout ${pathnames.pathname.privateKey} -out ${pathnames.pathname.certificate}`);
+    execSync(`openssl req -new -newkey rsa:2048 -days 3000 -nodes -x509 -subj "/C=CA/ST=ON/L=Markham/O=FA Enterprise System/CN=localhost" -keyout ${pathnames.pathname.privateKey} -out ${pathnames.pathname.certificate}`);
   }
   this.computeCertificatesPart2(callback);
 }
