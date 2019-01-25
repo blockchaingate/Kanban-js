@@ -45,8 +45,6 @@ var rpcCalls = {
   generateBlocks: {
     rpcCall: "generateBlocks", 
     method: "generate",  
-    mandatoryFixedArguments: {
-    },
     mandatoryModifiableArguments: {
       numberOfBlocks: null
     },
