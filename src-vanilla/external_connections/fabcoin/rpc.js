@@ -357,7 +357,6 @@ function getPOSTBodyFromRPCLabel(theRPCLabel, theArguments) {
   return `${encodeURIComponent(JSON.stringify(theRequest))}`;
 }
 
-
 module.exports = {
   rpcCalls,
   urlStrings,

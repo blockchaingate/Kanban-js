@@ -42,6 +42,7 @@ function FabNode() {
     setPublicKeySchnorr: this.getSetInputAndRunWithShortener(inputFabCryptoSchnorr.publicKey),
     setTxInputVoutAndValue: {
       clickHandler: this.setTxInputVoutAndValue.bind(this),
+      transformer: miscellaneousBackend.numberFormatterExact,
       tooltip: "Sets the tx inputs to this vout. Sets the transfer amount to the value of this txout minus 1."
     },
     setTxInputVoutNoValue: {

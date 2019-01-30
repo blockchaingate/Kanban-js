@@ -248,6 +248,7 @@ function numberFormatterExact(
   if (typeof input !== "number") {
     return input;
   }
+  //console.log("DEBUG: input number exact: ", input);
   return input + '';
 }
 
