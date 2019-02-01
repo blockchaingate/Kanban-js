@@ -248,6 +248,11 @@ var rpcCalls = {
     method: "rpc_modules",
     parameters: [],
   },
+  bridgeStatus: {
+    rpcCall: "bridgeStatus",
+    method: "bridge_bridgeStatus",
+    parameters: [],
+  },
   sendBenchmarkTransactions: {
     rpcCall: "sendBenchmarkTransactions",
     method: "kanban_sendBenchmarkTransactions",

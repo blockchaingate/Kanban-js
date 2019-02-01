@@ -484,7 +484,7 @@ function FabNode() {
     },
     getPeerInfo: {
       callType: this.callTypes.initialization,
-    }
+    },
   };
 
 }

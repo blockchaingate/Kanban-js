@@ -4,6 +4,7 @@
   "description": "FAB coin's kanban system.",
   "main": "src-vanilla/app.js",
   "scripts": {
+    "start": "node src-vanilla/app.js",
     "serve": "node src-vanilla/app.js",
     "develop": "nodemon src-vanilla/app.js",
     "daemon": "node src-vanilla/daemon.js",

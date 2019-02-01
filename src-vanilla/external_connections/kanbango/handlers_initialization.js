@@ -80,12 +80,12 @@ function NodeKanbanGo(
     rpcCalls: new OutputStream(),
   };
   var initializer = getInitializer();
-  this.outputStreams.log.idConsole = `[Node ${this.id}]`;
+  this.outputStreams.log.idConsole = `[Node ${this.id}] `;
   this.outputStreams.log.colorIdConsole = initializer.colors[this.id % initializer.colors.length];
-  this.outputStreams.initialization.idConsole = `[Node ${this.id}]`;
+  this.outputStreams.initialization.idConsole = `[Node ${this.id}] `;
   this.outputStreams.initialization.colorIdConsole = initializer.colors[this.id % initializer.colors.length];
   this.outputStreams.log.maximumLength = 3000;
-  this.outputStreams.rpcCalls.idConsole = `[RPC node ${this.id}]`;
+  this.outputStreams.rpcCalls.idConsole = `[RPC node ${this.id}] `;
   this.outputStreams.rpcCalls.colorIdConsole = initializer.colors[this.id % initializer.colors.length];
   this.outputStreams.rpcCalls.maximumLength = 3000;
 }
@@ -275,7 +275,7 @@ function KanbanGoInitializer() {
   this.nodes = [];
   /** @type {OutputStream} */
   this.notesStream = new OutputStream();
-  this.notesStream.idConsole = "[KanbanGoInitializer]";
+  this.notesStream.idConsole = "[KanbanGoInitializer] ";
   this.notesStream.colorIdConsole = "red";
 
   /** @type {String} */
@@ -453,11 +453,11 @@ function SolidityCode (codeBase64, basePath) {
   this.owner = null;
   /**@type {OutputStream} */
   this.errorStream = new OutputStream();
-  this.errorStream.idConsole = "[Solidity]";
+  this.errorStream.idConsole = "[Solidity] ";
   this.errorStream.colorIdConsole = "red";
   /**@type {OutputStream} */
   this.standardStream = new OutputStream();
-  this.standardStream.idConsole = "[Solidity]";
+  this.standardStream.idConsole = "[Solidity] ";
   this.standardStream.colorIdConsole = "blue";
 }
 

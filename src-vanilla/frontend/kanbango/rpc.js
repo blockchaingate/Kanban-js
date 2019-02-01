@@ -163,6 +163,7 @@ function KanbanGoNodes() {
       "input.txOutputs": this.transformersStandard.shortener,
       "comments.bytesToSign.${number}": this.transformersStandard.shortener,
       "comments.builder.inputs.${number}.unlockScript": this.transformersStandard.shortener,
+      "smartContractId": this.transformersStandard.shortener,
     }
   };
   this.optionsForAddressDisplay = {
@@ -606,6 +607,9 @@ function KanbanGoNodes() {
     },
     fetchMyNodesInfo: {
       callType: this.callTypes.myNodes,
+    },
+    bridgeStatus: {
+      outputJSON: ids.defaults.kanbanGO.outputKanbanInitialization
     },
     executeOverSSH: {
       callType: this.callTypes.myNodes,
