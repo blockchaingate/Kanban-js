@@ -243,7 +243,8 @@ NodeKanbanGo.prototype.run = function(response) {
     initializer.abiJSON,
     "--bridge.flagEnableTests",
     "--deposit",
-    0
+    //0,
+    1000
   );
   this.childProcessHandle = initializer.runShell(initializer.paths.geth, theArguments, theOptions, this.id);
   initializer.numberOfStartedNodes ++;

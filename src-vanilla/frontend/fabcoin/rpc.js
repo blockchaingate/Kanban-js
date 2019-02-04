@@ -111,6 +111,7 @@ function FabNode() {
       "transactionReceipt.stateRoot": this.transformersStandard.shortener,
       "executionResult.newAddress": this.transformersStandard.shortener,
       "executionResult.output": this.transformersStandard.shortener,
+      codeHex: this.transformersStandard.shortener,
     }
   };
   this.optionsCrypto = {
@@ -340,6 +341,12 @@ function FabNode() {
           "_rowLabel" : this.transformersStandard.setContractId,
         }
       }
+    },
+    contractCode: {
+      inputs: {
+        contractId: inputFabBlock.contractId,
+      },
+      outputOptions: this.optionsContract,
     },
     getNewAddress: {
       outputOptions: {

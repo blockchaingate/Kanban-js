@@ -178,6 +178,14 @@ var rpcCalls = {
     },
     parameters: ["contractId", "data", "amount", "gasLimit", "gasPrice", "senderAddress"]
   },
+  contractCode: {
+    rpcCall: "contractCode",
+    method: "contractcode",
+    mandatoryModifiableArguments: {
+      contractId: null,
+    },
+    parameters: ["contractId"]
+  },
   callContract: {
     rpcCall: "callContract",
     method: "callcontract",
