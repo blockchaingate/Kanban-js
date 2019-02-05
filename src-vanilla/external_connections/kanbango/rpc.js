@@ -215,6 +215,11 @@ var rpcCalls = {
     method: "bridge_getAccountsStates", //<- method name passed to kanban-go
     parameters: []
   },
+  getMainChainAccountsBalance: {
+    rpcCall: "getMainChainAccountsBalance",
+    method: "bridge_getMainChainAccountsBalance", //<- method name passed to kanban-go
+    parameters: []
+  },
   validators: {
     rpcCall: "validators",
     method: "pbft_validators",

@@ -120,6 +120,7 @@
     <button class = "buttonStandard" style = "width:100px" onclick = "window.kanban.kanbanGO.rpc.theKBNodes.run('versionGO');">Version</button><br>
     <button class = "buttonStandard" style = "width:100px" onclick = "window.kanban.kanbanGO.rpc.theKBNodes.run('rpcModules');">RPC modules</button><br>
     <button class = "buttonStandard" style = "width:100px" onclick = "window.kanban.kanbanGO.rpc.theKBNodes.run('getAccountsStates');">Account States</button><br>
+    <button class = "buttonStandard" style = "width:100px" onclick = "window.kanban.kanbanGO.rpc.theKBNodes.run('getMainChainAccountsBalance');">Main chain</button><br>
     </div>
     <div class = "divLabelButtonGroup">benchmark</div><div id = "panelKBGOBenchmarkButtons" class = "panelStandard">
     <button class = "buttonStandard" style = "width:100px" onclick = "window.kanban.kanbanGO.rpc.theKBNodes.run('sendBenchmarkTransactions');">Benchmark TPS</button><br>
@@ -244,7 +245,7 @@
     <input class = "inputStandard" id = "inputFabcoinPublicKey"                size = "50" placeholder = "public key"></input><br>    
     <input class = "inputStandard" id = "inputFabcoinAddress"                  size = "50" placeholder = "address FAB testnet"></input><br>
     <input class = "inputStandard" id = "inputFabcoinAddressMainnet"           size = "50" placeholder = "address FAB mainnet"></input><br>
-    <input class = "inputStandard" id = "inputEthereumAddress"                 size = "50" placeholder = "address Ethereum"></input><br>
+    <input class = "inputStandard" id = "inputKanbanAddress"                   size = "50" placeholder = "address Kanban"></input><br>
     </div>
     <div class = "divLabelButtonGroup">tx inputs</div><div id = "panelFabcoinTXInputs" class = "panelStandard">
     <input class = "inputStandard" id = "inputFabcoinTransactionId"            size = "50" placeholder = "tx id"></input><br>    

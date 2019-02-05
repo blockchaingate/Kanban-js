@@ -158,9 +158,18 @@ CurvePoint.prototype.computeEthereumAddressBytes = function() {
     throw "Uninitialized curve point";
   }
   var addressBytes = this.toBytesUncompressed().slice(1);
-  console.log( "DEBUG: address bytes: " + addressBytes.length);
+  //console.log( "DEBUG: address bytes: " + addressBytes.length);
   var theKeccak = hashes.keccak_256(addressBytes);
   return theKeccak.slice(12);
+}
+
+CurvePoint.prototype.computeKanbanAddressHex = function() {
+  if (this.point === null) {
+    throw "Uninitialized curve point";
+  }
+  var addressBytes = this.computeFABAddressBytesWithPrefix(null); 
+  var result = Buffer.from(addressBytes).toString('hex');
+  return result;
 }
 
 CurvePoint.prototype.computeEthereumAddressHex = function() {

@@ -726,7 +726,7 @@ FabNode.prototype.setPrivateKeyComputeAllElse = function(container, content, ext
   thePrivateKey.fromArbitrary(content);
   var thePublicKey = thePrivateKey.getExponent();
   miscellaneousFrontEnd.updateValue(ids.defaults.fabcoin.inputBlockInfo.publicKey, thePublicKey.toHex());
-  var addressEthereumHex = thePublicKey.computeEthereumAddressHex();
+  var addressKanbanHex = thePublicKey.computeKanbanAddressHex();
   var addressFabTestnetBytes = thePublicKey.computeFABAddressTestnetBytes();
   var addressFabTestnetBase58 =  encodingsKanban.encodingDefault.toBase58Check(addressFabTestnetBytes);
 
@@ -734,7 +734,7 @@ FabNode.prototype.setPrivateKeyComputeAllElse = function(container, content, ext
   var addressFabMainnetBase58 =  encodingsKanban.encodingDefault.toBase58Check(addressFabMainnetBytes);
   miscellaneousFrontEnd.updateValue(ids.defaults.fabcoin.inputBlockInfo.address, addressFabTestnetBase58);
   miscellaneousFrontEnd.updateValue(ids.defaults.fabcoin.inputBlockInfo.addressMainnet, addressFabMainnetBase58);
-  miscellaneousFrontEnd.updateValue(ids.defaults.fabcoin.inputBlockInfo.addressEthereum, addressEthereumHex);
+  miscellaneousFrontEnd.updateValue(ids.defaults.fabcoin.inputBlockInfo.addressKanban, addressKanbanHex);
 
   console.log(`DEBUG: private key hex: ${thePrivateKey.toHex()}`);
   console.log(`DEBUG: content: ${JSON.stringify(content)}`);

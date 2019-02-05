@@ -369,6 +369,10 @@ function KanbanGoNodes() {
       callback: PendingCall.prototype.callbackMakeAddressTable,
       outputOptions: this.optionsForAddressDisplay
     },
+    getMainChainAccountsBalance: {
+      callback: PendingCall.prototype.callbackMakeAddressTable,
+      outputOptions: this.optionsForAddressDisplay,
+    },
     getBlockByHash: {
       inputs: {
         blockHash: inputSendReceive.blockHash
