@@ -4,7 +4,7 @@
   "dataDir": "${projectBase}/secrets_data_fabcoin/"
 },
 "kanbanGO" : {
-  "dataDirName": "secrets_data_kanban_go",
+  "dataDirName": "secrets_kanban",
   "gethFolder": "${projectBase}/go/src/github.com/blockchaingate/kanban-go/build/bin/"
 },
 "useCertbot": false,
