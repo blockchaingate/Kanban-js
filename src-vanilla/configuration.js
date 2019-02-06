@@ -35,7 +35,7 @@ function Configuration () {
   this.configuration = {
     kanbanGO: {
       gethFolder: "uninitialized",
-      dataDirName: "secrets_data_kanban_go"
+      dataDirName: "secrets_kanban"
     },
     fabcoin: {
       executableFileName: `${pathnames.path.base}/fabcoin-dev-sm01/src/fabcoind`,

@@ -1,7 +1,7 @@
 node_modules/
 secrets_admin/
 secrets_server_only/
-secrets_data_kanban_go/
+secrets_kanban/
 secrets_data_fabcoin/
 experimental/*
 build/

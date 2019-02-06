@@ -34,7 +34,7 @@ function NodeKanbanGo(
   this.flagConnectInALine = inputData.connectInALine;
   /**@type {Number} */
   this.numberOfNodes = inputData.numberOfNodes;
-  this.basePath = `${getInitializer().paths.nodesDir}/${this.numberOfNodes}nodes`;
+  this.basePath = `${getInitializer().paths.nodesDir}/${this.numberOfNodes}_`;
   if (this.flagConnectInALine) {
     this.basePath += "l";
   } else {

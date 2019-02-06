@@ -111,6 +111,7 @@ function FabNode() {
       "transactionReceipt.stateRoot": this.transformersStandard.shortener,
       "executionResult.newAddress": this.transformersStandard.shortener,
       "executionResult.output": this.transformersStandard.shortener,
+      "comments": this.transformersStandard.shortener,
       codeHex: this.transformersStandard.shortener,
     }
   };
