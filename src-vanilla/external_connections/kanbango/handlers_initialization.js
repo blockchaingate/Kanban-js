@@ -337,13 +337,13 @@ KanbanGoInitializer.prototype.computePaths = function() {
   }
   if (this.paths.geth === "") {
     console.log(`Could not find geth executable. Searched directories along: ${startingPath}`.red);
-    throw(`Could not find geth executable.`);
+    throw(`Could not find geth executable. Please specify its location in the configure file: ` + `${pathnames.pathname.configurationSecretsAdmin}`.bold.green);
   } else {
     console.log(`Found geth executable:`.green + `${this.paths.geth}`.blue);
   }
   if (this.paths.dataDir === "") {
     console.log(`Could not find data directory ${kanbanDataDirName}. Searched directories along: ${startingPath}`.red);
-    throw(`Could not find data directory.`);
+    throw(`Could not find kanban data directory. Please specify its location in the configure file: ` + `${pathnames.pathname.configurationSecretsAdmin}`.bold.green);
   } else {
     console.log(`Found data directory: `.green + `${this.paths.dataDir}`.blue);
   }

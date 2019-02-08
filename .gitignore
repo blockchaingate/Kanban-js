@@ -31,6 +31,7 @@ test/kanban_gpu/debug/
 *.pdf
 *.pid
 build/Makefile
+.idea/
 
 go/bin
 go/src/github.com/golang.org
