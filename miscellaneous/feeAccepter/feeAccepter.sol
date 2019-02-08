@@ -16,6 +16,7 @@ contract FeeAccepter {
     //    return address(this).balance;
     //}
     function crash() public payable {
+        log0("Test of the crashing mechanism.");
         //require(false);
         require(false, "Test of the crashing mechanism.");
     }

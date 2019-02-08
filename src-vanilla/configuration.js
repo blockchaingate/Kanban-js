@@ -31,14 +31,14 @@ function Configuration () {
     lastCertificateRenewalTime: true,    
   };
   //defaults below. The defaults are overridden by this.readSecretsAdmin();
-  //which reads config.json from pathnames.path.configurationSecretsAdmin
+  //which reads configuration.json from pathnames.path.configurationSecretsAdmin
   this.configuration = {
     kanbanGO: {
       gethFolder: "uninitialized",
       dataDirName: "secrets_kanban"
     },
     fabcoin: {
-      executableFileName: `${pathnames.path.base}/fabcoin-dev-sm01/src/fabcoind`,
+      executableFileName: `${pathnames.path.base}/fabcoin-dev/src/fabcoind`,
       dataDir: `${pathnames.path.base}/secrets_data_fabcoin`
     },
     noLogFiles: false,
