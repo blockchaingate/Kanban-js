@@ -126,6 +126,9 @@ PendingCall.prototype.callbackStandardOneCaller = function(
       if (currentFunction.outputs !== null && currentFunction.outputs !== undefined) {
         this.updateFields(parsedInput, currentFunction.outputs);
       }
+      if (currentFunction.output !== null && currentFunction.output !== undefined) {
+        this.updateFields(input, currentFunction.output);
+      }
     }
   } catch (e) {
     header = `<b style = 'color:red'>Error:</b> ${e}<br>`;
@@ -256,6 +259,7 @@ PendingCall.prototype.callbackStandard = function(nodeId, input, output) {
   var theJSONWriter = new JSONTransformer();
   for (var currentNodeId in this.nodeCalls) {
     resultHTML += this.callbackStandardOneCaller(this.nodeCalls[currentNodeId].result, theJSONWriter);
+    resultHTML += "<br>";
     this.flagShowClearButton = false;
   }
   if (typeof output === "string") {

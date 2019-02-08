@@ -170,6 +170,11 @@ var rpcCalls = {
     },
     parameters: ["signatureComplete", "messageBase64"]
   },
+  getBestBlockNumber: {
+    rpcCall: "getBestBlockNumber",
+    method: "kanban_blockNumber",
+    parameters: [],
+  },
   getBlockByNumber: {
     rpcCall: "getBlockByNumber",
     method: "kanban_getBlockByNumber",

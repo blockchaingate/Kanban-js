@@ -373,6 +373,9 @@ function KanbanGoNodes() {
       callback: PendingCall.prototype.callbackMakeAddressTable,
       outputOptions: this.optionsForAddressDisplay,
     },
+    getBestBlockNumber: {
+      output: inputSendReceive.blockNumber, 
+    },
     getBlockByHash: {
       inputs: {
         blockHash: inputSendReceive.blockHash
