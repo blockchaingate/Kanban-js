@@ -56,6 +56,10 @@ function KanbanGoNodes() {
       clickHandler: this.setInput.bind(this, ids.defaults.fabcoin.inputBlockInfo.solidityInput),
       transformer: miscellaneousBackend.hexVeryShortDisplay,
     },
+    setBlockNumber: {
+      clickHandler: this.setInput.bind(this, ids.defaults.kanbanGO.inputSendReceive.blockNumber),
+      tooltip: "Sets the block number field."
+    },
     setPrivateKeySchnorr: this.getSetInputWithShortener(inputSchnorr.privateKey),
     setPublicKeySchnorr: this.getSetInputWithShortener(inputSchnorr.publicKey),
     setSignatureSchnorr: this.getSetInputWithShortener(inputSchnorr.signature),
@@ -116,6 +120,7 @@ function KanbanGoNodes() {
       payload: this.transformersStandard.shortener,
       logsBloom: this.transformersStandard.veryShort,
       hash: this.transformersStandard.blockHash,
+      nextBlock: this.transformersStandard.blockHash,
       miner: this.transformersStandard.shortener,
       mixHash: this.transformersStandard.veryShort,
       hashNoSignature: this.transformersStandard.shortener,
@@ -164,6 +169,8 @@ function KanbanGoNodes() {
       "comments.bytesToSign.${number}": this.transformersStandard.shortener,
       "comments.builder.inputs.${number}.unlockScript": this.transformersStandard.shortener,
       "smartContractId": this.transformersStandard.shortener,
+      currentBlockNumberHex: this.transformersStandard.setBlockNumber,
+      comments: this.transformersStandard.shortener,
     }
   };
   this.optionsForAddressDisplay = {
