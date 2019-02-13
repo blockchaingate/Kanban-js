@@ -374,7 +374,9 @@ function KanbanGoNodes() {
       outputOptions: this.optionsForAddressDisplay,
     },
     getBestBlockNumber: {
-      output: inputSendReceive.blockNumber, 
+      outputs: {
+        blockNumberHex: inputSendReceive.blockNumber, 
+      }
     },
     getBlockByHash: {
       inputs: {
@@ -429,6 +431,12 @@ function KanbanGoNodes() {
     },
     votingMachineStats: {
       callType: "votingMachine"
+    },
+    writeMessageToBlockHeader: {
+      callType: "standard",
+      inputs: {
+        messageHex: ids.defaults.kanbanGO.inputSendReceive.messageVoteHex,
+      },
     },
     voteMessage: {
       inputs: {

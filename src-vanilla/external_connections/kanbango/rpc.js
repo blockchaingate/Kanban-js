@@ -240,6 +240,14 @@ var rpcCalls = {
     method: "pbfttest_votingMachineStats",
     parameters: [],
   },
+  writeMessageToBlockHeader: {
+    rpcCall: "writeMessageToBlockHeader",
+    method: "pbft_writeMessageToBlockHeader",
+    mandatoryModifiableArguments: {
+      messageHex: null
+    },
+    parameters: ["messageHex"],
+  },
   votingNetStats: {
     rpcCall: "votingNetStats",
     method: "net_voteMessageNetworkStats",
