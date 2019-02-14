@@ -335,6 +335,7 @@ function KanbanGoNodes() {
         contractId: inputInitialization.contractId,
         connectKanbansInALine: ids.defaults.kanbanGO.checkboxConnectKanbansInALine,
         bridgeChainnet: inputInitialization.bridgeChainnet,
+        chainId: inputInitialization.chainId,
       },
       callback: PendingCall.prototype.callbackRunNodes,
       useOneNode: true

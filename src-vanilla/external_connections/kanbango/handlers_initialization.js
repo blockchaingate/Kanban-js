@@ -26,6 +26,7 @@ function NodeKanbanGo(
   /**@type {{id: String, contractId: String, connectInALine: boolean, numberOfNodes: Number}} */
   inputData
 ) {
+  var initializer = getInitializer();
   /**@type {Number} */
   this.id = inputData.id;
   /**@type {String} */
@@ -34,7 +35,7 @@ function NodeKanbanGo(
   this.flagConnectInALine = inputData.connectInALine;
   /**@type {Number} */
   this.numberOfNodes = inputData.numberOfNodes;
-  this.basePath = `${getInitializer().paths.nodesDir}/${this.numberOfNodes}_`;
+  this.basePath = `${getInitializer().paths.nodesDir}/${this.numberOfNodes}_${initializer.chainId}`;
   if (this.flagConnectInALine) {
     this.basePath += "l";
   } else {
@@ -79,7 +80,6 @@ function NodeKanbanGo(
     log: new OutputStream(),
     rpcCalls: new OutputStream(),
   };
-  var initializer = getInitializer();
   this.outputStreams.log.idConsole = `[Node ${this.id}] `;
   this.outputStreams.log.colorIdConsole = initializer.colors[this.id % initializer.colors.length];
   this.outputStreams.initialization.idConsole = `[Node ${this.id}] `;
@@ -963,10 +963,23 @@ KanbanGoInitializer.prototype.runNodesOnFAB = function(response, queryCommand, c
     reg: true, 
     regnet: true
   };
-  if (! (this.bridgeChainnet in allowedNets)) {
+  if (!(this.bridgeChainnet in allowedNets)) {
     var result = {
-      error: `Could not determine the bridgeChain net. Your input was: ${this.bridgeChainnet}. The allowed values are: ${Object.keys(allowedNets)}`,
-      allowedBridgeChainnets: allowedNets,
+      error: `Could not determine the bridgeChain net. Your input was: ${this.bridgeChainnet}.`,
+      allowedBridgeChainnets: Object.keys(allowedNets),
+    };
+    response.writeHead(400);
+    return response.end(JSON.stringify(result));
+  }
+  this.chainId = queryCommand.chainId;
+  var allowedKanbanChainIds = {
+    "211": true,
+    "212": true,
+  };
+  if (!(this.chainId in allowedKanbanChainIds)) {
+    var result = {
+      error: `Could not determine the kanban chainId. Your input was: ${this.chainId}.`,
+      allowedChainIds: Object.keys(allowedKanbanChainIds),
     };
     response.writeHead(400);
     return response.end(JSON.stringify(result));

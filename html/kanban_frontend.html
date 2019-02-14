@@ -72,7 +72,9 @@
   </td>
   <td>
   <div class = "divLabelButtonGroup">break KB</div><div id = "panelKBGODangerousInputs" class = "panelStandard">
-  <input id = "inputKBGOBridgeChainNet"    class = "inputStandard" size = "50" placeholder = "Bridge chain network" value = "regnet"></input><br>
+      
+  <input id = "inputKBGOChainId"           class = "inputStandard" size = "20" placeholder = "KB chain Id: 211 [main], 212 [test]" value = "212"></input>
+  <input id = "inputKBGOBridgeChainNet"    class = "inputStandard" size = "20" placeholder = "FAB net: reg, regnet, test, main" value = "reg"></input><br>
   <input id = "inputKBGONumberOfGethNodes" class = "inputStandard" size = "50" placeholder = "# nodes"              value = "1"></input><br>
   <input id = "inputKBGOContractId"        class = "inputStandard" size = "50" placeholder = "contract Id"          value = ""></input><br>
   <input id = "inputKBGOContractABI"       class = "inputStandard" size = "50" placeholder = "contract ABI"         value = ""></input><br>
@@ -120,6 +122,7 @@
     </div>
     <div class = "divLabelButtonGroup">miscellaneous</div><div id = "panelKBGOMiscellaneousButtons" class = "panelStandard">
     <button class = "buttonStandard" style = "width:100px" onclick = "window.kanban.kanbanGO.rpc.theKBNodes.run('versionGO');">Version</button><br>
+    <button class = "buttonStandard" style = "width:100px" onclick = "window.kanban.kanbanGO.rpc.theKBNodes.run('chainId');">ChainId</button><br>
     <button class = "buttonStandard" style = "width:100px" onclick = "window.kanban.kanbanGO.rpc.theKBNodes.run('rpcModules');">RPC modules</button><br>
     <button class = "buttonStandard" style = "width:100px" onclick = "window.kanban.kanbanGO.rpc.theKBNodes.run('getAccountsStates');">Account States</button><br>
     <button class = "buttonStandard" style = "width:100px" onclick = "window.kanban.kanbanGO.rpc.theKBNodes.run('getMainChainAccountsBalance');">Main chain</button><br>

@@ -235,10 +235,23 @@ var rpcCalls = {
     method: "web3_clientVersion",
     parameters: []
   },
+  chainId: {
+    rpcCall: "chainId",
+    method: "net_version",
+    parameters: []
+  },
   votingMachineStats: {
     rpcCall: "votingMachineStats",
     method: "pbfttest_votingMachineStats",
     parameters: [],
+  },
+  voteMessageAndWriteToHeader: {
+    rpcCall: "voteMessageAndWriteToHeader",
+    method: "pbft_voteMessageAndWriteToHeader",
+    mandatoryModifiableArguments: {
+      messageHex: null
+    },
+    parameters: ["messageHex"],
   },
   writeMessageToBlockHeader: {
     rpcCall: "writeMessageToBlockHeader",

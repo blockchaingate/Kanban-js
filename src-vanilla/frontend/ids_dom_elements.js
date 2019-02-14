@@ -126,6 +126,7 @@ var defaults = {
     },
     inputInitialization: {
       bridgeChainnet: "inputKBGOBridgeChainNet",
+      chainId: "inputKBGOChainId",
       numberOfNodes: "inputKBGONumberOfGethNodes",
       contractId: "inputKBGOContractId",
       contractABI: "inputKBGOContractABI"
