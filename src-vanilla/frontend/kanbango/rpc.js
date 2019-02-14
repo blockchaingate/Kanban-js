@@ -56,6 +56,10 @@ function KanbanGoNodes() {
       clickHandler: this.setInput.bind(this, ids.defaults.fabcoin.inputBlockInfo.solidityInput),
       transformer: miscellaneousBackend.hexVeryShortDisplay,
     },
+    getBlockByNumber: {
+      clickHandler: this.getBlockByNumber.bind(this),
+      tooltip: "Sets the block number field and fetches the block. "
+    },
     setBlockNumber: {
       clickHandler: this.setInput.bind(this, ids.defaults.kanbanGO.inputSendReceive.blockNumber),
       tooltip: "Sets the block number field."
@@ -169,6 +173,7 @@ function KanbanGoNodes() {
       "comments.bytesToSign.${number}": this.transformersStandard.shortener,
       "comments.builder.inputs.${number}.unlockScript": this.transformersStandard.shortener,
       "smartContractId": this.transformersStandard.shortener,
+      blockNumberHex: this.transformersStandard.getBlockByNumber,
       currentBlockNumberHex: this.transformersStandard.setBlockNumber,
       comments: this.transformersStandard.shortener,
     }
@@ -280,6 +285,9 @@ function KanbanGoNodes() {
       "peers.${any}.debugStatus.lines.${number}": this.transformersStandard.middleShortener,
       "inputHex": this.transformersStandard.shortener,
       "payloadHash": this.transformersStandard.shortener,
+      "votePayload.message": this.transformersStandard.shortener,
+      "votePayload.payloadHash": this.transformersStandard.shortener,
+      "votePayload.serialization": this.transformersStandard.shortener,
     },
   };
   this.callTypes = {
@@ -427,8 +435,8 @@ function KanbanGoNodes() {
     },
     testSha3 : {
       //if rpcCall omitted it will be assumed to be equal to the function label.
-      inputsBase64: {
-        message: inputSchnorr.message
+      inputs: {
+        messageHex: inputSchnorr.messageHex
       },
       callType: "cryptoTest"
     },
@@ -694,6 +702,12 @@ KanbanGoNodes.prototype.setInput = function(idToSet, container, content, extraDa
   //var extraDataString = JSON.stringify(extraData);
   //console.log(`DEBUG: Content: ${content}, extra data: ${extraDataString}`);
   miscellaneousFrontEnd.updateValue(idToSet, content);
+}
+
+KanbanGoNodes.prototype.getBlockByNumber = function(container, inputNumber) {
+  miscellaneousFrontEnd.updateValue(ids.defaults.kanbanGO.inputSendReceive.blockNumber, inputNumber);
+  miscellaneousFrontEnd.revealLongWithParent(container, inputNumber);
+  this.run('getBlockByNumber');
 }
 
 KanbanGoNodes.prototype.getBlockByHash = function(container, inputHash) {

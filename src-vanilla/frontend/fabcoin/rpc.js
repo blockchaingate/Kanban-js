@@ -357,8 +357,8 @@ function FabNode() {
       }
     },
     testSha3: {
-      inputsBase64: {
-        message: inputFabCryptoSchnorr.messageToSha3,
+      inputs: {
+        message: inputFabCryptoSchnorr.messageToSha3Hex,
       },
       callType: this.callTypes.crypto,
     },

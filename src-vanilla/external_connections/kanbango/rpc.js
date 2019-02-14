@@ -19,16 +19,10 @@ var rpcCalls = {
   testSha3: {
     rpcCall: "testSha3", //must be same as rpc label, used for autocomplete
     method: "cryptotest_testSha3", //<- name of go's RPC method 
-    mandatoryFixedArguments: { //<- values give defaults, null for none
-    },
     mandatoryModifiableArguments: { //<- values give defaults, null for none
-      message: null,
+      messageHex: null,
     },
-    optionalArguments: {
-    },
-    allowedArgumentValues: {
-    },
-    parameters: ["message"]
+    parameters: ["messageHex"]
   },
   testSha2: {
     rpcCall: "testSha2", //must be same as rpc label, used for autocomplete
