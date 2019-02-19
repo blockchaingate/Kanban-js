@@ -397,7 +397,11 @@ function abbreviateLabel(/** @type {string}*/ header) {
 }
 
 /**@returns {{inputJSON: Object, htmlSoFar: string}} */
-JSONTransformer.prototype.getHtmlPreamble = function(input, /**@type {OptionsJSON} */ options) {
+JSONTransformer.prototype.getHtmlPreamble = function(
+  input, 
+  /**@type {OptionsJSON} */ 
+  options,
+) {
   var inputJSON = input;
   if (typeof inputJSON === "string") {
     inputJSON = input.replace(/[\r\n]/g, " "); 
@@ -432,7 +436,11 @@ JSONTransformer.prototype.getHtmlPreamble = function(input, /**@type {OptionsJSO
 /**@typedef {Object.<string,Transformer>} TransformerCollection */
 /**@typedef {{transformers: TransformerCollection, layoutObjectAsArray: Boolean, flagDontShowClearButton: Boolean, flagDontShowRawButton: Boolean} } OptionsJSON */
 
-JSONTransformer.prototype.getHtmlFromArrayOfObjects = function(input, /**@type {OptionsJSON} */ options) {
+JSONTransformer.prototype.getHtmlFromArrayOfObjects = function(
+  input, 
+  /**@type {OptionsJSON} */ 
+  options,
+) {
   var preamble = this.getHtmlPreamble(input, options);
   var result = "";
   result += preamble.htmlSoFar;

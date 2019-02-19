@@ -174,7 +174,8 @@ function KanbanGoNodes() {
       "comments.builder.inputs.${number}.unlockScript": this.transformersStandard.shortener,
       "smartContractId": this.transformersStandard.shortener,
       blockNumberHex: this.transformersStandard.getBlockByNumber,
-      currentBlockNumberHex: this.transformersStandard.setBlockNumber,
+      currentBlockNumberHex: this.transformersStandard.getBlockByNumber,
+      currentBlockHash: this.transformersStandard.blockHash,
       comments: this.transformersStandard.shortener,
     }
   };
@@ -454,6 +455,12 @@ function KanbanGoNodes() {
         messageHex: ids.defaults.kanbanGO.inputSendReceive.messageVoteHex,
       },
     },
+    voteMessageAndWriteToHeader: {
+      callType: "standard",
+      inputs: {
+        messageHex: ids.defaults.kanbanGO.inputSendReceive.messageVoteHex,
+      },
+    },
     voteMessage: {
       inputs: {
         messageHex: ids.defaults.kanbanGO.inputSendReceive.messageVoteHex
@@ -706,7 +713,6 @@ KanbanGoNodes.prototype.setInput = function(idToSet, container, content, extraDa
 
 KanbanGoNodes.prototype.getBlockByNumber = function(container, inputNumber) {
   miscellaneousFrontEnd.updateValue(ids.defaults.kanbanGO.inputSendReceive.blockNumber, inputNumber);
-  miscellaneousFrontEnd.revealLongWithParent(container, inputNumber);
   this.run('getBlockByNumber');
 }
 
