@@ -45,6 +45,7 @@ go/src/github.com/karrick/
 go/src/github.com/mdempsky/
 go/src/github.com/pkg/
 go/src/github.com/uudashr/
+go/src/github.com/fjl/
 go/pkg
 
 #this auto-generated file should really be in the repo,

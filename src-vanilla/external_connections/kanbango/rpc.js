@@ -199,6 +199,11 @@ var rpcCalls = {
     method: "pbft_round",
     parameters: []
   },
+  currentProposal: {
+    rpcCall: "currentProposal",
+    method: "pbft_currentProposal",
+    parameters: []
+  },
   peerView: {
     rpcCall: "peerView",
     method: "pbft_peerView", //<- method name passed to kanban-go

@@ -355,6 +355,7 @@ var labelAbbreviations = {
   "blockindex": "bl.ind.",
   "generated": "gen.",
   "ethereumAddressHex": "ethAddrHex",
+  "writeBack" : "_writeBack",
   "fabAddressMainnetBase58Check": "fabAddrMain58Ch",
   "fabAddressMainnetHexNocheck": "fabAddrMHex",
   "fabAddressTestnetBase58Check": "fabAddrTHexCh",

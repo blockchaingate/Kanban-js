@@ -277,8 +277,10 @@ function KanbanGoNodes() {
     transformers: {
       "peers.${label}": this.transformersStandard.shortener,
       "approvedMessages.${number}.aggregateSignature": this.transformersStandard.shortener,
-      "approvedMessages.${number}.hash": this.transformersStandard.shortener,
       "approvedMessages.${number}.payloadHash": this.transformersStandard.shortener,
+      "approvedMessages.${number}.hash": this.transformersStandard.shortener,
+      "approvedMessages.${number}.dataAndAuthorization.aggregateSignature": this.transformersStandard.shortener,
+      "approvedMessages.${number}.dataAndAuthorization.payload.payloadHash": this.transformersStandard.shortener,
       "messages.debugStatus.lines.${number}": this.transformersStandard.middleShortener,
       "messages.errorLog.lines.${number}": this.transformersStandard.middleShortener,
       "messages.publicKey": this.transformersStandard.middleShortener,
