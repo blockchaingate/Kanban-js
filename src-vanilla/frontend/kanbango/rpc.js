@@ -196,6 +196,7 @@ function KanbanGoNodes() {
     totalEntriesToDisplayAtEnds: 30,
     transformers: {
       myEnodeAddress: this.transformersStandard.shortener16,
+      argumentsGeth: this.transformersStandard.veryShort,
       "myConnections.${number}": this.transformersStandard.shortener16,
       "secretKey": this.transformersStandard.shortener,
       "binaries.${number}": this.transformersStandard.contractHexSetter,

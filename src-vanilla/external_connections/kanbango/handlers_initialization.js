@@ -70,6 +70,8 @@ function NodeKanbanGo(
   this.maximumAttemptsToSelectAddress = 4;
   /** @type {object} */
   this.nodeInformation = {};
+  /**@type {String[]} */
+  this.argumentsGeth = [];
   /** @type {object} */
   this.nodeSensitiveInformation = {};
   /** @type {ChildProcess} */
@@ -127,11 +129,16 @@ NodeKanbanGo.prototype.initialize5ResetFolders = function(response) {
 }
 
 NodeKanbanGo.prototype.computeNodeInfo = function () {
-  this.nodeInformation = {};
   this.nodeInformation.id = this.id;
   this.nodeInformation.RPCPort = this.RPCPort;
   this.nodeInformation.port = this.port;
   this.nodeInformation.myEnodeAddress = this.myEnodeAddress;
+  var initializer = getInitializer();
+  this.nodeInformation.chainId = initializer.chainId;
+  if ( ("" + initializer.chainId) === ("" + initializer.chainIdTestNet)) {
+    this.nodeInformation.comment = "Chain id running on testnet, revealing sensitive information.";
+    this.nodeInformation.argumentsGeth = this.argumentsGeth;
+  }
   
   this.nodeSensitiveInformation = Object.assign({}, this.nodeInformation);
   this.nodeSensitiveInformation.secretKey = this.nodePrivateKey.toHex();
@@ -204,7 +211,7 @@ NodeKanbanGo.prototype.run = function(response) {
     cwd: initializer.paths.gethPath,
     env: process.env
   };
-  var theArguments = [
+  this.argumentsGeth = [
     "--datadir",
     this.dataDir,
     "--nodiscover",
@@ -229,7 +236,7 @@ NodeKanbanGo.prototype.run = function(response) {
     "--rpcport",
     this.RPCPort.toString()
   ];
-  theArguments.push(
+  this.argumentsGeth.push(
     "--bridge.chainnet",
     initializer.bridgeChainnet,
     "--bridge.attachtorunning",
@@ -246,7 +253,7 @@ NodeKanbanGo.prototype.run = function(response) {
     //0,
     1000
   );
-  this.childProcessHandle = initializer.runShell(initializer.paths.geth, theArguments, theOptions, this.id);
+  this.childProcessHandle = initializer.runShell(initializer.paths.geth, this.argumentsGeth, theOptions, this.id);
   initializer.numberOfStartedNodes ++;
   initializer.runNodesFinish(response);
 }
@@ -269,8 +276,9 @@ function KanbanGoInitializer() {
     solidityDir: "",
     nodesDir: "",
     passwordEmptyFile: "",
-    nodeConfiguration: ""
+    nodeConfiguration: "",
   };
+  this.chainIdTestNet = 212;
   this.chainId = 211;
   /** @type {NodeKanbanGo[]} */
   this.nodes = [];
@@ -427,7 +435,7 @@ KanbanGoInitializer.prototype.getNodeInformation = function(response, queryComma
 var numberOfSolidityCalls = 0;
 
 function SolidityCode (codeBase64, basePath) {
-  this.code = Buffer.from(codeBase64, "base64").toString();;
+  this.code = Buffer.from(codeBase64, "base64").toString();
   this.fileNameBase = `solidityFile${numberOfSolidityCalls}`;
   this.pathBase = basePath;
   /** @type {string[]} */
@@ -997,7 +1005,6 @@ KanbanGoInitializer.prototype.runNodes = function(
   this.flagStartWasEverAttempted = true;
   this.numberOfKanbanGORuns ++;
   this.log(`${this.numberOfKanbanGORuns} attempts to initialize KanbanGO so far. `);
-  //console.log(`DEBUIG: got to here pt 1`);
   var candidateNumberOfNodes = Number(queryCommand.numberOfNodes);
   var maxNumberOfNodes = 100;
   if (
@@ -1080,7 +1087,6 @@ KanbanGoInitializer.prototype.runNodes6DoRunNodes = function(response) {
   if (this.numberOfInitializedGenesis < this.nodes.length) {
     return;
   }
-  //this.log(`DEBUG: about to run: ${this.nodes.length} nodes. ` );
   for (var counterNode = 0; counterNode < this.nodes.length; counterNode ++) {
     this.nodes[counterNode].run(response);
   }
@@ -1089,7 +1095,7 @@ KanbanGoInitializer.prototype.runNodes6DoRunNodes = function(response) {
 KanbanGoInitializer.prototype.runNodes7WriteNodeConfig = function() {
   var nodeConfig = [];
   for (var i = 0; i < this.nodes.length; i ++) {
-    this.nodes[i].computeNodeInfo()
+    this.nodes[i].computeNodeInfo();
     nodeConfig.push(this.nodes[i].nodeSensitiveInformation);
   }
   this.log(`Proceeding to write node config to: ${this.paths.nodeConfiguration}`);
@@ -1105,7 +1111,7 @@ KanbanGoInitializer.prototype.runShell = function(
   /**@type {OutputStream} */
   errorLog,
   /**@type {OutputStream} */
-  standardLog
+  standardLog,
 ) {
   console.log(`About to execute: ${command}`.yellow);
   console.log(`Arguments: ${theArguments}`.green);
@@ -1137,7 +1143,7 @@ KanbanGoInitializer.prototype.runShell = function(
     } else if (currentNode !== null) {
       currentNode.logRegular(data.toString());
     } else {
-      thisContainer.log(data.toString())
+      thisContainer.log(data.toString());
     }
   });
   child.on('error', function(data) {
@@ -1146,7 +1152,7 @@ KanbanGoInitializer.prototype.runShell = function(
     } else if (currentNode !== null) {
       currentNode.logRegular(data.toString());
     } else {
-      thisContainer.log(data.toString())
+      thisContainer.log(data.toString());
     }
   });
   child.on('exit', function(code) {
@@ -1188,7 +1194,7 @@ KanbanGoInitializer.prototype.extractCurrentServiceFromKanbanLocal = function(
       }
       response.writeHead(400);
       var result = {
-        error: `Failed to select node ${currentNodeId}: ${this.nodeInformation.length} nodes running. `
+        error: `Failed to select node ${currentNodeId}: ${this.nodeInformation.length} nodes running. `,
       };
       response.end(JSON.stringify(result));
       return false;
@@ -1198,7 +1204,7 @@ KanbanGoInitializer.prototype.extractCurrentServiceFromKanbanLocal = function(
     if (output.service === undefined || output.service === null) {
       response.writeHead(400);
       var result = {
-        error: `KanbanGoInitializer: failed to extract node id from ${currentNodeId}. `
+        error: `KanbanGoInitializer: failed to extract node id from ${currentNodeId}. `,
       };
       response.end(JSON.stringify(result));          
       return false;
@@ -1241,7 +1247,7 @@ KanbanGoInitializer.prototype.extractCurrentService = function(
 KanbanGoInitializer.prototype.handleRPCArguments = function(
   /**@type {ResponseWrapper} */  
   response, 
-  queryCommand
+  queryCommand,
 ) {
   //console.log(`DEBUG: this.paths: ${this.paths}.`);
   if (this.numberRequestsRunning > this.maxRequestsRunning) {
