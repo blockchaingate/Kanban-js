@@ -135,7 +135,7 @@ NodeKanbanGo.prototype.computeNodeInfo = function () {
   this.nodeInformation.myEnodeAddress = this.myEnodeAddress;
   var initializer = getInitializer();
   this.nodeInformation.chainId = initializer.chainId;
-  if ( ("" + initializer.chainId) === ("" + initializer.chainIdTestNet)) {
+  if (("" + initializer.chainId) === ("" + initializer.chainIdTestNet)) {
     this.nodeInformation.comment = "Chain id running on testnet, revealing sensitive information.";
     this.nodeInformation.argumentsGeth = this.argumentsGeth;
   }

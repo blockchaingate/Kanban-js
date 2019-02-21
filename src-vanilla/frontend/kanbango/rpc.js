@@ -177,6 +177,7 @@ function KanbanGoNodes() {
       currentBlockNumberHex: this.transformersStandard.getBlockByNumber,
       currentBlockHash: this.transformersStandard.blockHash,
       comments: this.transformersStandard.shortener,
+      "_writeBack": this.transformersStandard.shortener,
     }
   };
   this.optionsForAddressDisplay = {
@@ -453,6 +454,12 @@ function KanbanGoNodes() {
       callType: "votingMachine"
     },
     writeMessageToBlockHeader: {
+      callType: "standard",
+      inputs: {
+        messageHex: ids.defaults.kanbanGO.inputSendReceive.messageVoteHex,
+      },
+    },
+    generateWriteBack: {
       callType: "standard",
       inputs: {
         messageHex: ids.defaults.kanbanGO.inputSendReceive.messageVoteHex,

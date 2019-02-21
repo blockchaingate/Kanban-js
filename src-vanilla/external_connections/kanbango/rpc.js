@@ -252,6 +252,14 @@ var rpcCalls = {
     },
     parameters: ["messageHex"],
   },
+  generateWriteBack: {
+    rpcCall: "generateWriteBack",
+    method: "pbft_generateWriteBack",
+    mandatoryModifiableArguments: {
+      messageHex: null,
+    },
+    parameters: ["messageHex"],
+  },
   writeMessageToBlockHeader: {
     rpcCall: "writeMessageToBlockHeader",
     method: "pbft_writeMessageToBlockHeader",
