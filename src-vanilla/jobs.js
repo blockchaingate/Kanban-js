@@ -53,7 +53,7 @@ Jobs.prototype.addJob = function (jobHandler, jobFunctionLabel) {
   this.ongoing[callId] = {
     status: pathnames.computationalEngineCallStatuses.starting,
     name: jobFunctionLabel
-  }
+  };
   process.nextTick(function() {
     console.log(`handling callid: ${callId}`);
     jobHandler(callId);

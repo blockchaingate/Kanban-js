@@ -110,7 +110,15 @@ function getTransformerForLabel(/** @type {string} */ label, transformers) {
   return null;
 }
 
-JSONTransformer.prototype.getClickableEntry = function(input, /**@type {string}*/ inputHTML, transformers, /** @type {string}*/ label, labelArray) {
+JSONTransformer.prototype.getClickableEntry = function(
+  input, 
+  /**@type {string}*/ 
+  inputHTML, 
+  transformers, 
+  /** @type {string}*/ 
+  label, 
+  labelArray,
+ ) {
   if (transformers === undefined || transformers === null) {
     return processInputStringStandard(input);
   }
@@ -392,7 +400,7 @@ var labelAbbreviations = {
 
 function abbreviateLabel(/** @type {string}*/ header) {
   if (!(header in labelAbbreviations)) {
-    return header
+    return header;
   }
   return labelAbbreviations[header];
 }

@@ -295,12 +295,12 @@ var rpcCalls = {
     rpcCall: "sendBenchmarkTransactions",
     method: "kanban_sendBenchmarkTransactions",
     mandatoryModifiableArguments: {
-        privateKey: null,
-        toAddress: null,
-        transactionNumber: null,
-        transactionValue: null,
+      privateKey: null,
+      toAddress: null,
+      transactionNumber: null,
+      transactionValue: null,
     },
-    parameters: ["privateKey", "toAddress", "transactionNumber", "transactionValue"]
+    parameters: ["privateKey", "toAddress", "transactionNumber", "transactionValue"],
   },
   testCreateAndSignTransactionStandard: {
     rpcCall: "testCreateAndSignTransactionStandard",
@@ -310,6 +310,14 @@ var rpcCalls = {
       outputs: null,
     },
     parameters: ["inputs", "outputs"],
+  },
+  decodeFabcoinTransactionHex: {
+    rpcCall: "decodeFabcoinTransactionHex",
+    method: "pbfttest_decodeFabcoinTransactionHex",
+    mandatoryModifiableArguments: {
+      transactionHex: null,
+    },
+    parameters: ["transactionHex"],
   },
 };
 

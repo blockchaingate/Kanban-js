@@ -178,6 +178,7 @@ function KanbanGoNodes() {
       currentBlockHash: this.transformersStandard.blockHash,
       comments: this.transformersStandard.shortener,
       "_writeBack": this.transformersStandard.shortener,
+      bytesToSign: this.transformersStandard.shortener,
     }
   };
   this.optionsForAddressDisplay = {
@@ -282,7 +283,9 @@ function KanbanGoNodes() {
       "approvedMessages.${number}.payloadHash": this.transformersStandard.shortener,
       "approvedMessages.${number}.hash": this.transformersStandard.shortener,
       "approvedMessages.${number}.dataAndAuthorization.aggregateSignature": this.transformersStandard.shortener,
+      "approvedMessages.${number}.dataAndAuthorization.payload.message": this.transformersStandard.shortener,
       "approvedMessages.${number}.dataAndAuthorization.payload.payloadHash": this.transformersStandard.shortener,
+      "approvedMessages.${number}.dataAndAuthorization.payload.serialization": this.transformersStandard.shortener,
       "messages.debugStatus.lines.${number}": this.transformersStandard.middleShortener,
       "messages.errorLog.lines.${number}": this.transformersStandard.middleShortener,
       "messages.publicKey": this.transformersStandard.middleShortener,
@@ -293,6 +296,7 @@ function KanbanGoNodes() {
       "votePayload.message": this.transformersStandard.shortener,
       "votePayload.payloadHash": this.transformersStandard.shortener,
       "votePayload.serialization": this.transformersStandard.shortener,
+      "slots.${number}.payloadHash": this.transformersStandard.shortener,
     },
   };
   this.callTypes = {
@@ -651,6 +655,11 @@ function KanbanGoNodes() {
       },
       outputs: {
         hex: [ids.defaults.kanbanGO.inputSendReceive.txHex, ids.defaults.fabcoin.inputBlockInfo.txHex],
+      },
+    },
+    decodeFabcoinTransactionHex: {
+      inputs: {
+        transactionHex: ids.defaults.kanbanGO.inputSendReceive.txHex,
       },
     },
     fetchMyNodesInfo: {
