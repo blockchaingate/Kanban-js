@@ -1,12 +1,12 @@
 pragma solidity ^0.4.24;
 contract FeeAccepter {
-    //function acceptFees() public returns (bool) {
-    //    require(address(this).balance >= 100, "Insufficient funds");        
-    //    bytes32 acceptString = bytes32("__________________Fees accepted.");
-    //    log0(acceptString);
-    //    log0(700000);
-    //    return true;
-    //}
+    function acceptFees() public returns (bool) {
+        require(address(this).balance >= 700000, "Insufficient funds");        
+        bytes32 acceptString = bytes32("__________________Fees accepted.");
+        log0(acceptString);
+        log0(700000);
+        return true;
+    }
     //function sendToContract() public payable {
     //}
     //function returnHalf() public payable {

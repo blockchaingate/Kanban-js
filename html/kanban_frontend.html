@@ -188,7 +188,7 @@
     <span class = "checkMark"></span>
     Send to contract
     </label><br>
-    <input id = "inputKBGOSmartContractId"                class = "inputStandard" size = "50" placeholder = "contract id"/><br>
+    <input id = "inputKBGOSCARShardId"                    class = "inputStandard" size = "50" placeholder = "SCAR shard id" value = "0000000000000000000000000000000000000000000000000000000000000fab"/><br>
     <input id = "inputKBGOGasLimit"                       class = "inputStandard" size = "50" placeholder = "gas limit"></input><br>
     <input id = "inputKBGOGasPrice"                       class = "inputStandard" size = "50" placeholder = "gas price"></input><br>
     <input id = "inputKBGOSmartContractFunctionName"      class = "inputStandard" size = "50" placeholder = "contract f-n"/><br>
@@ -232,6 +232,7 @@
     </div>    
     <div class = "divLabelButtonGroup">contracts</div><div id = "panelFabcoinSmartButtons" class = "panelStandard">
     <button class = "buttonStandard" style = "width: 100px" onclick = "window.kanban.fabcoin.rpc.fabNode.run('listContracts')">List contracts</button><br>
+    <button class = "buttonStandard" style = "width: 100px" onclick = "window.kanban.fabcoin.rpc.fabNode.run('fetchSCARShardPublicKeys')">SCAR keys</button><br>
     <button class = "buttonStandard" style = "width: 100px" onclick = "window.kanban.fabcoin.rpc.fabNode.run('contractCode')">Get code</button><br>
     <button class = "buttonStandard" style = "width: 100px" onclick = "window.kanban.fabcoin.rpc.fabNode.run('createContract')">Create</button><br>
     <button class = "buttonStandard" style = "width: 100px" onclick = "window.kanban.fabcoin.rpc.fabNode.run('sendToContract')">Send to contr.</button><br>
@@ -296,9 +297,10 @@
   <input type = "checkbox" id = "checkboxFabcoinSendToContract" onchange = "window.kanban.kanbanGO.rpc.theKBNodes.readCheckboxesConfiguration(); window.kanban.fabcoin.rpc.fabNode.computeTxInsAndOuts(true);">
   <span class = "checkMark"></span>
   Send to contract
-  </label><br>     
-  <input type = "text" class = "inputStandard" id = "inputFabcoinContractHex"               size = "50" value = "" placeholder = "contract hex"></input><br>
+  </label><br>
   <input type = "text" class = "inputStandard" id = "inputFabcoinContractId"                size = "50" value = "" placeholder = "contract id"></input><br>
+  <input type = "text" class = "inputStandard" id = "inputFabcoinSCARShardId"               size = "50" value = "" placeholder = "shard id" value = "0000000000000000000000000000000000000000000000000000000000000fab"></input><br>
+  <input type = "text" class = "inputStandard" id = "inputFabcoinContractHex"               size = "50" value = "" placeholder = "contract hex"></input><br>
   <input type = "text" class = "inputStandard" id = "inputFabcoinGasLimit"                  size = "50" value = "" placeholder = "gas limit"></input><br>
   <input type = "text" class = "inputStandard" id = "inputFabcoinGasPrice"                  size = "50" value = "" placeholder = "gas price"></input><br>
   <input type = "text" class = "inputStandard" id = "inputSolidityFunctionName"             size = "50" value = "" placeholder = "contract f-n name"></input><br>

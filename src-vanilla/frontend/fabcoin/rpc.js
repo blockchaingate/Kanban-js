@@ -79,6 +79,8 @@ function FabNode() {
       "details.${number}.address": this.transformersStandard.setAddress,
       "details.${number}.amount": this.transformersStandard.setTxInputVoutAndValue,
       "details.${number}.vout": this.transformersStandard.setTxInputVoutNoValue,
+      contractId: this.transformersStandard.shortener,
+      shardId: this.transformersStandard.shortener,
     },
   };
   this.optionsTransaction = {
@@ -341,6 +343,12 @@ function FabNode() {
         transformers: {
           "_rowLabel" : this.transformersStandard.setContractId,
         }
+      }
+    },
+    fetchSCARShardPublicKeys: {
+      inputs: {
+        contractId: inputFabBlock.contractId,
+        shardId: inputFabBlock.shardId,
       }
     },
     contractCode: {

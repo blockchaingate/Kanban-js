@@ -82,11 +82,20 @@ var rpcCalls = {
   listContracts: {
     rpcCall: "listContract",
     method: "listcontracts",
-    mandatoryModifiableArguments:{
+    mandatoryModifiableArguments: {
       start: 1,
       maxDisplay: 1000
     },
     parameters: ["start", "maxDisplay"]
+  },
+  fetchSCARShardPublicKeys: {
+    rpcCall: "fetchSCARShardPublicKeys",
+    method: "fetchscarshardpublickeys",
+    mandatoryModifiableArguments: {
+      contractId: null,
+      shardId: null,
+    },
+    parameters: ["contractId", "shardId"],
   },
   getNewAddress: {
     rpcCall: "getNewAddress",
