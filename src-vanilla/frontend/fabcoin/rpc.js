@@ -43,22 +43,22 @@ function FabNode() {
     setTxInputVoutAndValue: {
       clickHandler: this.setTxInputVoutAndValue.bind(this),
       transformer: miscellaneousBackend.numberFormatterExact,
-      tooltip: "Sets the tx inputs to this vout. Sets the transfer amount to the value of this txout minus 1."
+      tooltip: "Sets the tx inputs to this vout. Sets the transfer amount to the value of this txout minus 1.",
     },
     setTxInputVoutNoValue: {
       clickHandler: this.setTxInputVoutAndValue.bind(this),
-      tooltip: "Sets the tx inputs to this vout. Sets the transfer amount to 0. "
+      tooltip: "Sets the tx inputs to this vout. Sets the transfer amount to 0. ",
     },
     setContractId: {
       clickHandler: this.setContractId.bind(this),
-      transformer: miscellaneousBackend.hexShortener4Chars
+      transformer: miscellaneousBackend.hexShortener4Chars,
     },
     setSchnorrSignature: this.getSetInputWithShortener(inputFabCryptoSchnorr.signature),
     setAggregateSignature: this.getSetInputWithShortener(inputFabCryptoAggregate.theAggregation),
     setAggregateSignatureUncompressed: this.getSetInputWithShortener(inputFabCryptoAggregate.aggregateSignatureUncompressed),
     setAggregateSignatureComplete: this.getSetInputWithShortener(inputFabCryptoAggregate.aggregateSignatureComplete),
     replaceNewLinesWithBr: {
-      transformer: miscellaneousFrontEnd.replaceNewLinesWithBr
+      transformer: miscellaneousFrontEnd.replaceNewLinesWithBr,
     },
   };
 
@@ -80,6 +80,10 @@ function FabNode() {
       "details.${number}.amount": this.transformersStandard.setTxInputVoutAndValue,
       "details.${number}.vout": this.transformersStandard.setTxInputVoutNoValue,
       contractId: this.transformersStandard.shortener,
+      "executionResult.output": this.transformersStandard.shortener,
+      "executionResult.newAddress": this.transformersStandard.shortener,
+      "transactionReceipt.bloom": this.transformersStandard.shortener,
+      "transactionReceipt.stateRoot": this.transformersStandard.shortener,
       shardId: this.transformersStandard.shortener,
     },
   };
@@ -169,8 +173,7 @@ function FabNode() {
   this.optionsInitialization = {
     totalEntriesToDisplayAtEnds: 1000,
     transformers: {
-      resultHTML: this.transformersStandard.shortener,
-       
+      resultHTML: this.transformersStandard.shortener,       
     }
   };
   this.optionsErrors = {
@@ -190,24 +193,23 @@ function FabNode() {
       outputJSONDefault: ids.defaults.fabcoin.outputFabcoinInitialization,
       outputOptionsDefault: this.optionsInitialization,
     }
-  }
-
+  };
   this.theFunctions = {
     getBlockByHeight: {
       inputs: {
-        blockNumber: inputFabBlock.blockNumber
+        blockNumber: inputFabBlock.blockNumber,
       },
       outputs: inputFabBlock.blockHash,
       callback: this.callbackGetBlockByHeight,
       outputOptions: {
         transformers: {
-          singleEntry: this.transformersStandard.blockHash
+          singleEntry: this.transformersStandard.blockHash,
         }
       }
     },
     generateBlocks: {
       inputs: {
-        numberOfBlocks: inputFabBlock.numberOfBlocksToGenerate
+        numberOfBlocks: inputFabBlock.numberOfBlocksToGenerate,
       },
       outputOptions: {
         transformers: {

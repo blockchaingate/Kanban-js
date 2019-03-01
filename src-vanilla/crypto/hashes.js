@@ -44,7 +44,8 @@ Hashers.prototype.sha256 = function (input) {
   return crypto.createHash('sha256').update(input).digest();
 }
 
-Hashers.prototype.solidityGet8byteHexFromFunctionSpec = function(abi) {
+/** @returns {String} */
+Hashers.prototype.solidityGetFunctionSignature = function(abi) {
   var functionSignature = "";
   functionSignature += abi.name;
   functionSignature += "(";
@@ -55,11 +56,16 @@ Hashers.prototype.solidityGet8byteHexFromFunctionSpec = function(abi) {
     }
   }
   functionSignature += ")";
-  var keccak = this.keccak_ToHex(functionSignature);
-  var keccakFirst8Hex = keccak.slice(0, 8);
-  return keccakFirst8Hex
+  return functionSignature;
 }
 
+/** @returns {String} */
+Hashers.prototype.solidityGet8byteHexFromFunctionSpec = function(abi) {
+  var functionSignature = this.solidityGetFunctionSignature(abi);
+  var keccak = this.keccak_ToHex(functionSignature);
+  var keccakFirst8Hex = keccak.slice(0, 8);
+  return keccakFirst8Hex;
+}
 
 var hashes = new Hashers();  
 
