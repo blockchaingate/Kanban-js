@@ -315,7 +315,7 @@ function FabNode() {
         address: [
           inputFabBlock.contractId, 
           inputKBGOInitialization.contractId, 
-          ids.defaults.kanbanGO.inputSendReceive.contractId,
+          ids.defaults.kanbanGO.inputInitialization.contractId,
           ids.defaults.fabcoin.inputInitialization.smartContractId,
         ],
       },
