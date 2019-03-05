@@ -57,6 +57,7 @@ function NodeKanbanGo(
   /** @type {string[]} */
   this.nodeConnections = [];
   this.dataDir = `${this.basePath}/node${this.id}`;
+  this.logFileDefault = `${this.dataDir}/log.txt`;
   this.lockFileName = `${this.dataDir}/geth/LOCK`;
   this.keyStoreFolder = `${this.dataDir}/keystore`;
   this.nodeKeyDir = `${this.dataDir}/geth`;
@@ -82,6 +83,8 @@ function NodeKanbanGo(
     log: new OutputStream(),
     rpcCalls: new OutputStream(),
   };
+  this.outputStreams.log.fileName = this.logFileDefault;
+
   this.outputStreams.log.idConsole = `[Node ${this.id}] `;
   this.outputStreams.log.colorIdConsole = initializer.colors[this.id % initializer.colors.length];
   this.outputStreams.initialization.idConsole = `[Node ${this.id}] `;

@@ -2,6 +2,7 @@
 require('colors');
 const configuration = require('./configuration');
 const miscelaneous = require('./miscellaneous');
+const fs = require('fs');
 
 function OutputStream() {
   /**@type {string[]} */
@@ -15,6 +16,7 @@ function OutputStream() {
   /**@type {string[]} */
   this.idHTML = "";
   this.flagBounceCopyToConsole = true;
+  this.fileName = null;
 }
 
 /**
@@ -68,6 +70,13 @@ OutputStream.prototype.log = function (data) {
 }
 
 OutputStream.prototype.append = function (data) {
+  if (this.fileName !== null && this.fileName !== undefined) {
+    fs.appendFile(this.fileName, data, (err)=>{
+      if (err !== null) {
+       console.log("ERROR".red.bold + ` failed to write onto log file ${this.fileName}. Error: ${err}`);
+      }
+    });
+  }
   var dataToLog = this.idConsole[this.colorIdConsole] + data;
   dataToLog = miscelaneous.trimeWhiteSpaceAtEnds(dataToLog);
   dataToLog = dataToLog.replace("error", "error".bold.red);
