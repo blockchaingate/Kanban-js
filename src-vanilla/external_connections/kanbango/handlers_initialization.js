@@ -593,12 +593,15 @@ SolidityCode.prototype.readABI = function(counter, err, dataABI) {
 
 SolidityCode.prototype.readAndReturnBinaries = function() {
   if (this.errorStream.recentOutputs.length > 0) {
-    this.responseToUser.writeHead(200);
-    var result = {};
-    result.error = `Failed to compile your solidity file. `;
-    result.errorStream = this.errorStream.toString(); 
-    this.responseToUser.end(JSON.stringify(result));
-    return;
+    this.responseContent.comments = "While compiling your file, there were errors printed on the error stream. Those should be fatal, but just in case, I continue. ";
+    this.responseContent.error = this.errorStream.toString(); 
+    //old version: 
+    //this.responseToUser.writeHead(200);
+    // var result = {};
+    // result.error = `Failed to compile your solidity file. `;
+    // result.errorStream = this.errorStream.toString(); 
+    //this.responseToUser.end(JSON.stringify(result));
+    //return;
   }
   this.computeContractNames();
   this.responseContent.ABI = [];
