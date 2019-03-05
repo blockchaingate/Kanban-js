@@ -550,7 +550,10 @@ SolidityCode.prototype.sendResult = function() {
   if (this.responseToUser === null) {
     return;
   }
-  if (this.responseContent.error !== null && this.responseContent.error !== undefined && this.responseContent.error !== ""){
+  if (this.responseContent.error === null || this.responseContent.error === undefined || this.responseContent.error === "") {
+    delete this.responseContent.error;
+  }
+  if (this.responseContent.error !== null && this.responseContent.error !== undefined && this.responseContent.error !== "") {
     this.responseToUser.writeHead(400);
   } else {
     this.responseToUser.writeHead(200);
