@@ -459,6 +459,7 @@ function SolidityCode (codeBase64, basePath) {
     binaries: null,
     contractNames: null,
     contractInheritance: null,
+    error: "",
   };
   this.numberOfFilesRead = 0;
   this.totalFilesToRead = 0;
@@ -549,7 +550,7 @@ SolidityCode.prototype.sendResult = function() {
   if (this.responseToUser === null) {
     return;
   }
-  if (this.responseContent.error !== null && this.responseContent.error !== undefined){
+  if (this.responseContent.error !== null && this.responseContent.error !== undefined && this.responseContent.error !== ""){
     this.responseToUser.writeHead(400);
   } else {
     this.responseToUser.writeHead(200);
@@ -564,7 +565,7 @@ SolidityCode.prototype.readBinary = function(counter, err, dataBinary) {
   }
   //console.log("Got to read binary result");
   if (err) {
-    this.responseContent.error = `Failed to read binary file ${this.fileNamesBinaryWithPath[counter]}. ${err}`;
+    this.responseContent.error += `Failed to read binary file ${this.fileNamesBinaryWithPath[counter]}. ${err}`;
     return this.sendResult();
   }
 
@@ -581,7 +582,7 @@ SolidityCode.prototype.readABI = function(counter, err, dataABI) {
     return;
   }
   if (err) {
-    this.responseContent.error = `Failed to read binary file. ${err}`; 
+    this.responseContent.error += `Failed to read binary file. ${err}`; 
     return this.sendResult();
   }  
   try {
@@ -596,8 +597,8 @@ SolidityCode.prototype.readABI = function(counter, err, dataABI) {
 
 SolidityCode.prototype.readAndReturnBinaries = function() {
   if (this.errorStream.recentOutputs.length > 0) {
-    this.responseContent.comments = "While compiling your file, there were errors printed on the error stream. Those should be fatal, but just in case, I continue. ";
-    this.responseContent.error = this.errorStream.toString(); 
+    this.responseContent.comments = `While compiling your file, there were errors printed on the error stream. Those should be fatal, but just in case, I continue.`;
+    this.responseContent.error += this.errorStream.toString(); 
     //old version: 
     //this.responseToUser.writeHead(200);
     // var result = {};
@@ -614,7 +615,7 @@ SolidityCode.prototype.readAndReturnBinaries = function() {
   this.numberOfFilesRead = 0;
   this.totalFilesToRead = this.contractNames.length * 2;
   if (this.fileNamesBinaryWithPath.length === 0) {
-    this.responseContent.error = "Got 0 binaries. ";
+    this.responseContent.error += "Got 0 binaries. ";
     this.sendResult();
     return;
   }
