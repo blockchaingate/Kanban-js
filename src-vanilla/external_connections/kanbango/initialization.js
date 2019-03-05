@@ -49,7 +49,7 @@ var rpcCalls = {
   executeOverSSH: {
     rpcCall: "executeOverSSH",
     mandatoryModifiableArguments: {
-      command: null,
+      commandSSH: null,
     },
   },
 };

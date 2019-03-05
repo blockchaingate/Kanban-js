@@ -1,6 +1,5 @@
 "use strict";
 const ids = require('./ids_dom_elements');
-const myNodes = require('./my_nodes');
 const kanbanRPC = require('./kanbango/rpc');
 const fabcoinInitialization = require('./fabcoin/initialization');
 const miscellaneousFrontEnd = require('./miscellaneous_frontend');

@@ -22,8 +22,7 @@ NodeManager.prototype.fetchMyNodesInfo = function(
   queryCommand,
   notUsed,
 ) {
-  response.writeHead(500);
-  console.log(`DEBUG: My nodes: ${JSON.stringify(getConfiguration().configuration.myNodes)}. `)
+  response.writeHead(200);
   var result = {
     myNodes: miscellaneous.deepCopy(getConfiguration().configuration.myNodes, 0)
   };

@@ -8,6 +8,7 @@ const globals = require('../globals');
 const ids = require('../ids_dom_elements');
 const storageKanban = require('../storage').storageKanban;
 require('../solidity-ace-editor');
+const myNodes = require('../my_nodes');
 
 function KanbanGONode() {
   /**@type {string} */
@@ -67,6 +68,12 @@ function PendingCall() {
   /** @type {bool} */
   this.flagShowClearButton = false;
   this.callbackOverridesStandard = null;
+}
+
+
+PendingCall.prototype.writeNodeList = function(nodeId, input, output) {
+  myNodes.myNodes.initialize(input);
+  this.callbackStandard(nodeId, input, output);
 }
 
 PendingCall.prototype.run = function(functionLabel) {

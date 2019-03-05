@@ -668,6 +668,7 @@ function KanbanGoNodes() {
     },
     fetchMyNodesInfo: {
       callType: this.callTypes.myNodes,
+      callback: PendingCall.prototype.writeNodeList
     },
     bridgeStatus: {
       outputJSON: ids.defaults.kanbanGO.outputKanbanInitialization
@@ -675,7 +676,7 @@ function KanbanGoNodes() {
     executeOverSSH: {
       callType: this.callTypes.myNodes,
       inputs: {
-        command: ids.defaults.myNodes.inputSSH.command
+        commandSSH: ids.defaults.myNodes.inputSSH.command
       }
     }
   };

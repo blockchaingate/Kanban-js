@@ -154,7 +154,7 @@ var defaults = {
       machineNames: "inputMyNodeNames",
       command: "inputMyNodesCommand",
     },
-
+    panelMyNodesList: "panelMyNodesList",
   },
   fabcoin: {
     inputInitialization: {
@@ -272,6 +272,7 @@ var defaults = {
     rpcProfiling: "rpcProfiling",
     rpcMine: "rpcMine",
     rpcSend: "rpcSend",
+    myNodesList: "myNodesList",
     kanbanPlusPlusGeneral: "kanbanPlusPlusGeneral" 
   },
   radioButtonsSend: {
