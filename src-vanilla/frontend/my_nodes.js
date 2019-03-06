@@ -1,5 +1,6 @@
 "use strict";
 const ids = require('./ids_dom_elements');
+const miscellaneousFrontEnd = require('./miscellaneous_frontend');
 
 function MyNode(
   /**@type {{id: String, ipAddress: String, user: String, sshKey: String}} */
@@ -17,7 +18,7 @@ MyNode.prototype.toHtmlRadio = function() {
   var radioHTML = ""
   radioHTML += `<label class = "containerRadioButton">`;
   radioHTML += `<input type = "radio" name = "${ids.defaults.radioGroups.myNodesList}" id = "${this.idDOM}" `;
-  radioHTML += ` onchange = "window.kanban.kanbanGO.myNodes.selectRadio('${this.id}')" `; 
+  radioHTML += ` onchange = "window.kanban.myNodes.selectRadio('${this.id}')" `; 
   if (this.flagSelected) {
     radioHTML += "checked";
   }
@@ -34,10 +35,12 @@ function MyNodesContainer() {
   this.myNodesRaw = null;
 }
 
+MyNodesContainer.prototype.selectAll = function() {
+  miscellaneousFrontEnd.updateValue(ids.defaults.myNodes.inputSSH.machineNames, Object.keys(this.myNodes).join(", "))
+}
 
 MyNodesContainer.prototype.selectRadio = function(id) {
-  console.log("Not implemented: select radio with input:  " + id);
-  throw("Not implemented: select radio. ");
+  miscellaneousFrontEnd.updateValue(ids.defaults.myNodes.inputSSH.machineNames, id)
 }
 
 MyNodesContainer.prototype.initialize = function(input) {
@@ -55,7 +58,7 @@ MyNodesContainer.prototype.parseMyNodes = function () {
     var incomingData = this.myNodesRaw[label];
     this.myNodes[label] = new MyNode({
       id: label,
-      ipAddress: incomingData.idAddress,
+      ipAddress: incomingData.ipAddress,
       user: incomingData.user,
       sshKey: incomingData.sshKey,
     });
@@ -77,12 +80,31 @@ MyNodesContainer.prototype.initializeNoCatch = function(input) {
 MyNodesContainer.prototype.writeMyNodesHTML = function() {
   var panel = document.getElementById(ids.defaults.myNodes.panelMyNodesList);
   var radioHTML = "";
-  for (var label in this.myNodes) {
-    radioHTML += this.myNodes[label].toHtmlRadio();
-    radioHTML += "<br>";
-  }
-  panel.innerHTML = radioHTML;
+  radioHTML += "<table>";
 
+  radioHTML += "<tr><td>";
+  radioHTML += `<label class = "containerRadioButton">`;
+  radioHTML += `<input type = "radio" name = "${ids.defaults.radioGroups.myNodesList}" id = "radioButtonMyNodesSelectAll" `;
+  radioHTML += ` onchange = "window.kanban.myNodes.selectAll()" `; 
+  radioHTML += "checked";
+  radioHTML += `>`;
+  radioHTML += `<span class = "radioMark"></span>`;
+  radioHTML += `all`;
+  radioHTML += `</label>`;
+  radioHTML += "</td></tr>";
+
+  for (var label in this.myNodes) {
+    radioHTML += "<tr><td>";
+    radioHTML += this.myNodes[label].toHtmlRadio();
+    radioHTML += "</td>";
+    radioHTML += "<td>";
+    radioHTML += this.myNodes[label].ipAddress;
+    radioHTML += "</td>";
+    radioHTML += "</tr>"
+  }
+  radioHTML += "</table>";
+  panel.innerHTML = radioHTML;
+  this.selectAll();
 }
 
 var myNodes = new MyNodesContainer();

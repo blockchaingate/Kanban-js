@@ -5,6 +5,7 @@ const NodeKanbanGo = handlersInitialization.NodeKanbanGo;
 var getConfiguration = require('../../configuration').getConfiguration;
 const miscellaneous = require('../../miscellaneous');
 var SSHClient = require('ssh2').Client;
+const rpcSpecKanban = require('./rpc');
 //const kanbanGoInitializer =  handlersInitialization.getInitializer();
 
 if (getConfiguration === null || getConfiguration === undefined) {
@@ -13,7 +14,7 @@ if (getConfiguration === null || getConfiguration === undefined) {
 
 
 function NodeManager() {
-
+  this.defaultTimeOut = 5000; //5 second timeout
 }
 
 NodeManager.prototype.fetchMyNodesInfo = function(    
@@ -40,7 +41,6 @@ NodeManager.prototype.fetchMyNodesInfo = function(
   response.end(JSON.stringify(result)); 
 }
 
-
 function sshNodeToRemoteMachinePartFour(machineName, stdoutSoFar, response) {
   response.writeHead(200);
   response.end(stdoutSoFar);
@@ -51,8 +51,57 @@ function getSSHKeyFromMachine(theMachine) {
     return theMachine.sshKey;
   }
   if (theMachine.sshKeySameAs !== undefined) {
-    return configuration.getConfiguration().myNodes[theMachine.sshKeySameAs].sshKey;
+    return getConfiguration().configuration.myNodes[theMachine.sshKeySameAs].sshKey;
   }
+}
+
+function RemoteNodeCommunication() {
+  this.connection = new SSHClient();
+  this.command = "";
+  this.result = {
+    data: [],
+    error: [],
+  };
+}
+
+NodeManager.prototype.onSSHConnectionReady = function (
+  /**@type {ResponseWrapper} */
+  response, 
+  /**@type {RemoteNodeCommunication} */
+  communication,
+) {
+  communication.connection.exec(communication.command, function(err, stream) {
+    if (err) { 
+      throw err;
+    }
+    stream.on('close', function(code, signal) {
+      response.writeHead(200);
+      response.end(JSON.stringify(communication.result));
+      communication.connection.end();
+    }).on('data', function(data) {
+      communication.result.data.push(`${data}`);
+      response.writeHead(200);
+      response.end(JSON.stringify(communication.result));
+      communication.connection.end();
+    }).stderr.on('data', function(data) {
+      communication.result.error.push(`${data}`);
+      response.writeHead(200);
+      response.end(JSON.stringify(communication.result));
+      communication.connection.end();
+    });
+  });
+}
+
+NodeManager.prototype.onSSHError = function (
+  /**@type {ResponseWrapper} */
+  response,
+  theError, 
+) {
+  response.writeHead(200);
+  var result = {
+    error: `Error connecting. ${theError}`
+  };
+  response.end(JSON.stringify(result));
 }
 
 NodeManager.prototype.executeOverSSH = function ( 
@@ -60,62 +109,26 @@ NodeManager.prototype.executeOverSSH = function (
   response, 
   queryCommand,
 ) {
-  var machi
-
-  if (!(machineName in configuration.getConfiguration().myNodes)) {
+  var machineName = queryCommand[rpcSpecKanban.urlStrings.serviceLabelReserved][rpcSpecKanban.urlStrings.nodeId];
+  var configuration = getConfiguration().configuration;
+  if (!(machineName in configuration.myNodes)) {
     response.writeHead(200);
     response.end(`Machine name: ${machineName} not found. `);
     return;
   }
-  try {
-    var theMachine = configuration.getConfiguration().myNodes[machineName];
-    var theConnection = new SSHClient();
-    theConnection.on('ready', function() {
-      response.writeHead(200);
-      response.write(`<span style='color:blue'>SSH connection to ${machineName} ready.<br>Proceeding to execute: ${theCommand}</span><br>`);
-      var gotData = false;
-      theConnection.exec(theCommand, function(err, stream) {
-        if (err) { 
-          throw err;
-        }
-        stream.on('close', function(code, signal) {
-          //console.log('Stream :: close :: code: ' + code + ', signal: ' + signal);
-          response.end();
-          theConnection.end();
-        }).on('data', function(data) {
-          var formattedData = "";
-          if (gotData) {
-            formattedData += "<br>";
-          }
-          gotData = true;
-          formattedData += `<b style='color:green'>${data}</b>`;
-          response.write(formattedData);
-          //console.log('STDOUT: ' + data);
-        }).stderr.on('data', function(data) {
-          var formattedData = "";
-          if (gotData) {
-            formattedData += "<br>";
-          }
-          gotData = true;
-          formattedData += `<b style='color:orange'>${data}</b>`;
-          response.write(formattedData);
-          //console.log('STDERR: ' + data);
-        });
-      });
-    }).on('error', function(theError) {
-      response.writeHead(200);
-      response.end(`<b style='color:red'>Error connecting. ${theError}</b>`);
-    }).connect({
-      host: theMachine.ipAddress,
-      port: 22,
-      username: theMachine.user,
-      privateKey: getSSHKeyFromMachine(theMachine),
-      readyTimeout: 5000 //<- 5 second timeout
-    });
-  } catch (e) {
-    response.writeHead(200);
-    response.end(`Error while trying to ssh into machine: ${machineName}. ${e}`);
-  }
+  var theMachine = configuration.myNodes[machineName];
+  var remote = new RemoteNodeCommunication();
+  remote.command = queryCommand.commandSSH;
+  remote.connection.on('ready', this.onSSHConnectionReady.bind(this, response, remote));
+  remote.connection.on('error', this.onSSHError.bind(this, response, remote));
+  var connectionConfig = {
+    host: theMachine.ipAddress,
+    port: 22,
+    username: theMachine.user,
+    privateKey: getSSHKeyFromMachine(theMachine),
+    readyTimeout: this.defaultTimeOut
+  };
+  remote.connection.connect(connectionConfig);
 }
 
 function sshNodeToOneRemoteMachineGitPull(request, response, desiredCommand) {

@@ -1297,9 +1297,11 @@ KanbanGoInitializer.prototype.handleRPCArguments = function(
   var currentService = serviceWrapper.service;
   var currentFunction = null;
   var objectsToSearchForImplementation = [this, global.nodeManager];
+  var implementationThisObject = null;
   for (var i = 0; i < objectsToSearchForImplementation.length; i ++) {
     currentFunction = objectsToSearchForImplementation[i][theCallLabel];
     if (typeof currentFunction === "function") {
+      implementationThisObject = objectsToSearchForImplementation[i];
       break;
     }
   }
@@ -1311,7 +1313,7 @@ KanbanGoInitializer.prototype.handleRPCArguments = function(
     return response.end(JSON.stringify(result));
   }
   try {
-    return (currentFunction.bind(this))(response, queryCommand, currentService);
+    return (currentFunction.bind(implementationThisObject))(response, queryCommand, currentService);
   } catch (e) {
     response.writeHead(500);
     var result = {
