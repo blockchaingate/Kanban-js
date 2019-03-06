@@ -84,6 +84,7 @@ function FabNode() {
       "SCARCallResult.shardId": this.transformersStandard.shortener,
       "SCARCallResult.contractCallData": this.transformersStandard.shortener,
       "SCARCallResult.executionResult.newAddress": this.transformersStandard.shortener,
+      "SCARCallResult.executionResult.output": this.transformersStandard.shortener,
       "SCARCallResult.transactionReceipt.bloom": this.transformersStandard.shortener,
       "SCARCallResult.transactionReceipt.stateRoot": this.transformersStandard.shortener,
       "executionResult.output": this.transformersStandard.shortener,
