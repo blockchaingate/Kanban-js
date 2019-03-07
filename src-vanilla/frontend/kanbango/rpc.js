@@ -678,6 +678,11 @@ function KanbanGoNodes() {
       inputs: {
         commandSSH: ids.defaults.myNodes.inputSSH.command
       }
+    },
+    getExternalTransaction: {
+      inputs: {
+        txid: ids.defaults.kanbanGO.inputSendReceive.txInIds
+      }
     }
   };
   this.correctFunctions();
