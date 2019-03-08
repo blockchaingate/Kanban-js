@@ -32,6 +32,7 @@ test/kanban_gpu/debug/
 *.pid
 build/Makefile
 .idea/
+./package-lock.json
 
 go/bin
 go/src/github.com/golang.org
