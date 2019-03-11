@@ -64,6 +64,11 @@ function KanbanGoNodes() {
       clickHandler: this.setInput.bind(this, ids.defaults.kanbanGO.inputSendReceive.blockNumber),
       tooltip: "Sets the block number field."
     },
+    setTransactionHex: {
+      clickHandler: this.setTransactionHex.bind(this),
+      transformer: miscellaneousBackend.hexShortener8Chars,
+      tooltip: "Set the tx hex input and decode the transaction. ",
+    },
     setPrivateKeySchnorr: this.getSetInputWithShortener(inputSchnorr.privateKey),
     setPublicKeySchnorr: this.getSetInputWithShortener(inputSchnorr.publicKey),
     setSignatureSchnorr: this.getSetInputWithShortener(inputSchnorr.signature),
@@ -172,6 +177,7 @@ function KanbanGoNodes() {
       "transaction.inputs.${number}.txid": this.transformersStandard.shortener,
       "transaction.inputs.${number}.unlockScript": this.transformersStandard.shortener,
       "transaction.inputs.${number}.lockScript": this.transformersStandard.shortener,
+      "transaction.outputs.${number}.lockScript": this.transformersStandard.shortener,
       "input.txInputs" : this.transformersStandard.shortener,
       "input.txOutputs": this.transformersStandard.shortener,
       "comments.bytesToSign.${number}": this.transformersStandard.shortener,
@@ -290,7 +296,7 @@ function KanbanGoNodes() {
       "approvedMessages.${number}.dataAndAuthorization.payload.message": this.transformersStandard.shortener,
       "approvedMessages.${number}.dataAndAuthorization.payload.payloadHash": this.transformersStandard.shortener,
       "approvedMessages.${number}.dataAndAuthorization.payload.serialization": this.transformersStandard.shortener,
-      "approvedMessages.${number}.writeBackTransaction": this.transformersStandard.shortener,
+      "approvedMessages.${number}.writeBackTransaction": this.transformersStandard.setTransactionHex,
       "messages.debugStatus.lines.${number}": this.transformersStandard.middleShortener,
       "messages.errorLog.lines.${number}": this.transformersStandard.middleShortener,
       "messages.publicKey": this.transformersStandard.middleShortener,
@@ -721,6 +727,11 @@ KanbanGoNodes.prototype.setContractFunctionName = function(container, content, e
   miscellaneousFrontEnd.updateValue(inputsFab.contractFunctionId, keccakFirst8Hex);
   miscellaneousFrontEnd.updateValue(inputsKanbanGo.contractFunctionId, keccakFirst8Hex);
   this.computeContractData();
+}
+
+KanbanGoNodes.prototype.setTransactionHex = function(container, content, extraData) {
+  this.setInput(ids.defaults.kanbanGO.inputSendReceive.txHex, container, content, extraData);
+  this.run('decodeFabcoinTransactionHex');
 }
 
 KanbanGoNodes.prototype.setContractHex = function(container, content, extraData) {
