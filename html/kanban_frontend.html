@@ -135,6 +135,8 @@
     </div>
     <div class = "divLabelButtonGroup">tx builder</div><div id = "panelKBGOTransactionBuilder" class = "panelStandard">
     <button class = "buttonStandard" style = "width:100px" onclick = "window.kanban.kanbanGO.rpc.theKBNodes.run('decodeFabcoinTransactionHex');">Decode tx hex</button><br>
+    <button class = "buttonStandard" style = "width:100px" onclick = "window.kanban.kanbanGO.rpc.theKBNodes.run('getExternalTransaction');">txid decode</button><br>
+      
     <button class = "buttonStandard" style = "width:100px" onclick = "window.kanban.kanbanGO.rpc.theKBNodes.run('testCreateAndSignTransactionStandard');">Create &amp; sign</button><br>
     <button class = "buttonStandard" style = "width:100px" onclick = "window.kanban.fabcoin.rpc.fabNode.computeTxInsAndOuts(false);">Comp. tx/in/out</button><br>
   </div>

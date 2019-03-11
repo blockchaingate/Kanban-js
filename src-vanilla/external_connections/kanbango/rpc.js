@@ -319,6 +319,14 @@ var rpcCalls = {
     },
     parameters: ["transactionHex"],
   },
+  getExternalTransaction: {
+    rpcCall: "getExternalTransaction",
+    method: "bridge_getExternalTransaction",
+    mandatoryModifiableArguments: {
+      txid: null,
+    },
+    parameters: ["txid"],
+  }
 };
 
 module.exports = {
