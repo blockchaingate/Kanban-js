@@ -87,7 +87,9 @@ function FabNode() {
       "SCARCallResult.executionResult.output": this.transformersStandard.shortener,
       "SCARCallResult.transactionReceipt.bloom": this.transformersStandard.shortener,
       "SCARCallResult.transactionReceipt.stateRoot": this.transformersStandard.shortener,
+      "publicKeys.${number}": this.transformersStandard.shortener,
       "executionResult.output": this.transformersStandard.shortener,
+      "error": this.transformersStandard.shortener,
       "executionResult.newAddress": this.transformersStandard.shortener,
       "transactionReceipt.bloom": this.transformersStandard.shortener,
       "transactionReceipt.stateRoot": this.transformersStandard.shortener,
@@ -721,16 +723,12 @@ FabNode.prototype.setTxInputVoutAndValue = function(container, content, extraDat
 }
 
 FabNode.prototype.setContractId = function(container, content, extraData) {
-  //var extraDataString = JSON.stringify(extraData);
-  //console.log(`DEBUG: Content: ${content}, extra data: ${extraDataString}`);
   miscellaneousFrontEnd.updateValue(ids.defaults.fabcoin.inputBlockInfo.contractId, content);
   miscellaneousFrontEnd.updateValue(ids.defaults.kanbanGO.inputInitialization.contractId, content);
   miscellaneousFrontEnd.updateValue(ids.defaults.fabcoin.inputInitialization.smartContractId, content)
 }
 
 FabNode.prototype.setInput = function(idToSet, container, content, extraData) {
-  //var extraDataString = JSON.stringify(extraData);
-  //console.log(`DEBUG: Content: ${content}, extra data: ${extraDataString}`);
   miscellaneousFrontEnd.updateValue(idToSet, content);
 }
 
@@ -754,8 +752,6 @@ FabNode.prototype.setPrivateKeyComputeAllElse = function(container, content, ext
   miscellaneousFrontEnd.updateValue(ids.defaults.fabcoin.inputBlockInfo.addressMainnet, addressFabMainnetBase58);
   miscellaneousFrontEnd.updateValue(ids.defaults.fabcoin.inputBlockInfo.addressKanban, addressKanbanHex);
 
-  console.log(`DEBUG: private key hex: ${thePrivateKey.toHex()}`);
-  console.log(`DEBUG: content: ${JSON.stringify(content)}`);
 }
 
 FabNode.prototype.testAggregateSignatureClear = function() {

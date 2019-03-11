@@ -290,6 +290,7 @@ function KanbanGoNodes() {
       "approvedMessages.${number}.dataAndAuthorization.payload.message": this.transformersStandard.shortener,
       "approvedMessages.${number}.dataAndAuthorization.payload.payloadHash": this.transformersStandard.shortener,
       "approvedMessages.${number}.dataAndAuthorization.payload.serialization": this.transformersStandard.shortener,
+      "approvedMessages.${number}.writeBackTransaction": this.transformersStandard.shortener,
       "messages.debugStatus.lines.${number}": this.transformersStandard.middleShortener,
       "messages.errorLog.lines.${number}": this.transformersStandard.middleShortener,
       "messages.publicKey": this.transformersStandard.middleShortener,
