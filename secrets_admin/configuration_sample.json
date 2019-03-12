@@ -1,6 +1,6 @@
 {
 "fabcoin" : {
-  "executableFileName": "${projectBase}/fabcoin-dev-sm01/src/fabcoind",
+  "executableFileName": "${projectBase}/fabcoin-dev/src/fabcoind",
   "dataDir": "${projectBase}/secrets_data_fabcoin/"
 },
 "kanbanGO" : {

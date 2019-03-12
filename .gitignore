@@ -56,3 +56,11 @@ go/pkg
 html/kanban_frontend_browserified.js
 
 *.run.xml
+
+#Mac-specific files
+.DS_Store
+go/.DS_Store
+go/src/.DS_Store
+go/src/github.com/.DS_Store
+go/src/github.com/blockchaingate/.DS_Store
+

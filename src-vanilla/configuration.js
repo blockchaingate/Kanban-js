@@ -116,7 +116,17 @@ Configuration.prototype.readSecretsAdminCallback = function(err, data) {
 //Reads json entries from config.json in pathnames.path.configurationSecretsAdmin
 //and attaches them to the this object
 Configuration.prototype.readSecretsAdmin = function() {
-  var data = fs.readFileSync(pathnames.pathname.configurationSecretsAdmin);
+  try {
+    var data = fs.readFileSync(pathnames.pathname.configurationSecretsAdmin);
+  } catch(e) {
+    console.log("Error: failed to open configuration file: ".red.bold + pathnames.pathname.configurationSecretsAdmin);
+    console.log(
+      `If this is your first run, please copy file: ` + 
+      `${pathnames.path.secretsAdmin}/configuration_sample.json`.green + 
+      ` into: ` + pathnames.pathname.configurationSecretsAdmin.blue
+    );
+    throw("Failed to load configuration file. ");
+  }
   this.readSecretsAdminCallback(null, data);
   this.readStorage();
 }
