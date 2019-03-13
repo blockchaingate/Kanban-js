@@ -58,9 +58,7 @@ function extractQuery(response, queryNonParsed, callbackQueryCommand, parsedURL)
   query.hostname = hostname;
   var queryCommand = null;
   try {
-    //console.log("DEBUG: query.command is: " + query.command);
     queryCommand = JSON.parse(query.command);
-    //console.log("DEBUG: parsed to: " + JSON.stringify(queryCommand));
   } catch (e) {
     response.writeHead(400);
     var result = {
@@ -87,9 +85,11 @@ function handleRPCPOST(request, response, callbackQueryCommand, parsedURL) {
   request.on('error', (theError) => {
     response.writeHead(400);
     response.end(`Error during message body retrieval. ${theError}`);
-  }).on('data', (chunk) => {
+  });
+  request.on('data', (chunk) => {
     body.push(chunk);
-  }).on('end', () => {
+  });
+  request.on('end', () => {
     body = Buffer.concat(body).toString();
     return extractQuery(response, body, callbackQueryCommand, parsedURL);
   });
