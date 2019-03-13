@@ -58,12 +58,10 @@ function handleRequests(request, responseNonWrapped) {
 }
 
 function handleRequestsPart2(request, response, parsedURL) {
-  //console.log(`DEBUG: The url is pt 2: ${request.url}`.red);
   if (parsedURL.pathname === pathnames.url.known.ping) {
     return handlePing(request, response);
   }
   if (parsedURL.pathname in pathnames.url.whiteListed) {
-    //console.log(`The url is pt 3: ${request.url}`.red);
     return handleFile(request, response);
   }
   if (parsedURL.pathname === pathnames.url.known.kanbanGO.rpc) {

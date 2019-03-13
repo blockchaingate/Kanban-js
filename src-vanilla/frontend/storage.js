@@ -246,7 +246,8 @@ StorageKanban.prototype.registerInputBox = function (
   variableName
 ) {
   if (variableName in this.variables) {
-    throw (`Error: variable: ${variableName} already registered.`);
+    console.log (`Variable: ${variableName} already registered. Please deliberate if that is expected behavior. `);
+    return;
   }
   this.variables[variableName] = {
     name: variableName,

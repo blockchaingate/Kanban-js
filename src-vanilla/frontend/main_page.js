@@ -166,7 +166,9 @@ Page.prototype.initializePanels = function() {
     miscellaneousFrontEnd.makePanel(currentPanel);
     var currentId = currentPanel.id; 
     if (currentId in storageKanban.variables) {
-      throw (`Id ${currentId} already registered. `);
+      //variable is registered more than once.
+      console.log (`Id ${currentId} already registered. This may or may not be an error`);
+      continue;
     }
     storageKanban.variables[currentId] = {
       name: currentId,

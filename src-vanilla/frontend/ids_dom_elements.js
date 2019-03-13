@@ -114,6 +114,7 @@ var defaults = {
       gasPrice: "inputKBGOGasPrice",
       contractFunctionId: "inputKBGOSmartContractFunctionId",
       contractFunctionArguments: "inputKBGOSmartContractFunctionArguments",
+      contractId: "inputKBGOContractId",
       contractData: "inputKBGOSmartContractData",
       // end of matching 
     },

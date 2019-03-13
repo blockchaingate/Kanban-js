@@ -369,6 +369,7 @@ function FabNode() {
       outputOptions: this.optionsContract,
     },
     getNewAddress: {
+      output: ids.defaults.fabcoin.inputBlockInfo.address,
       outputOptions: {
         transformers: {
           singleEntry: this.transformersStandard.setAddress,
