@@ -11,8 +11,8 @@
 %[handout]%
 {beamer}
 %IMPORTANT: the following line selects the current lecture. Change number to select a different lecture.
-\newcommand{\currentLecture}{1}
-\newcommand{\semester}{Summer 2018}
+\newcommand{\currentLecture}{2}
+\newcommand{\semester}{Spring 2019}
 \input{../../../freecalc/lectures/example-templates}
 \input{../../../freecalc/lectures/pstricks-commands}
 \input{../../../freecalc/lectures/system-specific-config-Ubuntu-texlive} %
@@ -100,7 +100,7 @@
 \hspace{-10.4cm}{\raisebox{-1.6cm}[0cm][0cm]{\includegraphics[height=2cm]{../../../../html/fabcoin.png}}}
 
 \hfil\begin{tabular}{c}
-{\normalsize Crypto 101}\\
+{\normalsize Fabcoin crypto crash course }\\
 \insertlecture
 \end{tabular}
 }
@@ -121,8 +121,8 @@ FA Enterprise System, Inc.
 }
 
 \begin{document}
-\lect{\semester}{Fabcoin Crypto 101: Lecture 1}{1}{%
-%DesiredLectureName: ECDSA
+\lect{\semester}{Elliptic curve preliminaries}{1}{%
+%DesiredLectureName: Preliminaries_Elliptic_Curves
 \section{Groups}
 \input{../../../freecalc/modules/crypto-digital-signature-algorithm/modular-arithmetic-review}
 \input{../../../freecalc/modules/crypto-digital-signature-algorithm/abelian-group-definition}
@@ -134,14 +134,15 @@ FA Enterprise System, Inc.
 \input{../../../freecalc/modules/crypto-digital-signature-algorithm/elliptic-curve-group-law-example-1}
 }%
 
-\lect{\semester}{Fabcoin Crypto 101: PBFT consensus}{2}{
+\lect{\semester}{Signatures and aggregate signatures}{2}{
+%DesiredLectureName: Signatures_Elliptic_Curves
 \section{Signature algorithms}
 \subsection{Digital signature algorithm (DSA)}
 \input{../../../freecalc/modules/crypto-digital-signature-algorithm/digital-signature-algorithm-generalized}
 \subsection{Schnorr aggregate signatures}
 \input{../../../freecalc/modules/crypto-digital-signature-algorithm/schnorr-signature-generalized}
 
-\input{../../../freecalc/modules/crypto-digital-signature-algorithm/schnorr-signature-generalized-example-1}
+%\input{../../../freecalc/modules/crypto-digital-signature-algorithm/schnorr-signature-generalized-example-1}
 \subsection{Schnorr aggregate signature - Zilliqa}
 \input{../../../freecalc/modules/crypto-digital-signature-algorithm/schnorr-based-multisignatures-notation}
 
@@ -158,7 +159,7 @@ FA Enterprise System, Inc.
 
 \begin{frame}[t, allowframebreaks]
 \frametitle{References}
-\bibliography{../../bibliography/bibliography-crypto}
+\bibliography{../../../bibliography}
 \end{frame}
 } %end lecture
 
