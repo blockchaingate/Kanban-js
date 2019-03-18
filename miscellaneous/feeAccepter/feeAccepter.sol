@@ -20,4 +20,9 @@ contract FeeAccepter {
         //require(false);
         require(false, "Test of the crashing mechanism.");
     }
+    function infiniteLoop() public payable {
+        while(true) {
+            log0("Can you handle log messages");
+        }
+    }
 }
