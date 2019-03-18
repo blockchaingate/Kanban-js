@@ -190,7 +190,7 @@ function KanbanGoNodes() {
       currentBlockHash: this.transformersStandard.blockHash,
       comments: this.transformersStandard.shortener,
       "_writeBack": this.transformersStandard.shortener,
-      bytesToSign: this.transformersStandard.shortener,
+      "bytesToSign.${number}": this.transformersStandard.shortener,
     }
   };
   this.optionsForAddressDisplay = {

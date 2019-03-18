@@ -148,14 +148,11 @@ function handleRPCArgumentsPartTwo(
     request: theRequestJSON,
     options: requestOptions
   };
-  console.log("DEBUG: backend is about to fire a jsonRPC call to kanbanGO with request: " + JSON.stringify(theRequest).green.bold);
-
   currentNode.outputStreams.rpcCalls.log(JSON.stringify(theRequest));
 
   var theHTTPrequest = http.request(requestOptions);
 
   try {
-    //console.log("DEBUG: got to here");
     theHTTPrequest.on('error', function(theError) {
       response.writeHead(500);
       var result = {
@@ -166,10 +163,8 @@ function handleRPCArgumentsPartTwo(
     }); 
     theHTTPrequest.on('response', function(theHTTPresponse) {
       var finalData = "";
-      //console.log("DEBUG: got response!")
       theHTTPresponse.on ('data', function (chunk) {
         finalData += chunk;
-        //console.log(`DEBUG: got data chunk: ${chunk}`)
       });
       theHTTPresponse.on('error', function(yetAnotherError){
         response.writeHead(500);
@@ -177,19 +172,15 @@ function handleRPCArgumentsPartTwo(
           error: `Eror during commmunication with kanbanGO server. ${yetAnotherError}. ` 
         };
         response.end(JSON.stringify(result));
-        //console.log(`Eror during commmunication with rpc server. ${yetAnotherError}. `);  
       });
       theHTTPresponse.on('end', function() {
-        //console.log(`DEBUG: about to respond with status code: ${theHTTPresponse.statusCode}. Final data: ${finalData}`);
         if (theHTTPresponse.statusCode !== 200) {
           response.writeHead(theHTTPresponse.statusCode);
           return response.end(finalData);
         }
         try {
-          //console.log("DEBUG: Parsing: " + finalData + " typeof final data: " + (typeof finalData));
           var dataParsed = JSON.parse(finalData);
           if (dataParsed.error !== null && dataParsed.error !== "" && dataParsed.error !== undefined) {
-            //console.log("DEBUG: Data parsed error:" + dataParsed.error);
             response.writeHead(200);
             return response.end(dataParsed.error);
           }
@@ -205,7 +196,6 @@ function handleRPCArgumentsPartTwo(
         }
       });
     });
-    //console.log("DEBUG: got to before end.");
     theHTTPrequest.end(requestStringified);
   } catch (e) {
     response.writeHead(500);
