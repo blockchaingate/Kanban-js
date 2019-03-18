@@ -115,6 +115,7 @@ function FabNode() {
       "vin.${number}.scriptSig.asm": this.transformersStandard.shortener,
       "vin.${number}.scriptSig.hex": this.transformersStandard.shortener,
       comments: this.transformersStandard.shortener,
+      "bytesForSignatureWithoutAncestor": this.transformersStandard.shortener,
     }
   };
   this.optionsContract = {
