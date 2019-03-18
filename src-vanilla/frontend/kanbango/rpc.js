@@ -731,6 +731,7 @@ KanbanGoNodes.prototype.setContractFunctionName = function(container, content, e
 
 KanbanGoNodes.prototype.setTransactionHex = function(container, content, extraData) {
   this.setInput(ids.defaults.kanbanGO.inputSendReceive.txHex, container, content, extraData);
+  this.setInput(ids.defaults.fabcoin.inputBlockInfo.txHex, container, content, extraData);
   this.run('decodeFabcoinTransactionHex');
 }
 
