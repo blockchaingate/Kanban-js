@@ -94,6 +94,7 @@ function FabNode() {
       "transactionReceipt.bloom": this.transformersStandard.shortener,
       "transactionReceipt.stateRoot": this.transformersStandard.shortener,
       shardId: this.transformersStandard.shortener,
+      "bytesForSignatureWithoutAncestor": this.transformersStandard.shortener,
     },
   };
   this.optionsTransaction = {

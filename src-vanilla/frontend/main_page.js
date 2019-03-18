@@ -205,12 +205,13 @@ Page.prototype.initializeInputPlaceholders = function() {
   for (var collectionCounter = 0; collectionCounter < collectionsToPlaceholderify.length; collectionCounter ++) {
     var currentCollection = collectionsToPlaceholderify[collectionCounter];
     for (var label in currentCollection) {
-      if (label in alreadyLoaded) {
+      var currentId = currentCollection[label];
+      if (currentId in alreadyLoaded) {
         continue;
       } 
-      alreadyLoaded[label] = true;
-      this.initializeInputPlaceholder(currentCollection[label]);
-      storageKanban.registerInputBox(currentCollection[label]);
+      alreadyLoaded[currentId] = true;
+      this.initializeInputPlaceholder(currentId);
+      storageKanban.registerInputBox(currentId);
     }
   }
 }

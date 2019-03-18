@@ -191,6 +191,7 @@ function KanbanGoNodes() {
       comments: this.transformersStandard.shortener,
       "_writeBack": this.transformersStandard.shortener,
       "bytesToSign.${number}": this.transformersStandard.shortener,
+      "bytesForSignatureWithoutAncestor": this.transformersStandard.shortener,
     }
   };
   this.optionsForAddressDisplay = {
