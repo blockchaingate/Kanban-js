@@ -22,6 +22,12 @@ function Page() {
     kanbanGOSendReceive:{
       idPage: ids.defaults.pages.kanbanGOSendReceive
     },
+    kanbanGOTransfer: {
+      idPage: ids.defaults.pages.kanbanGOTransfer
+    },
+    sandbox: {
+      idPage: ids.defaults.pages.sandbox
+    },
     myLocalKanbanNodes: {
       idPage: ids.defaults.pages.kanbanMyLocalNodes,
       updateFunction: kanbanRPC.theKBNodes.getNodeInformation.bind(kanbanRPC.theKBNodes)
@@ -193,10 +199,16 @@ Page.prototype.initializeInputPlaceholders = function() {
     ids.defaults.demo.inputs,
     ids.defaults.kanbanGO.inputBenchmarkParameters,
     ids.defaults.myNodes.inputSSH,
+    ids.defaults.kanbanGO.inputTransfers,
   ];
+  var alreadyLoaded = {};
   for (var collectionCounter = 0; collectionCounter < collectionsToPlaceholderify.length; collectionCounter ++) {
     var currentCollection = collectionsToPlaceholderify[collectionCounter];
     for (var label in currentCollection) {
+      if (label in alreadyLoaded) {
+        continue;
+      } 
+      alreadyLoaded[label] = true;
       this.initializeInputPlaceholder(currentCollection[label]);
       storageKanban.registerInputBox(currentCollection[label]);
     }

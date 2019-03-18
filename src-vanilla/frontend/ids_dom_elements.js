@@ -14,6 +14,8 @@ var defaults = {
     kanbanGO: "pageKanbanGO",
     kanbanMyLocalNodes: "pageMyLocalKanbanNodes",
     kanbanGOSendReceive: "pageKanbanGOSendReceive",
+    kanbanGOTransfer: "pageKanbanGoTransactions",
+    sandbox: "pageSandbox",
     fabcoin: {
       initialization: "pageFabcoinInitialization",  
       smartContract: "pageFabcoinSmartContract",
@@ -69,6 +71,11 @@ var defaults = {
     outputDemo: "divOutputDemo",
   },
   kanbanGO: {
+    inputTransfers: {
+      nameInputForHelloWorld: "inputKBGOInputNameForHelloWorld",
+      nameInputForSandbox: "inputKBGOInputNameForSandbox",
+      nameInputForRIPEMD: "inputKBGOInputNameForRIPEMD"
+    },
     inputSchnorr: {
       message: "inputKBGOSchnorrMessage",
       messageHex: "inputKBGOSchnorrMessageHex",
@@ -145,6 +152,9 @@ var defaults = {
     outputKBGOTest: "divOutputKBGOTest",
     outputKanbanInitialization: "divOutputMyLocalKanbanNodes",
     outputSendReceive: "divOutputKBGOSendReceive",
+    outputTransfer: "outputKanbanGoTransactions",
+    outputTransferForSandbox: "outputKanbanGoTransferForSandbox",
+    outputTransferForRIPEMD: "outputKanbanGoTransferForRIPEMD",
   },
   serverStatus: {
     outputServerStatus: "divOutputServerStatus",

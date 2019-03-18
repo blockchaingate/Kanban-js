@@ -326,6 +326,30 @@ var rpcCalls = {
       txid: null,
     },
     parameters: ["txid"],
+  },
+  helloWorld: {
+    rpcCall: "helloWorld",
+    method: "pbfttest_helloWorld",
+    mandatoryModifiableArguments: {
+      inputName: null,
+    },
+    parameters: ["inputName"],
+  },
+  sandBox: {
+    rpcCall: "sandBox",
+    method: "pbfttest_sandBox",
+    mandatoryModifiableArguments: {
+      inputName: null,
+    },
+    parameters: ["inputName"],
+  },
+  encrypRIPEMD: {
+    rpcCall: "encrypRIPEMD",
+    method: "pbfttest_encrypRIPEMD",
+    mandatoryModifiableArguments: {
+      inputName: null,
+    },
+    parameters: ["inputName"],
   }
 };
 

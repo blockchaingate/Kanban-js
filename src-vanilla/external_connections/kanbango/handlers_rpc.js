@@ -148,6 +148,7 @@ function handleRPCArgumentsPartTwo(
     request: theRequestJSON,
     options: requestOptions
   };
+  console.log("DEBUG: backend is about to fire a jsonRPC call to kanbanGO with request: " + JSON.stringify(theRequest).green.bold);
 
   currentNode.outputStreams.rpcCalls.log(JSON.stringify(theRequest));
 

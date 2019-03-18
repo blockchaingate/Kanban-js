@@ -173,6 +173,8 @@ function KanbanGoNodes() {
       "comments.decodedOutputs.contract.contractAddress": this.transformersStandard.shortener,
       "comments.decodedOutputs.contract.data": this.transformersStandard.shortener,
       "hex": this.transformersStandard.shortener,
+      "hashHex": this.transformersStandard.shortener,
+      hashBase64: this.transformersStandard.shortener,
       "inputTransactionHex": this.transformersStandard.shortener,
       "transaction.inputs.${number}.txid": this.transformersStandard.shortener,
       "transaction.inputs.${number}.unlockScript": this.transformersStandard.shortener,
@@ -445,6 +447,24 @@ function KanbanGoNodes() {
         messageHex: inputSchnorr.messageHex
       },
       callType: "cryptoTest"
+    },
+    helloWorld: {
+      inputs: {
+        inputName: ids.defaults.kanbanGO.inputTransfers.nameInputForHelloWorld
+      },
+      outputJSON: ids.defaults.kanbanGO.outputTransfer
+    },
+    sandBox: {
+      inputs: {
+        inputName: ids.defaults.kanbanGO.inputTransfers.nameInputForSandbox
+      },
+      outputJSON: ids.defaults.kanbanGO.outputTransferForSandbox
+    },
+    encrypRIPEMD: {
+      inputs: {
+        inputName: ids.defaults.kanbanGO.inputTransfers.nameInputForRIPEMD
+      },
+      outputJSON: ids.defaults.kanbanGO.outputTransferForRIPEMD
     },
     testSha2Squared: {
       //if rpcCall omitted it will be assumed to be equal to the function label.
