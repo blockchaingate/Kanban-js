@@ -205,6 +205,54 @@
   <br>
   <div class = "divControlPanelDefault" id = "divOutputKBGOSendReceive" style = "font-family:'Courier New', Courier, monospace"></div><!--divFabcoinInitialization-->  
 </div><!--pageKanbanGOSendReceive-->
+
+<div class = "divMainPage" id = "pageKanbanGoTransactions">
+    <div class = "divControlPanelDefault">
+        <table class = "tableStandardInputs"> 
+            <tr>
+              <td><div class = "divLabelButtonGroup">send/receive</div><div id = "panelKBGOSendReceive" class = "panelStandard">
+                  <button class = "buttonStandard" style = "width:100px" onclick = "window.kanban.kanbanGO.rpc.theKBNodes.run('helloWorld');">Hello world</button><br>
+                  </div>
+              </td>
+              <td>
+                  <input id = "inputKBGOInputNameForHelloWorld"              class = "inputStandard" size = "50" placeholder = "inputName"/><br>
+              </td>
+          </tr>
+          </table>
+    </div><br>
+    <div class = "divControlPanelDefault" id = "outputKanbanGoTransactions" style = "font-family:'Courier New', Courier, monospace"></div><!--divFabcoinInitialization-->  
+</div>
+
+<div class = "divMainPage" id = "pageSandbox">
+My sandbox <br>
+  <div class = "divControlPanelDefault">
+      <table class = "tableStandardInputs"> 
+          <tr>
+            <td><div class = "divLabelButtonGroup">send/receive</div><div id = "panelKBGOSandbox" class = "panelStandard">
+              <button class = "buttonStandard" style = "width:100px" onclick = "window.kanban.kanbanGO.rpc.theKBNodes.run('sandBox');">Hello sandbox</button><br>
+                </div>
+            </td>
+            <td>
+                <input id = "inputKBGOInputNameForSandbox"              class = "inputStandard" size = "50" placeholder = "inputName"/><br>
+            </td>
+          </tr>
+          <tr>
+            <td>
+                <div class = "divLabelButtonGroup">send/receive</div><div id = "panelKBGORIPEMD" class = "panelStandard">
+                    <button class = "buttonStandard" style = "width:100px" onclick = "window.kanban.kanbanGO.rpc.theKBNodes.run('encrypRIPEMD');">RIPEMD160</button><br>
+                </div>
+            </td>
+            <td>
+                <input id = "inputKBGOInputNameForRIPEMD"              class = "inputStandard" size = "50" placeholder = "inputName"/><br>
+            </td>
+          </tr>
+        </table>
+  </div><br>
+  <div class = "divControlPanelDefault" id = "outputKanbanGoTransferForSandbox" style = "font-family:'Courier New', Courier, monospace"></div><!--divFabcoinInitialization--><br>  
+  <div class = "divControlPanelDefault" id = "outputKanbanGoTransferForRIPEMD" style = "font-family:'Courier New', Courier, monospace"></div><!--divFabcoinInitialization-->  
+</div>
+
+
 <div class = "divMainPage" id = "pageFabcoinSmartContract">
   <div class = "divControlPanelDefault">
   <table class = "tableStandardInputs">
@@ -674,6 +722,10 @@
     <!--div><button class = "buttonSelectPage" onclick = "window.kanban.thePage.selectPage('demoPage');">Demo</button></div-->
     <div><button class = "buttonSelectPage" onclick = "window.kanban.thePage.selectPage('myLocalKanbanNodes');">KanbanGO start</button></div>
     <div><button class = "buttonSelectPage" onclick = "window.kanban.thePage.selectPage('kanbanGOSendReceive');">KanbanGO</button></div>
+    <div><button class = "buttonSelectPage" onclick = "window.kanban.thePage.selectPage('kanbanGOTransfer');">KB transfer</button></div>
+    <hr>
+    <div><button class = "buttonSelectPage" onclick = "window.kanban.thePage.selectPage('sandbox');"> Sandbox</button></div>
+    
     <hr>
     <div><button class = "buttonSelectPage" onclick = "window.kanban.thePage.selectPage('fabcoinInitialization');">fabcoin start</button></div>
     <div><button class = "buttonSelectPage" onclick = "window.kanban.thePage.selectPage('fabcoinSmartContract');">fabcoin smart</button></div>
