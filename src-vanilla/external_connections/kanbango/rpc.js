@@ -111,18 +111,18 @@ var rpcCalls = {
     rpcCall: "testAggregateCommitment",
     method: "cryptotest_testAggregateCommitment",
     mandatoryModifiableArguments: {
-      messageBase64: null
+      messageHex: null
     },
-    parameters: ["messageBase64"]    
+    parameters: ["messageHex"]    
   },
   testAggregateChallenge: {
     rpcCall: "testAggregateChallenge",
     method: "cryptotest_testAggregateChallenge",
     mandatoryModifiableArguments: {
-      commitmentsBase64: null,
+      commitments: null,
       committedSigners: null
     },
-    parameters: ["commitmentsBase64", "committedSigners"]    
+    parameters: ["commitments", "committedSigners"]    
   },
   testAggregateSolutions: {
     rpcCall: "testAggregateSolutions",
@@ -140,9 +140,9 @@ var rpcCalls = {
     method: "cryptotest_testAggregateSignature",
     mandatoryModifiableArguments: {
       committedSigners: null,
-      solutionsBase64: null,
+      solutions: null,
     },
-    parameters: ["committedSigners", "solutionsBase64"]    
+    parameters: ["committedSigners", "solutions"]    
   },
   testAggregateVerification: {
     rpcCall: "testAggregateVerification",
@@ -150,19 +150,19 @@ var rpcCalls = {
     mandatoryModifiableArguments: {
       signature: null,
       committedSigners: null,
-      allPublicKeysBase64: null,
-      messageBase64: null,
+      allPublicKeys: null,
+      messageHex: null,
     },
-    parameters: ["signature", "committedSigners", "allPublicKeysBase64", "messageBase64"]    
+    parameters: ["signature", "committedSigners", "allPublicKeys", "messageHex"]    
   },
   testAggregateVerificationComplete: {
     rpcCall: "testAggregateVerificationComplete",
     method: "cryptotest_testAggregateVerificationComplete",
     mandatoryModifiableArguments: {
       signatureComplete: null,
-      messageBase64: null
+      messageHex: null
     },
-    parameters: ["signatureComplete", "messageBase64"]
+    parameters: ["signatureComplete", "messageHex"]
   },
   getBestBlockNumber: {
     rpcCall: "getBestBlockNumber",
@@ -202,11 +202,6 @@ var rpcCalls = {
   currentProposal: {
     rpcCall: "currentProposal",
     method: "pbft_currentProposal",
-    parameters: []
-  },
-  peerView: {
-    rpcCall: "peerView",
-    method: "pbft_peerView", //<- method name passed to kanban-go
     parameters: []
   },
   roundChangeRequests: {

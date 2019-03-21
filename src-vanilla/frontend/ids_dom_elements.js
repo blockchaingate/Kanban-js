@@ -87,6 +87,7 @@ var defaults = {
     },
     inputAggregateSignature: {
       message: "inputKBGOMessage",
+      messageHex: "inputKBGOMessageHex",
       numberOfPrivateKeysToGenerate: "inputKBGONumberOfPrivateKeysToGenerate",
       privateKeys: "inputKBGOPrivateKeys",
       nonces: "inputKBGONonces",

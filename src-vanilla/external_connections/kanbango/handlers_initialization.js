@@ -141,6 +141,7 @@ NodeKanbanGo.prototype.computeNodeInfo = function () {
   if (("" + initializer.chainId) === ("" + initializer.chainIdTestNet)) {
     this.nodeInformation.comment = "Chain id running on testnet, revealing sensitive information.";
     this.nodeInformation.argumentsGeth = this.argumentsGeth;
+    this.nodeInformation.argumentsGethOneLine = this.argumentsGeth.join(" ");
   }
   
   this.nodeSensitiveInformation = Object.assign({}, this.nodeInformation);

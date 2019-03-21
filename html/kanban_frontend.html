@@ -112,7 +112,6 @@
     <button class = "buttonStandard" style = "width:100px" onclick = "window.kanban.kanbanGO.rpc.theKBNodes.run('currentProposal');">Proposal</button><br>
     <button class = "buttonStandard" style = "width:100px" onclick = "window.kanban.kanbanGO.rpc.theKBNodes.run('round');">Round</button><br>
     <button class = "buttonStandard" style = "width:100px" onclick = "window.kanban.kanbanGO.rpc.theKBNodes.run('validators');">Validators</button><br>
-    <button class = "buttonStandard" style = "width:100px" onclick = "window.kanban.kanbanGO.rpc.theKBNodes.run('peerView');">Peer View</button><br>
     <button class = "buttonStandard" style = "width:100px" onclick = "window.kanban.kanbanGO.rpc.theKBNodes.run('roundChangeRequests');">Change Round</button><br>
     </div>
     <div class = "divLabelButtonGroup">voting</div><div id = "panelKBGOVotingMachine" class = "panelStandard">
@@ -450,8 +449,8 @@ My sandbox <br>
     <input type = "text" class = "inputStandard" id = "inputAggregateSignaturePrivateKeys"                   size = "50" placeholder = "private keys"></input><br>
     <input type = "text" class = "inputStandard" id = "inputAggregateSignatureNonces"                        size = "50" placeholder = "nonces"></input><br>
     <input type = "text" class = "inputStandard" id = "inputAggregateSignaturePublicKeys"                    size = "50" placeholder = "public keys"></input><br>
-    <input type = "text" class = "inputStandard" id = "inputAggregateSignatureCommitments"                   size = "50" placeholder = "commitments"></input><br>
     <input type = "text" class = "inputStandard" id = "inputAggregateSignatureCommittedSignersBitmap"        size = "50" placeholder = "committed signers bitmap"></input><br>
+    <input type = "text" class = "inputStandard" id = "inputAggregateSignatureCommitments"                   size = "50" placeholder = "commitments"></input><br>
     <input type = "text" class = "inputStandard" id = "inputAggregateSignatureMessageDigest"                 size = "50" placeholder = "digest"></input><br>
     <input type = "text" class = "inputStandard" id = "inputAggregateSignatureAggregateCommitment"           size = "50" placeholder = "aggregate commitment"></input><br>
     <input type = "text" class = "inputStandard" id = "inputAggregateSignatureAggregatePubkey"               size = "50" placeholder = "aggregate public key"></input><br>
@@ -510,6 +509,7 @@ My sandbox <br>
     </div>
     <div class = "divLabelButtonGroup">aggregate inputs</div><div id = "panelAggregateKanbanGOInputs" class = "panelStandard">
     <input type = "text" class = "inputStandard" id = "inputKBGOMessage"                        size = "50" placeholder = "message"></input><br>
+    <input type = "text" class = "inputStandard" id = "inputKBGOMessageHex"                     size = "50" placeholder = "message hex"></input><br>
     <input type = "text" class = "inputStandard" id = "inputKBGONumberOfPrivateKeysToGenerate"  size = "50" placeholder = "# private keys to generate"></input><br>
     <input type = "text" class = "inputStandard" id = "inputKBGOPrivateKeys"                    size = "50" placeholder = "private keys"></input><br>
     <input type = "text" class = "inputStandard" id = "inputKBGONonces"                         size = "50" placeholder = "nonces"></input><br>

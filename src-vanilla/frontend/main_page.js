@@ -140,6 +140,10 @@ Page.prototype.initialize = function() {
     ids.defaults.fabcoin.inputCrypto.inputSchnorrSignature.messageToSha3,
     ids.defaults.fabcoin.inputCrypto.inputSchnorrSignature.messageToSha3Hex,
   );
+  miscellaneousFrontEnd.hookUpHexWithStringInput(
+    ids.defaults.kanbanGO.inputAggregateSignature.message,
+    ids.defaults.kanbanGO.inputAggregateSignature.messageHex,
+  );
   //Load google login:
   gapi.load('auth2', login.login.gapiLoadCallback.bind(login.login));
   kanbanRPC.theKBNodes.getNodeInformation()
