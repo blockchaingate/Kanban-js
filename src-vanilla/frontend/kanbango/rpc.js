@@ -140,6 +140,7 @@ function KanbanGoNodes() {
       nonce: this.transformersStandard.veryShort,
       stateRoot: this.transformersStandard.shortener,
       transactionsRoot: this.transformersStandard.shortener,
+      messageHex: this.transformersStandard.shortener,
       "messages": this.transformersStandard.veryShort,
       "messages.received.${number}.payload": this.transformersStandard.shortener,
       "messages.received.${number}.from": this.transformersStandard.shortener,
@@ -296,6 +297,7 @@ function KanbanGoNodes() {
       "approvedMessages.${number}.payloadHash": this.transformersStandard.shortener,
       "approvedMessages.${number}.hash": this.transformersStandard.shortener,
       "approvedMessages.${number}.dataAndAuthorization.aggregateSignature": this.transformersStandard.shortener,
+      "approvedMessages.${number}.dataAndAuthorization.payload": this.transformersStandard.shortener,
       "approvedMessages.${number}.dataAndAuthorization.payload.message": this.transformersStandard.shortener,
       "approvedMessages.${number}.dataAndAuthorization.payload.payloadHash": this.transformersStandard.shortener,
       "approvedMessages.${number}.dataAndAuthorization.payload.serialization": this.transformersStandard.shortener,
@@ -505,7 +507,7 @@ function KanbanGoNodes() {
         messageHex: ids.defaults.kanbanGO.inputSendReceive.messageVoteHex,
       },
     },
-    voteMessage: {
+    testVote: {
       inputs: {
         messageHex: ids.defaults.kanbanGO.inputSendReceive.messageVoteHex
       },

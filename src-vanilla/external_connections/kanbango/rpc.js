@@ -268,8 +268,8 @@ var rpcCalls = {
     method: "net_voteMessageNetworkStats",
     parameters: [],
   },
-  voteMessage: {
-    rpcCall: "voteMessage",
+  testVote: {
+    rpcCall: "testVote",
     method: "pbfttest_testVote",
     mandatoryModifiableArguments: {
       messageHex: null,
