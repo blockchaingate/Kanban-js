@@ -203,9 +203,6 @@ function KanbanGoNodes() {
       "mainChainBalance": {transformer: miscellaneousBackend.ensureMinCharWidth.bind(null, 17)},
     }
   };
-  this.optionsKanbanGOLabelContraction = {};
-  this.optionsKanbanGOLabelContraction.transformers = Object.assign({}, this.optionsKanbanGOStandard.transformers);
-  this.optionsKanbanGOLabelContraction.transformers["${label}"] = this.transformersStandard.shortener;
 
   this.optionsInitialization = {
     totalEntriesToDisplayAtEnds: 30,
@@ -314,6 +311,7 @@ function KanbanGoNodes() {
       "votePayload.message": this.transformersStandard.shortener,
       "votePayload.payloadHash": this.transformersStandard.shortener,
       "votePayload.serialization": this.transformersStandard.shortener,
+      "votePayload": this.transformersStandard.shortener,
       "slots.${number}.payloadHash": this.transformersStandard.shortener,
     },
   };
@@ -440,7 +438,7 @@ function KanbanGoNodes() {
     },
     validators: {
       outputJSON: ids.defaults.kanbanGO.outputSendReceive,
-      outputOptions: this.optionsKanbanGOLabelContraction
+      outputOptions: this.optionsForAddressDisplay
     },
     testSha2: {
       //if rpcCall omitted it will be assumed to be equal to the function label.
