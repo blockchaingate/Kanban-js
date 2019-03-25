@@ -106,12 +106,15 @@
     <div class = "divLabelButtonGroup">blocks</div><div id = "panelKBGOBlockInfoButtons" class = "panelStandard">
     <button class = "buttonStandard" style = "width:100px" onclick = "window.kanban.kanbanGO.rpc.theKBNodes.run('getBlockByNumber');">Block by #</button><br>
     <button class = "buttonStandard" style = "width:100px" onclick = "window.kanban.kanbanGO.rpc.theKBNodes.run('getBestBlockNumber')">Best block #</button><br>
-    <button class = "buttonStandard" style = "width:100px" onclick = "window.kanban.kanbanGO.rpc.theKBNodes.run('getBlockByHash');">Block by hash</button><br>
+    <button class = "buttonStandard" style = "width:100px" onclick = "window.kanban.kanbanGO.rpc.theKBNodes.run('getBlockByHash');">Block by hash</button><br>    
     </div>
     <div class = "divLabelButtonGroup">block voting</div><div id = "panelKBGOConsensusBlock" class = "panelStandard">
     <button class = "buttonStandard" style = "width:100px" onclick = "window.kanban.kanbanGO.rpc.theKBNodes.run('currentProposal');">Proposal</button><br>
     <button class = "buttonStandard" style = "width:100px" onclick = "window.kanban.kanbanGO.rpc.theKBNodes.run('round');">Round</button><br>
     <button class = "buttonStandard" style = "width:100px" onclick = "window.kanban.kanbanGO.rpc.theKBNodes.run('validators');">Validators</button><br>
+    <button class = "buttonStandard" style = "width:100px" onclick = "window.kanban.kanbanGO.rpc.theKBNodes.run('pbftConfig');">PBFT Config</button><br>
+
+    <button class = "buttonStandard" style = "width:100px" onclick = "window.kanban.kanbanGO.rpc.theKBNodes.run('peerView');">Peer View</button><br>
     <button class = "buttonStandard" style = "width:100px" onclick = "window.kanban.kanbanGO.rpc.theKBNodes.run('roundChangeRequests');">Change Round</button><br>
     </div>
     <div class = "divLabelButtonGroup">voting</div><div id = "panelKBGOVotingMachine" class = "panelStandard">
@@ -722,10 +725,9 @@ My sandbox <br>
     <!--div><button class = "buttonSelectPage" onclick = "window.kanban.thePage.selectPage('demoPage');">Demo</button></div-->
     <div><button class = "buttonSelectPage" onclick = "window.kanban.thePage.selectPage('myLocalKanbanNodes');">KanbanGO start</button></div>
     <div><button class = "buttonSelectPage" onclick = "window.kanban.thePage.selectPage('kanbanGOSendReceive');">KanbanGO</button></div>
-    <!--<div><button class = "buttonSelectPage" onclick = "window.kanban.thePage.selectPage('kanbanGOTransfer');">KB transfer</button></div>
+    <div><button class = "buttonSelectPage" onclick = "window.kanban.thePage.selectPage('kanbanGOTransfer');">KB transfer</button></div>
     <hr>
     <div><button class = "buttonSelectPage" onclick = "window.kanban.thePage.selectPage('sandbox');"> Sandbox</button></div>
-    -->
     <hr>
     <div><button class = "buttonSelectPage" onclick = "window.kanban.thePage.selectPage('fabcoinInitialization');">fabcoin start</button></div>
     <div><button class = "buttonSelectPage" onclick = "window.kanban.thePage.selectPage('fabcoinSmartContract');">fabcoin smart</button></div>
