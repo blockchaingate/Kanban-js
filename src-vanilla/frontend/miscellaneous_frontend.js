@@ -115,6 +115,10 @@ function updateValue(id, content) {
   if (theElement.value === content) {
     return;
   }
+  if (content === undefined || content === null) {
+    highlightError(id);
+    return;
+  }
   var highlightName = "updatedRecently";
   theElement.value = content;
   theElement.classList.add(highlightName);

@@ -172,11 +172,14 @@ FabcoinNodeInitializer.prototype.getArguments = function(functionLabel) {
   for (var inputLabel in currentInputs) {
     var inputId = currentInputs[inputLabel];
     theArguments[inputLabel] = document.getElementById(inputId).value;
+    miscellaneousFrontEnd.highlightInput(inputId);
   }
   var currentInputsBase64 = functionFrontend.inputsBase64;
   if (currentInputsBase64 !== null && currentInputsBase64 !== undefined) {
     for (var inputLabel in currentInputsBase64) {
-      var theValue =  document.getElementById(currentInputsBase64[inputLabel]).value;
+      var inputId = currentInputsBase64[inputLabel];
+      var theValue =  document.getElementById(inputId).value;
+      miscellaneousFrontEnd.highlightInput(inputId);
       theArguments[inputLabel] = Buffer.from(theValue).toString('base64');
     }
   }
