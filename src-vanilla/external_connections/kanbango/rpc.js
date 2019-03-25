@@ -224,6 +224,11 @@ var rpcCalls = {
     method: "pbft_validators",
     parameters: []
   },
+  pbftConfig: {
+    rpcCall: "pbftConfig",
+    method: "pbft_pbftConfig",
+    parameters: []
+  },
   versionGO: {
     rpcCall: "versionGO",
     method: "web3_clientVersion",

@@ -442,6 +442,10 @@ function KanbanGoNodes() {
       outputJSON: ids.defaults.kanbanGO.outputSendReceive,
       outputOptions: this.optionsForAddressDisplay
     },
+    pbftConfig: {
+      outputJSON: ids.defaults.kanbanGO.outputSendReceive,
+      outputOptions: this.optionsKanbanGOLabelContraction
+    },
     testSha2: {
       //if rpcCall omitted it will be assumed to be equal to the function label.
       inputs: {
