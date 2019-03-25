@@ -124,6 +124,8 @@ var defaults = {
       contractFunctionArguments: "inputKBGOSmartContractFunctionArguments",
       contractId: "inputKBGOContractId",
       contractData: "inputKBGOSmartContractData",
+      txAggregatePublicKeys: "inputKBGOAggregateSignaturePubKeysForTx",
+      txAggregateSignature: "inputKBGOAggregateSignatureForTx",
       // end of matching 
     },
     inputBenchmarkParameters: {
@@ -202,9 +204,9 @@ var defaults = {
       contractData: "inputFabcoinContractData",
       contractFunctionArguments: "inputFabcoinContractFunctionArguments",
       contractFunctionId: "inputFabcoinContractFunctionId",
-      // end of matching 
       txAggregatePublicKeys: "inputAggregateSignaturePubKeysForTx",
       txAggregateSignature: "inputAggregateSignatureForTx",
+      // end of matching 
       solidityInput: "aceEditor",
       contractFunctionName: "inputSolidityFunctionName",
     },

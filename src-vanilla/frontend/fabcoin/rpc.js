@@ -576,6 +576,20 @@ FabNode.prototype.getSetInputWithShortener = function(idOutput) {
 FabNode.prototype.computeTxInsAndOuts = function(sourceIsFabPage) {
   var inputFab = ids.defaults.fabcoin.inputBlockInfo;
   var inputKB = ids.defaults.kanbanGO.inputSendReceive;
+
+  var inputs = {
+    txInIds: null,
+    txInNOuts: null,
+    txBeneficiaryAddresses: null,
+    txBeneficiaryAmounts: null,
+    gasPrice: null,
+    gasLimit: null,
+    contractId: null,
+    contractData: null,
+    txAggregatePublicKeys: null,
+    secretIn: null,
+  };
+
   var incomingIds;
   var incomingNOuts;
   var incomingOutAddresses;
@@ -692,6 +706,7 @@ FabNode.prototype.computeTxInsAndOuts = function(sourceIsFabPage) {
   miscellaneousFrontEnd.updateValue(otherIdContainer.gasPrice, incomingGasPrice);
   miscellaneousFrontEnd.updateValue(otherIdContainer.gasLimit, incomingGasLimit);
 
+  
   incomingIds = document.getElementById(inputIdContainer.txInIds).value;
   incomingNOuts = document.getElementById(inputIdContainer.txInNOuts).value;
   incomingOutAddresses = document.getElementById(inputIdContainer.txBeneficiaryAddresses).value;
