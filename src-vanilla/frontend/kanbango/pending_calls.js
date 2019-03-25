@@ -302,6 +302,7 @@ function getValueFromId(/**@type {string}*/ id) {
   if (domElement === null) {
     return null;
   }
+  miscellaneousFrontEnd.highlightInput(id);
   if (domElement.tagName === "INPUT") {
     if (domElement.type === "checkbox") {
       return domElement.checked;

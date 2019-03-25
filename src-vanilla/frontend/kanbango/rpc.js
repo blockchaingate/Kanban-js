@@ -140,6 +140,7 @@ function KanbanGoNodes() {
       nonce: this.transformersStandard.veryShort,
       stateRoot: this.transformersStandard.shortener,
       transactionsRoot: this.transformersStandard.shortener,
+      messageHex: this.transformersStandard.shortener,
       "messages": this.transformersStandard.veryShort,
       "messages.received.${number}.payload": this.transformersStandard.shortener,
       "messages.received.${number}.from": this.transformersStandard.shortener,
@@ -203,15 +204,13 @@ function KanbanGoNodes() {
       "mainChainBalance": {transformer: miscellaneousBackend.ensureMinCharWidth.bind(null, 17)},
     }
   };
-  this.optionsKanbanGOLabelContraction = {};
-  this.optionsKanbanGOLabelContraction.transformers = Object.assign({}, this.optionsKanbanGOStandard.transformers);
-  this.optionsKanbanGOLabelContraction.transformers["${label}"] = this.transformersStandard.shortener;
 
   this.optionsInitialization = {
     totalEntriesToDisplayAtEnds: 30,
     transformers: {
       myEnodeAddress: this.transformersStandard.shortener16,
       argumentsGeth: this.transformersStandard.veryShort,
+      argumentsGethOneLine: this.transformersStandard.veryShort,
       "myConnections.${number}": this.transformersStandard.shortener16,
       "secretKey": this.transformersStandard.shortener,
       "binaries.${number}": this.transformersStandard.contractHexSetter,
@@ -261,6 +260,7 @@ function KanbanGoNodes() {
       "aggregator.aggregatePublicKey": this.transformersStandard.shortener,
       "aggregator.commitments.${number}": this.transformersStandard.shortener,
       "aggregator.lockingCoefficients.${number}": this.transformersStandard.shortener,
+      "aggregator.messageHex": this.transformersStandard.shortener,
       "aggregator.messageDigest": this.transformersStandard.shortener,
       "aggregator.aggregateSolution": this.transformersStandard.shortener,
       "aggregator.signatureNoBitmap": this.transformersStandard.setAggregateSignatureNoBitmap,
@@ -280,6 +280,7 @@ function KanbanGoNodes() {
       "verifier.signatureComplete": this.transformersStandard.shortener,
 
       "signers.${number}.myPublicKey": this.transformersStandard.shortener,
+      "signers.${number}.messageHex": this.transformersStandard.shortener,
       "signers.${number}.privateKeyBase58": this.transformersStandard.shortener,
       "signers.${number}.commitmentHexCompressed": this.transformersStandard.shortener,
       "signers.${number}.myNonceBase58": this.transformersStandard.shortener,
@@ -296,6 +297,7 @@ function KanbanGoNodes() {
       "approvedMessages.${number}.payloadHash": this.transformersStandard.shortener,
       "approvedMessages.${number}.hash": this.transformersStandard.shortener,
       "approvedMessages.${number}.dataAndAuthorization.aggregateSignature": this.transformersStandard.shortener,
+      "approvedMessages.${number}.dataAndAuthorization.payload": this.transformersStandard.shortener,
       "approvedMessages.${number}.dataAndAuthorization.payload.message": this.transformersStandard.shortener,
       "approvedMessages.${number}.dataAndAuthorization.payload.payloadHash": this.transformersStandard.shortener,
       "approvedMessages.${number}.dataAndAuthorization.payload.serialization": this.transformersStandard.shortener,
@@ -303,6 +305,7 @@ function KanbanGoNodes() {
       "messages.debugStatus.lines.${number}": this.transformersStandard.middleShortener,
       "messages.errorLog.lines.${number}": this.transformersStandard.middleShortener,
       "messages.publicKey": this.transformersStandard.middleShortener,
+      "messages.allPublicKeys.${number}": this.transformersStandard.middleShortener,
       "debugStatus.lines.${number}": this.transformersStandard.middleShortener,
       "peers.${any}.debugStatus.lines.${number}": this.transformersStandard.middleShortener,
       "inputHex": this.transformersStandard.shortener,
@@ -310,6 +313,7 @@ function KanbanGoNodes() {
       "votePayload.message": this.transformersStandard.shortener,
       "votePayload.payloadHash": this.transformersStandard.shortener,
       "votePayload.serialization": this.transformersStandard.shortener,
+      "votePayload": this.transformersStandard.shortener,
       "slots.${number}.payloadHash": this.transformersStandard.shortener,
     },
   };
@@ -390,10 +394,6 @@ function KanbanGoNodes() {
     getNodeInformation: {
       callType: this.callTypes.initialization
     },
-    peerView: {
-      outputJSON: ids.defaults.kanbanGO.outputSendReceive,
-      outputOptions: this.optionsKanbanGOStandard
-    },
     roundChangeRequests: {
       // if rpcCall omitted it will be assumed to be equal to the function label.
       rpcCall: kanbanGO.rpcCalls.roundChangeRequests.rpcCall,
@@ -440,7 +440,7 @@ function KanbanGoNodes() {
     },
     validators: {
       outputJSON: ids.defaults.kanbanGO.outputSendReceive,
-      outputOptions: this.optionsKanbanGOLabelContraction
+      outputOptions: this.optionsForAddressDisplay
     },
     pbftConfig: {
       outputJSON: ids.defaults.kanbanGO.outputSendReceive,
@@ -511,7 +511,7 @@ function KanbanGoNodes() {
         messageHex: ids.defaults.kanbanGO.inputSendReceive.messageVoteHex,
       },
     },
-    voteMessage: {
+    testVote: {
       inputs: {
         messageHex: ids.defaults.kanbanGO.inputSendReceive.messageVoteHex
       },
@@ -573,23 +573,21 @@ function KanbanGoNodes() {
       callback: PendingCall.prototype.callbackAggregatePrivateKeyGeneration
     },
     testAggregateInitialize: {
-      inputsBase64: {
+      inputs: {
         privateKeys: inputAggregate.privateKeys
       },
       callback: PendingCall.prototype.callbackAggregateInitialization
     },
     testAggregateCommitment: {
-      inputsBase64: {
-        messageBase64: inputAggregate.message
+      inputs: {
+        messageHex: inputAggregate.messageHex
       },
       callback: PendingCall.prototype.callbackAggregateCommitment
     },
     testAggregateChallenge: {
       inputs: {        
-        committedSigners: inputAggregate.committedSignersBitmap
-      },
-      inputsBase64: {
-        commitmentsBase64: inputAggregate.commitments,
+        committedSigners: inputAggregate.committedSignersBitmap,
+        commitments: inputAggregate.commitments,
       },
       outputs: {
         aggregator: {
@@ -611,9 +609,7 @@ function KanbanGoNodes() {
     testAggregateSignature: {
       inputs: {
         committedSigners: inputAggregate.committedSignersBitmap,
-      },
-      inputsBase64: {
-        solutionsBase64: inputAggregate.solutions,
+        solutions: inputAggregate.solutions,
       },
       outputs: {
         aggregator: {
@@ -624,20 +620,16 @@ function KanbanGoNodes() {
       }
     },
     testAggregateVerification: {
-      inputsBase64: {
-        messageBase64: inputAggregate.message,
-        allPublicKeysBase64: inputAggregate.publicKeys,
-      },
       inputs: {
+        messageHex: inputAggregate.messageHex,
+        allPublicKeys: inputAggregate.publicKeys,
         signature: inputAggregate.aggregateSignature,
         committedSigners: inputAggregate.committedSignersBitmap,
       },
     },
     testAggregateVerificationComplete: {
-      inputsBase64: {
-        messageBase64: inputAggregate.message,
-      },
       inputs: {
+        messageHex: inputAggregate.messageHex,
         signatureComplete: inputAggregate.aggregateSignatureComplete,
       },
     },

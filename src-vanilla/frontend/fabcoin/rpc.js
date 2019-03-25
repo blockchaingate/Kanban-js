@@ -90,6 +90,7 @@ function FabNode() {
       "publicKeys.${number}": this.transformersStandard.shortener,
       "executionResult.output": this.transformersStandard.shortener,
       "error": this.transformersStandard.shortener,
+      "error.message": this.transformersStandard.replaceNewLinesWithBr,
       "executionResult.newAddress": this.transformersStandard.shortener,
       "transactionReceipt.bloom": this.transformersStandard.shortener,
       "transactionReceipt.stateRoot": this.transformersStandard.shortener,
@@ -152,11 +153,14 @@ function FabNode() {
       solutionBase58Check: this.transformersStandard.shortener,
       publicKeyHex: this.transformersStandard.setPublicKeySchnorr,
       "privateKeys.${number}": this.transformersStandard.setPrivateKeySchnorr,
+      input: this.transformersStandard.shortener,
       "aggregator.publicKeys.${number}": this.transformersStandard.setPublicKeySchnorr,
       "aggregator.commitments.${number}": this.transformersStandard.shortener,
       "aggregator.aggregatePublicKey": this.transformersStandard.shortener,
       "aggregator.aggregateCommitment": this.transformersStandard.shortener,
       "aggregator.messageDigest": this.transformersStandard.shortener,
+      "aggregator.message": this.transformersStandard.shortener,
+      "aggregator.messageHex": this.transformersStandard.shortener,
       "aggregator.aggregateSolution": this.transformersStandard.shortener,
       "aggregator.aggregateCommitmentFromSignature": this.transformersStandard.shortener,
       "aggregator.signatureNoBitmap": this.transformersStandard.setAggregateSignature,
@@ -164,6 +168,7 @@ function FabNode() {
       "aggregator.signatureComplete": this.transformersStandard.setAggregateSignatureComplete,
       "aggregator.lockingCoefficients.${number}": this.transformersStandard.shortener,
       "signers.${number}.myPublicKey": this.transformersStandard.setPublicKeySchnorr,
+      "signers.${number}.messageHex": this.transformersStandard.shortener,
       "signers.${number}.privateKeyBase58": this.transformersStandard.setPrivateKeySchnorr,
       "signers.${number}.myNonceBase58": this.transformersStandard.setNonceSchnorr,
       "signers.${number}.myLockingCoefficient": this.transformersStandard.shortener,
@@ -451,7 +456,8 @@ function FabNode() {
     },
     testAggregateSignatureCommitment: {
       inputs: {
-        messageHex: inputFabCryptoAggregate.messageHex
+        messageHex: inputFabCryptoAggregate.messageHex,
+        nonces: inputFabCryptoAggregate.nonces
       },
       callType: this.callTypes.crypto,
       callback: this.callbackAggregateSignatureCommit
@@ -495,8 +501,7 @@ function FabNode() {
     },
     testAggregateVerification: {
       inputs: {
-        signature: inputFabCryptoAggregate.theAggregation,
-        committedSignersBitmap: inputFabCryptoAggregate.committedSignersBitmap,
+        signature: inputFabCryptoAggregate.aggregateSignatureUncompressed,
         publicKeys: inputFabCryptoAggregate.publicKeys,
         messageHex: inputFabCryptoAggregate.messageHex,
       },
@@ -873,8 +878,9 @@ FabNode.prototype.getArguments = function(functionLabelFrontEnd, functionLabelBa
   var currentInputsBase64 = functionFrontend.inputsBase64;
   if (currentInputsBase64 !== null && currentInputsBase64 !== undefined) {
     for (var inputLabel in currentInputsBase64) {
-      var theValue =  document.getElementById(currentInputsBase64[inputLabel]).value;
-      miscellaneousFrontEnd.highlightInput(currentInputsBase64[inputLabel]);
+      var inputId = currentInputsBase64[inputLabel];
+      var theValue =  document.getElementById(inputId).value;
+      miscellaneousFrontEnd.highlightInput(inputId);
       theArguments[inputLabel] = Buffer.from(theValue).toString('base64');
     }
   }

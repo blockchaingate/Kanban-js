@@ -288,11 +288,10 @@ var rpcCalls = {
     method: "testaggregatesignatureverification",
     mandatoryModifiableArguments: {
       signature: null,
-      committedSignersBitmap: null,
       publicKeys: null,
       messageHex: null
     },
-    parameters: ["signature", "committedSignersBitmap", "publicKeys", "messageHex"]
+    parameters: ["messageHex", "signature", "publicKeys"]
   },
   testAggregateVerificationComplete: {
     rpcCall: "testAggregateVerificationComplete",
