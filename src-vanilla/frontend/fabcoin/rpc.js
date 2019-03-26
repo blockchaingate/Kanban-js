@@ -576,57 +576,68 @@ FabNode.prototype.getSetInputWithShortener = function(idOutput) {
 FabNode.prototype.computeTxInsAndOuts = function(sourceIsFabPage) {
   var inputFab = ids.defaults.fabcoin.inputBlockInfo;
   var inputKB = ids.defaults.kanbanGO.inputSendReceive;
-  var incomingIds;
-  var incomingNOuts;
-  var incomingOutAddresses;
-  var incomingAmounts;
-  var inputIdContainer;
-  var incomingGasPrice;
-  var incomingGasLimit;
-  var smartContractId;
-  var smartContractData;
-  var otherIdContainer;
-  var aggregatePubKeys;
+
   var currentCheckboxIds;
   var otherCheckboxIds;
+  var inputIdContainer;
+  var otherIdContainer;
+
   if (sourceIsFabPage) {
     inputIdContainer    = inputFab;
     otherIdContainer    = inputKB;
     currentCheckboxIds  = ids.defaults.fabcoin.checkboxes.transactions;
     otherCheckboxIds    = ids.defaults.kanbanGO.checkboxes.transactions;
-  } else  {
+  } else {
     inputIdContainer    = inputKB;
     otherIdContainer    = inputFab;
     currentCheckboxIds  = ids.defaults.kanbanGO.checkboxes.transactions;
     otherCheckboxIds    = ids.defaults.fabcoin.checkboxes.transactions;
   }
-  incomingIds = document.getElementById(inputIdContainer.txInIds).value;
-  incomingNOuts = document.getElementById(inputIdContainer.txInNOuts).value;
-  incomingOutAddresses = document.getElementById(inputIdContainer.txBeneficiaryAddresses).value;
-  incomingAmounts = document.getElementById(inputIdContainer.txBeneficiaryAmounts).value;
-  incomingGasPrice = document.getElementById(inputIdContainer.gasPrice).value;
-  incomingGasLimit = document.getElementById(inputIdContainer.gasLimit).value;
-  smartContractId = document.getElementById(inputIdContainer.contractId).value;
-  smartContractData = document.getElementById(inputIdContainer.contractData).value;
-  aggregatePubKeys = document.getElementById(inputFab.txAggregatePublicKeys).value;
-  var secretInString = document.getElementById(inputIdContainer.secretIn).value;
 
-  var smartContractInOutputs = document.getElementById(currentCheckboxIds.contractCallsInOutputs).checked;
-  var fullSignatureInInputs = document.getElementById(currentCheckboxIds.fullSignatureInInputs).checked; 
-  var usePayToPubkeyWithoutHash = document.getElementById(currentCheckboxIds.secretSignsPubkeyNoHash).checked;
-  var doSendToContract = document.getElementById(currentCheckboxIds.sendToContract).checked;
-  var incomingIdArray = miscellaneousBackend.splitMultipleDelimiters(incomingIds, ", \t");
-  var incomingNOutArray = miscellaneousBackend.splitMultipleDelimiters(incomingNOuts, ", \t");
-  var secretInArray = miscellaneousBackend.splitMultipleDelimiters(secretInString, ", \t");
+  var inputs = {
+    txInIds: null,
+    txInNOuts: null,
+    txBeneficiaryAddresses: null,
+    txBeneficiaryAmounts: null,
+    gasPrice: null,
+    gasLimit: null,
+    contractId: null,
+    contractData: null,
+    txAggregatePublicKeys: null,
+    secretIn: null,
+  };
+  for (var label in inputs) {
+    var currentComponent = document.getElementById(inputIdContainer[label]);
+    var otherComponent = document.getElementById(otherIdContainer[label]);
+    inputs[label] = currentComponent.value;
+    otherComponent.value = currentComponent.value;
+    miscellaneousFrontEnd.highlightInput(currentComponent);
+    miscellaneousFrontEnd.highlightOutput(otherComponent);
+  }
+  var checkboxesCurrent = {
+    contractCallsInOutputs: null,
+    noAncestorTransaction: null,
+    secretSignsPubkeyNoHash: null,
+    sendToContract: null,
+  };
+  for (var label in checkboxesCurrent) {
+    var currentCheckbox = document.getElementById(currentCheckboxIds[label]);
+    checkboxesCurrent[label] = currentCheckbox.checked;
+    document.getElementById(otherCheckboxIds[label]).checked = currentCheckbox.checked;
+  }
+
+  var incomingIdArray = miscellaneousBackend.splitMultipleDelimiters(inputs.txInIds, ", \t");
+  var incomingNOutArray = miscellaneousBackend.splitMultipleDelimiters(inputs.txInNOuts, ", \t");
+  var secretInArray = miscellaneousBackend.splitMultipleDelimiters(inputs.secretIn, ", \t");
   var resultIn = [];
   var counterSecret = 0;
   
-  if (fullSignatureInInputs) {
+  if (checkboxesCurrent.noAncestorTransaction) {
     var contractObject = {
       txid: "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
       vout: 0,
       secretIn: secretInArray[counterSecret],
-      isPayToPublicWithoutHash: usePayToPubkeyWithoutHash,
+      isPayToPublicWithoutHash: checkboxesCurrent.secretSignsPubkeyNoHash,
     };
     counterSecret ++;
     resultIn.push(contractObject)
@@ -644,18 +655,18 @@ FabNode.prototype.computeTxInsAndOuts = function(sourceIsFabPage) {
     }
     resultIn.push(incomingIn);
   }
-  var incomingOutAddressArray = miscellaneousBackend.splitMultipleDelimiters(incomingOutAddresses, ", \t");
-  var incomingOutAmountArray = miscellaneousBackend.splitMultipleDelimiters(incomingAmounts, ", \t");
+  var incomingOutAddressArray = miscellaneousBackend.splitMultipleDelimiters(inputs.txBeneficiaryAddresses, ", \t");
+  var incomingOutAmountArray = miscellaneousBackend.splitMultipleDelimiters(inputs.txBeneficiaryAmounts, ", \t");
 
   var amountCounter = 0;
-  if (aggregatePubKeys !== "" && typeof aggregatePubKeys === "string") {
+  if (inputs.txAggregatePublicKeys !== "" && typeof inputs.txAggregatePublicKeys === "string") {
     resultOut.aggregateSignature = {
-      publicKeysHex: aggregatePubKeys,
+      publicKeysHex: inputs.txAggregatePublicKeys,
       amount: Number(incomingOutAmountArray[amountCounter]),
     };
     amountCounter ++;
   }
-  if (smartContractInOutputs) {
+  if (checkboxesCurrent.contractCallsInOutputs) {
     resultOut.contract = {};
     resultOut.contract.contractAddress = smartContractId;
     resultOut.contract.data = smartContractData;
@@ -681,29 +692,10 @@ FabNode.prototype.computeTxInsAndOuts = function(sourceIsFabPage) {
     resultOut[incomingOutAddressArray[i]] = incomingAmount;
     amountCounter ++;
   }
-  miscellaneousFrontEnd.updateValue(otherIdContainer.contractId, smartContractId);
-  miscellaneousFrontEnd.updateValue(otherIdContainer.contractData, smartContractData);
-
-  miscellaneousFrontEnd.updateValue(otherIdContainer.secretIn, secretInString);
-  miscellaneousFrontEnd.updateValue(otherIdContainer.txInIds, incomingIds);
-  miscellaneousFrontEnd.updateValue(otherIdContainer.txInNOuts, incomingNOuts);
-  miscellaneousFrontEnd.updateValue(otherIdContainer.txBeneficiaryAddresses, incomingOutAddresses);
-  miscellaneousFrontEnd.updateValue(otherIdContainer.txBeneficiaryAmounts, incomingAmounts);
-  miscellaneousFrontEnd.updateValue(otherIdContainer.gasPrice, incomingGasPrice);
-  miscellaneousFrontEnd.updateValue(otherIdContainer.gasLimit, incomingGasLimit);
-
-  incomingIds = document.getElementById(inputIdContainer.txInIds).value;
-  incomingNOuts = document.getElementById(inputIdContainer.txInNOuts).value;
-  incomingOutAddresses = document.getElementById(inputIdContainer.txBeneficiaryAddresses).value;
-  incomingAmounts = document.getElementById(inputIdContainer.txBeneficiaryAmounts).value;
-
   miscellaneousFrontEnd.updateValue(inputFab.txInputs, JSON.stringify(resultIn));
   miscellaneousFrontEnd.updateValue(inputFab.txOutputs, JSON.stringify(resultOut));
   miscellaneousFrontEnd.updateValue(inputKB.txInputs, JSON.stringify(resultIn));
   miscellaneousFrontEnd.updateValue(inputKB.txOutputs, JSON.stringify(resultOut));
-  for (var label in currentCheckboxIds) {
-    document.getElementById(otherCheckboxIds[label]).checked = document.getElementById(currentCheckboxIds[label]).checked;
-  }
 }
 
 FabNode.prototype.setTxInputVoutAndValue = function(container, content, extraData) {

@@ -954,6 +954,7 @@ KanbanGoNodes.prototype.readCheckboxesConfiguration = function() {
     var checkBox = document.getElementById(idCheckboxPairs[i][1]);
     storageKanban.setVariable(idCheckboxPairs[i][0], checkBox.checked);
   }
+
 }
 
 var theKBNodes = new KanbanGoNodes();

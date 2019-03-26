@@ -229,6 +229,16 @@ var rpcCalls = {
     method: "pbft_pbftConfig",
     parameters: []
   },
+  isShardDefaultStarted: {
+    rpc: "isShardDefaultStarted",
+    method: "bridge_isShardDefaultStarted",
+    parameters: [],
+  },
+  getNodeShard: {
+    rpc: "getNodeShard",
+    method: "bridge_getNodeShard",
+    parameters: [],
+  },
   versionGO: {
     rpcCall: "versionGO",
     method: "web3_clientVersion",
