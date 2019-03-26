@@ -64,7 +64,12 @@ function highlightError(id) {
 }
 
 function highlightInput(id) {
-  var theElement = document.getElementById(id);
+  var theElement = null;
+  if (typeof id === "string") {
+    theElement = document.getElementById(id);
+  } else {
+    theElement = id;
+  }
   var highlightName = "inputUsedAsInput";
   theElement.classList.add(highlightName);
   setTimeout(removeUpdateHighlight.bind(null, id, highlightName), 1000);
@@ -92,6 +97,18 @@ function updateFieldsRecursively(parsedInput, outputs) {
       updateFieldsRecursively(parsedInput[label], outputs[label]);
     }
   }
+}
+
+function highlightOutput(id) {
+  var theElement = null;
+  if (typeof id === "string") {
+    theElement = document.getElementById(id);
+  } else {
+    theElement = id;
+  }
+  var highlightName = "updatedRecently";
+  theElement.classList.add(highlightName);
+  setTimeout(removeUpdateHighlight.bind(null, id, highlightName), 1000);
 }
 
 function updateValue(id, content) {
@@ -291,6 +308,7 @@ module.exports = {
   getPanelForRevealing,
   hookUpHexWithStringInput,
   highlightInput,
+  highlightOutput,
   highlightError,
   updateInnerHtml,
   updateValue,

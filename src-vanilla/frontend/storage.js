@@ -61,15 +61,15 @@ function StorageKanban() {
       value: null,
       changeValueHandler: null,
     },
-    fullSignatureInInputsFabcoin: {
-      name: "fullSignatureInInputsFabcoin",
-      nameLocalStorage: "fullSignatureInInputsFabcoin",
+    noAncestorTransactionFabcoin: {
+      name: "noAncestorTransactionFabcoin",
+      nameLocalStorage: "noAncestorTransactionFabcoin",
       value: null,
       changeValueHandler: null,
     },
-    fullSignatureInInputsKanban: {
-      name: "fullSignatureInInputsKanban",
-      nameLocalStorage: "fullSignatureInInputsKanban",
+    noAncestorTransactionKanban: {
+      name: "noAncestorTransactionKanban",
+      nameLocalStorage: "noAncestorTransactionKanban",
       value: null,
       changeValueHandler: null,
     },

@@ -125,6 +125,8 @@ var defaults = {
       contractFunctionArguments: "inputKBGOSmartContractFunctionArguments",
       contractId: "inputKBGOContractId",
       contractData: "inputKBGOSmartContractData",
+      txAggregatePublicKeys: "inputKBGOAggregateSignaturePubKeysForTx",
+      txAggregateSignature: "inputKBGOAggregateSignatureForTx",
       // end of matching 
     },
     inputBenchmarkParameters: {
@@ -142,10 +144,12 @@ var defaults = {
     },
     checkboxes: {
       transactions: {
-        fullSignatureInInputs: "checkboxKanbanIncludeFullSignatureInInputs",
+        // The following labels must match those in the fab page
+        noAncestorTransaction: "checkboxKanbanIncludeNoAncestorTransaction",
         contractCallsInOutputs: "checkboxKanbanIncludeContractCalls",
         sendToContract: "checkboxKanbanSendToContract",
         secretSignsPubkeyNoHash: "checkboxKanbanSecretSignsPubkeyNoHash"
+        // end of matching 
       },
     },
     checkboxConnectKanbansInALine: "checkboxConnectKanbansInALine",
@@ -203,18 +207,20 @@ var defaults = {
       contractData: "inputFabcoinContractData",
       contractFunctionArguments: "inputFabcoinContractFunctionArguments",
       contractFunctionId: "inputFabcoinContractFunctionId",
-      // end of matching 
       txAggregatePublicKeys: "inputAggregateSignaturePubKeysForTx",
       txAggregateSignature: "inputAggregateSignatureForTx",
+      // end of matching 
       solidityInput: "aceEditor",
       contractFunctionName: "inputSolidityFunctionName",
     },
     checkboxes: {
       transactions: {
-        fullSignatureInInputs: "checkboxFabcoinIncludeFullSignatureInInputs",
+        // The following labels must match those in the KBGO page
+        noAncestorTransaction: "checkboxFabcoinIncludeNoAncestorTransaction",
         contractCallsInOutputs: "checkboxFabcoinIncludeContractCalls",
         sendToContract: "checkboxFabcoinSendToContract",
         secretSignsPubkeyNoHash: "checkboxFabcoinSecretSignsPubkeyNoHash",
+        // end of matching.
       },
     },
     inputCrypto: {
