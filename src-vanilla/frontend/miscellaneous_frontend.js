@@ -111,7 +111,6 @@ function highlightOutput(id) {
   setTimeout(removeUpdateHighlight.bind(null, id, highlightName), 1000);
 }
 
-
 function updateValue(id, content) {
   if (id === ids.defaults.fabcoin.inputBlockInfo.solidityInput) {
     if (typeof content !== "string") {
