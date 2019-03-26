@@ -107,6 +107,7 @@ var defaults = {
       blockHash: "inputKBGOBlockHash",
       messageVoteHex: "inputKBGOVoteMessageHex",
       messageVote: "inputKBGOVoteMessage",
+      accountAddress: "inputKBGOAccountAddress",
       // The following labels must match those in the fab page
       secretIn: "inputKBGOSecretIn",
       txHex: "inputKBGOTransactionHex",

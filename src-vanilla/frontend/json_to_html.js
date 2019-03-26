@@ -365,9 +365,9 @@ var labelAbbreviations = {
   "ethereumAddressHex": "ethAddrHex",
   "writeBack" : "_writeBack",
   "fabAddressMainnetBase58Check": "fabAddrMain58Ch",
-  "fabAddressMainnetHexNocheck": "fabAddrMHex",
+  "fabAddressMainnetHexNoCheck": "fabAddrMHex",
   "fabAddressTestnetBase58Check": "fabAddrTHexCh",
-  "fabAddressTestnetHexNocheck": "fabAddrTHex",
+  "fabAddressTestnetHexNoCheck": "fabAddrTHex",
   "inputPrivateKeyBase58CheckRecoded": "inPriv58ChRe",
   "inputPrivateKeyBase58": "inPriv58",
   "inputPrivateKeyBase58Recoded": "inPriv58Re",
@@ -395,7 +395,7 @@ var labelAbbreviations = {
   "totalProcessedOutgoingVoteMessages": "totalOut",
   "totalMessagesNotSentAsTheyAreAlreadyKnown": "totalOptimizedOut",
   "numberOfRecentlyApprovedMessages": "num. approved",
-  "numberOfBusySlots": "busy slots"
+  "numberOfBusySlots": "busy slots",
 }
 
 function abbreviateLabel(/** @type {string}*/ header) {

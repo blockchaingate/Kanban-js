@@ -131,6 +131,8 @@
     <button class = "buttonStandard" style = "width:100px" onclick = "window.kanban.kanbanGO.rpc.theKBNodes.run('rpcModules');">RPC modules</button><br>
     <button class = "buttonStandard" style = "width:100px" onclick = "window.kanban.kanbanGO.rpc.theKBNodes.run('getAccountsStates');">Account States</button><br>
     <button class = "buttonStandard" style = "width:100px" onclick = "window.kanban.kanbanGO.rpc.theKBNodes.run('getMainChainAccountsBalance');">Main chain</button><br>
+    <button class = "buttonStandard" style = "width:100px" onclick = "window.kanban.kanbanGO.rpc.theKBNodes.run('getBalanceFromAddress');">Balance of Addr.</button><br>
+
     </div>
     <div class = "divLabelButtonGroup">benchmark</div><div id = "panelKBGOBenchmarkButtons" class = "panelStandard">
     <button class = "buttonStandard" style = "width:100px" onclick = "window.kanban.kanbanGO.rpc.theKBNodes.run('sendBenchmarkTransactions');">Benchmark TPS</button><br>
@@ -147,6 +149,8 @@
     <div class = "divLabelButtonGroup">block inputs</div><div id = "panelKBGOBlockInfoInputs" class = "panelStandard">
     <input id = "inputKBGOBlockNumber" class = "inputStandard" size = "50" placeholder = "block number"></input><br>
     <input id = "inputKBGOBlockHash"   class = "inputStandard" size = "50" placeholder = "block hash"></input><br>
+    <input id = "inputKBGOAccountAddress"   class = "inputStandard" size = "50" placeholder = "account address"></input><br>
+
     </div>
     <div class = "divLabelButtonGroup">vote inputs</div><div id = "panelKBGOVotingMachineInputs" class = "panelStandard">
     <input id = "inputKBGOVoteMessage"    class = "inputStandard" size = "50" placeholder = "message to vote"></input><br>
@@ -285,6 +289,8 @@ My sandbox <br>
     <div class = "divLabelButtonGroup">contracts</div><div id = "panelFabcoinSmartButtons" class = "panelStandard">
     <button class = "buttonStandard" style = "width: 100px" onclick = "window.kanban.fabcoin.rpc.fabNode.run('listContracts')">List contracts</button><br>
     <button class = "buttonStandard" style = "width: 100px" onclick = "window.kanban.fabcoin.rpc.fabNode.run('fetchSCARShardPublicKeys')">SCAR keys</button><br>
+    <button class = "buttonStandard" style = "width: 100px" onclick = "window.kanban.fabcoin.rpc.fabNode.run('sendToContract', {manualInputs: {data: '4a58db19'}})"><b>Add deposit</b></button><br>
+
     <button class = "buttonStandard" style = "width: 100px" onclick = "window.kanban.fabcoin.rpc.fabNode.run('contractCode')">Get code</button><br>
     <button class = "buttonStandard" style = "width: 100px" onclick = "window.kanban.fabcoin.rpc.fabNode.run('createContract')">Create</button><br>
     <button class = "buttonStandard" style = "width: 100px" onclick = "window.kanban.fabcoin.rpc.fabNode.run('sendToContract')">Send to contr.</button><br>

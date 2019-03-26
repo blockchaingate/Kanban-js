@@ -214,6 +214,17 @@ var rpcCalls = {
     method: "bridge_getAccountsStates", //<- method name passed to kanban-go
     parameters: []
   },
+  getBalanceFromAddress: {
+    rpcCall: "getBalanceFromAddress",
+    method: "kanban_getBalance",
+    mandatoryFixedArguments: {
+      blockNumber: "latest",
+    },
+    mandatoryModifiableArguments: {
+      address: null,
+    },
+    parameters: ["address", "blockNumber"],
+  },
   getMainChainAccountsBalance: {
     rpcCall: "getMainChainAccountsBalance",
     method: "bridge_getMainChainAccountsBalance", //<- method name passed to kanban-go
