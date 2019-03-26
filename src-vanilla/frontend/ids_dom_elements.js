@@ -143,10 +143,12 @@ var defaults = {
     },
     checkboxes: {
       transactions: {
-        fullSignatureInInputs: "checkboxKanbanIncludeFullSignatureInInputs",
+        // The following labels must match those in the fab page
+        noAncestorTransaction: "checkboxKanbanIncludeNoAncestorTransaction",
         contractCallsInOutputs: "checkboxKanbanIncludeContractCalls",
         sendToContract: "checkboxKanbanSendToContract",
         secretSignsPubkeyNoHash: "checkboxKanbanSecretSignsPubkeyNoHash"
+        // end of matching 
       },
     },
     checkboxConnectKanbansInALine: "checkboxConnectKanbansInALine",
@@ -212,10 +214,12 @@ var defaults = {
     },
     checkboxes: {
       transactions: {
-        fullSignatureInInputs: "checkboxFabcoinIncludeFullSignatureInInputs",
+        // The following labels must match those in the KBGO page
+        noAncestorTransaction: "checkboxFabcoinIncludeNoAncestorTransaction",
         contractCallsInOutputs: "checkboxFabcoinIncludeContractCalls",
         sendToContract: "checkboxFabcoinSendToContract",
         secretSignsPubkeyNoHash: "checkboxFabcoinSecretSignsPubkeyNoHash",
+        // end of matching.
       },
     },
     inputCrypto: {

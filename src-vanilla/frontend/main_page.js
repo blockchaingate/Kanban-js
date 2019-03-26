@@ -82,11 +82,11 @@ function Page() {
       storageKanban.variables.includeKanbanGoAmountInTransactionOutputs,
       ids.defaults.kanbanGO.checkboxes.transactions.sendToContract,
     ], [
-      storageKanban.variables.fullSignatureInInputsFabcoin,
-      ids.defaults.fabcoin.checkboxes.transactions.fullSignatureInInputs,
+      storageKanban.variables.noAncestorTransactionFabcoin,
+      ids.defaults.fabcoin.checkboxes.transactions.noAncestorTransaction,
     ], [
-      storageKanban.variables.fullSignatureInInputsKanban,
-      ids.defaults.kanbanGO.checkboxes.transactions.fullSignatureInInputs,
+      storageKanban.variables.noAncestorTransactionKanban,
+      ids.defaults.kanbanGO.checkboxes.transactions.noAncestorTransaction,
     ], [
       storageKanban.variables.secretSignsPublicKeyWithoutHashFabcoin,
       ids.defaults.fabcoin.checkboxes.transactions.secretSignsPubkeyNoHash,

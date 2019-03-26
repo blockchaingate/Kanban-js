@@ -165,7 +165,7 @@
       Txin is pay-to-public-key [default: pay-to-public-key-hash]
     </label><br>
     <label class = "containerCheckbox">
-    <input type = "checkbox" id = "checkboxKanbanIncludeFullSignatureInInputs" onchange = "window.kanban.kanbanGO.rpc.theKBNodes.readCheckboxesConfiguration(); window.kanban.fabcoin.rpc.fabNode.computeTxInsAndOuts(false);">
+    <input type = "checkbox" id = "checkboxKanbanIncludeNoAncestorTransaction" onchange = "window.kanban.kanbanGO.rpc.theKBNodes.readCheckboxesConfiguration(); window.kanban.fabcoin.rpc.fabNode.computeTxInsAndOuts(false);">
     <span class = "checkMark"></span>
       Transaction has no ancestor
     </label><br>     
@@ -180,9 +180,12 @@
       Append value to smart contract call
     </label><br>
     </div>
-    <div class = "divLabelButtonGroup">tx inputs</div><div id = "panelKBGOTransactionBuilderInputs" class = "panelStandard">
-    <input id = "inputKBGOTransactionHex"                class = "inputStandard" size = "50" placeholder = "tx hex"/><br>
 
+    <div class = "divLabelButtonGroup">tx info</div><div id = "panelKBGOFabcoinTXInformation" class = "panelStandard">
+    <input id = "inputKBGOTransactionHex"                class = "inputStandard" size = "50" placeholder = "tx hex"/><br>
+    </div>
+ 
+    <div class = "divLabelButtonGroup">tx inputs</div><div id = "panelKBGOTransactionBuilderInputs" class = "panelStandard">
     <input class = "inputStandard" id = "inputKBGOSecretIn"                        size = "50" placeholder = "secret in"/><br>
     <input class = "inputStandard" id = "inputKBGOAggregateSignaturePubKeysForTx"  size = "50" placeholder = "aggregate output public keys"                                               onchange = "window.kanban.fabcoin.rpc.fabNode.computeTxInsAndOuts(true);" onkeydown = "window.kanban.fabcoin.rpc.fabNode.computeTxInsAndOuts(true);"></input><br>
     <input class = "inputStandard" id = "inputKBGOAggregateSignatureForTx"         size = "50" placeholder = "aggregate output signature"></input><br>
@@ -322,7 +325,7 @@ My sandbox <br>
     Txin is pay-to-public-key [default: pay-to-public-key-hash]
     </label><br>         
     <label class = "containerCheckbox">
-    <input type = "checkbox" id = "checkboxFabcoinIncludeFullSignatureInInputs" onchange = "window.kanban.kanbanGO.rpc.theKBNodes.readCheckboxesConfiguration(); window.kanban.fabcoin.rpc.fabNode.computeTxInsAndOuts(true);">
+    <input type = "checkbox" id = "checkboxFabcoinIncludeNoAncestorTransaction" onchange = "window.kanban.kanbanGO.rpc.theKBNodes.readCheckboxesConfiguration(); window.kanban.fabcoin.rpc.fabNode.computeTxInsAndOuts(true);">
     <span class = "checkMark"></span>
       Transaction has no ancestor
     </label><br>     
@@ -337,10 +340,12 @@ My sandbox <br>
       Append value to smart contract call
     </label><br>
     </div>
-    <div class = "divLabelButtonGroup">tx inputs</div><div id = "panelFabcoinTXInputs" class = "panelStandard">
+    <div class = "divLabelButtonGroup">tx info</div><div id = "panelFabcoinTXInformation" class = "panelStandard">
     <input class = "inputStandard" id = "inputFabcoinTransactionId"            size = "50" placeholder = "tx id"></input><br>    
     <input class = "inputStandard" id = "inputFabcoinTransactionHex"           size = "50" placeholder = "tx hex"></input><br>
-
+    </div>
+    <div class = "divLabelButtonGroup">tx inputs</div><div id = "panelFabcoinTXInputs" class = "panelStandard">
+    
     <input class = "inputStandard" id = "inputFabcoinSecretIn"                 size = "50" placeholder = "secret in"></input><br>
     <input class = "inputStandard" id = "inputAggregateSignaturePubKeysForTx"  size = "50" placeholder = "aggregate output public keys"                                               onchange = "window.kanban.fabcoin.rpc.fabNode.computeTxInsAndOuts(true);" onkeydown = "window.kanban.fabcoin.rpc.fabNode.computeTxInsAndOuts(true);"></input><br>
     <input class = "inputStandard" id = "inputAggregateSignatureForTx"         size = "50" placeholder = "aggregate output signature"></input><br>
