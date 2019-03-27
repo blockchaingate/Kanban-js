@@ -53,7 +53,7 @@ JSONTransformer.prototype.bindButtons = function() {
   }
 }
 
-JSONTransformer.prototype.writeJSONtoDOMComponent =  function(inputJSON, theDomComponent, options) {
+JSONTransformer.prototype.writeJSONtoDOMComponent = function(inputJSON, theDomComponent, options) {
   this.bindings = {};
   this.bindIdsInOrder = [];
   this.originalInputs = [];

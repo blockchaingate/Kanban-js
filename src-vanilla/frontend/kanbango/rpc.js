@@ -193,6 +193,8 @@ function KanbanGoNodes() {
       "_writeBack": this.transformersStandard.shortener,
       "bytesToSign.${number}": this.transformersStandard.shortener,
       "bytesForSignatureWithoutAncestor": this.transformersStandard.shortener,
+      "defaultShardId": this.transformersStandard.shortener,
+      "shardId": this.transformersStandard.shortener,
     }
   };
   this.optionsForAddressDisplay = {
