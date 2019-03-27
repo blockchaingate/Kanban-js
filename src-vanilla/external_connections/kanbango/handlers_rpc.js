@@ -9,7 +9,7 @@ function getParameterFromType(input, type) {
   if (type === "number") {
     return Number(input);
   }
-  if (type === "numberHex") {
+  if (type === "numberHex" || type === "hexPrefixed") {
     if (typeof input === "string") {
       if (!input.startsWith("0x")) {
         input = "0x" + input;

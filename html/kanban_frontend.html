@@ -123,7 +123,8 @@
     <button class = "buttonStandard" style = "width:100px" onclick = "window.kanban.kanbanGO.rpc.theKBNodes.run('testVote');">Vote message</button><br>
     <button class = "buttonStandard" style = "width:100px" onclick = "window.kanban.kanbanGO.rpc.theKBNodes.run('writeMessageToBlockHeader');">Write header</button><br>
     <button class = "buttonStandard" style = "width:100px" onclick = "window.kanban.kanbanGO.rpc.theKBNodes.run('voteMessageAndWriteToHeader');">Vote + write</button><br>
-    <button class = "buttonStandard" style = "width:100px" onclick = "window.kanban.kanbanGO.rpc.theKBNodes.run('generateWriteBack');">Write-back tx</button><br>
+    <button class = "buttonStandard" style = "width:100px" onclick = "window.kanban.kanbanGO.rpc.theKBNodes.run('generateWriteBack');">Write-back tx<span class = "tooltiptext">Initiates a foundation chain write-back transaction. <br>The transaction is signed by all KB nodes.<br>When completed, the entire tx is stored in the writeBack header entry in the first available KB block. </span></button><br>
+    <button class = "buttonStandard" style = "width:100px" onclick = "window.kanban.kanbanGO.rpc.theKBNodes.run('generateWriteBackWithdrawal');">Withdraw<span class = "tooltiptext">Withdraws a fixed amount [see withdraw f-n in SCAR] to beneficiary given in account address input box. <br> The withdrawal is carried out as a write-back transaction. </span></button><br>
     </div>
     <div class = "divLabelButtonGroup">miscellaneous</div><div id = "panelKBGOMiscellaneousButtons" class = "panelStandard">
     <button class = "buttonStandard" style = "width:100px" onclick = "window.kanban.kanbanGO.rpc.theKBNodes.run('isShardDefaultStarted');">Shard runs?</button><br>
@@ -181,9 +182,9 @@
       Use smart contracts
     </label><br>
     <label class = "containerCheckbox">
-    <input type = "checkbox" id = "checkboxKanbanSendToContract" onchange = "window.kanban.kanbanGO.rpc.theKBNodes.readCheckboxesConfiguration(); window.kanban.fabcoin.rpc.fabNode.computeTxInsAndOuts(false);">
+    <input type = "checkbox" id = "checkboxKanbanContractCoversFees" onchange = "window.kanban.kanbanGO.rpc.theKBNodes.readCheckboxesConfiguration(); window.kanban.fabcoin.rpc.fabNode.computeTxInsAndOuts(false);">
     <span class = "checkMark"></span>
-      Append value to smart contract call
+      Contract covers fees
     </label><br>
     </div>
 
@@ -344,9 +345,9 @@ My sandbox <br>
       Use smart contracts
     </label><br>     
     <label class = "containerCheckbox">
-    <input type = "checkbox" id = "checkboxFabcoinSendToContract" onchange = "window.kanban.kanbanGO.rpc.theKBNodes.readCheckboxesConfiguration(); window.kanban.fabcoin.rpc.fabNode.computeTxInsAndOuts(true);">
+    <input type = "checkbox" id = "checkboxFabcoinContractCoversFees" onchange = "window.kanban.kanbanGO.rpc.theKBNodes.readCheckboxesConfiguration(); window.kanban.fabcoin.rpc.fabNode.computeTxInsAndOuts(true);">
     <span class = "checkMark"></span>
-      Append value to smart contract call
+      Contract covers fees
     </label><br>
     </div>
     <div class = "divLabelButtonGroup">tx info</div><div id = "panelFabcoinTXInformation" class = "panelStandard">

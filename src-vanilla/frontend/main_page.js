@@ -76,11 +76,11 @@ function Page() {
       storageKanban.variables.includeKanbanGoContractCallsInTransactionOutputs,
       ids.defaults.kanbanGO.checkboxes.transactions.contractCallsInOutputs,
     ], [
-      storageKanban.variables.includeFabcoinAmountInTransactionOutputs,
-      ids.defaults.fabcoin.checkboxes.transactions.sendToContract,
+      storageKanban.variables.contractCoversFeesFabcoin,
+      ids.defaults.fabcoin.checkboxes.transactions.contractCoversFees,
     ], [
-      storageKanban.variables.includeKanbanGoAmountInTransactionOutputs,
-      ids.defaults.kanbanGO.checkboxes.transactions.sendToContract,
+      storageKanban.variables.contractCoversFeesKanban,
+      ids.defaults.kanbanGO.checkboxes.transactions.contractCoversFees,
     ], [
       storageKanban.variables.noAncestorTransactionFabcoin,
       ids.defaults.fabcoin.checkboxes.transactions.noAncestorTransaction,

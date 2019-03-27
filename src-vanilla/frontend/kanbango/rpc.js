@@ -519,6 +519,12 @@ function KanbanGoNodes() {
         messageHex: ids.defaults.kanbanGO.inputSendReceive.messageVoteHex,
       },
     },
+    generateWriteBackWithdrawal: {
+      callType: "standard",
+      inputs: {
+        addressBeneficiary: ids.defaults.kanbanGO.inputSendReceive.accountAddress,
+      },
+    },
     voteMessageAndWriteToHeader: {
       callType: "standard",
       inputs: {

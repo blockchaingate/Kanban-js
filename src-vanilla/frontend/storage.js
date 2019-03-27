@@ -49,15 +49,15 @@ function StorageKanban() {
       value: null,
       changeValueHandler: null,
     },
-    includeFabcoinAmountInTransactionOutputs: {
-      name: "includeFabcoinAmountInTransactionOutputs",
-      nameLocalStorage: "includeFabcoinAmountInTransactionOutputs",
+    contractCoversFeesFabcoin: {
+      name: "contractCoversFeesFabcoin",
+      nameLocalStorage: "contractCoversFeesFabcoin",
       value: null,
       changeValueHandler: null,
     },
-    includeKanbanGoAmountInTransactionOutputs: {
-      name: "includeKanbanGoAmountInTransactionOutputs",
-      nameLocalStorage: "includeKanbanGoAmountInTransactionOutputs",
+    contractCoversFeesKanban: {
+      name: "contractCoversFeesKanban",
+      nameLocalStorage: "contractCoversFeesKanban",
       value: null,
       changeValueHandler: null,
     },

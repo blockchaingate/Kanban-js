@@ -223,6 +223,9 @@ var rpcCalls = {
     mandatoryModifiableArguments: {
       address: null,
     },
+    types: {
+      address: "hexPrefixed",
+    },
     parameters: ["address", "blockNumber"],
   },
   getMainChainAccountsBalance: {
@@ -280,6 +283,17 @@ var rpcCalls = {
       messageHex: null,
     },
     parameters: ["messageHex"],
+  },
+  generateWriteBackWithdrawal: {
+    rpcCall: "generateWriteBackWithdrawal",
+    method: "pbft_generateWriteBackWithdrawal",
+    mandatoryModifiableArguments: {
+      addressBeneficiary: null,
+    },
+    types: {
+      addressBeneficiary: "hexPrefixed",
+    },
+    parameters: ["addressBeneficiary"],
   },
   writeMessageToBlockHeader: {
     rpcCall: "writeMessageToBlockHeader",

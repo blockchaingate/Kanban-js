@@ -32,13 +32,14 @@ function FabNode() {
     },
     transactionId: this.getSetInputAndRunWithShortener(inputFabBlock.txid, "getTransactionById", "Sets the transaction id field, fetches and decodes the transaction. "),
     transactionHexDecoder: this.getSetInputAndRunWithShortener(inputFabBlock.txHex, "decodeTransactionRaw", "Sets the transaction hex field and decodes the tx."),
-    setAddress: this.getSetInputWithShortener(inputFabBlock.address),
+    setAddress: this.getSetInputWithShortener(inputFabBlock.address, "Copies the fab address into the key inputs panel. "),
     setPrivateKey: {
       clickHandler: this.setPrivateKeyComputeAllElse.bind(this),
+      tooltip: "Sets the private key in the key inputs panel and computes the corresponding public key and various-format addresses. ",
       transformer: miscellaneousBackend.hexShortener4Chars,
     },
-    setPrivateKeySchnorr: this.getSetInputWithShortener(inputFabCryptoSchnorr.privateKey),
-    setNonceSchnorr: this.getSetInputWithShortener(inputFabCryptoSchnorr.nonce),
+    setPrivateKeySchnorr: this.getSetInputWithShortener(inputFabCryptoSchnorr.privateKey, "Copies private key into the schnorr signature panel. "),
+    setNonceSchnorr: this.getSetInputWithShortener(inputFabCryptoSchnorr.nonce, "Copies nonce into the schnorr signature panel. "),
     setPublicKeySchnorr: this.getSetInputAndRunWithShortener(inputFabCryptoSchnorr.publicKey),
     setTxInputVoutAndValue: {
       clickHandler: this.setTxInputVoutAndValue.bind(this),
@@ -566,11 +567,15 @@ FabNode.prototype.getSetInputNoShortener = function(idOutput) {
   };  
 }
 
-FabNode.prototype.getSetInputWithShortener = function(idOutput) {
-  return {
+FabNode.prototype.getSetInputWithShortener = function(idOutput, tooltip) {
+  var result = {
     clickHandler: this.setInput.bind(this, idOutput),
     transformer: miscellaneousBackend.hexShortener4Chars
   };  
+  if (tooltip !== undefined && tooltip !== null && tooltip !== "") {
+    result.tooltip = tooltip
+  };
+  return result;
 }
 
 FabNode.prototype.computeTxInsAndOuts = function(sourceIsFabPage) {
@@ -618,7 +623,7 @@ FabNode.prototype.computeTxInsAndOuts = function(sourceIsFabPage) {
     contractCallsInOutputs: null,
     noAncestorTransaction: null,
     secretSignsPubkeyNoHash: null,
-    sendToContract: null,
+    contractCoversFees: null,
   };
   for (var label in checkboxesCurrent) {
     var currentCheckbox = document.getElementById(currentCheckboxIds[label]);
@@ -650,7 +655,7 @@ FabNode.prototype.computeTxInsAndOuts = function(sourceIsFabPage) {
     };
     if (counterSecret < secretInArray.length) {
       incomingIn.secretIn = secretInArray[counterSecret];
-      incomingIn.isPayToPublicWithoutHash = usePayToPubkeyWithoutHash;
+      incomingIn.isPayToPublicWithoutHash = checkboxesCurrent.secretSignsPubkeyNoHash;
       counterSecret ++;
     }
     resultIn.push(incomingIn);
@@ -668,16 +673,16 @@ FabNode.prototype.computeTxInsAndOuts = function(sourceIsFabPage) {
   }
   if (checkboxesCurrent.contractCallsInOutputs) {
     resultOut.contract = {};
-    resultOut.contract.contractAddress = smartContractId;
-    resultOut.contract.data = smartContractData;
+    resultOut.contract.contractAddress = inputs.contractId;
+    resultOut.contract.data = inputs.contractData;
     resultOut.contract.coverFees = false;
-    if (doSendToContract) {
+    if (!checkboxesCurrent.contractCoversFees) {
       resultOut.contract.amount = Number(incomingOutAmountArray[amountCounter]);
-      if (incomingGasLimit !== "" && incomingGasLimit !== null && incomingGasLimit !== undefined) {
-        resultOut.contract.gasLimit = Number(incomingGasLimit);
+      if (inputs.gasLimit !== "" && inputs.gasLimit !== null && inputs.gasLimit !== undefined) {
+        resultOut.contract.gasLimit = Number(inputs.gasLimit);
       }
-      if (incomingGasPrice !== "" && incomingGasPrice !== null && incomingGasPrice !== undefined) {
-        resultOut.contract.gasPrice = incomingGasPrice;
+      if (inputs.gasPrice !== "" && inputs.gasPrice !== null && inputs.gasPrice !== undefined) {
+        resultOut.contract.gasPrice = inputs.gasPrice;
       }
       amountCounter ++;
     } else {
@@ -748,6 +753,7 @@ FabNode.prototype.setPrivateKeyComputeAllElse = function(container, content, ext
 
   var addressFabMainnetBytes = thePublicKey.computeFABAddressBytes();
   var addressFabMainnetBase58 =  encodingsKanban.encodingDefault.toBase58Check(addressFabMainnetBytes);
+  miscellaneousFrontEnd.updateValue(ids.defaults.fabcoin.inputBlockInfo.privateKey, content);
   miscellaneousFrontEnd.updateValue(ids.defaults.fabcoin.inputBlockInfo.address, addressFabTestnetBase58);
   miscellaneousFrontEnd.updateValue(ids.defaults.fabcoin.inputBlockInfo.addressMainnet, addressFabMainnetBase58);
   miscellaneousFrontEnd.updateValue(ids.defaults.fabcoin.inputBlockInfo.addressKanban, addressKanbanHex);
