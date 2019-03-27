@@ -136,6 +136,10 @@ function removeQuotes(input) {
   return input;
 }
 
+function convertHexToBigInteger(input) {
+  return parseInt(input);
+}
+
 function convertToIntegerIfPossible(input) {
   if (input === "") {
     return input;
@@ -266,6 +270,7 @@ module.exports = {
   SpeedReport, 
   removeQuotes,
   convertToIntegerIfPossible,
+  convertHexToBigInteger,
   hexVeryShortDisplay,
   numberFormatterExact,
   ensureMinCharWidth,

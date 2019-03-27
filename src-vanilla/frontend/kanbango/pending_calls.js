@@ -186,6 +186,10 @@ PendingCall.prototype.callbackAggregatePrivateKeyGeneration = function(nodeId, i
   miscellaneousFrontEnd.updateValue(ids.defaults.kanbanGO.inputAggregateSignature.privateKeys, privateKeys.join(", "));
 }
 
+PendingCall.prototype.callbackBalanceTable = function(nodeId, input, output) {
+  this.callbackStandard(nodeId, input, output);
+}
+
 PendingCall.prototype.callbackAggregateInitialization = function(nodeId, input, output) {
   this.callbackStandard(nodeId, input, output);
   var privateKeys = getSignerField(input, "privateKeyBase58");

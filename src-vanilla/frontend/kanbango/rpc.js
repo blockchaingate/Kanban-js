@@ -64,6 +64,10 @@ function KanbanGoNodes() {
       clickHandler: this.setInput.bind(this, ids.defaults.kanbanGO.inputSendReceive.blockNumber),
       tooltip: "Sets the block number field."
     },
+    convertHexToBigInteger: {
+      transformer: miscellaneousBackend.convertHexToBigInteger,
+      clickHandler: this.clickFABBalance.bind(this),
+    },
     setTransactionHex: {
       clickHandler: this.setTransactionHex.bind(this),
       transformer: miscellaneousBackend.hexShortener8Chars,
@@ -193,6 +197,9 @@ function KanbanGoNodes() {
       "_writeBack": this.transformersStandard.shortener,
       "bytesToSign.${number}": this.transformersStandard.shortener,
       "bytesForSignatureWithoutAncestor": this.transformersStandard.shortener,
+      "pbftConfig.validatorPublicKeysHex.${number}": this.transformersStandard.shortener,
+      "pbftConfig.validators.${number}": this.transformersStandard.shortener,
+      "FAB" : this.transformersStandard.convertHexToBigInteger,
     }
   };
   this.optionsForAddressDisplay = {
@@ -234,9 +241,10 @@ function KanbanGoNodes() {
       privateKeyHex: this.transformersStandard.shortener,
       ethereumAddressHex: this.transformersStandard.shortener,
       fabAddressMainnetBase58Check: this.transformersStandard.shortener,
-      fabAddressMainnetHexNocheck: this.transformersStandard.shortener,
+      fabAddressMainnetHexNoCheck: this.transformersStandard.shortener,
+      inputPrivateKey: this.transformersStandard.shortener,
       fabAddressTestnetBase58Check: this.transformersStandard.shortener,
-      fabAddressTestnetHexNocheck: this.transformersStandard.shortener,
+      fabAddressTestnetHexNoCheck: this.transformersStandard.shortener,
       inputPrivateKeyBase58: this.transformersStandard.setPrivateKeySchnorr,
       inputPrivateKeyBase58CheckRecoded: this.transformersStandard.setPrivateKeySchnorr,
       inputPrivateKeyBase58Recoded: this.transformersStandard.setPrivateKeySchnorr,
@@ -405,11 +413,9 @@ function KanbanGoNodes() {
       outputOptions: this.optionsKanbanGOStandard
     },
     getAccountsStates: {
-      callback: PendingCall.prototype.callbackMakeAddressTable,
       outputOptions: this.optionsForAddressDisplay
     },
     getMainChainAccountsBalance: {
-      callback: PendingCall.prototype.callbackMakeAddressTable,
       outputOptions: this.optionsForAddressDisplay,
     },
     getBestBlockNumber: {
@@ -443,8 +449,7 @@ function KanbanGoNodes() {
       outputOptions: this.optionsForAddressDisplay
     },
     pbftConfig: {
-      outputJSON: ids.defaults.kanbanGO.outputSendReceive,
-      outputOptions: this.optionsKanbanGOLabelContraction
+      outputJSON: ids.defaults.kanbanGO.outputSendReceive
     },
     testSha2: {
       //if rpcCall omitted it will be assumed to be equal to the function label.
@@ -464,6 +469,13 @@ function KanbanGoNodes() {
         inputName: ids.defaults.kanbanGO.inputTransfers.nameInputForSandbox
       },
       outputJSON: ids.defaults.kanbanGO.outputTransferForSandbox
+    },
+    getBalanceFromAddress: {
+      inputs: {
+        address: ids.defaults.kanbanGO.inputSendReceive.accountAddress
+      },
+      //callback: PendingCall.prototype.callbackBalanceTable,
+      outputJSON: ids.defaults.kanbanGO.outputSendReceive
     },
     encrypRIPEMD: {
       inputs: {
@@ -710,6 +722,11 @@ function KanbanGoNodes() {
     }
   };
   this.correctFunctions();
+}
+
+KanbanGoNodes.prototype.clickFABBalance = function (container, input, extraData) {
+  console.log("This is a sample click handler. ");
+  console.log("DEBUG Input: " + input);
 }
 
 KanbanGoNodes.prototype.computeContractData = function() {
