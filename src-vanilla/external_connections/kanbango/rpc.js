@@ -281,19 +281,27 @@ var rpcCalls = {
     method: "pbft_generateWriteBack",
     mandatoryModifiableArguments: {
       messageHex: null,
+      gasLimit: null,
+      gasPrice: null,
     },
-    parameters: ["messageHex"],
+    types: {
+      gasLimit: "number",
+    },
+    parameters: ["messageHex", "gasLimit", "gasPrice"],
   },
   generateWriteBackWithdrawal: {
     rpcCall: "generateWriteBackWithdrawal",
     method: "pbft_generateWriteBackWithdrawal",
     mandatoryModifiableArguments: {
       addressBeneficiary: null,
+      gasLimit: null,
+      gasPrice: null,
     },
     types: {
+      gasLimit: "number",
       addressBeneficiary: "hexPrefixed",
     },
-    parameters: ["addressBeneficiary"],
+    parameters: ["addressBeneficiary", "gasLimit", "gasPrice"],
   },
   writeMessageToBlockHeader: {
     rpcCall: "writeMessageToBlockHeader",

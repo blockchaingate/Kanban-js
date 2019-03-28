@@ -517,12 +517,16 @@ function KanbanGoNodes() {
       callType: "standard",
       inputs: {
         messageHex: ids.defaults.kanbanGO.inputSendReceive.messageVoteHex,
+        gasLimit: ids.defaults.kanbanGO.inputSendReceive.gasLimit,
+        gasPrice: ids.defaults.kanbanGO.inputSendReceive.gasPrice,
       },
     },
     generateWriteBackWithdrawal: {
       callType: "standard",
       inputs: {
         addressBeneficiary: ids.defaults.kanbanGO.inputSendReceive.accountAddress,
+        gasLimit: ids.defaults.kanbanGO.inputSendReceive.gasLimit,
+        gasPrice: ids.defaults.kanbanGO.inputSendReceive.gasPrice,
       },
     },
     voteMessageAndWriteToHeader: {
