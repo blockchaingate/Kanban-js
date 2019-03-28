@@ -194,6 +194,9 @@ function KanbanGoNodes() {
       currentBlockNumberHex: this.transformersStandard.getBlockByNumber,
       currentBlockHash: this.transformersStandard.blockHash,
       comments: this.transformersStandard.shortener,
+      "lastCallContract.smartContractId": this.transformersStandard.shortener,
+      "lastFabcoindRPCCallsPerCallType.sendrawtransaction.inputs.${number}": this.transformersStandard.shortener,
+      "lastFabcoindRPCCallsPerCallType.sendrawtransaction.output": this.transformersStandard.shortener,
       "_writeBack": this.transformersStandard.shortener,
       "bytesToSign.${number}": this.transformersStandard.shortener,
       "bytesForSignatureWithoutAncestor": this.transformersStandard.shortener,
@@ -731,7 +734,8 @@ function KanbanGoNodes() {
       inputs: {
         txid: ids.defaults.kanbanGO.inputSendReceive.txInIds
       }
-    }
+    },
+
   };
   this.correctFunctions();
 }

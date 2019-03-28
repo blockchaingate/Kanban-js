@@ -7,14 +7,9 @@ contract FeeAccepter {
         log0(700000);
         return true;
     }
-    //function sendToContract() public payable {
-    //}
-    //function returnHalf() public payable {
-    //    msg.sender.transfer(msg.value / 2);
-    //}
-    //function getBalance() public view returns (uint256) {
-    //    return address(this).balance;
-    //}
+    function bounceBackAddress(address bounceMeBack) pure public returns (address) {
+        return bounceMeBack;
+    }
     function crash() public payable {
         log0("Test of the crashing mechanism.");
         //require(false);

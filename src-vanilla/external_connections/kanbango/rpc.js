@@ -303,6 +303,11 @@ var rpcCalls = {
     },
     parameters: ["addressBeneficiary", "gasLimit", "gasPrice"],
   },
+  getDefaultShardNonce: {
+    rpcCall: "getDefaultShardNonce",
+    method: "bridge_getDefaultShardNonce",
+    params: [],
+  },
   writeMessageToBlockHeader: {
     rpcCall: "writeMessageToBlockHeader",
     method: "pbft_writeMessageToBlockHeader",
