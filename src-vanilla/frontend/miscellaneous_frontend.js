@@ -165,6 +165,19 @@ function unHexAndCopy(fromHex, toNonHex) {
   updateValue(toNonHex, theString);
 }
 
+function appendOxToHexIfNeccessary(
+  /**@type {string} */
+  input
+) {
+  if (typeof input !== "string") {
+    return input;
+  }
+  if (input.startsWith("0x")) {
+    return input;
+  }
+  return "0x" + input;
+}
+
 function transformToHexAndCopy(fromNonHex, toHex) {
   var incoming = fromNonHex.value;
   if (incoming === undefined || incoming === null) {
@@ -303,6 +316,7 @@ function replaceNewLinesWithBr(input) {
 }
 
 module.exports = {
+  appendOxToHexIfNeccessary,
   attachModuleFullNameToHandlerNames,
   revealLongWithParent,
   getPanelForRevealing,

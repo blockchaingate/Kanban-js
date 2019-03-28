@@ -223,6 +223,9 @@ var rpcCalls = {
     mandatoryModifiableArguments: {
       address: null,
     },
+    types: {
+      address: "hexPrefixed",
+    },
     parameters: ["address", "blockNumber"],
   },
   getMainChainAccountsBalance: {
@@ -278,8 +281,32 @@ var rpcCalls = {
     method: "pbft_generateWriteBack",
     mandatoryModifiableArguments: {
       messageHex: null,
+      gasLimit: null,
+      gasPrice: null,
     },
-    parameters: ["messageHex"],
+    types: {
+      gasLimit: "number",
+    },
+    parameters: ["messageHex", "gasLimit", "gasPrice"],
+  },
+  generateWriteBackWithdrawal: {
+    rpcCall: "generateWriteBackWithdrawal",
+    method: "pbft_generateWriteBackWithdrawal",
+    mandatoryModifiableArguments: {
+      addressBeneficiary: null,
+      gasLimit: null,
+      gasPrice: null,
+    },
+    types: {
+      gasLimit: "number",
+      addressBeneficiary: "hexPrefixed",
+    },
+    parameters: ["addressBeneficiary", "gasLimit", "gasPrice"],
+  },
+  getDefaultShardNonce: {
+    rpcCall: "getDefaultShardNonce",
+    method: "bridge_getDefaultShardNonce",
+    params: [],
   },
   writeMessageToBlockHeader: {
     rpcCall: "writeMessageToBlockHeader",

@@ -194,9 +194,14 @@ function KanbanGoNodes() {
       currentBlockNumberHex: this.transformersStandard.getBlockByNumber,
       currentBlockHash: this.transformersStandard.blockHash,
       comments: this.transformersStandard.shortener,
+      "lastCallContract.smartContractId": this.transformersStandard.shortener,
+      "lastFabcoindRPCCallsPerCallType.sendrawtransaction.inputs.${number}": this.transformersStandard.shortener,
+      "lastFabcoindRPCCallsPerCallType.sendrawtransaction.output": this.transformersStandard.shortener,
       "_writeBack": this.transformersStandard.shortener,
       "bytesToSign.${number}": this.transformersStandard.shortener,
       "bytesForSignatureWithoutAncestor": this.transformersStandard.shortener,
+      "defaultShardId": this.transformersStandard.shortener,
+      "shardId": this.transformersStandard.shortener,
       "pbftConfig.validatorPublicKeysHex.${number}": this.transformersStandard.shortener,
       "pbftConfig.validators.${number}": this.transformersStandard.shortener,
       "FAB" : this.transformersStandard.convertHexToBigInteger,
@@ -515,6 +520,16 @@ function KanbanGoNodes() {
       callType: "standard",
       inputs: {
         messageHex: ids.defaults.kanbanGO.inputSendReceive.messageVoteHex,
+        gasLimit: ids.defaults.kanbanGO.inputSendReceive.gasLimit,
+        gasPrice: ids.defaults.kanbanGO.inputSendReceive.gasPrice,
+      },
+    },
+    generateWriteBackWithdrawal: {
+      callType: "standard",
+      inputs: {
+        addressBeneficiary: ids.defaults.kanbanGO.inputSendReceive.accountAddress,
+        gasLimit: ids.defaults.kanbanGO.inputSendReceive.gasLimit,
+        gasPrice: ids.defaults.kanbanGO.inputSendReceive.gasPrice,
       },
     },
     voteMessageAndWriteToHeader: {
@@ -719,7 +734,8 @@ function KanbanGoNodes() {
       inputs: {
         txid: ids.defaults.kanbanGO.inputSendReceive.txInIds
       }
-    }
+    },
+
   };
   this.correctFunctions();
 }

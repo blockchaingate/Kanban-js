@@ -131,6 +131,43 @@ button.buttonStandardLight{
   padding: 5px;
 }
 
+/* Show the tooltip text when you mouse over the tooltip container */
+.tooltip:hover .tooltiptext {
+  visibility: visible;
+}
+
+/* Tooltip text */
+.tooltip .tooltiptext {
+  visibility: hidden;
+  background-color: var(--colorBackgroundTooltip);
+  text-align: center;
+  padding: 5px;
+  border-radius: 6px;
+  transform: translateY(20px);
+
+  /* Position the tooltip text - see examples below! */
+  position: absolute;
+  z-index: 1;
+}
+
+.buttonStandard .tooltiptext {
+  visibility: hidden;
+  background-color: var(--colorBackgroundTooltip);
+  text-align: center;
+  padding: 5px;
+  border-radius: 6px;
+  transform: translateY(20px);
+
+  /* Position the tooltip text - see examples below! */
+  position: absolute;
+  z-index: 1;
+}
+
+/* Show the tooltip text when you mouse over the tooltip container */
+.buttonStandard:hover .tooltiptext {
+  visibility: visible;
+}
+
 button.buttonStandard{
   border: 0;
   background-color: var(--colorButtonBackgroundStandard);
@@ -496,29 +533,3 @@ span.panelRevealedContent {
   left: 0;
   right: 0;
 }
-
-/* Tooltip container 
-.tooltip {
-  position: relative;
-  display: inline-block;
-}*/
-
-/* Show the tooltip text when you mouse over the tooltip container */
-.tooltip:hover .tooltiptext {
-  visibility: visible;
-}
-
-/* Tooltip text */
-.tooltip .tooltiptext {
-  visibility: hidden;
-  background-color: var(--colorBackgroundTooltip);
-  text-align: center;
-  padding: 5px;
-  border-radius: 6px;
-  transform: translateY(20px);
-
-  /* Position the tooltip text - see examples below! */
-  position: absolute;
-  z-index: 1;
-}
-

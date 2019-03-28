@@ -147,7 +147,7 @@ var defaults = {
         // The following labels must match those in the fab page
         noAncestorTransaction: "checkboxKanbanIncludeNoAncestorTransaction",
         contractCallsInOutputs: "checkboxKanbanIncludeContractCalls",
-        sendToContract: "checkboxKanbanSendToContract",
+        contractCoversFees: "checkboxKanbanContractCoversFees",
         secretSignsPubkeyNoHash: "checkboxKanbanSecretSignsPubkeyNoHash"
         // end of matching 
       },
@@ -218,7 +218,7 @@ var defaults = {
         // The following labels must match those in the KBGO page
         noAncestorTransaction: "checkboxFabcoinIncludeNoAncestorTransaction",
         contractCallsInOutputs: "checkboxFabcoinIncludeContractCalls",
-        sendToContract: "checkboxFabcoinSendToContract",
+        contractCoversFees: "checkboxFabcoinContractCoversFees",
         secretSignsPubkeyNoHash: "checkboxFabcoinSecretSignsPubkeyNoHash",
         // end of matching.
       },
