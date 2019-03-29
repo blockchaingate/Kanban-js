@@ -9,7 +9,7 @@ Some quick reference links follow.
 
 2. A first draft of our system architecture can be found here.
 
-[development machine setup](doc/architecture.md)
+[architecture](doc/architecture.md)
 
 3. In addition, please also refer to the white paper on our website:
 
