@@ -57,11 +57,37 @@ In its shortest form, the use of Kanban follows the following procedure.
 
 
 ### Adding deposit to Kanban
-Here we elaborate on how money is moved from the user to Kanban
+Here we elaborate on how money is moved from the user's address on the foundation chain to Kanban. 
+
 1. The user chooses a SCAR address of a running Kanban chain.
 
-4. The user sends money to the SCAR address on the foundation chain via a smart contract call (at the time of writing, this is the ``addDeposit`` SCAR function call). 
+2. The user sends money to the SCAR address on the foundation chain via a smart contract call (at the time of writing, this is the ``addDeposit`` SCAR function call). 
 
 3. Since the money is sent on the foundation chain, the user needs to wait for his transaction to be mined and stored in a block sufficiently deep in the foundation chain. 
 
-4. When the money is received by a SCAR address, the SCAR contract records the event and (after sufficient mining as described above), the corresponding monetary value is added to the 
+4. When the money is received by a SCAR address, the SCAR contract records the event and (after sufficient mining as described above), the corresponding monetary value is added to the kanbanGO chain.
+
+### Making transfers on the kanbanGO chain
+
+The mechanism for making transfers on the kanbanGO chain is inherited from Ethereum. There should be no significant workflow changes; the only thing that the user needs to pay attention to is that our address format is that of bitocin (``RIPEMD160(SHA2_256(public_key))``). 
+
+### Withdrawals form kanbanGo back to the foundation chain
+Here we elaborate on how money is moved from Kanban/SCAR back to the foundation chain.
+
+1. The user requests withdrawal of funds on the Kanban chain. The mechanism for doing is being worked on at the very time of writing. The expected implementation is that the user transfers funds on the Kanban chain to a distinguished address (an address for which noone owns the private key). One such address could be 0xfff...
+
+2. This transfer is mined, i.e., approved by the distinguished Kanban nodes and included in a block. The block is sealed with the aggregate signature of the distinguished Kanban nodes.
+
+3. The mining of the block triggers the write-back sequence described below.
+
+- A withdrawal request (with possible fees subtracted - to be determined later) on SCAR is formed.
+- The withdrawal request is wrapped into a foundation chain write-back transaction.
+- The resulting foundation chain write-back transaction is signed by the aggregate signature of all distinguished nodes.
+- The completed aggregate-signed write-back transaction is "immortalized" on the kanbanGO chain. 
+-- At the time of writing, this write-back happens by writing the completed writeback transaction in the block header of the first available block.
+-- In the future (to be deremined later), this writeback may be moved to the block body.
+- The immortalized aggregate-signed write-back transaction is submitted to the foundation chain. This is done automatically by the distinguished nodes. Please note that anyone can submit the aggregate-signed transaction to the foundation chain: should the distinguished note have a failure in their communication with fabcoind, a regular user could manually submit the aggregate-signed transaction. The only requirement to the person submitting this transaction is that he is connected to at least one Kanban node that has access to the block header where the aggregate-signed transaction was "immortalized". 
+
+4. The write-back transaction is mined on the foundation chain. This can take a while.
+
+5. The write-back transaction causes the transfer of funds back to the Fabcoin address that triggered the withdrawal. More precisely, the beneficiary fabcoin address is the fabcoin-encoded equivalent of the Kanban address that initiated Step 1. 
