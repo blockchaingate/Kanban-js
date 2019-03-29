@@ -16,7 +16,8 @@ Kanban is an array of fast transaction system(s) that run in parallel to fabcoin
 In the present paragraph, we give a high-level overview of the distinguished kanban nodes. For technical details on the registration process, we direct the reader to
 
 
-...
+(To do: please write more documentation).
+
 
 1. The authority of the distinguished Kanban nodes is derived through registering their public keys on the foundation chain. In this way, the kanban system carries the benefits of a centralized system (speed and responsiveness). At the same time, since the registration process is open to everyone on the foundation chain, the kanban system retains the benefits of a decentralized system.
 

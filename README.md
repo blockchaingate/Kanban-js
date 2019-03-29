@@ -7,9 +7,11 @@ Some quick reference links follow.
 
 [development machine setup](doc/development_machine_setup.md)
 
-2. When complete, our system architecture will be desribed in the doc folder of the project.
+2. A first draft of our system architecture can be found here.
 
-Until then, please refer to the white paper on our website:
+[development machine setup](doc/architecture.md)
+
+3. In addition, please also refer to the white paper on our website:
 
 https://fabcoin.co/
 
