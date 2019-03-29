@@ -21,7 +21,7 @@ function handleRequestsHTTP(request, responseNonWrapped) {
  
 function handleRequestsHTTPPart2(request, response, parsedURL) {
   responseStats.requestTypes.httpRequestsRedirectedToHttps ++;
-  response.writeHead(307, {Location: `https://${parsedURL.hostname}:${pathnames.ports.https}${parsedURL.path}`});
+  response.writeHead(307, {Location: `https://${parsedURL.hostname}:${pathnames.ports.https}`});
   response.end();
 }
 
