@@ -18,7 +18,22 @@ In the present paragraph, we give a high-level overview of the distinguished kan
 (To do: please write more documentation).
 
 
-1. The authority of the distinguished Kanban nodes is derived through registering their public keys on the foundation chain. In this way, the kanban system carries the benefits of a centralized system (speed and responsiveness). At the same time, since the registration process is open to everyone on the foundation chain, the kanban system retains the benefits of a decentralized system.
+1. The authority of the distinguished Kanban nodes is derived through registering their public keys on the foundation chain. In this way, the kanban system carries the benefits of a centralized system (speed and responsiveness). At the same time, since the registration process is open to everyone on the foundation chain, the kanban system retains the benefits of a decentralized system. The distinguished Kanban nodes reach consensus via their aggregate signature. Details on aggregate signature can be found here.
+
+- Mathematical foundations
+
+  - [Preliminaries](architecture/lectures/FAB-aggregate-signature/pdf/FAB_aggregate_signature1_preliminaries_elliptic_curves_slides.pdf)
+
+  - [Aggregate signature](architecture/lectures/FAB-aggregate-signature/pdf/FAB_aggregate_signature2_signatures_elliptic_curves_slides.pdf)
+
+- Cryptography technical documentation
+
+  - [Preliminaries](https://github.com/blockchaingate/kanban-go/blob/feature/kanban/crypto_kanban/doc/secp256k1_kanban.md)
+
+  - [Schnorr and aggregate Schnorr signatures](https://github.com/blockchaingate/kanban-go/blob/feature/kanban/crypto_kanban/doc/secp256k1_kanban_schnorr_signature.md)
+  
+- [Networking documentation](https://github.com/blockchaingate/kanban-go/blob/feature/kanban/pbft_node/doc/aggregate_signature_networking.md)
+
 
 2. Kanban can also be run as a non-distinguished node. In this case, the non-distinguised Kanban has two purposes. First, it serves as a gateway/connection to the distinguished kanban nodes. Second, and very important, it verifies the work of the distinguished kanban nodes. In particular each non-distinguished kanban node has the same powers of verification and access to data as the distinguished kanban nodes. More precisely, non-distinguished nodes carry out full checks of the signatures of each transaction cleared, as well as checks of the aggregate signatures of the distinguished nodes.
 
