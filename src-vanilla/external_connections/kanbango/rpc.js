@@ -228,6 +228,15 @@ var rpcCalls = {
     },
     parameters: ["address", "blockNumber"],
   },
+  getAddressesChanged: {
+    rpcCall: "getAddressesChanged",
+    method: "kanban_getAddressesChanged",
+    mandatoryModifiableArguments: {
+      fromBlockNr: "0x1",
+      toBlockNr: "0x2",
+    },
+    parameters: ["fromBlockNr", "toBlockNr"],
+  },
   getMainChainAccountsBalance: {
     rpcCall: "getMainChainAccountsBalance",
     method: "bridge_getMainChainAccountsBalance", //<- method name passed to kanban-go

@@ -205,6 +205,7 @@ function KanbanGoNodes() {
       "pbftConfig.validatorPublicKeysHex.${number}": this.transformersStandard.shortener,
       "pbftConfig.validators.${number}": this.transformersStandard.shortener,
       "FAB" : this.transformersStandard.convertHexToBigInteger,
+      "AddressesChanged.${any}": this.transformersStandard.shortener,
     }
   };
   this.optionsForAddressDisplay = {
@@ -480,6 +481,13 @@ function KanbanGoNodes() {
         address: ids.defaults.kanbanGO.inputSendReceive.accountAddress
       },
       //callback: PendingCall.prototype.callbackBalanceTable,
+      outputJSON: ids.defaults.kanbanGO.outputSendReceive
+    },
+    getAddressesChanged: {
+      inputs: {
+        fromBlockNr: ids.defaults.kanbanGO.inputSendReceive.fromBlockNr,
+        toBlockNr: ids.defaults.kanbanGO.inputSendReceive.toBlockNr
+      },
       outputJSON: ids.defaults.kanbanGO.outputSendReceive
     },
     encrypRIPEMD: {

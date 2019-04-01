@@ -345,6 +345,13 @@ PendingCall.prototype.getArguments = function(
       if ((!(label in theArguments)) && defaultValue !== null && defaultValue !== undefined) {
         theArguments[label] = defaultValue;
       }
+      if (label in theArguments) {
+        if (theArguments[label] === "" || theArguments[label] === undefined) {
+          if (defaultValue !== null && defaultValue !== undefined){
+            theArguments[label] = defaultValue;
+          }
+        }
+      }
     }
   }
   return theArguments;

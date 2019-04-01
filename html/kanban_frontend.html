@@ -136,6 +136,8 @@
     <button class = "buttonStandard" style = "width:100px" onclick = "window.kanban.kanbanGO.rpc.theKBNodes.run('getAccountsStates');">Account States</button><br>
     <button class = "buttonStandard" style = "width:100px" onclick = "window.kanban.kanbanGO.rpc.theKBNodes.run('getMainChainAccountsBalance');">Main chain</button><br>
     <button class = "buttonStandard" style = "width:100px" onclick = "window.kanban.kanbanGO.rpc.theKBNodes.run('getBalanceFromAddress');">Balance of Addr.</button><br>
+    <button class = "buttonStandard" style = "width:100px" onclick = "window.kanban.kanbanGO.rpc.theKBNodes.run('getAddressesChanged');">Addr. of Bal. changed</button><br>
+
 
     </div>
     <div class = "divLabelButtonGroup">benchmark</div><div id = "panelKBGOBenchmarkButtons" class = "panelStandard">
@@ -154,6 +156,9 @@
     <input class = "inputStandard" id = "inputKBGOBlockNumber" size = "50" placeholder = "block number"></input><br>
     <input class = "inputStandard" id = "inputKBGOBlockHash"   size = "50" placeholder = "block hash"></input><br>
     <input class = "inputStandard" id = "inputKBGOAccountAddress"    size = "50" placeholder = "account address"></input><br>
+    <input class = "inputStandard" id = "inputKBGOFromBlockNr"    size = "50" placeholder = "From block #"></input><br>
+    <input class = "inputStandard" id = "inputKBGOToBlockNr"    size = "50" placeholder = "To block #"></input><br>
+
 
     </div>
     <div class = "divLabelButtonGroup">vote inputs</div><div id = "panelKBGOVotingMachineInputs" class = "panelStandard">
