@@ -110,6 +110,9 @@ var defaults = {
       accountAddress: "inputKBGOAccountAddress",
       fromBlockNr: "inputKBGOFromBlockNr", 
       toBlockNr: "inputKBGOToBlockNr",
+      fromAddress: "inputKBGOTxFromAddress",
+      toAddress:"inputKBGOTxToAddress",
+      txValue: "inputKBGOTxValue",
       // The following labels must match those in the fab page
       secretIn: "inputKBGOSecretIn",
       txHex: "inputKBGOTransactionHex",

@@ -490,6 +490,19 @@ function KanbanGoNodes() {
       },
       outputJSON: ids.defaults.kanbanGO.outputSendReceive
     },
+    sendTransaction: {
+      inputs: {
+        from: ids.defaults.kanbanGO.inputSendReceive.fromAddress,
+        to: ids.defaults.kanbanGO.inputSendReceive.toAddress,
+        gas: ids.defaults.kanbanGO.inputSendReceive.gasLimit,
+        gasPrice: ids.defaults.kanbanGO.inputSendReceive.gasPrice,
+        value: ids.defaults.kanbanGO.inputSendReceive.txValue,
+      },
+      outputJSON: ids.defaults.kanbanGO.outputSendReceive
+    },
+    getShardAccounts: {
+      outputJSON: ids.defaults.kanbanGO.outputSendReceive
+    },
     encrypRIPEMD: {
       inputs: {
         inputName: ids.defaults.kanbanGO.inputTransfers.nameInputForRIPEMD

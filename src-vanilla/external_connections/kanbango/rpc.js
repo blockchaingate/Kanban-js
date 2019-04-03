@@ -237,6 +237,25 @@ var rpcCalls = {
     },
     parameters: ["fromBlockNr", "toBlockNr"],
   },
+  sendTransaction: {
+    rpcCall: "sendTransaction",
+    method: "kanban_preSendTransaction",
+    mandatoryModifiableArguments: {
+      from: null,
+      to: null,
+      //gas: null,
+      //gasPrice: null,
+      value: null,
+    },
+    /*mandatoryFixedArguments: {
+      data: "", // data is left empty in fund transfer
+    },*/
+    types: {
+      from: "hexPrefixed",
+      to: "hexPrefixed",
+    }, 
+    parameters: ["from", "to", "value"],
+  },
   getMainChainAccountsBalance: {
     rpcCall: "getMainChainAccountsBalance",
     method: "bridge_getMainChainAccountsBalance", //<- method name passed to kanban-go
@@ -255,6 +274,11 @@ var rpcCalls = {
   isShardDefaultStarted: {
     rpc: "isShardDefaultStarted",
     method: "bridge_isShardDefaultStarted",
+    parameters: [],
+  },
+  getShardAccounts: {
+    rpc: "getShardAccounts",
+    method: "bridge_getShardAccounts",
     parameters: [],
   },
   getNodeShard: {
