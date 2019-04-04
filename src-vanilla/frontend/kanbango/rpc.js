@@ -500,6 +500,12 @@ function KanbanGoNodes() {
       },
       outputJSON: ids.defaults.kanbanGO.outputSendReceive
     },
+    getAccountInfo: {
+      inputs: {
+        address: ids.defaults.kanbanGO.inputSendReceive.addressToGetAccountInfo,
+      },
+      outputJSON: ids.defaults.kanbanGO.outputSendReceive,
+    },
     getShardAccounts: {
       outputJSON: ids.defaults.kanbanGO.outputSendReceive
     },

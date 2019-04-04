@@ -261,6 +261,17 @@ var rpcCalls = {
     method: "bridge_getMainChainAccountsBalance", //<- method name passed to kanban-go
     parameters: []
   },
+  getAccountInfo: {
+    rpcCall: "getAccountInfo",
+    method: "bridge_getAccountInfo", 
+    mandatoryModifiableArguments: {
+      address: null
+    },
+    types: {
+      address: "hexPrefixed",
+    },
+    parameters: ["address"],
+  },
   validators: {
     rpcCall: "validators",
     method: "pbft_validators",

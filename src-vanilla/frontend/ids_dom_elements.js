@@ -132,6 +132,7 @@ var defaults = {
       contractData: "inputKBGOSmartContractData",
       txAggregatePublicKeys: "inputKBGOAggregateSignaturePubKeysForTx",
       txAggregateSignature: "inputKBGOAggregateSignatureForTx",
+      addressToGetAccountInfo: "inputKBGOAccountAddress",
       // end of matching 
     },
     inputBenchmarkParameters: {
