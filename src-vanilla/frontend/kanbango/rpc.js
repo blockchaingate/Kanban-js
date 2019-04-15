@@ -490,6 +490,40 @@ function KanbanGoNodes() {
       },
       outputJSON: ids.defaults.kanbanGO.outputSendReceive
     },
+    sendTransaction: {
+      inputs: {
+        from: ids.defaults.kanbanGO.inputSendReceive.fromAddress,
+        to: ids.defaults.kanbanGO.inputSendReceive.toAddress,
+        gas: ids.defaults.kanbanGO.inputSendReceive.gasLimit,
+        gasPrice: ids.defaults.kanbanGO.inputSendReceive.gasPrice,
+        value: ids.defaults.kanbanGO.inputSendReceive.txValue,
+      },
+      outputJSON: ids.defaults.kanbanGO.outputSendReceive
+    },
+    getAccountInfo: {
+      inputs: {
+        address: ids.defaults.kanbanGO.inputSendReceive.addressToGetAccountInfo,
+      },
+      outputJSON: ids.defaults.kanbanGO.outputSendReceive,
+    },
+    getAllKBAccounts: {
+      outputJSON: ids.defaults.kanbanGO.outputSendReceive,
+    },
+    createAccount: {
+      inputs:{
+        privKey: ids.defaults.kanbanGO.inputSendReceive.privKey,
+      },
+      outputJSON: ids.defaults.kanbanGO.outputSendReceive,
+    },
+    unlockAccount: {
+      inputs: {
+        address: ids.defaults.kanbanGO.inputSendReceive.addressToGetAccountInfo,
+      },
+      outputJSON: ids.defaults.kanbanGO.outputSendReceive,
+    },
+    getShardAccounts: {
+      outputJSON: ids.defaults.kanbanGO.outputSendReceive
+    },
     encrypRIPEMD: {
       inputs: {
         inputName: ids.defaults.kanbanGO.inputTransfers.nameInputForRIPEMD

@@ -110,6 +110,10 @@ var defaults = {
       accountAddress: "inputKBGOAccountAddress",
       fromBlockNr: "inputKBGOFromBlockNr", 
       toBlockNr: "inputKBGOToBlockNr",
+      fromAddress: "inputKBGOTxFromAddress",
+      toAddress:"inputKBGOTxToAddress",
+      txValue: "inputKBGOTxValue",
+      privKey: "inputKBGOPrivKey",
       // The following labels must match those in the fab page
       secretIn: "inputKBGOSecretIn",
       txHex: "inputKBGOTransactionHex",
@@ -129,6 +133,7 @@ var defaults = {
       contractData: "inputKBGOSmartContractData",
       txAggregatePublicKeys: "inputKBGOAggregateSignaturePubKeysForTx",
       txAggregateSignature: "inputKBGOAggregateSignatureForTx",
+      addressToGetAccountInfo: "inputKBGOAccountAddress",
       // end of matching 
     },
     inputBenchmarkParameters: {

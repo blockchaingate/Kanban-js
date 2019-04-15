@@ -237,10 +237,68 @@ var rpcCalls = {
     },
     parameters: ["fromBlockNr", "toBlockNr"],
   },
+  sendTransaction: {
+    rpcCall: "sendTransaction",
+    method: "kanban_preSendTransaction",
+    mandatoryModifiableArguments: {
+      from: null,
+      to: null,
+      //gas: null,
+      //gasPrice: null,
+      value: null,
+    },
+    /*mandatoryFixedArguments: {
+      data: "", // data is left empty in fund transfer
+    },*/
+    types: {
+      from: "hexPrefixed",
+      to: "hexPrefixed",
+    }, 
+    parameters: ["from", "to", "value"],
+  },
   getMainChainAccountsBalance: {
     rpcCall: "getMainChainAccountsBalance",
     method: "bridge_getMainChainAccountsBalance", //<- method name passed to kanban-go
     parameters: []
+  },
+  getAccountInfo: {
+    rpcCall: "getAccountInfo",
+    method: "bridge_getAccountInfo", 
+    mandatoryModifiableArguments: {
+      address: null
+    },
+    types: {
+      address: "hexPrefixed",
+    },
+    parameters: ["address"],
+  },
+  getAllKBAccounts: {
+    rpcCall: "getAllKBAccounts",
+    method: "kanban_accounts", 
+    parameters: [],
+  },
+  createAccount: {
+    rpcCall: "createAccount",
+    method: "personal_importRawKey", 
+    mandatoryModifiableArguments: {
+      privKey: null,
+    },
+    mandatoryFixedArguments: {
+      passWord: "thisispassphrase",
+    },
+    parameters: ["privKey", "passWord"],
+  },
+  unlockAccount: {
+    rpcCall: "unlockAccount",
+    method: "personal_unlockAccount", 
+    mandatoryModifiableArguments: {
+      address: null,
+    },
+    mandatoryFixedArguments: {
+      passWord: "thisispassphrase",
+      duration: 60
+    },
+    parameters: ["address", "passWord", "duration"],
   },
   validators: {
     rpcCall: "validators",
@@ -255,6 +313,11 @@ var rpcCalls = {
   isShardDefaultStarted: {
     rpc: "isShardDefaultStarted",
     method: "bridge_isShardDefaultStarted",
+    parameters: [],
+  },
+  getShardAccounts: {
+    rpc: "getShardAccounts",
+    method: "bridge_getShardAccounts",
     parameters: [],
   },
   getNodeShard: {

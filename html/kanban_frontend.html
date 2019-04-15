@@ -130,13 +130,22 @@
     <div class = "divLabelButtonGroup">miscellaneous</div><div id = "panelKBGOMiscellaneousButtons" class = "panelStandard">
     <button class = "buttonStandard" style = "width:100px" onclick = "window.kanban.kanbanGO.rpc.theKBNodes.run('isShardDefaultStarted');">Shard runs?</button><br>
     <button class = "buttonStandard" style = "width:100px" onclick = "window.kanban.kanbanGO.rpc.theKBNodes.run('getNodeShard');">Get shardId</button><br>
+    <button class = "buttonStandard" style = "width:100px" onclick = "window.kanban.kanbanGO.rpc.theKBNodes.run('getShardAccounts');">Get shard accounts</button><br>
     <button class = "buttonStandard" style = "width:100px" onclick = "window.kanban.kanbanGO.rpc.theKBNodes.run('versionGO');">Version</button><br>
     <button class = "buttonStandard" style = "width:100px" onclick = "window.kanban.kanbanGO.rpc.theKBNodes.run('chainId');">ChainId</button><br>
     <button class = "buttonStandard" style = "width:100px" onclick = "window.kanban.kanbanGO.rpc.theKBNodes.run('rpcModules');">RPC modules</button><br>
     <button class = "buttonStandard" style = "width:100px" onclick = "window.kanban.kanbanGO.rpc.theKBNodes.run('getAccountsStates');">Account States</button><br>
     <button class = "buttonStandard" style = "width:100px" onclick = "window.kanban.kanbanGO.rpc.theKBNodes.run('getMainChainAccountsBalance');">Main chain</button><br>
-    <button class = "buttonStandard" style = "width:100px" onclick = "window.kanban.kanbanGO.rpc.theKBNodes.run('getBalanceFromAddress');">Balance of Addr.</button><br>
+    <button class = "buttonStandard" style = "width:100px" onclick = "window.kanban.kanbanGO.rpc.theKBNodes.run('getBalanceFromAddress');"><strong>Balance of Addr.</strong></strong></button><br>
     <button class = "buttonStandard" style = "width:100px" onclick = "window.kanban.kanbanGO.rpc.theKBNodes.run('getAddressesChanged');">Addr. of Bal. changed</button><br>
+    <button class = "buttonStandard" style = "width:100px" onclick = "window.kanban.kanbanGO.rpc.theKBNodes.run('getAccountInfo');">get account info</button><br>
+    <button class = "buttonStandard" style = "width:100px" onclick = "window.kanban.kanbanGO.rpc.theKBNodes.run('getAllKBAccounts');">get all Kanban accounts</button><br>
+    <button class = "buttonStandard" style = "width:100px" onclick = "window.kanban.kanbanGO.rpc.theKBNodes.run('createAccount');"><strong>Create account</strong></button><br>
+    <button class = "buttonStandard" style = "width:100px" onclick = "window.kanban.kanbanGO.rpc.theKBNodes.run('unlockAccount');">Unlock account</button><br>
+    <button class = "buttonStandard" style = "width:100px" onclick = "window.kanban.kanbanGO.rpc.theKBNodes.run('sendTransaction');">Send Transaction</button><br>
+
+
+
 
 
     </div>
@@ -158,7 +167,7 @@
     <input class = "inputStandard" id = "inputKBGOAccountAddress"    size = "50" placeholder = "account address"></input><br>
     <input class = "inputStandard" id = "inputKBGOFromBlockNr"    size = "50" placeholder = "From block #"></input><br>
     <input class = "inputStandard" id = "inputKBGOToBlockNr"    size = "50" placeholder = "To block #"></input><br>
-
+    <input class = "inputStandard" id = "inputKBGOPrivKey"    size = "50" placeholder = "Private Key"></input><br>
 
     </div>
     <div class = "divLabelButtonGroup">vote inputs</div><div id = "panelKBGOVotingMachineInputs" class = "panelStandard">
@@ -220,6 +229,11 @@
     <input id = "inputKBGOSmartContractFunctionId"        class = "inputStandard" size = "50" placeholder = "contract f-n id"/><br>
     <input id = "inputKBGOSmartContractFunctionArguments" class = "inputStandard" size = "50" placeholder = "contract f-n arguments"/><br>
     <input id = "inputKBGOSmartContractData"              class = "inputStandard" size = "50" placeholder = "contract final input"/><br>
+  </div>
+  <div class = "divLabelButtonGroup">Txs inside Kanban</div><div id = "panelKBGOTransactionInsideInputBuilder" class = "panelStandard">
+  <input class = "inputStandard" id = "inputKBGOTxFromAddress"    size = "50" placeholder = "From address"></input><br>
+  <input class = "inputStandard" id = "inputKBGOTxToAddress"    size = "50" placeholder = "To address"></input><br>
+  <input class = "inputStandard" id = "inputKBGOTxValue"    size = "50" placeholder = "Tx Value"></input><br>
   </div>  
   </td>
   </tr>
