@@ -136,10 +136,15 @@
     <button class = "buttonStandard" style = "width:100px" onclick = "window.kanban.kanbanGO.rpc.theKBNodes.run('rpcModules');">RPC modules</button><br>
     <button class = "buttonStandard" style = "width:100px" onclick = "window.kanban.kanbanGO.rpc.theKBNodes.run('getAccountsStates');">Account States</button><br>
     <button class = "buttonStandard" style = "width:100px" onclick = "window.kanban.kanbanGO.rpc.theKBNodes.run('getMainChainAccountsBalance');">Main chain</button><br>
-    <button class = "buttonStandard" style = "width:100px" onclick = "window.kanban.kanbanGO.rpc.theKBNodes.run('getBalanceFromAddress');">Balance of Addr.</button><br>
+    <button class = "buttonStandard" style = "width:100px" onclick = "window.kanban.kanbanGO.rpc.theKBNodes.run('getBalanceFromAddress');"><strong>Balance of Addr.</strong></strong></button><br>
     <button class = "buttonStandard" style = "width:100px" onclick = "window.kanban.kanbanGO.rpc.theKBNodes.run('getAddressesChanged');">Addr. of Bal. changed</button><br>
-    <button class = "buttonStandard" style = "width:100px" onclick = "window.kanban.kanbanGO.rpc.theKBNodes.run('sendTransaction');">Send Transaction</button><br>
     <button class = "buttonStandard" style = "width:100px" onclick = "window.kanban.kanbanGO.rpc.theKBNodes.run('getAccountInfo');">get account info</button><br>
+    <button class = "buttonStandard" style = "width:100px" onclick = "window.kanban.kanbanGO.rpc.theKBNodes.run('getAllKBAccounts');">get all Kanban accounts</button><br>
+    <button class = "buttonStandard" style = "width:100px" onclick = "window.kanban.kanbanGO.rpc.theKBNodes.run('createAccount');"><strong>Create account</strong></button><br>
+    <button class = "buttonStandard" style = "width:100px" onclick = "window.kanban.kanbanGO.rpc.theKBNodes.run('unlockAccount');">Unlock account</button><br>
+    <button class = "buttonStandard" style = "width:100px" onclick = "window.kanban.kanbanGO.rpc.theKBNodes.run('sendTransaction');">Send Transaction</button><br>
+
+
 
 
 
@@ -162,6 +167,8 @@
     <input class = "inputStandard" id = "inputKBGOAccountAddress"    size = "50" placeholder = "account address"></input><br>
     <input class = "inputStandard" id = "inputKBGOFromBlockNr"    size = "50" placeholder = "From block #"></input><br>
     <input class = "inputStandard" id = "inputKBGOToBlockNr"    size = "50" placeholder = "To block #"></input><br>
+    <input class = "inputStandard" id = "inputKBGOPrivKey"    size = "50" placeholder = "Private Key"></input><br>
+
     </div>
     <div class = "divLabelButtonGroup">vote inputs</div><div id = "panelKBGOVotingMachineInputs" class = "panelStandard">
     <input class = "inputStandard" id = "inputKBGOVoteMessage"    size = "50" placeholder = "message to vote"></input><br>

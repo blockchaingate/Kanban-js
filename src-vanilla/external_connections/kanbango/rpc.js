@@ -272,6 +272,34 @@ var rpcCalls = {
     },
     parameters: ["address"],
   },
+  getAllKBAccounts: {
+    rpcCall: "getAllKBAccounts",
+    method: "kanban_accounts", 
+    parameters: [],
+  },
+  createAccount: {
+    rpcCall: "createAccount",
+    method: "personal_importRawKey", 
+    mandatoryModifiableArguments: {
+      privKey: null,
+    },
+    mandatoryFixedArguments: {
+      passWord: "thisispassphrase",
+    },
+    parameters: ["privKey", "passWord"],
+  },
+  unlockAccount: {
+    rpcCall: "unlockAccount",
+    method: "personal_unlockAccount", 
+    mandatoryModifiableArguments: {
+      address: null,
+    },
+    mandatoryFixedArguments: {
+      passWord: "thisispassphrase",
+      duration: 60
+    },
+    parameters: ["address", "passWord", "duration"],
+  },
   validators: {
     rpcCall: "validators",
     method: "pbft_validators",

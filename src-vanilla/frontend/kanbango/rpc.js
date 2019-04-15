@@ -506,6 +506,21 @@ function KanbanGoNodes() {
       },
       outputJSON: ids.defaults.kanbanGO.outputSendReceive,
     },
+    getAllKBAccounts: {
+      outputJSON: ids.defaults.kanbanGO.outputSendReceive,
+    },
+    createAccount: {
+      inputs:{
+        privKey: ids.defaults.kanbanGO.inputSendReceive.privKey,
+      },
+      outputJSON: ids.defaults.kanbanGO.outputSendReceive,
+    },
+    unlockAccount: {
+      inputs: {
+        address: ids.defaults.kanbanGO.inputSendReceive.addressToGetAccountInfo,
+      },
+      outputJSON: ids.defaults.kanbanGO.outputSendReceive,
+    },
     getShardAccounts: {
       outputJSON: ids.defaults.kanbanGO.outputSendReceive
     },
