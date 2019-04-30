@@ -366,14 +366,16 @@ var rpcCalls = {
     method: "pbft_generateWriteBackWithdrawal",
     mandatoryModifiableArguments: {
       addressBeneficiary: null,
+      amount: null,
       gasLimit: null,
       gasPrice: null,
     },
     types: {
+      amount: "number",
       gasLimit: "number",
       addressBeneficiary: "hexPrefixed",
     },
-    parameters: ["addressBeneficiary", "gasLimit", "gasPrice"],
+    parameters: ["addressBeneficiary", "amount", "gasLimit", "gasPrice"],
   },
   getDefaultShardNonce: {
     rpcCall: "getDefaultShardNonce",

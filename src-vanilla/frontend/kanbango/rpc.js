@@ -569,7 +569,8 @@ function KanbanGoNodes() {
     generateWriteBackWithdrawal: {
       callType: "standard",
       inputs: {
-        addressBeneficiary: ids.defaults.kanbanGO.inputSendReceive.accountAddress,
+        addressBeneficiary: ids.defaults.kanbanGO.inputSendReceive.withdrawAccountAddress,
+        amount: ids.defaults.kanbanGO.inputSendReceive.withdrawAmount,
         gasLimit: ids.defaults.kanbanGO.inputSendReceive.gasLimit,
         gasPrice: ids.defaults.kanbanGO.inputSendReceive.gasPrice,
       },
