@@ -377,6 +377,19 @@ var rpcCalls = {
     },
     parameters: ["addressBeneficiary", "amount", "gasLimit", "gasPrice"],
   },
+  generateWithdrawRequest: {
+    rpcCall: "generateWithdrawRequest",
+    method: "bridge_generateWithdrawRequest",
+    mandatoryModifiableArguments: {
+      addressBeneficiary: null,
+      amount: null,
+    },
+    types: {
+      addressBeneficiary: "hexPrefixed",
+      amount: "number",
+    },
+    parameters: ["addressBeneficiary", "amount"],
+  },
   getDefaultShardNonce: {
     rpcCall: "getDefaultShardNonce",
     method: "bridge_getDefaultShardNonce",

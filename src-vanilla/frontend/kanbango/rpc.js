@@ -575,6 +575,13 @@ function KanbanGoNodes() {
         gasPrice: ids.defaults.kanbanGO.inputSendReceive.gasPrice,
       },
     },
+    generateWithdrawRequest: {
+      inputs: {
+        addressBeneficiary: ids.defaults.kanbanGO.inputSendReceive.withdrawAccountAddress,
+        amount: ids.defaults.kanbanGO.inputSendReceive.withdrawAmount,
+      },
+      outputJSON: ids.defaults.kanbanGO.outputSendReceive,
+    },
     voteMessageAndWriteToHeader: {
       callType: "standard",
       inputs: {
