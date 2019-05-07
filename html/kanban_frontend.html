@@ -124,12 +124,13 @@
     <button class = "buttonStandard" style = "width:100px" onclick = "window.kanban.kanbanGO.rpc.theKBNodes.run('writeMessageToBlockHeader');">Write header</button><br>
     <button class = "buttonStandard" style = "width:100px" onclick = "window.kanban.kanbanGO.rpc.theKBNodes.run('voteMessageAndWriteToHeader');">Vote + write</button><br>
     <button class = "buttonStandard" style = "width:100px" onclick = "window.kanban.kanbanGO.rpc.theKBNodes.run('generateWriteBack');">Write-back tx<span class = "tooltiptext">Initiates a foundation chain write-back transaction. <br>The transaction is signed by all KB nodes.<br>When completed, the entire tx is stored in the writeBack header entry in the first available KB block. </span></button><br>
-    <button class = "buttonStandard" style = "width:100px" onclick = "window.kanban.kanbanGO.rpc.theKBNodes.run('generateWriteBackWithdrawal');"><strong>Withdraw</strong><span class = "tooltiptext">Withdraws a fixed amount [see withdraw f-n in SCAR] to beneficiary given in account address input box. <br> The withdrawal is carried out as a write-back transaction. </span></button><br>
-    <button class = "buttonStandard" style = "width:100px" onclick = "window.kanban.kanbanGO.rpc.theKBNodes.run('generateWithdrawRequest');">Withdraw request</button><br>
+    <button class = "buttonStandard" style = "width:100px" onclick = "window.kanban.kanbanGO.rpc.theKBNodes.run('generateWriteBackWithdrawal');">Withdraw<span class = "tooltiptext">Withdraws a fixed amount [see withdraw f-n in SCAR] to beneficiary given in account address input box. <br> The withdrawal is carried out as a write-back transaction. </span></button><br>
+    <button class = "buttonStandard" style = "width:100px" onclick = "window.kanban.kanbanGO.rpc.theKBNodes.run('generateWithdrawRequest');"><strong>Withdraw request</strong></button><br>
     <button class = "buttonStandard" style = "width:100px" onclick = "window.kanban.kanbanGO.rpc.theKBNodes.run('getDefaultShardNonce');">Shard nonce<span class = "tooltiptext">Fetches the default shard nonce. <br>The nonce is included in the withdraw transaction as a security feature.<br>The nonce guards against withdrawal replay attacks, see the comments before the withdraw function in SCAR.</span></button><br>
     </div>
     <div class = "divLabelButtonGroup">miscellaneous</div><div id = "panelKBGOMiscellaneousButtons" class = "panelStandard">
     <button class = "buttonStandard" style = "width:100px" onclick = "window.kanban.kanbanGO.rpc.theKBNodes.run('isShardDefaultStarted');">Shard runs?</button><br>
+    <button class = "buttonStandard" style = "width:100px" onclick = "window.kanban.kanbanGO.rpc.theKBNodes.run('GetAllShardRequests');"><strong>All accounts requests</strong></button><br>
     <button class = "buttonStandard" style = "width:100px" onclick = "window.kanban.kanbanGO.rpc.theKBNodes.run('getNodeShard');">Get shardId</button><br>
     <button class = "buttonStandard" style = "width:100px" onclick = "window.kanban.kanbanGO.rpc.theKBNodes.run('getShardAccounts');">Get shard accounts</button><br>
     <button class = "buttonStandard" style = "width:100px" onclick = "window.kanban.kanbanGO.rpc.theKBNodes.run('versionGO');">Version</button><br>
@@ -327,7 +328,6 @@ My sandbox <br>
     <button class = "buttonStandard" style = "width: 100px" onclick = "window.kanban.fabcoin.rpc.fabNode.run('callContract', {manualInputs:{data: '04c5af170000000000000000000000000000000000000fab'}})">SCAR runs?</button><br>
     <button class = "buttonStandard" style = "width: 100px" onclick = "window.kanban.fabcoin.rpc.fabNode.run('fetchSCARShardPublicKeys')">SCAR keys</button><br>
     <button class = "buttonStandard" style = "width: 100px" onclick = "window.kanban.fabcoin.rpc.fabNode.run('sendToContract', {manualInputs: {data: '4a58db19'}})"><b>Add deposit</b></button><br>
-
     <button class = "buttonStandard" style = "width: 100px" onclick = "window.kanban.fabcoin.rpc.fabNode.run('contractCode')">Get code</button><br>
     <button class = "buttonStandard" style = "width: 100px" onclick = "window.kanban.fabcoin.rpc.fabNode.run('createContract')">Create</button><br>
     <button class = "buttonStandard" style = "width: 100px" onclick = "window.kanban.fabcoin.rpc.fabNode.run('sendToContract')">Send to contr.</button><br>

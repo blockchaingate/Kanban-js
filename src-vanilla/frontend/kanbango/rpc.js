@@ -509,6 +509,9 @@ function KanbanGoNodes() {
     getAllKBAccounts: {
       outputJSON: ids.defaults.kanbanGO.outputSendReceive,
     },
+    GetAllShardRequests: {
+      outputJSON: ids.defaults.kanbanGO.outputSendReceive,
+    },
     createAccount: {
       inputs:{
         privKey: ids.defaults.kanbanGO.inputSendReceive.privKey,

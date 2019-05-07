@@ -277,6 +277,11 @@ var rpcCalls = {
     method: "kanban_accounts", 
     parameters: [],
   },
+  GetAllShardRequests: {
+    rpcCall: "GetAllShardRequests",
+    method: "bridge_getAllShardRequests", 
+    parameters: [],
+  },
   createAccount: {
     rpcCall: "createAccount",
     method: "personal_importRawKey", 
@@ -386,7 +391,6 @@ var rpcCalls = {
     },
     types: {
       addressBeneficiary: "hexPrefixed",
-      amount: "number",
     },
     parameters: ["addressBeneficiary", "amount"],
   },
