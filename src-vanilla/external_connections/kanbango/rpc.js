@@ -376,7 +376,6 @@ var rpcCalls = {
       gasPrice: null,
     },
     types: {
-      amount: "number",
       gasLimit: "number",
       addressBeneficiary: "hexPrefixed",
     },
