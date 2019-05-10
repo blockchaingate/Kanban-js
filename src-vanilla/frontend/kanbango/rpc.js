@@ -509,6 +509,9 @@ function KanbanGoNodes() {
     getAllKBAccounts: {
       outputJSON: ids.defaults.kanbanGO.outputSendReceive,
     },
+    GetAllShardRequests: {
+      outputJSON: ids.defaults.kanbanGO.outputSendReceive,
+    },
     createAccount: {
       inputs:{
         privKey: ids.defaults.kanbanGO.inputSendReceive.privKey,
@@ -569,10 +572,18 @@ function KanbanGoNodes() {
     generateWriteBackWithdrawal: {
       callType: "standard",
       inputs: {
-        addressBeneficiary: ids.defaults.kanbanGO.inputSendReceive.accountAddress,
+        addressBeneficiary: ids.defaults.kanbanGO.inputSendReceive.withdrawAccountAddress,
+        amount: ids.defaults.kanbanGO.inputSendReceive.withdrawAmount,
         gasLimit: ids.defaults.kanbanGO.inputSendReceive.gasLimit,
         gasPrice: ids.defaults.kanbanGO.inputSendReceive.gasPrice,
       },
+    },
+    generateWithdrawRequest: {
+      inputs: {
+        addressBeneficiary: ids.defaults.kanbanGO.inputSendReceive.withdrawAccountAddress,
+        amount: ids.defaults.kanbanGO.inputSendReceive.withdrawAmount,
+      },
+      outputJSON: ids.defaults.kanbanGO.outputSendReceive,
     },
     voteMessageAndWriteToHeader: {
       callType: "standard",

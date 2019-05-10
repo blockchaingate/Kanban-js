@@ -277,6 +277,11 @@ var rpcCalls = {
     method: "kanban_accounts", 
     parameters: [],
   },
+  GetAllShardRequests: {
+    rpcCall: "GetAllShardRequests",
+    method: "bridge_getAllShardRequests", 
+    parameters: [],
+  },
   createAccount: {
     rpcCall: "createAccount",
     method: "personal_importRawKey", 
@@ -366,6 +371,7 @@ var rpcCalls = {
     method: "pbft_generateWriteBackWithdrawal",
     mandatoryModifiableArguments: {
       addressBeneficiary: null,
+      amount: null,
       gasLimit: null,
       gasPrice: null,
     },
@@ -373,7 +379,19 @@ var rpcCalls = {
       gasLimit: "number",
       addressBeneficiary: "hexPrefixed",
     },
-    parameters: ["addressBeneficiary", "gasLimit", "gasPrice"],
+    parameters: ["addressBeneficiary", "amount", "gasLimit", "gasPrice"],
+  },
+  generateWithdrawRequest: {
+    rpcCall: "generateWithdrawRequest",
+    method: "bridge_generateWithdrawRequest",
+    mandatoryModifiableArguments: {
+      addressBeneficiary: null,
+      amount: null,
+    },
+    types: {
+      addressBeneficiary: "hexPrefixed",
+    },
+    parameters: ["addressBeneficiary", "amount"],
   },
   getDefaultShardNonce: {
     rpcCall: "getDefaultShardNonce",

@@ -108,6 +108,8 @@ var defaults = {
       messageVoteHex: "inputKBGOVoteMessageHex",
       messageVote: "inputKBGOVoteMessage",
       accountAddress: "inputKBGOAccountAddress",
+      withdrawAccountAddress: "inputKBGOWithdrawAccountAddress",
+      withdrawAmount: "inputKBGOWithdrawAmount",
       fromBlockNr: "inputKBGOFromBlockNr", 
       toBlockNr: "inputKBGOToBlockNr",
       fromAddress: "inputKBGOTxFromAddress",
