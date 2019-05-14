@@ -145,6 +145,17 @@
     <button class = "buttonStandard" style = "width:100px" onclick = "window.kanban.kanbanGO.rpc.theKBNodes.run('createAccount');"><strong>Create account</strong></button><br>
     <button class = "buttonStandard" style = "width:100px" onclick = "window.kanban.kanbanGO.rpc.theKBNodes.run('unlockAccount');">Unlock account</button><br>
     <button class = "buttonStandard" style = "width:100px" onclick = "window.kanban.kanbanGO.rpc.theKBNodes.run('sendTransaction');">Send Transaction</button><br>
+    </div>
+    <div class = "divLabelButtonGroup">CoinPool</div><div id = "panelKBGOCoinPoolButtons" class = "panelStandard">
+      <button class = "buttonStandard" style = "width:100px" onclick = "window.kanban.kanbanGO.rpc.theKBNodes.run('fetchKanbanCoinPool', 'initialization');">Fetch CoinPool</button><br>
+      <button class = "buttonStandard" style = "width:100px" onclick = "window.kanban.kanbanGO.rpc.theKBNodes.run('compileSolidity', 'initialization');">Compile</button><br>
+      <button class = "buttonStandard" style = "width:100px" onclick = "window.kanban.kanbanGO.rpc.theKBNodes.run('deployOnKanban');">Deploy CoinPool</button><br>
+      <button class = "buttonStandard" style = "width:100px" onclick = "window.kanban.kanbanGO.rpc.theKBNodes.run('getTransactionReceipt');">Get Contract addr</button><br>
+      <button class = "buttonStandard" style = "width:100px" onclick = "window.kanban.kanbanGO.rpc.theKBNodes.run('callKanbanContract');">Contract Call</button><br>
+
+
+
+
 
 
 
@@ -236,11 +247,19 @@
   <input class = "inputStandard" id = "inputKBGOTxFromAddress"    size = "50" placeholder = "From address"></input><br>
   <input class = "inputStandard" id = "inputKBGOTxToAddress"    size = "50" placeholder = "To address"></input><br>
   <input class = "inputStandard" id = "inputKBGOTxValue"    size = "50" placeholder = "Tx Value"></input><br>
-  </div>  
+  <input class = "inputStandard" id = "inputKBGOTxData"    size = "50" placeholder = "Tx Data"></input><br>  
+  <input class = "inputStandard" id = "inputKBGOTxHash"    size = "50" placeholder = "Tx Hash"></input><br>
+  <input class = "inputStandard" id = "inputKBGOContractAddress"    size = "50" placeholder = "Contract Address"></input><br>
+  <input class = "inputStandard" id = "inputKBGOCallContractData"    size = "50" placeholder = "Call Contract Data"></input><br>
+
+  </div>
   <div class = "divLabelButtonGroup">Withdrawal</div><div id = "panelKBGOTransactionWithdrawal" class = "panelStandard">
     <input class="inputStandard form-control" id="inputKBGOWithdrawAccountAddress" size="50" placeholder="account address"><br>
     <input class="inputStandard form-control" id="inputKBGOWithdrawAmount" size="50" placeholder="withdraw amount">
-    </div>  
+  </div>
+  <!--<div class = "divLabelButtonGroup">Transfer Token</div><div id = "panelKBGOTransactionInsideInputBuilder" class = "panelStandard">
+    
+  </div>-->  
   </td>
   </tr>
   </table>

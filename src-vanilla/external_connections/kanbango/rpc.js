@@ -488,6 +488,45 @@ var rpcCalls = {
       inputName: null,
     },
     parameters: ["inputName"],
+  },
+  deployOnKanban: {
+    rpcCall: "deployOnKanban",
+    method: "kanban_preDeployContract",
+    mandatoryModifiableArguments: {
+      from: null,
+      data: null,
+    },
+    types: {
+      from: "hexPrefixed",
+    },
+    parameters: ["from", "data"],
+  },
+  getTransactionReceipt: {
+    rpcCall: "getTransactionReceipt",
+    method: "kanban_getTransactionReceipt",
+    mandatoryModifiableArguments: {
+      txHash: null,
+    },
+    types: {
+      txHash: "hexPrefixed",
+    },
+    parameters: ["txHash"],
+  },
+  callKanbanContract: {
+    rpcCall: "callKanbanContract",
+    method: "kanban_preCall",
+    mandatoryModifiableArguments: {
+      contractAddress: null,
+      callContractData: null,
+    },
+    mandatoryFixedArguments: {
+      blockNumber: "latest",
+    },
+    types: {
+      contractAddress: "hexPrefixed",
+      callContractData: "hexPrefixed",
+    },
+    parameters: ["contractAddress", "callContractData", "blockNumber"],
   }
 };
 

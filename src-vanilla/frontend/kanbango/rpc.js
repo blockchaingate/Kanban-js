@@ -500,6 +500,26 @@ function KanbanGoNodes() {
       },
       outputJSON: ids.defaults.kanbanGO.outputSendReceive
     },
+    deployOnKanban: {
+      inputs: {
+        from: ids.defaults.kanbanGO.inputSendReceive.fromAddress,
+        data: ids.defaults.kanbanGO.inputSendReceive.txData,
+      },
+      outputJSON: ids.defaults.kanbanGO.outputSendReceive
+    },
+    getTransactionReceipt: {
+      inputs: {
+        txHash: ids.defaults.kanbanGO.inputSendReceive.txHash,
+      },
+      outputJSON: ids.defaults.kanbanGO.outputSendReceive
+    },
+    callKanbanContract: {
+      inputs: {
+        contractAddress: ids.defaults.kanbanGO.inputSendReceive.contractAddress,
+        callContractData: ids.defaults.kanbanGO.inputSendReceive.callContractData,
+      },
+      outputJSON: ids.defaults.kanbanGO.outputSendReceive
+    },
     getAccountInfo: {
       inputs: {
         address: ids.defaults.kanbanGO.inputSendReceive.addressToGetAccountInfo,
@@ -730,6 +750,14 @@ function KanbanGoNodes() {
       useOneNode: true,
     },
     fetchKanbanContractTwo: {
+      outputs: {
+        code: ids.defaults.fabcoin.inputBlockInfo.solidityInput
+      },
+      outputJSON: ids.defaults.fabcoin.outputFabcoinBlockInfo,
+      callback: PendingCall.prototype.callbackFetchSmartContract,
+      useOneNode: true,
+    },
+    fetchKanbanCoinPool: {
       outputs: {
         code: ids.defaults.fabcoin.inputBlockInfo.solidityInput
       },

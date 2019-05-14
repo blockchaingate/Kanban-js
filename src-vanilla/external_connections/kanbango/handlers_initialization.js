@@ -847,6 +847,18 @@ KanbanGoInitializer.prototype.fetchKanbanContract = function(
   fileCombinator.combineFiles();
 }
 
+KanbanGoInitializer.prototype.fetchKanbanCoinPool = function(  
+  response, 
+  queryCommand,
+  notUsed,
+) {
+  var fileCombinator = new SolidityBuilder();
+  fileCombinator.response = response;
+  fileCombinator.pathBase = `${this.paths.gethProjectBase}/contracts/coinpool/`; 
+  fileCombinator.owner = this;
+  fileCombinator.combineFiles();
+}
+
 KanbanGoInitializer.prototype.fetchDemoContract = function(  
   response, 
   queryCommand,
