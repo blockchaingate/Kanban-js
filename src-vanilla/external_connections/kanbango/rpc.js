@@ -256,6 +256,26 @@ var rpcCalls = {
     }, 
     parameters: ["from", "to", "value"],
   },
+  sendToKBContract: {
+    rpcCall: "sendToKBContract",
+    method: "kanban_sendToKBContract",
+    mandatoryModifiableArguments: {
+      from: null,
+      to: null,
+      //gas: null,
+      //gasPrice: null,
+      data: null,
+    },
+    /*mandatoryFixedArguments: {
+      data: "", // data is left empty in fund transfer
+    },*/
+    types: {
+      from: "hexPrefixed",
+      to: "hexPrefixed",
+      data: "hexPrefixed",
+    }, 
+    parameters: ["from", "to", "data"],
+  },
   getMainChainAccountsBalance: {
     rpcCall: "getMainChainAccountsBalance",
     method: "bridge_getMainChainAccountsBalance", //<- method name passed to kanban-go
@@ -302,6 +322,9 @@ var rpcCalls = {
     mandatoryFixedArguments: {
       passWord: "thisispassphrase",
       duration: 60
+    },
+    types: {
+      address: "hexPrefixed",
     },
     parameters: ["address", "passWord", "duration"],
   },
@@ -498,6 +521,7 @@ var rpcCalls = {
     },
     types: {
       from: "hexPrefixed",
+      data: "hexPrefixed",
     },
     parameters: ["from", "data"],
   },

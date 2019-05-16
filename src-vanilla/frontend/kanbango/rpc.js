@@ -500,6 +500,16 @@ function KanbanGoNodes() {
       },
       outputJSON: ids.defaults.kanbanGO.outputSendReceive
     },
+    sendToKBContract: {
+      inputs: {
+        from: ids.defaults.kanbanGO.inputSendReceive.fromAddress,
+        to: ids.defaults.kanbanGO.inputSendReceive.contractAddress,
+        //gas: ids.defaults.kanbanGO.inputSendReceive.gasLimit,
+        //gasPrice: ids.defaults.kanbanGO.inputSendReceive.gasPrice,
+        data: ids.defaults.kanbanGO.inputSendReceive.callContractData,
+      },
+      outputJSON: ids.defaults.kanbanGO.outputSendReceive
+    },
     deployOnKanban: {
       inputs: {
         from: ids.defaults.kanbanGO.inputSendReceive.fromAddress,
