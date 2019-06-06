@@ -20,3 +20,22 @@ https://fabcoin.co/
 At the moment, Kanban is under intense development; its features are likely to change significantly. 
 
 Stay tuned for more information as the project progresses. 
+
+
+
+//Noted by Paul
+TO run this kanban-js project:
+
+1. Clone kanban-js from github, checkout out to branch harry-develop
+
+2. Go to go/src/github.com/blockchaingate, clone kanban-go project here
+    2.1 go to ./kanban-go,  then execute make or make all
+
+3. Go to home fold of the project, clone fabcoin-dev here, then go into fabcoin-dev
+    3.1 execute ./autogen.sh
+    3.2 execute ./configure -- disable-tests
+    3.3 make -j6   (use 6 cores to make)
+
+4. Go to secrets_admin fold, copy configuration_sample.json into configuration.json
+
+5. Go to home fold of the project, execute npm run develop

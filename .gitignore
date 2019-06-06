@@ -34,6 +34,8 @@ build/Makefile
 .idea/
 ./package-lock.json
 
+fabcoin-dev/
+
 go/bin
 go/src/github.com/golang.org
 go/src/github.com/ramya-rao-a
