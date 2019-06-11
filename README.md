@@ -23,18 +23,19 @@ Stay tuned for more information as the project progresses.
 
 
 
-//Noted by Paul
-TO run this kanban-js project:
+## To run this kanban-js project:
 
-1. Clone kanban-js from github, checkout out to branch harry-develop
+1. Clone kanban-js from github, checkout out to branch master
 
-2. Go to go/src/github.com/blockchaingate, clone kanban-go project here
-    2.1 go to ./kanban-go,  then execute make or make all
+2. Checkout Kanban-go: 
+    1. Go to folder: go/src/github.com/blockchaingate, clone kanban-go project here
+    2. Go to ./kanban-go,  then execute make
 
-3. Go to home fold of the project, clone fabcoin-dev here, then go into fabcoin-dev
-    3.1 execute ./autogen.sh
-    3.2 execute ./configure -- disable-tests
-    3.3 make -j6   (use 6 cores to make)
+3. Checkout Fabcoin-dev:
+    1. Go to home fold of the project, clone fabcoin-dev here, then go into fabcoin-dev
+    2. Execute ./autogen.sh
+    3. Execute ./configure -- disable-tests
+    4. make -j6   (use 6 cores to make)
 
 4. Go to secrets_admin fold, copy configuration_sample.json into configuration.json
 
