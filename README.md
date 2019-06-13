@@ -29,17 +29,19 @@ Stay tuned for more information as the project progresses.
 
 2. Checkout Kanban-go: 
     1. Go to folder: go/src/github.com/blockchaingate, clone kanban-go project here
-    2. Go to ./kanban-go,  then execute make
+    2. Go to ./kanban-go
+    3. Checkout branch: `feature/kanban`,  then execute `make`
 
 3. Checkout Fabcoin-dev:
     1. Go to home fold of the project, clone fabcoin-dev here, then go into fabcoin-dev
-    2. Execute ./autogen.sh
-    3. Execute ./configure -- disable-tests
-    4. make -j6   (use 6 cores to make)
+    2. Checkout branch: `master`
+    3. Execute `./autogen.sh`
+    4. Execute `./configure` or `./configure --disable-tests`
+    5. Execute `make -j6`   (use 6 cores to make)
 
 4. Go to secrets_admin fold, copy configuration_sample.json into configuration.json
 
-5. Go to home fold of the project, execute npm run develop
+6. Go to home fold of the project, execute `npm run develop` (If error "nodemon: command not found" is generated, resolve this problem by `npm install nodemon --save`)
 
 ## How To Use Kanban-js
 Run fabcoin:
