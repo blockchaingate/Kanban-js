@@ -591,6 +591,11 @@ function KanbanGoNodes() {
         messageHex: ids.defaults.kanbanGO.inputSendReceive.messageVoteHex,
       },
     },
+    thresholdSign: {
+      inputs: {
+        message: ids.defaults.kanbanGO.inputSendReceive.signMessages,
+      },
+    },
     testVote: {
       inputs: {
         messageHex: ids.defaults.kanbanGO.inputSendReceive.messageVoteHex

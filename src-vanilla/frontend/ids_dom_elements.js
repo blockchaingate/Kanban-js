@@ -136,6 +136,7 @@ var defaults = {
       txAggregatePublicKeys: "inputKBGOAggregateSignaturePubKeysForTx",
       txAggregateSignature: "inputKBGOAggregateSignatureForTx",
       addressToGetAccountInfo: "inputKBGOAccountAddress",
+      signMessages: "inputKBGOMessages"
       // end of matching 
     },
     inputBenchmarkParameters: {

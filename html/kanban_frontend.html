@@ -157,6 +157,7 @@
     <div class = "divLabelButtonGroup">tx builder</div><div id = "panelKBGOTransactionBuilder" class = "panelStandard">
     <button class = "buttonStandard" style = "width:100px" onclick = "window.kanban.kanbanGO.rpc.theKBNodes.run('decodeFabcoinTransactionHex');">Decode tx hex</button><br>
     <button class = "buttonStandard" style = "width:100px" onclick = "window.kanban.kanbanGO.rpc.theKBNodes.run('getExternalTransaction');">txid decode</button><br>
+    <button class = "buttonStandard" style = "width:100px" onclick = "window.kanban.kanbanGO.rpc.theKBNodes.run('thresholdSign');">Threshold Sign</button><br>
       
     <button class = "buttonStandard" style = "width:100px" onclick = "window.kanban.kanbanGO.rpc.theKBNodes.run('testCreateAndSignTransactionStandard');">Create &amp; sign</button><br>
     <button class = "buttonStandard" style = "width:100px" onclick = "window.kanban.fabcoin.rpc.fabNode.computeTxInsAndOuts(false);">Comp. tx/in/out</button><br>
@@ -220,6 +221,7 @@
     <input class = "inputStandard" id = "inputKBGOTransactionFees"                 size = "50" placeholder = "fee"/><br>
     <input class = "inputStandard" id = "inputKBGOTransactionInputs"               size = "50" placeholder = "tx inputs"></input><br>
     <input class = "inputStandard" id = "inputKBGOTransactionOutputs"              size = "50" placeholder = "tx outputs"></input><br>
+    <input class = "inputStandard" id = "inputKBGOMessages"                        size = "50" placeholder = "messages to be signed"/><br>
     </div>
   </td>
   <td>

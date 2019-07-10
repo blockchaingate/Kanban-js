@@ -209,6 +209,14 @@ var rpcCalls = {
     method: "pbft_roundChangeRequests", //<- method name passed to kanban-go
     parameters: []
   },
+  thresholdSign: {
+    rpcCall: "thresholdSign",
+    method: "pbft_thresholdSign",
+    mandatoryModifiableArguments: {
+      message: null,
+    },
+    parameters: ["message"],
+  },
   getAccountsStates: {
     rpcCall: "getAccountsStates",
     method: "bridge_getAccountsStates", //<- method name passed to kanban-go
