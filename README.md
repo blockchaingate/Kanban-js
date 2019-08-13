@@ -33,17 +33,19 @@ Stay tuned for more information as the project progresses.
     3. Checkout branch: `feature/kanban`,  then execute `make`
 
 3. Checkout Fabcoin-dev:
-    1. Go to home fold of the project, clone fabcoin-dev here, then go into fabcoin-dev
+    1. Go to home folder of the project, clone fabcoin-dev here, then go into fabcoin-dev
     2. Checkout branch: `master`
     3. Execute `./autogen.sh`
     4. Execute `./configure` or `./configure --disable-tests`
     5. Execute `make -j6`   (use 6 cores to make)
 
-4. Go to secrets_admin fold, copy configuration_sample.json into configuration.json
+4. Go to secrets_admin folder, copy configuration_sample.json into configuration.json
 
-6. Go to home fold of the project, execute `npm run develop` (If error "nodemon: command not found" is generated, resolve this problem by `npm install nodemon --save`)
+6. Go to home folder of the project, execute `npm run develop` (If error "nodemon: command not found" is generated, resolve this problem by `npm install nodemon --save`)
 
 ## How To Use Kanban-js
+Go to https://localhost:52907
+
 Run fabcoin:
 1. Go to page "fabcoin start"
 2. Fill in inputbox arguments: "-regtest -printtoconsole" (run in testnet)
@@ -59,7 +61,7 @@ Run Kanban:
     ```
     KB chain: 212
     FAB net: reg
-    #of nodes: (number of nodes you want to have)
+    #of nodes: (number of nodes you want to have, should >= 3)
     ```
 3. Click button "Run"
 4. Since few registration transactions are needed, go back to "fabcoin smart" and mine 2 more blocks
