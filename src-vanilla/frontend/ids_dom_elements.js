@@ -115,6 +115,10 @@ var defaults = {
       fromAddress: "inputKBGOTxFromAddress",
       toAddress:"inputKBGOTxToAddress",
       txValue: "inputKBGOTxValue",
+      txData: "inputKBGOTxData",
+      txHash: "inputKBGOTxHash",
+      contractAddress: "inputKBGOContractAddress",
+      callContractData: "inputKBGOCallContractData",
       privKey: "inputKBGOPrivKey",
       // The following labels must match those in the fab page
       secretIn: "inputKBGOSecretIn",

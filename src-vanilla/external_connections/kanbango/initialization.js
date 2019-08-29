@@ -40,6 +40,9 @@ var rpcCalls = {
   fetchKanbanContractTwo: {
     rpcCall: "fetchKanbanContractTwo",
   },
+  fetchKanbanCoinPool: {
+    rpcCall: "fetchKanbanCoinPool",
+  },
   fetchLocalRegtestNodeConfig: {
     rpcCall: "fetchLocalRegtestNodeConfig",
   },

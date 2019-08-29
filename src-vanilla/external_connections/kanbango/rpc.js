@@ -264,6 +264,26 @@ var rpcCalls = {
     }, 
     parameters: ["from", "to", "value"],
   },
+  sendToKBContract: {
+    rpcCall: "sendToKBContract",
+    method: "kanban_sendToKBContract",
+    mandatoryModifiableArguments: {
+      from: null,
+      to: null,
+      //gas: null,
+      //gasPrice: null,
+      data: null,
+    },
+    /*mandatoryFixedArguments: {
+      data: "", // data is left empty in fund transfer
+    },*/
+    types: {
+      from: "hexPrefixed",
+      to: "hexPrefixed",
+      data: "hexPrefixed",
+    }, 
+    parameters: ["from", "to", "data"],
+  },
   getMainChainAccountsBalance: {
     rpcCall: "getMainChainAccountsBalance",
     method: "bridge_getMainChainAccountsBalance", //<- method name passed to kanban-go
@@ -310,6 +330,9 @@ var rpcCalls = {
     mandatoryFixedArguments: {
       passWord: "thisispassphrase",
       duration: 60
+    },
+    types: {
+      address: "hexPrefixed",
     },
     parameters: ["address", "passWord", "duration"],
   },
@@ -496,6 +519,46 @@ var rpcCalls = {
       inputName: null,
     },
     parameters: ["inputName"],
+  },
+  deployOnKanban: {
+    rpcCall: "deployOnKanban",
+    method: "kanban_preDeployContract",
+    mandatoryModifiableArguments: {
+      from: null,
+      data: null,
+    },
+    types: {
+      from: "hexPrefixed",
+      data: "hexPrefixed",
+    },
+    parameters: ["from", "data"],
+  },
+  getTransactionReceipt: {
+    rpcCall: "getTransactionReceipt",
+    method: "kanban_getTransactionReceipt",
+    mandatoryModifiableArguments: {
+      txHash: null,
+    },
+    types: {
+      txHash: "hexPrefixed",
+    },
+    parameters: ["txHash"],
+  },
+  callKanbanContract: {
+    rpcCall: "callKanbanContract",
+    method: "kanban_preCall",
+    mandatoryModifiableArguments: {
+      contractAddress: null,
+      callContractData: null,
+    },
+    mandatoryFixedArguments: {
+      blockNumber: "latest",
+    },
+    types: {
+      contractAddress: "hexPrefixed",
+      callContractData: "hexPrefixed",
+    },
+    parameters: ["contractAddress", "callContractData", "blockNumber"],
   }
 };
 
