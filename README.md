@@ -65,6 +65,25 @@ Run Kanban:
 4. Since few registration transactions are needed, go back to "fabcoin smart" and mine 2 more blocks
 5. Now Kanban is running
 
+## Deploy & Test Contract On Kanban
+### Deployment
+1. Compile the contract that you want to test. Or use Remix IDE to compile it
+2. Get the bytecode (and abi if you need it)
+3. Start Kanban blockchain
+4. Fill in "From addr" & "Tx Data"(bytecode)
+5. Click "Deploy CoinPool" button
+6. Copy the returned tx hash and fill it into "Tx Hash"
+7. Click "Get Contract Addr" to get the address
+
+### Testing
+1. Here we use Remix to generate abi, 4 bytes function selector and encode input parameter.
+2. Fill in "Contract Address" and "Call Contract Data"(encoded parameters)
+3. If the state of evm will be changed
+    1. Unlock account and then click "send to KBContract" to send transaction
+    2. The return value is a transaction hash
+4. else, it is a simple function call
+    1. Click "Call Contract"
+    2. The returned value is encoded. Here we can use [abi decoder](https://adibas03.github.io/online-ethereum-abi-encoder-decoder/#/decode) to decode
 
 
 
