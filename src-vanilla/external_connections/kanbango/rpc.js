@@ -264,6 +264,14 @@ var rpcCalls = {
     }, 
     parameters: ["from", "to", "value"],
   },
+  sendRawTransaction: {
+    rpcCall: "sendRawTransaction",
+    method: "kanban_sendRawTransaction",
+    mandatoryModifiableArguments: {
+      rawTransactionHex: null,
+    },
+    parameters: ["rawTransactionHex"]
+  },
   sendToKBContract: {
     rpcCall: "sendToKBContract",
     method: "kanban_sendToKBContract",

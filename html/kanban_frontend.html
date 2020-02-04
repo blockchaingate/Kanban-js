@@ -129,6 +129,7 @@
     <button class = "buttonStandard" style = "width:100px" onclick = "window.kanban.kanbanGO.rpc.theKBNodes.run('getDefaultShardNonce');">Shard nonce<span class = "tooltiptext">Fetches the default shard nonce. <br>The nonce is included in the withdraw transaction as a security feature.<br>The nonce guards against withdrawal replay attacks, see the comments before the withdraw function in SCAR.</span></button><br>
     </div>
     <div class = "divLabelButtonGroup">miscellaneous</div><div id = "panelKBGOMiscellaneousButtons" class = "panelStandard">
+    <button class = "buttonStandard" style = "width:100px" onclick = "window.kanban.kanbanGO.rpc.theKBNodes.run('sendRawTransaction')"><strong><b style = "color:red">Send raw</b></strong></button><br>   
     <button class = "buttonStandard" style = "width:100px" onclick = "window.kanban.kanbanGO.rpc.theKBNodes.run('isShardDefaultStarted');">Shard runs?</button><br>
     <button class = "buttonStandard" style = "width:100px" onclick = "window.kanban.kanbanGO.rpc.theKBNodes.run('GetAllShardRequests');"><strong>All accounts requests</strong></button><br>
     <button class = "buttonStandard" style = "width:100px" onclick = "window.kanban.kanbanGO.rpc.theKBNodes.run('getNodeShard');">Get shardId</button><br>

@@ -500,6 +500,12 @@ function KanbanGoNodes() {
       },
       outputJSON: ids.defaults.kanbanGO.outputSendReceive
     },
+    sendRawTransaction: {
+      inputs: {
+        rawTransactionHex: inputSendReceive.txHex
+      },
+      outputJSON: ids.defaults.kanbanGO.outputSendReceive
+    },
     sendToKBContract: {
       inputs: {
         from: ids.defaults.kanbanGO.inputSendReceive.fromAddress,
